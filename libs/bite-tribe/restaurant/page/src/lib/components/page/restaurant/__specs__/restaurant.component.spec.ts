@@ -5,7 +5,7 @@ import { ComponentRef } from '@angular/core';
 import { RestaurantComponent } from '../restaurant.component';
 import type { Bite, Geopoint, Restaurant } from 'model';
 import { of } from 'rxjs';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import type { getDistance } from '../../../../utils/get-distance';
 import type { getPosition } from '../../../../utils/get-position';
 
@@ -302,6 +302,70 @@ describe('RestaurantComponent', () => {
       const text = nativeEl.textContent ?? '';
       expect(text).not.toContain('Main Street');
     });
+  });
+
+  /**
+   * Stated by the restaurant (issue #1830). An absent value is a restaurant
+   * that has not said, and is never shown as no.
+   */
+  describe('gender-neutral restroom', () => {
+    // A real Transloco instance rather than the stubbed service: which of the
+    // two sentences renders is the behaviour under test.
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TranslocoTestingModule.forRoot({
+            langs: {
+              en: {
+                'gender-neutral-restroom-yes': 'Gender-neutral restroom',
+                'gender-neutral-restroom-no': 'No gender-neutral restroom',
+              },
+            },
+            translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+            preloadLangs: true,
+          }),
+        ],
+        providers: [provideIonicAngular(getIonicConfig())],
+      });
+
+      fixture = TestBed.createComponent(RestaurantComponent);
+      componentRef = fixture.componentRef;
+    });
+
+    const lineFor = (
+      facilities: Restaurant['facilities'],
+    ): HTMLElement | null => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        facilities,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      return (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-testid="restaurant-gender-neutral-restroom"]',
+      );
+    };
+
+    it('shows the yes line for true', () => {
+      expect(
+        lineFor({ genderNeutralRestroom: true })?.textContent?.trim(),
+      ).toBe('Gender-neutral restroom');
+    });
+
+    it('shows the no line for false', () => {
+      expect(
+        lineFor({ genderNeutralRestroom: false })?.textContent?.trim(),
+      ).toBe('No gender-neutral restroom');
+    });
+
+    it.each([undefined, {}])(
+      'shows nothing when the restaurant has not said (%j)',
+      (facilities) => {
+        expect(lineFor(facilities)).toBeNull();
+      },
+    );
   });
 
   describe('loading state', () => {

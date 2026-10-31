@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Address,
   DaySchedule,
@@ -228,6 +228,34 @@ export class RestaurantApiService {
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
       data: {
         tableOrdering,
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  /**
+   * Whether the restaurant has a gender-neutral restroom (GitHub issue #1830).
+   *
+   * **`undefined` removes the field rather than storing `false`.** The
+   * restaurant choosing "Not stated" is taking back an answer, and `false` is
+   * an answer: it would tell a guest "no" on behalf of a restaurant that never
+   * said so. `FieldValue.delete()` is the plugin's own marker, for the reason
+   * `saveMenuCurrency` gives.
+   *
+   * Written through the field path rather than as a `facilities` map, because
+   * `updateDocument` replaces a map: saving this one fact as `{ facilities: {...} }`
+   * would wipe the next facility added beside it.
+   */
+  async saveGenderNeutralRestroomForRestaurant(
+    restaurantId: string,
+    genderNeutralRestroom: boolean | undefined,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        'facilities.genderNeutralRestroom':
+          genderNeutralRestroom ?? FieldValue.delete(),
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

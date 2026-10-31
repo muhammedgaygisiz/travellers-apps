@@ -137,6 +137,17 @@ export class BiteTribeApiService {
     );
   }
 
+  /** Whether the restaurant has a gender-neutral restroom (GitHub issue #1830). */
+  saveGenderNeutralRestroomForRestaurant(
+    restaurantId: string,
+    genderNeutralRestroom: boolean | undefined,
+  ): Promise<void> {
+    return this.restaurantApiService.saveGenderNeutralRestroomForRestaurant(
+      restaurantId,
+      genderNeutralRestroom,
+    );
+  }
+
   saveAddressForRestaurant(
     restaurantId: string,
     address: Address,

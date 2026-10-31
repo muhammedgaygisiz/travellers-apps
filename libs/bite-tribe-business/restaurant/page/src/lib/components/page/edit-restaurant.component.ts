@@ -54,6 +54,21 @@ import { MenuQrComponent } from '../menu-qr/menu-qr.component';
 const detectedTimeZone = (): string =>
   Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
+/**
+ * The three answers a restaurant can give about a facility (issue #1830).
+ *
+ * A string rather than the `boolean | undefined` the model holds, because a
+ * select cannot tell `undefined` apart from no selection, and "Not stated" is
+ * a choice the owner makes rather than a field they forgot.
+ */
+type FacilityAnswer = 'yes' | 'no' | 'not-stated';
+
+const toFacilityAnswer = (value: boolean | undefined): FacilityAnswer =>
+  value === undefined ? 'not-stated' : value ? 'yes' : 'no';
+
+const fromFacilityAnswer = (answer: FacilityAnswer): boolean | undefined =>
+  answer === 'not-stated' ? undefined : answer === 'yes';
+
 @Component({
   selector: 'edit-restaurant',
   templateUrl: 'edit-restaurant.component.html',
@@ -106,6 +121,8 @@ export class EditRestaurantComponent {
    */
   readonly manageStaff = output<void>();
   readonly submitTableOrderingSettings = output<TableOrderingSettings>();
+  /** `undefined` is "Not stated", which removes the field (issue #1830). */
+  readonly submitGenderNeutralRestroom = output<boolean | undefined>();
   readonly editFloorPlan = output<void>();
   readonly openTablePlan = output<void>();
 
@@ -199,6 +216,33 @@ export class EditRestaurantComponent {
       timeZone,
       ...(paused ? { pausedUntilTimestamp: paused } : {}),
     });
+  }
+
+  /**
+   * What the restaurant says about its facilities (issue #1830). A field group
+   * of its own, with its own Save, so the next facility joins it rather than
+   * becoming another section.
+   */
+  readonly facilitiesForm = this.formBuilder.group({
+    genderNeutralRestroom: ['not-stated' as FacilityAnswer],
+  });
+
+  initFacilities = effect(() => {
+    const facilities = this.restaurant()?.facilities;
+
+    this.facilitiesForm.patchValue({
+      genderNeutralRestroom: toFacilityAnswer(
+        facilities?.genderNeutralRestroom,
+      ),
+    });
+  });
+
+  saveFacilities(): void {
+    const { genderNeutralRestroom } = this.facilitiesForm.getRawValue();
+
+    this.submitGenderNeutralRestroom.emit(
+      fromFacilityAnswer(genderNeutralRestroom ?? 'not-stated'),
+    );
   }
 
   get links(): FormArray {

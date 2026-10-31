@@ -282,6 +282,8 @@
   "day-saturday": "ቅዳሜ",
   "day-sunday": "እሑድ",
   "closed": "ዝግ",
+  "gender-neutral-restroom-yes": "ለሁሉም ፆታ የሚያገለግል መጸዳጃ ቤት",
+  "gender-neutral-restroom-no": "ለሁሉም ፆታ የሚያገለግል መጸዳጃ ቤት የለም",
   "ok": "እሺ",
   "registration-in-progress": "መለያዎ እየተፈጠረ ነው...",
   "registration-success-check-your-email-to-verify-account": "ምዝገባው ተሳክቷል! መለያዎን ለማረጋገጥ ኢሜይልዎን ይመልከቱ።",

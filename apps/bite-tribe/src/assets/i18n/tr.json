@@ -282,6 +282,8 @@
   "day-saturday": "Cumartesi",
   "day-sunday": "Pazar",
   "closed": "Kapalı",
+  "gender-neutral-restroom-yes": "Cinsiyetsiz tuvalet",
+  "gender-neutral-restroom-no": "Cinsiyetsiz tuvalet yok",
   "ok": "Tamam",
   "registration-in-progress": "Hesabın oluşturuluyor...",
   "registration-success-check-your-email-to-verify-account": "Kayıt başarılı! Hesabını doğrulamak için e-postanı kontrol et.",

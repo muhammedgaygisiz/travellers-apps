@@ -52,6 +52,16 @@ export class RestaurantDataAccessService {
     await this.api.saveTableOrderingForRestaurant(restaurantId, tableOrdering);
   }
 
+  async submitGenderNeutralRestroom(
+    restaurantId: string,
+    genderNeutralRestroom: boolean | undefined,
+  ): Promise<void> {
+    await this.api.saveGenderNeutralRestroomForRestaurant(
+      restaurantId,
+      genderNeutralRestroom,
+    );
+  }
+
   async submitAddress(restaurantId: string, address: Address): Promise<void> {
     await this.api.saveAddressForRestaurant(restaurantId, address);
   }

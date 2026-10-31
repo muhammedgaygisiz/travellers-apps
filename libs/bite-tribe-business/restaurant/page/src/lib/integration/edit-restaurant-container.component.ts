@@ -14,6 +14,9 @@ import { EditRestaurantService } from './edit-restaurant.service';
       (submitTableOrderingSettings)="
         service.submitTableOrderingSettings($event)
       "
+      (submitGenderNeutralRestroom)="
+        service.submitGenderNeutralRestroom($event)
+      "
       (submitAddress)="service.submitAddress($event)"
       (submitPosition)="service.submitPosition($event)"
       (createMenu)="service.createMenu()"

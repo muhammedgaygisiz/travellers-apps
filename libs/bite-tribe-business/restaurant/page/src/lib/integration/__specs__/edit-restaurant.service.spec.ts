@@ -23,6 +23,7 @@ describe('EditRestaurantService', () => {
       submitSocialMediaLinks: jest.fn(),
       submitDescription: jest.fn(),
       submitOpeningHours: jest.fn(),
+      submitGenderNeutralRestroom: jest.fn(),
       submitAddress: jest.fn(),
       submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
@@ -228,6 +229,49 @@ describe('EditRestaurantService', () => {
       );
 
       await service.submitOpeningHours([]);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  describe('submitGenderNeutralRestroom', () => {
+    it('does nothing without a restaurant', async () => {
+      await service.submitGenderNeutralRestroom(true);
+      expect(dataAccessMock.submitGenderNeutralRestroom).not.toHaveBeenCalled();
+    });
+
+    it.each([true, false, undefined])(
+      'saves %s and confirms it',
+      async (genderNeutralRestroom) => {
+        const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+        (dataAccessMock.restaurant as ReturnType<typeof signal>).set(
+          restaurant,
+        );
+
+        await service.submitGenderNeutralRestroom(genderNeutralRestroom);
+
+        expect(dataAccessMock.submitGenderNeutralRestroom).toHaveBeenCalledWith(
+          'rest1',
+          genderNeutralRestroom,
+        );
+        expect(toastMock.present).toHaveBeenCalledWith({
+          messageKey: 'facilities-saved',
+          outcome: 'success',
+        });
+      },
+    );
+
+    it('says so when the save fails', async () => {
+      const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (
+        dataAccessMock.submitGenderNeutralRestroom as jest.Mock
+      ).mockRejectedValue(new Error('fail'));
+
+      await service.submitGenderNeutralRestroom(true);
 
       expect(toastMock.present).toHaveBeenCalledWith({
         messageKey: 'something-went-wrong-please-try-again',

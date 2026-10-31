@@ -7,7 +7,16 @@ import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
 jest.mock('../utils/get-restaurant-by-id');
 
-jest.mock('@capacitor-firebase/firestore');
+/**
+ * The automock, with `FieldValue` filled in: the automock leaves that class
+ * export undefined, and `saveGenderNeutralRestroomForRestaurant` calls
+ * `FieldValue.delete()` to remove a field. The marker is the real one the
+ * plugin builds, a plain `{ __type__ }` object.
+ */
+jest.mock('@capacitor-firebase/firestore', () => ({
+  ...jest.createMockFromModule<object>('@capacitor-firebase/firestore'),
+  FieldValue: { delete: jest.fn(() => ({ __type__: 'delete' })) },
+}));
 
 jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest
@@ -436,6 +445,51 @@ describe(RestaurantApiService.name, () => {
         reference: `restaurants/${restaurantId}`,
         data: {
           socialMediaLinks: links,
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+  });
+
+  describe('saveGenderNeutralRestroomForRestaurant', () => {
+    it.each([true, false])(
+      'writes %s through the field path, leaving other facilities alone',
+      async (genderNeutralRestroom) => {
+        const updateDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockResolvedValue({} as any);
+
+        await service.saveGenderNeutralRestroomForRestaurant(
+          'resto-123',
+          genderNeutralRestroom,
+        );
+
+        expect(updateDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-123',
+          data: {
+            'facilities.genderNeutralRestroom': genderNeutralRestroom,
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+      },
+    );
+
+    it('removes the field for "Not stated" rather than writing false', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue({} as any);
+
+      await service.saveGenderNeutralRestroomForRestaurant(
+        'resto-123',
+        undefined,
+      );
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'restaurants/resto-123',
+        data: {
+          'facilities.genderNeutralRestroom': { __type__: 'delete' },
           updatedAt: '2024-03-15T12:00:00.000Z',
           updatedAtTimestamp: 1710504000000,
         },

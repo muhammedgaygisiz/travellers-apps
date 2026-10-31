@@ -232,6 +232,45 @@
           </ion-button>
         </div>
 
+        <!--
+          What the restaurant says about its premises (issue #1830), next to
+          the opening hours because that is where a guest reads it. Three
+          answers, and "Not stated" removes the field rather than writing no:
+          the consumer page shows nothing for a restaurant that has not said.
+        -->
+        <div class="ion-margin-top" [formGroup]="facilitiesForm">
+          <ion-text
+            ><h2>{{ 'facilities' | transloco }}</h2></ion-text
+          >
+
+          <ion-item>
+            <ion-select
+              formControlName="genderNeutralRestroom"
+              interface="popover"
+              [label]="'gender-neutral-restroom' | transloco"
+              data-testid="gender-neutral-restroom"
+            >
+              <ion-select-option value="yes">{{
+                'facility-yes' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="no">{{
+                'facility-no' | transloco
+              }}</ion-select-option>
+              <ion-select-option value="not-stated">{{
+                'facility-not-stated' | transloco
+              }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-facilities"
+            (click)="saveFacilities()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+
         <div class="ion-margin-top">
           <bt-opening-hours
             [openingHours]="

@@ -176,3 +176,29 @@ export const FullMaintained: Story = {
     } as unknown as Restaurant,
   },
 };
+
+/**
+ * A restaurant that has said it has a gender-neutral restroom (issue #1830).
+ * `Registered` is the third state: a restaurant that has not said shows no
+ * line at all, rather than a "no" on its behalf.
+ */
+export const WithGenderNeutralRestroom: Story = {
+  args: {
+    ...Registered.args,
+    restaurant: {
+      ...verifiedRestaurant,
+      facilities: { genderNeutralRestroom: true },
+    } as Restaurant,
+  },
+};
+
+/** A restaurant that has said it has none (issue #1830). */
+export const WithoutGenderNeutralRestroom: Story = {
+  args: {
+    ...Registered.args,
+    restaurant: {
+      ...verifiedRestaurant,
+      facilities: { genderNeutralRestroom: false },
+    } as Restaurant,
+  },
+};

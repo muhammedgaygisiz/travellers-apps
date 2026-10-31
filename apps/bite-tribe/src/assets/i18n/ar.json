@@ -282,6 +282,8 @@
   "day-saturday": "السبت",
   "day-sunday": "الأحد",
   "closed": "مغلق",
+  "gender-neutral-restroom-yes": "دورة مياه محايدة جنسانيًا",
+  "gender-neutral-restroom-no": "لا توجد دورة مياه محايدة جنسانيًا",
   "ok": "حسنًا",
   "registration-in-progress": "جارٍ إنشاء حسابك...",
   "registration-success-check-your-email-to-verify-account": "تم التسجيل بنجاح! يُرجى مراجعة بريدك الإلكتروني لتأكيد حسابك.",

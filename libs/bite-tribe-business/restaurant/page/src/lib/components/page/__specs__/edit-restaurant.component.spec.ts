@@ -141,6 +141,48 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
+  /**
+   * The gender-neutral restroom (GitHub issue #1830). Three answers, and
+   * "Not stated" emits `undefined` so the write removes the field rather than
+   * telling guests "no" on the restaurant's behalf.
+   */
+  describe('facilities', () => {
+    const withFacilities = (facilities: Restaurant['facilities']): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        facilities,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it.each([
+      [undefined, 'not-stated'],
+      [{}, 'not-stated'],
+      [{ genderNeutralRestroom: true }, 'yes'],
+      [{ genderNeutralRestroom: false }, 'no'],
+    ] as const)('shows %j as %s', (facilities, answer) => {
+      withFacilities(facilities);
+
+      expect(component.facilitiesForm.value.genderNeutralRestroom).toBe(answer);
+    });
+
+    it.each([
+      ['yes', true],
+      ['no', false],
+      ['not-stated', undefined],
+    ] as const)('saves %s as %s', (answer, emittedValue) => {
+      withFacilities({ genderNeutralRestroom: true });
+      component.facilitiesForm.patchValue({ genderNeutralRestroom: answer });
+
+      const emitted = jest.fn();
+      component.submitGenderNeutralRestroom.subscribe(emitted);
+      component.saveFacilities();
+
+      expect(emitted).toHaveBeenCalledWith(emittedValue);
+    });
+  });
+
   describe('links', () => {
     it('should return empty array if no links', () => {
       componentRef.setInput('restaurant', {

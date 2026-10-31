@@ -47,3 +47,14 @@ export const EmailVerificationResendRunning: Story = {
     emailVerificationResendRunning: true,
   },
 };
+
+/** A profile that states its pronouns, next to the display name (#1826). */
+export const WithPronouns: Story = {
+  args: {
+    publicUser: {
+      ...unverifiedUser,
+      emailVerified: true,
+      pronouns: 'they/them',
+    },
+  },
+};

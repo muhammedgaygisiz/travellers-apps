@@ -75,6 +75,33 @@ export const Default: Story = {
   },
 };
 
+/** Somebody else's public profile with pronouns after the name (#1826). */
+export const WithPronouns: Story = {
+  args: {
+    user: { ...baseUser, pronouns: 'they/them' },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
+/**
+ * Pronouns close to the 40-character limit, beside a long display name: they wrap
+ * under it rather than pushing the badge or the follow button off the row.
+ */
+export const WithLongPronouns: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      displayName: 'Wanderlust Gourmet',
+      pronouns: 'they/them, she/her, elle/iel, sie/ihr',
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 export const OwnProfile: Story = {
   args: {
     user: {

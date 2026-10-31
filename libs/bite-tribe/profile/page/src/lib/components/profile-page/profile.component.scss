@@ -31,6 +31,16 @@ $GOLD: #ffd700;
       overflow-wrap: anywhere;
     }
 
+    // Secondary to the name it follows (issue #1826).
+    .profile-pronouns {
+      min-width: 0;
+      overflow-wrap: anywhere;
+
+      color: gray;
+      font-size: 0.875rem;
+      font-weight: normal;
+    }
+
     .subscription-badge {
       flex: 0 0 auto;
       background: var(--ion-color-tertiary-tint);

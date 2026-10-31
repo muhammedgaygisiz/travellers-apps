@@ -135,6 +135,15 @@ generic user-generated-content type beyond photos, messages and files. Bites
 carry review text, ratings, prices and place names, which Apple expects under
 that heading. The divergence is a taxonomy difference, not an inconsistency.
 
+Pronouns, an optional free-text profile field since [#1826], need no new Apple
+type: they are text the user writes and publishes on their own profile, used for
+app functionality only, which is `Other User Content`. Play has no such catch-all,
+and its `Personal info - Other info` type names gender identity among its
+examples, so the Play Data safety form should declare `Other info` (collected,
+optional, App functionality, not shared) before the build that ships the field.
+That is a console step and is not done yet. The privacy policy lists pronouns
+among the account data it collects.
+
 `Purchases` is left undeclared on both stores: paid BiteTrails are
 [epic-1125][#1125] and are not in the shipped build.
 
@@ -327,3 +336,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
+[#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826

@@ -9,7 +9,7 @@ all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
 normal case. Follow suggestions ship with [#1708]. The visited-countries globe
 ships with [#1787]. A changed display name reaches every stored copy of it since
-[#1827].
+[#1827]. A profile can state its pronouns since [#1826].
 
 ## Goal
 
@@ -50,6 +50,7 @@ signed-in account, the follow relation, and the block one account places on anot
 - User opens a profile's countries on a globe, per `Visited Countries Globe` below.
 - User changes their display name, and the old one is gone from every surface another
   account can open, per `Display Name Copies` below.
+- User sets, changes or clears their pronouns in profile edit, per `Pronouns` below.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
@@ -96,6 +97,33 @@ city — so that line only earns its space when it has something of its own.
   an optional home city step. Optional is the operative word: a profile with no
   city is still the ordinary case, so this contract still governs what is
   rendered when there is none.
+
+## Pronouns
+
+Issue [#1826], part of epic [#1823]. A profile could say what to call a person but not
+how to refer to them. Pronouns can reveal gender identity, which the GDPR may treat as
+sensitive, so the field is held to one line: the user writes it, the user publishes it,
+and nothing else reads it.
+
+- **Optional, and never asked.** Set in profile edit, directly under the display name.
+  Onboarding neither shows nor requires it, and BiteTribe asks for no gender.
+- **Free text.** No picker, because no fixed list covers every language and every person.
+  Trimmed, at most 40 characters. A longer value is refused with a message that says the
+  limit, not cut off; the Firestore rules refuse it from any other client too.
+- **Empty means absent.** Clearing the field removes `pronouns` from the user document
+  rather than storing an empty string, so a profile that never had pronouns and one whose
+  owner cleared them read the same.
+- **Where it shows.** The profile header, after the display name, smaller and in the
+  secondary colour. Not on Bite cards, reviews, search results, the leaderboard or the menu.
+- **Visibility.** Another account sees pronouns on a public profile only. On a private
+  profile, or one with no saved choice, they are not rendered for anybody but the owner.
+  This is a rendering rule, as it is for the real name and city: `/users/{uid}` is
+  readable by every member, so the stored value is not hidden from a client that reads
+  the document directly.
+- **Never used.** Not searchable (`searchUsers` does not match or return it), not indexed,
+  carried by no analytics event, and used for no suggestion or ranking.
+- **Content filtering.** It is user-authored text published to others, so the
+  pre-publication filter of [#1610] covers it alongside the display name once that ships.
 
 ## Account Identity In The Menu
 
@@ -300,7 +328,9 @@ Follow suggestions add no permission and no purpose string: they use a position 
 where location is already granted, so the priming rule onboarding owns is untouched, and
 their three events are product interaction like the rest. The visited-countries globe
 adds no permission either: it shows the country codes the profile already shows, from
-outlines bundled with the app.
+outlines bundled with the app. Pronouns are user content used for app functionality
+only; how they map onto each store's data declaration is in
+[Implementation - Store Declarations](../implementation/store-declarations.md).
 
 The user block contract is the blocking half of Apple's user-generated-content guideline
 and the equivalent Google Play policy; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
@@ -325,6 +355,10 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
   `FollowSuggestionsService` in `libs/bite-tribe/follow-suggestions/data-access`; the
   `bt-follow-suggestions` component and its stories in
   `libs/bite-tribe/follow-suggestions/ui`.
+- Pronouns: `pronouns.ts` in `libs/bite-tribe-common/model`, `withPronounsWrite` in
+  `libs/bite-tribe/api`, the `pronouns` control of `edit-profile-page` and the header in
+  `profile-page`, the `validPronouns` rule in `firestore.rules`, and the
+  `Pages/Profile` `With Pronouns` stories.
 - Display name copies: the `syncDisplayNameCopiesOnUserUpdate` trigger in
   `apps/bite-tribe-firebase/functions/src/functions/users/sync-display-name-copies.ts`
   and its spec.
@@ -340,6 +374,8 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1787] is `Visited Countries Globe` above.
 - Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
+- Issue [#1826] is `Pronouns` above, part of epic [#1823].
+- Issue [#1610] is the content filter that is to cover pronouns with the display name.
 
 ## Related Domains
 
@@ -376,3 +412,5 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#1827]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1827
+[#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

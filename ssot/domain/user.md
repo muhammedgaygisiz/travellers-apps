@@ -44,6 +44,8 @@
 
 - ## Optional Data
 - `fullName`
+- `pronouns` - free text, at most 40 characters, absent rather than empty. What it is
+  and who sees it is in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1826]).
 - `city`
 - `about`
 - `public`
@@ -146,6 +148,7 @@
 - Follow and unfollow users.
 - View followers and following.
 - Block and unblock another user.
+- State optional pronouns on the profile.
 - Search users by display name, full name, or email.
 - Update last seen.
 - Track latest reported app version and build number.
@@ -248,3 +251,4 @@
 
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
+[#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826

@@ -47,6 +47,12 @@
           <h1 class="profile-name">
             <span class="profile-display-name">{{ displayName() }}</span>
 
+            @if (pronouns()) {
+              <span class="profile-pronouns" data-testid="profile-pronouns">{{
+                pronouns()
+              }}</span>
+            }
+
             <ion-badge class="subscription-badge">
               @if (subscriptionTierData === 0) {
                 FREE

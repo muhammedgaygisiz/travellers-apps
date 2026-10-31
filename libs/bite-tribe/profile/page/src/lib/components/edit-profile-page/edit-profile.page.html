@@ -7,7 +7,8 @@
 
     <form [formGroup]="profileForm">
       <div class="profile-image-block" id="select-image">
-        @let photoUrl = $safeNavigationMigration(this.profileForm.get('photoUrl')?.value); @if
+        @let photoUrl =
+        $safeNavigationMigration(this.profileForm.get('photoUrl')?.value); @if
         (shouldShowProfileImage(photoUrl)) {
         <img
           [src]="photoUrl"
@@ -58,6 +59,19 @@
         fill="outline"
         mode="md"
         class="ion-margin-top"
+      />
+
+      <!-- Next to the display name, because both say how the user is
+      referred to. Optional, and never asked in onboarding (issue #1826). -->
+      <ion-input
+        label="{{ 'pronouns' | transloco }}"
+        helperText="{{ 'pronouns-hint' | transloco }}"
+        errorText="{{ 'pronouns-too-long' | transloco: { max: pronounsMaxLength } }}"
+        formControlName="pronouns"
+        fill="outline"
+        mode="md"
+        class="ion-margin-top"
+        data-testid="edit-profile-pronouns"
       />
 
       <ion-input

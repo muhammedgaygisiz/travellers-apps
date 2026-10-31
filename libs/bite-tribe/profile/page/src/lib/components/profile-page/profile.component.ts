@@ -23,7 +23,13 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
-import { Bite, LikeClick, ProfileMetaData, PublicUser } from 'model';
+import {
+  Bite,
+  LikeClick,
+  normalizePronouns,
+  ProfileMetaData,
+  PublicUser,
+} from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { HapticsService } from 'haptics';
@@ -129,6 +135,23 @@ export class ProfileComponent {
     return [this.metaName(), city].filter(Boolean).join(', ');
   });
   enableImageRetry = input(false, { transform: booleanAttribute });
+
+  /**
+   * The pronouns after the display name, empty when there are none to show.
+   *
+   * They follow profile visibility (issue #1826): another account sees them on a
+   * public profile only, and the owner always sees their own. A profile with no
+   * saved choice reads as private, as it does on the visibility status.
+   */
+  readonly pronouns = computed((): string => {
+    const user = this.user();
+
+    if (!user || (!this.isOwnProfile() && user.public !== true)) {
+      return '';
+    }
+
+    return normalizePronouns(user.pronouns) ?? '';
+  });
 
   readonly logoutClick = output();
   readonly menuNavigate = output<PageMenuTarget>();

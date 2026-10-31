@@ -223,7 +223,7 @@ export class EditRestaurantComponent {
    * of its own, with its own Save, so the next facility joins it rather than
    * becoming another section.
    */
-  readonly facilitiesForm = this.formBuilder.group({
+  readonly facilitiesForm = this.formBuilder.nonNullable.group({
     genderNeutralRestroom: ['not-stated' as FacilityAnswer],
   });
 
@@ -241,7 +241,7 @@ export class EditRestaurantComponent {
     const { genderNeutralRestroom } = this.facilitiesForm.getRawValue();
 
     this.submitGenderNeutralRestroom.emit(
-      fromFacilityAnswer(genderNeutralRestroom ?? 'not-stated'),
+      fromFacilityAnswer(genderNeutralRestroom),
     );
   }
 

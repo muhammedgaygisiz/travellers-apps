@@ -141,7 +141,7 @@ app functionality only, which is `Other User Content`. Play has no such catch-al
 and its `Personal info - Other info` type names gender identity among its
 examples, so the Play Data safety form should declare `Other info` (collected,
 optional, App functionality, not shared) before the build that ships the field.
-That is a console step and is not done yet. The privacy policy lists pronouns
+That is a console step, not done yet, and tracked as [#1864]. The privacy policy lists pronouns
 among the account data it collects.
 
 `Purchases` is left undeclared on both stores: paid BiteTrails are
@@ -337,3 +337,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
+[#1864]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1864

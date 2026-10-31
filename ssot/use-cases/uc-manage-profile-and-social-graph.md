@@ -117,9 +117,11 @@ and nothing else reads it.
   secondary colour. Not on Bite cards, reviews, search results, the leaderboard or the menu.
 - **Visibility.** Another account sees pronouns on a public profile only. On a private
   profile, or one with no saved choice, they are not rendered for anybody but the owner.
-  This is a rendering rule, as it is for the real name and city: `/users/{uid}` is
-  readable by every member, so the stored value is not hidden from a client that reads
-  the document directly.
+  This is a rendering rule only. `/users/{uid}` is readable by every member, so the
+  stored value reaches any client that reads the document, and the follower lists
+  already read it. A private profile's real name, city and about are not even hidden
+  on screen. Keeping a private profile's fields out of other accounts' reads is
+  [#1863].
 - **Never used.** Not searchable (`searchUsers` does not match or return it), not indexed,
   carried by no analytics event, and used for no suggestion or ranking.
 - **Content filtering.** It is user-authored text published to others, so the
@@ -376,6 +378,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the content filter that is to cover pronouns with the display name.
+- Issue [#1863] keeps a private profile's fields, pronouns included, out of other accounts' reads.
 
 ## Related Domains
 
@@ -414,3 +417,4 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1827]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1827
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863

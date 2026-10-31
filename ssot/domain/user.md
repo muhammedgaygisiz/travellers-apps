@@ -203,6 +203,7 @@
   unblockUser
   claimDisplayName
   checkDisplayNameAvailability
+  syncDisplayNameCopiesOnUserUpdate
   updateLastSeen
   updateUserMetadata
   syncEmailVerificationStatus

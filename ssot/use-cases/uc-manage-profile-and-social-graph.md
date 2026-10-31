@@ -8,7 +8,8 @@ lists, the visibility choice, user-to-user blocking, and the two identity contra
 all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
 normal case. Follow suggestions ship with [#1708]. The visited-countries globe
-ships with [#1787].
+ships with [#1787]. A changed display name reaches every stored copy of it since
+[#1827].
 
 ## Goal
 
@@ -47,6 +48,8 @@ signed-in account, the follow relation, and the block one account places on anot
 - User blocks or unblocks another account from that account's profile, per the block
   contract below.
 - User opens a profile's countries on a globe, per `Visited Countries Globe` below.
+- User changes their display name, and the old one is gone from every surface another
+  account can open, per `Display Name Copies` below.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
@@ -225,6 +228,41 @@ account for everybody.
 
 The storage, the callables and the rules are in [User](../domain/user.md).
 
+## Display Name Copies
+
+Issue [#1827]. A name a person has left behind must not keep following them. For a trans
+or non-binary user an old name shown to others is deadnaming, which is the [#1308] class
+of harm rather than a stale label.
+
+- **Read live.** Most surfaces read `/users/{uid}.displayName` when they render, so a
+  change shows on the next read with nothing to rewrite: the profile, Bite cards, search
+  (`searchUsers`), the follower and following lists (the follow edges store uids only),
+  follow suggestions (`suggestPeopleToFollow` and the follow-up mail's picks resolve the
+  name from the profile on every call), and a review thread, which resolves each author
+  through `authorId` per [UC - Inspect Bite Details](uc-inspect-bite-details.md). Push
+  notifications read the sender's name from the profile when they are sent, so one sent
+  after the change carries the new name.
+- **Copied, and rewritten on change.** Four places store a copy, and all of them are
+  readable by every member. `syncDisplayNameCopiesOnUserUpdate` fires on an update to
+  `/users/{uid}` whose `displayName` changed - whichever path wrote it - and rewrites them:
+  - `meta/leaderboard`, the leaderboard, which is otherwise rebuilt only when a Bite is
+    created or deleted. The new name shows without waiting for anybody to post.
+  - `meta/leaderboardDaily`, the daily notification baseline.
+  - `reviews.author`, the name written onto each review the person wrote.
+  - `biteTrails.ownerName`, the `@name` on each of the person's Bite Trail cards.
+
+  A leaderboard entry that is not public carries no name, and stays without one.
+
+- **Kept as it is.** `BiteReport.authorDisplayName` records who a reported Bite was
+  attributed to when it was reported. It is evidence for the Operator, no member can
+  read it, and rewriting it would change the record.
+- **Not recallable.** A push notification already delivered to a device, and a follow-up
+  mail already sent, show the name they were sent with.
+- **The old name is released.** Renaming deletes the old `/displayNames` claim in the same
+  transaction that takes the new one, so the old name can be claimed straight away by
+  anybody, the previous holder included. Holding it would not expose it, and releasing
+  it is how account deletion already treats a name.
+
 ## Out Of Scope
 
 - A profile is not a shareable destination. There is no profile share action, no
@@ -287,6 +325,9 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
   `FollowSuggestionsService` in `libs/bite-tribe/follow-suggestions/data-access`; the
   `bt-follow-suggestions` component and its stories in
   `libs/bite-tribe/follow-suggestions/ui`.
+- Display name copies: the `syncDisplayNameCopiesOnUserUpdate` trigger in
+  `apps/bite-tribe-firebase/functions/src/functions/users/sync-display-name-copies.ts`
+  and its spec.
 
 ## Related GitHub Scope
 
@@ -298,6 +339,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1609] is the User Block Contract above.
 - Issue [#1787] is `Visited Countries Globe` above.
 - Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
+- Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
 
 ## Related Domains
 
@@ -332,3 +374,5 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
+[#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
+[#1827]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1827

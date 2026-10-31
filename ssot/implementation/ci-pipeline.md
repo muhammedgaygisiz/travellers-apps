@@ -40,7 +40,7 @@ lint
 |
 stylelint
 |
-tests
+test-shard (x4) -- tests
 |
 +-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
 +-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
@@ -62,20 +62,21 @@ tests
 Not every test in this repository runs on a pull request, and the difference is
 worth stating rather than inferring from a workflow file.
 
-| Suite                       | Command                 | Gates a merge                         |
-| --------------------------- | ----------------------- | ------------------------------------- |
-| Unit tests                  | `nx affected -t test`   | Yes, `tests`                          |
-| App and functions builds    | `nx run-many -t build`  | Yes, `build`, for the affected ones   |
-| Lint, Stylelint             | `nx affected -t lint`   | Yes                                   |
-| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                    |
-| Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected |
-| Consumer and business e2e   | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e` |
-| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`                |
-| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator`             |
+| Suite                       | Command                 | Gates a merge                                  |
+| --------------------------- | ----------------------- | ---------------------------------------------- |
+| Unit tests                  | `nx run-many -t test`   | Yes, `tests` (4 shards), for the affected ones |
+| App and functions builds    | `nx run-many -t build`  | Yes, `build`, for the affected ones            |
+| Lint, Stylelint             | `nx affected -t lint`   | Yes                                            |
+| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                             |
+| Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected          |
+| Consumer and business e2e   | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e`          |
+| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`                         |
+| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator`                      |
 
 **Coverage Is Informational.** `codecov/project` is reported on every pull
-request and never fails one: `codecov.yml` sets it `informational`. The `tests`
-job runs `nx affected -t test --coverage`, so a pull request uploads coverage
+request and never fails one: `codecov.yml` sets it `informational`. Each
+`test-shard` leg runs its share of the affected Jest projects with coverage
+and uploads it under the `unittests` flag, so a pull request uploads coverage
 for the projects it affects and nothing else. The project figure is then taken
 over a different set of files each time, and it moves with that set: on [#1839]
 it compared 503 files against the base's 709 and reported a 0.54% drop the
@@ -236,14 +237,14 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 
 ## Composite Actions
 
-| Action                                   | Used by                                                                            | Responsibility                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                             | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
-| `.github/actions/restore-cache`          | Every pipeline job                                                                 | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
-| `.github/actions/install-if-missing`     | `build`                                                                            | `npm ci` when the restored `node_modules` is unusable                                       |
-| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
-| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
-| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`                                                        | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
+| Action                                   | Used by                                                                                 | Responsibility                                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                                  | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
+| `.github/actions/restore-cache`          | Every pipeline job                                                                      | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
+| `.github/actions/install-if-missing`     | `build`                                                                                 | `npm ci` when the restored `node_modules` is unusable                                       |
+| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `test-shard`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
+| `.github/actions/nx-cache`               | `lint`, `stylelint`, `test-shard`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache; `key-suffix` separates the legs of a matrix   |
+| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`                                                             | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -303,16 +304,17 @@ through `digest-mismatch`. That is the safer default and it is kept.
 
 ## Caching Layers
 
-Four independent caches, each with its own key:
+Five independent caches, each with its own key:
 
-| Cache               | Path                              | Key                                                                           |
-| ------------------- | --------------------------------- | ----------------------------------------------------------------------------- |
-| Dependencies        | `node_modules`                    | `node-modules-<package-lock hash>`                                            |
-| npm download        | npm's own cache directory         | `node-cache-<os>-npm-<package-lock hash>`                                     |
-| Nx computation      | `.nx/cache`, `.nx/workspace-data` | `nx-cache-v2-<os>-<run id>-<job>`, restored by the `nx-cache-v2-<os>-` prefix |
-| Playwright browsers | `~/.cache/ms-playwright`          | `playwright-chromium-<os>-<ImageOS>-<@playwright/test version>`               |
+| Cache               | Path                              | Key                                                                               |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------- |
+| Dependencies        | `node_modules`                    | `node-modules-<package-lock hash>`                                                |
+| npm download        | npm's own cache directory         | `node-cache-<os>-npm-<package-lock hash>`                                         |
+| Nx computation      | `.nx/cache`, `.nx/workspace-data` | `nx-cache-v2-<os>-<run id>-<job>`, restored by the `nx-cache-v2-<os>-` prefix     |
+| Playwright browsers | `~/.cache/ms-playwright`          | `playwright-chromium-<os>-<ImageOS>-<@playwright/test version>`                   |
+| Jest transforms     | `tmp/jest-cache`                  | `jest-cache-v1-<os>-<package-lock hash>-<shard>`, restored by the lockfile prefix |
 
-The Nx key is unique per run and job so every job saves its own entry, while the `restore-keys` prefix pulls the most recent entry from any earlier job or run. Nx keys its own entries by content hash, so restoring a slightly stale cache is safe: matching tasks are replayed and everything else is recomputed.
+The Nx key is unique per run and job so every job saves its own entry - a matrix leg appends its `key-suffix`, because the legs share one job id - while the `restore-keys` prefix pulls the most recent entry from any earlier job or run. Nx keys its own entries by content hash, so restoring a slightly stale cache is safe: matching tasks are replayed and everything else is recomputed.
 
 ### Playwright Browsers Without apt
 
@@ -353,7 +355,7 @@ Nx names the index after the machine id of the host that wrote it, reading `/var
 
 ## Affected Computation
 
-`lint`, `stylelint`, `tests` and `build` run through the affected set; `loki-build` reads it to decide whether to capture. E2E runs unconditionally.
+`lint`, `stylelint`, `test-shard` and `build` run through the affected set; `loki-build` reads it to decide whether to capture. E2E runs unconditionally.
 
 `build` is also the only type check for the Firebase functions, so gating it on affected is safe only because affected selects `functions` for everything that can break the compile. Checked for [issue #1819][#1819]: its own sources and package files, a root dependency it imports (`firebase-admin`), the workspace `typescript` and `@types/node`, `tsconfig.base.json` and `nx.json` each select it, and a change confined to `ssot/` or to `apps/bite-tribe-firebase/firebase.json` does not. The functions compile cannot read a workspace library, because its `tsconfig.json` sets `rootDir: src` and does not extend `tsconfig.base.json`.
 
@@ -465,6 +467,48 @@ tests a shard holds without starting the emulators.
 
 `business-e2e`, at a median of 2.4 minutes, stays one job.
 
+### The Unit Tests Run As Four Shards
+
+Until [issue #1813][#1813] one `tests` job ran `nx affected -t test`. It took
+under 1.5 minutes when few projects were affected and 10 to 14 minutes when a
+shared library was: in run 40863200582, 67 projects took 591 seconds of
+wall-clock time and 1,655 seconds of summed Jest time. Nx ran three projects at
+a time on the four-vCPU runner and every Jest process started `cpus - 1`
+workers, so about nine workers competed for four cores, and the Jest transform
+cache sat in `/tmp` and was thrown away with the runner. The job is now two, in
+the same shape as `e2e`:
+
+- **`test-shard`** is a matrix over `shard: [1, 2, 3, 4]` with
+  `fail-fast: false`. Each leg lists `nx show projects --affected
+--withTarget=test`, sorts it, keeps every fourth project starting at its own
+  index, and runs them with `nx run-many -t test -c ci --parallel=2
+--maxWorkers=2`. A leg whose share is empty skips its run and its upload.
+- **`tests`** needs the matrix and passes only when every leg did. Every job
+  after the unit tests needs `tests`, so none of them depends on the shard
+  count, and the check name is unchanged.
+
+The legs agree on the split without a job to hand it out, because each sorts the
+same list. The split is by count, not by cost: Jest's time on CI follows a
+project's module graph more than its spec count, and `bite-tribe-business/floor-plan`
+with ten spec files was the slowest project in the run above. Balance the
+shards with recorded timings only if one leg is consistently the long pole.
+
+Two projects at a time with two workers each fills the runner's four vCPUs. The
+`ci` configuration of the `test` target in `nx.json` adds `--ci`, which fails a
+missing snapshot instead of writing it, and `--coverage`.
+
+`jest.preset.js` sets `cacheDirectory` to `tmp/jest-cache`, which each leg
+persists with `actions/cache` keyed on the lockfile and its shard. Jest keys
+every transform by content, so a cache restored from an older commit is safe;
+the lockfile key is for the Angular and Ionic `.mjs` files under
+`node_modules`, which are the expensive transforms and change only with it. A
+key that exists is never saved again, so the cache holds what the first run on a
+lockfile transformed, and a project that was not affected then is transformed
+afresh on every run until the lockfile moves.
+
+Codecov merges every upload for a commit, so each leg uploads its own projects
+under the same `unittests` flag and the report covers every affected project.
+
 ## Build-Time Environment Variables
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
@@ -564,6 +608,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Keep every file a story renders inside `storybook-host`'s graph or its target inputs. A story in a project the graph does not reach, or a file outside any project that the build or the capture reads, is skipped by the `loki` gate and left out of the build's cache key. Check a new one with `nx show target inputs storybook-host:build-storybook`.
 - Verify a caching change by reading the `Cache: <hits>/<total> hit` line that Nx prints at the end of each run. The first run after a key change is always 0%; the second run on the same branch is the real signal.
 - Pull requests read the cache scope of the default branch. A cache written by a pull request is visible only to that pull request, so a new caching behavior only proves itself once `develop` has run with it.
+- Size Jest's workers to the runner. `test-shard` runs `--parallel=2` with `--maxWorkers=2` on four vCPUs; raising either without lowering the other oversubscribes the cores, which is what made the unit tests 2.5 times slower on CI than on a laptop.
 - Keep the E2E jobs on separate runners, and each consumer shard on a runner of its own. Every suite and shard drives the same Firebase emulator ports and would fight over them in one job, and a shard is only isolated because it starts its own emulators from the seeded export. Shard across jobs; do not raise Playwright `workers` against one emulator.
 - Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
 - Never put `continue-on-error` on a deploy job. A deploy that is allowed to fail quietly is the manual deploy again, with extra steps.
@@ -593,6 +638,7 @@ tools/set-functions-deploy-service-account.sh
 tools/write-build-provenance.mjs
 apps/bite-tribe-ios/ios/App/ExportOptions.plist
 .github/actions/nx-cache/action.yml
+jest.preset.js
 .github/actions/setup/action.yml
 .github/actions/restore-cache/action.yml
 .github/actions/install-if-missing/action.yml
@@ -614,7 +660,7 @@ nx.json
 - CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
 - Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
 - **The emulator suite has one rare flake, and it is in the test that races two writes.** `table-orders.emulator-spec.ts`'s "creates one order when both copies arrive together" failed twice in roughly twenty local full-suite runs while [issue #1681][#1681] was being worked, and could not be reproduced under deliberate CPU load or by running that spec alone thirty times. Both failures followed back-to-back `emulators:exec` invocations, which a CI run does not do - it starts one emulator, runs the suite once, and exits. Recorded because a job that goes red at random teaches people to ignore it, so if `functions-emulator` starts flaking on pull requests, this is the first place to look and the flake is older than the job.
-- One Node 20 deprecation warning cannot be removed from this repository. `codecov/codecov-action@v5` pins `actions/github-script` at v7.0.1 by commit SHA, so the `tests` job reports the warning no matter what versions this page's table holds. It is Codecov's to fix, v5 is their latest, and the run is not affected - the runner executes the action on Node 24 regardless.
+- One Node 20 deprecation warning cannot be removed from this repository. `codecov/codecov-action@v5` pins `actions/github-script` at v7.0.1 by commit SHA, so every `test-shard` leg reports the warning no matter what versions this page's table holds. It is Codecov's to fix, v5 is their latest, and the run is not affected - the runner executes the action on Node 24 regardless.
 
 ## Related Pages
 
@@ -634,6 +680,7 @@ nx.json
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
+[#1813]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1813
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816
 [#1817]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1817

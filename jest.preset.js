@@ -13,6 +13,9 @@ module.exports = {
    * More info: https://jestjs.io/docs/upgrading-to-jest29#snapshot-format
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
+  // Under the workspace rather than /tmp, so CI can persist the transforms
+  // between runs (issue #1813). `tmp` is gitignored.
+  cacheDirectory: path.resolve(__dirname, 'tmp/jest-cache'),
   roots: ['<rootDir>', path.resolve(__dirname, './__mocks__')],
   setupFilesAfterEnv: [
     path.resolve(__dirname, './__mocks__/fetch.js'),

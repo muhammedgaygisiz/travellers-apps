@@ -177,10 +177,25 @@ jobs:
       - name: Run Stylelint
         run: npm run nx -- affected -t stylelint
 
-  tests:
+  # The unit tests are split over four runners (issue #1813). A change to a
+  # shared library affects most of the 118 Jest projects, and on one runner that
+  # took 10 to 14 minutes. Every shard lists the same affected projects, sorts
+  # them and takes every fourth one, so the shards agree on the split without a
+  # job to hand it out. `tests` folds the legs back into the one result the rest
+  # of the pipeline needs.
+  test-shard:
     runs-on: ubuntu-latest
     needs:
       - stylelint
+    strategy:
+      # Let every shard finish, so one run shows every failing spec.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    env:
+      SHARD: ${{ matrix.shard }}
+      SHARDS: 4
 
     steps:
       - name: Checkout repository
@@ -199,18 +214,68 @@ jobs:
 
       - name: 'Nx cache'
         uses: ./.github/actions/nx-cache
+        with:
+          key-suffix: ${{ matrix.shard }}
 
+      # jest.preset.js points Jest's cache at tmp/jest-cache instead of /tmp, so
+      # it survives the job. Jest keys every transform by content, so a cache
+      # saved under an older commit is still safe; the lockfile key keeps the
+      # transforms of the Angular and Ionic .mjs files, the expensive part.
+      - name: Jest transform cache
+        uses: actions/cache@v6
+        with:
+          path: tmp/jest-cache
+          key: jest-cache-v1-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ matrix.shard }}
+          restore-keys: |
+            jest-cache-v1-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Pick this shard's projects
+        id: projects
+        run: |
+          list=$(npx nx show projects --affected --withTarget=test --json \
+            | jq -r --argjson i "$((SHARD - 1))" --argjson n "$SHARDS" \
+              'sort | to_entries | map(select(.key % $n == $i) | .value) | join(",")')
+          echo "Shard $SHARD/$SHARDS: ${list:-no affected projects}"
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
+      # Two projects at a time with two Jest workers each fills the four vCPUs
+      # of a runner. Nx's default of three projects, each starting `cpus - 1`
+      # workers, put nine workers on four cores. The `ci` configuration in
+      # nx.json adds `--ci` and `--coverage`.
       - name: Run Unit Tests
-        run: npm run nx -- affected -t test --coverage --coverageReporters=cobertura
+        if: ${{ steps.projects.outputs.list != '' }}
+        run: >-
+          npm run nx -- run-many -t test -c ci --parallel=2
+          -p '${{ steps.projects.outputs.list }}'
+          --coverageReporters=cobertura --maxWorkers=2
 
+      # Codecov merges every upload for a commit, so each shard sends its own
+      # projects under the same flag.
       - uses: codecov/codecov-action@v7
+        if: ${{ steps.projects.outputs.list != '' }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./coverage # optional
           flags: unittests # optional
-          name: codecov-umbrella # optional
+          name: unittests-${{ matrix.shard }} # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: false # optional (default = false)
+
+  tests:
+    runs-on: ubuntu-latest
+    # Skipped like the shards when stylelint fails, rather than failing in turn.
+    if: ${{ !cancelled() && needs.stylelint.result == 'success' }}
+    needs:
+      - stylelint
+      - test-shard
+
+    steps:
+      - name: Require every shard to pass
+        env:
+          RESULT: ${{ needs.test-shard.result }}
+        run: |
+          echo "test-shard: $RESULT"
+          [ "$RESULT" = 'success' ]
 
   # Loki is split over three jobs so the two configurations in loki.config.js
   # capture on separate runners (issue #1816). `loki-build` builds Storybook once

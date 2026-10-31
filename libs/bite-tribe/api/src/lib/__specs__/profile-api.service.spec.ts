@@ -16,7 +16,16 @@ import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebas
 import { updateProfileWithImagePathFromFirebaseStorage } from '../bite-api/utils/update-profile-with-image-path-from-firestorage';
 import { loadProfileById } from '../bite-api/utils/load-profile-by-id';
 
-jest.mock('@capacitor-firebase/firestore');
+/**
+ * The automock, plus the deletion marker it leaves undefined: `FieldValue` is a
+ * class export beside the plugin object, and a profile write calls
+ * `FieldValue.delete()` to remove cleared pronouns (issue #1826). The marker is
+ * the plain `{ __type__ }` object the plugin builds.
+ */
+jest.mock('@capacitor-firebase/firestore', () => ({
+  ...jest.createMockFromModule<object>('@capacitor-firebase/firestore'),
+  FieldValue: { delete: jest.fn(() => ({ __type__: 'delete' })) },
+}));
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: {
     callByName: jest.fn(),
@@ -417,11 +426,50 @@ describe(ProfileApiService.name, () => {
               fullName: '',
               email: undefined,
               photoUrl: undefined,
+              pronouns: { __type__: 'delete' },
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
             },
           });
+        },
+      ));
+    });
+
+    describe('pronouns (issue #1826)', () => {
+      const written = (): Record<string, unknown> => {
+        const calls = jest.mocked(FirebaseFirestore.updateDocument).mock.calls;
+
+        return calls[calls.length - 1][0].data as Record<string, unknown>;
+      };
+
+      beforeEach(() => {
+        jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
+      });
+
+      it('writes the pronouns trimmed', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const result = await service.updateUser({
+            userId: '123',
+            pronouns: '  she/they ',
+          } as PublicUser);
+
+          expect(written()['pronouns']).toBe('she/they');
+          expect(result.pronouns).toBe('she/they');
+        },
+      ));
+
+      it('removes the field when the pronouns are cleared', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const result = await service.updateUser({
+            userId: '123',
+            pronouns: ' ',
+          } as PublicUser);
+
+          expect(written()['pronouns']).toEqual({ __type__: 'delete' });
+          expect(result).not.toHaveProperty('pronouns');
         },
       ));
     });
@@ -474,6 +522,7 @@ describe(ProfileApiService.name, () => {
               fullName: '',
               email: undefined,
               photoUrl: 'download-url',
+              pronouns: { __type__: 'delete' },
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,

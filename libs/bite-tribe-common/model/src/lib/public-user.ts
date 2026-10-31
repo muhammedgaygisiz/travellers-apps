@@ -2,6 +2,12 @@ export interface PublicUser {
   displayName: string;
   normalizedDisplayName?: string;
   fullName?: string;
+  /**
+   * How the user wants to be referred to, as they typed it (issue #1826).
+   * Trimmed, at most `PRONOUNS_MAX_LENGTH` characters, and absent rather
+   * than empty. Shown in the profile header only, never inferred or analysed.
+   */
+  pronouns?: string;
   email: string;
   photoUrl: string;
   userId: string;

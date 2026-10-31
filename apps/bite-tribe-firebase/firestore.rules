@@ -1091,6 +1091,17 @@ service cloud.firestore {
       ];
     }
 
+    /**
+     * Pronouns are free text the user publishes on their profile (GitHub issue
+     * #1826): a string of at most 40 characters, or no field at all. The edit
+     * form refuses a longer value with a message; this refuses it from any other
+     * client. Clearing them removes the field, which this allows.
+     */
+    function validPronouns(data) {
+      return !('pronouns' in data)
+        || (data.pronouns is string && data.pronouns.size() <= 40);
+    }
+
     match /users/{userId} {
       allow read: if isMember();
 
@@ -1100,9 +1111,13 @@ service cloud.firestore {
        * own first write in the case where that trigger has not landed yet, and
        * it may not seed the backend-owned fields.
        */
-      allow create: if isSelf(userId) && absentAll(backendOwnedUserFields());
+      allow create: if isSelf(userId)
+        && absentAll(backendOwnedUserFields())
+        && validPronouns(request.resource.data);
 
-      allow update: if isSelf(userId) && unchangedAll(backendOwnedUserFields());
+      allow update: if isSelf(userId)
+        && unchangedAll(backendOwnedUserFields())
+        && validPronouns(request.resource.data);
 
       /** Account deletion runs in `deleteOwnAccount` with the Admin SDK. */
       allow delete: if false;

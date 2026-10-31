@@ -50,6 +50,7 @@ describe(EditProfilePage.name, () => {
         city: '',
         displayName: '',
         fullName: '',
+        pronouns: '',
         about: '',
         email: '',
         photoUrl: '',
@@ -148,6 +149,7 @@ describe(EditProfilePage.name, () => {
           userId: 'user123',
           city: 'Test City',
           about: 'About me text',
+          pronouns: 'they/them',
           public: true,
         };
 
@@ -159,6 +161,7 @@ describe(EditProfilePage.name, () => {
           city: 'Test City',
           displayName: 'Test User',
           fullName: 'Test Full Name',
+          pronouns: 'they/them',
           email: 'e@mail.com',
           photoUrl: 'photo.jpg',
           public: true,
@@ -176,6 +179,7 @@ describe(EditProfilePage.name, () => {
           city: '',
           displayName: 'Anonymous',
           fullName: '',
+          pronouns: '',
           email: '',
           photoUrl: '',
           public: false,
@@ -366,6 +370,58 @@ describe(EditProfilePage.name, () => {
 
       expect(emittedPublicUser).toBeDefined();
       expect(emittedPublicUser?.about).toBe('');
+    });
+
+    describe('pronouns (issue #1826)', () => {
+      const save = (pronouns: string): PublicUser | undefined => {
+        let emitted: PublicUser | undefined;
+        component.submitPublicUser.subscribe((user) => {
+          emitted = user;
+        });
+        component.profileForm.patchValue({ pronouns });
+        component.saveProfile();
+
+        return emitted;
+      };
+
+      it('saves the pronouns trimmed', () => {
+        expect(save('  they/them ')?.pronouns).toBe('they/them');
+      });
+
+      it('saves no pronouns when the field is cleared', () => {
+        compRef.setInput('publicUser', {
+          displayName: 'Test User',
+          email: 'test@example.com',
+          photoUrl: '',
+          userId: 'user123',
+          pronouns: 'she/her',
+        });
+
+        expect(save('   ')?.pronouns).toBeUndefined();
+      });
+
+      it('accepts 40 characters and refuses 41, saying why', () => {
+        const control = component.profileForm.controls.pronouns;
+
+        control.setValue('x'.repeat(40));
+        expect(control.valid).toBe(true);
+
+        control.setValue('x'.repeat(41));
+        expect(control.hasError('maxlength')).toBe(true);
+        expect(component.profileForm.invalid).toBe(true);
+        // Touched at once, so Ionic shows the error text while typing.
+        expect(control.touched).toBe(true);
+      });
+
+      it('offers the field on the edit form', () => {
+        fixture.detectChanges();
+
+        expect(
+          fixture.nativeElement.querySelector(
+            '[data-testid="edit-profile-pronouns"]',
+          ),
+        ).not.toBeNull();
+      });
     });
 
     it('should not save if publicUser is not provided', () => {

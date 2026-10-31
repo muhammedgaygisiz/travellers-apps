@@ -2,7 +2,16 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { updateProfileWithImagePathFromFirebaseStorage } from '../update-profile-with-image-path-from-firestorage';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
-jest.mock('@capacitor-firebase/firestore');
+/**
+ * The automock, plus the deletion marker it leaves undefined: `FieldValue` is a
+ * class export beside the plugin object, and a profile write calls
+ * `FieldValue.delete()` to remove cleared pronouns (issue #1826). The marker is
+ * the plain `{ __type__ }` object the plugin builds.
+ */
+jest.mock('@capacitor-firebase/firestore', () => ({
+  ...jest.createMockFromModule<object>('@capacitor-firebase/firestore'),
+  FieldValue: { delete: jest.fn(() => ({ __type__: 'delete' })) },
+}));
 
 jest.mock('utils', () => ({
   getDownloadUrlFromFirebaseStorage: jest
@@ -42,6 +51,7 @@ describe(updateProfileWithImagePathFromFirebaseStorage.name, () => {
         about: '',
         public: false,
         photoUrl: 'download-url',
+        pronouns: { __type__: 'delete' },
         updatedAt: '2024-03-15T12:00:00.000Z',
         updatedAtTimestamp: 1710504000000,
       },
@@ -83,5 +93,46 @@ describe(updateProfileWithImagePathFromFirebaseStorage.name, () => {
     expect(written).not.toHaveProperty('subscriptionTier');
     expect(written).not.toHaveProperty('followersCount');
     expect(written).not.toHaveProperty('userId');
+  });
+
+  describe('pronouns (issue #1826)', () => {
+    const written = (): Record<string, unknown> =>
+      (FirebaseFirestore.updateDocument as unknown as jest.Mock).mock.calls.at(
+        -1,
+      )?.[0]?.data;
+
+    it('keeps the pronouns, trimmed, when the photo changes', async () => {
+      const result = await updateProfileWithImagePathFromFirebaseStorage(
+        'photo-url',
+        { displayName: 'Mo', email: 'e', userId: 'u', pronouns: ' they/them ' },
+        'u',
+      );
+
+      expect(written()['pronouns']).toBe('they/them');
+      expect(result.pronouns).toBe('they/them');
+    });
+
+    it('removes cleared pronouns from the document and the result', async () => {
+      const result = await updateProfileWithImagePathFromFirebaseStorage(
+        'photo-url',
+        { displayName: 'Mo', email: 'e', userId: 'u', pronouns: '   ' },
+        'u',
+      );
+
+      expect(written()['pronouns']).toEqual({ __type__: 'delete' });
+      expect(result).not.toHaveProperty('pronouns');
+    });
+
+    it('removes the field when no profile is passed', async () => {
+      const result = await updateProfileWithImagePathFromFirebaseStorage(
+        'photo-url',
+        undefined,
+        'u',
+      );
+
+      expect(written()['pronouns']).toEqual({ __type__: 'delete' });
+      expect(result).not.toHaveProperty('pronouns');
+      expect(result.photoUrl).toBe('download-url');
+    });
   });
 });

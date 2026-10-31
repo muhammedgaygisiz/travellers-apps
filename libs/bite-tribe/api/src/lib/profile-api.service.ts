@@ -13,6 +13,7 @@ import type {
   FollowSuggestion,
   PublicUser,
 } from 'model';
+import { normalizePronouns } from 'model';
 import { toPublicUser } from './utils/to-public-user';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
@@ -26,6 +27,7 @@ import { deleteCurrentImage } from './utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
 import { updateProfileWithImagePathFromFirebaseStorage } from './bite-api/utils/update-profile-with-image-path-from-firestorage';
 import { loadProfileById } from './bite-api/utils/load-profile-by-id';
+import { withPronounsWrite } from './utils/pronouns-write';
 import {
   markUserMetadataUpdated,
   shouldUpdateUserMetadata,
@@ -201,20 +203,20 @@ export class ProfileApiService {
 
         await FirebaseFirestore.updateDocument({
           reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-          data: updatedUser,
+          data: withPronounsWrite(updatedUser),
         });
 
-        return { ...publicUser, ...updatedUser } as PublicUser;
+        return this.toUpdatedUser(publicUser, updatedUser);
       }
 
       const updatedUser = this.toProfileUpdate(publicUser, publicUser.photoUrl);
 
       await FirebaseFirestore.updateDocument({
         reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-        data: updatedUser,
+        data: withPronounsWrite(updatedUser),
       });
 
-      return { ...publicUser, ...updatedUser } as PublicUser;
+      return this.toUpdatedUser(publicUser, updatedUser);
     } catch (error) {
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);
@@ -264,14 +266,21 @@ export class ProfileApiService {
    * carrying it. Spreading also forwarded keys whose value is `undefined` —
    * which a caller produces just by reading a document that never had the field
    * — and Firestore rejects the whole update for those.
+   *
+   * `pronouns` is the one field that is absent rather than empty, so it is left
+   * out here when there are none, and {@link withPronounsWrite} turns that into
+   * the removal of the stored value (issue #1826).
    */
   private toProfileUpdate(
     publicUser: PublicUser,
     photoUrl: string,
   ): Omit<PublicUser, 'userId' | 'followers'> {
+    const pronouns = normalizePronouns(publicUser.pronouns);
+
     return {
       displayName: publicUser.displayName,
       fullName: publicUser.fullName || '',
+      ...(pronouns ? { pronouns } : {}),
       email: publicUser.email,
       photoUrl,
       city: publicUser.city || '',
@@ -280,6 +289,21 @@ export class ProfileApiService {
       updatedAt: new Date().toISOString(),
       updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
     };
+  }
+
+  /**
+   * The profile as it stands after an update. Cleared pronouns leave the object
+   * too, as they leave the document, rather than surviving from the caller's
+   * copy.
+   */
+  private toUpdatedUser(
+    publicUser: PublicUser,
+    updatedUser: Omit<PublicUser, 'userId' | 'followers'>,
+  ): PublicUser {
+    const { pronouns: previousPronouns, ...rest } = publicUser;
+    void previousPronouns;
+
+    return { ...rest, ...updatedUser } as PublicUser;
   }
 
   /**

@@ -483,6 +483,10 @@ the same shape as `e2e`:
 --withTarget=test`, sorts it, keeps every fourth project starting at its own
   index, and runs them with `nx run-many -t test -c ci --parallel=2
 --maxWorkers=2`. A leg whose share is empty skips its run and its upload.
+  Those flags reach every project's own `test` command, so no project may pin
+  `--runInBand` there: Jest refuses it next to `--maxWorkers` and prints its
+  usage instead of running. `functions` did, and failed its leg on the first pull
+  request that touched it ([#1826]).
 - **`tests`** needs the matrix and passes only when every leg did. Every job
   after the unit tests needs `tests`, so none of them depends on the shard
   count, and the check name is unchanged.
@@ -702,3 +706,4 @@ nx.json
 [#1818]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1818
 [#1819]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1819
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839
+[#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826

@@ -30,8 +30,9 @@ import {
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { PublicUser } from 'model';
+import { normalizePronouns, PRONOUNS_MAX_LENGTH } from 'model';
 import type { IonToggleCustomEvent, OverlayEventDetail } from '@ionic/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
 import { ImageUploadComponent } from 'image-upload';
@@ -102,15 +103,34 @@ export class EditProfilePage {
 
   isOpen = signal(false);
   failedProfileImageUrl = signal<string | null>(null);
+  readonly pronounsMaxLength = PRONOUNS_MAX_LENGTH;
   profileForm = this.formBuilder.group({
     displayName: [''],
     fullName: [''],
+    // Refused rather than cut off at the limit: a `maxlength` on the input would
+    // drop the end of what was typed without saying so (issue #1826).
+    pronouns: ['', Validators.maxLength(PRONOUNS_MAX_LENGTH)],
     city: [''],
     about: [''],
     email: ['', Validators.required],
     public: [false],
     photoUrl: [''],
   });
+
+  /**
+   * Shows the length error as soon as the value is too long, not on blur, so
+   * the user reads why Save went disabled while still typing.
+   */
+  private readonly pronounsTouchedOnInvalid =
+    this.profileForm.controls.pronouns.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        const control = this.profileForm.controls.pronouns;
+
+        if (control.invalid) {
+          control.markAsTouched();
+        }
+      });
 
   isFormInvalid = toSignal(
     this.profileForm.valueChanges.pipe(map(() => !this.profileForm.valid)),
@@ -152,6 +172,7 @@ export class EditProfilePage {
       city,
       displayName,
       fullName,
+      pronouns,
       about,
       public: isPublic,
       email,
@@ -165,6 +186,7 @@ export class EditProfilePage {
         city: city ?? '',
         displayName: displayName ? displayName : publicUser.displayName,
         fullName: fullName || '',
+        pronouns: normalizePronouns(pronouns),
         about: about || '',
         email: email || '',
         public: isPublic || false,

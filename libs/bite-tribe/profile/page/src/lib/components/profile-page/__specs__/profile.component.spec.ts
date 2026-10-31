@@ -595,6 +595,86 @@ describe('ProfileComponent', () => {
     });
   });
   /** GitHub issue #1787. */
+  describe('pronouns (issue #1826)', () => {
+    const renderedPronouns = (): string | undefined => {
+      fixture.detectChanges();
+
+      return (fixture.nativeElement as HTMLElement)
+        .querySelector('[data-testid="profile-pronouns"]')
+        ?.textContent?.trim();
+    };
+
+    it('shows them after the display name on a public profile', () => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        public: true,
+        pronouns: 'they/them',
+      });
+
+      expect(renderedPronouns()).toBe('they/them');
+    });
+
+    it('shows nothing in their place on a public profile without them', () => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        public: true,
+      });
+
+      expect(renderedPronouns()).toBeUndefined();
+    });
+
+    it('does not expose them to another account on a private profile', () => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        public: false,
+        pronouns: 'she/her',
+      });
+
+      expect(renderedPronouns()).toBeUndefined();
+    });
+
+    it('treats a profile with no saved visibility as private', () => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        pronouns: 'she/her',
+      });
+
+      expect(renderedPronouns()).toBeUndefined();
+    });
+
+    it('shows the owner their own pronouns on a private profile', () => {
+      compRef.setInput('userId', 'owner');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        public: false,
+        pronouns: 'he/they',
+      });
+
+      expect(renderedPronouns()).toBe('he/they');
+    });
+
+    it('shows nothing for pronouns that are only spaces', () => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', {
+        userId: 'owner',
+        displayName: 'Mo',
+        public: true,
+        pronouns: '   ',
+      });
+
+      expect(renderedPronouns()).toBeUndefined();
+    });
+  });
+
   describe('the show on globe button', () => {
     const button = (): HTMLElement | null =>
       (fixture.nativeElement as HTMLElement).querySelector(

@@ -1,7 +1,8 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { PublicUser } from 'model';
+import { normalizePronouns, PublicUser } from 'model';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 import { USERS_COLLECTION } from '../../utils/user-collection-key';
+import { withPronounsWrite } from '../../utils/pronouns-write';
 
 /**
  * Points the profile at the image that was just uploaded to Storage.
@@ -26,10 +27,12 @@ export const updateProfileWithImagePathFromFirebaseStorage = async (
   userId: string,
 ): Promise<PublicUser> => {
   const downloadUrl = await getDownloadUrlFromFirebaseStorage(photoUrl);
+  const pronouns = normalizePronouns(profileWithoutPhotoUrl?.pronouns);
 
   const data: Partial<PublicUser> & Pick<PublicUser, 'photoUrl'> = {
     displayName: profileWithoutPhotoUrl?.displayName || '',
     fullName: profileWithoutPhotoUrl?.fullName || '',
+    ...(pronouns ? { pronouns } : {}),
     email: profileWithoutPhotoUrl?.email || '',
     city: profileWithoutPhotoUrl?.city || '',
     about: profileWithoutPhotoUrl?.about || '',
@@ -41,8 +44,13 @@ export const updateProfileWithImagePathFromFirebaseStorage = async (
 
   await FirebaseFirestore.updateDocument({
     reference: `${USERS_COLLECTION}/${userId}`,
-    data,
+    data: withPronounsWrite(data),
   });
 
-  return { ...(profileWithoutPhotoUrl ?? {}), ...data } as PublicUser;
+  // Cleared pronouns leave the returned profile as they leave the document.
+  const { pronouns: previousPronouns, ...previous } =
+    profileWithoutPhotoUrl ?? {};
+  void previousPronouns;
+
+  return { ...previous, ...data } as PublicUser;
 };

@@ -11,6 +11,7 @@ import {
   collection,
   collectionGroup,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -2695,6 +2696,44 @@ describe('users', () => {
         followersCount: 2,
       }),
     );
+  });
+
+  describe('pronouns (issue #1826)', () => {
+    it('lets an account set pronouns of up to 40 characters', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          pronouns: 'x'.repeat(40),
+        }),
+      );
+    });
+
+    it('refuses pronouns longer than 40 characters', async () => {
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          pronouns: 'x'.repeat(41),
+        }),
+      );
+    });
+
+    it('refuses pronouns that are not text', async () => {
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          pronouns: ['they', 'them'],
+        }),
+      );
+    });
+
+    it('lets an account clear its pronouns by removing the field', async () => {
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+        pronouns: 'they/them',
+      });
+
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          pronouns: deleteField(),
+        }),
+      );
+    });
   });
 
   it('lets an account follow another and refuses forging somebody else’s follow', async () => {

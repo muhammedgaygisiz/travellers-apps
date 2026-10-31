@@ -1,5 +1,10 @@
 name: "Nx computation cache"
 description: "Persist the Nx task cache across CI runs so unchanged targets are restored instead of re-executed."
+inputs:
+  key-suffix:
+    description: "Tells apart the legs of a matrix job, which share one job id and would otherwise race to save under one key."
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -24,7 +29,7 @@ runs:
         # v2: entries under the old prefix hold `.nx/cache` only, so they can
         # never produce a hit. The bump avoids restoring ~150 MB of unusable
         # artifacts until they age out.
-        key: nx-cache-v2-${{ runner.os }}-${{ github.run_id }}-${{ github.job }}
+        key: nx-cache-v2-${{ runner.os }}-${{ github.run_id }}-${{ github.job }}${{ inputs.key-suffix && format('-{0}', inputs.key-suffix) || '' }}
         restore-keys: |
           nx-cache-v2-${{ runner.os }}-
 

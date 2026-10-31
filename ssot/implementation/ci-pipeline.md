@@ -497,6 +497,21 @@ Two projects at a time with two workers each fills the runner's four vCPUs. The
 `ci` configuration of the `test` target in `nx.json` adds `--ci`, which fails a
 missing snapshot instead of writing it, and `--coverage`.
 
+Measured on the pull request that made the change, run 41183078451, which
+affected 115 Jest projects because it edited `jest.preset.js`. Every Jest cache
+was cold, so this is the slow case:
+
+| Figure                                          | One job, run 40863200582 | Four shards, run 41183078451 |
+| ----------------------------------------------- | ------------------------ | ---------------------------- |
+| Projects run                                    | 67                       | 115                          |
+| Unit-test wall-clock, stylelint done to `tests` | 10.4 min                 | 4.0 min                      |
+| Longest leg's test step                         | 591 s                    | 192 s, shortest 130 s        |
+| Summed Jest time, the 63 projects in both runs  | 1,658 s                  | 875 s                        |
+| `bite-tribe-business/floor-plan`                | 98 s                     | 34 s                         |
+
+The per-project halving is the worker sizing alone, because neither run had a
+transform cache. Codecov merged the four uploads into one report of 702 files.
+
 `jest.preset.js` sets `cacheDirectory` to `tmp/jest-cache`, which each leg
 persists with `actions/cache` keyed on the lockfile and its shard. Jest keys
 every transform by content, so a cache restored from an older commit is safe;

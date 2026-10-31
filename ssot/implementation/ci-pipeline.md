@@ -51,10 +51,10 @@ tests
 |
 +-- deploy-firestore-indexes --+                             (develop only)
 |                              |
-+-- bite-tribe-build ----------|- deploy-bite-tribe          (develop only)
-+-- bite-tribe-business-build -|- deploy-bite-tribe-business (develop only)
-+-- bite-tribe-admin-build ----|- deploy-bite-tribe-admin    (develop only)
-+-- functions-build -----------+- deploy-functions           (develop only)
++-- build ---------------------+- deploy-bite-tribe          (develop only)
+                               +- deploy-bite-tribe-business (develop only)
+                               +- deploy-bite-tribe-admin    (develop only)
+                               +- deploy-functions           (develop only)
 ```
 
 ## Which Suites Gate A Merge
@@ -65,6 +65,7 @@ worth stating rather than inferring from a workflow file.
 | Suite                       | Command                 | Gates a merge                         |
 | --------------------------- | ----------------------- | ------------------------------------- |
 | Unit tests                  | `nx affected -t test`   | Yes, `tests`                          |
+| App and functions builds    | `nx run-many -t build`  | Yes, `build`, for the affected ones   |
 | Lint, Stylelint             | `nx affected -t lint`   | Yes                                   |
 | SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                    |
 | Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected |
@@ -108,17 +109,35 @@ reach production the instant they land and cannot be staged or rolled back.
 Gating that deploy on a table-ordering spec would couple two things that answer
 different questions and should be able to fail independently.
 
-`deploy-functions` is the only job with two `needs`: `functions-build` for the
-artifact and `deploy-firestore-indexes` for the ordering. The three web deploys
-take their build only.
+`deploy-functions` is the only job with two `needs`: `build` for the compile
+check and `deploy-firestore-indexes` for the ordering. The three web deploys
+take `build` only.
 
-The three web apps deploy through three independent build/deploy pairs to three
+**One job builds all four.** Until [issue #1819][#1819] each app and the
+functions had a build job of its own, and each spent 25 to 40 seconds of a
+roughly one-minute job on checkout and cache restore. A pull request that fans
+out to that many runners at once queues behind itself: in run 40573152209
+`loki` started 40.7 minutes in, although everything it needed had finished at
+4.7. `build` asks `nx show projects --affected` which of `bite-tribe`,
+`bite-tribe-business`, `bite-tribe-admin` and `functions` a change affects and
+builds those with `nx run-many`, so a pull request that only touches `ssot/`
+builds nothing. It does not run `nx affected -t build` with `-p`: `affected` has
+no include filter, and the `-p` is forwarded to the build itself, where it
+reaches `tsc` as a project path. Nx runs every selected build even when one
+fails, so one red app still reports the others.
+
+The price is that the deploys share a gate. A failed build of one app on
+`develop` now holds back all four deploys, not only its own. That push has
+already built green on its pull request, so the case is rare, and it fails
+closed.
+
+The three web apps still deploy through three independent deploy jobs to three
 hosting sites. They are not one job with three targets: a failure deploying one
 app must not hold the other two back, and the consumer app is the only one under
 release-candidate scope, so it is the only one that sets
 `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` and runs `release:verify-bundle`.
 
-`functions-build` compiles the Firebase functions and `deploy-functions` ships
+`build` compiles the Firebase functions and `deploy-functions` ships
 them, so backend behaviour reaches production on the same push as the web bundle
 that calls it. Until [issue #1464][#1464]
 the pipeline built them and threw the result away, and the deploy was a command
@@ -217,14 +236,14 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 
 ## Composite Actions
 
-| Action                                   | Used by                                                                           | Responsibility                                                                              |
-| ---------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                            | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
-| `.github/actions/restore-cache`          | Every pipeline job                                                                | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
-| `.github/actions/install-if-missing`     | The build jobs                                                                    | `npm ci` when the restored `node_modules` is unusable                                       |
-| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`                                        | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
-| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, builds, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
-| `.github/actions/playwright-chromium`    | `e2e`, `business-e2e`                                                             | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
+| Action                                   | Used by                                                                            | Responsibility                                                                              |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `.github/actions/setup`                  | `setup`, deploys, standalone workflows                                             | Restore `node_modules`, set up Node.js from `.nvmrc`; on a miss `npm ci` and save the cache |
+| `.github/actions/restore-cache`          | Every pipeline job                                                                 | Exact-key restore of `node_modules`, no fallback; exposes `cache-hit`                       |
+| `.github/actions/install-if-missing`     | `build`                                                                            | `npm ci` when the restored `node_modules` is unusable                                       |
+| `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
+| `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
+| `.github/actions/playwright-chromium`    | `e2e`, `business-e2e`                                                              | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -334,7 +353,9 @@ Nx names the index after the machine id of the host that wrote it, reading `/var
 
 ## Affected Computation
 
-`lint`, `stylelint` and `tests` run through `nx affected`. Builds and E2E run unconditionally, which is why `functions-build` is the type check for the Firebase functions rather than an affected-gated target: it compiles them on every run.
+`lint`, `stylelint`, `tests` and `build` run through the affected set; `loki-build` reads it to decide whether to capture. E2E runs unconditionally.
+
+`build` is also the only type check for the Firebase functions, so gating it on affected is safe only because affected selects `functions` for everything that can break the compile. Checked for [issue #1819][#1819]: its own sources and package files, a root dependency it imports (`firebase-admin`), the workspace `typescript` and `@types/node`, `tsconfig.base.json` and `nx.json` each select it, and a change confined to `ssot/` or to `apps/bite-tribe-firebase/firebase.json` does not. The functions compile cannot read a workspace library, because its `tsconfig.json` sets `rootDir: src` and does not extend `tsconfig.base.json`.
 
 `pipeline.yml` sets `NX_BASE: develop` as a workflow-level default. `nrwl/nx-set-shas` then writes the resolved `NX_BASE` and `NX_HEAD` SHAs to `GITHUB_ENV`, which takes precedence for the steps that follow, so the affected jobs compare against the real merge base rather than the branch name. Jobs that need affected must therefore run `setup-env-for-affected` before the Nx command.
 
@@ -416,7 +437,7 @@ it is not, and it is simply never captured in CI.
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
 
-This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bite-tribe-admin` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `bite-tribe-build` be replayed into a deploy, or the reverse.
+This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bite-tribe-admin` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `build` be replayed into a deploy, or the reverse. It is also why a deploy still runs when `build` skipped its app as unaffected: the deploy never used that artifact.
 
 Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`. All three hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
 
@@ -552,11 +573,11 @@ nx.json
 ## Current Limitations
 
 - `e2e` and `business-e2e` do not restore the Nx cache, so the E2E app builds re-run on every pipeline run. They build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above. `loki` and `deploy-bite-tribe-storybook` were in this list until [issue #1815][#1815], which put both Storybook builds on the cache. Before that, `develop` built the Storybook twice, at roughly 80 seconds each.
-- Only the two build jobs carry `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
+- Only `build` carries `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
 - The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [Implementation - Store Release Steps](store-release-steps.md) is still the one that produces store artifacts. See [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md).
 - `native-release.yml` builds on whatever Xcode `macos-latest` carries. An artifact is reproducible against a commit, not against a toolchain.
-- The two jobs that compile the Firebase functions use different compilers. `functions-build` does not install the functions package, so it compiles with the workspace TypeScript 6; `deploy-functions` installs it and therefore compiles with the `^5.7.3` that package pins, which is also what a workstation deploy uses. An error only one of them reports passes the pull request and fails the deploy. The version split is described in [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
+- The two jobs that compile the Firebase functions use different compilers. `build` does not install the functions package, so it compiles with the workspace TypeScript 6; `deploy-functions` installs it and therefore compiles with the `^5.7.3` that package pins, which is also what a workstation deploy uses. An error only one of them reports passes the pull request and fails the deploy. The version split is described in [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md).
 - A second push to `develop` cancels a functions deploy in flight. The workflow-level `cancel-in-progress` supersedes the whole run, and a job-level `concurrency` group cannot override that; it only keeps a deploy started from another run from overlapping. A cancelled gen2 deploy leaves the already-updated functions updated, and the next push deploys the rest.
 - CI never deletes a function. `--non-interactive` turns the deletion prompt into a failure, so removing an export from `src/index.ts` makes the deploy fail rather than silently take a live endpoint away. Delete it locally and deliberately, then push.
 - Gen2 functions have no rollback. Recovery from a bad deploy is a forward deploy of the reverted commit, not a console action.
@@ -584,4 +605,5 @@ nx.json
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816
 [#1818]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1818
+[#1819]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1819
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

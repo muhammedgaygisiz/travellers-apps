@@ -539,9 +539,27 @@ jobs:
               });
             }
 
-  # BiteTribe
+  # Builds
 
-  bite-tribe-build:
+  # One job builds the three web apps and compiles the Firebase functions, and
+  # only the ones the change affects (issue #1819). Four jobs of their own spent
+  # 25 to 40 seconds each on checkout and cache restore, and a pull request that
+  # fans out to that many runners queues behind itself.
+  #
+  # The functions compile is the only one in CI: the specs are transpiled per
+  # file and the linter checks style, not assignability. Affected still selects
+  # `functions` for everything that can break it - its own sources and package
+  # files, a root dependency it imports, the workspace `typescript` and
+  # `@types/node`, `tsconfig.base.json` and `nx.json`. It compiles with the
+  # workspace TypeScript, because it does not install the functions package;
+  # `deploy-functions` does install it and therefore compiles with the version
+  # that package pins, so the two can disagree.
+  # See ssot/implementation/firebase-functions.md.
+  #
+  # Nx runs every selected build even when one fails, so one app's compile
+  # error still reports the others. The deploys below need this job, so on
+  # `develop` a failed build holds back all four deploys, not only its own.
+  build:
     runs-on: ubuntu-latest
     needs:
       - tests
@@ -558,17 +576,36 @@ jobs:
       - name: 'Install dependencies when the cache is unavailable'
         uses: ./.github/actions/install-if-missing
 
+      - name: 'Setup env'
+        uses: ./.github/actions/setup-env-for-affected
+
       - name: 'Nx cache'
         uses: ./.github/actions/nx-cache
 
-      - name: Build BiteTribe App
-        run: npm run nx -- build bite-tribe
+      # `nx affected` has no filter that keeps only these four projects - a
+      # `-p` is forwarded to the build and reaches `tsc` as its project path -
+      # so the affected four are listed first and built with `run-many`. As in
+      # `loki-build`, the list is read outside a condition so a failing Nx
+      # fails the step rather than reading as "nothing affected".
+      - name: Build the affected apps and functions
+        shell: bash
+        run: |
+          affected=$(npm run --silent nx -- show projects --affected --projects bite-tribe,bite-tribe-business,bite-tribe-admin,functions --json)
+          projects=$(jq -r 'join(",")' <<< "$affected")
+          if [ -z "$projects" ]; then
+            echo 'None of bite-tribe, bite-tribe-business, bite-tribe-admin and functions is affected. Builds skipped.' | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "Building $projects" | tee -a "$GITHUB_STEP_SUMMARY"
+          npm run nx -- run-many -t build -p "$projects"
+
+  # BiteTribe
 
   deploy-bite-tribe:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - bite-tribe-build
+      - build
 
     steps:
       - name: Checkout repository
@@ -625,34 +662,11 @@ jobs:
 
   # BiteTribe Business
 
-  bite-tribe-business-build:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: 'Restore Cache'
-        uses: ./.github/actions/restore-cache
-
-      - name: 'Install dependencies when the cache is unavailable'
-        uses: ./.github/actions/install-if-missing
-
-      - name: 'Nx cache'
-        uses: ./.github/actions/nx-cache
-
-      - name: Build BiteTribe Business App
-        run: npm run nx -- build bite-tribe-business
-
   deploy-bite-tribe-business:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - bite-tribe-business-build
+      - build
 
     steps:
       - name: Checkout repository
@@ -693,42 +707,20 @@ jobs:
 
   # BiteTribe Admin
 
-  # The internal operations tool (issue 1469). It mirrors the business pair
+  # The internal operations tool (issue 1469). It mirrors the business deploy
   # above rather than sharing a job with it, because the two deploy to separate
-  # hosting sites and a failure in one must not hold the other back.
+  # hosting sites and a failed deploy of one must not hold the other back. Its
+  # build runs in the shared `build` job.
   #
   # Like the business app it is out of release-candidate scope, so
   # `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is deliberately absent and
   # `release:verify-bundle` is not run here.
 
-  bite-tribe-admin-build:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: 'Restore Cache'
-        uses: ./.github/actions/restore-cache
-
-      - name: 'Install dependencies when the cache is unavailable'
-        uses: ./.github/actions/install-if-missing
-
-      - name: 'Nx cache'
-        uses: ./.github/actions/nx-cache
-
-      - name: Build BiteTribe Admin App
-        run: npm run nx -- build bite-tribe-admin
-
   deploy-bite-tribe-admin:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - bite-tribe-admin-build
+      - build
 
     steps:
       - name: Checkout repository
@@ -999,37 +991,6 @@ jobs:
 
   # Firebase Functions
 
-  # Compiles the functions, so a compile error fails on the pull request rather
-  # than at deploy time. Nothing else in CI compiles this project: the specs are
-  # transpiled per file and the linter checks style, not assignability.
-  #
-  # It compiles with the workspace TypeScript, because it does not install the
-  # functions package. `deploy-functions` does install it and therefore compiles
-  # with the version that package pins, so the two can disagree.
-  # See ssot/implementation/firebase-functions.md.
-  functions-build:
-    runs-on: ubuntu-latest
-    needs:
-      - tests
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: 'Restore Cache'
-        uses: ./.github/actions/restore-cache
-
-      - name: 'Install dependencies when the cache is unavailable'
-        uses: ./.github/actions/install-if-missing
-
-      - name: 'Nx cache'
-        uses: ./.github/actions/nx-cache
-
-      - name: Build Firebase Functions
-        run: npm run nx -- build functions
-
   # Deploys the compiled functions to the live project, so backend behaviour
   # reaches production on the same push that shipped the web bundle calling it.
   # Before this job the deploy ran from a workstation, which meant a merged
@@ -1051,7 +1012,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - functions-build
+      - build
       - deploy-firestore-indexes
 
     # Two function deploys must not overlap. The workflow-level group already

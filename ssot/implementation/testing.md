@@ -85,7 +85,7 @@ Playwright is the only supported E2E framework. Put new consumer and business-ap
 
 Both E2E targets start the Firebase emulators and their app's Angular dev server before running browser tests. Use them when validating launch-critical flows such as login, registration, creating a Bite, or maintaining a Restaurant through the real UI.
 
-The two suites share **one** emulator stack (`bite-tribe-firebase`, same ports, same `.firebase-export` seed). They are kept as separate projects, and as separate CI jobs, so they never contend for those ports. Never run them at the same time.
+The two suites share **one** emulator stack (`bite-tribe-firebase`, same ports, same `.firebase-export` seed). They are kept as separate projects, and as separate CI jobs, so they never contend for those ports. The consumer suite is further split into three Playwright shards, each on its own runner with its own emulators; see [CI Pipeline](ci-pipeline.md#the-consumer-e2e-suite-runs-as-three-shards). Never run them at the same time.
 
 Each suite owns its own `src/support` helpers and page objects. That duplication is deliberate: a business journey must not be able to break the consumer suite, and vice versa.
 
@@ -99,6 +99,8 @@ Run the suite serially when a local result has to be trustworthy:
 npx nx e2e bite-tribe-e2e --workers=1
 npx nx e2e bite-tribe-business-e2e --workers=1
 ```
+
+To reproduce one CI shard of the consumer suite, add its `--shard`, for example `npx nx e2e bite-tribe-e2e --workers=1 --shard=2/3`.
 
 A local red suite is not evidence of a regression until it has been reproduced serially. Do not draw conclusions by comparing a parallel full-suite run against a single `--grep` run: those differ in more than the code being tested.
 

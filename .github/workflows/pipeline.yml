@@ -361,10 +361,23 @@ jobs:
           echo "loki-build: $BUILD, loki-capture: $CAPTURE"
           [ "$BUILD" = 'success' ] && [ "$CAPTURE" = 'success' ]
 
-  e2e:
+  # The consumer suite runs as three Playwright shards, one runner each
+  # (issue #1817). On one worker it took about 7 minutes after the emulators
+  # came up. Each shard boots its own emulators from the seeded export, which
+  # is why it shards across jobs rather than raising `workers`: the specs share
+  # one emulator's data, and several create users, bites and table sessions.
+  #
+  # Like Loki, the shards report through an aggregate `e2e` job, so `report`
+  # and any required check read one name however many shards there are.
+  e2e-shard:
     runs-on: ubuntu-latest
     needs:
       - tests
+    strategy:
+      # Let every shard finish, so one run shows every failing test.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     steps:
       - name: Checkout repository
@@ -389,7 +402,10 @@ jobs:
         uses: ./.github/actions/playwright-chromium
 
       # Boots the Firebase emulators + Angular dev server (see
-      # apps/bite-tribe-e2e/playwright.config.ts) and runs the suite.
+      # apps/bite-tribe-e2e/playwright.config.ts) and runs this shard's part of
+      # the suite. Playwright splits by test, not by file, because the Nx preset
+      # sets `fullyParallel`; every spec seeds what it needs, and the `serial`
+      # describes stay in one shard.
       #
       # apps/bite-tribe/.env is gitignored, so these NX_* vars are absent in CI.
       # env-var-plugin.js inlines them into the served bundle at build time.
@@ -398,7 +414,7 @@ jobs:
       # hangs headless. All traffic stays on the local emulators, so the values
       # below only need a matching projectId — the rest are throwaway demo values.
       - name: Run E2E Tests
-        run: npm run nx -- e2e bite-tribe-e2e
+        run: npm run nx -- e2e bite-tribe-e2e --shard=${{ matrix.shard }}/3
         env:
           NX_APP_BITE_TRIBE_IS_DEV: 'true'
           NX_APP_BITE_TRIBE_PROJECT_ID: bite-tribe
@@ -412,11 +428,25 @@ jobs:
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: dist/.playwright/apps/bite-tribe-e2e
           retention-days: 7
 
-  # Same setup as the consumer `e2e` job, but its own runner: both suites drive
+  e2e:
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    needs:
+      - e2e-shard
+
+    steps:
+      - name: Require every shard to pass
+        env:
+          SHARDS: ${{ needs.e2e-shard.result }}
+        run: |
+          echo "e2e-shard: $SHARDS"
+          [ "$SHARDS" = 'success' ]
+
+  # Same setup as a consumer `e2e-shard` leg, but its own runner: both suites drive
   # the same Firebase emulator ports and would fight over them in one job.
   business-e2e:
     runs-on: ubuntu-latest
@@ -515,7 +545,7 @@ jobs:
               `| Business E2E (Playwright) | ${icon(results.businessE2e)} |`,
               `| Visual regression (Loki) | ${icon(results.loki)} |`,
               '',
-              `Artifacts on the [workflow run](${runUrl}): \`playwright-report\`, \`business-playwright-report\`, plus \`loki-diffs-<configuration>\` for each Loki configuration that finds visual changes.`,
+              `Artifacts on the [workflow run](${runUrl}): \`playwright-report-<shard>\` for each of the three consumer shards, \`business-playwright-report\`, plus \`loki-diffs-<configuration>\` for each Loki configuration that finds visual changes.`,
             ].join('\n');
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

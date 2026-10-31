@@ -43,7 +43,7 @@ stylelint
 tests
 |
 +-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
-+-- e2e --------------------------------------+-- report (pull requests only)
++-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
 +-- business-e2e -----------------------------+
 |
 +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
@@ -69,7 +69,7 @@ worth stating rather than inferring from a workflow file.
 | Lint, Stylelint             | `nx affected -t lint`   | Yes                                   |
 | SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                    |
 | Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected |
-| Consumer and business e2e   | `nx e2e …`              | Yes                                   |
+| Consumer and business e2e   | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e` |
 | Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`                |
 | Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator`             |
 
@@ -243,7 +243,7 @@ The lint, stylelint and tests chain is deliberately sequential so a cheap failur
 | `.github/actions/install-if-missing`     | `build`                                                                            | `npm ci` when the restored `node_modules` is unusable                                       |
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `tests`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `tests`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache                                                |
-| `.github/actions/playwright-chromium`    | `e2e`, `business-e2e`                                                              | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
+| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`                                                        | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -316,7 +316,7 @@ The Nx key is unique per run and job so every job saves its own entry, while the
 
 ### Playwright Browsers Without apt
 
-`e2e` and `business-e2e` get Chromium through
+`e2e-shard` and `business-e2e` get Chromium through
 `.github/actions/playwright-chromium`. Until [issue #1818][#1818] both ran
 `npx playwright install --with-deps chromium` on every run. That usually took 21
 to 44 seconds, but the `apt-get` half of `--with-deps` took 610 s and 729 s on
@@ -433,6 +433,38 @@ configuration, would otherwise pass without capturing anything. A configuration
 added to `loki.config.js` must be added to the matrix as well; nothing fails if
 it is not, and it is simply never captured in CI.
 
+### The Consumer E2E Suite Runs As Three Shards
+
+Until [issue #1817][#1817] `e2e` ran all 49 consumer tests on one Playwright
+worker. The emulators and dev server were up about 45 seconds into the job, and
+the tests then took 7.0 minutes, for a median job of 8.5 minutes. The suite now
+runs over two jobs, in the same shape as Loki:
+
+- **`e2e-shard`** is a matrix over `shard: [1, 2, 3]` with `fail-fast: false`.
+  Each leg runs `nx e2e bite-tribe-e2e --shard=<n>/3`, boots its own emulators
+  and dev server, and uploads `playwright-report-<n>`. The reports are not
+  merged; the `report` comment names all three.
+- **`e2e`** needs the matrix and passes only when every shard did. `report`
+  reads this job, so it keeps one consumer e2e row however many shards there
+  are, and the check name `e2e` is unchanged.
+
+The suite shards across jobs rather than raising `workers`, because the specs
+share one emulator's data and several create users, bites and table sessions.
+A shard has the emulator to itself and starts from the seeded export.
+
+Playwright splits by test, not by file, because `nxE2EPreset` sets
+`fullyParallel`. A file can therefore land in two shards, which is safe only
+because every spec seeds what it reads; a `test.describe.configure({ mode:
+'serial' })` block always stays in one shard. A spec that depends on an earlier
+test in its file must be made `serial`, or it passes only when the split
+happens to keep the two together.
+
+Shard 1 of 3 reproduces locally with
+`npx nx e2e bite-tribe-e2e --workers=1 --shard=1/3`, and `--list` shows which
+tests a shard holds without starting the emulators.
+
+`business-e2e`, at a median of 2.4 minutes, stays one job.
+
 ## Build-Time Environment Variables
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
@@ -532,7 +564,7 @@ the Nx-cache gaps under Current Limitations are the larger lever.
 - Keep every file a story renders inside `storybook-host`'s graph or its target inputs. A story in a project the graph does not reach, or a file outside any project that the build or the capture reads, is skipped by the `loki` gate and left out of the build's cache key. Check a new one with `nx show target inputs storybook-host:build-storybook`.
 - Verify a caching change by reading the `Cache: <hits>/<total> hit` line that Nx prints at the end of each run. The first run after a key change is always 0%; the second run on the same branch is the real signal.
 - Pull requests read the cache scope of the default branch. A cache written by a pull request is visible only to that pull request, so a new caching behavior only proves itself once `develop` has run with it.
-- Keep the E2E jobs on separate runners. Both suites drive the same Firebase emulator ports and would fight over them in one job.
+- Keep the E2E jobs on separate runners, and each consumer shard on a runner of its own. Every suite and shard drives the same Firebase emulator ports and would fight over them in one job, and a shard is only isolated because it starts its own emulators from the seeded export. Shard across jobs; do not raise Playwright `workers` against one emulator.
 - Add a new deploy to `pipeline.yml` behind `if: github.ref == 'refs/heads/develop'`. Do not give it a manually dispatched workflow of its own. A separate workflow needs a trigger that fires on its own, as `native-release.yml`'s tag does.
 - Never put `continue-on-error` on a deploy job. A deploy that is allowed to fail quietly is the manual deploy again, with extra steps.
 - Give a deploy the narrowest credential that can perform it, and grant a new permission to that deploy's own service account. Widening `FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE` is how a hosting secret ends up worth a project.
@@ -572,7 +604,7 @@ nx.json
 
 ## Current Limitations
 
-- `e2e` and `business-e2e` do not restore the Nx cache, so the E2E app builds re-run on every pipeline run. They build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above. `loki` and `deploy-bite-tribe-storybook` were in this list until [issue #1815][#1815], which put both Storybook builds on the cache. Before that, `develop` built the Storybook twice, at roughly 80 seconds each.
+- `e2e-shard` and `business-e2e` do not restore the Nx cache, so the E2E app builds re-run on every pipeline run, and since [issue #1817][#1817] the consumer dev server is built once per shard. They build with `NX_APP_BITE_TRIBE_IS_DEV=true` and fall under the environment-variable rule above. `loki` and `deploy-bite-tribe-storybook` were in this list until [issue #1815][#1815], which put both Storybook builds on the cache. Before that, `develop` built the Storybook twice, at roughly 80 seconds each.
 - Only `build` carries `install-if-missing`. Every other job restores `node_modules` with an exact key and no fallback, so a cache miss or an unreachable cache service fails them with `nx: not found` instead of installing.
 - There is no remote cache. Nx Cloud's free tier is exhausted too quickly for this workspace, and the self-hosted cache plugins (`@nx/gcs-cache` and siblings) are deprecated over CVE-2025-36852, an unpatchable cache-poisoning design flaw. The GitHub Actions cache is used instead, and its branch scoping provides the isolation those plugins lack.
 - The native jobs in `native-release.yml` have never run. The Android and iOS signing secrets are not provisioned, so the workflow is written and reviewed but unexecuted, and the manual workstation release in [Implementation - Store Release Steps](store-release-steps.md) is still the one that produces store artifacts. See [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md).
@@ -604,6 +636,7 @@ nx.json
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816
+[#1817]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1817
 [#1818]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1818
 [#1819]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1819
 [#1839]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1839

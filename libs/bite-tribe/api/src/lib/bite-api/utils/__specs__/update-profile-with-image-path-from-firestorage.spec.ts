@@ -122,5 +122,17 @@ describe(updateProfileWithImagePathFromFirebaseStorage.name, () => {
       expect(written()['pronouns']).toEqual({ __type__: 'delete' });
       expect(result).not.toHaveProperty('pronouns');
     });
+
+    it('removes the field when no profile is passed', async () => {
+      const result = await updateProfileWithImagePathFromFirebaseStorage(
+        'photo-url',
+        undefined,
+        'u',
+      );
+
+      expect(written()['pronouns']).toEqual({ __type__: 'delete' });
+      expect(result).not.toHaveProperty('pronouns');
+      expect(result.photoUrl).toBe('download-url');
+    });
   });
 });

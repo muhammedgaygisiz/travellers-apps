@@ -8,7 +8,13 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import type { Bite, LikeClick, PublicUser } from 'model';
+import type {
+  Bite,
+  LikeClick,
+  PublicUser,
+  ReportUserResult,
+  UserReportReason,
+} from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
@@ -127,5 +133,18 @@ export class ProfileDataAccessService {
 
   submitUnblockClick(user: PublicUser): void {
     this.storeService.unblockUser(user);
+  }
+
+  /**
+   * Reports the profile to the BiteTribe operators (GitHub issue #1829).
+   *
+   * Straight to the API rather than through the store, as a Bite report is:
+   * nothing the app holds changes, and the report only reaches an operator.
+   */
+  reportUser(
+    userId: string,
+    reason: UserReportReason,
+  ): Promise<ReportUserResult> {
+    return this.api.reportUser(userId, reason);
   }
 }

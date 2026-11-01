@@ -1,0 +1,234 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row profile-reports">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-profile-reports-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              fill="outline"
+              data-testid="admin-profile-reports-reload"
+              [disabled]="loading()"
+              (click)="reload.emit()"
+            >
+              {{ 'admin-reports-reload' | transloco }}
+            </ion-button>
+
+            @if (loading()) {
+              <div class="profile-reports__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (failed()) {
+              <p data-testid="admin-profile-reports-failed">
+                {{ 'admin-reports-load-failed' | transloco }}
+              </p>
+            } @else {
+              <ion-list lines="full" data-testid="admin-profile-reports-list">
+                @for (user of reports(); track user.uid) {
+                  <ion-item
+                    [button]="true"
+                    [color]="user.uid === selected()?.uid ? 'light' : undefined"
+                    (click)="onSelect(user)"
+                  >
+                    <ion-label>
+                      <h3>{{ nameOf(user) }}</h3>
+                      @if (user.blocked) {
+                        <p>
+                          {{ 'admin-profile-reports-is-blocked' | transloco }}
+                        </p>
+                      }
+                    </ion-label>
+                    <ion-badge slot="end" color="danger">{{
+                      user.reportCount
+                    }}</ion-badge>
+                  </ion-item>
+                } @empty {
+                  @if (loaded()) {
+                    <p data-testid="admin-profile-reports-empty">
+                      {{ 'admin-reports-empty' | transloco }}
+                    </p>
+                  }
+                }
+              </ion-list>
+
+              @if (truncated()) {
+                <ion-note
+                  class="profile-reports__hint"
+                  data-testid="admin-profile-reports-truncated"
+                >
+                  {{ 'admin-reports-truncated' | transloco }}
+                </ion-note>
+              }
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as user) {
+          <ion-card data-testid="admin-profile-reports-detail">
+            <ion-card-header>
+              <ion-card-title>{{ nameOf(user) }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              @if (!user.exists) {
+                <ion-note
+                  class="profile-reports__hint"
+                  data-testid="admin-profile-reports-gone"
+                >
+                  {{ 'admin-profile-reports-gone' | transloco }}
+                </ion-note>
+              } @else {
+                <div class="profile-reports__identity">
+                  @if (user.photoUrl) {
+                    <img
+                      class="profile-reports__photo"
+                      data-testid="admin-profile-reports-photo"
+                      alt="{{ nameOf(user) }}"
+                      [src]="user.photoUrl"
+                    />
+                  } @else {
+                    <div
+                      class="profile-reports__photo profile-reports__photo--empty"
+                    >
+                      {{ 'admin-profile-reports-no-photo' | transloco }}
+                    </div>
+                  }
+                  <div>
+                    <h3>{{ user.displayName || '—' }}</h3>
+                    <p>{{ user.uid }}</p>
+                    @if (user.about) {
+                      <p class="ion-text-wrap">{{ user.about }}</p>
+                    }
+                  </div>
+                </div>
+              }
+
+              <h4 class="profile-reports__section">
+                {{ 'admin-reports-why' | transloco }}
+              </h4>
+              <ion-list
+                lines="none"
+                data-testid="admin-profile-reports-reasons"
+              >
+                @for (entry of reasonCounts(); track entry.reason) {
+                  <ion-item>
+                    <ion-label>{{
+                      'admin-profile-reports-reason-' + entry.reason | transloco
+                    }}</ion-label>
+                    <ion-badge slot="end">{{ entry.count }}</ion-badge>
+                  </ion-item>
+                }
+              </ion-list>
+              <ion-note class="profile-reports__hint">
+                {{ 'admin-reports-first-reported' | transloco }}
+                {{ user.firstReportedAt | date: 'medium' }}
+              </ion-note>
+
+              @if (user.exists) {
+                <h4 class="profile-reports__section">
+                  {{ 'admin-profile-reports-recent-bites' | transloco }}
+                </h4>
+                @if (user.recentBites.length) {
+                  <div
+                    class="profile-reports__bites"
+                    data-testid="admin-profile-reports-bites"
+                  >
+                    @for (bite of user.recentBites; track bite.biteId) {
+                      <figure class="profile-reports__bite">
+                        @if (bite.imageSrc) {
+                          <img [src]="bite.imageSrc" alt="{{ bite.name }}" />
+                        } @else {
+                          <div class="profile-reports__bite-empty"></div>
+                        }
+                        <figcaption>{{ bite.name || bite.biteId }}</figcaption>
+                      </figure>
+                    }
+                  </div>
+                } @else {
+                  <ion-note class="profile-reports__hint">
+                    {{ 'admin-profile-reports-no-bites' | transloco }}
+                  </ion-note>
+                }
+
+                <h4 class="profile-reports__section">
+                  {{ 'admin-profile-reports-block-title' | transloco }}
+                </h4>
+                <ion-note class="profile-reports__hint">
+                  {{
+                    (user.blocked
+                      ? 'admin-profile-reports-is-blocked'
+                      : 'admin-profile-reports-block-hint'
+                    ) | transloco
+                  }}
+                </ion-note>
+                <ion-button
+                  expand="block"
+                  color="danger"
+                  class="ion-margin-top"
+                  data-testid="admin-profile-reports-block"
+                  [disabled]="!canBlock()"
+                  (click)="onBlockAccount()"
+                >
+                  @if (action() === 'block') {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-profile-reports-block' | transloco }}
+                </ion-button>
+              }
+
+              <h4 class="profile-reports__section">
+                {{ 'admin-profile-reports-close-title' | transloco }}
+              </h4>
+              <ion-note class="profile-reports__hint">
+                {{ 'admin-profile-reports-dismiss-hint' | transloco }}
+              </ion-note>
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-reports-reason' | transloco"
+                    [placeholder]="
+                      'admin-profile-reports-reason-placeholder' | transloco
+                    "
+                    [value]="reason()"
+                    data-testid="admin-profile-reports-decision-reason"
+                    (ionInput)="onReasonChange($event.detail.value ?? '')"
+                  />
+                </ion-item>
+              </ion-list>
+              <ion-button
+                expand="block"
+                fill="outline"
+                class="ion-margin-top"
+                data-testid="admin-profile-reports-dismiss"
+                [disabled]="!hasReason() || busy()"
+                (click)="onDismiss()"
+              >
+                @if (action() === 'dismiss') {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+                {{ 'admin-profile-reports-dismiss' | transloco }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-profile-reports-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

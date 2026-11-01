@@ -1,0 +1,108 @@
+:host {
+  /* The Bite report queue's 1:2 split: a list to scan and a profile to read. */
+  .profile-reports {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  @media (min-width: 768px) {
+    .profile-reports {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .profile-reports {
+      flex-direction: column;
+    }
+  }
+
+  .profile-reports__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .profile-reports__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .profile-reports__identity {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  /* Large enough to judge, because the photo is often what was reported. */
+  .profile-reports__photo {
+    flex: none;
+    width: 8rem;
+    height: 8rem;
+    object-fit: cover;
+    border-radius: 50%;
+    background: var(--ion-color-step-100, #f2f2f2);
+  }
+
+  .profile-reports__photo--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+  }
+
+  .profile-reports__bites {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .profile-reports__bite {
+    margin: 0;
+
+    img,
+    .profile-reports__bite-empty {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      background: var(--ion-color-step-100, #f2f2f2);
+    }
+
+    figcaption {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .profile-reports__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+}

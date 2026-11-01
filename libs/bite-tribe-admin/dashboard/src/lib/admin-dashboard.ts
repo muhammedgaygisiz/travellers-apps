@@ -137,7 +137,9 @@ export class AdminDashboard {
    * and needs an entry of its own, because there is no Bite list to filter
    * (issue #1476). Reported Bites sit between the two, because a report is
    * where most Bite work starts and the lookup is where it goes when a report
-   * names a Bite the queue does not hold (issue #1608). Restaurant verification comes next because it is the daily
+   * names a Bite the queue does not hold (issue #1608). Reported profiles
+   * follow reported Bites, because they are the same queue for another kind of
+   * report (issue #1829). Restaurant verification comes next because it is the daily
    * work; the migrations below it are each their own entry rather than one
    * "migrations" page, so an operator reaches the one they came for instead of
    * scrolling past five Bite tables (issue #1473). Restaurant ownership sits
@@ -158,6 +160,13 @@ export class AdminDashboard {
       icon: 'flag-outline',
       path: '/bite-reports',
       testId: 'admin-tool-bite-reports',
+    },
+    {
+      titleKey: 'admin-tool-profile-reports',
+      descriptionKey: 'admin-tool-profile-reports-description',
+      icon: 'person-circle-outline',
+      path: '/profile-reports',
+      testId: 'admin-tool-profile-reports',
     },
     {
       titleKey: 'admin-tool-bite-search',

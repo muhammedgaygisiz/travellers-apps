@@ -11,6 +11,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { deleteBiteReportsByReporter } from '../bites/bite-report';
+import { deleteUserReportsForUser } from './user-report';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
 import {
@@ -509,6 +510,7 @@ export const deleteAccountForUser = async (
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
     const deletedBiteReports = await deleteBiteReportsByReporter(db, uid);
+    const deletedUserReports = await deleteUserReportsForUser(db, uid);
 
     await deleteSettingsForUser(db, uid);
     await deleteFollowUpRecordsForUser(db, uid);
@@ -536,6 +538,7 @@ export const deleteAccountForUser = async (
         deletedPushTokens,
         deletedRestaurantStaff,
         deletedBiteReports,
+        deletedUserReports,
       },
       { merge: true },
     );
@@ -553,6 +556,7 @@ export const deleteAccountForUser = async (
       deletedPushTokens,
       deletedRestaurantStaff,
       deletedBiteReports,
+      deletedUserReports,
     });
 
     return { status: 'completed' };

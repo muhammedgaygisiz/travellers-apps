@@ -16,6 +16,8 @@ import { ProfileComponent } from '../profile.component';
 const TRANSLATIONS: Translation = {
   block: 'Block',
   unblock: 'Unblock',
+  cancel: 'Cancel',
+  'yes-block': 'Yes, block',
   'block-username': 'Block @{{username}}?',
   'block-confirmation-message':
     "You won't see their Bites, reviews or profile any more, and you'll stop following each other. They won't be told.",
@@ -160,15 +162,26 @@ describe(`${ProfileComponent.name} block`, () => {
     });
 
     it('plays the warning haptic from the confirming button, on release', () => {
-      component.blockConfirmationButtons
-        .find(({ role }) => role === 'block')
-        ?.handler?.();
+      component.openBlockConfirmationDialog();
+      const buttons = component.blockConfirmationButtons();
+
+      buttons.find(({ role }) => role === 'block')?.handler?.(undefined);
 
       expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
       expect(
-        component.blockConfirmationButtons.find(({ role }) => role === 'cancel')
-          ?.handler,
+        buttons.find(({ role }) => role === 'cancel')?.handler,
       ).toBeUndefined();
+    });
+
+    // A profile opened by its URL is built before the translations arrive.
+    it('names its buttons when it opens, not when the page is built', () => {
+      expect(component.blockConfirmationButtons()).toEqual([]);
+
+      component.openBlockConfirmationDialog();
+
+      expect(
+        component.blockConfirmationButtons().map(({ text }) => text),
+      ).toEqual(['Cancel', 'Yes, block']);
     });
 
     it('blocks nobody when the confirmation is cancelled', () => {
@@ -201,7 +214,9 @@ describe(`${ProfileComponent.name} block`, () => {
 
     it('offers unblocking instead of following or blocking', () => {
       expect(byTestId('profile-unblock')).not.toBeNull();
-      expect(byTestId('profile-actions-menu')).toBeNull();
+      // The menu stays for Report (#1829); Block leaves it, and its contents
+      // are in the `BlockedAccountActionsMenuOpen` story.
+      expect(component.showProfileActionsMenu()).toBe(true);
       const actions = [
         ...element().querySelectorAll('.profile-actions ion-button'),
       ].map((button) => button.textContent?.trim());

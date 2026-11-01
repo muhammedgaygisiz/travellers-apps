@@ -4,7 +4,7 @@ import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
-import type { Bite, LikeClick, PublicUser } from 'model';
+import type { Bite, LikeClick, PublicUser, UserReportReason } from 'model';
 import {
   PATH,
   getDisplayNameFailureReason,
@@ -158,6 +158,40 @@ export class ProfileService {
 
   unblockButtonClicked(user: PublicUser): void {
     this.dataAccess.submitUnblockClick(user);
+  }
+
+  /**
+   * Files the report and tells the reporter it was received (GitHub issue
+   * #1829).
+   *
+   * The same three answers a Bite report gives: received, already received, or
+   * not sent. A second report is refused by the backend and said so here, in
+   * its own words, because the profile is already in front of an operator.
+   */
+  async reportUser(report: {
+    user: PublicUser;
+    reason: UserReportReason;
+  }): Promise<void> {
+    try {
+      const { reported } = await this.dataAccess.reportUser(
+        report.user.userId,
+        report.reason,
+      );
+
+      await this.toast.present({
+        messageKey: reported
+          ? 'report-profile-sent'
+          : 'report-profile-already-sent',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to report the profile:', error);
+
+      await this.toast.present({
+        messageKey: 'report-profile-failed',
+        outcome: 'failure',
+      });
+    }
   }
 
   /** Opens the profile's countries on a globe (GitHub issue #1787). */

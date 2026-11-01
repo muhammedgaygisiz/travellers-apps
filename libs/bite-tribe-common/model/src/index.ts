@@ -107,6 +107,7 @@ export * from './lib/bite-listability';
  * admin app counts, not only a shape (issue #1608).
  */
 export * from './lib/bite-report';
+export * from './lib/user-report';
 /**
  * A value export: the length limit and the trim rule are applied by the edit
  * form and by the profile write alike (issue #1826).

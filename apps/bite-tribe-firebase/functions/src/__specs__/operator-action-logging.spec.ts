@@ -32,6 +32,7 @@ import { join } from 'node:path';
  */
 const READ_ONLY_OPERATOR_ENDPOINTS = [
   'listBiteReports',
+  'listUserReports',
   'listUsersWithRoles',
   'listRestaurantStaff',
 ];

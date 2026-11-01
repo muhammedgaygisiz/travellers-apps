@@ -87,6 +87,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // and who filed one is not something any other account may learn.
   dismissBiteReports: 'operator',
   listBiteReports: 'operator',
+  // The same queue for profiles (issue #1829), on the same terms.
+  dismissUserReports: 'operator',
+  listUserReports: 'operator',
   listUsersWithRoles: 'operator',
   revokeRestaurantOwner: 'operator',
   sendNewVersionNotification: 'operator',
@@ -168,6 +171,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // `anySession`: a table guest has no Bite surface to report from, and a
   // report is weighed by who filed it, which an anonymous uid cannot answer.
   reportBite: 'member',
+  // A signed-in account reporting a profile (issue #1829), for the same
+  // reasons as `reportBite`.
+  reportUser: 'member',
   resendEmailVerification: 'member',
   searchBites: 'member',
   searchBitesByCity: 'member',

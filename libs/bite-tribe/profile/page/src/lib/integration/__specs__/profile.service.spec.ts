@@ -29,6 +29,7 @@ class Mock {
   submitFollowClick = jest.fn();
   savePublicProfile = jest.fn();
   submitUnfollowClick = jest.fn();
+  reportUser = jest.fn();
   claimDisplayName = jest.fn().mockResolvedValue({
     displayName: '',
     normalizedDisplayName: '',
@@ -273,6 +274,52 @@ describe(ProfileService.name, () => {
       );
       service.unfollowButtonClicked(user);
       expect(submitUnfollowClickSpy).toHaveBeenCalledWith(user);
+    });
+  });
+
+  /** GitHub issue #1829. */
+  describe('reportUser', () => {
+    const user = { userId: 'user123' } as PublicUser;
+
+    it('reports the profile and says it was received', async () => {
+      const reportSpy = jest
+        .spyOn(profileDataAccessService, 'reportUser')
+        .mockResolvedValue({ reported: true });
+
+      await service.reportUser({ user, reason: 'impersonation' });
+
+      expect(reportSpy).toHaveBeenCalledWith('user123', 'impersonation');
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'report-profile-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says a second report was already sent', async () => {
+      jest
+        .spyOn(profileDataAccessService, 'reportUser')
+        .mockResolvedValue({ reported: false });
+
+      await service.reportUser({ user, reason: 'spam' });
+
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'report-profile-already-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says the report was not sent when it failed', async () => {
+      jest
+        .spyOn(profileDataAccessService, 'reportUser')
+        .mockRejectedValue(new Error('internal'));
+      jest.spyOn(console, 'error').mockImplementation();
+
+      await service.reportUser({ user, reason: 'spam' });
+
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'report-profile-failed',
+        outcome: 'failure',
+      });
     });
   });
 

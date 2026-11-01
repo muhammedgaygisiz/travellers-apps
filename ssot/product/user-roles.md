@@ -117,11 +117,12 @@ means there is no grant to revoke either. **The operator half shipped**: block a
 detail page, and the operator works the reports from the admin app's report queue, where they
 dismiss them, block the author or delete the Bite. **User-to-user blocking ships** ([#1609]):
 any account blocks another from its profile, per
-[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **The rest of the user-facing half - content
-filtering, and reporting a Review or a profile - does not exist yet**: [#1610] filtering
-before publication, and epic [#1284] for reporting inside a review thread - narrower than it
-looks, because it moderates review threads and nothing else. Reporting a profile has no
-owning issue, checked 8 October 2026. Store requirement
+[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **Reporting a profile ships** ([#1829]): any account
+reports another from its profile, and the operator works the reports from the admin app's
+reported-profiles queue, where they block the account or close the reports. **The rest of
+the user-facing half - content filtering, and reporting a Review - does not exist yet**:
+[#1610] filtering before publication, and epic [#1284] for reporting inside a review thread -
+narrower than it looks, because it moderates review threads and nothing else. Store requirement
 rather than product polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,
@@ -371,3 +372,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
 [#1565]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1565
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629
+[#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829

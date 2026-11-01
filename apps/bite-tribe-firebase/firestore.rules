@@ -1247,6 +1247,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * A report on a profile (GitHub issue #1829).
+     *
+     * ```text
+     * /userReports/{reportedUid}_{reporterUid}
+     * ```
+     *
+     * The same terms as `/biteReports`, for the same reasons: readable by an
+     * operator and by nobody else, the reported account and the reporter
+     * included, and written only by `reportUser` and `dismissUserReports`
+     * through the Admin SDK.
+     */
+    match /userReports/{reportId} {
+      allow read: if isOperator();
+      allow write: if false;
+    }
+
     // ------------------------------------------------------------------- rest
 
     /**

@@ -14,9 +14,9 @@
   (menuNavigate)="menuNavigate.emit($event)"
 >
   <!-- The secondary actions on somebody else's profile. Follow stays the one
-  prominent action on the page, so Block lives behind this menu rather than
-  beside it. Not offered once blocked: Unblock then takes Follow's place. See
-  GitHub issue #1609. -->
+  prominent action on the page, so Block and Report live behind this menu
+  rather than beside it. Block leaves it once the account is blocked: Unblock
+  then takes Follow's place. See GitHub issues #1609 and #1829. -->
   @if (showProfileActionsMenu()) {
     <ion-buttons header-end slot="end">
       <ion-button
@@ -184,7 +184,7 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
       'are-you-sure-you-want-to-stop-following-username'
         | transloco: { username: $safeNavigationMigration(user()?.displayName) }
     }}"
-    [buttons]="confirmationButtons"
+    [buttons]="confirmationButtons()"
     (didDismiss)="handleConfirmationDismiss($event)"
   />
 }
@@ -200,15 +200,30 @@ popover has gone, so two overlays never animate over each other. -->
   >
     <ng-template>
       <ion-list lines="none">
-        <ion-item
-          button
-          detail="false"
-          data-testid="profile-block"
-          (click)="chooseBlockFromMenu()"
-        >
-          <ion-icon slot="start" color="danger" name="ban-outline" />
-          <ion-label color="danger">{{ 'block' | transloco }}</ion-label>
-        </ion-item>
+        @if (canReport()) {
+          <ion-item
+            button
+            detail="false"
+            data-testid="profile-report"
+            (click)="chooseReportFromMenu()"
+          >
+            <ion-icon slot="start" color="danger" name="flag-outline" />
+            <ion-label color="danger">{{
+              'report-profile' | transloco
+            }}</ion-label>
+          </ion-item>
+        }
+        @if (!isBlocked()) {
+          <ion-item
+            button
+            detail="false"
+            data-testid="profile-block"
+            (click)="chooseBlockFromMenu()"
+          >
+            <ion-icon slot="start" color="danger" name="ban-outline" />
+            <ion-label color="danger">{{ 'block' | transloco }}</ion-label>
+          </ion-item>
+        }
       </ion-list>
     </ng-template>
   </ion-popover>
@@ -221,7 +236,22 @@ popover has gone, so two overlays never animate over each other. -->
     [isOpen]="true"
     header="{{ 'block-username' | transloco: { username: displayName() } }}"
     message="{{ 'block-confirmation-message' | transloco }}"
-    [buttons]="blockConfirmationButtons"
+    [buttons]="blockConfirmationButtons()"
     (didDismiss)="handleBlockConfirmationDismiss($event)"
+  />
+}
+
+<!-- Created only while a report is being written, for the reason above. The
+message says up front that the account is not told who reported it. -->
+@if (isReportDialogOpen()) {
+  <ion-alert
+    [isOpen]="true"
+    header="{{
+      'report-profile-title' | transloco: { username: displayName() }
+    }}"
+    message="{{ 'report-profile-message' | transloco }}"
+    [inputs]="reportReasonInputs()"
+    [buttons]="reportButtons()"
+    (didDismiss)="handleReportDialogDismiss($event)"
   />
 }

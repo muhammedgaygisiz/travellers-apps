@@ -11,6 +11,7 @@ export class ProfilePage {
   readonly stopFollowing: Locator;
   readonly actionsMenu: Locator;
   readonly block: Locator;
+  readonly report: Locator;
   readonly unblock: Locator;
   readonly blockedMessage: Locator;
 
@@ -38,6 +39,7 @@ export class ProfilePage {
       .getByRole('button', { name: 'More actions', exact: true });
     // The popover renders at the root of the app, outside the profile page.
     this.block = page.locator('ion-popover [data-testid="profile-block"]');
+    this.report = page.locator('ion-popover [data-testid="profile-report"]');
     this.unblock = page.locator(
       'profile-page:visible [data-testid="profile-unblock"]',
     );
@@ -106,6 +108,17 @@ export class ProfilePage {
       .getByRole('alertdialog', { name: `Block @${displayName}?` })
       .getByRole('button', { name: 'Yes, block', exact: true })
       .click();
+  }
+
+  /** Reports the profile from its header menu, with the reason given. */
+  async reportProfile(displayName: string, reason: string): Promise<void> {
+    await this.actionsMenu.click();
+    await this.report.click();
+    const dialog = this.page.getByRole('alertdialog', {
+      name: `Report @${displayName}?`,
+    });
+    await dialog.getByRole('radio', { name: reason, exact: true }).click();
+    await dialog.getByRole('button', { name: 'Report', exact: true }).click();
   }
 
   async confirmUnfollow(): Promise<void> {

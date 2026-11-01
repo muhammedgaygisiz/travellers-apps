@@ -101,6 +101,7 @@ describe(AdminDashboard.name, () => {
     expect(component.tools.map((tool) => tool.path)).toEqual([
       '/user-management',
       '/bite-reports',
+      '/profile-reports',
       '/bite-search',
       '/restaurant-candidates',
       '/restaurant-ownership',

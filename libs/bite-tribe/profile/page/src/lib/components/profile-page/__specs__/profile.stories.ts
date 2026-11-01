@@ -241,8 +241,9 @@ export const BlockedAccount: Story = {
 };
 
 /**
- * Somebody else's profile with its header menu open, where Block lives so
- * that Follow stays the one prominent action (GitHub issue #1609).
+ * Somebody else's profile with its header menu open, where Report and Block
+ * live so that Follow stays the one prominent action (GitHub issues #1609 and
+ * #1829).
  */
 export const ActionsMenuOpen: Story = {
   args: {
@@ -250,6 +251,26 @@ export const ActionsMenuOpen: Story = {
     userId: currentUserId,
     profileMetadata,
     bites: [bite],
+  },
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-testid="profile-actions-menu"]')
+      ?.click();
+  },
+};
+
+/**
+ * A blocked account's header menu: Block has gone with the block, and Report
+ * stays, because blocking protects only the person who blocks (GitHub issue
+ * #1829).
+ */
+export const BlockedAccountActionsMenuOpen: Story = {
+  args: {
+    user: baseUser,
+    userId: currentUserId,
+    profileMetadata: noProfileMetadata,
+    bites: [bite],
+    isBlocked: true,
   },
   play: async ({ canvasElement }) => {
     canvasElement

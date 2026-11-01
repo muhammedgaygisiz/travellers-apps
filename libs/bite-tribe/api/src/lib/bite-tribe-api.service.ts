@@ -21,12 +21,14 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   ReportBiteResult,
+  ReportUserResult,
   Restaurant,
   Review,
   SaveToBucketListParams,
   PublicMenuResult,
   Settings,
   TableOrderingSettings,
+  UserReportReason,
   WeekRange,
   WeeklyBites,
 } from 'model';
@@ -405,6 +407,13 @@ export class BiteTribeApiService {
 
   unblockUser(userId: string): Promise<void> {
     return this.profileApiService.unblockUser(userId);
+  }
+
+  reportUser(
+    userId: string,
+    reason: UserReportReason,
+  ): Promise<ReportUserResult> {
+    return this.profileApiService.reportUser(userId, reason);
   }
 
   fetchBlockedUserIds(): Promise<string[]> {

@@ -44,6 +44,7 @@ config
 newUserFollowUps
 emailOptOuts
 biteReports
+userReports
 ```
 
 Every one of these is named in `firestore.rules`, and anything not named there
@@ -65,7 +66,8 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   the Admin SDK is their only reader and writer ([#1707]). `biteReports` is
   readable by an operator alone and written by no client: `reportBite` files a
   report through the Admin SDK so that the reported author can never read who
-  reported them ([#1608]).
+  reported them ([#1608]). `userReports` is the same for a reported profile, filed
+  by `reportUser` ([#1829]).
 - **A write is allowed by ownership, not by a role.** The document names the
   account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
@@ -575,3 +577,4 @@ libs/bite-tribe/api
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
+[#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829

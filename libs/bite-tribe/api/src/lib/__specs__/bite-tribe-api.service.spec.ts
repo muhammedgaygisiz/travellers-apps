@@ -61,6 +61,7 @@ class ProfileApiMock {
   unfollowUser = jest.fn();
   blockUser = jest.fn();
   unblockUser = jest.fn();
+  reportUser = jest.fn();
   fetchBlockedUserIds = jest.fn();
   getTotalNumberOfUsers = jest.fn();
   fetchFollowers = jest.fn();
@@ -712,6 +713,23 @@ describe(BiteTribeApiService.name, () => {
         expect(unblock).toHaveBeenCalledWith('a');
         await expect(service.fetchBlockedUserIds()).resolves.toEqual(['a']);
         expect(list).toHaveBeenCalled();
+      },
+    ));
+
+    it('should forward a profile report to ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        const report = jest
+          .spyOn(profileApiService, 'reportUser')
+          .mockResolvedValue({ reported: true });
+
+        await expect(service.reportUser('a', 'harassment')).resolves.toEqual({
+          reported: true,
+        });
+        expect(report).toHaveBeenCalledWith('a', 'harassment');
       },
     ));
   });

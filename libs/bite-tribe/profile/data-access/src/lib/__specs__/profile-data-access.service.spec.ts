@@ -31,6 +31,7 @@ class Mock {
 
 const ApiMock = {
   claimDisplayName: jest.fn(),
+  reportUser: jest.fn(),
 };
 
 const MOCK_PUBLIC_USER: PublicUser = {
@@ -177,6 +178,23 @@ describe('ProfileDataAccessService', () => {
         const blockUserSpy = jest.spyOn(storeService, 'blockUser');
         service.submitBlockClick(MOCK_PUBLIC_USER);
         expect(blockUserSpy).toHaveBeenCalledWith(MOCK_PUBLIC_USER);
+      },
+    ));
+  });
+
+  describe('reportUser', () => {
+    it('should report the profile through BiteTribeApiService', inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        ApiMock.reportUser.mockResolvedValue({ reported: true });
+
+        await expect(
+          service.reportUser('user-id', 'harassment'),
+        ).resolves.toEqual({ reported: true });
+        expect(ApiMock.reportUser).toHaveBeenCalledWith(
+          'user-id',
+          'harassment',
+        );
       },
     ));
   });

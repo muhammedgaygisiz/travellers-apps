@@ -336,6 +336,38 @@ describe('deleteAccountForUser', () => {
     });
   });
 
+  /**
+   * A profile report names both accounts in its path, so the reports the
+   * account filed and the reports filed against it both go (issue #1829).
+   */
+  it('removes the profile reports the account filed and the ones against it', async () => {
+    seedFullAccount();
+    db.seed(`userReports/someone-else_${UID}`, {
+      reportedUid: 'someone-else',
+      reporterUid: UID,
+      status: 'open',
+    });
+    db.seed(`userReports/${UID}_someone-else`, {
+      reportedUid: UID,
+      reporterUid: 'someone-else',
+      status: 'dismissed',
+    });
+    db.seed('userReports/third_someone-else', {
+      reportedUid: 'third',
+      reporterUid: 'someone-else',
+      status: 'open',
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists(`userReports/someone-else_${UID}`)).toBe(false);
+    expect(db.exists(`userReports/${UID}_someone-else`)).toBe(false);
+    expect(db.exists('userReports/third_someone-else')).toBe(true);
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      deletedUserReports: 2,
+    });
+  });
+
   /** Most accounts work at no restaurant, and the count has to say so. */
   it('records no removal for an account that is not staff', async () => {
     db.seed(`users/${UID}`, { displayName: 'Gone User' });

@@ -796,6 +796,40 @@ describe(ProfileApiService.name, () => {
     ));
   });
 
+  // GitHub issue #1829.
+  describe('reportUser', () => {
+    it('should call the reportUser firebase function with the reason', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { reported: false },
+        });
+
+        await expect(
+          service.reportUser('other', 'impersonation'),
+        ).resolves.toEqual({ reported: false });
+
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'reportUser',
+          data: { uid: 'other', reason: 'impersonation' },
+        });
+      },
+    ));
+
+    it('should leave a failure to the caller', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockRejectedValue(new Error('internal'));
+
+        await expect(service.reportUser('other', 'spam')).rejects.toThrow(
+          'internal',
+        );
+      },
+    ));
+  });
+
   describe('unblockUser', () => {
     it('should call the unblockUser firebase function for the account', inject(
       [ProfileApiService],

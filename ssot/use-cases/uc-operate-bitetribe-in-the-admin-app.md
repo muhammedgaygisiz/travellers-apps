@@ -4,7 +4,7 @@
 
 **Level:** L1
 Supported today. The app exists, deploys, and is gated on the `admin` role as of issue [#1469].
-Account management - roles, subscription tier and blocking - the report queue, Bite search and removal,
+Account management - roles, subscription tier and blocking - the report queues for Bites and profiles, Bite search and removal,
 restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the
 operational migrations are its surfaces. Epic [#1471], which grew the app into the operations
 tool, is closed with every issue under it complete.
@@ -57,7 +57,8 @@ A restaurant that already has an owner offers no picker at all: reassignment is 
 The same card removes it. A required reason and a confirmation sit between the operator and `deleteBiteAsOperator`, below a rule, because the deletion is irreversible and reaches further than the Bite (issue [#1475]).
 
 9. **Reported Bites** is the queue of Bites accounts have reported from the consumer app ([#1608]), most-reported first. It reads `listBiteReports`, which aggregates the open reports per Bite and joins the Bite and its author, and never returns who reported it. Selecting a Bite shows its image, why it was reported and how often, and three answers: dismiss the reports and keep the Bite (`dismissBiteReports`), block the author (`setUserBlocked`, as user management does), or delete the Bite (`deleteBiteAsOperator`, as Bite search does). Dismissing and deleting take a required reason; every answer sits behind a confirmation, and deleting sits last, below a rule.
-10. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [UC - Run Operational Migrations](uc-run-operational-migrations.md).
+10. **Reported profiles** is the same queue for accounts reported from their profile in the consumer app ([#1829]), most-reported first. It reads `listUserReports`, which aggregates the open reports per account and joins the profile's display name, photo and about text, its six newest Bites and whether the account is already blocked, and never returns who reported it. Selecting a profile shows those, why it was reported and how often, and two answers: block the account (`setUserBlocked`, as user management does) and close the reports (`dismissUserReports`). Closing takes a required reason; both sit behind a confirmation.
+11. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [UC - Run Operational Migrations](uc-run-operational-migrations.md).
 
 ## Why It Is Needed
 
@@ -80,6 +81,7 @@ Two problems in one, both verified before issue [#1469]:
 - **Blocking and content removal are two actions, and the log shows two entries.** An operator who wants both does both. One action with hidden consequences is harder to reason about and harder to undo, and it is the same reason roles, tier and access save through three buttons rather than one.
 - **The account list loads every page.** `listUsersWithRoles` pages at up to 1000 and returns a token; the client follows it, bounded at twenty pages. It used to take the first 200 and drop the token, which is survivable for a list to scroll and not survivable for a list to search: a search over a prefix answers "no such account" for an account that exists.
 - **A report is closed by what happens to the Bite, not by a status of its own.** Deleting the Bite deletes its reports, through `deleteBiteReportsOnBiteDelete`, which fires for the author's own deletion and the console's as well as the operator's. Dismissing keeps the reports as `dismissed`, so the accounts that filed them cannot put the Bite straight back in the queue. Blocking the author closes nothing: a block removes no content, so the Bite is still waiting for a decision (issue [#1608]).
+- **A profile report is closed by the operator, whatever they decided.** Blocking the account leaves its reports open, because a block can be lifted and the queue should not forget an account until someone says they are done with it; the profile stays in the queue marked as blocked. Closing marks the reports `dismissed`, for the same reason a Bite's are kept: the accounts that filed them cannot put the profile straight back. A profile's reports are deleted only with one of the two accounts, per [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md) (issue [#1829]).
 - **Removing a Bite is a delete, and the reason is what makes it auditable.** The Bite, its image in Storage, its reactions and its whole review thread are gone, and the stale id is dropped from every restaurant candidate, bucket list and BiteTrail that named it. Nothing is restorable and the author is not told, so `deleteBiteAsOperator` requires a short reason and refuses without one — Cloud Logging is the only record the action leaves, and the entry also keeps the Bite's name, its author and the Storage objects that were removed, because the Bite itself no longer holds them. The full contract, including why removing the reference from a bucket list and a BiteTrail is part of it, is on [Bite](../domain/bite.md).
 - **Bite search is the consumer callable, limits included.** `searchBites` matches name and tags, needs three characters and returns at most twenty results. Those are consumer-facing choices, and changing them would change the consumer app's search, which issue [#1476] puts out of scope. The operator surface states both rather than hiding them: a term that is too short says so instead of showing an empty list, and a result set that fills the cap says it was capped. Searching Bites by id, by place or by author is not possible. A report filed in the app no longer needs it, because the report queue opens the reported Bite directly; a report that reaches BiteTribe some other way carrying only an id still cannot be resolved through this surface.
 - The admin app is English-only. Its audience is BiteTribe Operators, and four locale lists kept in step for no reader is a cost with no reader.
@@ -109,7 +111,7 @@ The first `admin` role was granted through the Identity Toolkit REST API from Cl
 ## MVP Classification
 
 **[MVP]** - the `admin` gate itself, and the three moderation surfaces: blocking an account
-([#1474]), removing an improper Bite ([#1475]), and the report queue ([#1608]). An app that publishes what its users write
+([#1474]), removing an improper Bite ([#1475]), and the report queues for Bites ([#1608]) and profiles ([#1829]). An app that publishes what its users write
 cannot ship without someone able to take content down.
 
 **[Secondary]** - the rest of the tooling: role and subscription-tier editing, restaurant
@@ -124,22 +126,23 @@ reporting, user-to-user blocking, and published contact details. Google Play has
 policy, and [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use
 category at a **13+** age rating.
 
-**This page owns the operator half, and it ships**: an operator works the report queue
-([#1608]), removes a Bite ([#1475]) and blocks an account ([#1474]), with the contact address
-delivered by [#1429].
+**This page owns the operator half, and it ships**: an operator works the report queues
+for Bites ([#1608]) and profiles ([#1829]), removes a Bite ([#1475]) and blocks an account
+([#1474]), with the contact address delivered by [#1429].
 
-**The user-facing half ships for Bites and for blocking**, and `RD-UR-7` classes the set
-`[MVP]`. Reporting a Bite is on the Bite detail page ([#1608]), and user-to-user blocking is on
-another account's profile ([#1609], in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md)). Content
+**The user-facing half ships for Bites, for profiles and for blocking**, and `RD-UR-7` classes
+the set `[MVP]`. Reporting a Bite is on the Bite detail page ([#1608]); reporting a profile
+([#1829]) and user-to-user blocking ([#1609]) are on another account's profile, in
+[UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md). Content
 filtering has no surface in the consumer app yet - [#1610] filtering before publication - and
 epic [#1284] covers reporting inside a review thread only. Not this page's behaviour, but this
 page is where the queue the reports arrive in lives.
 
 ## Supported Evidence
 
-- `libs/bite-tribe-admin/shell/src/lib/routes.ts` - every route behind `authGuard` and `roleGuard('admin')`: `dashboard`, `user-management`, `bite-reports`, `bite-search`, `restaurant-candidates`, `restaurant-ownership`, `bite-places`, `new-restaurant`, and the six migration routes.
+- `libs/bite-tribe-admin/shell/src/lib/routes.ts` - every route behind `authGuard` and `roleGuard('admin')`: `dashboard`, `user-management`, `bite-reports`, `profile-reports`, `bite-search`, `restaurant-candidates`, `restaurant-ownership`, `bite-places`, `new-restaurant`, and the six migration routes.
 - `roleGuard` in `libs/common/ta-firestore/src/lib/role.guard.ts`, the client-side backstop for a restored session or a revoked role.
-- `requireAdmin` in `apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts`, the server-side gate `listUsersWithRoles`, `setUserRoles`, `setUserBlocked`, `setUserSubscriptionTier`, `assignRestaurantOwner`, `revokeRestaurantOwner`, `deleteBiteAsOperator`, `listBiteReports` and `dismissBiteReports` all import.
+- `requireAdmin` in `apps/bite-tribe-firebase/functions/src/functions/shared/roles.ts`, the server-side gate `listUsersWithRoles`, `setUserRoles`, `setUserBlocked`, `setUserSubscriptionTier`, `assignRestaurantOwner`, `revokeRestaurantOwner`, `deleteBiteAsOperator`, `listBiteReports`, `dismissBiteReports`, `listUserReports` and `dismissUserReports` all import.
 - `apps/bite-tribe-firebase/scripts/grant-role.mjs`, the bootstrap script that grants the first `admin` role.
 - `searchBites`, the same callable the consumer app's search drives.
 - The six operational-migration routes and their callables are [UC - Run Operational Migrations](uc-run-operational-migrations.md)'s own evidence.
@@ -155,6 +158,7 @@ page is where the queue the reports arrive in lives.
 - Issue [#1475] - delete an improper Bite, and the cascade that keeps the derived state correct
 - Issue [#1485] - see and change an account's subscription tier for a support case
 - Issue [#1608] - a user reports a Bite, and the report queue an operator works it from
+- Issue [#1829] - a user reports a profile, and the reported-profiles queue an operator works it from, part of epic [#1823]
 - Issue [#1069] - stage 0 of [#735], restaurant ownership, claiming and authorization
 - Issue [#1075] - business roles as verified identity
 - Issue [#1077] - assign and revoke restaurant ownership, and the admin-app surface for it; done
@@ -197,3 +201,5 @@ page is where the queue the reports arrive in lives.
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
+[#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829

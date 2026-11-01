@@ -4,23 +4,27 @@
 
 **Level:** L1
 Supported today. Profile view and edit, public profiles, follow and unfollow with their
-lists, the visibility choice, user-to-user blocking, and the two identity contracts below
-all ship. Onboarding
+lists, the visibility choice, user-to-user blocking, reporting a profile, and the two
+identity contracts below all ship. Onboarding
 has collected an optional home city since [#1271], so a profile without one stays the
 normal case. Follow suggestions ship with [#1708]. The visited-countries globe
 ships with [#1787]. A changed display name reaches every stored copy of it since
-[#1827]. A profile can state its pronouns since [#1826].
+[#1827]. A profile can state its pronouns since [#1826]. A profile can be reported to the
+Operator since [#1829].
 
 ## Goal
 
 Any account can maintain its identity and read profile and social context to judge whether
 to trust a food experience. This page owns what a profile renders, what identifies the
-signed-in account, the follow relation, and the block one account places on another.
+signed-in account, the follow relation, the block one account places on another, and the
+report one account files against another.
 
 ## Actors
 
 - **Bite Creator** — views and edits its own profile, sets its visibility, opens other
-  public profiles, follows or unfollows them, and blocks or unblocks them.
+  public profiles, follows or unfollows them, blocks or unblocks them, and reports them.
+- **BiteTribe Operator** — not an actor here. A profile report reaches them, and what they
+  do with it belongs to [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md).
 
 ## Flow
 
@@ -47,6 +51,8 @@ signed-in account, the follow relation, and the block one account places on anot
   `Follow Suggestions` below.
 - User blocks or unblocks another account from that account's profile, per the block
   contract below.
+- User reports another account from that account's profile, per the report contract
+  below.
 - User opens a profile's countries on a globe, per `Visited Countries Globe` below.
 - User changes their display name, and the old one is gone from every surface another
   account can open, per `Display Name Copies` below.
@@ -258,6 +264,32 @@ account for everybody.
 
 The storage, the callables and the rules are in [User](../domain/user.md).
 
+## Profile Report Contract
+
+Issue [#1829]. A report asks the Operator to look at an account. It exists for abuse that
+sits in the profile itself - a display name, a photo, a pattern across accounts - rather
+than in any one Bite, which a Bite report ([UC - Inspect Bite Details](uc-inspect-bite-details.md)) cannot reach. A block protects
+the person who blocks; a report is how somebody else gets protected too.
+
+- Reporting is offered on any account's profile that is not the user's own, from the
+  same header menu as Block, and stays there once the account is blocked: blocking and
+  reporting are often used together.
+- The reporter picks one reason: harassment or hate, pretending to be someone else, spam
+  or advertising, offensive or inappropriate, or something else. A list rather than a text
+  field, so nothing a reporter submits is itself text the Operator has to read. Not food,
+  a Bite reason, does not apply to a person.
+- The dialog says that the account is not told who reported it. Nothing the reported
+  account can read records the report.
+- One report per account per profile. A second one from the same account is refused and
+  the reporter is told they already reported it; a report the Operator has closed stays
+  closed for that account too.
+- The reporter is told the report was received, already sent, or not sent. A failure is
+  never shown as a success.
+- What happens next is the Operator's, in the reported-profiles queue: the account block
+  ([#1474]) and closing the reports, per [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md).
+
+The storage, the callable and the rules are in [User](../domain/user.md).
+
 ## Display Name Copies
 
 Issue [#1827]. A name a person has left behind must not keep following them. For a trans
@@ -285,7 +317,8 @@ of harm rather than a stale label.
 
 - **Kept as it is.** `BiteReport.authorDisplayName` records who a reported Bite was
   attributed to when it was reported. It is evidence for the Operator, no member can
-  read it, and rewriting it would change the record.
+  read it, and rewriting it would change the record. A profile report stores no name:
+  the queue reads the reported account's current one ([#1829]).
 - **Not recallable.** A push notification already delivered to a device, and a follow-up
   mail already sent, show the name they were sent with.
 - **The old name is released.** Renaming deletes the old `/displayNames` claim in the same
@@ -313,8 +346,9 @@ readable off the profile itself, the loading skeleton that withholds placeholder
 both identity contracts. Visibility is a privacy control the product offers, so getting
 identity wrong here is the [#1308] class of defect rather than polish.
 
-**[MVP]** — the user block contract. `RD-UR-7` classes user-to-user blocking as part of the
-user-generated-content safeguard set.
+**[MVP]** — the user block contract and the profile report contract. `RD-UR-7` classes
+user-to-user blocking and reporting a user profile as part of the user-generated-content
+safeguard set.
 
 **[Secondary]** — the social graph: follow and unfollow, the follower and following
 lists, follow suggestions, and the visited-countries globe. Shipped, but the contribution loop does not depend on it
@@ -335,7 +369,10 @@ only; how they map onto each store's data declaration is in
 [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 The user block contract is the blocking half of Apple's user-generated-content guideline
-and the equivalent Google Play policy; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
+(1.2) and the equivalent Google Play policy, and the profile report contract is its
+reporting of abusive users; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
+Reporting adds no permission and no data declaration: a report is user content already
+declared as `Other User Content` in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
 
@@ -344,6 +381,8 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - `profile/:userId`
 - `followers/:userId/:type`
 - `blockUser` and `unblockUser` callables.
+- Profile reports: the `reportUser` callable; the Report entry and reason dialog of
+  `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.
 - Public-user conversion.
 - Visited-countries globe: `world/:userId`; `bt-globe` and its country table in
@@ -373,6 +412,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 - Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
+- Issue [#1829] is the Profile Report Contract above, part of epic [#1823].
 - Issue [#1787] is `Visited Countries Globe` above.
 - Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
@@ -408,6 +448,7 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
+[#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
@@ -418,3 +459,4 @@ and the equivalent Google Play policy; see [User Roles](../product/user-roles.md
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
+[#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474

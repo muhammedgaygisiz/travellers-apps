@@ -12,6 +12,8 @@ import type {
   CreateAndUploadImageCallbackParams,
   FollowSuggestion,
   PublicUser,
+  ReportUserResult,
+  UserReportReason,
 } from 'model';
 import { normalizePronouns } from 'model';
 import { toPublicUser } from './utils/to-public-user';
@@ -617,6 +619,27 @@ export class ProfileApiService {
       name: 'unblockUser',
       data: { uid: userId },
     });
+  }
+
+  /**
+   * Reports a profile to the BiteTribe operators (GitHub issue #1829).
+   *
+   * Errors are not swallowed, as on a Bite report: a reporter told their report
+   * went through when it did not will not report the profile again.
+   */
+  async reportUser(
+    userId: string,
+    reason: UserReportReason,
+  ): Promise<ReportUserResult> {
+    const result = await FirebaseFunctions.callByName<
+      { uid: string; reason: UserReportReason },
+      ReportUserResult
+    >({
+      name: 'reportUser',
+      data: { uid: userId, reason },
+    });
+
+    return result.data;
   }
 
   /**

@@ -25,6 +25,11 @@
   boundary, invisible to the blocked account, and distinct from the Operator's block that
   disables an account for everybody. Its behaviour is in
   [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
+- A User can report another User's profile to the Operator, once per profile. The reported
+  account is never told who reported it. Its behaviour is in
+  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md),
+  and the Operator's queue for it in
+  [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md).
 - A User can save Bites to bucket lists.
 - A User can save a BiteTrail as a bucket list.
 - A User can like and review Bites.
@@ -121,6 +126,7 @@
 - `subscriptionTier` is currently written as `1` by `createUserOnAuthCreate` for every new account and is only read for display in the profile and settings pages. Nothing enforces it, and `firestore.rules` still allows any authenticated user to write any document, so it is not a trustworthy access signal today. [epic-1122][#1122] makes the entitlement server-owned and turns this field into a backend-written display mirror. See [Subscription](subscription.md).
 - Follow relationships are stored under `/users/{targetUserId}/followers/{currentUserId}` and `/users/{currentUserId}/following/{targetUserId}`.
 - User blocks are a mirrored edge like the follow relation, stored under `/users/{blockerId}/blocked/{blockedId}` and `/users/{blockedId}/blockedBy/{blockerId}` ([#1609]). Only the `blockUser` and `unblockUser` callables write them: blocking also deletes the follow edges in both directions, and the blocked account's `following` entry for the blocker is not one any client may delete. The rules let the blocker read their own `blocked` list and nobody read `blockedBy`, which exists so the deletion cascade can find the edges an account appears on. The feed, weekly, search and user-search callables drop blocked authors server-side, and the consumer app filters the same set out of everything it already holds - the store, the weekly Bites, the follower lists and search results on screen - so a block applies at once. Search Bites carry their author's `userId` for that reason.
+- A profile report is one document per reporter per reported account, `/userReports/{reportedUid}_{reporterUid}`, holding both uids, the reason, `status` (`open` or `dismissed`) and when it was filed ([#1829]). Only `reportUser` writes it, through the Admin SDK: the name is the duplicate check, a `create` that Firestore refuses on an existing document, so a second report from the same account is refused even after the Operator closed the first. The rules let an Operator read the collection and nobody write it, so neither the reported account nor the reporter can read a report. `listUserReports` and `dismissUserReports` are the Operator's reads and writes; listing a user's newest Bites for the queue uses the `bites` composite index on `userId` and `createdAtTimestamp`. The reasons are a fixed list repeated in `libs/bite-tribe-common/model/src/lib/user-report.ts` and `functions/users/user-report.ts`, which change together.
 - A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, both sides of every block it placed or received, the display-name claim, settings, reviews, likes, bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md); the reasoning is in [issue-1182](../records/issue-1182.md).
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 - There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and [issue-1371](../records/issue-1371.md).
@@ -180,6 +186,7 @@
   /users/{userId}/following/{followedUserId}
   /users/{userId}/blocked/{blockedUserId}
   /users/{userId}/blockedBy/{blockerUserId}
+  /userReports/{reportedUserId}_{reporterUserId}
   /displayNames/{normalizedDisplayName}
   /biteTrails/{biteTrailId}/ratings/{userId}
   ```
@@ -204,6 +211,9 @@
   deleteOwnAccount
   blockUser
   unblockUser
+  reportUser
+  listUserReports
+  dismissUserReports
   claimDisplayName
   checkDisplayNameAvailability
   syncDisplayNameCopiesOnUserUpdate
@@ -252,3 +262,4 @@
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
+[#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829

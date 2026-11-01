@@ -201,7 +201,9 @@ describe(`${ProfileComponent.name} block`, () => {
 
     it('offers unblocking instead of following or blocking', () => {
       expect(byTestId('profile-unblock')).not.toBeNull();
-      expect(byTestId('profile-actions-menu')).toBeNull();
+      // The menu stays for Report (#1829); Block leaves it, and its contents
+      // are in the `BlockedAccountActionsMenuOpen` story.
+      expect(component.showProfileActionsMenu()).toBe(true);
       const actions = [
         ...element().querySelectorAll('.profile-actions ion-button'),
       ].map((button) => button.textContent?.trim());

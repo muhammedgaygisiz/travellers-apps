@@ -660,6 +660,12 @@ beforeEach(async () => {
       reason: 'spam',
       status: 'open',
     });
+    await setDoc(doc(db, 'userReports', `${CONSUMER}_${STRANGER}`), {
+      reportedUid: CONSUMER,
+      reporterUid: STRANGER,
+      reason: 'harassment',
+      status: 'open',
+    });
     await setDoc(doc(db, 'accountDeletions', 'deletion-1'), {
       userId: 'gone-uid',
     });
@@ -2959,6 +2965,30 @@ describe('backend-owned collections', () => {
     );
     await assertFails(
       updateDoc(doc(asOperator(), 'biteReports', report), {
+        status: 'dismissed',
+      }),
+    );
+  });
+
+  it('keeps profile reports readable by operators and written by nobody', async () => {
+    const report = `${CONSUMER}_${STRANGER}`;
+
+    await assertSucceeds(getDoc(doc(asOperator(), 'userReports', report)));
+    await assertSucceeds(getDocs(collection(asOperator(), 'userReports')));
+    // Neither the reported account nor the one that reported it may read it.
+    await assertFails(getDoc(doc(asConsumer(), 'userReports', report)));
+    await assertFails(getDoc(doc(asStranger(), 'userReports', report)));
+    await assertFails(getDocs(collection(asConsumer(), 'userReports')));
+    await assertFails(
+      setDoc(doc(asConsumer(), 'userReports', `${STRANGER}_${CONSUMER}`), {
+        reportedUid: STRANGER,
+        reporterUid: CONSUMER,
+        reason: 'spam',
+        status: 'open',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asOperator(), 'userReports', report), {
         status: 'dismissed',
       }),
     );

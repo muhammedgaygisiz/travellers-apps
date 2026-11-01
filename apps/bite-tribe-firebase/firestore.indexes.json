@@ -51,6 +51,20 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtTimestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bites",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "menuItemId",
           "order": "ASCENDING"
         },

@@ -105,7 +105,12 @@ test.describe('Block another user', () => {
     await expect(profile.blockedMessage).toBeVisible();
     await expect(profile.unblock).toBeVisible();
     await expect(profile.about).toHaveCount(0);
-    await expect(profile.actionsMenu).toHaveCount(0);
+    // Block leaves the header menu; Report stays in it (#1829).
+    await profile.actionsMenu.click();
+    await expect(profile.report).toBeVisible();
+    await expect(profile.block).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(profile.report).toHaveCount(0);
     await expectFirestoreDocument(page, `users/${ME}/blocked/${other.id}`, {
       blockerUid: ME,
       blockedUid: other.id,

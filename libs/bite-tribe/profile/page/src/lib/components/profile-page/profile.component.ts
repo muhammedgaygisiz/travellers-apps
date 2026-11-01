@@ -29,11 +29,13 @@ import {
   normalizePronouns,
   ProfileMetaData,
   PublicUser,
+  USER_REPORT_REASONS,
+  UserReportReason,
 } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { HapticsService } from 'haptics';
-import { OverlayEventDetail } from '@ionic/core';
+import { AlertButton, AlertInput, OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { ProfileHeader } from './components/profile-header';
 import { CountryFlags } from './components/country-flags';
@@ -44,6 +46,7 @@ import { totalBiteCount } from 'utils';
 
 const UNFOLLOW = 'unfollow';
 const BLOCK = 'block';
+const REPORT = 'report';
 const CANCEL = 'cancel';
 
 const PAGE_SIZE = 50;
@@ -163,6 +166,11 @@ export class ProfileComponent {
   readonly unfollowButtonClick = output<PublicUser>();
   readonly blockButtonClick = output<PublicUser>();
   readonly unblockButtonClick = output<PublicUser>();
+  /** A report on this profile, with the reason picked (GitHub issue #1829). */
+  readonly reportProfile = output<{
+    user: PublicUser;
+    reason: UserReportReason;
+  }>();
   readonly followersClick = output<string>();
   readonly followingClick = output<string>();
   /** The profile's user id, to open its countries on a globe (#1787). */
@@ -173,8 +181,11 @@ export class ProfileComponent {
   isBlockConfirmationOpen = signal(false);
   isProfileActionsMenuOpen = signal(false);
   profileActionsMenuEvent = signal<Event | undefined>(undefined);
+  isReportDialogOpen = signal(false);
   /** Block was picked in the menu; confirm once the popover has gone. */
   private blockChosenFromMenu = false;
+  /** Report was picked in the menu; ask why once the popover has gone. */
+  private reportChosenFromMenu = false;
   currentPage = signal<number>(1);
 
   // Only skeletonize while there is nothing to show. A reload of an already
@@ -215,6 +226,18 @@ export class ProfileComponent {
       },
     },
   ];
+
+  /**
+   * One radio per reason. A list rather than a text field, as on a Bite
+   * report: one tap past the button, and nothing a reporter submits can itself
+   * be text an operator has to read.
+   *
+   * Translated when the dialog opens rather than when the page is built: a
+   * profile opened cold is built before the translations have loaded, and the
+   * alert would otherwise show their keys.
+   */
+  reportReasonInputs = signal<AlertInput[]>([]);
+  reportButtons = signal<AlertButton[]>([]);
 
   followerCount = computed(() => {
     return this.profileMetadata()?.followers;
@@ -295,11 +318,24 @@ export class ProfileComponent {
   }
 
   /**
-   * The header menu belongs to somebody else's profile that is not blocked.
-   * Once it is, Unblock replaces Follow and the menu has nothing to offer.
+   * Whether the signed-in user may report this profile (GitHub issue #1829).
+   *
+   * Any profile that is not their own, blocked or not: blocking protects the
+   * person who blocks, and a report is how somebody else is protected too, so
+   * the two are often used together. `reportUser` refuses a self-report and a
+   * signed-out caller regardless.
+   */
+  canReport = computed((): boolean => {
+    return this.isUnfollowedUser() && !!this.userId();
+  });
+
+  /**
+   * The header menu belongs to somebody else's profile. Block leaves it once
+   * the account is blocked, because Unblock then takes Follow's place; Report
+   * stays.
    */
   showProfileActionsMenu = computed((): boolean => {
-    return this.isUnfollowedUser() && !this.isBlocked();
+    return this.isUnfollowedUser() && (!this.isBlocked() || this.canReport());
   });
 
   openProfileActionsMenu(event: Event): void {
@@ -312,6 +348,11 @@ export class ProfileComponent {
     this.isProfileActionsMenuOpen.set(false);
   }
 
+  chooseReportFromMenu(): void {
+    this.reportChosenFromMenu = true;
+    this.isProfileActionsMenuOpen.set(false);
+  }
+
   handleProfileActionsMenuDismiss(): void {
     this.isProfileActionsMenuOpen.set(false);
 
@@ -319,6 +360,44 @@ export class ProfileComponent {
       this.blockChosenFromMenu = false;
       this.openBlockConfirmationDialog();
     }
+
+    if (this.reportChosenFromMenu) {
+      this.reportChosenFromMenu = false;
+      this.openReportDialog();
+    }
+  }
+
+  openReportDialog(): void {
+    this.reportReasonInputs.set(
+      USER_REPORT_REASONS.map((reason) => ({
+        type: 'radio',
+        label: this.transloco.translate(`report-profile-reason-${reason}`),
+        value: reason,
+      })),
+    );
+    this.reportButtons.set([
+      { text: this.transloco.translate('cancel'), role: CANCEL },
+      {
+        text: this.transloco.translate('report-profile-submit'),
+        role: REPORT,
+        // Refused until a reason is picked, so the alert stays open.
+        handler: (reason: UserReportReason | undefined): boolean => !!reason,
+      },
+    ]);
+    this.isReportDialogOpen.set(true);
+  }
+
+  handleReportDialogDismiss(
+    event: CustomEvent<OverlayEventDetail<{ values?: UserReportReason }>>,
+  ): void {
+    const user = this.user();
+    const reason = event.detail.data?.values;
+
+    if (event.detail.role === REPORT && user && reason) {
+      this.reportProfile.emit({ user, reason });
+    }
+
+    this.isReportDialogOpen.set(false);
   }
 
   openBlockConfirmationDialog(): void {

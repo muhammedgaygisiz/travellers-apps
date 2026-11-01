@@ -142,9 +142,10 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
 
     expect(MockHapticsService.warning).not.toHaveBeenCalled();
 
-    component.confirmationButtons
+    component
+      .confirmationButtons()
       .find(({ role }) => role === 'unfollow')
-      ?.handler?.();
+      ?.handler?.(undefined);
 
     expect(MockHapticsService.warning).toHaveBeenCalledTimes(1);
   });
@@ -165,5 +166,17 @@ describe(`${ProfileComponent.name} unfollow dialog`, () => {
     );
 
     expect(MockHapticsService.warning).not.toHaveBeenCalled();
+  });
+
+  // A profile opened by its URL is built before the translations arrive.
+  it('should name its buttons when it opens, not when the page is built', () => {
+    expect(component.confirmationButtons()).toEqual([]);
+
+    component.openConfirmationDialog();
+
+    expect(component.confirmationButtons().map(({ role }) => role)).toEqual([
+      'cancel',
+      'unfollow',
+    ]);
   });
 });

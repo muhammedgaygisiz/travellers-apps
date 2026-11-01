@@ -151,10 +151,14 @@ jobs:
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
 
+  # `lint` and `stylelint` are the cheap gate: e2e, Loki, the builds and the
+  # Firebase suites wait for both, but not for the unit tests, which they read
+  # nothing from (issue #1812). The unit tests start alongside the gate, and
+  # every deploy needs `tests` as well, so a red unit test still stops a deploy.
   stylelint:
     runs-on: ubuntu-latest
     needs:
-      - lint
+      - setup
 
     steps:
       - name: Checkout repository
@@ -181,12 +185,12 @@ jobs:
   # shared library affects most of the 118 Jest projects, and on one runner that
   # took 10 to 14 minutes. Every shard lists the same affected projects, sorts
   # them and takes every fourth one, so the shards agree on the split without a
-  # job to hand it out. `tests` folds the legs back into the one result the rest
-  # of the pipeline needs.
+  # job to hand it out. `tests` folds the legs back into the one result the
+  # deploys need.
   test-shard:
     runs-on: ubuntu-latest
     needs:
-      - stylelint
+      - setup
     strategy:
       # Let every shard finish, so one run shows every failing spec.
       fail-fast: false
@@ -263,10 +267,10 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    # Skipped like the shards when stylelint fails, rather than failing in turn.
-    if: ${{ !cancelled() && needs.stylelint.result == 'success' }}
+    # Skipped like the shards when setup fails, rather than failing in turn.
+    if: ${{ !cancelled() && needs.setup.result == 'success' }}
     needs:
-      - stylelint
+      - setup
       - test-shard
 
     steps:
@@ -284,7 +288,8 @@ jobs:
   loki-build:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
     outputs:
       storybook: ${{ steps.affected.outputs.storybook }}
 
@@ -437,7 +442,8 @@ jobs:
   e2e-shard:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
     strategy:
       # Let every shard finish, so one run shows every failing test.
       fail-fast: false
@@ -447,8 +453,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
@@ -516,13 +520,12 @@ jobs:
   business-e2e:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
@@ -657,7 +660,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
 
     steps:
       - name: Checkout repository
@@ -701,6 +705,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+      - tests
 
     steps:
       - name: Checkout repository
@@ -762,6 +767,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+      - tests
 
     steps:
       - name: Checkout repository
@@ -816,6 +822,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+      - tests
 
     steps:
       - name: Checkout repository
@@ -874,13 +881,12 @@ jobs:
   functions-emulator:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
@@ -914,13 +920,12 @@ jobs:
   firestore-rules:
     runs-on: ubuntu-latest
     needs:
-      - tests
+      - lint
+      - stylelint
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: 'Restore Cache'
         uses: ./.github/actions/restore-cache
@@ -962,6 +967,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - firestore-rules
+      - tests
 
     # Two rules deploys must not overlap. Each one creates a ruleset and then
     # moves the release pointer, so interleaving them can leave the release on
@@ -1034,6 +1040,8 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
+      - lint
+      - stylelint
       - tests
 
     # Two index deploys must not overlap: the second would read the build state
@@ -1109,6 +1117,7 @@ jobs:
     needs:
       - build
       - deploy-firestore-indexes
+      - tests
 
     # Two function deploys must not overlap. The workflow-level group already
     # supersedes an older run on the same ref; this one also covers a deploy
@@ -1180,7 +1189,7 @@ jobs:
 
   # BiteTribe Storybook
 
-  # Gated on `loki` rather than `tests`, so the published Storybook is always one
+  # Gated on `loki` as well as `tests`, so the published Storybook is always one
   # whose stories passed visual regression on the same commit.
   #
   # The Storybook build reads no NX_APP_* variables, so unlike the two app
@@ -1198,6 +1207,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - loki
+      - tests
 
     steps:
       - name: Checkout repository

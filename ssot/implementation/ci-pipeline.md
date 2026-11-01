@@ -36,26 +36,30 @@ Loki reference images are regenerated locally with `npm run loki:update` and com
 ```text
 setup
 |
-lint
++-- test-shard (x4) -- tests ........ every deploy-* job also needs tests
 |
-stylelint
-|
-test-shard (x4) -- tests
-|
-+-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
-+-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
-+-- business-e2e -----------------------------+
-|
-+-- firestore-rules ----------- deploy-firestore-rules       (develop only)
-+-- functions-emulator
-|
-+-- deploy-firestore-indexes --+                             (develop only)
-|                              |
-+-- build ---------------------+- deploy-bite-tribe          (develop only)
-                               +- deploy-bite-tribe-business (develop only)
-                               +- deploy-bite-tribe-admin    (develop only)
-                               +- deploy-functions           (develop only)
++-- lint -------+
++-- stylelint --+  (the cheap gate)
+                |
+                +-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
+                +-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
+                +-- business-e2e -----------------------------+
+                |
+                +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
+                +-- functions-emulator
+                |
+                +-- deploy-firestore-indexes --+                             (develop only)
+                |                              |
+                +-- build ---------------------+- deploy-bite-tribe          (develop only)
+                                               +- deploy-bite-tribe-business (develop only)
+                                               +- deploy-bite-tribe-admin    (develop only)
+                                               +- deploy-functions           (develop only)
 ```
+
+`lint`, `stylelint` and the unit tests start together once `setup` has
+finished. Everything expensive waits for `lint` and `stylelint`, the cheap gate,
+and not for `tests`; every `deploy-*` job needs `tests` as well, directly, so a
+red unit test still keeps a commit out of production.
 
 ## Which Suites Gate A Merge
 
@@ -231,7 +235,24 @@ hundred times a month.
 
 See [Implementation - Firebase Functions](firebase-functions.md).
 
-The lint, stylelint and tests chain is deliberately sequential so a cheap failure stops the run before the expensive jobs start. Everything after `tests` fans out in parallel.
+**The expensive jobs wait for lint, not for the unit tests.** Until [issue
+#1812][#1812] the pipeline was one chain, `lint` -> `stylelint` -> `tests`, and
+everything else needed `tests`, so that a cheap failure stopped the run before
+the expensive jobs started. None of those jobs reads anything `tests` produces,
+and the chain had stopped paying for itself. Across roughly 110 runs from 23
+October to 1 November 2026 a unit-test failure held back e2e and Loki twice,
+while on every green pull request after [issue #1813][#1813] Loki started about
+3.4 minutes later than it had to: `tests` finished 5.8 minutes in, `stylelint`
+2.7. The minutes the two failing runs would have spent are free, because the
+repository is public (see
+[Repository Visibility And Actions Cost](#repository-visibility-and-actions-cost)).
+
+`lint` and `stylelint` stay in front of the expensive jobs because they are
+cheap, about a minute each, so holding the expensive jobs for them costs
+little. The unit tests are not moved later: they now start straight after
+`setup` instead of after `stylelint`, so a failing spec is reported sooner than
+before. What the change gives up is that a red unit test no longer stops e2e and
+Loki, which run to the end on that commit.
 
 `report` posts a single sticky PR comment with the E2E and Loki results. It runs with `if: !cancelled()` so a failing job is still reported. A `loki` run that skipped its capture because no story was affected reports as passed, because the job itself succeeded. `loki` is the aggregate of `loki-build` and both `loki-capture` legs, so the comment shows one Loki result that is red if either configuration failed (see [Loki Captures Each Configuration On Its Own Runner](#loki-captures-each-configuration-on-its-own-runner)).
 
@@ -361,7 +382,12 @@ Nx names the index after the machine id of the host that wrote it, reading `/var
 
 `pipeline.yml` sets `NX_BASE: develop` as a workflow-level default. `nrwl/nx-set-shas` then writes the resolved `NX_BASE` and `NX_HEAD` SHAs to `GITHUB_ENV`, which takes precedence for the steps that follow, so the affected jobs compare against the real merge base rather than the branch name. Jobs that need affected must therefore run `setup-env-for-affected` before the Nx command.
 
-Every checkout in `pipeline.yml` uses `fetch-depth: 0` because affected needs full history.
+Every job that computes the affected set checks out with `fetch-depth: 0`,
+because affected needs full history: `lint`, `stylelint`, `test-shard`,
+`loki-build` and `build`, and the deploy jobs keep it too. The jobs
+that run their suite whatever changed - `e2e-shard`, `business-e2e`,
+`functions-emulator`, `firestore-rules` and `loki-capture` - take the default
+shallow checkout ([issue #1812][#1812]).
 
 ### Loki Runs Only When A Story Is Affected
 
@@ -487,9 +513,9 @@ the same shape as `e2e`:
   `--runInBand` there: Jest refuses it next to `--maxWorkers` and prints its
   usage instead of running. `functions` did, and failed its leg on the first pull
   request that touched it ([#1826]).
-- **`tests`** needs the matrix and passes only when every leg did. Every job
-  after the unit tests needs `tests`, so none of them depends on the shard
-  count, and the check name is unchanged.
+- **`tests`** needs the matrix and passes only when every leg did. Every
+  deploy needs `tests` rather than the legs, so none of them depends on the
+  shard count, and the check name is unchanged.
 
 The legs agree on the split without a job to hand it out, because each sorts the
 same list. The split is by count, not by cost: Jest's time on CI follows a
@@ -567,9 +593,9 @@ come up, and it does not apply here at all.
 | Analytics digest runs                             | 29, a minute or two each |
 | Cost                                              | **0**                    |
 
-Wall-clock per run is 10-25 minutes, which is not the billable figure: the jobs
-after `tests` fan out in parallel, so billing sums the jobs and the parallelism
-buys latency rather than money.
+Wall-clock per run is 10-25 minutes, which is not the billable figure: most jobs
+run in parallel, so billing sums the jobs and the parallelism buys latency
+rather than money.
 
 ### What going private would cost
 
@@ -699,6 +725,7 @@ nx.json
 [#1588]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1588
 [#1681]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1681
 [#1811]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1811
+[#1812]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1812
 [#1813]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1813
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1816]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1816

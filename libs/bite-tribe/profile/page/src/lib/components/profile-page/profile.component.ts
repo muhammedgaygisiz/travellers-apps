@@ -194,38 +194,13 @@ export class ProfileComponent {
     return this.isLoading() && !this.user();
   });
 
-  confirmationButtons = [
-    {
-      text: this.transloco.translate('cancel'),
-      role: CANCEL,
-    },
-    {
-      text: this.transloco.translate('yes-unfollow'),
-      role: UNFOLLOW,
-      // Played from the button rather than from the dismissal, so it lands on
-      // the release instead of after the alert has animated away. The alert
-      // carries `btPressable="release-off"`, so this replaces the shared
-      // `release` instead of stacking on it (issues #1636, #1747).
-      handler: (): void => {
-        void this.haptics.warning();
-      },
-    },
-  ];
-
-  blockConfirmationButtons = [
-    {
-      text: this.transloco.translate('cancel'),
-      role: CANCEL,
-    },
-    {
-      text: this.transloco.translate('yes-block'),
-      role: BLOCK,
-      // Destructive and confirmed, like the unfollow above.
-      handler: (): void => {
-        void this.haptics.warning();
-      },
-    },
-  ];
+  /**
+   * The buttons of the unfollow and block confirmations, translated when each
+   * dialog opens. A profile opened by its URL is built before the translations
+   * have loaded, so labels fixed at that moment read as their keys.
+   */
+  confirmationButtons = signal<AlertButton[]>([]);
+  blockConfirmationButtons = signal<AlertButton[]>([]);
 
   /**
    * One radio per reason. A list rather than a text field, as on a Bite
@@ -304,6 +279,20 @@ export class ProfileComponent {
   }
 
   openConfirmationDialog(): void {
+    this.confirmationButtons.set([
+      { text: this.transloco.translate('cancel'), role: CANCEL },
+      {
+        text: this.transloco.translate('yes-unfollow'),
+        role: UNFOLLOW,
+        // Played from the button rather than from the dismissal, so it lands on
+        // the release instead of after the alert has animated away. The alert
+        // carries `btPressable="release-off"`, so this replaces the shared
+        // `release` instead of stacking on it (issues #1636, #1747).
+        handler: (): void => {
+          void this.haptics.warning();
+        },
+      },
+    ]);
     this.isOpen.set(true);
   }
 
@@ -401,6 +390,17 @@ export class ProfileComponent {
   }
 
   openBlockConfirmationDialog(): void {
+    this.blockConfirmationButtons.set([
+      { text: this.transloco.translate('cancel'), role: CANCEL },
+      {
+        text: this.transloco.translate('yes-block'),
+        role: BLOCK,
+        // Destructive and confirmed, like the unfollow.
+        handler: (): void => {
+          void this.haptics.warning();
+        },
+      },
+    ]);
     this.isBlockConfirmationOpen.set(true);
   }
 

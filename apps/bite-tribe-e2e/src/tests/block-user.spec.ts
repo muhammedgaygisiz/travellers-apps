@@ -151,4 +151,55 @@ test.describe('Block another user', () => {
       .poll(() => getFirestoreDocument(page, `users/${ME}/blocked/${other.id}`))
       .toBeUndefined();
   });
+
+  /**
+   * A profile opened by its URL builds the page before the translations have
+   * loaded, so a dialog label fixed at that moment would read as its key.
+   */
+  test('names the confirmation buttons on a profile opened directly', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const other = {
+      id: `cold-${runId}`,
+      displayName: `Cold ${runId}`,
+    };
+
+    await seedMutualFollower(page, other);
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    await page.goto(`/profile/${other.id}`);
+    const profile = new ProfilePage(page);
+    await expect(profile.displayName).toHaveText(other.displayName);
+
+    await profile.stopFollowing.click();
+    const unfollow = page.getByRole('alertdialog', {
+      name: 'Stop following',
+      exact: true,
+    });
+    await expect(
+      unfollow.getByRole('button', { name: 'Yes, unfollow', exact: true }),
+    ).toBeVisible();
+    await expect(
+      unfollow.getByRole('button', { name: 'Cancel', exact: true }),
+    ).toBeVisible();
+    await unfollow.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(unfollow).toHaveCount(0);
+
+    await profile.actionsMenu.click();
+    await profile.block.click();
+    const block = page.getByRole('alertdialog', {
+      name: `Block @${other.displayName}?`,
+    });
+    await expect(
+      block.getByRole('button', { name: 'Yes, block', exact: true }),
+    ).toBeVisible();
+    await expect(
+      block.getByRole('button', { name: 'Cancel', exact: true }),
+    ).toBeVisible();
+  });
 });

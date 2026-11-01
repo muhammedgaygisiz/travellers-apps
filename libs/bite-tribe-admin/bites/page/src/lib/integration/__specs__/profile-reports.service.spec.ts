@@ -33,6 +33,7 @@ describe(ProfileReportsService.name, () => {
   let dismiss: jest.Mock;
   let blockAccount: jest.Mock;
   let present: jest.Mock;
+  let logout: jest.Mock;
 
   beforeEach(() => {
     list = jest.fn().mockResolvedValue({
@@ -42,6 +43,7 @@ describe(ProfileReportsService.name, () => {
     dismiss = jest.fn().mockResolvedValue({ uid: 'u1', dismissedReports: 2 });
     blockAccount = jest.fn().mockResolvedValue(undefined);
     present = jest.fn().mockResolvedValue(undefined);
+    logout = jest.fn();
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
     TestBed.configureTestingModule({
@@ -50,7 +52,7 @@ describe(ProfileReportsService.name, () => {
           provide: UserReportsDataAccessService,
           useValue: { list, dismiss, blockAccount },
         },
-        { provide: BiteTribeStoreService, useValue: { logout: jest.fn() } },
+        { provide: BiteTribeStoreService, useValue: { logout } },
         { provide: ToastService, useValue: { present } },
       ],
     });
@@ -75,6 +77,12 @@ describe(ProfileReportsService.name, () => {
     expect(service.reports()).toEqual([]);
     expect(service.failed()).toBe(true);
     expect(service.loaded()).toBe(true);
+  });
+
+  it('has no selection before one is made', async () => {
+    await service.load();
+
+    expect(service.selected()).toBeUndefined();
   });
 
   it('resolves the selection out of the list', async () => {
@@ -139,5 +147,11 @@ describe(ProfileReportsService.name, () => {
       messageKey: 'admin-profile-reports-dismiss-failed',
       outcome: 'failure',
     });
+  });
+
+  it('signs the operator out through the store', () => {
+    service.logout();
+
+    expect(logout).toHaveBeenCalled();
   });
 });

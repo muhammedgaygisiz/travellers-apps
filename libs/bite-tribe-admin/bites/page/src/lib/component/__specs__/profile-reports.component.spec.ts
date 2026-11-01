@@ -162,6 +162,12 @@ describe(ProfileReportsComponent.name, () => {
     expect(emit).toHaveBeenCalledWith('u1');
   });
 
+  it('does not offer the block while another answer is running', () => {
+    setInputs({ selected: reported(), action: 'dismiss' });
+
+    expect(component.canBlock()).toBe(false);
+  });
+
   it('does not offer the block for an account already blocked', () => {
     setInputs({ selected: reported({ blocked: true }) });
 
@@ -213,8 +219,19 @@ describe(ProfileReportsComponent.name, () => {
       await component.onDismiss();
       await component.onBlockAccount();
 
+      expect(component.canBlock()).toBe(false);
       expect(component.reasonCounts()).toEqual([]);
       expect(create).not.toHaveBeenCalled();
+    });
+
+    it('treats a reason missing from the counts as none', () => {
+      setInputs({
+        selected: reported({
+          reasons: { spam: 2 } as ReportedUser['reasons'],
+        }),
+      });
+
+      expect(component.reasonCounts()).toEqual([{ reason: 'spam', count: 2 }]);
     });
 
     it('asks nothing for a closing without a reason', async () => {

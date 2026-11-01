@@ -177,6 +177,16 @@ describe(`${ProfileComponent.name} report`, () => {
     expect(queryAlerts()).toHaveLength(0);
   });
 
+  it('reports nothing when the dialog closes without any data', () => {
+    component.openReportDialog();
+    component.handleReportDialogDismiss(
+      new CustomEvent('didDismiss', { detail: { role: 'backdrop' } }),
+    );
+
+    expect(reports).toEqual([]);
+    expect(component.isReportDialogOpen()).toBe(false);
+  });
+
   it('reports nothing when the dialog is cancelled', () => {
     component.openReportDialog();
     component.handleReportDialogDismiss(dismissal('cancel', 'harassment'));

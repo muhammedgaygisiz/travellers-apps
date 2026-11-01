@@ -10,7 +10,7 @@ has collected an optional home city since [#1271], so a profile without one stay
 normal case. Follow suggestions ship with [#1708]. The visited-countries globe
 ships with [#1787]. A changed display name reaches every stored copy of it since
 [#1827]. A profile can state its pronouns since [#1826]. A profile can be reported to the
-Operator since [#1829].
+Operator since [#1829]. A private profile is unreadable to other accounts since [#1863].
 
 ## Goal
 
@@ -104,6 +104,45 @@ city — so that line only earns its space when it has something of its own.
   city is still the ordinary case, so this contract still governs what is
   rendered when there is none.
 
+## Profile Visibility Contract
+
+Issue [#1863]. Choosing private has to keep the profile private in the data, not only on
+screen: the edit form promises "you will be shown as anonymous", and for somebody
+travelling where LGBTQ+ people are persecuted a real name, home city and pronouns that any
+account can read are the harm.
+
+- **A private profile is unreadable to every other account.** `/users/{uid}` is readable
+  by its owner, and by any other member only while it holds `public: true`. A document
+  with no saved choice is private. A Firestore read returns a whole document or none of
+  it, so the rules refuse the read rather than trim it: nothing of a private profile -
+  real name, email, city, about, photo URL, pronouns, flags, counts - leaves the backend
+  to another account's device. Operators and Functions read it through the Admin SDK and
+  are not affected. The photo file itself is governed by `storage.rules`, which still
+  lets any signed-in user read it by path; that is [#1350], open.
+- **The switch takes effect with the save.** The rule reads the stored `public` flag, so
+  the write that makes a profile private is the write that closes it, and the one that
+  makes it public opens it. There is no copy of the profile elsewhere to fall behind and
+  no migration: every existing document already carries the flag or reads as private
+  without it.
+- **What another account gets instead.** A refused read is the expected answer, not an
+  error. The client turns it into a stand-in holding the uid and `public: false`, which
+  every surface already renders as anonymous: the follower and following lists hide the
+  row, a Bite's detail page names no creator, and a review keeps the author name stored
+  on it, per [UC - Inspect Bite Details](uc-inspect-bite-details.md).
+- **The profile page withholds what it still receives.** Opened by its route, another
+  account's private profile shows `Anonymous`, the private-profile notice and its
+  follow counts, and none of its real name, city, about, pronouns, flags, subscription
+  badge, Bite count or Bites. The Bites are a separate collection, readable because a
+  Bite card renders a private author anonymously, so the page has to withhold them
+  itself. The owner sees everything on their own profile either way.
+- **A query has to prove it reads no private profile.** Rules are not filters, so a
+  client query over `/users` is refused unless its constraints rule private documents
+  out. The owner's own listener filters on `userId == uid`, which the rule admits.
+  The About page's member count therefore comes from the `countUsers` callable, and
+  still counts every account.
+- **Not in this contract.** A public profile still exposes its email to every member;
+  whether it should is a separate product decision.
+
 ## Pronouns
 
 Issue [#1826], part of epic [#1823]. A profile could say what to call a person but not
@@ -122,12 +161,8 @@ and nothing else reads it.
 - **Where it shows.** The profile header, after the display name, smaller and in the
   secondary colour. Not on Bite cards, reviews, search results, the leaderboard or the menu.
 - **Visibility.** Another account sees pronouns on a public profile only. On a private
-  profile, or one with no saved choice, they are not rendered for anybody but the owner.
-  This is a rendering rule only. `/users/{uid}` is readable by every member, so the
-  stored value reaches any client that reads the document, and the follower lists
-  already read it. A private profile's real name, city and about are not even hidden
-  on screen. Keeping a private profile's fields out of other accounts' reads is
-  [#1863].
+  profile, or one with no saved choice, nobody but the owner can read them, per the
+  `Profile Visibility Contract` below.
 - **Never used.** Not searchable (`searchUsers` does not match or return it), not indexed,
   carried by no analytics event, and used for no suggestion or ranking.
 - **Content filtering.** It is user-authored text published to others, so the
@@ -374,6 +409,10 @@ reporting of abusive users; see [User Roles](../product/user-roles.md) footnote 
 Reporting adds no permission and no data declaration: a report is user content already
 declared as `Other User Content` in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
+The profile visibility contract is what makes the public/private switch do what it says,
+which Apple guideline 5.1.1 and Google Play's User Data policy expect of a privacy control.
+It changes no declaration: the data collected and its purpose are the same.
+
 ## Supported Evidence
 
 - `my-profile`
@@ -418,7 +457,7 @@ declared as `Other User Content` in [Implementation - Store Declarations](../imp
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the content filter that is to cover pronouns with the display name.
-- Issue [#1863] keeps a private profile's fields, pronouns included, out of other accounts' reads.
+- Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
 
 ## Related Domains
 
@@ -460,3 +499,4 @@ declared as `Other User Content` in [Implementation - Store Declarations](../imp
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
+[#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350

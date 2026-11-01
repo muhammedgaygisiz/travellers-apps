@@ -97,6 +97,10 @@ export class ProfileComponent {
     return this.user()?.subscriptionTier || 0;
   });
   displayName = computed((): string => {
+    if (this.user() && !this.showsProfileContent()) {
+      return this.transloco.translate('anonymous');
+    }
+
     return (
       this.user()?.displayName || this.transloco.translate('no-display-name')
     );
@@ -133,6 +137,10 @@ export class ProfileComponent {
    * all today, which is tracked separately in issue #1271.
    */
   readonly profileMeta = computed((): string => {
+    if (!this.showsProfileContent()) {
+      return '';
+    }
+
     const city = this.user()?.city?.trim() || '';
 
     return [this.metaName(), city].filter(Boolean).join(', ');
@@ -149,11 +157,26 @@ export class ProfileComponent {
   readonly pronouns = computed((): string => {
     const user = this.user();
 
-    if (!user || (!this.isOwnProfile() && user.public !== true)) {
+    if (!user || !this.showsProfileContent()) {
       return '';
     }
 
     return normalizePronouns(user.pronouns) ?? '';
+  });
+
+  /**
+   * Whether the page shows what the profile says: always to its owner, and to
+   * anybody else only while it is public (issue #1863).
+   *
+   * Another account cannot read a private profile, so what reaches the page is
+   * a stand-in holding the uid alone. The Bites are a separate read, though,
+   * and still arrive by the route, so the page has to withhold them itself, as
+   * it withholds the name, city, about and flags the stand-in no longer has.
+   */
+  readonly showsProfileContent = computed((): boolean => {
+    const user = this.user();
+
+    return !!user && (this.isOwnProfile() || user.public === true);
   });
 
   readonly logoutClick = output();
@@ -228,7 +251,9 @@ export class ProfileComponent {
   );
 
   biteCount = computed(() =>
-    totalBiteCount(this.user()?.biteCount, this.bites()?.length ?? 0),
+    this.showsProfileContent()
+      ? totalBiteCount(this.user()?.biteCount, this.bites()?.length ?? 0)
+      : 0,
   );
 
   displayedBites = computed(() => {

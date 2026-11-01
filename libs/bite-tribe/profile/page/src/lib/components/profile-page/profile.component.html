@@ -45,7 +45,14 @@
       <div class="profile-summary">
         <div class="profile-info">
           <h1 class="profile-name">
-            <span class="profile-display-name">{{ displayName() }}</span>
+            <!-- Through the pipe rather than displayName(), which translates
+            once: a profile opened by its URL is built before the translations
+            have loaded (issue #1868). -->
+            <span class="profile-display-name">{{
+              userData && !showsProfileContent()
+                ? ('anonymous' | transloco)
+                : displayName()
+            }}</span>
 
             @if (pronouns()) {
               <span class="profile-pronouns" data-testid="profile-pronouns">{{
@@ -53,17 +60,19 @@
               }}</span>
             }
 
-            <ion-badge class="subscription-badge">
-              @if (subscriptionTierData === 0) {
-                FREE
-              }
-              @if (subscriptionTierData === 1) {
-                PRO
-              }
-              @if (subscriptionTierData === 2) {
-                ULTRA
-              }
-            </ion-badge>
+            @if (showsProfileContent()) {
+              <ion-badge class="subscription-badge">
+                @if (subscriptionTierData === 0) {
+                  FREE
+                }
+                @if (subscriptionTierData === 1) {
+                  PRO
+                }
+                @if (subscriptionTierData === 2) {
+                  ULTRA
+                }
+              </ion-badge>
+            }
           </h1>
 
           @if (profileMeta()) {
@@ -103,6 +112,12 @@
       @if (isBlocked()) {
         <p class="profile-blocked-message" data-testid="profile-blocked">
           {{ 'you-blocked-this-account' | transloco }}
+        </p>
+      } @else if (userData && !showsProfileContent()) {
+        <!-- Another account's private profile: nothing of it was readable but
+        its uid, and its Bites are not shown either. See issue #1863. -->
+        <p class="profile-private-message" data-testid="profile-private">
+          {{ 'profile-visibility-private' | transloco }}
         </p>
       } @else {
         @if (showVisibilityStatus()) {

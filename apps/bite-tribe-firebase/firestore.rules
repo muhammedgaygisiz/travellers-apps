@@ -16,9 +16,10 @@ rules_version = '2';
  *    registered account could read before, it can still read. Narrowing what
  *    one member reads about another is issue #1079's visible scope, not this
  *    one's, and mixing the two would make a regression here indistinguishable
- *    from a regression there. The two exceptions are named at their own match
+ *    from a regression there. The exceptions are named at their own match
  *    blocks: `accountDeletions` and the `pushTokens` index are cross-account
- *    identifiers no client ever read.
+ *    identifiers no client ever read, and a private `/users` profile is
+ *    readable by its owner alone (issue #1863).
  *
  *    The general read clauses ask `isMember()` rather than `signedIn()` since
  *    issue #1565, because since issue #1101 a signed-in account is no longer
@@ -1102,8 +1103,36 @@ service cloud.firestore {
         || (data.pronouns is string && data.pronouns.size() <= 40);
     }
 
+    /**
+     * Whether another member may read this profile at all (GitHub issue #1863).
+     *
+     * A read returns the whole document or none of it, so a private profile
+     * cannot hand out its display name and keep its real name, email, city,
+     * about, pronouns and flags: it is refused outright. Nothing another
+     * account renders of a private profile comes from this document - it is
+     * shown as anonymous - so the refusal costs no screen anything. A document
+     * without the flag is private, as `createUserOnAuthCreate` writes it.
+     *
+     * The decision is the stored `public` flag, so it changes with the write
+     * that changes the flag: there is no copy elsewhere to fall behind.
+     */
+    function isPublicProfile(data) {
+      return data.get('public', false) == true;
+    }
+
     match /users/{userId} {
-      allow read: if isMember();
+      /**
+       * The owner reads their own document whatever it says; everybody else
+       * reads a public one. `owns(...)` is what lets the owner's listener query
+       * `where('userId', '==', uid)`: a query is allowed only when the rule
+       * holds for every document it could return, and the path's `userId` is
+       * not something a query filter can prove. An anonymous table guest reads
+       * none of them, its own uid included (issue #1565).
+       */
+      allow read: if isMember()
+        && (isSelf(userId)
+          || owns(resource.data, 'userId')
+          || isPublicProfile(resource.data));
 
       /**
        * The document is created by `createUserOnAuthCreate` before the account

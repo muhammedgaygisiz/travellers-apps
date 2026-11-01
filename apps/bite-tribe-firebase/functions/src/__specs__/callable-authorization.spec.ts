@@ -161,6 +161,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   blockUser: 'member',
   checkDisplayNameAvailability: 'member',
   claimDisplayName: 'member',
+  countUsers: 'member',
   deleteOwnAccount: 'member',
   getCurrencyByPosition: 'member',
   getPlaceDetails: 'member',

@@ -67,7 +67,11 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   readable by an operator alone and written by no client: `reportBite` files a
   report through the Admin SDK so that the reported author can never read who
   reported them ([#1608]). `userReports` is the same for a reported profile, filed
-  by `reportUser` ([#1829]).
+  by `reportUser` ([#1829]). `/users/{uid}` is the one collection whose reads were
+  narrowed: another member reads a profile only while it is public, because a
+  read returns the whole document and a private profile's fields are the thing
+  being protected ([#1863]). See the `Profile Visibility Contract` in
+  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
 - **A write is allowed by ownership, not by a role.** The document names the
   account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
@@ -578,3 +582,4 @@ libs/bite-tribe/api
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
+[#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863

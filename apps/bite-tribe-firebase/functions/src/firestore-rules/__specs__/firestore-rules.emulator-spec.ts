@@ -2756,6 +2756,62 @@ describe('users', () => {
     );
   });
 
+  /**
+   * A read returns a whole document, so a private profile is refused to other
+   * accounts outright rather than trimmed (issue #1863). Both seeded profiles
+   * carry no `public` flag, which is what a new account is written with.
+   */
+  describe('a private profile (issue #1863)', () => {
+    it("refuses a stranger's read of a private profile", async () => {
+      await assertFails(getDoc(doc(asStranger(), 'users', CONSUMER)));
+    });
+
+    it('refuses a read of a profile that is explicitly private', async () => {
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), { public: false });
+
+      await assertFails(getDoc(doc(asStranger(), 'users', CONSUMER)));
+    });
+
+    it('lets the owner read their own private profile, by id and by query', async () => {
+      await assertSucceeds(getDoc(doc(asConsumer(), 'users', CONSUMER)));
+      await assertSucceeds(
+        getDocs(
+          query(
+            collection(asConsumer(), 'users'),
+            where('userId', '==', CONSUMER),
+          ),
+        ),
+      );
+    });
+
+    it('lets every member read a public profile', async () => {
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), { public: true });
+
+      await assertSucceeds(getDoc(doc(asStranger(), 'users', CONSUMER)));
+      await assertSucceeds(getDoc(doc(asOwner(), 'users', CONSUMER)));
+    });
+
+    it('stops the read with the write that makes the profile private, and allows it again with the one that makes it public', async () => {
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), { public: true });
+      await assertSucceeds(getDoc(doc(asStranger(), 'users', CONSUMER)));
+
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), { public: false });
+      await assertFails(getDoc(doc(asStranger(), 'users', CONSUMER)));
+
+      await updateDoc(doc(asConsumer(), 'users', CONSUMER), { public: true });
+      await assertSucceeds(getDoc(doc(asStranger(), 'users', CONSUMER)));
+    });
+
+    it('refuses a query that could return a private profile, and allows one that cannot', async () => {
+      await assertFails(getDocs(collection(asStranger(), 'users')));
+      await assertSucceeds(
+        getDocs(
+          query(collection(asStranger(), 'users'), where('public', '==', true)),
+        ),
+      );
+    });
+  });
+
   describe('pronouns (issue #1826)', () => {
     it('lets an account set pronouns of up to 40 characters', async () => {
       await assertSucceeds(

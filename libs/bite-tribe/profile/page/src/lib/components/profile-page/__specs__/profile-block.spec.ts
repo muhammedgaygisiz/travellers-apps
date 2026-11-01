@@ -34,6 +34,7 @@ class BlockTranslocoLoader implements TranslocoLoader {
 
 const OTHER_USER: PublicUser = {
   userId: 'other',
+  public: true,
   displayName: 'Alice',
   about: 'Loves ramen',
   email: '',

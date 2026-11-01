@@ -30,6 +30,7 @@ class Mock {
 }
 
 const ApiMock = {
+  bitesByUser: jest.fn(),
   claimDisplayName: jest.fn(),
   reportUser: jest.fn(),
 };
@@ -217,6 +218,32 @@ describe('ProfileDataAccessService', () => {
         expect(service.isBlockedByMe()).toBe(false);
       },
     ));
+
+    it('is true for a loaded profile the signed-in user blocked', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const writable = service as unknown as {
+          userValue: () => PublicUser | undefined;
+          blockedUserIds: () => string[];
+        };
+        writable.userValue = (): PublicUser => MOCK_PUBLIC_USER;
+        writable.blockedUserIds = (): string[] => [MOCK_PUBLIC_USER.userId];
+
+        expect(service.isBlockedByMe()).toBe(true);
+      },
+    ));
+  });
+
+  describe('loadBitesByUser', () => {
+    it("reads the user's Bites through BiteTribeApiService", inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        ApiMock.bitesByUser.mockResolvedValue([]);
+
+        await expect(service.loadBitesByUser('user-id')).resolves.toEqual([]);
+        expect(ApiMock.bitesByUser).toHaveBeenCalledWith('user-id');
+      },
+    ));
   });
 
   describe('userLoader', () => {
@@ -265,6 +292,29 @@ describe('ProfileDataAccessService', () => {
           );
 
           expect(result).toBeUndefined();
+        },
+      ));
+    });
+
+    describe('given the rules refuse a private profile (issue #1863)', () => {
+      it('should return a stand-in holding the uid alone', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockRejectedValue(
+            new Error('Missing or insufficient permissions.'),
+          );
+
+          const result = await service.userLoader(
+            createLoaderParams('user-id'),
+          );
+
+          expect(result).toEqual({
+            userId: 'user-id',
+            public: false,
+            displayName: '',
+            email: '',
+            photoUrl: '',
+          });
         },
       ));
     });

@@ -768,6 +768,58 @@ describe('restaurants', () => {
       getDoc(doc(asConsumer(), 'restaurants', OWNED_RESTAURANT)),
     );
   });
+
+  /**
+   * Only the restaurant states it (issue #1830). No rule names the field: the
+   * restaurant rule already gives every non-ownership field to the holder and
+   * to an operator, and these pin that it covers this one, both ways it is
+   * written - a value through the field path, and "Not stated" as a delete.
+   */
+  describe('the gender-neutral restroom (issue #1830)', () => {
+    it.each([true, false])('lets the owner state %s', async (value) => {
+      await assertSucceeds(
+        updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+          'facilities.genderNeutralRestroom': value,
+        }),
+      );
+    });
+
+    it('lets the owner take the answer back by removing the field', async () => {
+      await updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+        'facilities.genderNeutralRestroom': true,
+      });
+
+      await assertSucceeds(
+        updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+          'facilities.genderNeutralRestroom': deleteField(),
+        }),
+      );
+    });
+
+    it('refuses a business account that does not hold the restaurant', async () => {
+      await assertFails(
+        updateDoc(doc(asOtherBusiness(), 'restaurants', OWNED_RESTAURANT), {
+          'facilities.genderNeutralRestroom': false,
+        }),
+      );
+    });
+
+    it('refuses a consumer stating it for the restaurant', async () => {
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'restaurants', OWNED_RESTAURANT), {
+          'facilities.genderNeutralRestroom': false,
+        }),
+      );
+    });
+
+    it('refuses a staff account stating it for the restaurant', async () => {
+      await assertFails(
+        updateDoc(doc(asStaff(), 'restaurants', OWNED_RESTAURANT), {
+          'facilities.genderNeutralRestroom': true,
+        }),
+      );
+    });
+  });
 });
 
 describe('menus', () => {

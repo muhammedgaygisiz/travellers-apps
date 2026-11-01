@@ -156,6 +156,30 @@ export class EditRestaurantService {
     }
   }
 
+  /**
+   * Whether the restaurant has a gender-neutral restroom (GitHub issue #1830).
+   * `undefined` is the owner choosing "Not stated", and removes the field.
+   */
+  async submitGenderNeutralRestroom(
+    genderNeutralRestroom: boolean | undefined,
+  ): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitGenderNeutralRestroom(
+          restaurant.id,
+          genderNeutralRestroom,
+        );
+        await this.toast.present({
+          messageKey: 'facilities-saved',
+          outcome: 'success',
+        });
+      } catch {
+        await this.showFailureToast();
+      }
+    }
+  }
+
   async submitAddress(address: Address): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {

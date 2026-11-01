@@ -282,6 +282,8 @@
   "day-saturday": "Sabato",
   "day-sunday": "Domenica",
   "closed": "Chiuso",
+  "gender-neutral-restroom-yes": "Bagno gender neutral",
+  "gender-neutral-restroom-no": "Nessun bagno gender neutral",
   "ok": "OK",
   "registration-in-progress": "Creazione del tuo account...",
   "registration-success-check-your-email-to-verify-account": "Registrazione completata con successo! Controlla la tua e-mail per verificare il tuo account.",

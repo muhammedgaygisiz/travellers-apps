@@ -6,7 +6,7 @@
 
 Supported today. A business account signs in, sees the map and the two surfaces the dashboard
 offers, and edits the Restaurants assigned to it - metadata, opening hours, social links,
-address, and the menu seeded from its Bites. It sees only what it owns, and the edit routes
+address, facilities, and the menu seeded from its Bites. It sees only what it owns, and the edit routes
 refuse anything else by direct URL. Creating a Restaurant is not done here; that moved to the admin app with issue [#1473].
 
 ## Goal
@@ -36,6 +36,7 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   operator work in the admin app, and there is nothing the account can do here
   to change it.
 - The Restaurant Owner publishes the menu, by taking the code on the restaurant's page (issue [#370]). It is a QR code and the same address as plain text, because publishing a menu should not require owning a printer - the text goes on a Google listing, an Instagram bio or the restaurant's own site, and the code goes in a window, on a menu card or on a table tent. A restaurant with no menu is shown what is missing instead of a code: one for a restaurant with no menu tells whoever scans it that there is nothing to read. What the reader then sees is [UC - View Restaurant Menus](uc-view-restaurant-menus.md); which restaurants may publish at all is `RD-PM-5`.
+- The Restaurant Owner states the Restaurant's facilities (issue [#1830]). Today that is one: whether it has a gender-neutral restroom, answered `Yes`, `No` or `Not stated`. `Not stated` removes the field rather than writing no, because the consumer page shows nothing for a Restaurant that has not said and would otherwise tell a guest "no" on the owner's behalf. Only the account holding the Restaurant states it; the rule is the Restaurant's, in [Restaurant](../domain/restaurant.md).
 - The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
 
 This page owns producing the code and not what it leads to, which is the split
@@ -48,7 +49,8 @@ and the floor-plan editor's printable table sheets are a different printed thing
 
 Two columns inside a centred 78 rem measure, from the Ionic `lg` breakpoint
 (issue [#1572]). The picture, the social links, the About text and the address
-run down the left; the map and the opening hours run down the right; and the
+run down the left; the map, the menu code, table ordering, the facilities and
+the opening hours run down the right; and the
 ways _out_ of the page - the menu, the staff, the floor plan - sit in a row
 under both.
 
@@ -108,7 +110,7 @@ all be reviewed for the first time.
 - Business `dashboard`, `bite-trails` and `restaurants`
 - `restaurant/:restaurantId`
 - `restaurant/:restaurantId/menu/:menuId`
-- `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
+- `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, stating the gender-neutral restroom across a reload and taking the answer back as a removed field, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
 
 ## Related GitHub Scope
 
@@ -126,6 +128,8 @@ all be reviewed for the first time.
   Restaurant page already had. Closed as completed.
 - Issue [#370] put the published menu code on `restaurant/:restaurantId`, and with it the
   copyable address and the print sheet. Closed as completed, delivering issue [#371].
+- Issue [#1830] added the facilities field group and its first facility, the gender-neutral
+  restroom, which the consumer restaurant page shows. Part of [#1823].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
@@ -156,3 +160,5 @@ all be reviewed for the first time.
 [#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
 [#371]: https://github.com/muhammedgaygisiz/travellers-apps/issues/371
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
+[#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
+[#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830

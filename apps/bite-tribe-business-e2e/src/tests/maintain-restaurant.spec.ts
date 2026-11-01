@@ -5,6 +5,7 @@ import { loginAsBusinessUser } from '../support/auth';
 import {
   deleteFirestoreDocument,
   expectFirestoreDocument,
+  getFirestoreDocument,
   seedFirestoreDocument,
 } from '../support/firestore';
 import { TEST_USERS } from '../support/test-users';
@@ -93,6 +94,76 @@ test.describe('Maintain restaurants in the business app', () => {
       description,
       address,
     });
+  });
+
+  /**
+   * The gender-neutral restroom (issue #1830): an answer survives a reload,
+   * and "Not stated" removes the field rather than writing `false` - which
+   * the consumer page would show as "No gender-neutral restroom".
+   */
+  test('states the gender-neutral restroom and takes the answer back', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const restaurantId = `business-facilities-${runId}`;
+    const restaurantName = `Facilities Bistro ${runId}`;
+
+    seededRestaurantIds.push(restaurantId);
+    await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
+      id: { stringValue: restaurantId },
+      name: { stringValue: restaurantName },
+      ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+      claimStatus: { stringValue: 'claimed' },
+      position: {
+        mapValue: {
+          fields: {
+            latitude: { doubleValue: POSITION.latitude },
+            longitude: { doubleValue: POSITION.longitude },
+          },
+        },
+      },
+    });
+
+    await loginAsBusinessUser(page);
+
+    const dashboard = new DashboardPage(page);
+    await dashboard.openRestaurants();
+    await dashboard.openRestaurant(restaurantName, restaurantId);
+
+    const editRestaurant = new EditRestaurantPage(page);
+    await editRestaurant.expectRestaurantName(restaurantName);
+    // A restaurant written before the field existed has not said.
+    await editRestaurant.expectGenderNeutralRestroom('not-stated');
+
+    await editRestaurant.chooseGenderNeutralRestroom('Yes');
+    await editRestaurant.expectSavedToast('Facilities saved');
+    await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {
+      facilities: { genderNeutralRestroom: true },
+    });
+
+    await page.reload();
+    await editRestaurant.expectRestaurantName(restaurantName);
+    await editRestaurant.expectGenderNeutralRestroom('yes');
+
+    await editRestaurant.chooseGenderNeutralRestroom('Not stated');
+    await editRestaurant.expectSavedToast('Facilities saved');
+    await expect
+      .poll(
+        async () => {
+          const restaurant = await getFirestoreDocument(
+            page,
+            `restaurants/${restaurantId}`,
+          );
+          const facilities = restaurant?.['facilities'] as
+            Record<string, unknown> | undefined;
+
+          return !!facilities && 'genderNeutralRestroom' in facilities;
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(false);
   });
 
   /**

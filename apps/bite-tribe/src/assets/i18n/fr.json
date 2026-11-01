@@ -282,6 +282,8 @@
   "day-saturday": "Samedi",
   "day-sunday": "Dimanche",
   "closed": "Fermé",
+  "gender-neutral-restroom-yes": "Toilettes non genrées",
+  "gender-neutral-restroom-no": "Pas de toilettes non genrées",
   "ok": "OK",
   "registration-in-progress": "Création de ton compte...",
   "registration-success-check-your-email-to-verify-account": "Inscription réussie ! Vérifie ton e-mail pour confirmer ton compte.",

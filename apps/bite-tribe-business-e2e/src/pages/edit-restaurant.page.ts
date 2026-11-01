@@ -26,6 +26,8 @@ export class EditRestaurantPage {
   readonly city: Locator;
   readonly country: Locator;
   readonly saveAddress: Locator;
+  readonly genderNeutralRestroom: Locator;
+  readonly saveFacilities: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -39,6 +41,8 @@ export class EditRestaurantPage {
     this.city = page.getByTestId('restaurant-city').locator('input');
     this.country = page.getByTestId('restaurant-country').locator('input');
     this.saveAddress = page.getByTestId('save-address');
+    this.genderNeutralRestroom = page.getByTestId('gender-neutral-restroom');
+    this.saveFacilities = page.getByTestId('save-facilities');
   }
 
   async expectRestaurantName(name: string): Promise<void> {
@@ -56,6 +60,28 @@ export class EditRestaurantPage {
     await this.city.fill(address.city);
     await this.country.fill(address.country);
     await this.saveAddress.click();
+  }
+
+  /**
+   * The facilities select is a popover, which Ionic renders outside the page,
+   * so the answer is picked from `ion-select-popover` rather than from the
+   * select itself. Picking an answer closes the popover.
+   */
+  async chooseGenderNeutralRestroom(
+    answer: 'Yes' | 'No' | 'Not stated',
+  ): Promise<void> {
+    await this.genderNeutralRestroom.click();
+    await this.page
+      .locator('ion-select-popover')
+      .getByText(answer, { exact: true })
+      .click();
+    await this.saveFacilities.click();
+  }
+
+  async expectGenderNeutralRestroom(
+    value: 'yes' | 'no' | 'not-stated',
+  ): Promise<void> {
+    await expect(this.genderNeutralRestroom).toHaveJSProperty('value', value);
   }
 
   /**

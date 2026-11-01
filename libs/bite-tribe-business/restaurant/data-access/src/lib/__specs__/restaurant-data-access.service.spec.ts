@@ -27,6 +27,9 @@ describe('RestaurantDataAccessService', () => {
       saveSocialMediaLinksForRestaurant: jest.fn().mockResolvedValue(undefined),
       saveDescriptionForRestaurant: jest.fn().mockResolvedValue(undefined),
       saveOpeningHoursForRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveGenderNeutralRestroomForRestaurant: jest
+        .fn()
+        .mockResolvedValue(undefined),
       saveAddressForRestaurant: jest.fn().mockResolvedValue(undefined),
       savePositionForRestaurant: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<BiteTribeApiService>;
@@ -87,6 +90,20 @@ describe('RestaurantDataAccessService', () => {
         openingHours,
       );
     });
+
+    it.each([true, false, undefined])(
+      'saves the gender-neutral restroom as %s through the API',
+      async (genderNeutralRestroom) => {
+        await service.submitGenderNeutralRestroom(
+          'rest-1',
+          genderNeutralRestroom,
+        );
+
+        expect(
+          apiMock.saveGenderNeutralRestroomForRestaurant,
+        ).toHaveBeenCalledWith('rest-1', genderNeutralRestroom);
+      },
+    );
 
     it('saves the address through the API', async () => {
       const address = {

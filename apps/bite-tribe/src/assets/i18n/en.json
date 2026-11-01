@@ -283,6 +283,8 @@
   "day-saturday": "Saturday",
   "day-sunday": "Sunday",
   "closed": "Closed",
+  "gender-neutral-restroom-yes": "Gender-neutral restroom",
+  "gender-neutral-restroom-no": "No gender-neutral restroom",
   "ok": "OK",
   "registration-in-progress": "Creating your account...",
   "registration-success-check-your-email-to-verify-account": "Registration successful! Please check your email to verify your account.",

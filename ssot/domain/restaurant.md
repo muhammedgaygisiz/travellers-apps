@@ -43,6 +43,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - **A Restaurant decides whether guests may order from the table, and it is off until it says otherwise.** `tableOrdering` holds the decision (issue [#1100]): `enabled`, the IANA `timeZone` its `openingHours` are written in, and an optional `pausedUntilTimestamp` for a staff-side stop. Absent on every Restaurant that has never been asked, and absent reads as off - ordering at the table is a commitment somebody has to watch a queue and carry food for, so a scanned code at a Restaurant that never opted in is refused rather than starting an order nobody is reading.
 - **A Restaurant is "active" for ordering while a business account holds it.** There is no `active` field and adding one would be a third state nothing writes. An order placed at a Restaurant nobody holds lands in a queue no account can open, and `claimStatus: 'revoked'` is exactly a Restaurant that used to be able to take one. The scan resolution reads `ownerUserId` and `claimStatus`, which the assignment callables already write.
 - **The time zone belongs to `tableOrdering` rather than to `openingHours`.** A `DaySchedule` is a weekday and a pair of `HH:mm` strings and says nothing about where in the world that is, which cost nothing while nothing evaluated it. The scan resolution is the first reader that has to turn "18:00 to 23:00 on Friday" into an instant, and it runs on a server in UTC.
+- **A Restaurant states its own facilities, and nobody else does.** `facilities` holds them (issue [#1830]), with `genderNeutralRestroom` as its first and only field. Every facility has three states: `true` is yes, `false` is no, and an absent field is a Restaurant that has not said - which is never shown as no. The account holding the Restaurant writes it in the business app; there is no way for a guest to suggest or correct a value, because a user-sourced flag would be unverifiable and could be used to target a venue. A nested object rather than a top-level key, so the next facility is a new field on it - the reasoning `tableOrdering` gives.
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue [#1389] and [issue-1389](../records/issue-1389.md).
 
 ## Required Data
@@ -74,6 +75,7 @@ Current model fields:
 - `description`
 - `openingHours`
 - `tableOrdering`
+- `facilities`
 - `createdAt`
 - `createdAtTimestamp`
 - `updatedAt`
@@ -146,7 +148,7 @@ Current implementation notes:
 - Business user or admin
   - Create Restaurant.
   - Edit Restaurant.
-  - Maintain image, address, position, opening hours, social links, description, and menu.
+  - Maintain image, address, position, opening hours, social links, description, facilities, and menu.
 - Business user, on a Restaurant it holds
   - Add and remove the staff on that Restaurant.
 - Admin
@@ -167,7 +169,7 @@ Supported today:
 - Verify Restaurant candidate in admin app.
 - Assign and revoke Restaurant ownership in admin app.
 - Edit Restaurant in business app.
-- Maintain address, position, social links, opening hours, description, image, and menu.
+- Maintain address, position, social links, opening hours, description, facilities, image, and menu.
 
 Related future or expanding use cases:
 
@@ -283,3 +285,4 @@ images/restaurants/{restaurantId}/{filename}
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1498]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1498
+[#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830

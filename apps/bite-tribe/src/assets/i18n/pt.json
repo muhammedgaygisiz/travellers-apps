@@ -283,6 +283,8 @@
   "day-saturday": "Sábado",
   "day-sunday": "Domingo",
   "closed": "Fechado",
+  "gender-neutral-restroom-yes": "Casa de banho de género neutro",
+  "gender-neutral-restroom-no": "Sem casa de banho de género neutro",
   "ok": "OK",
   "registration-in-progress": "A criar a tua conta...",
   "registration-success-check-your-email-to-verify-account": "Conta criada! Verifica o teu e-mail para confirmar.",

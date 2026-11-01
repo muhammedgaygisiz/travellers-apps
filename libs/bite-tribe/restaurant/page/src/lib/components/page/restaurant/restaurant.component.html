@@ -300,6 +300,34 @@
           <div class="seperator"></div>
         }
 
+        <!-- Stated by the restaurant and by nobody else (issue #1830). An absent
+        value is a restaurant that has not said, and shows nothing - it is
+        never read as no. -->
+        @let genderNeutralRestroom =
+          restaurantData?.facilities?.genderNeutralRestroom;
+        @if (genderNeutralRestroom !== undefined) {
+          <div
+            class="facility ion-display-flex ion-align-items-center ion-margin-top"
+            data-testid="restaurant-gender-neutral-restroom"
+          >
+            <ion-icon
+              name="male-female-outline"
+              class="ion-margin-end"
+              aria-hidden="true"
+            />
+            <span>
+              {{
+                (genderNeutralRestroom
+                  ? 'gender-neutral-restroom-yes'
+                  : 'gender-neutral-restroom-no'
+                ) | transloco
+              }}
+            </span>
+          </div>
+
+          <div class="seperator ion-margin-top"></div>
+        }
+
         @if (restaurantData?.address) {
           <div class="ion-margin-top">
             @if (restaurantData?.address?.street) {

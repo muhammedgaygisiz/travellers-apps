@@ -22,6 +22,22 @@ import type { TableOrderingSettings } from './table-ordering';
  */
 export type RestaurantClaimStatus = 'unclaimed' | 'claimed' | 'revoked';
 
+/**
+ * What a restaurant says about its premises (GitHub issue #1830).
+ *
+ * Every field has three states: `true` is yes, `false` is no, and an absent
+ * field means the restaurant has not said. Absent is never read as no - a
+ * guest deciding where they can go to the toilet without being challenged is
+ * owed the difference between "they told us no" and "nobody asked".
+ *
+ * Only the account holding the restaurant states these. A facility a guest
+ * could flag would be unverifiable, and a flag like this one could be used to
+ * target a venue.
+ */
+export interface RestaurantFacilities {
+  genderNeutralRestroom?: boolean;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -62,6 +78,13 @@ export interface Restaurant {
    * whoever has to evaluate the schedule, which is this.
    */
   tableOrdering?: TableOrderingSettings;
+
+  /**
+   * The restaurant's facilities, as the restaurant states them (GitHub issue
+   * #1830). A nested object so that the next facility is a new field here
+   * rather than a new top-level key - the reasoning `tableOrdering` gives.
+   */
+  facilities?: RestaurantFacilities;
 
   createdAt?: string;
   createdAtTimestamp?: number;

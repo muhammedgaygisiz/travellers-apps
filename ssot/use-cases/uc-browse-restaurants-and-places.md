@@ -66,6 +66,11 @@ screen before the state backing them existed.
   rating. It is plain text only when there are no Bites.
 - The menu button sits under the description and links, above the tags, so it
   is reachable without scrolling past the opening hours and the map.
+- A facility the restaurant has stated shows as one line with an icon, under
+  the opening hours (issue [#1830]): "Gender-neutral restroom" for yes, "No
+  gender-neutral restroom" for no. A restaurant that has not said shows
+  nothing, because an absent value is never read as no. The line belongs to
+  the loaded page, so it cannot appear before the restaurant has.
 
 ## MVP Classification
 
@@ -100,6 +105,8 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1381] owns the state contract above. Closed as completed.
 - Issue [#1696] made the Menu label readable in light mode, where it had been drawn in fixed white on a transparent button, moved the menu button above the tags, and replaced the Bites button on both pages with the rating count as a link.
 
+- Issue [#1830] added the facility line to the restaurant page. Part of [#1823].
+
 ## Related Domains
 
 - [Restaurant](../domain/restaurant.md)
@@ -120,3 +127,5 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#1381]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1381
 [#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382
 [#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696
+[#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
+[#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830

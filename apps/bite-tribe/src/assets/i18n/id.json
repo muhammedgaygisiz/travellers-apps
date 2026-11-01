@@ -282,6 +282,8 @@
   "day-saturday": "Sabtu",
   "day-sunday": "Minggu",
   "closed": "Tutup",
+  "gender-neutral-restroom-yes": "Toilet netral gender",
+  "gender-neutral-restroom-no": "Tidak ada toilet netral gender",
   "ok": "OK",
   "registration-in-progress": "Membuat akunmu...",
   "registration-success-check-your-email-to-verify-account": "Pendaftaran berhasil! Cek emailmu untuk memverifikasi akunmu.",

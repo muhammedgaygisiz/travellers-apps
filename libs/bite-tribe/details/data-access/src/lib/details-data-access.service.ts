@@ -8,7 +8,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService, toBase64 } from 'bite-tribe/api';
+import {
+  BiteTribeApiService,
+  loadVisibleProfile,
+  toBase64,
+} from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { resourceValue, sharedBiteUrl } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -293,9 +297,9 @@ export class DetailsDataAccessService {
   > = ({ params }) => {
     const userId = params.userId;
     if (userId) {
-      return FirebaseFirestore.getDocument({
-        reference: `users/${userId}`,
-      }).then((res) => res.snapshot.data as PublicUser);
+      // A private creator arrives as a stand-in the page renders as
+      // anonymous, rather than as an error the page retries (issue #1863).
+      return loadVisibleProfile(userId);
     }
 
     return Promise.resolve(undefined);

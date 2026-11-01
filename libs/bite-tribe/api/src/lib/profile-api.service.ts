@@ -17,6 +17,7 @@ import type {
 } from 'model';
 import { normalizePronouns } from 'model';
 import { toPublicUser } from './utils/to-public-user';
+import { loadVisibleProfile } from './utils/load-visible-profile';
 import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
@@ -353,13 +354,9 @@ export class ProfileApiService {
     }
 
     try {
-      const reference = `${USERS_COLLECTION}/${biteCreatorId}`;
-      const result = await FirebaseFirestore.getDocument({
-        reference,
-      });
-      const user = toPublicUser(result.snapshot);
-
-      return Promise.resolve(user);
+      // A private profile is a stand-in without counts (issue #1863), which
+      // sends the follow metadata to the subcollections it falls back on.
+      return await loadVisibleProfile(biteCreatorId);
     } catch (error) {
       console.error('Error fetching user by ID:', error);
       this.errorHandler.handleError(error);
@@ -749,18 +746,7 @@ export class ProfileApiService {
         return [];
       }
 
-      const users: PublicUser[] = [];
-      for (const uid of userIds) {
-        const userDoc = await FirebaseFirestore.getDocument({
-          reference: `${USERS_COLLECTION}/${uid}`,
-        });
-
-        if (userDoc.snapshot?.data) {
-          users.push(userDoc.snapshot.data as PublicUser);
-        }
-      }
-
-      return users;
+      return await this.loadListedProfiles(userIds as string[]);
     } catch (error) {
       console.error('Error fetching followers with details:', error);
       this.errorHandler.handleError(error);
@@ -780,23 +766,34 @@ export class ProfileApiService {
         return [];
       }
 
-      const users: PublicUser[] = [];
-      for (const uid of userIds) {
-        const userDoc = await FirebaseFirestore.getDocument({
-          reference: `${USERS_COLLECTION}/${uid}`,
-        });
-
-        if (userDoc.snapshot.data) {
-          users.push(userDoc.snapshot.data as PublicUser);
-        }
-      }
-
-      return users;
+      return await this.loadListedProfiles(userIds as string[]);
     } catch (error) {
       console.error('Error fetching following with details:', error);
       this.errorHandler.handleError(error);
       return [];
     }
+  }
+
+  /**
+   * The profiles behind a follower or following list, one read each.
+   *
+   * A private account in the list is refused by the rules since issue #1863,
+   * and comes back as a stand-in carrying its uid alone: the list hides it as
+   * it hid a private row before, without its profile reaching this device.
+   * A missing profile is left out, as it always was.
+   */
+  private async loadListedProfiles(userIds: string[]): Promise<PublicUser[]> {
+    const users: PublicUser[] = [];
+
+    for (const uid of userIds) {
+      const user = await loadVisibleProfile(uid);
+
+      if (user) {
+        users.push(user);
+      }
+    }
+
+    return users;
   }
 
   public async uploadImage(

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeApiService, loadVisibleProfile } from 'bite-tribe/api';
 import type {
   Bite,
   LikeClick,
@@ -15,7 +15,6 @@ import type {
   ReportUserResult,
   UserReportReason,
 } from 'model';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
 interface ProfileResourceParams {
@@ -51,15 +50,9 @@ export class ProfileDataAccessService {
         return undefined;
       }
 
-      const userDoc = await FirebaseFirestore.getDocument({
-        reference: `users/${params.userId}`,
-      });
-
-      if (!userDoc.snapshot?.data) {
-        return undefined;
-      }
-
-      return userDoc.snapshot.data as PublicUser;
+      // A private profile of another account is refused by the rules and
+      // arrives as a stand-in holding its uid alone (issue #1863).
+      return loadVisibleProfile(params.userId);
     };
 
   user = resource({

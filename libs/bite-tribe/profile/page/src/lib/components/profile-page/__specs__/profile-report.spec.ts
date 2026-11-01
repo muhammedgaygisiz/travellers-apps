@@ -35,6 +35,7 @@ class ReportTranslocoLoader implements TranslocoLoader {
 
 const OTHER_USER: PublicUser = {
   userId: 'other',
+  public: true,
   displayName: 'Alice',
   email: '',
   photoUrl: '',

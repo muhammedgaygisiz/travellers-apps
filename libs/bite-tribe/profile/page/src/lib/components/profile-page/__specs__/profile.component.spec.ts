@@ -165,6 +165,7 @@ describe('ProfileComponent', () => {
 
     it('should return the length of bites if bites is defined', () => {
       const bitesArray = [{}, {}, {}];
+      compRef.setInput('user', { public: true });
       compRef.setInput('bites', bitesArray);
 
       expect(component.biteCount()).toBe(bitesArray.length);
@@ -172,7 +173,7 @@ describe('ProfileComponent', () => {
 
     it('should prefer the aggregate biteCount from the user document', () => {
       compRef.setInput('bites', [{}, {}, {}]);
-      compRef.setInput('user', { biteCount: 42 });
+      compRef.setInput('user', { public: true, biteCount: 42 });
 
       expect(component.biteCount()).toBe(42);
     });
@@ -180,7 +181,7 @@ describe('ProfileComponent', () => {
     it('should fall back to the loaded bites when the user has no aggregate', () => {
       const bitesArray = [{}, {}];
       compRef.setInput('bites', bitesArray);
-      compRef.setInput('user', {});
+      compRef.setInput('user', { public: true });
 
       expect(component.biteCount()).toBe(bitesArray.length);
     });
@@ -188,7 +189,11 @@ describe('ProfileComponent', () => {
     // The header used to report an aggregate that predated the user's own
     // write, next to a list that already showed the new Bite (issue #1310).
     it('should render the count the store hands it', () => {
-      compRef.setInput('user', { displayName: 'Mo', biteCount: 3 });
+      compRef.setInput('user', {
+        public: true,
+        displayName: 'Mo',
+        biteCount: 3,
+      });
       compRef.setInput('bites', [{}, {}, {}]);
 
       fixture.detectChanges();
@@ -197,7 +202,11 @@ describe('ProfileComponent', () => {
     });
 
     it('should never render fewer bites than the list under it shows', () => {
-      compRef.setInput('user', { displayName: 'Mo', biteCount: 2 });
+      compRef.setInput('user', {
+        public: true,
+        displayName: 'Mo',
+        biteCount: 2,
+      });
       compRef.setInput('bites', [{}, {}, {}]);
 
       fixture.detectChanges();
@@ -206,7 +215,11 @@ describe('ProfileComponent', () => {
     });
 
     it('should keep the aggregate when the list is a paginated subset', () => {
-      compRef.setInput('user', { displayName: 'Mo', biteCount: 120 });
+      compRef.setInput('user', {
+        public: true,
+        displayName: 'Mo',
+        biteCount: 120,
+      });
       compRef.setInput('bites', [{}, {}, {}]);
 
       fixture.detectChanges();
@@ -246,6 +259,7 @@ describe('ProfileComponent', () => {
   describe('emptyBitesMessage', () => {
     it('should show a placeholder when the user has no bites', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         userId: 'user1',
       });
@@ -344,6 +358,7 @@ describe('ProfileComponent', () => {
   describe('profile location', () => {
     it('should show displayName when present', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         city: 'Zurich',
         userId: 'user1',
@@ -360,6 +375,7 @@ describe('ProfileComponent', () => {
 
     it('should show displayName placeholder when displayName is not present', () => {
       compRef.setInput('user', {
+        public: true,
         city: 'Zurich',
         userId: 'user1',
       });
@@ -377,6 +393,7 @@ describe('ProfileComponent', () => {
 
     it('should show fullName before city separated by a comma', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         fullName: 'Muhammed Gaygisiz',
         city: 'Zurich',
@@ -396,6 +413,7 @@ describe('ProfileComponent', () => {
 
     it('should show only city when fullName is not present', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         city: 'Zurich',
         userId: 'user1',
@@ -415,6 +433,7 @@ describe('ProfileComponent', () => {
     // #1270.
     it('should show only city when fullName repeats the display name', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'run5mo',
         fullName: 'run5mo',
         city: 'Zurich',
@@ -432,6 +451,7 @@ describe('ProfileComponent', () => {
 
     it('should treat a fullName differing only in case as a repeat', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         fullName: ' Mo ',
         city: 'Zurich',
@@ -449,6 +469,7 @@ describe('ProfileComponent', () => {
 
     it('should show nothing when fullName repeats the display name and no city is known', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'run5mo',
         fullName: 'run5mo',
         userId: 'user1',
@@ -463,6 +484,7 @@ describe('ProfileComponent', () => {
     // the user for. See GitHub issue #1270.
     it('should show no location placeholder when fullName and city are empty', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         userId: 'user1',
       });
@@ -474,6 +496,7 @@ describe('ProfileComponent', () => {
 
     it('should still show a real name that differs from the display name', () => {
       compRef.setInput('user', {
+        public: true,
         displayName: 'mo',
         fullName: 'Muhammed Gaygisiz',
         userId: 'user1',
@@ -675,6 +698,79 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe("another account's private profile (issue #1863)", () => {
+    const standIn = {
+      userId: 'owner',
+      public: false,
+      displayName: '',
+      email: '',
+      photoUrl: '',
+    };
+
+    beforeEach(() => {
+      compRef.setInput('userId', 'viewer');
+      compRef.setInput('user', standIn);
+      compRef.setInput('bites', [{ id: 'bite1' }]);
+      fixture.detectChanges();
+    });
+
+    it('names it anonymous and says it is private', () => {
+      const element = fixture.nativeElement as HTMLElement;
+
+      // The heading translates through the pipe, which the mocked service
+      // leaves empty; the block and report dialogs name it by this.
+      expect(component.displayName()).toBe('anonymous');
+      expect(
+        element.querySelector('[data-testid="profile-private"]'),
+      ).not.toBeNull();
+    });
+
+    it('shows none of its Bites, flags, about or subscription', () => {
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(element.querySelector('bt-bite')).toBeNull();
+      expect(element.querySelector('country-flags')).toBeNull();
+      expect(element.querySelector('.profile-about')).toBeNull();
+      expect(element.querySelector('.subscription-badge')).toBeNull();
+      expect(component.biteCount()).toBe(0);
+    });
+
+    it('withholds what a private profile says even if it reaches the page', () => {
+      compRef.setInput('user', {
+        ...standIn,
+        fullName: 'Real Name',
+        city: 'Zurich',
+        about: 'About me',
+        countryCodes: ['AT'],
+        biteCount: 4,
+      });
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).not.toContain('Real Name');
+      expect(text).not.toContain('Zurich');
+      expect(text).not.toContain('About me');
+      expect(component.biteCount()).toBe(0);
+    });
+
+    it('still shows its owner everything', () => {
+      compRef.setInput('userId', 'owner');
+      compRef.setInput('user', { ...standIn, about: 'About me' });
+      fixture.detectChanges();
+
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(
+        element.querySelector('[data-testid="profile-private"]'),
+      ).toBeNull();
+      expect(element.querySelector('.profile-about')?.textContent).toContain(
+        'About me',
+      );
+      expect(element.querySelector('bt-bite')).not.toBeNull();
+    });
+  });
+
   describe('the show on globe button', () => {
     const button = (): HTMLElement | null =>
       (fixture.nativeElement as HTMLElement).querySelector(
@@ -682,14 +778,22 @@ describe('ProfileComponent', () => {
       );
 
     it('should show the button for a profile with countries', () => {
-      compRef.setInput('user', { userId: 'u1', countryCodes: ['AT'] });
+      compRef.setInput('user', {
+        public: true,
+        userId: 'u1',
+        countryCodes: ['AT'],
+      });
       fixture.detectChanges();
 
       expect(button()).not.toBeNull();
     });
 
     it('should hide the button for a profile without countries', () => {
-      compRef.setInput('user', { userId: 'u1', countryCodes: [' ', ''] });
+      compRef.setInput('user', {
+        public: true,
+        userId: 'u1',
+        countryCodes: [' ', ''],
+      });
       fixture.detectChanges();
 
       expect(button()).toBeNull();
@@ -699,7 +803,11 @@ describe('ProfileComponent', () => {
       const opened: string[] = [];
 
       component.worldClick.subscribe((userId) => opened.push(userId));
-      compRef.setInput('user', { userId: 'u1', countryCodes: ['AT'] });
+      compRef.setInput('user', {
+        public: true,
+        userId: 'u1',
+        countryCodes: ['AT'],
+      });
       fixture.detectChanges();
       button()?.click();
 

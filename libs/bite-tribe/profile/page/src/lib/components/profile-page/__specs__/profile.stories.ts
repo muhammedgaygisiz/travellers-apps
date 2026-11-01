@@ -127,6 +127,24 @@ export const OwnPrivateProfile: Story = {
   },
 };
 
+// Another account's private profile. The rules refuse its document, so the
+// page receives a stand-in holding the uid alone, while the Bites still arrive
+// by the route and must not be shown (issue #1863).
+export const OtherPrivateProfile: Story = {
+  args: {
+    user: {
+      userId: 'profile-owner',
+      public: false,
+      displayName: '',
+      email: '',
+      photoUrl: '',
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 export const WithoutBites: Story = {
   args: {
     user: baseUser,

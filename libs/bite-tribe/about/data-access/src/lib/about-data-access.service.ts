@@ -1,5 +1,6 @@
 import { Injectable, resource } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { resourceValue } from 'utils';
 
 @Injectable({
@@ -13,11 +14,13 @@ export class AboutDataAccessService {
       }).then((result) => result.count),
   });
 
+  // Counted by a callable: the rules no longer let a member count the private
+  // profiles themselves (GitHub issue #1863).
   totalNumberUsers = resource({
     loader: () =>
-      FirebaseFirestore.getCountFromServer({
-        reference: 'users',
-      }).then((result) => result.count),
+      FirebaseFunctions.callByName<void, number>({
+        name: 'countUsers',
+      }).then((result) => result.data),
   });
 
   // A count read can reject, and `value()` throws in that state, which would

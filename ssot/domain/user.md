@@ -20,6 +20,10 @@
 - A public profile is visible to other BiteTribe users inside the app. It is not
   a shareable link: profiles have no share action and no deep link, by design.
   Sharing is a [Bite](bite.md) capability. See [issue-1190](../records/issue-1190.md).
+- A private profile is readable by its owner alone. Other accounts receive nothing of
+  it and render it as anonymous; switching visibility takes effect with the save. See
+  the `Profile Visibility Contract` in
+  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
 - A User can follow and be followed by other users.
 - A User can block another User, and lift that block. A block is the blocker's personal
   boundary, invisible to the blocked account, and distinct from the Operator's block that
@@ -216,6 +220,7 @@
   dismissUserReports
   claimDisplayName
   checkDisplayNameAvailability
+  countUsers
   syncDisplayNameCopiesOnUserUpdate
   updateLastSeen
   updateUserMetadata

@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeApiService, loadVisibleProfile } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { of, throwError } from 'rxjs';
 import {
@@ -28,6 +28,7 @@ jest.mock('bite-tribe/store');
 jest.mock('bite-tribe/api', () => ({
   BiteTribeApiService: class {},
   toBase64: jest.fn().mockResolvedValue('BASE64'),
+  loadVisibleProfile: jest.fn(),
 }));
 jest.mock('@capacitor/geolocation', () => ({
   Geolocation: {
@@ -598,24 +599,18 @@ describe(DetailsDataAccessService.name, () => {
     });
 
     describe('given a user id', () => {
-      let getDocumentSpy: jest.SpyInstance;
+      it('should load the profile the viewer may see (issue #1863)', async () => {
+        const creator = { userId: 'test-user-id', public: false };
+        jest.mocked(loadVisibleProfile).mockResolvedValue(creator as never);
 
-      beforeEach(() => {
-        getDocumentSpy = jest
-          .spyOn(FirebaseFirestore, 'getDocument')
-          .mockResolvedValue(getDocumentResult({}));
-      });
-
-      it('should load the user document', async () => {
-        await service.biteCreatorLoader(
+        const result = await service.biteCreatorLoader(
           loaderParams({
             userId: 'test-user-id',
           }),
         );
 
-        expect(getDocumentSpy).toHaveBeenCalledWith({
-          reference: 'users/test-user-id',
-        });
+        expect(loadVisibleProfile).toHaveBeenCalledWith('test-user-id');
+        expect(result).toBe(creator);
       });
     });
   });

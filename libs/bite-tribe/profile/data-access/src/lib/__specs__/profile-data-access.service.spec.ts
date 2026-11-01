@@ -269,6 +269,29 @@ describe('ProfileDataAccessService', () => {
       ));
     });
 
+    describe('given the rules refuse a private profile (issue #1863)', () => {
+      it('should return a stand-in holding the uid alone', inject(
+        [ProfileDataAccessService],
+        async (service: ProfileDataAccessService) => {
+          getDocumentSpy.mockRejectedValue(
+            new Error('Missing or insufficient permissions.'),
+          );
+
+          const result = await service.userLoader(
+            createLoaderParams('user-id'),
+          );
+
+          expect(result).toEqual({
+            userId: 'user-id',
+            public: false,
+            displayName: '',
+            email: '',
+            photoUrl: '',
+          });
+        },
+      ));
+    });
+
     describe('given a snapshot without data is returned', () => {
       it('should return an empty object', inject(
         [ProfileDataAccessService],

@@ -43,6 +43,7 @@ export {
   searchNearbyPlaces,
 } from './functions/restaurants/search-places';
 export { getPlaceDetails } from './functions/restaurants/get-place-details';
+export { countUsers } from './functions/users/count-users';
 export { updateLastSeen } from './functions/users/update-last-seen';
 export { updateUserMetadata } from './functions/users/update-user-metadata';
 export { resendEmailVerification } from './functions/users/resend-email-verification';

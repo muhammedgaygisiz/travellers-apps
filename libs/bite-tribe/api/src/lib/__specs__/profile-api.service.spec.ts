@@ -1598,8 +1598,8 @@ describe(ProfileApiService.name, () => {
           [ProfileApiService],
           async (service: ProfileApiService) => {
             const mockedFollowers = [
-              { id: 'follower1', name: 'User follower1' },
-              { id: 'follower2', name: 'User follower2' },
+              { id: 'follower1', name: 'User follower1', userId: 'follower1' },
+              { id: 'follower2', name: 'User follower2', userId: 'follower2' },
             ] as any;
 
             const fetchFollowersSpy = jest
@@ -1626,8 +1626,8 @@ describe(ProfileApiService.name, () => {
             expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
             expect(getDocumentSpy).toHaveBeenCalledTimes(2);
             expect(result).toEqual([
-              { id: 'follower1', name: 'User follower1' },
-              { id: 'follower2', name: 'User follower2' },
+              { id: 'follower1', name: 'User follower1', userId: 'follower1' },
+              { id: 'follower2', name: 'User follower2', userId: 'follower2' },
             ]);
           },
         ));
@@ -1638,8 +1638,8 @@ describe(ProfileApiService.name, () => {
           [ProfileApiService],
           async (service: ProfileApiService) => {
             const mockedFollowers = [
-              { id: 'follower1', name: 'User follower1' },
-              { id: 'follower2', name: 'User follower2' },
+              { id: 'follower1', name: 'User follower1', userId: 'follower1' },
+              { id: 'follower2', name: 'User follower2', userId: 'follower2' },
             ] as any;
 
             const fetchFollowersSpy = jest
@@ -1671,11 +1671,50 @@ describe(ProfileApiService.name, () => {
             expect(fetchFollowersSpy).toHaveBeenCalledWith('user-id-123');
             expect(getDocumentSpy).toHaveBeenCalledTimes(2);
             expect(result).toEqual([
-              { id: 'follower2', name: 'User follower2' },
+              { id: 'follower2', name: 'User follower2', userId: 'follower2' },
             ]);
           },
         ));
       });
+    });
+
+    describe('given a private follower (issue #1863)', () => {
+      it('should list a stand-in holding the uid alone', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(service, 'fetchFollowers')
+            .mockResolvedValue([{ id: 'private1' }, { id: 'public1' }] as any);
+
+          jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockImplementation(({ reference }) =>
+              reference === 'users/private1'
+                ? Promise.reject(
+                    new Error('Missing or insufficient permissions.'),
+                  )
+                : Promise.resolve({
+                    snapshot: {
+                      id: 'public1',
+                      data: { displayName: 'Mo', public: true },
+                    },
+                  } as any),
+            );
+
+          const result = await service.fetchFollowersWithDetails('user-id-123');
+
+          expect(result).toEqual([
+            {
+              userId: 'private1',
+              public: false,
+              displayName: '',
+              email: '',
+              photoUrl: '',
+            },
+            { userId: 'public1', displayName: 'Mo', public: true },
+          ]);
+        },
+      ));
     });
 
     describe('given no followers found', () => {
@@ -1766,8 +1805,16 @@ describe(ProfileApiService.name, () => {
             expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
             expect(getDocumentSpy).toHaveBeenCalledTimes(2);
             expect(result).toEqual([
-              { id: 'following1', name: 'User following1' },
-              { id: 'following2', name: 'User following2' },
+              {
+                id: 'following1',
+                name: 'User following1',
+                userId: 'following1',
+              },
+              {
+                id: 'following2',
+                name: 'User following2',
+                userId: 'following2',
+              },
             ]);
           },
         ));
@@ -1810,7 +1857,11 @@ describe(ProfileApiService.name, () => {
             expect(fetchFollowingSpy).toHaveBeenCalledWith('user-id-123');
             expect(getDocumentSpy).toHaveBeenCalledTimes(1);
             expect(result).toEqual([
-              { id: 'following1', name: 'User following1' },
+              {
+                id: 'following1',
+                name: 'User following1',
+                userId: 'following1',
+              },
             ]);
           },
         ));

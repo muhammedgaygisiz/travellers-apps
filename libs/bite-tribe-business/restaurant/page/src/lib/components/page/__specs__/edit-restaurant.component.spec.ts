@@ -167,6 +167,14 @@ describe('EditRestaurantComponent', () => {
       expect(component.facilitiesForm.value.genderNeutralRestroom).toBe(answer);
     });
 
+    it('shows "Not stated" before the restaurant has loaded', () => {
+      fixture.detectChanges();
+
+      expect(component.facilitiesForm.value.genderNeutralRestroom).toBe(
+        'not-stated',
+      );
+    });
+
     it.each([
       ['yes', true],
       ['no', false],

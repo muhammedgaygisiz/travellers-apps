@@ -80,7 +80,10 @@ Every pressable surface in bite-tribe gives way under the finger, on the same
 frame as the `press` haptic (epic [#1740], issue [#1745]). The class comes from
 the delegated listener in `libs/bite-tribe/shell/src/lib/press-feedback.ts` - see
 `Haptic Feedback Rule` in [Architecture - Capacitor](../architecture/capacitor.md) - and the
-look comes from `libs/bite-tribe-common/styles/_globals.scss`.
+look comes from `libs/bite-tribe-common/styles/_globals.scss`. Inside
+`ion-content` the press waits to rule out a scroll, so scrolling a page never
+presses what the thumb landed on (issue [#1872]); that rule lives with the listener
+too.
 
 | Phase   | Class         | What it does                                                    |
 | ------- | ------------- | --------------------------------------------------------------- |
@@ -329,3 +332,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1800]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1800
 [#1801]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1801
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835
+[#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872

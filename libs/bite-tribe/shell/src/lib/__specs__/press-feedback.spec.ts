@@ -8,6 +8,8 @@ import {
   providePressFeedback,
   RELEASED_CLASS,
   RELEASED_MS,
+  SCROLL_INTENT_MS,
+  TAP_PRESS_MS,
 } from '../press-feedback';
 
 type PointerType =
@@ -540,6 +542,126 @@ describe(providePressFeedback.name, () => {
     query('#surface').dispatchEvent(event);
 
     expect(event.defaultPrevented).toBe(false);
+  });
+
+  describe('given a surface inside scrolling content', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      render(`
+        <ion-content>
+          <ion-card btPressable id="card"><p>A Bite</p></ion-card>
+          <ion-alert><button class="alert-button" id="confirm">OK</button></ion-alert>
+        </ion-content>
+        <ion-button id="toolbar">Back</ion-button>
+      `);
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    const expectNothingPlayed = (): void => {
+      jest.advanceTimersByTime(SCROLL_INTENT_MS + TAP_PRESS_MS + RELEASED_MS);
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(query('#card').classList).not.toContain(RELEASED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+      expect(haptics.release).not.toHaveBeenCalled();
+    };
+
+    it('should play nothing on touch-down', () => {
+      dispatch(query('#card p'), 'pointerdown');
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
+
+    it('should play nothing when the finger starts dragging', () => {
+      dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
+      dispatch(query('#card p'), 'pointermove', {
+        clientX: 50,
+        clientY: 50 - DRAG_CANCEL_PX - 1,
+      });
+
+      expectNothingPlayed();
+    });
+
+    it('should play nothing when the browser takes the gesture for a scroll', () => {
+      dispatch(query('#card p'), 'pointerdown');
+      dispatch(query('#card p'), 'pointercancel');
+
+      expectNothingPlayed();
+    });
+
+    it('should play nothing when the finger lifts outside the surface', () => {
+      dispatch(query('#card p'), 'pointerdown');
+      dispatch(query('#card p'), 'pointerup', OUTSIDE);
+
+      expectNothingPlayed();
+    });
+
+    it('should press once a finger has rested for the wait', () => {
+      dispatch(query('#card p'), 'pointerdown');
+      jest.advanceTimersByTime(SCROLL_INTENT_MS);
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+
+      dispatch(query('#card p'), 'pointerup');
+
+      expect(query('#card').classList).toContain(RELEASED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+    });
+
+    it('should play the whole press on the lift of a quick tap', () => {
+      tap(query('#card p'));
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(TAP_PRESS_MS);
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(query('#card').classList).toContain(RELEASED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(SCROLL_INTENT_MS + RELEASED_MS);
+
+      expect(query('#card').classList).not.toContain(RELEASED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not leave a quick tap pressed when a drag follows on the same surface', () => {
+      tap(query('#card p'));
+      dispatch(query('#card p'), 'pointerdown');
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+
+      dispatch(query('#card p'), 'pointercancel');
+      jest.advanceTimersByTime(SCROLL_INTENT_MS + TAP_PRESS_MS);
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['#toolbar', '#confirm'])(
+      'should press %s on touch-down, as nothing scrolls under it',
+      (selector) => {
+        dispatch(query(selector), 'pointerdown');
+
+        expect(query(selector).classList).toContain(PRESSED_CLASS);
+        expect(haptics.press).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('should not press after the app is destroyed', () => {
+      dispatch(query('#card p'), 'pointerdown');
+      TestBed.resetTestingModule();
+      jest.advanceTimersByTime(SCROLL_INTENT_MS);
+
+      expect(haptics.press).not.toHaveBeenCalled();
+    });
   });
 
   describe('given the spring back after a press', () => {

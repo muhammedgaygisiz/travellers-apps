@@ -31,6 +31,20 @@ export const RELEASED_MS = 300;
 export const DRAG_CANCEL_PX = 10;
 
 /**
+ * How long a finger must rest on a surface inside scrolling content before it
+ * counts as a press. Every scroll starts with a touch-down on whatever is under
+ * the thumb, so until then the gesture could still become a scroll, and
+ * nothing plays. The same wait a native iOS scroll view gives its content.
+ */
+export const SCROLL_INTENT_MS = 150;
+
+/**
+ * How long a tap that lifted within {@link SCROLL_INTENT_MS} stays pressed, so
+ * it still gives way and ticks twice: the press transition in `_globals.scss`.
+ */
+export const TAP_PRESS_MS = 70;
+
+/**
  * The class on the document element that opts it into the pressed-state
  * styles. The styles live in a stylesheet the business and admin apps share,
  * and Ionic's own `.ion-activated` tint is only neutralised under it, so those
@@ -69,6 +83,15 @@ const OPT_OUT = '[btPressable="off"]';
  */
 const RELEASE_OFF = '[btPressable="release-off"]';
 
+/** Content a touch-down can start scrolling. */
+const SCROLLER = 'ion-content';
+
+/**
+ * An `ion-alert` declared in a page's template sits inside its `ion-content`,
+ * but nothing behind the alert scrolls while it is open.
+ */
+const NOT_SCROLLABLE = 'ion-alert';
+
 interface Press {
   readonly surface: HTMLElement;
   readonly pointerId: number;
@@ -88,7 +111,9 @@ interface Press {
  * on the same frame.
  *
  * - **Press:** a `pointerdown` on a surface adds {@link PRESSED_CLASS} and
- *   plays `press`.
+ *   plays `press`. Inside scrolling content both wait
+ *   {@link SCROLL_INTENT_MS}, and a tap that lifts sooner plays them on the
+ *   lift, with the release following {@link TAP_PRESS_MS} later.
  * - **Release:** a `pointerup` that lands inside the same surface swaps the
  *   class for {@link RELEASED_CLASS}, which lets the surface spring back with
  *   an overshoot, and plays `release`, except on list rows and under
@@ -113,27 +138,23 @@ export const providePressFeedback = (): EnvironmentProviders =>
     const haptics = inject(HapticsService);
     const releaseTimers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
     let active: Press | undefined;
+    let scrollIntentTimer: ReturnType<typeof setTimeout> | undefined;
 
     document.documentElement.classList.add(PRESS_FEEDBACK_ROOT_CLASS);
 
     const clearReleased = (surface: HTMLElement): void => {
       clearTimeout(releaseTimers.get(surface));
       releaseTimers.delete(surface);
-      surface.classList.remove(RELEASED_CLASS);
+      surface.classList.remove(PRESSED_CLASS, RELEASED_CLASS);
     };
 
-    const end = (inside: boolean): void => {
-      if (!active) {
-        return;
-      }
+    const press = (surface: HTMLElement): void => {
+      surface.classList.add(PRESSED_CLASS);
+      void haptics.press();
+    };
 
-      const { surface, release } = active;
-      active = undefined;
+    const springBack = (surface: HTMLElement, release: boolean): void => {
       surface.classList.remove(PRESSED_CLASS);
-
-      if (!inside) {
-        return;
-      }
 
       // Rows spring back in full; only their second tick is left out.
       surface.classList.add(RELEASED_CLASS);
@@ -145,6 +166,37 @@ export const providePressFeedback = (): EnvironmentProviders =>
       if (release) {
         void haptics.release();
       }
+    };
+
+    const end = (inside: boolean): void => {
+      if (!active) {
+        return;
+      }
+
+      const { surface, release } = active;
+      const undecided = scrollIntentTimer !== undefined;
+      clearTimeout(scrollIntentTimer);
+      scrollIntentTimer = undefined;
+      active = undefined;
+
+      if (!inside) {
+        surface.classList.remove(PRESSED_CLASS);
+
+        return;
+      }
+
+      if (!undecided) {
+        springBack(surface, release);
+
+        return;
+      }
+
+      // Lifted before the wait ran out, so this was a tap after all.
+      press(surface);
+      releaseTimers.set(
+        surface,
+        setTimeout(() => springBack(surface, release), TAP_PRESS_MS),
+      );
     };
 
     const onPointerDown = (event: PointerEvent): void => {
@@ -173,8 +225,17 @@ export const providePressFeedback = (): EnvironmentProviders =>
         startY: event.clientY,
       };
       clearReleased(surface);
-      surface.classList.add(PRESSED_CLASS);
-      void haptics.press();
+
+      if (!canScrollUnder(surface)) {
+        press(surface);
+
+        return;
+      }
+
+      scrollIntentTimer = setTimeout(() => {
+        scrollIntentTimer = undefined;
+        press(surface);
+      }, SCROLL_INTENT_MS);
     };
 
     const onPointerUp = (event: PointerEvent): void => {
@@ -240,6 +301,7 @@ export const providePressFeedback = (): EnvironmentProviders =>
       listeners.forEach(([type, listener]) =>
         document.removeEventListener(type, listener as EventListener, options),
       );
+      clearTimeout(scrollIntentTimer);
       [...releaseTimers.keys()].forEach(clearReleased);
       document.documentElement.classList.remove(PRESS_FEEDBACK_ROOT_CLASS);
     });
@@ -293,6 +355,10 @@ const isTappableRow = (item: HTMLElement): boolean => {
     item.hasAttribute('routerLink')
   );
 };
+
+const canScrollUnder = (surface: HTMLElement): boolean =>
+  surface.closest(SCROLLER) !== null &&
+  surface.closest(NOT_SCROLLABLE) === null;
 
 const isDisabled = (surface: HTMLElement): boolean =>
   surface.hasAttribute('disabled') ||

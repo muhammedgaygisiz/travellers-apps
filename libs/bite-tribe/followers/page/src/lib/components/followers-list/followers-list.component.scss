@@ -1,20 +1,6 @@
 @use 'globals';
 
 :host {
-  .spinner-container {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    justify-content: center;
-    padding-top: 30%;
-
-    ion-spinner {
-      width: 100px;
-      height: 100px;
-    }
-  }
-
   .empty-container {
     height: 100%;
 

@@ -270,15 +270,17 @@ describe('deleteAccountForUser', () => {
     expect(db.exists(`biteTrails/trail-1/ratings/${UID}`)).toBe(false);
   });
 
-  it('removes the follow-up claim and every unsubscribe token of the account', async () => {
+  it('removes both follow-up claims and every unsubscribe token of the account', async () => {
     seedFullAccount();
     db.seed(`newUserFollowUps/${UID}`, { status: 'sent' });
+    db.seed(`newUserWeekFollowUps/${UID}`, { status: 'sent' });
     db.seed('emailOptOuts/token-mine', { uid: UID });
     db.seed('emailOptOuts/token-theirs', { uid: 'someone-else' });
 
     await deleteAccountForUser(UID, NOW);
 
     expect(db.exists(`newUserFollowUps/${UID}`)).toBe(false);
+    expect(db.exists(`newUserWeekFollowUps/${UID}`)).toBe(false);
     expect(db.exists('emailOptOuts/token-mine')).toBe(false);
     expect(db.exists('emailOptOuts/token-theirs')).toBe(true);
   });

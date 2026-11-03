@@ -228,6 +228,7 @@
   resendEmailVerification
   sendEmailVerificationReminders
   sendNewUserFollowUps
+  sendNewUserWeekFollowUps
   handleEmailUnsubscribe
   searchUsers
   suggestPeopleToFollow

@@ -58,6 +58,13 @@ export const am: NotificationMessages = {
   'newUserFollowUp.footer':
     'ይህን ኢሜይል አንድ ጊዜ ብቻ የሚቀበሉት አሁን BiteTribeን ስለተቀላቀሉ ነው።',
   'newUserFollowUp.unsubscribeLabel': 'ከBiteTribe ኢሜይሎች ምዝገባ ይሰርዙ',
+  'newUserWeekFollowUp.emailSubject': 'በዚህ ሳምንት በBiteTribe ላይ ያሉ አዳዲስ ነገሮች',
+  'newUserWeekFollowUp.emailIntro':
+    'BiteTribeን ከተቀላቀሉ አንድ ሳምንት ሆኗል። ሊመለከቷቸው የሚገቡ ጥቂት አዳዲስ Biteዎች እነሆ።',
+  'newUserWeekFollowUp.followingHeading': 'ከሚከተሏቸው ሰዎች አዲስ',
+  'newUserWeekFollowUp.moreHeading': 'ሊሞክሯቸው የሚገቡ ሌሎች ምግቦች',
+  'newUserWeekFollowUp.footer':
+    'ይህን ኢሜይል BiteTribeን ከተቀላቀሉ ከአንድ ሳምንት በኋላ አንድ ጊዜ ብቻ ይቀበላሉ።',
   'emailUnsubscribe.title': 'ከBiteTribe ኢሜይሎች ምዝገባ ይሰርዙ',
   'emailUnsubscribe.confirm':
     'BiteTribe እንደዚህ ያሉ ኢሜይሎችን ከእንግዲህ አይልክልዎትም። እንደ ማረጋገጫ ያሉ የመለያ ኢሜይሎች መድረሳቸውን ይቀጥላሉ።',

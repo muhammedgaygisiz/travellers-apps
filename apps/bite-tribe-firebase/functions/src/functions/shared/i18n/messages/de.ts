@@ -69,6 +69,15 @@ export const de: NotificationMessages = {
   'newUserFollowUp.footer':
     'Du erhältst diese E-Mail einmalig, weil du BiteTribe gerade beigetreten bist.',
   'newUserFollowUp.unsubscribeLabel': 'BiteTribe-E-Mails abbestellen',
+  'newUserWeekFollowUp.emailSubject':
+    'Was es diese Woche Neues auf BiteTribe gibt',
+  'newUserWeekFollowUp.emailIntro':
+    'Vor einer Woche bist du BiteTribe beigetreten. Hier sind ein paar neue Bites, die sich lohnen.',
+  'newUserWeekFollowUp.followingHeading': 'Neu von Leuten, denen du folgst',
+  'newUserWeekFollowUp.moreHeading':
+    'Weitere Gerichte, die du probieren solltest',
+  'newUserWeekFollowUp.footer':
+    'Du erhältst diese E-Mail einmalig, eine Woche nachdem du BiteTribe beigetreten bist.',
   'emailUnsubscribe.title': 'BiteTribe-E-Mails abbestellen',
   'emailUnsubscribe.confirm':
     'BiteTribe schickt dir keine E-Mails wie diese mehr. Konto-E-Mails, etwa zur Bestätigung, kommen weiterhin an.',

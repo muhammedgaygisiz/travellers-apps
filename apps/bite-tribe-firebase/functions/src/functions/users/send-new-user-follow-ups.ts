@@ -96,7 +96,7 @@ export interface FollowUpSummary {
 
 export type FollowUpEmailSender = (email: RenderedEmail) => Promise<void>;
 
-const isAlreadyExists = (error: unknown): boolean => {
+export const isAlreadyExists = (error: unknown): boolean => {
   const code = (error as { code?: unknown })?.code;
 
   return code === 6 || code === 'already-exists';
@@ -124,7 +124,7 @@ const claim = async (
   }
 };
 
-const summaryLine = ({
+export const summaryLine = ({
   candidates,
   sent,
   skipped,
@@ -201,7 +201,7 @@ const sendMonitorCopies = async (
   }
 };
 
-const isReachable = (
+export const isReachable = (
   authUser: UserRecord | undefined,
 ): authUser is UserRecord & { email: string } =>
   !!authUser &&

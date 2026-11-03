@@ -61,6 +61,13 @@ export const ar: NotificationMessages = {
   'newUserFollowUp.footer':
     'تصلك هذه الرسالة مرة واحدة فقط لأنك انضممت للتو إلى BiteTribe.',
   'newUserFollowUp.unsubscribeLabel': 'إلغاء الاشتراك في رسائل BiteTribe',
+  'newUserWeekFollowUp.emailSubject': 'الجديد هذا الأسبوع على BiteTribe',
+  'newUserWeekFollowUp.emailIntro':
+    'مضى أسبوع على انضمامك إلى BiteTribe. إليك بعض الـ Bites الجديدة التي تستحق النظر.',
+  'newUserWeekFollowUp.followingHeading': 'جديد من الأشخاص الذين تتابعهم',
+  'newUserWeekFollowUp.moreHeading': 'أطباق أخرى تستحق التجربة',
+  'newUserWeekFollowUp.footer':
+    'تصلك هذه الرسالة مرة واحدة فقط، بعد أسبوع من انضمامك إلى BiteTribe.',
   'emailUnsubscribe.title': 'إلغاء الاشتراك في رسائل BiteTribe',
   'emailUnsubscribe.confirm':
     'لن يرسل لك BiteTribe رسائل مثل هذه بعد الآن. ستستمر رسائل الحساب، مثل رسالة التحقق، في الوصول.',

@@ -140,6 +140,55 @@ brought them back.
 - **Deletion.** Account deletion removes the claim and every opt-out token the
   account was issued; see [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
 
+## Day-7 Mail Contract
+
+The day-1 mail brings new users back the next day; nothing did after that. The
+day-7 mail is one more reason, sent only to the ones who drifted off after day 1
+(issue [#1874]). D1 was 20.8% and D7 10% when it was specified, from the
+2026-11-03 analytics check on [#914].
+
+- **Trigger.** `sendNewUserWeekFollowUps` runs daily at 18:00 Europe/Zurich, the
+  same slot as the day-1 mail, and reads the profiles whose `createdAtTimestamp`
+  falls on the Zurich calendar day seven days before the run. It is a calendar
+  day, not 6 to 7 times 24 hours, because the digest counts D7 as active on the
+  seventh calendar day: with a rolling window a morning sign-up would be mailed
+  on day 6, and a return that evening would count for nothing. A late scheduler
+  reads the same day, and the claim stops a second run from sending twice.
+- **Channel.** Email only, for the reason the day-1 mail gives.
+- **Who gets it.** The day-1 audience - a verified address on an enabled account
+  with a sign-in provider, and no opt-out of product mail - minus anyone who came
+  back. Coming back is being seen from the start of day 2 (Zurich midnight two
+  days after sign-up) on: the profile's `lastSeenTimestamp`, which the app writes
+  at most once a day, or Firebase Auth's `lastRefreshTime`, which moves while a
+  session is open. A visit on day 1 does not count, because day 1 is what the
+  day-1 mail asks for.
+- **Exactly once.** `newUserWeekFollowUps/{uid}`, created before the send and
+  ending as `sent` or `failed`, exactly as `newUserFollowUps` is for day 1.
+- **Content.** Up to three listable Bites that the recipient's followed accounts
+  posted in the last seven days, newest first, each with the poster's display
+  name. A followed account that is not public is left out: the mail is read
+  outside the app. The places left are filled from a hand-picked list in
+  `config/newUserWeekFollowUp.biteIds` (at most ten), leaving out the Bites the
+  day-1 mail's `config/newUserFollowUp.biteIds` names, the recipient's own
+  Bites, and any Bite that is gone or not listable. A recipient with nothing to
+  show is skipped without a claim. The mail is in the recipient's language; its
+  open and unsubscribe labels are the day-1 mail's.
+- **Monitor copy.** As for day 1, through
+  `config/newUserWeekFollowUp.monitorUids`: the mail a recipient who follows
+  nobody would get, with the run's counts in a
+  `[Week follow-up monitor] ...` subject, or an alert when the fallback resolves
+  to nothing, because then such a recipient gets no mail at all.
+- **Opt-out.** The same token, endpoint and `productEmails` setting as the day-1
+  mail.
+- **Measurement.** Every link carries
+  `utm_source=bitetribe&utm_medium=email&utm_campaign=new_user_week_follow_up`.
+  Click-through - sessions with that campaign over the `sent` records - is the
+  fast signal. The outcome is D7 from `retention-cohorts` for the four weeks of
+  cohorts after the release against the four before; about 20 users a week
+  reach day 7, so it reads as a direction rather than a result.
+- **Deletion.** Account deletion removes `newUserWeekFollowUps/{uid}` with the
+  day-1 claim.
+
 ## MVP Classification
 
 **[MVP]** - the blocking assistant and its steps: the unique display name, the public/private
@@ -186,6 +235,10 @@ permission surface, so the purpose strings are read here before any other screen
   `users/email-opt-out.ts` and `users/handle-email-unsubscribe.ts` in
   `apps/bite-tribe-firebase/functions`, with the `newUserFollowUp.*` and
   `emailUnsubscribe.*` keys of the backend catalog.
+- The day-7 mail: `users/send-new-user-week-follow-ups.ts`,
+  `users/new-user-week-follow-up-picks.ts` and
+  `users/new-user-week-follow-up-email.ts`, with the `newUserWeekFollowUp.*`
+  keys of the backend catalog.
 
 ## Related GitHub Scope
 
@@ -198,6 +251,8 @@ permission surface, so the purpose strings are read here before any other screen
 - Issue [#1707] (the follow-up mail the day after sign-up), with the consent
   decision in [#989]
 - Issue [#1708] (people to follow on the finish step)
+- Issue [#1874] (the day-7 mail to new users who did not come back), part of
+  epic [#907], from the analytics check on [#914]
 - Issue [#1798] (finishing onboarding is celebrated), part of epic [#1741]
 
 ## Related Domains
@@ -245,3 +300,6 @@ permission surface, so the purpose strings are read here before any other screen
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1798]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1798
+[#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
+[#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
+[#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874

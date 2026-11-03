@@ -37,7 +37,7 @@ export interface FollowUpEmailParams {
   unsubscribeToken: string;
 }
 
-const card = (
+export const card = (
   imageUrl: string | undefined,
   title: string,
   subtitle: string | undefined,

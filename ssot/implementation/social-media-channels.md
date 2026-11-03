@@ -602,15 +602,18 @@ to every link of the next channel ([#1627]).
 
 | Link        | Tagged URL for the Instagram bio                                                                                                             | Where the campaign is read                                             |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| App Store   | `https://apps.apple.com/app/id6746098595?pt=<provider-token>&ct=instagram-bio`                                                               | App Store Connect - App Analytics - Sources - Campaigns, never GA4     |
+| App Store   | `https://apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8`                                                     | App Store Connect - App Analytics - Sources - Campaigns, never GA4     |
 | Google Play | `https://play.google.com/store/apps/details?id=com.bitetribe.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Dbio` | The Play Install Referrer, which the Firebase SDK puts on `first_open` |
 | Web         | `https://bitetribe.app/?utm_source=instagram&utm_medium=social&utm_campaign=bio`                                                             | `first_visit` in GA4                                                   |
 
-- **The App Store link needs the provider token.** `pt` is the account's
-  provider id, shown by App Store Connect's campaign link generator (App
-  Analytics - Sources - Campaigns - Generate a Campaign Link). Apple does not
-  pass the campaign on to the app, so App Store campaign installs are read in
-  App Store Connect alone.
+- **The App Store link is the one Apple's generator builds.** `pt=127766028`
+  is the account's provider token, `ct` the campaign name and `mt=8` the
+  media type Apple adds. A new campaign link comes from App Store Connect -
+  BiteTribe - Analytics - Acquisition - Campaigns - Generate a Campaign Link,
+  generated on 3 November 2026 for `instagram-bio`. Apple does not pass the
+  campaign on to the app, so App Store campaign installs are read in App
+  Store Connect alone, and only once at least five Apple Accounts have
+  installed through the campaign.
 - **The Play referrer is URL-encoded**, because it is one query parameter that
   itself holds three.
 - **Instagram adds its own tag.** Instagram appends `utm_source=ig` and

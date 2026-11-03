@@ -11,11 +11,10 @@
       {{ titleKey() | transloco }}
     </h1>
 
-    @if (isLoading()) {
-      <div class="spinner-container">
-        <ion-spinner color="primary" />
-      </div>
-    } @else if (hasError()) {
+    <!-- Loading shows in the header alone (issue #1876). A spinner in place of
+    the list blanked the rows on every reload - an unfollow, a follow from the
+    suggestions, a retry - although the resource still held them. -->
+    @if (hasError()) {
       <!-- An unreadable list is not an empty one: saying "no followers yet"
       here would state something untrue about the account. See issue #1232. -->
       <div class="empty-container">
@@ -31,7 +30,7 @@
           {{ 'retry' | transloco }}
         </ion-button>
       </div>
-    } @else if (users()?.length === 0) {
+    } @else if (isEmptyList() && listSettled()) {
       <div
         class="empty-container"
         [class.empty-container--with-suggestions]="showsFollowSuggestions()"

@@ -1717,6 +1717,47 @@ describe(ProfileApiService.name, () => {
       ));
     });
 
+    describe('given several followers (issue #1876)', () => {
+      it('should read their profiles at once, keeping the list order', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          jest
+            .spyOn(service, 'fetchFollowers')
+            .mockResolvedValue([{ id: 'slow' }, { id: 'fast' }] as any);
+
+          const pending: ((value: unknown) => void)[] = [];
+          const getDocumentSpy = jest
+            .spyOn(FirebaseFirestore, 'getDocument')
+            .mockImplementation(
+              ({ reference }) =>
+                new Promise((resolve) =>
+                  pending.push(() =>
+                    resolve({
+                      snapshot: { data: { displayName: reference } },
+                    } as any),
+                  ),
+                ),
+            );
+
+          const result = service.fetchFollowersWithDetails('user-id-123');
+          for (let i = 0; i < 5; i++) {
+            await Promise.resolve();
+          }
+
+          // Both reads are out before either has answered.
+          expect(getDocumentSpy).toHaveBeenCalledTimes(2);
+
+          pending[1](undefined);
+          pending[0](undefined);
+
+          expect(await result).toEqual([
+            { displayName: 'users/slow', userId: 'slow' },
+            { displayName: 'users/fast', userId: 'fast' },
+          ]);
+        },
+      ));
+    });
+
     describe('given no followers found', () => {
       it('should return empty array', inject(
         [ProfileApiService],

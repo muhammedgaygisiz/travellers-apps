@@ -46,23 +46,76 @@ describe(FollowersListComponent.name, () => {
     expect(component).toBeTruthy();
   });
 
-  it('should run the header progress bar while the spinner shows', () => {
-    componentRef.setInput('type', 'followers');
-    componentRef.setInput('users', []);
-    componentRef.setInput('isLoading', true);
-    fixture.detectChanges();
+  // Loading shows in the header alone, and the list stays on screen while it
+  // reloads. See GitHub issue #1876.
+  describe('while the list loads', () => {
+    const ana = {
+      userId: 'ana',
+      displayName: 'Ana',
+      public: true,
+    } as PublicUser;
 
-    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
-    expect(
-      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
-    ).toBeTruthy();
+    const rows = (): number =>
+      fixture.nativeElement.querySelectorAll('ion-item').length;
+    const emptyMessage = (): Element | null =>
+      fixture.nativeElement.querySelector('.empty-container');
 
-    componentRef.setInput('isLoading', false);
-    fixture.detectChanges();
+    it('should run the header progress bar and no spinner of its own', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
 
-    expect(
-      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
-    ).toBeFalsy();
+      expect(fixture.nativeElement.querySelector('ion-spinner')).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeTruthy();
+
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
+      ).toBeFalsy();
+    });
+
+    it('should keep the rows on screen through a reload', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', [ana]);
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
+
+      expect(rows()).toBe(1);
+    });
+
+    it('should not call the list empty before its first read is in', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
+
+      expect(emptyMessage()).toBeNull();
+
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      expect(emptyMessage()).toBeTruthy();
+    });
+
+    it('should keep the empty message through a reload', () => {
+      componentRef.setInput('type', 'followers');
+      componentRef.setInput('users', []);
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
+
+      expect(emptyMessage()).toBeTruthy();
+    });
   });
 
   describe('given the list could not be read', () => {

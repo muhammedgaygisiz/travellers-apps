@@ -18,7 +18,6 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonSpinner,
 } from '@ionic/angular/standalone';
 import type { FollowSuggestion, PublicUser } from 'model';
 import { FollowSuggestionsComponent } from 'bite-tribe/follow-suggestions-ui';
@@ -43,7 +42,6 @@ const CANCEL = 'cancel';
     IonButton,
     IonAvatar,
     PageComponent,
-    IonSpinner,
     IonAlert,
     IonIcon,
     TranslocoPipe,
@@ -99,12 +97,12 @@ export class FollowersListComponent {
   );
 
   /**
-   * Whether the list has finished its first read. Suggestions wait for it, so
-   * they never sit under the loading spinner of a page that has not said yet
-   * what the list holds - and once shown they stay through the reload a
-   * follow from them triggers, rather than unmounting with the list.
+   * Whether the list has finished its first read. The empty message and the
+   * suggestions wait for it, so neither shows while the header still says the
+   * page has not learnt what the list holds - and once shown they stay
+   * through the reload a follow from them triggers, as the rows do (#1876).
    */
-  private readonly listSettled = signal(false);
+  protected readonly listSettled = signal(false);
 
   private readonly settleList = effect(() => {
     if (!this.isLoading()) {

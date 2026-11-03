@@ -781,19 +781,14 @@ export class ProfileApiService {
    * and comes back as a stand-in carrying its uid alone: the list hides it as
    * it hid a private row before, without its profile reaching this device.
    * A missing profile is left out, as it always was.
+   *
+   * The reads run concurrently (issue #1876). One after another, a list took
+   * a round trip per person to load.
    */
   private async loadListedProfiles(userIds: string[]): Promise<PublicUser[]> {
-    const users: PublicUser[] = [];
+    const users = await Promise.all(userIds.map(loadVisibleProfile));
 
-    for (const uid of userIds) {
-      const user = await loadVisibleProfile(uid);
-
-      if (user) {
-        users.push(user);
-      }
-    }
-
-    return users;
+    return users.filter((user): user is PublicUser => !!user);
   }
 
   public async uploadImage(

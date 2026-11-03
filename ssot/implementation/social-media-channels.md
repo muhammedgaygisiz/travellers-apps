@@ -577,11 +577,55 @@ Instagram takes up to five profile links, set in the mobile app only - see
 [Instagram's Website Field Is Mobile-Only](#instagrams-website-field-is-mobile-only).
 The profile shows the first and folds the rest behind _and N more_.
 
-| Order | URL                                                               | Title         |
-| ----- | ----------------------------------------------------------------- | ------------- |
-| 1     | `https://apps.apple.com/app/id6746098595`                         | `App Store`   |
-| 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app` | `Google Play` |
-| 3     | `https://bitetribe.app`                                           | blank         |
+| Order | URL                                                                                                                                          | Title         |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1     | `https://apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8`                                                     | `App Store`   |
+| 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Dbio` | `Google Play` |
+| 3     | `https://bitetribe.app/?utm_source=instagram&utm_medium=social&utm_campaign=bio`                                                             | blank         |
+
+**Tagged on 3 November 2026** ([#1759]), replacing the bare URLs set on
+16 September 2026, in the same order and with the same titles. They were edited
+from the Android app under Edit profile - Links, one link at a time. The profile
+now shows `apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8 and 2 more`.
+Arrivals from the bio before that date read as `(direct)` in the digest.
+
+### Campaign Tags On Every Link
+
+Every link we place on a channel carries a campaign tag, so the daily digest can
+say which channel an arrival came from ([#1759]). Instagram sends every link
+through `l.instagram.com`, which drops the referrer, so a link without a tag is
+indistinguishable from someone typing the address.
+
+The convention is `utm_source=<platform>`, `utm_medium=social` and
+`utm_campaign=bio` for a profile link or `utm_campaign=<post-slug>` for a link in
+a post or story. The same convention applies to every profile on this page and
+to every link of the next channel ([#1627]).
+
+| Link        | Tagged URL for the Instagram bio                                                                                                             | Where the campaign is read                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| App Store   | `https://apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8`                                                     | App Store Connect - App Analytics - Sources - Campaigns, never GA4     |
+| Google Play | `https://play.google.com/store/apps/details?id=com.bitetribe.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Dbio` | The Play Install Referrer, which the Firebase SDK puts on `first_open` |
+| Web         | `https://bitetribe.app/?utm_source=instagram&utm_medium=social&utm_campaign=bio`                                                             | `first_visit` in GA4                                                   |
+
+- **The App Store link is the one Apple's generator builds.** `pt=127766028`
+  is the account's provider token, `ct` the campaign name and `mt=8` the
+  media type Apple adds. A new campaign link comes from App Store Connect -
+  BiteTribe - Analytics - Acquisition - Campaigns - Generate a Campaign Link,
+  generated on 3 November 2026 for `instagram-bio`. Apple does not pass the
+  campaign on to the app, so App Store campaign installs are read in App
+  Store Connect alone, and only once at least five Apple Accounts have
+  installed through the campaign.
+- **The Play referrer is URL-encoded**, because it is one query parameter that
+  itself holds three.
+- **Instagram adds its own tag.** Instagram appends `utm_source=ig` and
+  `utm_medium=social` to outbound links. The digest folds `ig`,
+  `instagram.com` and `l.instagram.com` into `instagram`, and the Facebook
+  equivalents into `facebook` (`SOURCE_ALIASES` in
+  `tools/analytics/cohorts.config.mjs`), so a channel is one row whichever
+  tag reached the export.
+- **`/download` carries no campaign.** [The One Download Link](#the-one-download-link-done)
+  redirects to the bare store listings, so a channel link that needs to be
+  measured uses the tagged store links above instead.
 
 **Store links get a title.** The blank-title rule in
 [Profile Content](#profile-content) is about a single link whose domain is the
@@ -1307,3 +1351,5 @@ yet reflected.
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
 [#1729]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1729
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
+[#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
+[#1627]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1627

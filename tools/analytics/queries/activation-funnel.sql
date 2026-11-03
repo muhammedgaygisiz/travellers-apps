@@ -16,9 +16,9 @@
 --
 -- ## What one row is
 --
--- One arrival day, one platform. `arrived` is people, not events, and every
--- later column is a subset of it: the same person counted once however many
--- Bites they went on to publish.
+-- One arrival day, one platform, one source. `arrived` is people, not events,
+-- and every later column is a subset of it: the same person counted once
+-- however many Bites they went on to publish.
 --
 -- ## The two honesty guards
 --
@@ -40,6 +40,23 @@
 -- step with). They are left out of `arrived` and every step, and counted in
 -- `crawler_arrivals` instead, so the web conversion rate is a rate over people
 -- and the number removed stays visible.
+--
+-- ## Where an arrival came from
+--
+-- Each arrival carries the source and medium of its own `first_open` or
+-- `first_visit` (issue #1759), so a row is one arrival day, one platform and
+-- one source. The campaign tags on a link (`utm_source`, or the Play install
+-- referrer's) win, because they are the only thing that survives Instagram's
+-- `l.instagram.com` redirect; GA4's first-touch `traffic_source` fills in
+-- where there were none, and an arrival with neither is `(direct) / (none)`.
+-- Source and medium are taken as a pair, never mixed across the two.
+--
+-- ## A web arrival handed to a store
+--
+-- `store_handoffs` counts web arrivals that followed a store link
+-- (`store_link_clicked`, `STORE_HANDOFF` in `cohorts.config.mjs`). The install
+-- that follows happens in the app under a new identity, so without it every one
+-- of them reads as a web arrival lost.
 WITH funnel_events AS (
   SELECT
     user_pseudo_id,
@@ -47,7 +64,17 @@ WITH funnel_events AS (
     event_name,
     event_timestamp,
     PARSE_DATE('%Y%m%d', event_date) AS event_day,
-    geo.city AS city
+    geo.city AS city,
+    IF(
+      IFNULL(collected_traffic_source.manual_source, '') != '',
+      LOWER(collected_traffic_source.manual_source),
+      LOWER(IFNULL(NULLIF(traffic_source.source, ''), '(direct)'))
+    ) AS source,
+    IF(
+      IFNULL(collected_traffic_source.manual_source, '') != '',
+      LOWER(IFNULL(NULLIF(collected_traffic_source.manual_medium, ''), '(none)')),
+      LOWER(IFNULL(NULLIF(traffic_source.medium, ''), '(none)'))
+    ) AS medium
   FROM ${EVENTS_TABLE}
   WHERE _TABLE_SUFFIX BETWEEN @start_date AND @end_date
     AND event_name IN (
@@ -56,7 +83,8 @@ WITH funnel_events AS (
       'onboarding_assistant_started',
       'onboarding_assistant_completed',
       'sign_up',
-      'bite_created'
+      'bite_created',
+      'store_link_clicked'
     )
 ),
 -- The last day the export actually delivered. GA4 writes a day's table up to
@@ -68,12 +96,15 @@ window_bounds AS (
 -- The arrival itself, and the platform it happened on. A person who opens the
 -- app and later the website belongs to the surface that brought them in.
 arrivals AS (
-  SELECT user_pseudo_id, cohort_day, platform, arrived_at, is_crawler
+  SELECT
+    user_pseudo_id, cohort_day, platform, source, medium, arrived_at, is_crawler
   FROM (
     SELECT
       user_pseudo_id,
       event_day AS cohort_day,
       platform,
+      source,
+      medium,
       event_timestamp AS arrived_at,
       platform = 'WEB' AND IFNULL(city IN (
         'Prineville',
@@ -99,6 +130,8 @@ per_user AS (
   SELECT
     a.cohort_day,
     a.platform,
+    a.source,
+    a.medium,
     a.user_pseudo_id,
     ANY_VALUE(a.is_crawler) AS is_crawler,
     LOGICAL_OR(
@@ -114,14 +147,20 @@ per_user AS (
     ) AS signed_up,
     LOGICAL_OR(
       e.event_name = 'bite_created' AND e.event_timestamp >= a.arrived_at
-    ) AS published_bite
+    ) AS published_bite,
+    LOGICAL_OR(
+      e.event_name = 'store_link_clicked'
+      AND e.event_timestamp >= a.arrived_at
+    ) AS handed_to_store
   FROM arrivals a
   LEFT JOIN funnel_events e USING (user_pseudo_id)
-  GROUP BY cohort_day, platform, user_pseudo_id
+  GROUP BY cohort_day, platform, source, medium, user_pseudo_id
 )
 SELECT
   cohort_day,
   platform,
+  source,
+  medium,
   -- Repeated on every row rather than left implicit: a reader, and the digest,
   -- both need to know which day the export actually reaches before judging the
   -- youngest cohort.
@@ -133,6 +172,7 @@ SELECT
   COUNTIF(NOT is_crawler AND completed_onboarding) AS onboarding_completed,
   COUNTIF(NOT is_crawler AND signed_up) AS signed_up,
   COUNTIF(NOT is_crawler AND published_bite) AS first_bite,
+  COUNTIF(NOT is_crawler AND handed_to_store) AS store_handoffs,
   COUNTIF(is_crawler) AS crawler_arrivals,
   -- The end-to-end rate, and then the three places it can be lost. A single
   -- percentage says a funnel is bad; these say where.
@@ -163,5 +203,5 @@ SELECT
     1
   ) AS signup_to_bite_pct
 FROM per_user
-GROUP BY cohort_day, platform
+GROUP BY cohort_day, platform, source, medium
 ORDER BY cohort_day DESC, arrived DESC

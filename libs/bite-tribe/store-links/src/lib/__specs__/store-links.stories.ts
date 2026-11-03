@@ -31,4 +31,6 @@ type Story = StoryObj<StoreLinksComponent>;
  * Browsing it by hand needs the Storybook viewport toolbar rather than a story
  * switch, for the same reason.
  */
-export const Primary: Story = {};
+export const Primary: Story = {
+  args: { surface: 'start' },
+};

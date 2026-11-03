@@ -76,6 +76,8 @@ export const AnalyticsEvent = {
   WorldGlobeZoomed: 'world_globe_zoom',
   // Celebrations, consumer app (epic #1741, issue #1795)
   CelebrationShown: 'celebration_shown',
+  // Acquisition, consumer web app (issue #1759)
+  StoreLinkClicked: 'store_link_clicked',
 } as const;
 
 export type AnalyticsEventName =
@@ -368,7 +370,29 @@ export interface AnalyticsEventParamMap {
       | 'first-follow'
       | 'bite-trail-completed';
   };
+  /**
+   * A web visitor followed a store badge or QR link (GitHub issue #1759).
+   *
+   * Without it a visitor the web hands to a store reads as a 0% web
+   * conversion: the install happens in the store, under a new identity, and
+   * nothing on the web said it was the web that sent them there. Fired by
+   * `bt-store-links` alone, which renders nothing in a native build, so it
+   * never fires from the apps.
+   */
+  [AnalyticsEvent.StoreLinkClicked]: {
+    store: StoreListing;
+    surface: StoreLinkSurface;
+  };
 }
+
+/** Which store listing a store link points at (issue #1759). */
+export type StoreListing = 'app_store' | 'google_play';
+
+/**
+ * The web page a store link was followed from (issue #1759): one value per
+ * page that renders `bt-store-links`.
+ */
+export type StoreLinkSurface = 'start' | 'public_menu' | 'about';
 
 /**
  * The share menu entry the user picked (GitHub issue #1733).
@@ -573,6 +597,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.WorldGlobeCountryTapped]: 'consumer',
   [AnalyticsEvent.WorldGlobeZoomed]: 'consumer',
   [AnalyticsEvent.CelebrationShown]: 'consumer',
+  [AnalyticsEvent.StoreLinkClicked]: 'consumer',
 };
 
 /**

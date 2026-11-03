@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import {
+  AnalyticsEvent,
+  AnalyticsService,
+  StoreLinkSurface,
+  StoreListing,
+} from 'ta-firestore';
 import { APP_STORE_URL, GOOGLE_PLAY_URL } from './store-links';
 
 /**
@@ -17,6 +28,11 @@ import { APP_STORE_URL, GOOGLE_PLAY_URL } from './store-links';
  * QR code, because a plain store link there opens a listing on the wrong
  * device; below {@link STORE_BADGE_MAX_WIDTH_PX} each is the store's own badge,
  * because a code cannot be scanned by the screen displaying it.
+ *
+ * A followed link logs `store_link_clicked` with the page it was on (GitHub
+ * issue #1759), so the activation funnel can tell a web visitor the web handed
+ * to a store from one it lost. A scanned code is not a click on this page and
+ * is not counted: the phone that scans it opens the store directly.
  */
 @Component({
   selector: 'bt-store-links',
@@ -34,6 +50,18 @@ export class StoreLinksComponent {
    */
   protected readonly isWeb = !Capacitor.isNativePlatform();
 
+  /** The page this block is on, reported with every followed link. */
+  readonly surface = input.required<StoreLinkSurface>();
+
   protected readonly appStoreUrl = APP_STORE_URL;
   protected readonly googlePlayUrl = GOOGLE_PLAY_URL;
+
+  private readonly analytics = inject(AnalyticsService);
+
+  protected followed(store: StoreListing): void {
+    this.analytics.logEvent(AnalyticsEvent.StoreLinkClicked, {
+      store,
+      surface: this.surface(),
+    });
+  }
 }

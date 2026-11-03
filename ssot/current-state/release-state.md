@@ -255,6 +255,37 @@ forward from the 31 August caveats:
   threshold does not fire, so they have been visible and unexamined since the
   launch. Filed as [#1624].
 
+### October 2026: reach without measurable conversion
+
+The Instagram launch of 16 September 2026 ([#913]) reached people, and the
+digest followed the same curve at a far smaller scale. Neither could say how many
+of the people Instagram reached arrived, because no link carried a campaign tag
+([#1759]).
+
+Instagram Insights for 18 September - 17 October 2026:
+
+- **15,014 views** from **1,380 viewers**, **52.5%** of the views from
+  non-followers.
+- 12.1K views on posts and 1.6K on stories.
+- Daily views peaked at about 1.1K around 26 September and 3 October, then fell
+  through October.
+- Net followers shown as `--`: no visible follower growth.
+
+The daily digest ([#991]) over the same period:
+
+|                              | Late September - early October | Digest of 18 October 2026 |
+| ---------------------------- | ------------------------------ | ------------------------- |
+| Active users (7 days)        | ~160                           | 40                        |
+| Human arrivals (7 days)      | 20-36                          | 7                         |
+| New activated users (7 days) | up to 15                       | 1                         |
+| D1 / D7 retention            | 8-15% / ~1.4%                  | 0% / 0%                   |
+| Web arrive → sign-up         | ~0-6%                          | 0%                        |
+
+[#1759] made the two comparable: the digest's activation funnel now splits
+arrivals by acquisition source, and counts the web arrivals handed to a store
+(`store_link_clicked`) next to web sign-ups. The tagged bio links that feed it are
+in [Social Media Channels](../implementation/social-media-channels.md#campaign-tags-on-every-link).
+
 ## Launch Rule
 
 Before public launch, the release should be stable enough to learn from real users without confusing technical failures with product feedback.
@@ -297,3 +328,4 @@ Before public launch, the release should be stable enough to learn from real use
 [#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
 [#1623]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1623
 [#1624]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1624
+[#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759

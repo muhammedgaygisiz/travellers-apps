@@ -69,6 +69,13 @@ export type NotificationMessageKey =
   | 'newUserFollowUp.openProfile'
   | 'newUserFollowUp.footer'
   | 'newUserFollowUp.unsubscribeLabel'
+  // The day-7 mail to new users who did not come back (GitHub issue #1874).
+  // Its open and unsubscribe labels are the day-1 mail's.
+  | 'newUserWeekFollowUp.emailSubject'
+  | 'newUserWeekFollowUp.emailIntro'
+  | 'newUserWeekFollowUp.followingHeading'
+  | 'newUserWeekFollowUp.moreHeading'
+  | 'newUserWeekFollowUp.footer'
   // The page the mail's unsubscribe link opens.
   | 'emailUnsubscribe.title'
   | 'emailUnsubscribe.confirm'

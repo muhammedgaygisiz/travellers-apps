@@ -64,6 +64,13 @@ export const id: NotificationMessages = {
   'newUserFollowUp.footer':
     'Kamu menerima email ini sekali saja karena kamu baru bergabung dengan BiteTribe.',
   'newUserFollowUp.unsubscribeLabel': 'Berhenti berlangganan email BiteTribe',
+  'newUserWeekFollowUp.emailSubject': 'Yang baru di BiteTribe minggu ini',
+  'newUserWeekFollowUp.emailIntro':
+    'Sudah seminggu sejak kamu bergabung dengan BiteTribe. Berikut beberapa Bite baru yang layak dilihat.',
+  'newUserWeekFollowUp.followingHeading': 'Baru dari orang yang kamu ikuti',
+  'newUserWeekFollowUp.moreHeading': 'Hidangan lain yang layak dicoba',
+  'newUserWeekFollowUp.footer':
+    'Kamu menerima email ini sekali saja, seminggu setelah kamu bergabung dengan BiteTribe.',
   'emailUnsubscribe.title': 'Berhenti berlangganan email BiteTribe',
   'emailUnsubscribe.confirm':
     'BiteTribe akan berhenti mengirimimu email seperti ini. Email akun, seperti email verifikasi, tetap akan dikirim.',

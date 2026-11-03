@@ -62,6 +62,13 @@ export const tr: NotificationMessages = {
   'newUserFollowUp.footer':
     'Bu e-postayı BiteTribe’a yeni katıldığın için bir kez alıyorsun.',
   'newUserFollowUp.unsubscribeLabel': 'BiteTribe e-postalarından çık',
+  'newUserWeekFollowUp.emailSubject': 'Bu hafta BiteTribe’da neler var',
+  'newUserWeekFollowUp.emailIntro':
+    'BiteTribe’a katılalı bir hafta oldu. İşte göz atmaya değer birkaç yeni Bite.',
+  'newUserWeekFollowUp.followingHeading': 'Takip ettiğin kişilerden yeni',
+  'newUserWeekFollowUp.moreHeading': 'Denemeye değer başka yemekler',
+  'newUserWeekFollowUp.footer':
+    'Bu e-postayı BiteTribe’a katılmandan bir hafta sonra, bir kez alıyorsun.',
   'emailUnsubscribe.title': 'BiteTribe e-postalarından çık',
   'emailUnsubscribe.confirm':
     'BiteTribe sana artık bunun gibi e-postalar göndermeyecek. Doğrulama gibi hesap e-postaları gelmeye devam eder.',

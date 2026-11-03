@@ -674,12 +674,13 @@ beforeEach(async () => {
       installationId: 'installation-1',
     });
 
-    // The new-user follow-up mail (issue #1707), all Admin SDK only.
+    // The new-user follow-up mails (issues #1707, #1874), all Admin SDK only.
     await setDoc(doc(db, 'config', 'newUserFollowUp'), {
       biteIds: ['bite-1'],
       userIds: [],
     });
     await setDoc(doc(db, 'newUserFollowUps', CONSUMER), { status: 'sent' });
+    await setDoc(doc(db, 'newUserWeekFollowUps', CONSUMER), { status: 'sent' });
     await setDoc(doc(db, 'emailOptOuts', 'opt-out-token-1'), {
       uid: CONSUMER,
     });
@@ -2412,11 +2413,13 @@ describe('new user follow-up', () => {
   const documents = (db: Firestore): DocumentReference[] => [
     doc(db, 'config', 'newUserFollowUp'),
     doc(db, 'newUserFollowUps', CONSUMER),
+    doc(db, 'newUserWeekFollowUps', CONSUMER),
     doc(db, 'emailOptOuts', 'opt-out-token-1'),
   ];
 
   /**
-   * Closed to every client, the account's own included (issue #1707). A
+   * Closed to every client, the account's own included (issues #1707,
+   * #1874). A
    * readable opt-out token would let anybody who saw one unsubscribe somebody
    * else, and the claim and the picks are the mail job's bookkeeping.
    */

@@ -583,6 +583,46 @@ The profile shows the first and folds the rest behind _and N more_.
 | 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app` | `Google Play` |
 | 3     | `https://bitetribe.app`                                           | blank         |
 
+**The table is what was set on 16 September 2026; the links are to be replaced
+by the tagged ones under [Campaign Tags On Every Link](#campaign-tags-on-every-link)**
+([#1759]). Until they are, an install or a visit from the bio cannot be told
+apart from an organic one.
+
+### Campaign Tags On Every Link
+
+Every link we place on a channel carries a campaign tag, so the daily digest can
+say which channel an arrival came from ([#1759]). Instagram sends every link
+through `l.instagram.com`, which drops the referrer, so a link without a tag is
+indistinguishable from someone typing the address.
+
+The convention is `utm_source=<platform>`, `utm_medium=social` and
+`utm_campaign=bio` for a profile link or `utm_campaign=<post-slug>` for a link in
+a post or story. The same convention applies to every profile on this page and
+to every link of the next channel ([#1627]).
+
+| Link        | Tagged URL for the Instagram bio                                                                                                             | Where the campaign is read                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| App Store   | `https://apps.apple.com/app/id6746098595?pt=<provider-token>&ct=instagram-bio`                                                               | App Store Connect - App Analytics - Sources - Campaigns, never GA4     |
+| Google Play | `https://play.google.com/store/apps/details?id=com.bitetribe.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Dbio` | The Play Install Referrer, which the Firebase SDK puts on `first_open` |
+| Web         | `https://bitetribe.app/?utm_source=instagram&utm_medium=social&utm_campaign=bio`                                                             | `first_visit` in GA4                                                   |
+
+- **The App Store link needs the provider token.** `pt` is the account's
+  provider id, shown by App Store Connect's campaign link generator (App
+  Analytics - Sources - Campaigns - Generate a Campaign Link). Apple does not
+  pass the campaign on to the app, so App Store campaign installs are read in
+  App Store Connect alone.
+- **The Play referrer is URL-encoded**, because it is one query parameter that
+  itself holds three.
+- **Instagram adds its own tag.** Instagram appends `utm_source=ig` and
+  `utm_medium=social` to outbound links. The digest folds `ig`,
+  `instagram.com` and `l.instagram.com` into `instagram`, and the Facebook
+  equivalents into `facebook` (`SOURCE_ALIASES` in
+  `tools/analytics/cohorts.config.mjs`), so a channel is one row whichever
+  tag reached the export.
+- **`/download` carries no campaign.** [The One Download Link](#the-one-download-link-done)
+  redirects to the bare store listings, so a channel link that needs to be
+  measured uses the tagged store links above instead.
+
 **Store links get a title.** The blank-title rule in
 [Profile Content](#profile-content) is about a single link whose domain is the
 brand; two store URLs are indistinguishable without one. `bitetribe.app` keeps its
@@ -1307,3 +1347,5 @@ yet reflected.
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
 [#1729]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1729
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
+[#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
+[#1627]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1627

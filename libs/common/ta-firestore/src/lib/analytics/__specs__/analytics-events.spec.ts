@@ -208,6 +208,23 @@ const activationSteps = (): {
   }));
 };
 
+/** The events of the store hand-off `cohorts.config.mjs` declares (issue #1759). */
+const storeHandoffEvents = (): string[] => {
+  const block = /export const STORE_HANDOFF = \{([\s\S]*?)\n\};/.exec(
+    readFileSync(COHORTS_CONFIG, 'utf8'),
+  );
+
+  if (!block) {
+    throw new Error('No STORE_HANDOFF declaration found');
+  }
+
+  return [
+    ...(/events: \[([^\]]*)\]/.exec(block[1])?.[1] ?? '').matchAll(
+      /'([^']+)'/g,
+    ),
+  ].map((match) => match[1]);
+};
+
 /** The GA4 key events `provision-ga4.mjs` registers (issue #910). */
 const keyEvents = (): string[] => {
   const source = readFileSync(PROVISION_GA4, 'utf8');
@@ -555,6 +572,39 @@ describe('analytics taxonomy', () => {
      * to be one of the GA4 key events issue #910 registered, or the funnel and
      * the GA4 console are measuring conversion differently.
      */
+    /**
+     * Issue #1759. A web visitor handed to a store installs under a new
+     * identity, so the hand-off is the only trace the web did its job. If the
+     * event is renamed, dropped from the config or no longer counted, the web
+     * goes back to reading as a dead end.
+     */
+    it('counts web arrivals handed to a store', () => {
+      const sql = readFileSync(ACTIVATION_QUERY, 'utf8');
+
+      expect(storeHandoffEvents()).toEqual(['store_link_clicked']);
+      for (const event of storeHandoffEvents()) {
+        expect(names).toContain(event);
+        expect(sql).toContain(`'${event}'`);
+      }
+      expect(sql).toContain('AS store_handoffs');
+      expect(customDimensions()).toEqual(
+        expect.arrayContaining(['store', 'surface']),
+      );
+    });
+
+    /**
+     * Issue #1759: an arrival is split by the source of its own arrival event,
+     * with a campaign tag winning over GA4's first-touch guess, because a tag
+     * is the only thing that survives Instagram's link redirect.
+     */
+    it('splits arrivals by where they came from', () => {
+      const sql = readFileSync(ACTIVATION_QUERY, 'utf8');
+
+      expect(sql).toContain('collected_traffic_source.manual_source');
+      expect(sql).toContain('traffic_source.source');
+      expect(sql).toContain('GROUP BY cohort_day, platform, source, medium');
+    });
+
     it('converts on the GA4 key events the property is provisioned with', () => {
       const conversions = activationSteps().filter((step) => step.conversion);
 

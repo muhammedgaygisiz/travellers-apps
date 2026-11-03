@@ -166,16 +166,48 @@ function cohortMarkdown(cohorts, days) {
   );
   lines.push('');
   lines.push(
-    '| Arrived on | Arrived | Onboarding started | Completed | Signed up | First Bite | Arrive → sign-up |',
+    '| Arrived on | Arrived | Onboarding started | Completed | Signed up | First Bite | Handed to a store | Arrive → sign-up |',
   );
-  lines.push('| --- | --- | --- | --- | --- | --- | --- |');
+  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
   for (const row of [...funnel.platforms, funnel.total]) {
+    // Only the web has store links, so an app row says so rather than 0.
+    const handoffs =
+      row.platform === 'WEB' || row.platform === 'All'
+        ? row.storeHandoffs
+        : '–';
     lines.push(
       `| ${row.platform} | ${row.arrived} | ${row.onboardingStarted} | ` +
         `${row.onboardingCompleted} | ${row.signedUp} | ${row.firstBite} | ` +
-        `${cell(row.signupPct, { unit: '%' })} |`,
+        `${handoffs} | ${cell(row.signupPct, { unit: '%' })} |`,
     );
   }
+  lines.push('');
+  lines.push(
+    '<sub>Handed to a store: web arrivals who followed an App Store or ' +
+      'Google Play link. They install under a new identity, so they never ' +
+      'sign up on the web, and the web did its job anyway.</sub>',
+  );
+  lines.push('');
+
+  lines.push('#### By source');
+  lines.push('');
+  lines.push(
+    '| Source / medium | Arrived | Signed up | Handed to a store | Arrive → sign-up |',
+  );
+  lines.push('| --- | --- | --- | --- | --- |');
+  for (const row of funnel.sources) {
+    lines.push(
+      `| ${row.platform} | ${row.arrived} | ${row.signedUp} | ` +
+        `${row.storeHandoffs} | ${cell(row.signupPct, { unit: '%' })} |`,
+    );
+  }
+  lines.push('');
+  lines.push(
+    "<sub>The campaign tags on the link people came through, or GA4's own " +
+      'first-touch source where there were none. `(direct) / (none)` is an ' +
+      'arrival with neither, which includes every untagged store install. ' +
+      'App Store campaign installs are only in App Store Connect.</sub>',
+  );
   lines.push('');
   if (funnel.total.crawlerArrivals > 0) {
     lines.push(

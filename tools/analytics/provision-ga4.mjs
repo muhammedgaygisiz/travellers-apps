@@ -96,6 +96,9 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'control', displayName: 'Zoom control' },
   // The celebrations (issue #1795). `moment` is one of five fixed values.
   { parameterName: 'moment', displayName: 'Celebration moment' },
+  // A web visitor handed to a store (issue #1759). `store` is the listing; the
+  // page it was followed from rides on the shared `surface` registered above.
+  { parameterName: 'store', displayName: 'Store listing' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

@@ -89,6 +89,44 @@ export const ACTIVATION_STEPS = [
 ];
 
 /**
+ * A web visitor the web handed to a store (GitHub issue #1759).
+ *
+ * Beside the steps rather than one of them: it is an exit from the web funnel,
+ * not a stage of it. A visitor who follows a store link installs under a new
+ * identity in the app, so on the web they never sign up, and without this
+ * they read as a lost arrival. With it, a web row says how many arrivals the
+ * web sent to a store next to how many it signed up itself.
+ *
+ * @type {ActivationStep}
+ */
+export const STORE_HANDOFF = {
+  id: 'store-handoff',
+  title: 'Handed to a store',
+  events: ['store_link_clicked'],
+  origin: 'taxonomy',
+  note: 'A web arrival followed an App Store or Google Play link from `bt-store-links`. Web only: the block renders nothing in a native build.',
+};
+
+/**
+ * The names one channel arrives under (GitHub issue #1759).
+ *
+ * A link from Instagram can carry our own `utm_source=instagram`, Instagram's
+ * own `utm_source=ig` (it adds one to outbound links), or no tag at all and a
+ * referrer of `l.instagram.com`; Facebook has the same three shapes. The query
+ * reports what the export holds, and the digest folds these into one source so
+ * a channel is one row. A source not listed here is shown as it is.
+ */
+export const SOURCE_ALIASES = {
+  ig: 'instagram',
+  'instagram.com': 'instagram',
+  'l.instagram.com': 'instagram',
+  'facebook.com': 'facebook',
+  'm.facebook.com': 'facebook',
+  'l.facebook.com': 'facebook',
+  'lm.facebook.com': 'facebook',
+};
+
+/**
  * The days after arrival a cohort is checked on.
  *
  * Classic retention rather than rolling: the cohort is counted on exactly that

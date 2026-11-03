@@ -20,6 +20,8 @@ export {
   type ShareImageCelebrationParam,
   type ShareImageParams,
   type ShareTarget,
+  type StoreLinkSurface,
+  type StoreListing,
   type TableOperationParams,
   type TableOperationStatus,
 } from './lib/analytics/analytics-events';

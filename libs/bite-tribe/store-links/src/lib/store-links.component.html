@@ -16,6 +16,7 @@
         [href]="appStoreUrl"
         target="_blank"
         rel="noopener"
+        (click)="followed('app_store')"
         [attr.aria-label]="'download-on-the-app-store' | transloco"
       >
         <span class="store-code store-code-app-store"></span>
@@ -28,6 +29,7 @@
         [href]="googlePlayUrl"
         target="_blank"
         rel="noopener"
+        (click)="followed('google_play')"
         [attr.aria-label]="'get-it-on-google-play' | transloco"
       >
         <span class="store-code store-code-google-play"></span>

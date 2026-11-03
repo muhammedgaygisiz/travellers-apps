@@ -19,6 +19,7 @@ import {
   ACTIVATION_STEPS,
   DIGEST_HORIZONS,
   RETENTION_COHORTS_QUERY,
+  SOURCE_ALIASES,
 } from './cohorts.config.mjs';
 import { resolvePropertyId } from './ga4.mjs';
 import {
@@ -83,8 +84,15 @@ async function runCheckedIn(
  * day with one arrival and a day with twenty are not two equal opinions about
  * the conversion rate.
  */
+/** `ig / social` → `instagram / social`; see `SOURCE_ALIASES`. */
+function channelOf(row) {
+  const source = row.source ?? '(direct)';
+  return `${SOURCE_ALIASES[source] ?? source} / ${row.medium ?? '(none)'}`;
+}
+
 function summariseFunnel(rows) {
   const platforms = [...new Set(rows.map((row) => row.platform))].sort();
+  const channels = [...new Set(rows.map(channelOf))];
   const forRows = (subset, platform) => ({
     platform,
     arrived: sumBy(subset, 'arrived'),
@@ -92,6 +100,7 @@ function summariseFunnel(rows) {
     onboardingCompleted: sumBy(subset, 'onboarding_completed'),
     signedUp: sumBy(subset, 'signed_up'),
     firstBite: sumBy(subset, 'first_bite'),
+    storeHandoffs: sumBy(subset, 'store_handoffs'),
     crawlerArrivals: sumBy(subset, 'crawler_arrivals'),
     signupPct: pct(sumBy(subset, 'signed_up'), sumBy(subset, 'arrived')),
   });
@@ -108,6 +117,18 @@ function summariseFunnel(rows) {
       )
       // A platform whose every arrival was a crawler would print as a row of
       // zeros. Its crawlers still count towards the total's note.
+      .filter((row) => row.arrived > 0)
+      .sort((a, b) => b.arrived - a.arrived),
+    // Issue #1759: the same people, split by where they came from instead of
+    // where they landed. `platform` holds the channel here so one row shape
+    // serves both tables.
+    sources: channels
+      .map((channel) =>
+        forRows(
+          rows.filter((row) => channelOf(row) === channel),
+          channel,
+        ),
+      )
       .filter((row) => row.arrived > 0)
       .sort((a, b) => b.arrived - a.arrived),
     total: forRows(rows, 'All'),

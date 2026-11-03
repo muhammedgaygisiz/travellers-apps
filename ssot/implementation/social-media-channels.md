@@ -577,16 +577,17 @@ Instagram takes up to five profile links, set in the mobile app only - see
 [Instagram's Website Field Is Mobile-Only](#instagrams-website-field-is-mobile-only).
 The profile shows the first and folds the rest behind _and N more_.
 
-| Order | URL                                                               | Title         |
-| ----- | ----------------------------------------------------------------- | ------------- |
-| 1     | `https://apps.apple.com/app/id6746098595`                         | `App Store`   |
-| 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app` | `Google Play` |
-| 3     | `https://bitetribe.app`                                           | blank         |
+| Order | URL                                                                                                                                          | Title         |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1     | `https://apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8`                                                     | `App Store`   |
+| 2     | `https://play.google.com/store/apps/details?id=com.bitetribe.app&referrer=utm_source%3Dinstagram%26utm_medium%3Dsocial%26utm_campaign%3Dbio` | `Google Play` |
+| 3     | `https://bitetribe.app/?utm_source=instagram&utm_medium=social&utm_campaign=bio`                                                             | blank         |
 
-**The table is what was set on 16 September 2026; the links are to be replaced
-by the tagged ones under [Campaign Tags On Every Link](#campaign-tags-on-every-link)**
-([#1759]). Until they are, an install or a visit from the bio cannot be told
-apart from an organic one.
+**Tagged on 3 November 2026** ([#1759]), replacing the bare URLs set on
+16 September 2026, in the same order and with the same titles. They were edited
+from the Android app under Edit profile - Links, one link at a time. The profile
+now shows `apps.apple.com/app/apple-store/id6746098595?pt=127766028&ct=instagram-bio&mt=8 and 2 more`.
+Arrivals from the bio before that date read as `(direct)` in the digest.
 
 ### Campaign Tags On Every Link
 

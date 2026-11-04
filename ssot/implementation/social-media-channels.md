@@ -1260,7 +1260,8 @@ city.** Bern, Trieste, Vienna and Split
 (3 November 2026) went up as six slides. From Bratislava (4 November 2026)
 there are seven, with Leela added. The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
-an agent makes one, and its renderer is
+an agent makes one: it takes a city, asking for one if none is given, and
+derives the rest from it, and its renderer is
 [`skills/instagram-city-top5/scripts/render.mjs`](../../skills/instagram-city-top5/scripts/render.mjs).
 Filed as [#1886].
 

@@ -1,6 +1,7 @@
 ---
 name: instagram-city-top5
-description: Build and publish the @bitetribeapp "<City> Top 5 dishes" Instagram carousel from real Bites - dish choice through the web app's country search, a seven-slide render with Leela on the cover and the closing slide, and the Instagram web upload. Use when the user asks for a city post, a Top 5 post, or the next post "in the style of Bern / Split / Bratislava".
+description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, and publishes on Instagram web after approval. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
+argument-hint: <city>
 ---
 
 # Instagram City Top 5
@@ -9,6 +10,29 @@ The city carousels on @bitetribeapp (Bern, Trieste, Vienna, Split, Bratislava) a
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
+
+## Input: One City
+
+**The skill makes a post for one city, and the city is its only input.**
+
+- If the city came with the request (`/instagram-city-top5 Ljubljana`, or "a Top 5 post for Ljubljana"), use it.
+- If not, ask for it and nothing else: "Which city should the post be about?" Do not suggest dishes, photos or wording before you have the city.
+
+Then derive everything else from it, without asking:
+
+| Derived          | From                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Country and flag | The city. Ask only if the name is ambiguous (for example, Frankfurt am Main or Frankfurt an der Oder). |
+| Country filter   | The country, in the web app's search (step 1).                                                         |
+| Cover photo      | An Unsplash search for the city (step 3).                                                              |
+| Leela's lines    | The renderer's defaults, which use the city name.                                                      |
+| Caption          | The template in step 5, with the city, the country, its flag and local hashtags.                       |
+| Location         | "<City>, <Country>" on Instagram (step 6).                                                             |
+
+Before step 1, check two things:
+
+- **Has the city been posted already?** The list is in [The City Top 5 Posts](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts). If it has, say so and ask whether to do it again.
+- **Are there enough Bites?** If the country search finds fewer than five Bites in or near the city, stop and report what it found, rather than filling the post with Bites from elsewhere in the country.
 
 ## The Post
 
@@ -30,7 +54,7 @@ Steps 2 and 5 are **gates**. Stop and wait for the user's answer.
 
 The user's Chrome (Claude in Chrome), signed in to `https://bitetribe.app` - not the built-in browser. If it is not signed in, ask the user to sign in; never type a password.
 
-1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the country. The country search returns every Bite in it; a city search misses nearby places.
+1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the city's country. The country search returns every Bite in the country, so keep only the ones in or near the city. A city search would miss nearby places.
 2. Read the cards with JavaScript rather than screenshots: `document.querySelectorAll('bt-bite')`, the title from the card's first line, the stars from `star-rating ion-icon.filled`.
 3. Shortlist five-star Bites, **preferring local dishes** (Pašticada in Split, bryndzové halušky in Bratislava) over pizza, burgers, ramen and coffee. A Bite from a nearby place (Hvar for Split) is fine - the cover names the city.
 

@@ -1,4 +1,4 @@
 interface:
   display_name: 'Instagram City Top 5'
   short_description: 'Build and publish the city Top 5 dishes carousel'
-  default_prompt: 'Use $instagram-city-top5 to make the next city Top 5 dishes post for @bitetribeapp.'
+  default_prompt: 'Use $instagram-city-top5 to create the Top 5 dishes post for a city. Ask me which city first.'

@@ -22,14 +22,19 @@ const handler = searchUsers as unknown as SearchUsersHandler;
 
 const mockUser = (fields: Record<string, unknown>): void => {
   const get = jest.fn().mockResolvedValue({
-    docs: [{ id: 'match', data: () => ({ public: true, ...fields }) }],
+    docs: [
+      {
+        id: 'match',
+        data: (): Record<string, unknown> => ({ public: true, ...fields }),
+      },
+    ],
   });
 
   (getFirestore as jest.Mock).mockReturnValue({
     collection: jest.fn().mockReturnValue({
       get,
-      doc: () => ({
-        collection: () => ({
+      doc: (): { collection: () => { get: jest.Mock } } => ({
+        collection: (): { get: jest.Mock } => ({
           get: jest.fn().mockResolvedValue({ docs: [] }),
         }),
       }),

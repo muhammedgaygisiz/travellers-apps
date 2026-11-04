@@ -55,6 +55,7 @@
 		BE7E00000000000000000108 /* pt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BE7E00000000000000000109 /* th */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BE7E0000000000000000010A /* tr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		BE7E0000000000000000010B /* ko */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +180,7 @@
 				fr,
 				id,
 				it,
+				ko,
 				pt,
 				th,
 				tr,
@@ -314,6 +316,7 @@
 				BE7E00000000000000000108 /* pt */,
 				BE7E00000000000000000109 /* th */,
 				BE7E0000000000000000010A /* tr */,
+				BE7E0000000000000000010B /* ko */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

@@ -73,7 +73,7 @@ const reasonsIn = (file: string): string[] => {
   return [...list[1].matchAll(/^\s*'([^']+)',/gm)].map((match) => match[1]);
 };
 
-/** The eleven consumer locales, as `[language, messages]`. */
+/** The consumer locales, as `[language, messages]`. */
 const CONSUMER_LANGS = [
   'am',
   'ar',
@@ -83,6 +83,7 @@ const CONSUMER_LANGS = [
   'fr',
   'id',
   'it',
+  'ko',
   'pt',
   'th',
   'tr',

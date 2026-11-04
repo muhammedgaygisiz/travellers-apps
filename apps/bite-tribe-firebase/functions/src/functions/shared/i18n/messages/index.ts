@@ -8,6 +8,7 @@ import { es } from './es';
 import { fr } from './fr';
 import { id } from './id';
 import { it } from './it';
+import { ko } from './ko';
 import { pt } from './pt';
 import { th } from './th';
 import { tr } from './tr';
@@ -21,4 +22,4 @@ import { tr } from './tr';
 export const NOTIFICATION_MESSAGES: Record<
   SupportedLanguage,
   NotificationMessages
-> = { en, de, fr, tr, es, it, ar, am, id, pt, th };
+> = { en, de, fr, tr, es, it, ar, am, id, pt, th, ko };

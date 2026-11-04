@@ -30,3 +30,13 @@
 @import '@ionic/angular/css/text-alignment.css';
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
+
+// Korean is written with spaces, but browsers still break it between any two
+// syllables, which splits words on Bite cards, buttons and the profile header.
+// `keep-all` wraps at the spaces, and `break-word` stops a long unspaced string
+// such as a dish name from overflowing. Scoped by `<html lang>`, which
+// `provideDocumentLanguage` keeps in step with the active language.
+html[lang='ko'] {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}

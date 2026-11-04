@@ -37,6 +37,7 @@ describe('getCurrencyForDevice', () => {
     expect(getCurrencyForDevice({ locale: 'en' })).toBe('USD');
     expect(getCurrencyForDevice({ locale: 'de' })).toBe('EUR');
     expect(getCurrencyForDevice({ locale: 'th' })).toBe('THB');
+    expect(getCurrencyForDevice({ locale: 'ko' })).toBe('KRW');
   });
 
   it('accepts underscore separated and lowercase locales', () => {

@@ -36,7 +36,7 @@ new decision recorded on this page, not by editing a console field.
 | Subtitle / short description | Find it. Try it. Share it.        |
 | Primary category             | Food & Drink, on both stores      |
 | Secondary category           | Social Networking, App Store only |
-| Listing locales              | The eleven shipped locales        |
+| Listing locales              | The twelve shipped locales        |
 
 Applied on 21 August 2026: Play's category moved from Entertainment to Food &
 Drink and is in Google's review queue; Apple carries Food & Drink with Social
@@ -100,7 +100,7 @@ well past the app UI, and every one of these now carries the one-word spelling:
 | App locale JSON, 4 keys                        | `apps/bite-tribe/src/assets/i18n/*.json` and the business equivalent                                   |
 | Document title                                 | `apps/bite-tribe/src/index.html`, `apps/bite-tribe-business/src/index.html`                            |
 | Mail sender name                               | `SENDER_NAME` in `apps/bite-tribe-firebase/functions/src/functions/users/google-workspace-email.ts`    |
-| Verification mail copy                         | `emailVerification.subject` and body in all eleven `functions/src/functions/shared/i18n/messages/*.ts` |
+| Verification mail copy                         | `emailVerification.subject` and body in all twelve `functions/src/functions/shared/i18n/messages/*.ts` |
 | CI step names, README, agent instruction files | prose that names the product                                                                           |
 
 German compounds the name with hyphens, so `Bite-Tribe-E-Mail-Adresse` became
@@ -253,7 +253,7 @@ Every claim maps to a use case marked _Supported today_ in [SSOT](../README.md):
 | Following, replies, likes     | [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md), [Bite](../domain/bite.md)                    |
 | Notifications on new posts    | [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md)             |
 | Leaderboard                   | [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md)                                                             |
-| Eleven languages              | [Implementation - Localization](localization.md)                                                                                         |
+| Twelve languages              | [Implementation - Localization](localization.md)                                                                                         |
 
 Four things are **deliberately absent** because they are not in the shipped
 build, and naming them would be a promise the app does not keep:
@@ -620,7 +620,7 @@ desktop browser a plain store link opens a listing on the wrong device, which is
 what makes a code the right control there. On a phone browser a code cannot be
 scanned by the screen displaying it, which is what makes it useless there.
 
-The badges carry the English store names in all eleven locales. Apple and Google
+The badges carry the English store names in every locale. Apple and Google
 both publish localized badge artwork, and adopting it would mean 22 files and a
 locale-to-asset map rather than three files and none; that trade has not been
 made.

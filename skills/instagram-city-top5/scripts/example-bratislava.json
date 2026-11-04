@@ -1,0 +1,51 @@
+{
+  "city": "Bratislava",
+  "where": "Bratislava, Slovakia",
+  "coverPhoto": "photos/2NmJUdGsFUs.jpg",
+  "leela": {
+    "cover": "Hi, I'm Leela! Here are my favourite bites in Bratislava 👉",
+    "outro": "Liked these? Follow us for more city picks, and try BiteTribe to find your own!"
+  },
+  "bites": [
+    {
+      "name": "Sheep cheese gnocchi",
+      "place": "Zlatý Bažant",
+      "stars": 5,
+      "emojis": "🤤",
+      "count": 2,
+      "photo": "bites/1.jpg"
+    },
+    {
+      "name": "Slovenská misa pre 2",
+      "place": "Slovak Pub",
+      "stars": 5,
+      "emojis": "👍",
+      "count": 1,
+      "photo": "bites/2.jpg"
+    },
+    {
+      "name": "Br. rožok makový",
+      "place": "Bratislava Bakery",
+      "stars": 5,
+      "emojis": "👍",
+      "count": 1,
+      "photo": "bites/3.jpg"
+    },
+    {
+      "name": "Garlic cream soup served in a loaf of homemade bread",
+      "place": "Bratislava Flagship Restaurant",
+      "stars": 5,
+      "emojis": "🤤🤯",
+      "count": 3,
+      "photo": "bites/4.jpg"
+    },
+    {
+      "name": "Domáci karamelový veterník",
+      "place": "Bratislava Flagship Restaurant",
+      "stars": 5,
+      "emojis": "🤤",
+      "count": 1,
+      "photo": "bites/5.jpg"
+    }
+  ]
+}

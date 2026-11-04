@@ -1253,6 +1253,65 @@ account is still Personal, so the full music library is available - see
 [Open: Instagram Account Type](#open-instagram-account-type), which a switch to
 Business would change.
 
+## The City Top 5 Posts
+
+**The account's recurring format: a carousel of five rated Bites from one
+city.** Bern, Trieste, Vienna and Split
+(3 November 2026) went up as six slides. From Bratislava (4 November 2026)
+there are seven, with Leela added. The
+[`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
+an agent makes one, and its renderer is
+[`skills/instagram-city-top5/scripts/render.mjs`](../../skills/instagram-city-top5/scripts/render.mjs).
+Filed as [#1886].
+
+### The Slides
+
+`1080x1440` (3:4), uploaded with the crop set to **Original**:
+
+1. **The cover:**
+   - a free Unsplash photo of the city under a dark overlay;
+   - the logo and wordmark;
+   - the city name in italic Playfair Display, with "Top 5 dishes" beneath;
+   - Leela in a round frame with a greeting bubble.
+2. **Five Bite cards.** Each is redrawn from the web search card's styles in
+   `libs/bite-tribe-common/bite/src/lib/bite.component.scss`, scaled 2.2x, with
+   the Bite's original photo, its stars and its reactions. The cards are
+   redrawn, not screenshotted, because a search card is 458px wide at the web
+   app's device pixel ratio of 1, and a screenshot of it is too soft for a
+   1080px slide.
+3. **The closing slide.** Leela asks people to follow @bitetribeapp and try
+   the app, above the handle and "Available on iOS and Android".
+
+**Leela sits in a round frame because no clean artwork of her exists.** The
+only artwork is the reference crops in
+[Implementation - Brand Characters](brand-characters.md#her-current-look). Each
+is `480x560` and carries the comic's café behind her.
+
+### Choosing The Dishes
+
+The dishes come from the web app's country search rather than a city search, so
+a nearby place counts: the Split post includes a squid from Hvar. **Local
+dishes are preferred** over pizza, burgers or coffee, and the product owner
+approves the five before anything is rendered.
+
+**Only the operator's own Bites are free to use.** Until [#1772] gives creators
+terms that license their photos outside the app, another creator's Bite photo
+has no licence for a post. The Bratislava post includes one: _Slovenská misa
+pre 2_, by another member.
+
+### The Caption
+
+```text
+Need some inspiration for your next bites in Bratislava, Slovakia? 🇸🇰
+Leela picked her favourites for your next trip to this charming city on the Danube!
+
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #slovakia #bratislava #halusky #slovakfood
+```
+
+The location is set to the city. No alt text has been written for any of the
+five posts.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done
@@ -1353,3 +1412,5 @@ yet reflected.
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
 [#1627]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1627
+[#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
+[#1886]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1886

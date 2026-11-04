@@ -730,7 +730,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   - Create a Bite → `bite_created`.
   - Create a bucket list → `bucketlist_created`; rate a BiteTrail →
     `bucketlist_rated`.
-  - Type a search query (≥ 3 chars) → `search_performed`.
+  - Type a search query (≥ 2 chars) → `search_performed`.
   - Open a restaurant/place → `restaurant_viewed`; open a Bite → `bite_viewed`.
   - Enter the onboarding assistant → `onboarding_assistant_started`; advance
     each step → `onboarding_step_completed` with the matching `step`; finish →

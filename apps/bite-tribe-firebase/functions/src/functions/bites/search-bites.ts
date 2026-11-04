@@ -7,10 +7,11 @@ import {
   toSearchBite,
 } from '../shared/utils/search-bite';
 import { requireMember } from '../shared/roles';
+import { foldSearchText } from '../shared/utils/fold-search-text';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 const MAX_RESULTS = 20;
 
 interface SearchBitesRequest {
@@ -18,7 +19,7 @@ interface SearchBitesRequest {
 }
 
 const matchesSearchText = (value: string, searchText: string): boolean =>
-  value.toLocaleLowerCase().includes(searchText);
+  foldSearchText(value).includes(searchText);
 
 export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
   requireMember(request, 'You must be signed in to search for bites.');
@@ -27,7 +28,7 @@ export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
     throw new HttpsError('invalid-argument', 'searchText must be a string.');
   }
 
-  const searchText = request.data.searchText.trim().toLocaleLowerCase();
+  const searchText = foldSearchText(request.data.searchText.trim());
 
   if (searchText.length < MIN_SEARCH_TEXT_LENGTH) {
     return [];

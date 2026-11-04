@@ -64,7 +64,7 @@ describe(SearchService.name, () => {
   it('should not log search_performed for a too-short query', () => {
     const service = TestBed.inject(SearchService);
 
-    service.search('Da');
+    service.search('D');
 
     expect(analytics.logEvent).not.toHaveBeenCalled();
   });
@@ -77,10 +77,10 @@ describe(SearchService.name, () => {
     expect(searchCategory()).toBe('bite');
   });
 
-  it('should report a search after three non-blank characters', () => {
+  it('should report a search after two non-blank characters', () => {
     const service = TestBed.inject(SearchService);
 
-    searchText.set('  Dan  ');
+    searchText.set('  Da  ');
 
     expect(service.hasSearched()).toBe(true);
   });

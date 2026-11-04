@@ -22,7 +22,7 @@ import { resourceFailed, resourceValue } from 'utils';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
 import { toUploadErrorCode } from './utils/to-upload-error-code';
 
-const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 3;
+const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 2;
 
 /**
  * How long an upload may report nothing at all before this device stops

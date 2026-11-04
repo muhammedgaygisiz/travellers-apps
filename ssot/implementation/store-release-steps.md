@@ -310,7 +310,7 @@ monitored daily - see [Analytics Operations](../operations/analytics-operations.
 
 Play pre-fills the release-notes field with one block per listing locale, and
 the listing is localized: `en-US`, `am`, `ar`, `de-DE`, `es-ES`, `fr-FR`, `id`,
-`it-IT`, `ko-KR`, `pt-BR`, `th`, `tr-TR`.
+`it-IT`, `ja-JP`, `ko-KR`, `pt-BR`, `th`, `tr-TR`.
 
 **A block left unedited is published verbatim.** Testers in that language see
 `Enter or paste your release notes for de-DE here`. This step used to say to

@@ -283,9 +283,9 @@ describe(BiteSearchComponent.name, () => {
   });
 
   // The minimum is the callable's and applies to every caller. An empty result
-  // list for a two-character term reads as "no such Bite".
+  // list for a one-character term reads as "no such Bite".
   describe('the callable minimum', () => {
-    it.each([['r'], ['ra']])('refuses to search for %p', (term) => {
+    it.each([['r'], [' r ']])('refuses to search for %p', (term) => {
       const emitted: string[] = [];
       component.searchSubmit.subscribe((value) => emitted.push(value));
 
@@ -297,7 +297,7 @@ describe(BiteSearchComponent.name, () => {
     });
 
     it('says the term is too short rather than showing nothing', () => {
-      component.onTermChange('ra');
+      component.onTermChange('r');
       fixture.detectChanges();
 
       expect(textOf('admin-bite-hint')).toContain('admin-bites-too-short');

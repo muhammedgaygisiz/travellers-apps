@@ -161,6 +161,26 @@ describe('TagsInputComponent', () => {
 
       expect(event.defaultPrevented).toBe(true);
     });
+
+    // Enter confirms the conversion on a Japanese keyboard. Committing there
+    // would turn half-typed reading into a tag.
+    it.each([
+      ['isComposing', { isComposing: true }],
+      ['keyCode 229', { keyCode: 229 }],
+    ])('should leave Enter alone during composition (%s)', (_, init) => {
+      component.formGroup.get('tagInput')?.setValue('らーめん');
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        cancelable: true,
+        ...init,
+      });
+
+      component.onEnter(event);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(false);
+      expect(component.formGroup.get('tagInput')?.value).toBe('らーめん');
+    });
   });
 
   // The wiring is the fix: without these bindings the handlers above are never

@@ -33,7 +33,7 @@ describe(SearchDataAccessService.name, () => {
   it('should not call a Firebase function for short search text', async () => {
     const service = createService();
     const result = await service.resultsLoader({
-      params: { searchText: 'ab', category: 'user' },
+      params: { searchText: 'a', category: 'user' },
     } as never);
 
     expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();

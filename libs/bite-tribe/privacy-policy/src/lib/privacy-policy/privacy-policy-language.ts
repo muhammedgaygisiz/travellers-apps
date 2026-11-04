@@ -21,6 +21,7 @@ export const PUBLISHED_PRIVACY_POLICY_LANGUAGES = [
   'pt',
   'th',
   'ko',
+  'ja',
 ] as const;
 
 /** The published language a user without a published policy is shown. */

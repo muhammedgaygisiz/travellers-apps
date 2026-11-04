@@ -978,7 +978,7 @@ describe('OnboardingService', () => {
 
     it('falls back to English for a locale the app has no translations for', async () => {
       setup(['identity', 'visibility', 'currency']);
-      mockDeviceLocale('ja-JP');
+      mockDeviceLocale('nl-NL');
 
       await service.initialize();
 

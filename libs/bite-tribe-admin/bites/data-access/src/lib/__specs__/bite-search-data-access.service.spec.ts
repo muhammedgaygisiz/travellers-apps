@@ -56,7 +56,7 @@ describe(BiteSearchDataAccessService.name, () => {
 
   // The callable would return nothing for these anyway; not calling lets the
   // page say "too short" instead of "no results".
-  it.each([[''], ['  '], ['ra'], [' ra ']])(
+  it.each([[''], ['  '], ['r'], [' r ']])(
     'does not call for the term %p',
     async (term) => {
       await expect(service.search(term)).resolves.toEqual([]);

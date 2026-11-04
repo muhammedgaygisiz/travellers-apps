@@ -83,6 +83,7 @@ const CONSUMER_LANGS = [
   'fr',
   'id',
   'it',
+  'ja',
   'ko',
   'pt',
   'th',

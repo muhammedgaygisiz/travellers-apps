@@ -25,7 +25,8 @@ categorised and paged, and the two views they can be read in.
 ## Flow
 
 - User opens search.
-- User enters search text.
+- User enters search text. Free-text search starts at two characters, in every language: a kanji name is often two characters long, and a higher minimum made those names unsearchable ([#1882]). `searchPlaces` follows the same minimum.
+- Matching folds spellings a person treats as the same word, on the query and the stored value alike: hiragana, katakana and half-width kana, and full-width and half-width Latin. `らーめん`, `ラーメン` and `ﾗｰﾒﾝ` find each other. Kanji spellings do not, so `拉麺` does not match `ラーメン`, because that takes a dictionary rather than a character mapping. This is `foldSearchText` in `shared/utils/fold-search-text.ts`, used by `searchUsers`, `searchBites` and `searchRestaurants`.
 - Search returns users, Bites, and restaurants.
 - Search categories help separate result types.
 - User can search Bites by city when enriched location data exists.
@@ -71,6 +72,7 @@ location permission that decides which Bites are loaded in the first place belon
 - Issue [#973] adds city search, delivered by pull request [#974].
 - Issue [#722] adds country search.
 - Issue [#1476] reuses `searchBites` for the admin app's operator lookup without changing it.
+- Issue [#1882] lowers the minimum to two characters and folds kana and width.
 
 ## Related Domains
 
@@ -98,3 +100,4 @@ location permission that decides which Bites are loaded in the first place belon
 [#974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/974
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
+[#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882

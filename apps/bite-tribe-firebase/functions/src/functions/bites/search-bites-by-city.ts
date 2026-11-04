@@ -14,7 +14,7 @@ import { requireMember } from '../shared/roles';
 import { isBiteVisibleTo } from '../shared/utils/bite-listability';
 import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 const MAX_RESULTS = 20;
 const BITE_COLLECTION = 'bites';
 const DEFAULT_SEARCH_RADIUS_IN_M = 15 * 1000;

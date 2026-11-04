@@ -5,7 +5,7 @@
 **Level:** L0.
 
 Partly built, and the unbuilt half is a review rather than a feature. The consumer app ships
-eleven locales - `en`, `de`, `fr`, `tr`, `es`, `it`, `ar`, `am`, `id`, `pt`, `th` - with the
+twelve locales - `en`, `de`, `fr`, `tr`, `es`, `it`, `ar`, `am`, `id`, `pt`, `th`, `ko` - with the
 same key set in every locale file, and `locale-copy.spec.ts` and `language-names.spec.ts`
 fail the build when one drifts. Not done: the manual review of AI-generated copy, which epic
 [#738] tracks with one story per language and which is outstanding for some of them, and the
@@ -13,7 +13,7 @@ rule "avoid hardcoded visible English in templates" (line 122 of
 [Implementation - Localization](../implementation/localization.md)), which the consumer templates break with visible
 text nodes in nine components and with English `alt`, `title`, `placeholder` and
 `aria-label` copy; the issues in `Related GitHub Scope` carry the list. Brand terms -
-`BiteTribe`, `Bitemap`, `PRO` and, in ten of the eleven locales, `Bites` - are kept in
+`BiteTribe`, `Bitemap`, `PRO` and, in eleven of the twelve locales, `Bites` - are kept in
 English by the catalogs themselves. Nothing enforces the rule: the existing guards compare
 locale files with each other and never read a template.
 
@@ -42,7 +42,7 @@ nor which languages are offered, nor the store product pages, which are
 
 ## MVP Classification
 
-**[MVP]** - the whole page. The consumer app is store-distributed in eleven locales, and a
+**[MVP]** - the whole page. The consumer app is store-distributed in twelve locales, and a
 shipping surface that renders English to ten of them is not the product the store listing
 offers.
 
@@ -67,7 +67,7 @@ back to English in a dialog the reviewer sees. And the listing locale set is bou
 - Issue [#1612] - the five components that already use Transloco and carry one stray literal
   each. Open
 - Issue [#1613] - the four consumer components that import no Transloco at all, whose every
-  visible string and announced attribute is English in all eleven locales. Open
+  visible string and announced attribute is English in all twelve locales. Open
 
 ## Related Domains
 

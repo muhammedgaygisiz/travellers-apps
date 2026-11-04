@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The ten locale translations of the store listing, derived from the English
+The translated locales of the store listing, derived from the English
 source in [Implementation - Store Listing Assets](store-listing-assets.md).
 
 They live here rather than only in the two consoles so that they are
@@ -49,6 +49,7 @@ rather than invented here:
 | th     | รายการความฝัน        | กระดานผู้นำ     |
 | ar     | قائمة آمال           | لوحة المتصدرين  |
 | am     | ዝርዝር                 | የመሪዎች ሰሌዳ       |
+| ko     | 버킷리스트           | 순위표          |
 
 If the app's wording for either term changes, this page changes with it.
 A listing that says one word and an app that says another is a defect the store
@@ -542,9 +543,58 @@ Keywords:
 ምግብ,መብላት,ሜኑ,ጣዕም,አካባቢያዊ,ግምገማ,ማግኘት,ጉዞ,ምግቦች,ካፌ
 ```
 
+## Korean (ko)
+
+Added for issue [#1881], and **not yet entered in either console**. It goes in as
+`ko` on the App Store and `ko-KR` on Google Play. The body avoids naming a number
+of languages, so it does not go stale when the next language ships.
+
+Subtitle and short description:
+
+```text
+찾고. 맛보고. 나누고.
+```
+
+Description:
+
+```text
+다른 음식 앱은 어디로 갈지 알려 줘요. BiteTribe는 무엇을 주문할지 알려 줘요.
+
+Bite는 진짜 메뉴 하나예요. 먹은 사람이 직접 찍고, 먹은 곳에 핀을 꽂고, 낸 가격과 솔직한 의견을 함께 남겨요.
+
+먹어 볼 만한 메뉴 찾기
+내 주변 Bite를 둘러보거나 지도로 바꿔서 근처에 어떤 맛있는 메뉴가 있는지 확인해 보세요. 메뉴, 장소, 태그로 검색할 수 있어요. 모든 Bite에는 사진, 가격, 진짜 의견이 담겨 있어서 자리에 앉기 전에 결정할 수 있어요.
+
+먹은 메뉴 공유하기
+메뉴를 찍고, 장소를 태그하고, 가격과 평점을 더해 보세요. 위치와 현지 통화는 자동으로 채워져요. Bite 하나에 메뉴 하나, 그래서 모두에게 유용해요.
+
+BITETRAIL 따라가기
+BiteTrail은 정성껏 고른 미식 코스예요. 버킷리스트로 저장하고 맛본 Bite를 하나씩 체크해 보세요. 낯선 도시에서 보내는 주말에도, 드디어 우리 동네를 맛보는 날에도 잘 어울려요.
+
+나만의 Tribe 만들기
+입맛이 믿음직한 사람들을 팔로우하고 새 글이 올라오면 바로 확인하세요. 리뷰에 답글을 달고, 마음에 드는 글에 좋아요를 누르고, 순위표에서 내 활동이 쌓이는 모습을 지켜보세요.
+
+어디서든 맛있게
+BiteTribe는 여러 언어와 현지 통화를 지원해요. 취리히에서 저장한 Bite는 방콕에서 다시 봐도 이해하기 쉬워요.
+
+찾고. 맛보고. 나누고.
+```
+
+Promotional text:
+
+```text
+지도 위의 핀 하나하나가 진짜 메뉴예요. 먹은 사람이 직접 찍고, 낸 가격과 솔직한 의견을 함께 남겼어요.
+```
+
+Keywords:
+
+```text
+맛집,음식,식당,메뉴,리뷰,주변맛집,미식,여행,추천,맛집지도,후기,먹방
+```
+
 ## Where They Were Entered
 
-Both stores on 30 August 2026.
+Both stores on 30 August 2026, for the ten locales above Korean. Korean is still to enter.
 
 ### Google Play - ten locales, submitted
 
@@ -620,12 +670,13 @@ shipped as gibberish to the audience least able to report it.
 ## Review Status
 
 Not one of these has been read by a native speaker other than the author.
+Korean has not been read by a native speaker at all.
 
 Machine-quality translation is good enough to ship a listing and not good enough
 to be confident in, and the risk is not evenly spread: German, French, Spanish,
 Italian and Portuguese are close enough to the English that an error would be
-obvious, while **Thai, Arabic and Amharic** would carry an awkward or wrong
-phrasing silently. Have those three read before they become the public face of
+obvious, while **Thai, Arabic, Amharic and Korean** would carry an awkward or wrong
+phrasing silently. Have those four read before they become the public face of
 the product.
 
 ## Related Pages
@@ -633,3 +684,5 @@ the product.
 - [Implementation - Store Listing Assets](store-listing-assets.md)
 - [Implementation - Localization](localization.md)
 - [Implementation - Store Release Steps](store-release-steps.md)
+
+[#1881]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1881

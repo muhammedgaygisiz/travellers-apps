@@ -82,6 +82,7 @@ const REGION_BY_LANGUAGE: Readonly<Record<string, string>> = {
   fr: 'FR',
   id: 'ID',
   it: 'IT',
+  ko: 'KR',
   pt: 'PT',
   th: 'TH',
   tr: 'TR',

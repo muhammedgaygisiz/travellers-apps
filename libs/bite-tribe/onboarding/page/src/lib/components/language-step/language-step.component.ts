@@ -28,6 +28,7 @@ export const ONBOARDING_LANGUAGES: readonly OnboardingLanguageOption[] = [
   { code: 'fr', labelKey: 'french' },
   { code: 'id', labelKey: 'indonesian' },
   { code: 'it', labelKey: 'italian' },
+  { code: 'ko', labelKey: 'korean' },
   { code: 'pt', labelKey: 'portuguese' },
   { code: 'th', labelKey: 'thai' },
   { code: 'tr', labelKey: 'turkish' },

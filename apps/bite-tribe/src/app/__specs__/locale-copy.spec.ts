@@ -112,6 +112,8 @@ describe('locale copy', () => {
       'ar.json': [/هل أنت متأكد/, /(?:^|\s)حاول مرة أخرى/, /(?:^|\s)اضغط /],
       // Gendered speaker particles in the app's own voice.
       'th.json': [/ครับ|ค่ะ/],
+      // Korean has no grammatical gender; only its address terms carry one.
+      'ko.json': [/오빠|언니|누나|형님|아저씨|아줌마|아가씨/],
     };
 
     const offenders = Object.entries(GENDERED_ADDRESS).flatMap(

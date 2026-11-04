@@ -74,6 +74,7 @@ const SUPPORTED_LOCALES = [
   { value: 'id', title: 'Indonesian' },
   { value: 'pt', title: 'Portuguese' },
   { value: 'th', title: 'Thai' },
+  { value: 'ko', title: 'Korean' },
 ];
 
 const withLocale: Decorator = (storyFn, context): ReturnType<StoryFn> => {

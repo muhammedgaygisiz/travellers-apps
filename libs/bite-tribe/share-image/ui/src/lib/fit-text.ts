@@ -1,3 +1,5 @@
+/// <reference lib="es2022.intl" />
+
 /**
  * The part of the 2D context text fitting needs. Narrowed so that the fitting
  * can be tested without a canvas, which jsdom does not have.

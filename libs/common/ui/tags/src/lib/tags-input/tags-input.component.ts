@@ -81,8 +81,10 @@ export class TagsInputComponent implements OnInit {
    * that keydown with `isComposing` already false, so `keyCode` 229 is checked
    * as well.
    */
-  onEnter(event: KeyboardEvent): void {
-    if (event.isComposing || event.keyCode === IME_PROCESSING_KEY_CODE) {
+  onEnter(event: Event): void {
+    const { isComposing, keyCode } = event as KeyboardEvent;
+
+    if (isComposing || keyCode === IME_PROCESSING_KEY_CODE) {
       return;
     }
 

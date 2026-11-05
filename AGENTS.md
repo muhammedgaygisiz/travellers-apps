@@ -73,6 +73,7 @@ ssot/overview/spec-to-code-workflow.md
 ssot/overview/feature-delivery-workflow.md
 ssot/overview/release-workflow.md
 skills/travellers-apps/SKILL.md
+skills/instagram-city-top5/SKILL.md
 CLAUDE.md
 apps/bite-tribe
 apps/bite-tribe-business

@@ -1253,6 +1253,142 @@ account is still Personal, so the full music library is available - see
 [Open: Instagram Account Type](#open-instagram-account-type), which a switch to
 Business would change.
 
+## The City Top 5 Posts
+
+**The account's recurring format: a carousel of five rated Bites from one
+city.** Solothurn came first (23 September 2026, "Top 5 Bites", with the
+autumn fair HESO among the five). Istanbul (30 September 2026), Budapest
+(7 October 2026), Vienna, Trieste, Bern and Split (3 November 2026) followed.
+All of them went up as six slides. From Bratislava (4 November 2026)
+there are seven, with Leela added. Malta (5 November 2026) was the first post
+made with the skill end to end. It was also the first to cover a whole country
+rather than a city, the first with restaurant tags and a dish list in the
+caption from the start, and the first with a cover line written for the place.
+The
+[`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
+an agent makes one: it takes a city, asking for one if none is given, and
+derives the rest from it, and its renderer is
+[`skills/instagram-city-top5/scripts/render.mjs`](../../skills/instagram-city-top5/scripts/render.mjs).
+Filed as [#1886].
+
+### The Slides
+
+`1080x1440` (3:4), uploaded with the crop set to **Original**:
+
+1. **The cover:**
+   - a free Unsplash photo of the city under a dark overlay;
+   - the logo and wordmark;
+   - the city name in italic Playfair Display, with "Top 5 dishes" beneath;
+   - Leela in a round frame with a greeting bubble.
+2. **Five Bite cards.** Each is redrawn from the web search card's styles in
+   `libs/bite-tribe-common/bite/src/lib/bite.component.scss`, scaled 2.2x, with
+   the Bite's original photo, its stars and its reactions. The cards are
+   redrawn, not screenshotted, because a search card is 458px wide at the web
+   app's device pixel ratio of 1, and a screenshot of it is too soft for a
+   1080px slide.
+3. **The closing slide.** Leela asks people to follow @bitetribeapp and try
+   the app, above the handle and "Available on iOS and Android".
+
+**Leela sits in a round frame because no clean artwork of her exists.** The
+only artwork is the reference crops in
+[Implementation - Brand Characters](brand-characters.md#her-current-look). Each
+is `480x560` and carries the comic's café behind her.
+
+### Choosing The Dishes
+
+The dishes come from the web app's country search rather than a city search, so
+a nearby place counts: the Split post includes a squid from Hvar. **Local
+dishes are preferred** over pizza, burgers or coffee, and the product owner
+approves the five before anything is rendered.
+
+**Any shared Bite can be used, whoever posted it.** The product owner
+confirmed this on 5 November 2026, so [#1772] does not block these posts. The
+Bratislava post includes _Slovenská misa pre 2_, by another member, and the
+Budapest post a stuffed paprika by another member.
+
+### The Caption
+
+```text
+Need some inspiration for your next bites in Bratislava, Slovakia? 🇸🇰
+Leela picked her favourites for your next trip to this charming city on the Danube!
+
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #slovakia #bratislava #halusky #slovakfood
+```
+
+The location is set to the city. No alt text has been written for any of the
+five posts.
+
+**From the next post on, the restaurants are named.** Instagram takes one
+location per post, so the city keeps it. Instead:
+
+- each dish slide tags the restaurant's own Instagram account;
+- the caption lists the five dishes with their restaurants.
+
+A tag notifies the account, so only a handle confirmed as the restaurant's own
+is used: one linked from its website or Google Maps listing, or with a
+matching name and address. A restaurant without one appears in the caption by
+name only.
+
+**@bitetribeapp follows every account it tags.** As of 5 November 2026 it
+follows all 32 tagged so far, across all nine posts.
+
+**Bern was tagged afterwards** (5 November 2026), through the post's Edit
+dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
+`@ristorante_davito`. Tramway has no account of its own, and the Yikou
+accounts belong to the Old Town shop rather than the Garden branch of the
+Bite. Its caption has no dish list.
+
+**Solothurn was tagged the same day,** with all five places:
+`@19thalleyburger`, `@pittaria_solothurn`, `@chickenchaotikum`,
+`@confiseriehofer` and `@heso_solothurn`. Pittaria has a separate Bern
+account; the card's city named the branch.
+
+**Istanbul was tagged the same day,** with all five places:
+`@viyanakahvesi`, `@hafizmustafa1864`, `@asirlikkanlicayogurdu`, `@pirin1960`
+and `@beykozbalikekmek`. The first `@viyanakahvesi` tag was dropped on save
+without an error and only the read-back caught it, so every tagging pass ends
+with one.
+
+**Budapest was tagged the same day,** with three of five places:
+`@molnars_langos`, `@mama.goulash.bp` and `@wafu_ramenizakaya_`. The Maps
+listing for Wafu links a dead account. Frici Papa's only candidate,
+`@fricipapakifozdeje`, links the restaurant's site but runs under a person's
+name with no address, so it was not used. "The goulash" is a stall in the
+Great Market Hall with no account.
+
+**Vienna was tagged the same day.** Three of its five dishes come from Al
+Zaytouna, and each carries `@alzaytouna_restaurant`. The espresso carries
+`@eissalon_caffe_perrella`. Al Zaytouna's website links a dead account. The
+Dim-Sum Restaurant Chinazentrum has no account.
+
+**Trieste was tagged the same day.** The focaccia and the bagel carry
+`@pagna_panificioartigianale`, and the pizza carries `@damicheletrieste`, the
+Trieste branch of L'Antica Pizzeria da Michele. Menarosti, with two dishes, has
+no account.
+
+**Split was tagged the same day,** with all five places: `@fife_split`,
+`@restaurant_adriatic`, `@sugrestaurant`, `@kogohvar` (Hvar) and
+`@taboobeachclub.split`. The pistachio dessert's place is named only "Bar,
+club" in the app. Its pin put it at Taboo Beach Club, Bačvice, which Google
+Maps also lists as "Bar, club".
+
+**Bratislava was tagged the same day.** The Slovenská misa carries
+`@slovak_pub`, and the garlic soup and the veterník carry
+`@bratislava_flagship_restaurant`. The Flagship website links a near-empty
+`@flagshipbratislava`, which was not used. Bratislava Bakery has no account.
+The gnocchi's "Zlaty Bažant" stays untagged by the product owner's call. No
+listing carries that name at the Bite's pin, and the nearby Pheasant Pub
+(Sedlárska 6) was not confirmed as the place.
+
+**Malta** (5 November 2026) tags all five dish slides: `@bruvv_mt` (ftira),
+`@chophousemalta` (lampuki), `@step15restaurant` (rabbit liver),
+`@rexyrestaurant` (Gozitana, from Għajnsielem on Gozo) and `@one80mellieha`
+(imqaret). Leela's cover line is "From ftira to fenek, here are my favourite
+bites across Malta & Gozo". Chophouse's four-star lampuki replaced a five-star
+one from Merkanti Village because Merkanti has no account. The cards correct
+two place names the app misspells ("Meekanti", "Rexy Resturant").
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done
@@ -1353,3 +1489,5 @@ yet reflected.
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
 [#1627]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1627
+[#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
+[#1886]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1886

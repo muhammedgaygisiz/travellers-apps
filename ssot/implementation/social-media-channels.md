@@ -1260,7 +1260,11 @@ city.** Solothurn came first (23 September 2026, "Top 5 Bites", with the
 autumn fair HESO among the five). Istanbul (30 September 2026), Budapest
 (7 October 2026), Vienna, Trieste, Bern and Split (3 November 2026) followed.
 All of them went up as six slides. From Bratislava (4 November 2026)
-there are seven, with Leela added. The
+there are seven, with Leela added. Malta (5 November 2026) was the first post
+made with the skill end to end. It was also the first to cover a whole country
+rather than a city, the first with restaurant tags and a dish list in the
+caption from the start, and the first with a cover line written for the place.
+The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
 derives the rest from it, and its renderer is
@@ -1327,7 +1331,7 @@ matching name and address. A restaurant without one appears in the caption by
 name only.
 
 **@bitetribeapp follows every account it tags.** As of 5 November 2026 it
-follows all 27 tagged so far, across all eight city posts.
+follows all 32 tagged so far, across all nine posts.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
@@ -1376,6 +1380,14 @@ Maps also lists as "Bar, club".
 The gnocchi's "Zlaty Bažant" stays untagged by the product owner's call. No
 listing carries that name at the Bite's pin, and the nearby Pheasant Pub
 (Sedlárska 6) was not confirmed as the place.
+
+**Malta** (5 November 2026) tags all five dish slides: `@bruvv_mt` (ftira),
+`@chophousemalta` (lampuki), `@step15restaurant` (rabbit liver),
+`@rexyrestaurant` (Gozitana, from Għajnsielem on Gozo) and `@one80mellieha`
+(imqaret). Leela's cover line is "From ftira to fenek, here are my favourite
+bites across Malta & Gozo". Chophouse's four-star lampuki replaced a five-star
+one from Merkanti Village because Merkanti has no account. The cards correct
+two place names the app misspells ("Meekanti", "Rexy Resturant").
 
 ## Wiring Back Into The Product
 

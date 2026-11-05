@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -20,15 +20,15 @@ All paths are relative to the repository root. Run commands from there.
 
 Then derive everything else from it, without asking:
 
-| Derived          | From                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| Country and flag | The city. Ask only if the name is ambiguous (for example, Frankfurt am Main or Frankfurt an der Oder). |
-| Country filter   | The country, in the web app's search (step 1).                                                         |
-| Cover photo      | An Unsplash search for the city (step 3).                                                              |
-| Leela's lines    | The renderer's defaults, which use the city name.                                                      |
-| Caption          | The template in step 5, with the city, the country, its flag and local hashtags.                       |
-| Location         | "<City>, <Country>" on Instagram (step 6).                                                             |
-| Restaurant tags  | Each restaurant's own Instagram account, where one can be confirmed (step 3).                          |
+| Derived            | From                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Country and flag   | The city. Ask only if the name is ambiguous (for example, Frankfurt am Main or Frankfurt an der Oder). |
+| Country filter     | The country, in the web app's search (step 1).                                                         |
+| Cover photo        | An Unsplash search for the city (step 3).                                                              |
+| Leela's cover line | Written for the place each time (step 2). Only the closing line stays the same.                        |
+| Caption            | The template in step 5, with the city, the country, its flag and local hashtags.                       |
+| Location           | "<City>, <Country>" on Instagram (step 6).                                                             |
+| Restaurant tags    | Each restaurant's own Instagram account, where one can be confirmed (step 3).                          |
 
 Before step 1, check two things:
 
@@ -62,6 +62,8 @@ The user's Chrome (Claude in Chrome), signed in to `https://bitetribe.app` - not
 ### 2. Gate: the user approves the five
 
 List the five with restaurant and author, plus two or three local alternatives, and state what Leela will say on the cover and the closing slide.
+
+**Write Leela's cover line for the place; do not reuse the generic greeting** (user's call, 5 November 2026). Start it with "Hi, I'm Leela!" and end it with 👉. In between, name something local: the dishes in this post, or the island or region it covers. For Malta it was "From ftira to fenek, here are my favourite bites across Malta & Gozo". Keep it to four lines in the bubble, about 90 characters, and check the cover after rendering. The closing line stays the default.
 
 **Any shared Bite can be used, whoever posted it.** The product owner confirmed this on 5 November 2026, so [#1772](https://github.com/muhammedgaygisiz/travellers-apps/issues/1772) does not block these posts. Still list each Bite's author, which shows on the Bite's detail page.
 
@@ -115,7 +117,7 @@ Copy everything into a working folder in the scratchpad, never into the reposito
 Write a config next to the photos, shaped like [scripts/example-bratislava.json](scripts/example-bratislava.json):
 
 - `city`, `where` and `coverPhoto` are required.
-- `leela.cover` and `leela.outro` are optional, and default to the Bratislava lines.
+- `leela.cover` is the place-specific line from step 2; always set it. `leela.outro` is optional and defaults to the closing line. The cover default exists only as a fallback.
 - `cityFontSize` is optional and defaults to 190. Lower it for a city name longer than about ten letters.
 - Each Bite takes `name`, `place`, `stars`, `emojis`, `count` and `photo`, plus an optional `where` that overrides the config's.
 - Each Bite can also take an `instagram` handle (without `@`). It is not drawn on the slides. It is kept in the config as the record for the caption and the tags.

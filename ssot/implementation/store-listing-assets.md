@@ -36,7 +36,7 @@ new decision recorded on this page, not by editing a console field.
 | Subtitle / short description | Find it. Try it. Share it.        |
 | Primary category             | Food & Drink, on both stores      |
 | Secondary category           | Social Networking, App Store only |
-| Listing locales              | The twelve shipped locales        |
+| Listing locales              | The thirteen shipped locales      |
 
 Applied on 21 August 2026: Play's category moved from Entertainment to Food &
 Drink and is in Google's review queue; Apple carries Food & Drink with Social
@@ -95,13 +95,13 @@ the product name.
 The repository was corrected on 21 August 2026. The spaced form had reached
 well past the app UI, and every one of these now carries the one-word spelling:
 
-| Surface                                        | Where                                                                                                  |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| App locale JSON, 4 keys                        | `apps/bite-tribe/src/assets/i18n/*.json` and the business equivalent                                   |
-| Document title                                 | `apps/bite-tribe/src/index.html`, `apps/bite-tribe-business/src/index.html`                            |
-| Mail sender name                               | `SENDER_NAME` in `apps/bite-tribe-firebase/functions/src/functions/users/google-workspace-email.ts`    |
-| Verification mail copy                         | `emailVerification.subject` and body in all twelve `functions/src/functions/shared/i18n/messages/*.ts` |
-| CI step names, README, agent instruction files | prose that names the product                                                                           |
+| Surface                                        | Where                                                                                                    |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| App locale JSON, 4 keys                        | `apps/bite-tribe/src/assets/i18n/*.json` and the business equivalent                                     |
+| Document title                                 | `apps/bite-tribe/src/index.html`, `apps/bite-tribe-business/src/index.html`                              |
+| Mail sender name                               | `SENDER_NAME` in `apps/bite-tribe-firebase/functions/src/functions/users/google-workspace-email.ts`      |
+| Verification mail copy                         | `emailVerification.subject` and body in all thirteen `functions/src/functions/shared/i18n/messages/*.ts` |
+| CI step names, README, agent instruction files | prose that names the product                                                                             |
 
 German compounds the name with hyphens, so `Bite-Tribe-E-Mail-Adresse` became
 `BiteTribe-E-Mail-Adresse`. A search for the spaced form alone misses it.
@@ -253,7 +253,7 @@ Every claim maps to a use case marked _Supported today_ in [SSOT](../README.md):
 | Following, replies, likes     | [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md), [Bite](../domain/bite.md)                    |
 | Notifications on new posts    | [UC - Receive App Notifications And Engagement Updates](../use-cases/uc-receive-app-notifications-and-engagement-updates.md)             |
 | Leaderboard                   | [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md)                                                             |
-| Twelve languages              | [Implementation - Localization](localization.md)                                                                                         |
+| Thirteen languages            | [Implementation - Localization](localization.md)                                                                                         |
 
 Four things are **deliberately absent** because they are not in the shipped
 build, and naming them would be a promise the app does not keep:

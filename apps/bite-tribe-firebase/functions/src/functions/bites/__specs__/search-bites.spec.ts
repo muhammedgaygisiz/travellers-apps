@@ -133,4 +133,45 @@ describe('searchBites', () => {
 
     expect(result.map((bite) => bite.id)).toEqual(['other']);
   });
+
+  it('searches from two characters and not from one', async () => {
+    mockBites([biteDoc('ramen', { name: 'ラーメン' })]);
+
+    const search = (searchText: string): Promise<SearchBite[]> =>
+      handler({ auth: { uid: 'viewer' }, data: { searchText } });
+
+    await expect(search('ラ')).resolves.toEqual([]);
+    expect((await search('ラー')).map((bite) => bite.id)).toEqual(['ramen']);
+  });
+
+  /** GitHub issue #1882. */
+  it.each([
+    ['hiragana query, katakana name', 'らーめん', { name: 'ラーメン' }],
+    ['katakana query, hiragana name', 'ラーメン', { name: 'らーめん' }],
+    ['half-width query, katakana name', 'ﾗｰﾒﾝ', { name: 'ラーメン' }],
+    ['hiragana query, half-width name', 'らーめん', { name: 'ﾗｰﾒﾝ' }],
+    ['full-width query, Latin name', 'ＰＩＺＺＡ', { name: 'pizza' }],
+    [
+      'hiragana query, katakana tag',
+      'らーめん',
+      { name: '', tags: ['ラーメン'] },
+    ],
+  ])('folds kana and width: %s', async (_, searchText, fields) => {
+    mockBites([biteDoc('match', fields)]);
+
+    const result = await handler({
+      auth: { uid: 'viewer' },
+      data: { searchText },
+    });
+
+    expect(result.map((bite) => bite.id)).toEqual(['match']);
+  });
+
+  it('does not match a kanji spelling from its reading', async () => {
+    mockBites([biteDoc('kanji', { name: '拉麺' })]);
+
+    await expect(
+      handler({ auth: { uid: 'viewer' }, data: { searchText: 'ラーメン' } }),
+    ).resolves.toEqual([]);
+  });
 });

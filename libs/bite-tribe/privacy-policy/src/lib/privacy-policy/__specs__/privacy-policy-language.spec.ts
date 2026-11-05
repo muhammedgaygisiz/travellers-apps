@@ -19,7 +19,7 @@ describe('resolvePrivacyPolicyLanguage', () => {
 
   // Languages the app does not publish a policy in - a locale added to the app
   // before its policy copy exists lands here.
-  describe.each(['ja', 'zh', 'nl'])(
+  describe.each(['zh', 'nl'])(
     'given the unpublished app language %s',
     (lang) => {
       it('should resolve to the fallback language and report the fallback', () => {

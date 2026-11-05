@@ -117,7 +117,7 @@ open the card. See GitHub issue #1765. -->
               <h2>{{ biteTrailData.currency | uppercase }}</h2>
             </ion-text>
             <ion-text color="secondary">
-              <h1>{{ biteTrailData.price | number:'1.2-2' }}</h1>
+              <h1>{{ biteTrailData.price | number: priceDigitsInfo() }}</h1>
             </ion-text>
             }
           </div>

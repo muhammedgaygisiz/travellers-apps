@@ -6,8 +6,9 @@ import {
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { foldSearchText } from '../shared/utils/fold-search-text';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 const MAX_RESULTS = 20;
 
 interface SearchRestaurantsRequest {
@@ -55,7 +56,7 @@ const getPosition = (data: DocumentData): SearchRestaurant['position'] => {
 };
 
 const matchesSearchText = (value: string, searchText: string): boolean =>
-  value.toLocaleLowerCase().includes(searchText);
+  foldSearchText(value).includes(searchText);
 
 const idFromPath = (value: string): string => {
   const segments = value.split('/').filter(Boolean);
@@ -120,7 +121,7 @@ export const searchRestaurants = onAppCheck<SearchRestaurantsRequest>(
       throw new HttpsError('invalid-argument', 'searchText must be a string.');
     }
 
-    const searchText = request.data.searchText.trim().toLocaleLowerCase();
+    const searchText = foldSearchText(request.data.searchText.trim());
 
     if (searchText.length < MIN_SEARCH_TEXT_LENGTH) {
       return [];

@@ -2,9 +2,10 @@ import { QueryDocumentSnapshot, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { foldSearchText } from '../shared/utils/fold-search-text';
 import { isBlockedUid, loadBlockedUids } from '../shared/utils/user-blocks';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 const MAX_RESULTS = 20;
 
 interface SearchUsersRequest {
@@ -47,7 +48,7 @@ export const searchUsers = onAppCheck<SearchUsersRequest>(async (request) => {
     throw new HttpsError('invalid-argument', 'searchText must be a string.');
   }
 
-  const searchText = request.data.searchText.trim().toLocaleLowerCase();
+  const searchText = foldSearchText(request.data.searchText.trim());
 
   if (searchText.length < MIN_SEARCH_TEXT_LENGTH) {
     return [];
@@ -71,15 +72,13 @@ export const searchUsers = onAppCheck<SearchUsersRequest>(async (request) => {
       }
       const displayName =
         typeof user['displayName'] === 'string'
-          ? user['displayName'].toLocaleLowerCase()
+          ? foldSearchText(user['displayName'])
           : '';
       const email =
-        typeof user['email'] === 'string'
-          ? user['email'].toLocaleLowerCase()
-          : '';
+        typeof user['email'] === 'string' ? foldSearchText(user['email']) : '';
       const fullName =
         typeof user['fullName'] === 'string'
-          ? user['fullName'].toLocaleLowerCase()
+          ? foldSearchText(user['fullName'])
           : '';
 
       return (

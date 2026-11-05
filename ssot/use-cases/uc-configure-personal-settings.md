@@ -88,7 +88,7 @@ installation-specific management:
 **[MVP]** - the notification-delivery list, language, and currency. The delivery state is
 classified `[MVP]` by [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) and this is the
 only surface that exposes it, so without it an account can stop notifications only at the OS.
-Language is what the app and every notification are rendered in, and the app ships in twelve of
+Language is what the app and every notification are rendered in, and the app ships in thirteen of
 them. Currency is what reported prices mean: a price read in the wrong one misinforms rather
 than inconveniences, and prices are the point of the product.
 

@@ -34,11 +34,11 @@ const tr = {
 // Stands in for a locale that is offered by the app but carries no policy copy
 // - the state a newly added language is in until its policy is written. It has
 // the disclosure notice and nothing else.
-const unpublishedLang = 'ja';
+const unpublishedLang = 'nl';
 
-const ja = {
+const nl = {
   'privacy-policy-language-fallback':
-    'このプライバシーポリシーはまだアプリの言語で利用できないため、英語で表示されます。',
+    'Dit privacybeleid is nog niet beschikbaar in de taal van de app en wordt daarom in het Engels getoond.',
 };
 
 describe(PrivacyPolicy.name, () => {
@@ -65,7 +65,7 @@ describe(PrivacyPolicy.name, () => {
     TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en, de, tr, ja },
+          langs: { en, de, tr, nl },
           translocoConfig: {
             availableLangs: ['en', 'de', 'tr', unpublishedLang],
             defaultLang: 'en',
@@ -126,7 +126,7 @@ describe(PrivacyPolicy.name, () => {
         expect(title()).toBe(en['privacy-policy-title']);
         expect(component.isLanguageFallback()).toBe(true);
         expect(fallbackNotice()?.textContent?.trim()).toBe(
-          ja['privacy-policy-language-fallback'],
+          nl['privacy-policy-language-fallback'],
         );
       });
     });

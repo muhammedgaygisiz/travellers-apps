@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -16,7 +17,11 @@ import {
   IonIcon,
   IonText,
 } from '@ionic/angular/standalone';
-import { DecimalPipe, UpperCasePipe } from '@angular/common';
+import {
+  DecimalPipe,
+  getNumberOfCurrencyDigits,
+  UpperCasePipe,
+} from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { isFromCardControl } from 'utils';
 
@@ -45,6 +50,19 @@ export class BiteTrailComponent {
 
   goToProfile = output<string>();
   viewBiteTrail = output<BiteTrail>();
+
+  /**
+   * The price takes the decimal places of its own currency: none for JPY and
+   * KRW, two for EUR. A fixed two would show `¥1,200.00`, a precision yen does
+   * not have.
+   */
+  priceDigitsInfo = computed(() => {
+    const digits = getNumberOfCurrencyDigits(
+      this.biteTrail().currency?.toUpperCase() ?? '',
+    );
+
+    return `1.${digits}-${digits}`;
+  });
 
   /**
    * A tap anywhere on the card opens the BiteTrail, unless it landed on the

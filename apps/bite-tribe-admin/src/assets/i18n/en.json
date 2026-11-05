@@ -232,7 +232,7 @@
   "admin-bites-search": "Search",
   "admin-bites-search-placeholder": "Bite name or tag",
   "admin-bites-search-failed": "The search failed. This is not the same as finding nothing — try again.",
-  "admin-bites-too-short": "Type at least three characters.",
+  "admin-bites-too-short": "Type at least two characters.",
   "admin-bites-start-hint": "Search for a Bite by its name or one of its tags.",
   "admin-bites-no-results": "No Bite matches that name or tag.",
   "admin-bites-capped": "Showing the first 20 matches. Narrow the term if the Bite you want is not among them.",

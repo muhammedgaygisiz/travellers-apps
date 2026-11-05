@@ -1,3 +1,5 @@
+/// <reference lib="es2022.intl" />
+
 /**
  * The part of the 2D context text fitting needs. Narrowed so that the fitting
  * can be tested without a canvas, which jsdom does not have.
@@ -8,6 +10,40 @@ const ELLIPSIS = '…';
 
 const fits = (ctx: TextMeasurer, text: string, maxWidth: number): boolean =>
   ctx.measureText(text).width <= maxWidth;
+
+/**
+ * `text` cut into its words or into its visible characters. `Intl.Segmenter`
+ * knows where words end in scripts written without spaces, and keeps a Thai
+ * vowel on its consonant. Without it, every code point stands alone.
+ */
+const segmentsOf = (
+  text: string,
+  granularity: Intl.SegmenterOptions['granularity'],
+): string[] =>
+  typeof Intl.Segmenter === 'function'
+    ? Array.from(
+        new Intl.Segmenter(undefined, { granularity }).segment(text),
+        ({ segment }) => segment,
+      )
+    : Array.from(text);
+
+/**
+ * `word` as the pieces a line may break between: the word whole when it fits,
+ * otherwise its dictionary words, and the characters of any that are still too
+ * wide.
+ */
+const splitToFit = (
+  ctx: TextMeasurer,
+  word: string,
+  maxWidth: number,
+): string[] =>
+  fits(ctx, word, maxWidth)
+    ? [word]
+    : segmentsOf(word, 'word').flatMap((segment) =>
+        fits(ctx, segment, maxWidth)
+          ? [segment]
+          : segmentsOf(segment, 'grapheme'),
+      );
 
 /**
  * The longest prefix of `text` that fits `maxWidth` with an ellipsis after it,
@@ -23,7 +59,7 @@ export const fitText = (
     return text;
   }
 
-  const characters = Array.from(text);
+  const characters = segmentsOf(text, 'grapheme');
   let low = 0;
   let high = characters.length;
 
@@ -45,8 +81,10 @@ export const fitText = (
 
 /**
  * `text` broken into at most `maxLines` lines no wider than `maxWidth`. Lines
- * break between words; a word too long for a line on its own, and whatever is
- * left over after the last line, are cut with an ellipsis.
+ * break between words. A word too long for a line on its own continues on the
+ * next one, which is the normal case for Japanese and Thai: they write a whole
+ * name without a space. Whatever is left over after the last line is cut with an
+ * ellipsis.
  */
 export const wrapText = (
   ctx: TextMeasurer,
@@ -54,27 +92,29 @@ export const wrapText = (
   maxWidth: number,
   maxLines: number,
 ): string[] => {
-  const words = text
+  const units = text
     .trim()
     .split(/\s+/)
-    .filter((word) => !!word);
+    .filter((word) => !!word)
+    .flatMap((word, wordIndex) =>
+      splitToFit(ctx, word, maxWidth).map((unit, unitIndex) =>
+        wordIndex > 0 && unitIndex === 0 ? ` ${unit}` : unit,
+      ),
+    );
   const lines: string[] = [];
   let index = 0;
 
-  while (index < words.length && lines.length < maxLines) {
+  while (index < units.length && lines.length < maxLines) {
     if (lines.length === maxLines - 1) {
-      lines.push(fitText(ctx, words.slice(index).join(' '), maxWidth));
+      lines.push(fitText(ctx, units.slice(index).join('').trim(), maxWidth));
       break;
     }
 
-    let line = words[index];
+    let line = units[index].trim();
     index += 1;
 
-    while (
-      index < words.length &&
-      fits(ctx, `${line} ${words[index]}`, maxWidth)
-    ) {
-      line = `${line} ${words[index]}`;
+    while (index < units.length && fits(ctx, line + units[index], maxWidth)) {
+      line += units[index];
       index += 1;
     }
 

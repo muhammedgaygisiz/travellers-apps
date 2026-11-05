@@ -49,6 +49,34 @@ describe('BiteTrail', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('the price', () => {
+    const priceFor = async (
+      currency: string,
+      price: number,
+    ): Promise<string | undefined> => {
+      fixture.componentRef.setInput('biteTrail', { ...trail, currency, price });
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      return (
+        fixture.nativeElement.querySelector('.price-row h1') as HTMLElement
+      ).textContent?.trim();
+    };
+
+    it.each([
+      ['JPY', 1200, '1,200'],
+      ['KRW', 15000, '15,000'],
+      ['jpy', 1200, '1,200'],
+      ['EUR', 12, '12.00'],
+      ['CHF', 12.5, '12.50'],
+    ])(
+      'shows %s with its own decimal places',
+      async (currency, price, shown) => {
+        await expect(priceFor(currency, price)).resolves.toBe(shown);
+      },
+    );
+  });
+
   describe('opening the BiteTrail from the card (issue #1765)', () => {
     let opened: BiteTrail[];
     let profiles: string[];

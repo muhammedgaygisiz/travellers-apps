@@ -7,12 +7,10 @@ import { SearchBite } from 'model';
  * return.
  *
  * Both are the callable's numbers, restated here so the UI can say why it did
- * nothing rather than showing an empty list for a two-character term. Changing
- * either would mean changing the callable, which would change the consumer
- * app's search — out of scope for issue #1476, and recorded as a known limit on
- * the operator surface instead.
+ * nothing rather than showing an empty list for a one-character term. Changing
+ * either means changing the callable, and with it the consumer app's search.
  */
-export const MIN_SEARCH_TEXT_LENGTH = 3;
+export const MIN_SEARCH_TEXT_LENGTH = 2;
 export const MAX_RESULTS = 20;
 
 interface SearchBitesRequest {

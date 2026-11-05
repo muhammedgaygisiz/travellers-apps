@@ -115,7 +115,7 @@ describe('places callable boundary', () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(
-      searchPlacesHandler({ auth, data: { searchText: 'pi' } }),
+      searchPlacesHandler({ auth, data: { searchText: 'p' } }),
     ).resolves.toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
   });

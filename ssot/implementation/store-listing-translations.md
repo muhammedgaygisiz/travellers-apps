@@ -50,6 +50,7 @@ rather than invented here:
 | ar     | قائمة آمال           | لوحة المتصدرين  |
 | am     | ዝርዝር                 | የመሪዎች ሰሌዳ       |
 | ko     | 버킷리스트           | 순위표          |
+| ja     | バケットリスト       | ランキング      |
 
 If the app's wording for either term changes, this page changes with it.
 A listing that says one word and an app that says another is a defect the store
@@ -592,9 +593,58 @@ Keywords:
 맛집,음식,식당,메뉴,리뷰,주변맛집,미식,여행,추천,맛집지도,후기,먹방
 ```
 
+## Japanese (ja)
+
+Added for issue [#1882], and **not yet entered in either console**. It goes in as
+`ja` on the App Store and `ja-JP` on Google Play. The body avoids naming a number
+of languages, so it does not go stale when the next language ships.
+
+Subtitle and short description:
+
+```text
+見つけましょう。味わいましょう。シェアしましょう。
+```
+
+Description:
+
+```text
+ほかのグルメアプリは、どこへ行くかを教えてくれます。BiteTribeは、何を注文するかを教えてくれます。
+
+Biteは、本物の一皿です。食べた人が撮影し、食べた場所にピンを立て、支払った価格と正直な感想を添えて投稿します。
+
+食べる価値のある一皿を見つけましょう
+近くのBiteを眺めたり、地図に切り替えたりして、周りのおいしい料理を確認できます。料理、場所、タグで検索することもできます。どのBiteにも写真、価格、本当の感想があるので、席に着く前に決められます。
+
+食べたものをシェアしましょう
+料理を撮影し、お店をタグ付けして、価格と評価を加えてください。位置情報と現地の通貨は自動で入力されます。1つのBiteに1つの料理。だから誰にとっても役に立ちます。
+
+BITETRAILをたどりましょう
+BiteTrailは、厳選された食の旅です。バケットリストとして保存し、味わったBiteを1つずつチェックしていきましょう。知らない街で過ごす週末にも、地元をじっくり味わう日にもぴったりです。
+
+自分のTribeをつくりましょう
+味覚を信頼できる人をフォローすると、新しい投稿が届きます。レビューに返信し、気に入ったものにいいねを付け、自分の投稿がランキングで積み上がっていくのを楽しめます。
+
+どこでもおいしく
+BiteTribeは多くの言語と現地の通貨に対応しています。チューリッヒで保存したBiteは、バンコクで読み返してもよくわかります。
+
+見つけましょう。味わいましょう。シェアしましょう。
+```
+
+Promotional text:
+
+```text
+地図上のピンはすべて本物の一皿です。食べた人が撮影し、支払った価格と正直な感想を添えて投稿しています。
+```
+
+Keywords:
+
+```text
+グルメ,レストラン,料理,メニュー,レビュー,食べ歩き,口コミ,旅行,おすすめ,地図,ランチ,食事
+```
+
 ## Where They Were Entered
 
-Both stores on 30 August 2026, for the ten locales above Korean. Korean is still to enter.
+Both stores on 30 August 2026, for the ten locales above Korean. Korean and Japanese are still to enter.
 
 ### Google Play - ten locales, submitted
 
@@ -670,7 +720,9 @@ shipped as gibberish to the audience least able to report it.
 ## Review Status
 
 Not one of these has been read by a native speaker other than the author.
-Korean has not been read by a native speaker at all.
+Korean has not been read by a native speaker at all, and neither has Japanese.
+Japanese launches that way: its review, of this listing and of the app copy,
+follows after launch.
 
 Machine-quality translation is good enough to ship a listing and not good enough
 to be confident in, and the risk is not evenly spread: German, French, Spanish,
@@ -686,3 +738,4 @@ the product.
 - [Implementation - Store Release Steps](store-release-steps.md)
 
 [#1881]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1881
+[#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882

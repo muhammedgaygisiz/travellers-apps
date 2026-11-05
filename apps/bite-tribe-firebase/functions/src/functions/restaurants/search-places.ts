@@ -4,7 +4,7 @@ import { defineSecret } from 'firebase-functions/params';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 const MAX_RESULTS = 20;
 const MAX_NEARBY_RESULTS = 5;
 const LOCATION_BIAS_RADIUS_METERS = 20000;

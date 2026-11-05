@@ -5,7 +5,7 @@ import type { SearchCategory, SearchResult } from 'model';
 import { PATH } from 'utils';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {

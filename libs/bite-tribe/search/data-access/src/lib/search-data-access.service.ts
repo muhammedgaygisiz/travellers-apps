@@ -17,7 +17,7 @@ import type {
   SearchResult,
 } from 'model';
 
-const MIN_SEARCH_TEXT_LENGTH = 3;
+const MIN_SEARCH_TEXT_LENGTH = 2;
 
 interface SearchParams {
   searchText: string;

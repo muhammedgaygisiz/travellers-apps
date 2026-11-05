@@ -19,6 +19,7 @@ const LANGUAGE_ENDONYMS: Readonly<Record<string, string>> = {
   german: 'Deutsch',
   indonesian: 'Indonesia',
   italian: 'Italiano',
+  japanese: '日本語',
   korean: '한국어',
   portuguese: 'Português',
   spanish: 'Español',

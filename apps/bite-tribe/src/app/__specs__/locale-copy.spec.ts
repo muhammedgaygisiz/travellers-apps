@@ -114,6 +114,14 @@ describe('locale copy', () => {
       'th.json': [/ครับ|ค่ะ/],
       // Korean has no grammatical gender; only its address terms carry one.
       'ko.json': [/오빠|언니|누나|형님|아저씨|아줌마|아가씨/],
+      // Japanese has no grammatical gender. Pronouns and sentence-final
+      // particles carry it instead, and `-くん` and `-ちゃん` guess it for a name.
+      'ja.json': [
+        /僕|俺|あたし|彼/,
+        /くん|ちゃん/,
+        /(?:です|ます|ました|ません|でした|ましょう|ください)[よねわぞぜな](?:[。！？\s]|$)/,
+        /(?:だわ|だぜ|だぞ|かしら|のよ)(?:[。！？\s]|$)/,
+      ],
     };
 
     const offenders = Object.entries(GENDERED_ADDRESS).flatMap(
@@ -127,6 +135,43 @@ describe('locale copy', () => {
 
     it('does not address the user with a gendered form', () => {
       expect(offenders).toEqual([]);
+    });
+  });
+
+  /**
+   * Japanese register and names (`Implementation - Localization`). A plain-form
+   * sentence next to `です/ます` copy reads as a change of speaker, and a
+   * katakana `バイト` reads as a part-time job. See GitHub issue #1882.
+   */
+  describe('ja.json', () => {
+    const entries = Object.entries(readLocale('ja.json'));
+
+    it('ends no sentence in the plain form', () => {
+      expect(
+        entries
+          .filter(([, value]) =>
+            /(?:である|だ|(?<![まで])した)[。！]/.test(value),
+          )
+          .map(([key]) => key),
+      ).toEqual([]);
+    });
+
+    it('keeps Bite and BiteTribe in Latin script', () => {
+      expect(
+        entries
+          .filter(([, value]) => /バイト|トライブ|ﾊﾞｲﾄ/.test(value))
+          .map(([key]) => key),
+      ).toEqual([]);
+    });
+
+    it('addresses a person with さん', () => {
+      expect(
+        entries
+          .filter(([, value]) =>
+            /\{\{\s*(?:name|user|username)\s*\}\}(?!さん)/.test(value),
+          )
+          .map(([key]) => key),
+      ).toEqual([]);
     });
   });
 

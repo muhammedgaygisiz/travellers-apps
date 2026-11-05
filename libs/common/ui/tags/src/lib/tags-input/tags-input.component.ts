@@ -15,6 +15,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { ChipComponent } from 'common/ui/chip';
 
 const REGEX_STRING_ONLY_CONTAINS_BLANK_SPACES = /^\s*$/;
+const IME_PROCESSING_KEY_CODE = 229;
 
 @Component({
   selector: 'bt-tags-input',
@@ -74,8 +75,19 @@ export class TagsInputComponent implements OnInit {
   /**
    * Enter commits the tag rather than submitting the surrounding form, which is
    * what pressing it while the tag field has focus is meant to do.
+   *
+   * During IME composition, Enter belongs to the keyboard: it confirms the
+   * conversion, and the text in the field is not the tag yet. Safari reports
+   * that keydown with `isComposing` already false, so `keyCode` 229 is checked
+   * as well.
    */
   onEnter(event: Event): void {
+    const { isComposing, keyCode } = event as KeyboardEvent;
+
+    if (isComposing || keyCode === IME_PROCESSING_KEY_CODE) {
+      return;
+    }
+
     event.preventDefault();
     this.commitPendingTag();
   }

@@ -1257,8 +1257,9 @@ Business would change.
 
 **The account's recurring format: a carousel of five rated Bites from one
 city.** Solothurn came first (23 September 2026, "Top 5 Bites", with the
-autumn fair HESO among the five). Bern, Trieste, Vienna and Split
-(3 November 2026) followed. All five went up as six slides. From Bratislava (4 November 2026)
+autumn fair HESO among the five). Istanbul (30 September 2026), Budapest
+(7 October 2026), Vienna, Trieste, Bern and Split (3 November 2026) followed.
+All of them went up as six slides. From Bratislava (4 November 2026)
 there are seven, with Leela added. The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1296,10 +1297,10 @@ a nearby place counts: the Split post includes a squid from Hvar. **Local
 dishes are preferred** over pizza, burgers or coffee, and the product owner
 approves the five before anything is rendered.
 
-**Only the operator's own Bites are free to use.** Until [#1772] gives creators
-terms that license their photos outside the app, another creator's Bite photo
-has no licence for a post. The Bratislava post includes one: _Slovenská misa
-pre 2_, by another member.
+**Any shared Bite can be used, whoever posted it.** The product owner
+confirmed this on 5 November 2026, so [#1772] does not block these posts. The
+Bratislava post includes _Slovenská misa pre 2_, by another member, and the
+Budapest post a stuffed paprika by another member.
 
 ### The Caption
 
@@ -1325,6 +1326,10 @@ is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
 name only.
 
+**@bitetribeapp follows every account it tags.** As of 5 November 2026 it
+follows all 18 tagged so far, across Bern, Solothurn, Istanbul, Budapest and
+Vienna.
+
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
 `@ristorante_davito`. Tramway has no account of its own, and the Yikou
@@ -1334,8 +1339,26 @@ Bite. Its caption has no dish list.
 **Solothurn was tagged the same day,** with all five places:
 `@19thalleyburger`, `@pittaria_solothurn`, `@chickenchaotikum`,
 `@confiseriehofer` and `@heso_solothurn`. Pittaria has a separate Bern
-account; the card's city named the branch. Trieste, Vienna, Split and
-Bratislava carry no restaurant tags yet.
+account; the card's city named the branch.
+
+**Istanbul was tagged the same day,** with all five places:
+`@viyanakahvesi`, `@hafizmustafa1864`, `@asirlikkanlicayogurdu`, `@pirin1960`
+and `@beykozbalikekmek`. The first `@viyanakahvesi` tag was dropped on save
+without an error and only the read-back caught it, so every tagging pass ends
+with one.
+
+**Budapest was tagged the same day,** with three of five places:
+`@molnars_langos`, `@mama.goulash.bp` and `@wafu_ramenizakaya_`. The Maps
+listing for Wafu links a dead account. Frici Papa's only candidate,
+`@fricipapakifozdeje`, links the restaurant's site but runs under a person's
+name with no address, so it was not used. "The goulash" is a stall in the
+Great Market Hall with no account.
+
+**Vienna was tagged the same day.** Three of its five dishes come from Al
+Zaytouna, and each carries `@alzaytouna_restaurant`. The espresso carries
+`@eissalon_caffe_perrella`. Al Zaytouna's website links a dead account. The
+Dim-Sum Restaurant Chinazentrum has no account. Trieste, Split and Bratislava
+carry no restaurant tags yet.
 
 ## Wiring Back Into The Product
 

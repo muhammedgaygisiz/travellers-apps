@@ -1,12 +1,12 @@
 ---
 name: instagram-city-top5
-description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags each restaurant's confirmed Instagram account, and publishes on Instagram web after approval. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
+description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, and publishes on Instagram web after approval. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
 argument-hint: <city>
 ---
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Bern, Trieste, Vienna, Split, Bratislava) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -32,7 +32,7 @@ Then derive everything else from it, without asking:
 
 Before step 1, check two things:
 
-- **Has the city been posted already?** The list is in [The City Top 5 Posts](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts). If it has, say so and ask whether to do it again.
+- **Has the city been posted already?** The list is in [The City Top 5 Posts](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts), but it has fallen behind before: Solothurn, Istanbul and Budapest were missing from it. So also scroll the profile grid at `instagram.com/bitetribeapp/` and search the tiles' image alt text for the city. If the city has been posted, say so and ask whether to do it again. If the list is missing a post, add it.
 - **Are there enough Bites?** If the country search finds fewer than five Bites in or near the city, stop and report what it found, rather than filling the post with Bites from elsewhere in the country.
 
 ## The Post
@@ -63,7 +63,7 @@ The user's Chrome (Claude in Chrome), signed in to `https://bitetribe.app` - not
 
 List the five with restaurant and author, plus two or three local alternatives, and state what Leela will say on the cover and the closing slide.
 
-**Name every Bite that is not the @bitetribeapp operator's own.** Until [#1772](https://github.com/muhammedgaygisiz/travellers-apps/issues/1772) lands, another creator's photo has no licence for use outside the app. The author shows on the Bite's detail page. Prefer the operator's own Bites, and use another creator's only when the user decides to.
+**Any shared Bite can be used, whoever posted it.** The product owner confirmed this on 5 November 2026, so [#1772](https://github.com/muhammedgaygisiz/travellers-apps/issues/1772) does not block these posts. Still list each Bite's author, which shows on the Bite's detail page.
 
 ### 3. Collect photos, reactions and a cover photo
 
@@ -86,9 +86,9 @@ List the five with restaurant and author, plus two or three local alternatives, 
   A similar name alone is not enough: small places often have no account, and a chain or a namesake in another city often shares the name. If no account can be confirmed, the restaurant gets no tag and appears in the caption by name only. Note each handle together with how it was confirmed.
 
   Two things the Bern dry run showed:
-  - **Find the place's address first.** Start with the city printed on the Bite card: it already names the branch when a chain has one per city (Pittaria in Solothurn and Bern). Where a chain has several branches in the same city, use the app's restaurant page (`/restaurant/place/<name>`), which shows no address, only a map. Read the pin's position from the Leaflet tiles with the snippet below, and match it to the Google Maps listing. For Bern's Yikou Sushi, this showed that the Bite came from the Garden branch, not the Old Town shop that has the Yikou accounts.
+  - **Find the place's address first.** Start with the city printed on the Bite card: it already names the branch when a chain has one per city (Pittaria in Solothurn and Bern). Where a chain has several branches in the same city, or the name is too generic for Maps to find (Budapest's "the goulash", a stall in the Great Market Hall), read the pin. Neither the restaurant page (`/bite/<id>/restaurant/place/<name>`) nor the Bite's own page (`/bite/<id>`) shows an address, but both have a map. Read the pin's position from the Leaflet tiles with the snippet below, and match it to the Google Maps listing. For Bern's Yikou Sushi, this showed that the Bite came from the Garden branch, not the Old Town shop that has the Yikou accounts.
 
-    Some restaurant maps open zoomed out to Europe (zoom 2). At that zoom one tile pixel spans kilometres, so a pin read there lands in the wrong country. The snippet refuses below zoom 14. Zooming with the scroll wheel loses the pin, so fall back to the card's city and the Maps listing.
+    **Wait for the map to settle.** The map starts without a position, zoomed out to Europe (zoom 2), and moves to the place a few seconds later. A pin read before that lands in the wrong country, so the snippet refuses below zoom 14. If it throws, wait a few seconds and run it again. Do not zoom with the scroll wheel, which loses the pin.
 
     ```js
     const c = document.querySelector('.leaflet-container');
@@ -102,7 +102,7 @@ List the five with restaurant and author, plus two or three local alternatives, 
     const x = tx + (e.x + e.width / 2 - tr.x) / 256;
     const y = ty + (e.y + e.height / 2 - tr.y) / 256;
     const n = 2 ** z;
-    if (z < 14) throw new Error(`map is at zoom ${z}; the pin is too coarse to read`);
+    if (z < 14) throw new Error(`map is at zoom ${z}; it has not settled yet - wait and run again`);
     [(Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n))) * 180) / Math.PI, (x / n) * 360 - 180]; // lat, lng
     ```
 
@@ -174,26 +174,43 @@ In the same Chrome, signed in as @bitetribeapp:
    A tag label then sits on the photo. Tag nothing on the cover or the closing slide. Each slide has a delete icon at its top left, which removes the slide from the post - never click it.
 
 6. Leave "Share to Facebook" off; no Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
+7. **Follow every tagged account** from @bitetribeapp. Open each profile and click **Follow**, or **Follow Back**, if the header shows it. If it shows **Following** already, leave it. Check that the button reads **Following** afterwards:
 
-**Tagging a post that is already up** works the same way in **⋯ → Edit**. Use the same per-slide steps, then **Done**. Reload the post and read the tags back to check them:
+   ```js
+   // On instagram.com/<handle>/ - follows the account if not yet followed; returns [handle, before, after]
+   await new Promise((r) => setTimeout(r, 2500));
+   const re = /^(Follow|Follow Back|Following|Requested)$/;
+   const state = () => [...document.querySelectorAll('header button, header div[role=button]')].map((b) => b.innerText.trim()).find((t) => re.test(t));
+   const before = state();
+   if (before === 'Follow' || before === 'Follow Back') {
+     [...document.querySelectorAll('header button, header div[role=button]')].find((b) => b.innerText.trim() === before).click();
+     await new Promise((r) => setTimeout(r, 2500));
+   }
+   [location.pathname, before, state()];
+   ```
+
+**Tagging a post that is already up** works the same way in **⋯ → Edit**. Open the post from the profile grid: Edit opened from the post's own `/p/<id>/` page can keep loading forever. Use the same per-slide steps, then **Done**, then follow the accounts as in step 7.
+
+**Always read the tags back.** A tag can be dropped on save without any error: Istanbul's `@viyanakahvesi` was, and the second try stuck. Read them back in the post dialog that stays open after **Done**. The carousel keeps only the current slide and its neighbours in the page, so this collects the tags slide by slide (the slides of older posts have no useful alt text):
 
 ```js
-// Collects each slide's tags by stepping through the carousel; returns { "<image alt>": ["/<handle>/"] }
-const seen = {};
-for (let i = 0; i < 8; i++) {
-  document.querySelectorAll('main ul li').forEach((li) => {
-    const im = li.querySelector('img');
-    if (im) seen[im.alt] = [...new Set([...(seen[im.alt] ?? []), ...[...li.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href'))])];
-  });
-  const next = document.querySelector('main button[aria-label="Next"]');
+// In the open post dialog; returns one line per slide: "?img_index=<n> /<handle>/ ..." (neighbouring slides' tags show too)
+const root = document.querySelector('[role=dialog]') ?? document;
+const out = [];
+for (let k = 0; k < 8; k++) {
+  const tags = [...new Set([...root.querySelectorAll('ul li')].flatMap((li) => [...li.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href'))).filter((h) => !/bitetribeapp|explore/.test(h)))];
+  out.push(`${location.search} ${tags.join(' ')}`);
+  const next = root.querySelector('button[aria-label="Next"]');
   if (!next) break;
   next.click();
-  await new Promise((r) => setTimeout(r, 900));
+  await new Promise((r) => setTimeout(r, 1200));
 }
-seen;
+out;
 ```
+
+Every handle has to show up somewhere in the output. If one is missing, open **Edit** again and look at that slide. When one handle covers several slides (three Al Zaytouna dishes in Vienna), the output cannot tell those slides apart. Key each `li` by its image file name instead, and check that every one of those slides carries the handle.
 
 ## After Publishing
 
-- Report the result: the slide count, the caption, the location, the tags that were set, and anything skipped (for example alt text, or a tag that could not be set).
+- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, and anything skipped (for example alt text, or a tag that could not be set).
 - If the post changed the format, update `## The City Top 5 Posts` in `ssot/implementation/social-media-channels.md`, and this skill too.

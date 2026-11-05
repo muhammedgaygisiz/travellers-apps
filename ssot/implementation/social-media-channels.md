@@ -1322,7 +1322,14 @@ location per post, so the city keeps it. Instead:
 A tag notifies the account, so only a handle confirmed as the restaurant's own
 is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
-name only. The five posts so far carry no restaurant tags.
+name only.
+
+**Bern was tagged afterwards** (5 November 2026), through the post's Edit
+dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
+`@ristorante_davito`. Tramway has no account of its own, and the Yikou
+accounts belong to the Old Town shop rather than the Garden branch of the
+Bite. Its caption has no dish list. Trieste, Vienna, Split and Bratislava
+carry no restaurant tags yet.
 
 ## Wiring Back Into The Product
 

@@ -160,8 +160,33 @@ In the same Chrome, signed in as @bitetribeapp:
 2. **Crop defaults to square.** Open the crop control at the bottom left of the preview, choose **Original**, and confirm that the slide counter shows seven slides.
 3. Next, Next. Type the caption into the `Add a caption...` textbox line by line, pressing `Enter` between lines. **Never press Escape** to close the hashtag suggestions: it opens "Discard post?" - press Cancel if it appears. Read the caption back from `div[contenteditable=true][role=textbox]`.
 4. **Location.** Clicking "Add Location" leaves the focus in the caption, so whatever you type lands in the caption. Focus `input[placeholder="Add Location"]` with JavaScript, type "<City>, <Country>", and pick the first option. If the suggestion list stays open, pick that option again by its `find` ref.
-5. **Restaurant tags.** For each dish slide with a confirmed handle, move the preview to that slide, open the people-tagging control, search the handle, and pick the result whose handle matches it exactly. Tag nothing on the cover or the closing slide. If Instagram web offers no tagging on this step, publish with the caption mentions only, and report which tags are still to be added.
+5. **Restaurant tags.** For each dish slide with a confirmed handle:
+   1. Move the preview to that slide with its right arrow.
+   2. Click the photo where it shows "Click photo to tag people". A `Tag:` search box opens where you clicked.
+   3. Type the handle and wait for the results.
+   4. Pick the result whose handle matches exactly. Look-alikes come next in the list (`kesar.restaurant` under `restaurant.kesar`).
+
+   A tag label then sits on the photo. Tag nothing on the cover or the closing slide. Each slide has a delete icon at its top left, which removes the slide from the post - never click it.
+
 6. Leave "Share to Facebook" off; no Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
+
+**Tagging a post that is already up** works the same way in **⋯ → Edit**. Use the same per-slide steps, then **Done**. Reload the post and read the tags back to check them:
+
+```js
+// Collects each slide's tags by stepping through the carousel; returns { "<image alt>": ["/<handle>/"] }
+const seen = {};
+for (let i = 0; i < 8; i++) {
+  document.querySelectorAll('main ul li').forEach((li) => {
+    const im = li.querySelector('img');
+    if (im) seen[im.alt] = [...new Set([...(seen[im.alt] ?? []), ...[...li.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href'))])];
+  });
+  const next = document.querySelector('main button[aria-label="Next"]');
+  if (!next) break;
+  next.click();
+  await new Promise((r) => setTimeout(r, 900));
+}
+seen;
+```
 
 ## After Publishing
 

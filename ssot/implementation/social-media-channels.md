@@ -1256,8 +1256,9 @@ Business would change.
 ## The City Top 5 Posts
 
 **The account's recurring format: a carousel of five rated Bites from one
-city.** Bern, Trieste, Vienna and Split
-(3 November 2026) went up as six slides. From Bratislava (4 November 2026)
+city.** Solothurn came first (23 September 2026, "Top 5 Bites", with the
+autumn fair HESO among the five). Bern, Trieste, Vienna and Split
+(3 November 2026) followed. All five went up as six slides. From Bratislava (4 November 2026)
 there are seven, with Leela added. The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1328,8 +1329,13 @@ name only.
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
 `@ristorante_davito`. Tramway has no account of its own, and the Yikou
 accounts belong to the Old Town shop rather than the Garden branch of the
-Bite. Its caption has no dish list. Trieste, Vienna, Split and Bratislava
-carry no restaurant tags yet.
+Bite. Its caption has no dish list.
+
+**Solothurn was tagged the same day,** with all five places:
+`@19thalleyburger`, `@pittaria_solothurn`, `@chickenchaotikum`,
+`@confiseriehofer` and `@heso_solothurn`. Pittaria has a separate Bern
+account; the card's city named the branch. Trieste, Vienna, Split and
+Bratislava carry no restaurant tags yet.
 
 ## Wiring Back Into The Product
 

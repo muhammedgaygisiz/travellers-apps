@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Bern, Trieste, Vienna, Split, Bratislava) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Bern, Trieste, Vienna, Split, Bratislava) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -86,10 +86,13 @@ List the five with restaurant and author, plus two or three local alternatives, 
   A similar name alone is not enough: small places often have no account, and a chain or a namesake in another city often shares the name. If no account can be confirmed, the restaurant gets no tag and appears in the caption by name only. Note each handle together with how it was confirmed.
 
   Two things the Bern dry run showed:
-  - **Find the place's address first.** The app's restaurant page (`/restaurant/place/<name>`) shows no address, only a map. Read the pin's position from the Leaflet tiles with the snippet below, and match it to the Google Maps listing. For Bern's Yikou Sushi, this showed that the Bite came from the Garden branch, not the Old Town shop that has the Yikou accounts.
+  - **Find the place's address first.** Start with the city printed on the Bite card: it already names the branch when a chain has one per city (Pittaria in Solothurn and Bern). Where a chain has several branches in the same city, use the app's restaurant page (`/restaurant/place/<name>`), which shows no address, only a map. Read the pin's position from the Leaflet tiles with the snippet below, and match it to the Google Maps listing. For Bern's Yikou Sushi, this showed that the Bite came from the Garden branch, not the Old Town shop that has the Yikou accounts.
+
+    Some restaurant maps open zoomed out to Europe (zoom 2). At that zoom one tile pixel spans kilometres, so a pin read there lands in the wrong country. The snippet refuses below zoom 14. Zooming with the scroll wheel loses the pin, so fall back to the card's city and the Maps listing.
+
     ```js
     const c = document.querySelector('.leaflet-container');
-    const t = c.querySelector('img.leaflet-tile');
+    const t = c.querySelector('img.leaflet-tile-loaded');
     const tr = t.getBoundingClientRect();
     const [z, tx, ty] = t.src
       .match(/(\d+)\/(\d+)\/(\d+)\.png/)
@@ -99,8 +102,10 @@ List the five with restaurant and author, plus two or three local alternatives, 
     const x = tx + (e.x + e.width / 2 - tr.x) / 256;
     const y = ty + (e.y + e.height / 2 - tr.y) / 256;
     const n = 2 ** z;
+    if (z < 14) throw new Error(`map is at zoom ${z}; the pin is too coarse to read`);
     [(Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n))) * 180) / Math.PI, (x / n) * 360 - 180]; // lat, lng
     ```
+
   - **Open every handle before using it.** A link on the restaurant's website can be dead. Da Vito's group site links `@davito_liebefeld`, which no longer exists, and the live account is `@ristorante_davito`. Read the profile header, and use the handle only if it exists, has posts, and gives the same name and address. Instagram's search box (`/explore/search/`) finds candidates; its JSON endpoints do not answer from the page.
 
 Copy everything into a working folder in the scratchpad, never into the repository: the photos are other people's work.

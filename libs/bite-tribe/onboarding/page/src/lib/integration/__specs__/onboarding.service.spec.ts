@@ -985,6 +985,30 @@ describe('OnboardingService', () => {
       expect(service.selectedLanguage()).toBe('en');
     });
 
+    it.each(['zh-CN', 'zh-Hans-CN', 'zh-SG', 'zh-Hans-HK', 'zh'])(
+      'prefills Simplified Chinese for %s',
+      async (locale) => {
+        setup(['identity', 'visibility', 'currency']);
+        mockDeviceLocale(locale);
+
+        await service.initialize();
+
+        expect(service.selectedLanguage()).toBe('zh');
+      },
+    );
+
+    it.each(['zh-TW', 'zh-Hant-TW', 'zh-HK', 'zh_Hant_MO'])(
+      'falls back to English for the Traditional Chinese locale %s',
+      async (locale) => {
+        setup(['identity', 'visibility', 'currency']);
+        mockDeviceLocale(locale);
+
+        await service.initialize();
+
+        expect(service.selectedLanguage()).toBe('en');
+      },
+    );
+
     it('prefills from persisted settings over the device locale', async () => {
       setup(['identity', 'visibility', 'currency'], {}, storedSettings());
       mockDeviceLocale('de-CH');

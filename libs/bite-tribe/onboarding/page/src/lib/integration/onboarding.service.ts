@@ -274,8 +274,24 @@ export class OnboardingService {
     }
   }
 
+  /**
+   * `zh` is Simplified Chinese only. A device reading Traditional Chinese
+   * (`zh-Hant`, or a region that writes it) gets English rather than a script
+   * it did not choose; the picker still offers `zh` (issue #1880).
+   */
   private languageForLocale(locale: string): string {
-    const language = locale.replace(/_/g, '-').split('-')[0].toLowerCase();
+    const [language, ...subtags] = locale
+      .replace(/_/g, '-')
+      .toLowerCase()
+      .split('-');
+
+    if (
+      language === 'zh' &&
+      subtags.some((subtag) => ['hant', 'tw', 'hk', 'mo'].includes(subtag)) &&
+      !subtags.includes('hans')
+    ) {
+      return DEFAULT_LANGUAGE;
+    }
 
     return ONBOARDING_LANGUAGES.some((option) => option.code === language)
       ? language

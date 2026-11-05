@@ -29,7 +29,7 @@ An in-place switch has to load the locale before activating it. `setActiveLang` 
 
 ## Current Locale Scope
 
-The app has translations for multiple languages including English, German, Turkish, French, Spanish, Italian, Arabic, Indonesian, Thai, Korean, Japanese, Amharic, and Portuguese.
+The app has translations for multiple languages including English, German, Turkish, French, Spanish, Italian, Arabic, Indonesian, Thai, Korean, Japanese, Simplified Chinese, Amharic, and Portuguese.
 
 ## Code Anchors
 

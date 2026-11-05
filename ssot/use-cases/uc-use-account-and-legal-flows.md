@@ -31,7 +31,7 @@ data, and email verification.
 ## Flow
 
 - User opens the privacy policy from the About page, or from the public `/privacy` route.
-- The privacy policy is shown in the selected app language. It is published in all thirteen app languages, and both entry points share the same component, so the in-app and web routes resolve the language identically.
+- The privacy policy is shown in the selected app language. It is published in all fourteen app languages, and both entry points share the same component, so the in-app and web routes resolve the language identically.
 - A language without published policy copy - a locale added to the app before its policy is written - falls back to the English document and is told so on the page, in its own app language. The policy language is never switched silently.
 - User opens account deletion from the Account section at the bottom of the settings page.
 - The delete-account page names the signed-in account first - avatar, display name, email and sign-in method - then what is removed and what is kept, then asks for an explicit destructive confirmation that repeats the account.

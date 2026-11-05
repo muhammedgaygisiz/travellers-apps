@@ -65,6 +65,7 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
           'th',
           'ko',
           'ja',
+          'zh',
         ],
         defaultLang: 'en',
         fallbackLang: 'en',

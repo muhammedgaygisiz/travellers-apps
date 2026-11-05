@@ -87,6 +87,7 @@ const REGION_BY_LANGUAGE: Readonly<Record<string, string>> = {
   pt: 'PT',
   th: 'TH',
   tr: 'TR',
+  zh: 'CN',
 };
 
 const isSupportedCurrency = (code: string): boolean =>

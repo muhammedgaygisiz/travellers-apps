@@ -13,6 +13,7 @@ import { ko } from './ko';
 import { pt } from './pt';
 import { th } from './th';
 import { tr } from './tr';
+import { zh } from './zh';
 
 /**
  * Notification copy per supported language.
@@ -23,4 +24,4 @@ import { tr } from './tr';
 export const NOTIFICATION_MESSAGES: Record<
   SupportedLanguage,
   NotificationMessages
-> = { en, de, fr, tr, es, it, ar, am, id, pt, th, ko, ja };
+> = { en, de, fr, tr, es, it, ar, am, id, pt, th, ko, ja, zh };

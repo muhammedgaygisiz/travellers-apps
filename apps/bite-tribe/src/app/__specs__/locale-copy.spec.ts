@@ -122,6 +122,9 @@ describe('locale copy', () => {
         /(?:です|ます|ました|ません|でした|ましょう|ください)[よねわぞぜな](?:[。！？\s]|$)/,
         /(?:だわ|だぜ|だぞ|かしら|のよ)(?:[。！？\s]|$)/,
       ],
+      // Chinese has no grammatical gender. Third-person pronouns and address
+      // terms carry it; `其他` and `他人` are neutral.
+      'zh.json': [/她|(?<!其)他(?!人)/, /先生|女士|小姐|帅哥|美女|亲爱的/],
     };
 
     const offenders = Object.entries(GENDERED_ADDRESS).flatMap(
@@ -169,6 +172,39 @@ describe('locale copy', () => {
         entries
           .filter(([, value]) =>
             /\{\{\s*(?:name|user|username)\s*\}\}(?!さん)/.test(value),
+          )
+          .map(([key]) => key),
+      ).toEqual([]);
+    });
+  });
+
+  /**
+   * Simplified Chinese register and names (`Implementation - Localization`).
+   * The app says `你` everywhere, and `Bite` and `BiteTribe` stay in Latin
+   * script. See GitHub issue #1880.
+   */
+  describe('zh.json', () => {
+    const entries = Object.entries(readLocale('zh.json'));
+
+    it('addresses the user with 你, never 您', () => {
+      expect(
+        entries.filter(([, value]) => value.includes('您')).map(([key]) => key),
+      ).toEqual([]);
+    });
+
+    it('keeps Bite and BiteTribe in Latin script', () => {
+      expect(
+        entries
+          .filter(([, value]) => /咬|一口|部落/.test(value))
+          .map(([key]) => key),
+      ).toEqual([]);
+    });
+
+    it('writes no Traditional characters', () => {
+      expect(
+        entries
+          .filter(([, value]) =>
+            /[們這個來說時對會與還點後裡證帳號設鐘幣]/.test(value),
           )
           .map(([key]) => key),
       ).toEqual([]);

@@ -33,6 +33,7 @@ export const ONBOARDING_LANGUAGES: readonly OnboardingLanguageOption[] = [
   { code: 'pt', labelKey: 'portuguese' },
   { code: 'th', labelKey: 'thai' },
   { code: 'tr', labelKey: 'turkish' },
+  { code: 'zh', labelKey: 'chinese' },
 ];
 
 /**

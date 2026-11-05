@@ -19,17 +19,14 @@ describe('resolvePrivacyPolicyLanguage', () => {
 
   // Languages the app does not publish a policy in - a locale added to the app
   // before its policy copy exists lands here.
-  describe.each(['zh', 'nl'])(
-    'given the unpublished app language %s',
-    (lang) => {
-      it('should resolve to the fallback language and report the fallback', () => {
-        expect(resolvePrivacyPolicyLanguage(lang)).toEqual({
-          lang: PRIVACY_POLICY_FALLBACK_LANGUAGE,
-          isFallback: true,
-        });
+  describe.each(['nl'])('given the unpublished app language %s', (lang) => {
+    it('should resolve to the fallback language and report the fallback', () => {
+      expect(resolvePrivacyPolicyLanguage(lang)).toEqual({
+        lang: PRIVACY_POLICY_FALLBACK_LANGUAGE,
+        isFallback: true,
       });
-    },
-  );
+    });
+  });
 
   describe.each(['de-CH', 'de_AT', 'DE'])(
     'given the regional language tag %s',

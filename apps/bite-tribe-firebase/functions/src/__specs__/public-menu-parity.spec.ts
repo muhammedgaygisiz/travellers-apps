@@ -88,6 +88,7 @@ const CONSUMER_LANGS = [
   'pt',
   'th',
   'tr',
+  'zh',
 ] as const;
 
 const localeFiles = (): [string, Record<string, string>][] =>

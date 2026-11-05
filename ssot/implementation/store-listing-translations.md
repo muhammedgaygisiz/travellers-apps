@@ -51,6 +51,7 @@ rather than invented here:
 | am     | ዝርዝር                 | የመሪዎች ሰሌዳ       |
 | ko     | 버킷리스트           | 순위표          |
 | ja     | バケットリスト       | ランキング      |
+| zh     | 心愿清单             | 排行榜          |
 
 If the app's wording for either term changes, this page changes with it.
 A listing that says one word and an app that says another is a defect the store
@@ -642,9 +643,58 @@ Keywords:
 グルメ,レストラン,料理,メニュー,レビュー,食べ歩き,口コミ,旅行,おすすめ,地図,ランチ,食事
 ```
 
+## Simplified Chinese (zh)
+
+Added for issue [#1880], and **not yet entered in either console**. It goes in as
+`zh-Hans` on the App Store and `zh-CN` on Google Play. Traditional Chinese
+(`zh-Hant`, `zh-TW`, `zh-HK`) is a separate listing and not part of it.
+
+Subtitle and short description:
+
+```text
+发现美味，品尝美味，分享美味。
+```
+
+Description:
+
+```text
+别的美食App告诉你去哪儿吃。BiteTribe告诉你该点什么。
+
+每个Bite都是一道真实的菜品：由吃过的人拍摄，标记在吃饭的地方，附上实付价格和真实评价。
+
+发现值得一吃的菜品
+浏览附近的Bite，或切换到地图，看看周围有什么好吃的。也可以按菜品、地点或标签搜索。每个Bite都有照片、价格和真实感受，坐下之前就能做决定。
+
+分享你吃过的美食
+拍下菜品，标记餐厅，加上价格和评分。位置和当地货币会自动填写。一个Bite只放一道菜，所以对每个人都有用。
+
+跟着BITETRAIL走
+BiteTrail是精心挑选的美食路线。把它存进心愿清单，吃过一个Bite就勾掉一个。适合在陌生城市度过的周末，也适合在家门口慢慢探索。
+
+建立你的Tribe
+关注口味信得过的人，第一时间看到新发布。回复评价，给喜欢的内容点赞，看着自己的发布在排行榜上不断攀升。
+
+走到哪儿都好吃
+BiteTribe支持多种语言和当地货币。在苏黎世保存的Bite，到了曼谷再看也一清二楚。
+
+发现美味，品尝美味，分享美味。
+```
+
+Promotional text:
+
+```text
+地图上的每个标记都是一道真实的菜品，由吃过的人拍摄，附上实付价格和真实评价。
+```
+
+Keywords:
+
+```text
+美食,餐厅,菜品,菜单,点评,探店,推荐,旅行,附近美食,美食地图,吃什么,打卡
+```
+
 ## Where They Were Entered
 
-Both stores on 30 August 2026, for the ten locales above Korean. Korean and Japanese are still to enter.
+Both stores on 30 August 2026, for the ten locales above Korean. Korean, Japanese and Simplified Chinese are still to enter.
 
 ### Google Play - ten locales, submitted
 
@@ -720,9 +770,9 @@ shipped as gibberish to the audience least able to report it.
 ## Review Status
 
 Not one of these has been read by a native speaker other than the author.
-Korean has not been read by a native speaker at all, and neither has Japanese.
-Japanese launches that way: its review, of this listing and of the app copy,
-follows after launch.
+Korean has not been read by a native speaker at all, and neither has Japanese
+or Simplified Chinese. Both launch that way: their review, of this listing and
+of the app copy, follows after launch.
 
 Machine-quality translation is good enough to ship a listing and not good enough
 to be confident in, and the risk is not evenly spread: German, French, Spanish,
@@ -739,3 +789,4 @@ the product.
 
 [#1881]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1881
 [#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882
+[#1880]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1880

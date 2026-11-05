@@ -14,6 +14,7 @@ const LOCALE_DIR = join(__dirname, '..', '..', 'assets', 'i18n');
 const LANGUAGE_ENDONYMS: Readonly<Record<string, string>> = {
   amharic: 'አማርኛ',
   arabic: 'العربية',
+  chinese: '中文',
   english: 'English',
   french: 'Français',
   german: 'Deutsch',

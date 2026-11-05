@@ -1313,6 +1313,17 @@ Leela picked her favourites for your next trip to this charming city on the Danu
 The location is set to the city. No alt text has been written for any of the
 five posts.
 
+**From the next post on, the restaurants are named.** Instagram takes one
+location per post, so the city keeps it. Instead:
+
+- each dish slide tags the restaurant's own Instagram account;
+- the caption lists the five dishes with their restaurants.
+
+A tag notifies the account, so only a handle confirmed as the restaurant's own
+is used: one linked from its website or Google Maps listing, or with a
+matching name and address. A restaurant without one appears in the caption by
+name only. The five posts so far carry no restaurant tags.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done

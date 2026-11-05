@@ -1327,8 +1327,7 @@ matching name and address. A restaurant without one appears in the caption by
 name only.
 
 **@bitetribeapp follows every account it tags.** As of 5 November 2026 it
-follows all 18 tagged so far, across Bern, Solothurn, Istanbul, Budapest and
-Vienna.
+follows all 27 tagged so far, across all eight city posts.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
@@ -1357,8 +1356,26 @@ Great Market Hall with no account.
 **Vienna was tagged the same day.** Three of its five dishes come from Al
 Zaytouna, and each carries `@alzaytouna_restaurant`. The espresso carries
 `@eissalon_caffe_perrella`. Al Zaytouna's website links a dead account. The
-Dim-Sum Restaurant Chinazentrum has no account. Trieste, Split and Bratislava
-carry no restaurant tags yet.
+Dim-Sum Restaurant Chinazentrum has no account.
+
+**Trieste was tagged the same day.** The focaccia and the bagel carry
+`@pagna_panificioartigianale`, and the pizza carries `@damicheletrieste`, the
+Trieste branch of L'Antica Pizzeria da Michele. Menarosti, with two dishes, has
+no account.
+
+**Split was tagged the same day,** with all five places: `@fife_split`,
+`@restaurant_adriatic`, `@sugrestaurant`, `@kogohvar` (Hvar) and
+`@taboobeachclub.split`. The pistachio dessert's place is named only "Bar,
+club" in the app. Its pin put it at Taboo Beach Club, Bačvice, which Google
+Maps also lists as "Bar, club".
+
+**Bratislava was tagged the same day.** The Slovenská misa carries
+`@slovak_pub`, and the garlic soup and the veterník carry
+`@bratislava_flagship_restaurant`. The Flagship website links a near-empty
+`@flagshipbratislava`, which was not used. Bratislava Bakery has no account.
+The gnocchi's "Zlaty Bažant" stays untagged by the product owner's call. No
+listing carries that name at the Bite's pin, and the nearby Pheasant Pub
+(Sedlárska 6) was not confirmed as the place.
 
 ## Wiring Back Into The Product
 

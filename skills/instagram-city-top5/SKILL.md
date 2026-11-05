@@ -106,7 +106,7 @@ List the five with restaurant and author, plus two or three local alternatives, 
     [(Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n))) * 180) / Math.PI, (x / n) * 360 - 180]; // lat, lng
     ```
 
-  - **Open every handle before using it.** A link on the restaurant's website can be dead. Da Vito's group site links `@davito_liebefeld`, which no longer exists, and the live account is `@ristorante_davito`. Read the profile header, and use the handle only if it exists, has posts, and gives the same name and address. Instagram's search box (`/explore/search/`) finds candidates; its JSON endpoints do not answer from the page.
+  - **Open every handle before using it.** A link on the restaurant's website can be dead. Da Vito's group site links `@davito_liebefeld`, which no longer exists, and the live account is `@ristorante_davito`. A linked account can also be an empty placeholder: the Bratislava Flagship website links `@flagshipbratislava`, which has one post and no bio, while the active `@bratislava_flagship_restaurant` gives the name and address. Read the profile header, and use the handle only if it exists, has posts, and gives the same name and address. Instagram's search box (`/explore/search/`) finds candidates; its JSON endpoints do not answer from the page.
 
 Copy everything into a working folder in the scratchpad, never into the repository: the photos are other people's work.
 
@@ -174,7 +174,7 @@ In the same Chrome, signed in as @bitetribeapp:
    A tag label then sits on the photo. Tag nothing on the cover or the closing slide. Each slide has a delete icon at its top left, which removes the slide from the post - never click it.
 
 6. Leave "Share to Facebook" off; no Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
-7. **Follow every tagged account** from @bitetribeapp. Open each profile and click **Follow**, or **Follow Back**, if the header shows it. If it shows **Following** already, leave it. Check that the button reads **Following** afterwards:
+7. **Follow every tagged account** from @bitetribeapp. Open each profile and click **Follow**, or **Follow Back**, if the header shows it. If it shows **Following** already, leave it. Check that the button reads **Following** afterwards. If it still reads **Follow**, reload the profile before clicking again: on Šug the button had not updated yet, and the follow had already gone through.
 
    ```js
    // On instagram.com/<handle>/ - follows the account if not yet followed; returns [handle, before, after]
@@ -191,7 +191,7 @@ In the same Chrome, signed in as @bitetribeapp:
 
 **Tagging a post that is already up** works the same way in **⋯ → Edit**. Open the post from the profile grid: Edit opened from the post's own `/p/<id>/` page can keep loading forever. Use the same per-slide steps, then **Done**, then follow the accounts as in step 7.
 
-**Always read the tags back.** A tag can be dropped on save without any error: Istanbul's `@viyanakahvesi` was, and the second try stuck. Read them back in the post dialog that stays open after **Done**. The carousel keeps only the current slide and its neighbours in the page, so this collects the tags slide by slide (the slides of older posts have no useful alt text):
+**Always read the tags back.** A tag can be dropped on save without any error: Istanbul's `@viyanakahvesi` was, and the second try stuck. Do not read them in the dialog that stays open after **Done**: it can still show the old tags (Trieste showed one of three, and all three were there after a reload). Reopen the post from the profile grid, then read the tags back. The carousel keeps only the current slide and its neighbours in the page, so this collects the tags slide by slide (the slides of older posts have no useful alt text):
 
 ```js
 // In the open post dialog; returns one line per slide: "?img_index=<n> /<handle>/ ..." (neighbouring slides' tags show too)

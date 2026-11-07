@@ -63,8 +63,7 @@ test.describe('Configure personal settings', () => {
     const settings = new SettingsPage(page);
     await settings.open();
 
-    // The seeded user has no subscription, and nothing is saveable yet.
-    await settings.expectAccountType('Free tier');
+    // Nothing is saveable yet.
     await settings.expectSaveDisabled();
 
     await settings.choosePreferredCurrency('CHF');

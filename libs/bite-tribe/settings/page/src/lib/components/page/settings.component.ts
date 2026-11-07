@@ -14,8 +14,6 @@ import {
   IonButton,
   IonCard,
   IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
   IonContent,
   IonIcon,
   IonItem,
@@ -34,7 +32,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
 import { User } from '@capacitor-firebase/authentication';
-import { CardComponent } from 'common/ui/card';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PushPermissionState } from 'push-notifications';
 import type { MediaLocationPermissionState } from 'media-location';
@@ -76,9 +73,6 @@ export interface PushInstallationView {
     IonModal,
     CurrencySelectorComponent,
     IonText,
-    CardComponent,
-    IonCardHeader,
-    IonCardTitle,
     IonIcon,
     IonNote,
     IonSpinner,
@@ -201,14 +195,6 @@ export class PageSettings {
       .filter((currencyName): currencyName is string => !!currencyName)
       .join(', ');
   });
-
-  subscriptionTier = computed(() => {
-    const user = this.publicUser();
-    return user?.subscriptionTier ?? 0;
-  });
-
-  isFreeUser = computed(() => this.subscriptionTier() === 0);
-  isProUser = computed(() => this.subscriptionTier() >= 1);
 
   /**
    * Whether this platform can receive push at all.

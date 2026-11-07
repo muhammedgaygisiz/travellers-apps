@@ -111,6 +111,7 @@ describe(AdminDashboard.name, () => {
       '/review-timestamps-backfill',
       '/menu-item-ids-backfill',
       '/bite-image-status-backfill',
+      '/bite-countries-rebuild',
       '/menu-item-stats-recompute',
       '/bite-address-backfill',
       '/restaurant-clustering',

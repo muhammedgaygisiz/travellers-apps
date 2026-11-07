@@ -4,9 +4,9 @@
 
 **Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
-`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Four collection-wide
-migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats` and
-`bite-image-status` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Five collection-wide
+migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats`,
+`bite-image-status` and `bite-countries` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
 removed rather than carried over, for the reasons below.
 
 ## Goal
@@ -77,7 +77,15 @@ collection itself.
   entry — not another copy of the state handling.
 
 Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)), `menu-item-ids`
-(issue [#1099]), `menu-item-stats` (issue [#1113]) and `bite-image-status` (issue [#1717]).
+(issue [#1099]), `menu-item-stats` (issue [#1113]), `bite-image-status` (issue [#1717]) and
+`bite-countries` (issue [#1893]).
+
+`bite-countries` rebuilds `meta/biteCountries`, the countries the About page's globe
+lights up, from every Bite's `countryCode`, and reports how many it lists. Like
+`menu-item-stats` it **replaces rather than merges**: the triggers that keep the list
+add and remove one country at a time and cannot notice what they missed, so the
+rebuild is both the first fill and the repair. See `Platform Countries Globe` in
+[UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
 
 `menu-item-ids` is the second registration, and it is the first evidence that
 the contract above holds: it added a name, a runner, its copy and its dashboard
@@ -184,6 +192,7 @@ reaches a device is the new version announcement, whose store considerations bel
   surface.
 - `backfillBiteImageStatusCallable`, started from the Bite image status
   backfill surface.
+- `rebuildBiteCountriesCallable`, started from the Bite countries surface.
 - `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
   surface. It leaves an operator-log entry on both sides of the work - `started` and `succeeded` - because it reads every linked
   Bite and can time out halfway, and a `started` with no `succeeded` is exactly
@@ -210,6 +219,8 @@ reaches a device is the new version announcement, whose store considerations bel
   before it, delivered by pull request [#1593]. Closed.
 - Issue [#1717] added `backfillBiteImageStatusCallable`, which has to run before the rule that
   lists only Bites with an uploaded photo goes live. Open.
+- Issue [#1893] added `rebuildBiteCountriesCallable`, the first fill and repair of the
+  About page's country list. Open.
 - Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005]. Closed.
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
   delivered by pull request [#948]. Closed.
@@ -250,3 +261,4 @@ reaches a device is the new version announcement, whose store considerations bel
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
 [#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
+[#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893

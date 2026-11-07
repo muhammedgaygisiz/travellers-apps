@@ -14,6 +14,7 @@ export class AboutService {
   /** Read guarded: `value()` throws once a read has failed (#1232). */
   totalNumberBitesValue = this.dataAccess.totalNumberBitesValue;
   totalNumberUsersValue = this.dataAccess.totalNumberUsersValue;
+  biteCountriesValue = this.dataAccess.biteCountriesValue;
 
   goToPrivacyPolicy(): void {
     void this.navController.navigateForward([PATH.PRIVACY_POLICY]);

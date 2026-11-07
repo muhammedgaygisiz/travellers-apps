@@ -133,6 +133,14 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'bite-countries-rebuild',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.BiteCountriesRebuildContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'menu-item-stats-recompute',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(

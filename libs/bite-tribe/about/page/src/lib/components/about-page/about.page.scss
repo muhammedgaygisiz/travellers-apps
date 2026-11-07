@@ -1,4 +1,66 @@
+// The desktop column of common/ui/page opens at this width (desktopLayout,
+// GitHub issue #1250); the two columns below open with it.
+$desktop-breakpoint: 1024px;
+
+// The phone column the page keeps without a globe, and below the breakpoint.
+$single-column-max-width: 720px;
+
 :host {
+  // One column on a phone, in plain block flow: who BiteTribe is, where its
+  // Bites are, then the facts - the markup's own order. On a desktop the globe
+  // takes the right half beside the text, as the start page puts its picture
+  // beside the pitch (GitHub issue #1893). The grid is desktop-only on
+  // purpose: as a grid item the text keeps its margins uncollapsed and lands
+  // on fractional rows, which moves the phone page below it.
+  .about-layout {
+    max-width: $single-column-max-width;
+    margin-inline: auto;
+
+    .globe {
+      margin-top: 16px;
+    }
+
+    @media (width >= $desktop-breakpoint) {
+      &.with-globe {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+          'intro globe'
+          'facts globe';
+        column-gap: 3rem;
+        align-items: start;
+        max-width: 1200px;
+
+        .intro {
+          grid-area: intro;
+        }
+
+        .facts {
+          grid-area: facts;
+        }
+
+        // Stays in view beside the text while the store links scroll past.
+        // The globe draws at most 420px across (bt-globe's MAX_SIZE); the cap
+        // keeps its zoom buttons beside it instead of at the column's edge.
+        .globe {
+          grid-area: globe;
+          position: sticky;
+          top: 16px;
+          justify-self: center;
+          width: 100%;
+          max-width: 480px;
+          margin-top: 24px;
+        }
+      }
+    }
+  }
+
+  .release {
+    max-width: $single-column-max-width;
+    margin-inline: auto;
+  }
+
   .legal-section {
     padding-top: 16px;
     border-top: 1px solid var(--ion-color-step-150, #e0e0e0);

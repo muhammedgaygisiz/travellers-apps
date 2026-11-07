@@ -2,6 +2,7 @@ export { NewVersionNotificationContainer } from './lib/integration/new-version-n
 export { ReviewTimestampsBackfillContainer } from './lib/integration/review-timestamps-backfill-container';
 export { MenuItemIdsBackfillContainer } from './lib/integration/menu-item-ids-backfill-container';
 export { BiteImageStatusBackfillContainer } from './lib/integration/bite-image-status-backfill-container';
+export { BiteCountriesRebuildContainer } from './lib/integration/bite-countries-rebuild-container';
 export { MenuItemStatsRecomputeContainer } from './lib/integration/menu-item-stats-recompute-container';
 export { BiteAddressBackfillContainer } from './lib/integration/bite-address-backfill-container';
 export { RestaurantClusteringContainer } from './lib/integration/restaurant-clustering-container';

@@ -74,6 +74,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   backfillMenuItemIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
+  // Rebuilds meta/biteCountries from every Bite (issue #1893).
+  rebuildBiteCountriesCallable: 'operator',
 
   // Rebuilding every dish's Bite count and rating from the Bites themselves
   // (issue #1113). `operator`, because it rewrites an aggregate over every

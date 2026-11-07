@@ -114,6 +114,11 @@ export interface BackfillBiteImageStatusResult extends CollectionMigrationResult
   skipped: number;
 }
 
+export interface RebuildBiteCountriesResult extends CollectionMigrationResult {
+  /** The countries now listed in `meta/biteCountries` (issue #1893). */
+  countries: number;
+}
+
 export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
   /** Dishes that now carry an aggregate. */
   dishes: number;
@@ -341,6 +346,20 @@ export class MigrationsDataAccessService {
       void,
       BackfillBiteImageStatusResult
     >({ name: 'backfillBiteImageStatusCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Rebuilds `meta/biteCountries`, the countries the About page's globe lights
+   * up, from every Bite's country (issue #1893). Replaces the list, so it both
+   * fills it the first time and repairs any drift the triggers left.
+   */
+  async rebuildBiteCountries(): Promise<RebuildBiteCountriesResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      RebuildBiteCountriesResult
+    >({ name: 'rebuildBiteCountriesCallable' });
 
     return result.data;
   }

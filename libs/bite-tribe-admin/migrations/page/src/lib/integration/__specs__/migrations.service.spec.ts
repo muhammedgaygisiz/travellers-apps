@@ -247,6 +247,24 @@ describe(MigrationsService.name, () => {
       });
     });
 
+    it('should call the Bite countries rebuild for its own name', async () => {
+      const result = { countries: 12 };
+      const rebuildBiteCountries = jest.fn().mockResolvedValue(result);
+      const service = configure(
+        aDataAccess({
+          rebuildBiteCountries,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('bite-countries');
+
+      expect(rebuildBiteCountries).toHaveBeenCalledTimes(1);
+      expect(service.collectionMigrationState('bite-countries')).toEqual({
+        status: 'done',
+        result,
+      });
+    });
+
     /**
      * Each migration holds its own state, so one long run does not block or
      * overwrite another - the contract in `UC - Run Operational Migrations`,

@@ -1,53 +1,77 @@
 <ta-page
-  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+    desktopLayout: true,
+  }"
 >
   <ion-content class="ion-padding">
-    <h1>{{ 'about' | transloco }}</h1>
+    <div
+      class="about-layout"
+      data-testid="about-layout"
+      [class.with-globe]="hasGlobe()"
+    >
+      <div class="intro">
+        <h1>{{ 'about' | transloco }}</h1>
 
-    <div>
-      <p>
-        {{ 'bite-tribe-is-a-social-food-discovery-app-for-food-lovers' |
-        transloco }}
-      </p>
-      <p>
-        {{
-        'capture-your-meals-tag-the-location-and-share-bites-from-around-the-world-discover-hidden-gems-track-where-youve-eaten-and-see-what-others-are-tasting-nearby'
-        | transloco }}
-      </p>
+        <p>
+          {{ 'bite-tribe-is-a-social-food-discovery-app-for-food-lovers' |
+          transloco }}
+        </p>
+        <p>
+          {{
+          'capture-your-meals-tag-the-location-and-share-bites-from-around-the-world-discover-hidden-gems-track-where-youve-eaten-and-see-what-others-are-tasting-nearby'
+          | transloco }}
+        </p>
+      </div>
+
+      @if (hasGlobe()) {
+      <bt-globe
+        class="globe"
+        data-testid="about-globe"
+        [countryCodes]="biteCountryCodes()"
+        [autoSpin]="autoSpin()"
+      />
+      }
+
+      <div class="facts">
+        <div class="ion-margin-top">
+          <ng-container
+            >{{ 'total-number-of-bites-on-bite-tribe' | transloco
+            }}</ng-container
+          >
+          <br />
+
+          <ion-text color="primary">{{totalNumberBites()}}</ion-text>
+        </div>
+        <div class="ion-margin-top">
+          <ng-container
+            >{{ 'total-number-of-users-on-bite-tribe' | transloco
+            }}</ng-container
+          >
+          <br />
+
+          <ion-text color="primary">{{totalNumberUsers()}}</ion-text>
+        </div>
+        <div class="legal-section ion-margin-top">
+          <ion-item
+            data-testid="about-privacy-policy"
+            [button]="true"
+            [detail]="true"
+            lines="none"
+            (click)="openPrivacyPolicy.emit()"
+          >
+            <ion-icon name="shield-checkmark-outline" slot="start" />
+            <ion-label>{{ 'privacy-policy' | transloco }}</ion-label>
+          </ion-item>
+        </div>
+
+        <bt-store-links surface="about" />
+      </div>
     </div>
 
-    <div class="ion-margin-top">
-      <ng-container
-        >{{ 'total-number-of-bites-on-bite-tribe' | transloco }}</ng-container
-      >
-      <br />
-
-      <ion-text color="primary">{{totalNumberBites()}}</ion-text>
-    </div>
-    <div class="ion-margin-top">
-      <ng-container
-        >{{ 'total-number-of-users-on-bite-tribe' | transloco }}</ng-container
-      >
-      <br />
-
-      <ion-text color="primary">{{totalNumberUsers()}}</ion-text>
-    </div>
-    <div class="legal-section ion-margin-top">
-      <ion-item
-        data-testid="about-privacy-policy"
-        [button]="true"
-        [detail]="true"
-        lines="none"
-        (click)="openPrivacyPolicy.emit()"
-      >
-        <ion-icon name="shield-checkmark-outline" slot="start" />
-        <ion-label>{{ 'privacy-policy' | transloco }}</ion-label>
-      </ion-item>
-    </div>
-
-    <bt-store-links surface="about" />
-
-    <div class="ion-text-center ion-margin-top">
+    <div class="release ion-text-center ion-margin-top">
       <img width="150" src="assets/icons/logo.svg" alt="logo" />
       <p>Version {{ release().version }} (Build {{ release().buildNumber }})</p>
     </div>

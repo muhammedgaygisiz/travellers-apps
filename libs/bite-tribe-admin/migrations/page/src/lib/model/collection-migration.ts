@@ -15,6 +15,7 @@ export const COLLECTION_MIGRATIONS = [
   'menu-item-ids',
   'menu-item-stats',
   'bite-image-status',
+  'bite-countries',
 ] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];

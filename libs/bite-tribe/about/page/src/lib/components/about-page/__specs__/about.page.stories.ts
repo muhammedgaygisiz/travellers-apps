@@ -9,6 +9,9 @@ addNecessaryIcons();
 export default {
   title: 'Pages/About',
   component: AboutPage,
+  // The page is taller than the laptop viewport; see LokiSettleOptions in
+  // apps/storybook-host/.storybook/loki-getstories-shim.ts (issue #1893).
+  parameters: { lokiSettle: { resetScroll: true } },
   decorators: [
     applicationConfig({
       providers: [
@@ -32,5 +35,17 @@ export const Primary: Story = {
   args: {
     totalNumberBites: 1284,
     totalNumberUsers: 312,
+  },
+};
+
+/**
+ * The globe of every country with a Bite (GitHub issue #1893), held still so
+ * the reference does not depend on where the spin happened to stop.
+ */
+export const WithBiteCountries: Story = {
+  args: {
+    ...Primary.args,
+    biteCountryCodes: ['DE', 'TR', 'IT', 'HU', 'SK', 'JP', 'US', 'BR'],
+    autoSpin: false,
   },
 };

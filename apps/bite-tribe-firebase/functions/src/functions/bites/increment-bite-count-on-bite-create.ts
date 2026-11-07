@@ -5,6 +5,7 @@ import {
   onDocumentDeleted,
 } from 'firebase-functions/firestore';
 import { Bite } from '../shared/model/bite';
+import { removeBiteCountryIfUnused } from '../shared/utils/bite-countries';
 import { rebuildLeaderboard } from '../shared/utils/leaderboard';
 import { removeCountryCodeFromUser } from '../shared/utils/user-country-codes';
 
@@ -95,6 +96,20 @@ export const decrementBiteCountOnBiteDelete = onDocumentDeleted(
     );
 
     await removeCountryCodeFromUser(db, authorUid, bite.countryCode);
+
+    // The About page's globe drops the country with its last Bite (#1893).
+    // A failure here must not cost the leaderboard rebuild below.
+    try {
+      await removeBiteCountryIfUnused(db, bite.countryCode);
+    } catch (error) {
+      logger.warn(
+        'decrementBiteCountOnBiteDelete: failed to update the Bite countries',
+        {
+          biteId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+    }
 
     await rebuildLeaderboard(db);
   },

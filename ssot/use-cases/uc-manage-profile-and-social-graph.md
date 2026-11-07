@@ -273,6 +273,34 @@ they are.
 - **Not part of it.** No journey playback, no link from a country to the Bites there,
   no street-level detail.
 
+## Platform Countries Globe
+
+Issue [#1893]. The About page shows the same `bt-globe`, lit up with every country in
+which at least one Bite exists, from anybody. It is the platform's counterpart of the
+visited-countries globe above: the same drawing and gestures, no title, no counts, no
+list.
+
+- **Data.** One document, `meta/biteCountries`, holding `countryCodes`: the distinct
+  alpha-2 codes, normalised as `user-country-codes.ts` normalises. Firestore cannot group
+  Bites by country, so the backend keeps the list and the About page reads it once.
+  `meta` is readable by members and written only by Functions.
+- **Kept by.** `enrichBiteAddressOnWrite`, when it resolves a Bite's country, adds it.
+  A Bite that moves to another country, fails to resolve after a move, or is deleted
+  (`decrementBiteCountOnBiteDelete`) takes its old country off the list only once no
+  other Bite is filed under it - the rule the profile's country badges follow. A failing
+  update is logged and never marks the Bite's address `failed`.
+- **Rebuilt by.** The `bite-countries` migration in the admin app, the first fill of the
+  document and the repair for drift; see
+  [UC - Run Operational Migrations](uc-run-operational-migrations.md).
+- **Shown.** Above the Bite and member counts, only once the list has arrived and holds
+  a country. While it loads, if the read fails, or before the first fill, the page is as
+  it was without it.
+- **Desktop.** The About page opts into the desktop layout (`desktopLayout`). From
+  1024px, with a globe, the text, counts, privacy policy and store links take the left
+  column and the globe the right, held in view while the left column scrolls - the
+  start page's two-column pattern. Without a globe, and below 1024px, it is the single
+  phone column, in the order intro, globe, facts.
+
 ## User Block Contract
 
 Issue [#1609]. A block is a personal boundary one account sets against another. It needs
@@ -428,6 +456,11 @@ It changes no declaration: the data collected and its purpose are the same.
   `libs/bite-tribe-common/map/src/lib/globe` (entry point `bite-tribe-common/map/globe`);
   `WorldContainer` and `world-page` in `libs/bite-tribe/profile/page`; the
   `Components/Globe` and `Pages/World` stories.
+- Platform countries globe: `bite-countries.ts` in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils`, called from
+  `enrich-bite-address-on-write.ts` and `increment-bite-count-on-bite-create.ts`;
+  `rebuildBiteCountriesCallable`; `biteCountries` in `AboutDataAccessService`; the
+  `bt-globe` in `about-page` and its `Pages/About` `With Bite Countries` story.
 - Playwright coverage for profile editing, public-profile navigation,
   follower/following lists, and follow/unfollow persistence.
 - Follow suggestions: the `suggestPeopleToFollow` callable and the shared
@@ -453,6 +486,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1609] is the User Block Contract above.
 - Issue [#1829] is the Profile Report Contract above, part of epic [#1823].
 - Issue [#1787] is `Visited Countries Globe` above.
+- Issue [#1893] is `Platform Countries Globe` above.
 - Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
@@ -491,6 +525,7 @@ It changes no declaration: the data collected and its purpose are the same.
 [#1707]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1707
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1787]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1787
+[#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823

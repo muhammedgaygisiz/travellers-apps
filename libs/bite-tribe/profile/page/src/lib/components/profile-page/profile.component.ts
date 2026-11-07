@@ -11,7 +11,6 @@ import {
 import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonAlert,
-  IonBadge,
   IonButton,
   IonButtons,
   IonContent,
@@ -67,7 +66,6 @@ const PAGE_SIZE = 50;
     IonList,
     IonPopover,
     BiteComponent,
-    IonBadge,
     IonAlert,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
@@ -93,9 +91,6 @@ export class ProfileComponent {
    */
   isBlocked = input(false, { transform: booleanAttribute });
   userId = input<string>();
-  subscriptionTier = computed((): number => {
-    return this.user()?.subscriptionTier || 0;
-  });
   displayName = computed((): string => {
     if (this.user() && !this.showsProfileContent()) {
       return this.transloco.translate('anonymous');

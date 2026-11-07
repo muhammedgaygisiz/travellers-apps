@@ -106,19 +106,18 @@ Nothing is implemented yet. The current state is:
 
 ```text
 libs/bite-tribe-common/model/src/lib/public-user.ts        subscriptionTier?: number
-libs/bite-tribe/settings/page                              local isFreeUser / isProUser computed signals
-libs/bite-tribe/profile/page                               tier badge rendering for 0, 1 and 2
 apps/bite-tribe-firebase/functions/src/functions/users/create-user-on-auth-create.ts
 ```
 
 The last of these writes `subscriptionTier: 1` for every new account, which issue [#1127] corrects.
+
+No consumer surface shows the tier. Settings had an "Account type" section with Free and PRO cards, and the profile page a FREE, PRO or ULTRA badge next to the display name; issue [#1878] removed both from the templates, because nothing can be bought yet and the cards read as broken controls. Issue [#1145] brings them back with real subscription state once the purchase flow exists. The admin app still shows and sets the tier ([#1485]).
 
 ## Current Limitations
 
 - No entitlement store, no custom claims, no billing integration.
 - No gate is enforced in any callable.
 - `firestore.rules` allows every authenticated user to write every document, so `subscriptionTier` is client-writable today.
-- The settings and profile pages each compute the tier locally instead of reading shared state.
 
 ## Future Ideas
 
@@ -141,3 +140,5 @@ The last of these writes `subscriptionTier: 1` for every new account, which issu
 [#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
 [#1127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1127
 [#1485]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1485
+[#1145]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1145
+[#1878]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1878

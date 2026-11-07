@@ -76,8 +76,9 @@ deletion citations were.
 
 Not implemented. The surfaces this will touch are:
 
-- `libs/bite-tribe/settings/page` current `isFreeUser` and `isProUser` computed signals
-- `libs/bite-tribe/profile/page` tier badge
+- `libs/bite-tribe/settings/page` and `libs/bite-tribe/profile/page`, which show no tier today:
+  issue [#1878] removed the settings tier cards and the profile badge until something can be
+  bought, and issue [#1145] re-adds them on real subscription state
 - `libs/bite-tribe/store` for the shared entitlement state
 - `apps/bite-tribe-firebase/functions` for the webhook and the gated callables
 
@@ -118,3 +119,5 @@ Not implemented. The surfaces this will touch are:
 [#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
 [#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
 [#1127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1127
+[#1145]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1145
+[#1878]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1878

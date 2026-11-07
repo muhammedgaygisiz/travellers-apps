@@ -40,30 +40,26 @@ describe('ProfileComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('subscriptionTier', () => {
-    describe('given no user', () => {
-      it('should return 0', () => {
-        compRef.setInput('user', undefined);
+  // Nothing is for sale yet, so no tier badge shows at any subscriptionTier (#1878).
+  describe('subscription tier', () => {
+    it.each([undefined, 0, 1, 2])(
+      'renders no tier badge for subscriptionTier %s',
+      (subscriptionTier) => {
+        compRef.setInput('user', {
+          displayName: 'Mo',
+          userId: 'user123',
+          subscriptionTier,
+        });
+        compRef.setInput('userId', 'user123');
+        fixture.detectChanges();
 
-        expect(component.subscriptionTier()).toBe(0);
-      });
-    });
+        const element = fixture.nativeElement as HTMLElement;
 
-    describe('given a user without subscriptionTier', () => {
-      it('should return 0', () => {
-        compRef.setInput('user', {});
-
-        expect(component.subscriptionTier()).toBe(0);
-      });
-    });
-
-    describe('given a user with subscriptionTier 1', () => {
-      it('should return 1', () => {
-        compRef.setInput('user', { subscriptionTier: 1 });
-
-        expect(component.subscriptionTier()).toBe(1);
-      });
-    });
+        expect(element.querySelector('.profile-display-name')).not.toBeNull();
+        expect(element.querySelector('ion-badge')).toBeNull();
+        expect(element.textContent).not.toMatch(/\b(FREE|PRO|ULTRA)\b/);
+      },
+    );
   });
 
   describe('followerCount', () => {
@@ -125,7 +121,6 @@ describe('ProfileComponent', () => {
       const nativeElement = fixture.nativeElement as HTMLElement;
 
       expect(nativeElement.querySelector('profile-skeleton')).toBeTruthy();
-      expect(nativeElement.querySelector('.subscription-badge')).toBeFalsy();
       expect(nativeElement.querySelector('.no-profile-message')).toBeFalsy();
     });
 
@@ -725,13 +720,12 @@ describe('ProfileComponent', () => {
       ).not.toBeNull();
     });
 
-    it('shows none of its Bites, flags, about or subscription', () => {
+    it('shows none of its Bites, flags or about', () => {
       const element = fixture.nativeElement as HTMLElement;
 
       expect(element.querySelector('bt-bite')).toBeNull();
       expect(element.querySelector('country-flags')).toBeNull();
       expect(element.querySelector('.profile-about')).toBeNull();
-      expect(element.querySelector('.subscription-badge')).toBeNull();
       expect(component.biteCount()).toBe(0);
     });
 

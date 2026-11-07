@@ -1,5 +1,4 @@
 @let userData = user();
-@let subscriptionTierData = subscriptionTier();
 @let currentUserId = userId();
 
 <ta-page
@@ -58,20 +57,6 @@
               <span class="profile-pronouns" data-testid="profile-pronouns">{{
                 pronouns()
               }}</span>
-            }
-
-            @if (showsProfileContent()) {
-              <ion-badge class="subscription-badge">
-                @if (subscriptionTierData === 0) {
-                  FREE
-                }
-                @if (subscriptionTierData === 1) {
-                  PRO
-                }
-                @if (subscriptionTierData === 2) {
-                  ULTRA
-                }
-              </ion-badge>
             }
           </h1>
 

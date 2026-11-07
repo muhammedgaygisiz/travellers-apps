@@ -323,78 +323,29 @@ describe(PageSettings.name, () => {
     });
   });
 
-  describe('Subscription Tier', () => {
-    it('should default to free tier (0) when publicUser has no subscriptionTier', () => {
-      const mockPublicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-      };
-      compRef.setInput('publicUser', mockPublicUser);
-      fixture.detectChanges();
+  // Nothing is for sale yet, so no tier is shown at any subscriptionTier (#1878).
+  describe('Subscription tier', () => {
+    it.each([undefined, 0, 1, 2])(
+      'renders no account type or tier card for subscriptionTier %s',
+      (subscriptionTier) => {
+        const mockPublicUser: PublicUser = {
+          displayName: 'Test User',
+          email: 'test@example.com',
+          photoUrl: 'photo.jpg',
+          userId: 'user123',
+          subscriptionTier,
+        };
+        compRef.setInput('publicUser', mockPublicUser);
+        fixture.detectChanges();
 
-      expect(component.subscriptionTier()).toBe(0);
-      expect(component.isFreeUser()).toBe(true);
-      expect(component.isProUser()).toBe(false);
-    });
+        const element = fixture.nativeElement as HTMLElement;
 
-    it('should identify free user when subscriptionTier is 0', () => {
-      const mockPublicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        subscriptionTier: 0,
-      };
-      compRef.setInput('publicUser', mockPublicUser);
-      fixture.detectChanges();
-
-      expect(component.subscriptionTier()).toBe(0);
-      expect(component.isFreeUser()).toBe(true);
-      expect(component.isProUser()).toBe(false);
-    });
-
-    it('should identify pro user when subscriptionTier is 1', () => {
-      const mockPublicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        subscriptionTier: 1,
-      };
-      compRef.setInput('publicUser', mockPublicUser);
-      fixture.detectChanges();
-
-      expect(component.subscriptionTier()).toBe(1);
-      expect(component.isFreeUser()).toBe(false);
-      expect(component.isProUser()).toBe(true);
-    });
-
-    it('should identify pro user when subscriptionTier is greater than 1', () => {
-      const mockPublicUser: PublicUser = {
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'photo.jpg',
-        userId: 'user123',
-        subscriptionTier: 2,
-      };
-      compRef.setInput('publicUser', mockPublicUser);
-      fixture.detectChanges();
-
-      expect(component.subscriptionTier()).toBe(2);
-      expect(component.isFreeUser()).toBe(false);
-      expect(component.isProUser()).toBe(true);
-    });
-
-    it('should handle undefined publicUser', () => {
-      compRef.setInput('publicUser', undefined);
-      fixture.detectChanges();
-
-      expect(component.subscriptionTier()).toBe(0);
-      expect(component.isFreeUser()).toBe(true);
-      expect(component.isProUser()).toBe(false);
-    });
+        expect(element.querySelector('.subscription-section')).toBeNull();
+        expect(element.querySelector('[aria-label="Free tier"]')).toBeNull();
+        expect(element.querySelector('[aria-label="PRO tier"]')).toBeNull();
+        expect(element.textContent).not.toMatch(/\bPRO\b/);
+      },
+    );
   });
 
   describe('Push installations', () => {

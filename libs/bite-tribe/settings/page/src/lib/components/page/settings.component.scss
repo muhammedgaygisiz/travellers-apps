@@ -1,50 +1,11 @@
 :host {
   // Every section on the page carries its own heading, which is what tells the
-  // save button apart from a page-level action (#1217). One rule so the four
+  // save button apart from a page-level action (#1217). One rule so the
   // sections cannot drift apart.
   h2 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
-  }
-
-  .subscription-section {
-    h2 {
-      margin-bottom: 1rem;
-    }
-
-    .subscription-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-
-      @media (max-width: 400px) {
-        grid-template-columns: 1fr;
-      }
-
-      ta-card {
-        transition: all 0.3s ease;
-
-        ::ng-deep ion-card {
-          margin: 0;
-          text-align: center;
-          border: 2px solid transparent;
-        }
-
-        &.highlighted ::ng-deep ion-card {
-          border-color: var(--ion-color-primary);
-        }
-
-        ion-card-header {
-          padding: 24px 16px;
-        }
-
-        ion-card-title {
-          font-size: 1.125rem;
-          font-weight: 600;
-        }
-      }
-    }
   }
 
   .nearby-value {

@@ -50,14 +50,6 @@ export class SettingsPage {
     await this.page.waitForURL(/\/settings\/delete-account$/);
   }
 
-  /** The highlighted tier card. Free and PRO both render; only one is current. */
-  async expectAccountType(tier: 'Free tier' | 'PRO tier'): Promise<void> {
-    await expect(this.root.locator(`[aria-label="${tier}"]`)).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-  }
-
   /**
    * Nothing is saveable until something changes: the button is bound to the
    * form's pristine state as well as its validity.

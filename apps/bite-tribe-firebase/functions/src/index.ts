@@ -51,6 +51,7 @@ export { syncEmailVerificationStatus } from './functions/users/sync-email-verifi
 export { sendEmailVerificationReminders } from './functions/users/send-email-verification-reminders';
 export { sendNewUserFollowUps } from './functions/users/send-new-user-follow-ups';
 export { sendNewUserWeekFollowUps } from './functions/users/send-new-user-week-follow-ups';
+export { sendNewUserMonthFollowUps } from './functions/users/send-new-user-month-follow-ups';
 export { handleEmailUnsubscribe } from './functions/users/handle-email-unsubscribe';
 export { loadBitesByLocation } from './functions/bites/load-bites-by-location';
 export { loadWeeklyBites } from './functions/bites/load-weekly-bites';

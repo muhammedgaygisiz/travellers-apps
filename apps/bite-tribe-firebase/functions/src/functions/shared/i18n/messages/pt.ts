@@ -71,6 +71,14 @@ export const pt: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': 'Mais pratos que valem a pena provar',
   'newUserWeekFollowUp.footer':
     'Você recebe este e-mail uma única vez, uma semana depois de entrar no BiteTribe.',
+  'newUserMonthFollowUp.emailSubject':
+    'O que você perdeu este mês no BiteTribe',
+  'newUserMonthFollowUp.emailIntro':
+    'Faz um mês que você entrou no BiteTribe. Aqui estão alguns Bites das últimas semanas que valem a pena ver.',
+  'newUserMonthFollowUp.followingHeading': 'Este mês, de quem você segue',
+  'newUserMonthFollowUp.moreHeading': 'Mais pratos que valem a pena provar',
+  'newUserMonthFollowUp.footer':
+    'Você recebe este e-mail uma única vez, um mês depois de entrar no BiteTribe.',
   'emailUnsubscribe.title': 'Cancelar inscrição nos e-mails do BiteTribe',
   'emailUnsubscribe.confirm':
     'O BiteTribe deixará de enviar e-mails como este. E-mails da sua conta, como o de verificação, continuarão chegando.',

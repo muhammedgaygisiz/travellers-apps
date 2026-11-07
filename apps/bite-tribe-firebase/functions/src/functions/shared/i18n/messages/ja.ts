@@ -73,6 +73,13 @@ export const ja: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': 'ほかにも試してみたい料理',
   'newUserWeekFollowUp.footer':
     'このメールは、BiteTribeへの登録から1週間後に一度だけお送りしています。',
+  'newUserMonthFollowUp.emailSubject': '今月のBiteTribeで見逃した投稿',
+  'newUserMonthFollowUp.emailIntro':
+    'BiteTribeに登録してから1か月が経ちました。ここ数週間の注目のBiteを集めました。',
+  'newUserMonthFollowUp.followingHeading': '今月のフォロー中のユーザーの投稿',
+  'newUserMonthFollowUp.moreHeading': 'ほかにも試してみたい料理',
+  'newUserMonthFollowUp.footer':
+    'このメールは、BiteTribeへの登録から1か月後に一度だけお送りしています。',
   'emailUnsubscribe.title': 'BiteTribeのメール配信を停止',
   'emailUnsubscribe.confirm':
     'BiteTribeからこのようなメールは届かなくなります。認証メールなど、アカウントに関するメールは引き続き届きます。',

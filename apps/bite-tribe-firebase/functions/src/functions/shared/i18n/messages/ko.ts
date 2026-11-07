@@ -67,6 +67,14 @@ export const ko: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': '더 먹어 볼 만한 메뉴',
   'newUserWeekFollowUp.footer':
     'BiteTribe 가입 일주일 후에 이 이메일을 한 번만 보내 드려요.',
+  'newUserMonthFollowUp.emailSubject': '이번 달 BiteTribe에서 놓친 소식',
+  'newUserMonthFollowUp.emailIntro':
+    'BiteTribe에 가입한 지 한 달이 됐어요. 지난 몇 주 동안 올라온 볼 만한 Bite를 모았어요.',
+  'newUserMonthFollowUp.followingHeading':
+    '이번 달 내가 팔로우하는 사람들의 소식',
+  'newUserMonthFollowUp.moreHeading': '더 먹어 볼 만한 메뉴',
+  'newUserMonthFollowUp.footer':
+    'BiteTribe 가입 한 달 후에 이 이메일을 한 번만 보내 드려요.',
   'emailUnsubscribe.title': 'BiteTribe 이메일 수신 거부',
   'emailUnsubscribe.confirm':
     'BiteTribe에서 이런 이메일을 더 이상 보내지 않아요. 인증 메일 같은 계정 관련 이메일은 계속 받게 돼요.',

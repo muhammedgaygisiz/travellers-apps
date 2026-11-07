@@ -69,6 +69,13 @@ export const th: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': 'เมนูอื่นที่น่าลอง',
   'newUserWeekFollowUp.footer':
     'คุณได้รับอีเมลนี้เพียงครั้งเดียว หนึ่งสัปดาห์หลังจากที่คุณเข้าร่วม BiteTribe',
+  'newUserMonthFollowUp.emailSubject': 'สิ่งที่คุณพลาดไปบน BiteTribe เดือนนี้',
+  'newUserMonthFollowUp.emailIntro':
+    'ผ่านมาหนึ่งเดือนแล้วตั้งแต่คุณเข้าร่วม BiteTribe นี่คือ Bite จากช่วงหลายสัปดาห์ที่ผ่านมาที่น่าดู',
+  'newUserMonthFollowUp.followingHeading': 'เดือนนี้จากคนที่คุณติดตาม',
+  'newUserMonthFollowUp.moreHeading': 'เมนูอื่นที่น่าลอง',
+  'newUserMonthFollowUp.footer':
+    'คุณได้รับอีเมลนี้เพียงครั้งเดียว หนึ่งเดือนหลังจากที่คุณเข้าร่วม BiteTribe',
   'emailUnsubscribe.title': 'ยกเลิกการรับอีเมลจาก BiteTribe',
   'emailUnsubscribe.confirm':
     'BiteTribe จะหยุดส่งอีเมลแบบนี้ให้คุณ อีเมลเกี่ยวกับบัญชี เช่น อีเมลยืนยัน จะยังคงส่งถึงคุณ',

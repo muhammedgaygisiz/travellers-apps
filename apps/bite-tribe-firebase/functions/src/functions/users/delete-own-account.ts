@@ -29,7 +29,10 @@ import {
 import { requireMember } from '../shared/roles';
 import { EMAIL_OPT_OUTS_COLLECTION } from './email-opt-out';
 import { NEW_USER_FOLLOW_UPS_COLLECTION } from './new-user-follow-up-picks';
-import { NEW_USER_WEEK_FOLLOW_UPS_COLLECTION } from './new-user-week-follow-up-picks';
+import {
+  NEW_USER_MONTH_FOLLOW_UPS_COLLECTION,
+  NEW_USER_WEEK_FOLLOW_UPS_COLLECTION,
+} from './new-user-week-follow-up-picks';
 import {
   BLOCKED_BY_SUBCOLLECTION,
   BLOCKED_SUBCOLLECTION,
@@ -409,9 +412,9 @@ export const deleteSettingsForUser = (
 
 /**
  * Deletes what the new-user follow-up mails kept about the account
- * (GitHub issues #1707 and #1874): the once-only claim of each mail and every
- * unsubscribe token issued to it. A token outliving its account would answer a click with a page about
- * an account that no longer exists.
+ * (GitHub issues #1707, #1874 and #1894): the once-only claim of each mail and
+ * every unsubscribe token issued to it. A token outliving its account would
+ * answer a click with a page about an account that no longer exists.
  */
 export const deleteFollowUpRecordsForUser = async (
   db: Firestore,
@@ -424,6 +427,7 @@ export const deleteFollowUpRecordsForUser = async (
   );
   await db.collection(NEW_USER_FOLLOW_UPS_COLLECTION).doc(uid).delete();
   await db.collection(NEW_USER_WEEK_FOLLOW_UPS_COLLECTION).doc(uid).delete();
+  await db.collection(NEW_USER_MONTH_FOLLOW_UPS_COLLECTION).doc(uid).delete();
 };
 
 export const deleteProfileImagesForUser = async (

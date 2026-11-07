@@ -961,12 +961,13 @@ service cloud.firestore {
     }
 
     /**
-     * The new-user follow-up mails (GitHub issues #1707 and #1874), all written
-     * and read by the Admin SDK only. `config` holds the hand-picked Bites and
-     * people, edited in the console; `newUserFollowUps` and
-     * `newUserWeekFollowUps` are the once-per-account claims of the day-1 and
-     * the day-7 mail; `emailOptOuts` maps an unsubscribe token to its account,
-     * and a readable token would let anybody who saw one opt somebody else out.
+     * The new-user follow-up mails (GitHub issues #1707, #1874 and #1894), all
+     * written and read by the Admin SDK only. `config` holds the hand-picked
+     * Bites and people, edited in the console; `newUserFollowUps`,
+     * `newUserWeekFollowUps` and `newUserMonthFollowUps` are the
+     * once-per-account claims of the day-1, day-7 and day-30 mail;
+     * `emailOptOuts` maps an unsubscribe token to its account, and a readable
+     * token would let anybody who saw one opt somebody else out.
      */
     match /config/{documentId} {
       allow read, write: if false;
@@ -977,6 +978,10 @@ service cloud.firestore {
     }
 
     match /newUserWeekFollowUps/{userId} {
+      allow read, write: if false;
+    }
+
+    match /newUserMonthFollowUps/{userId} {
       allow read, write: if false;
     }
 

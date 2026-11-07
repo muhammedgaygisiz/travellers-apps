@@ -17,7 +17,9 @@ import { TEST_USERS } from '../support/test-users';
  */
 async function seedBaselineSettings(page: Page): Promise<void> {
   await seedFirestoreDocument(page, `settings/${TEST_USERS.default.uid}`, {
-    emailUpdates: { booleanValue: false },
+    // No switch on the page sets this (#1879); seeding the non-default proves a
+    // save carries it through.
+    emailUpdates: { booleanValue: true },
     location: { booleanValue: true },
     theme: { stringValue: 'light' },
     currency: { stringValue: 'EUR' },
@@ -75,15 +77,16 @@ test.describe('Configure personal settings', () => {
     await settings.selectTheme('Dark');
     await settings.save();
 
-    // `location` is not on this form; it is carried through from the existing
-    // document, so a settings save must not drop the onboarding grant.
+    // `location` and `emailUpdates` are not on this form; they are carried
+    // through from the existing document, so a settings save must not drop the
+    // onboarding grant or the stored email preference.
     await expectFirestoreDocument(page, `settings/${TEST_USERS.default.uid}`, {
       currency: 'CHF',
       favoriteCurrencies: ['JPY'],
       theme: 'dark',
       language: 'en',
       location: true,
-      emailUpdates: false,
+      emailUpdates: true,
     });
 
     // Read the values back through the UI. The theme control is deliberately

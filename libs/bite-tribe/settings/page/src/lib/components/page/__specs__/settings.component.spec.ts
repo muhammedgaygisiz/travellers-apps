@@ -62,7 +62,6 @@ describe(PageSettings.name, () => {
       const formValue = component.settingsForm.getRawValue();
 
       expect(formValue).toEqual({
-        emailUpdates: false,
         theme: 'light',
         currency: 'EUR',
         favoriteCurrencies: [],
@@ -104,7 +103,6 @@ describe(PageSettings.name, () => {
       };
 
       component.settingsForm.setValue({
-        emailUpdates: mockSettings.emailUpdates,
         theme: mockSettings.theme,
         currency: mockSettings.currency,
         favoriteCurrencies: mockSettings.favoriteCurrencies || [],
@@ -134,6 +132,41 @@ describe(PageSettings.name, () => {
       expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
         expect.objectContaining({ location: true }),
       );
+    });
+
+    // Email updates has no switch until there is a newsletter (#1879), so a
+    // save must hand back whatever is stored rather than a default.
+    it.each([true, false])(
+      'should keep a stored emailUpdates of %s it has no control for',
+      (emailUpdates) => {
+        compRef.setInput('settings', {
+          location: false,
+          emailUpdates,
+          theme: 'dark',
+          currency: 'USD',
+          favoriteCurrencies: [],
+          language: 'de',
+        } satisfies Settings);
+        fixture.detectChanges();
+
+        component.settingsForm.patchValue({ currency: 'JPY' });
+        component.saveSettings();
+
+        expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ emailUpdates, currency: 'JPY' }),
+        );
+      },
+    );
+
+    it('should render no email updates control', () => {
+      fixture.detectChanges();
+
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(
+        element.querySelector('[formcontrolname="emailUpdates"]'),
+      ).toBeNull();
+      expect(element.textContent).not.toContain('email-updates');
     });
 
     it('should not emit if form is invalid', () => {

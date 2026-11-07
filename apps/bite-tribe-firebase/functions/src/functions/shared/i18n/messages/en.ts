@@ -71,6 +71,14 @@ export const en: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': 'More dishes worth trying',
   'newUserWeekFollowUp.footer':
     'You get this email once, a week after you joined BiteTribe.',
+  'newUserMonthFollowUp.emailSubject':
+    'What you missed on BiteTribe this month',
+  'newUserMonthFollowUp.emailIntro':
+    "It's been a month since you joined BiteTribe. Here are a few Bites from the past weeks worth a look.",
+  'newUserMonthFollowUp.followingHeading': 'From people you follow this month',
+  'newUserMonthFollowUp.moreHeading': 'More dishes worth trying',
+  'newUserMonthFollowUp.footer':
+    'You get this email once, a month after you joined BiteTribe.',
   'emailUnsubscribe.title': 'Unsubscribe from BiteTribe emails',
   'emailUnsubscribe.confirm':
     'BiteTribe will stop sending you emails like this one. Account emails, such as the verification email, still arrive.',

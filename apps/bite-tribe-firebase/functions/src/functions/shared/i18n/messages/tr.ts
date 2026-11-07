@@ -69,6 +69,13 @@ export const tr: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': 'Denemeye değer başka yemekler',
   'newUserWeekFollowUp.footer':
     'Bu e-postayı BiteTribe’a katılmandan bir hafta sonra, bir kez alıyorsun.',
+  'newUserMonthFollowUp.emailSubject': 'Bu ay BiteTribe’da kaçırdıkların',
+  'newUserMonthFollowUp.emailIntro':
+    'BiteTribe’a katılalı bir ay oldu. İşte son haftalardan göz atmaya değer birkaç Bite.',
+  'newUserMonthFollowUp.followingHeading': 'Bu ay takip ettiğin kişilerden',
+  'newUserMonthFollowUp.moreHeading': 'Denemeye değer başka yemekler',
+  'newUserMonthFollowUp.footer':
+    'Bu e-postayı BiteTribe’a katılmandan bir ay sonra, bir kez alıyorsun.',
   'emailUnsubscribe.title': 'BiteTribe e-postalarından çık',
   'emailUnsubscribe.confirm':
     'BiteTribe sana artık bunun gibi e-postalar göndermeyecek. Doğrulama gibi hesap e-postaları gelmeye devam eder.',

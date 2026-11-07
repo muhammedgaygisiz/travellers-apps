@@ -43,6 +43,7 @@ pushTokens
 config
 newUserFollowUps
 newUserWeekFollowUps
+newUserMonthFollowUps
 emailOptOuts
 biteReports
 userReports
@@ -63,9 +64,9 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   readable and simply not listed. The two exceptions are `accountDeletions` and
   the top-level `pushTokens` index, which are cross-account identifiers no
   client ever read. The collections of the new-user follow-up mails -
-  `config`, `newUserFollowUps`, `newUserWeekFollowUps` and `emailOptOuts` - were
-  never readable at all: the Admin SDK is their only reader and writer ([#1707],
-  [#1874]). `biteReports` is
+  `config`, `newUserFollowUps`, `newUserWeekFollowUps`, `newUserMonthFollowUps`
+  and `emailOptOuts` - were never readable at all: the Admin SDK is their only
+  reader and writer ([#1707], [#1874], [#1894]). `biteReports` is
   readable by an operator alone and written by no client: `reportBite` files a
   report through the Admin SDK so that the reported author can never read who
   reported them ([#1608]). `userReports` is the same for a reported profile, filed
@@ -586,3 +587,4 @@ libs/bite-tribe/api
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
+[#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894

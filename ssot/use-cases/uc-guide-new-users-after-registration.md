@@ -189,6 +189,34 @@ day-7 mail is one more reason, sent only to the ones who drifted off after day 1
 - **Deletion.** Account deletion removes `newUserWeekFollowUps/{uid}` with the
   day-1 claim.
 
+## Day-30 Mail Contract
+
+After day 7 nothing reached a new user, and D30 had no lever. The day-30 mail
+is the day-7 mail a month in (issue [#1894]): the same run, layout, opt-out and
+monitor copy, and only these differences.
+
+- **Trigger.** `sendNewUserMonthFollowUps` runs daily at 18:00 Europe/Zurich and
+  reads the profiles created on the Zurich calendar day thirty days before the
+  run - the day `retention-cohorts` counts as D30.
+- **Who gets it.** The day-7 audience rules, except what counts as active: an
+  account seen from the start of day 23 (Zurich midnight seven days before the
+  run) on is left alone. The question is whether the account is active now, not
+  whether it ever came back, so one that returned after the day-7 mail and
+  drifted off again still gets this one.
+- **Exactly once.** `newUserMonthFollowUps/{uid}`, `sent` or `failed`.
+- **Content.** Up to three listable Bites the recipient's followed public
+  accounts posted in the last thirty days, newest first. The fallback is
+  `config/newUserMonthFollowUp.biteIds` (at most ten), leaving out every Bite the
+  day-1 and day-7 configs name, so no fallback pick is shown twice.
+- **Monitor copy.** Through `config/newUserMonthFollowUp.monitorUids`, under a
+  `[Month follow-up monitor] ...` subject.
+- **Measurement.** Every link carries
+  `utm_campaign=new_user_month_follow_up`. Click-through over the `sent` records
+  is the fast signal; the outcome is D30 from `retention-cohorts`, which stays
+  out of the digest until the export has matured D30 cohorts.
+- **Deletion.** Account deletion removes `newUserMonthFollowUps/{uid}` with the
+  other claims.
+
 ## MVP Classification
 
 **[MVP]** - the blocking assistant and its steps: the unique display name, the public/private
@@ -239,6 +267,9 @@ permission surface, so the purpose strings are read here before any other screen
   `users/new-user-week-follow-up-picks.ts` and
   `users/new-user-week-follow-up-email.ts`, with the `newUserWeekFollowUp.*`
   keys of the backend catalog.
+- The day-30 mail: `users/send-new-user-month-follow-ups.ts`, running through
+  `users/send-lapsed-new-user-follow-ups.ts` with the day-7 mail, with the
+  `newUserMonthFollowUp.*` keys of the backend catalog.
 
 ## Related GitHub Scope
 
@@ -253,6 +284,8 @@ permission surface, so the purpose strings are read here before any other screen
 - Issue [#1708] (people to follow on the finish step)
 - Issue [#1874] (the day-7 mail to new users who did not come back), part of
   epic [#907], from the analytics check on [#914]
+- Issue [#1894] (the day-30 mail to new users who are not active), part of epic
+  [#907]
 - Issue [#1798] (finishing onboarding is celebrated), part of epic [#1741]
 
 ## Related Domains
@@ -303,3 +336,4 @@ permission surface, so the purpose strings are read here before any other screen
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
+[#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894

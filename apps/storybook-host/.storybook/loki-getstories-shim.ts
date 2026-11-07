@@ -136,7 +136,52 @@ const skeletonsSettled = (elapsedMs: number): boolean =>
 // it settles after one quiet period instead of stalling until the timeout.
 // The timeout is a backstop - a story that never settles is still captured, so
 // it fails on its diff rather than hanging the run.
-const awaitStorySettled = async (): Promise<void> => {
+/**
+ * Per-story settle options, read from `parameters.lokiSettle` (not
+ * `parameters.loki`, which Loki itself reads as tab options).
+ */
+export interface LokiSettleOptions {
+  /**
+   * Scroll every scroll container back to the top before the capture.
+   *
+   * Loki sizes a capture from the union of the story's element boxes, measured
+   * at the configured viewport height, and only then grows the window to fit.
+   * A page taller than the viewport that is left scrolled a few pixels down at
+   * that moment is measured that many pixels short, and once the window grows
+   * the scroll is gone, so the capture loses its bottom strip instead: the
+   * `Pages/About` laptop capture came out 963, 975 or 986px tall run to run
+   * (GitHub issue #1893). Opt-in, because some stories scroll on purpose.
+   */
+  resetScroll?: boolean;
+}
+
+/** Every element that scrolls, light and shadow DOM alike. */
+const collectScrollContainers = (root: ParentNode = document): Element[] => {
+  const containers: Element[] = [];
+
+  root.querySelectorAll('*').forEach((element) => {
+    if (element.scrollTop > 0 || element.scrollLeft > 0) {
+      containers.push(element);
+    }
+    if (element.shadowRoot) {
+      containers.push(...collectScrollContainers(element.shadowRoot));
+    }
+  });
+
+  return containers;
+};
+
+const resetScrollPositions = (): void => {
+  collectScrollContainers().forEach((element) => {
+    element.scrollTop = 0;
+    element.scrollLeft = 0;
+  });
+  window.scrollTo(0, 0);
+};
+
+const awaitStorySettled = async (
+  options: LokiSettleOptions = {},
+): Promise<void> => {
   const start = Date.now();
   let lastMutation = Date.now();
 
@@ -162,6 +207,10 @@ const awaitStorySettled = async (): Promise<void> => {
     observer.disconnect();
   }
 
+  if (options.resetScroll) {
+    resetScrollPositions();
+  }
+
   // Give the settled DOM two frames to paint before the screenshot.
   await new Promise((resolve) =>
     requestAnimationFrame(() =>
@@ -172,13 +221,13 @@ const awaitStorySettled = async (): Promise<void> => {
 
 // Called once per story render from the preview decorator, so each story gets
 // its own settle promise. No-op outside a Loki run (`window.loki` is undefined).
-export const registerLokiSettle = (): void => {
+export const registerLokiSettle = (options?: LokiSettleOptions): void => {
   const loki = (window as any).loki;
   if (!loki || typeof loki.registerPendingPromise !== 'function') {
     return;
   }
   try {
-    loki.registerPendingPromise(awaitStorySettled());
+    loki.registerPendingPromise(awaitStorySettled(options));
   } catch {
     /* ignore */
   }

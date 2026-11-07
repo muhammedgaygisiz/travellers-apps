@@ -13,6 +13,7 @@ import {
   removeCountryCodeFromUser,
 } from '../../shared/utils/user-country-codes';
 import { notifyOnNewCountryBadge } from '../../notifications/notify-on-new-country-badge';
+import { updateBiteCountries } from '../../shared/utils/bite-countries';
 import { Bite } from '../../shared/model/bite';
 
 /** The Bite document the transaction reads back before it writes. */
@@ -80,6 +81,10 @@ jest.mock('../../shared/utils/user-country-codes', () => ({
   ...jest.requireActual('../../shared/utils/user-country-codes'),
   addCountryCodeToUser: jest.fn(),
   removeCountryCodeFromUser: jest.fn(),
+}));
+
+jest.mock('../../shared/utils/bite-countries', () => ({
+  updateBiteCountries: jest.fn(),
 }));
 
 jest.mock('../../notifications/notify-on-new-country-badge', () => ({
@@ -365,6 +370,34 @@ describe('enrichBiteAddressOnWrite', () => {
     );
     expect(notifyOnNewCountryBadge).toHaveBeenCalledWith('user-1', 'HU');
     expect(removeCountryCodeFromUser).not.toHaveBeenCalled();
+    expect(updateBiteCountries).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      'HU',
+    );
+  });
+
+  it('keeps the address resolved when the Bite countries cannot be updated', async () => {
+    const created: Bite = {
+      ...resolvedInMartin,
+      position: BUDAPEST,
+      geohash: geohashOf(BUDAPEST),
+      addressStatus: 'pending',
+      countryCode: undefined,
+    };
+    storedBite = created;
+    jest.mocked(reverseGeocode).mockResolvedValue(BUDAPEST_ADDRESS);
+    jest
+      .mocked(updateBiteCountries)
+      .mockRejectedValueOnce(new Error('unavailable'));
+
+    await expect(write(undefined, created)).resolves.not.toThrow();
+
+    expect(transactionUpdate).toHaveBeenCalledTimes(1);
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      ref,
+      expect.objectContaining({ addressStatus: 'resolved' }),
+    );
   });
 
   it('re-derives city, country and geohash when an edit picks a restaurant elsewhere', async () => {
@@ -397,6 +430,11 @@ describe('enrichBiteAddressOnWrite', () => {
       'user-1',
       'SK',
     );
+    expect(updateBiteCountries).toHaveBeenCalledWith(
+      expect.anything(),
+      'SK',
+      'HU',
+    );
   });
 
   it('does nothing when an edit keeps the restaurant and position', async () => {
@@ -410,6 +448,7 @@ describe('enrichBiteAddressOnWrite', () => {
     expect(transactionUpdate).not.toHaveBeenCalled();
     expect(addCountryCodeToUser).not.toHaveBeenCalled();
     expect(removeCountryCodeFromUser).not.toHaveBeenCalled();
+    expect(updateBiteCountries).not.toHaveBeenCalled();
   });
 
   it('does not overwrite a Bite that moved again while it was geocoded', async () => {
@@ -423,6 +462,7 @@ describe('enrichBiteAddressOnWrite', () => {
 
     expect(transactionUpdate).not.toHaveBeenCalled();
     expect(addCountryCodeToUser).not.toHaveBeenCalled();
+    expect(updateBiteCountries).not.toHaveBeenCalled();
   });
 
   it('clears the stale address when the moved Bite cannot be geocoded', async () => {
@@ -446,6 +486,11 @@ describe('enrichBiteAddressOnWrite', () => {
       expect.anything(),
       'user-1',
       'SK',
+    );
+    expect(updateBiteCountries).toHaveBeenCalledWith(
+      expect.anything(),
+      'SK',
+      undefined,
     );
   });
 

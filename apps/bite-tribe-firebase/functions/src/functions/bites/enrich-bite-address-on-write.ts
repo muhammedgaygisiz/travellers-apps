@@ -23,6 +23,7 @@ import {
   removeCountryCodeFromUser,
 } from '../shared/utils/user-country-codes';
 import { notifyOnNewCountryBadge } from '../notifications/notify-on-new-country-badge';
+import { updateBiteCountries } from '../shared/utils/bite-countries';
 
 export { extractBiteAddress } from '../shared/utils/reverse-geocode';
 export type { BiteAddress } from '../shared/utils/reverse-geocode';
@@ -211,6 +212,26 @@ const updateCountryBadges = async (
 };
 
 /**
+ * Keeps the platform-wide country list the About page's globe reads in step
+ * with the Bite's country (GitHub issue #1893). Kept out of the geocoding
+ * result for the same reason as the badges: the address is already written.
+ */
+const updatePlatformCountries = async (
+  biteId: string,
+  previousCountryCode: unknown,
+  countryCode: unknown,
+): Promise<void> => {
+  try {
+    await updateBiteCountries(db, previousCountryCode, countryCode);
+  } catch (error) {
+    logger.warn('enrichBiteAddress: failed to update the Bite countries', {
+      biteId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+/**
  * Derives a Bite's address and geohash from its position. The one path the
  * create trigger, the edit trigger and the operator backfill all share.
  *
@@ -262,6 +283,10 @@ const enrichBiteAddress = async (
       );
     }
 
+    if (written) {
+      await updatePlatformCountries(biteId, previousCountryCode, undefined);
+    }
+
     return written ? 'failed' : 'skipped';
   }
 
@@ -286,6 +311,12 @@ const enrichBiteAddress = async (
       address.countryCode,
     );
   }
+
+  await updatePlatformCountries(
+    biteId,
+    previousCountryCode,
+    address.countryCode,
+  );
 
   logger.info('enrichBiteAddress: resolved bite address', {
     biteId,

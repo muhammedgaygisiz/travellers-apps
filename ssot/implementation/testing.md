@@ -263,6 +263,18 @@ would otherwise capture the placeholder for some viewports and the resolved
 content for others. Before treating a skeleton diff as a bug, check whether the
 committed reference already shows a skeleton.
 
+**A page taller than the viewport can be captured short, with its bottom strip
+cut off.** Loki sizes a capture from the union of the story's element boxes at
+the configured viewport height, and only then grows the window to fit. A scroll
+container left a few pixels down at that moment shortens the union by exactly
+that much, and once the window grows the scroll is gone, so the bottom of the
+page falls outside the clip. `Pages/About` came out 963, 975 or 986px tall at
+`chrome.laptop` with identical content (issue [#1893]). A story that shows this
+sets `parameters: { lokiSettle: { resetScroll: true } }`, and the settle gate
+scrolls every container back to the top before the capture. It is opt-in
+because some stories scroll on purpose. When only the height of a capture
+differs, compare the PNG sizes before calling it a regression.
+
 ## Related Pages
 
 - [Architecture - Testing](../architecture/testing.md)
@@ -278,3 +290,4 @@ committed reference already shows a skeleton.
 [#1549]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1549
 [#1814]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1814
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
+[#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893

@@ -1,6 +1,8 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
 } from '@angular/core';
@@ -15,6 +17,7 @@ import {
 import { TranslocoPipe } from '@jsverse/transloco';
 import { appRelease } from 'utils';
 import { StoreLinksComponent } from 'bite-tribe/store-links';
+import { GlobeComponent } from 'bite-tribe-common/map/globe';
 
 @Component({
   selector: 'about-page',
@@ -30,6 +33,7 @@ import { StoreLinksComponent } from 'bite-tribe/store-links';
     IonIcon,
     TranslocoPipe,
     StoreLinksComponent,
+    GlobeComponent,
   ],
 })
 export class AboutPage {
@@ -37,6 +41,19 @@ export class AboutPage {
 
   totalNumberBites = input<number>();
   totalNumberUsers = input<number>();
+
+  /**
+   * The countries with at least one Bite on BiteTribe (GitHub issue #1893).
+   * No globe while they load, if the read fails, or if there are none.
+   */
+  biteCountryCodes = input<string[]>();
+
+  /** Spin the globe until the first touch. Off in stories, for a still image. */
+  autoSpin = input(true, { transform: booleanAttribute });
+
+  protected readonly hasGlobe = computed(
+    () => (this.biteCountryCodes()?.length ?? 0) > 0,
+  );
 
   openPrivacyPolicy = output<void>();
 }

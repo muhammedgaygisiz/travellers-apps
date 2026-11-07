@@ -232,6 +232,13 @@ export class AdminDashboard {
       testId: 'admin-tool-bite-image-status-backfill',
     },
     {
+      titleKey: 'admin-tool-bite-countries-rebuild',
+      descriptionKey: 'admin-tool-bite-countries-rebuild-description',
+      icon: 'earth-outline',
+      path: '/bite-countries-rebuild',
+      testId: 'admin-tool-bite-countries-rebuild',
+    },
+    {
       titleKey: 'admin-tool-menu-item-stats-recompute',
       descriptionKey: 'admin-tool-menu-item-stats-recompute-description',
       icon: 'stats-chart-outline',

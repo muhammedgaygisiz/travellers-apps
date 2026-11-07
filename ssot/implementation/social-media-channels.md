@@ -1264,7 +1264,8 @@ there are seven, with Leela added. Malta (5 November 2026) was the first post
 made with the skill end to end. It was also the first to cover a whole country
 rather than a city, the first with restaurant tags and a dish list in the
 caption from the start, and the first with a cover line written for the place.
-Mostar (7 November 2026) followed the same way. The
+Mostar (7 November 2026) and Granada (8 November 2026) followed the same way.
+The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
 derives the rest from it, and its renderer is
@@ -1330,8 +1331,8 @@ is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
 name only.
 
-**@bitetribeapp follows every account it tags.** As of 7 November 2026 it
-follows all 35 tagged so far, across all ten posts.
+**@bitetribeapp follows every account it tags.** As of 8 November 2026 it
+follows all 38 tagged so far, across all eleven posts.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
@@ -1396,6 +1397,15 @@ account, and the only "La Kafeta" account is a café in Mexico, so the fig
 baklava stays untagged. Rota has two branches in Mostar and one account; the
 Bite's pin is at Mladena Balorde. Leela's cover line is "Ćevapi, burek and
 Bosnian coffee: my favourite bites under the Old Bridge".
+
+**Granada** (8 November 2026) tags four of five dish slides:
+`@la_macetilla_bar` on both La Macetilla dishes (the free meatball tapa and
+the macetilla de verduras), `@dplatos` (oxtail croquettes) and
+`@cafeteriaelinicio` (empanada). No Los Montaditos account is in Granada, so
+the tomato toast stays untagged. Leela's cover line is "Free tapas, croquetas
+and tostadas below the Alhambra: my Granada favourites". Sharing the post to
+the story with music works only in the mobile app, so it is not part of the
+skill.
 
 ## Wiring Back Into The Product
 

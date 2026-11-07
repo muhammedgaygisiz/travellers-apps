@@ -76,6 +76,13 @@ export type NotificationMessageKey =
   | 'newUserWeekFollowUp.followingHeading'
   | 'newUserWeekFollowUp.moreHeading'
   | 'newUserWeekFollowUp.footer'
+  // The day-30 mail to new users who are not active (GitHub issue #1894),
+  // the day-7 mail's layout with its own copy.
+  | 'newUserMonthFollowUp.emailSubject'
+  | 'newUserMonthFollowUp.emailIntro'
+  | 'newUserMonthFollowUp.followingHeading'
+  | 'newUserMonthFollowUp.moreHeading'
+  | 'newUserMonthFollowUp.footer'
   // The page the mail's unsubscribe link opens.
   | 'emailUnsubscribe.title'
   | 'emailUnsubscribe.confirm'

@@ -25,14 +25,30 @@ export const NEW_USER_WEEK_FOLLOW_UP_CONFIG_PATH = 'config/newUserWeekFollowUp';
  */
 export const NEW_USER_WEEK_FOLLOW_UPS_COLLECTION = 'newUserWeekFollowUps';
 
+/**
+ * The fallback of the day-30 mail (GitHub issue #1894), the same shape as
+ * `config/newUserWeekFollowUp`. The Bites the day-1 and day-7 configs name are
+ * taken out of it per run.
+ */
+export const NEW_USER_MONTH_FOLLOW_UP_CONFIG_PATH =
+  'config/newUserMonthFollowUp';
+
+/** The once-per-account claim of the day-30 mail, `newUserMonthFollowUps/{uid}`. */
+export const NEW_USER_MONTH_FOLLOW_UPS_COLLECTION = 'newUserMonthFollowUps';
+
 /** How many fallback Bites the config may name, at most. */
 export const MAX_FALLBACK_BITES = 10;
 
 /** How many followed accounts one recipient's mail reads, at most. */
 export const MAX_FOLLOWED_READ = 50;
 
-/** How far back a followed account's Bite still counts as new. */
-export const NEW_BITE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** How far back a followed account's Bite still counts as new in the day-7 mail. */
+export const NEW_BITE_WINDOW_MS = 7 * DAY_MS;
+
+/** The same for the day-30 mail: everything since the recipient joined. */
+export const MONTH_NEW_BITE_WINDOW_MS = 30 * DAY_MS;
 
 export interface WeekFollowUpBite extends FollowUpBite {
   /** The display name of the followed account that posted it. */
@@ -64,10 +80,12 @@ const toIds = (value: unknown, max: number): string[] =>
         .slice(0, max)
     : [];
 
+/** Reads the config of the day-7 mail, or of a later one shaped like it. */
 export const readWeekFollowUpConfig = async (
   db: Firestore,
+  path: string = NEW_USER_WEEK_FOLLOW_UP_CONFIG_PATH,
 ): Promise<WeekFollowUpConfig> => {
-  const data = (await db.doc(NEW_USER_WEEK_FOLLOW_UP_CONFIG_PATH).get()).data();
+  const data = (await db.doc(path).get()).data();
 
   return {
     biteIds: toIds(data?.['biteIds'], MAX_FALLBACK_BITES),
@@ -94,7 +112,7 @@ const toFollowUpBite = (
 };
 
 /**
- * Resolves the fallback ids, leaving out the ones the day-1 mail showed.
+ * Resolves the fallback ids, leaving out the ones earlier mails showed.
  *
  * Unlike the day-1 picks, a fallback Bite must also be listable: it is shown
  * to somebody a week in, next to Bites that already had to be, and a Bite whose

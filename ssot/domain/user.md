@@ -229,6 +229,7 @@
   sendEmailVerificationReminders
   sendNewUserFollowUps
   sendNewUserWeekFollowUps
+  sendNewUserMonthFollowUps
   handleEmailUnsubscribe
   searchUsers
   suggestPeopleToFollow

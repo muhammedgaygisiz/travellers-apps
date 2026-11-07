@@ -63,6 +63,13 @@ export const zh: NotificationMessages = {
   'newUserWeekFollowUp.moreHeading': '更多值得一试的菜品',
   'newUserWeekFollowUp.footer':
     '这封邮件在你加入BiteTribe一周后发送，仅此一次。',
+  'newUserMonthFollowUp.emailSubject': '你本月在BiteTribe上错过的内容',
+  'newUserMonthFollowUp.emailIntro':
+    '你加入BiteTribe已经一个月了。这里有过去几周里一些值得一看的Bite。',
+  'newUserMonthFollowUp.followingHeading': '本月你关注的人发布的内容',
+  'newUserMonthFollowUp.moreHeading': '更多值得一试的菜品',
+  'newUserMonthFollowUp.footer':
+    '这封邮件在你加入BiteTribe一个月后发送，仅此一次。',
   'emailUnsubscribe.title': '退订BiteTribe邮件',
   'emailUnsubscribe.confirm':
     'BiteTribe将不再向你发送此类邮件。验证邮件等账号邮件仍会照常发送。',

@@ -10,7 +10,7 @@ import { RequestedUrlService } from 'ta-firestore';
 import { onboardingGuard } from '../onboarding.guard';
 
 describe('onboardingGuard', () => {
-  let isOnboardingComplete: jest.Mock;
+  let onboardingState: jest.Mock;
   let dismissedForSession: jest.Mock;
   let parseUrl: jest.Mock;
   let requestedUrlService: RequestedUrlService;
@@ -25,7 +25,7 @@ describe('onboardingGuard', () => {
     );
 
   beforeEach(() => {
-    isOnboardingComplete = jest.fn();
+    onboardingState = jest.fn();
     dismissedForSession = jest.fn(() => false);
     parseUrl = jest.fn(
       (url: string): UrlTree => ({ url }) as unknown as UrlTree,
@@ -35,7 +35,7 @@ describe('onboardingGuard', () => {
       providers: [
         {
           provide: OnboardingDataAccessService,
-          useValue: { isOnboardingComplete, dismissedForSession },
+          useValue: { onboardingState, dismissedForSession },
         },
         { provide: Router, useValue: { parseUrl } },
       ],
@@ -47,13 +47,13 @@ describe('onboardingGuard', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('allows navigation when onboarding is complete', async () => {
-    isOnboardingComplete.mockResolvedValue(true);
+    onboardingState.mockResolvedValue('complete');
 
     await expect(runGuard()).resolves.toBe(true);
   });
 
   it('redirects to the onboarding route when incomplete', async () => {
-    isOnboardingComplete.mockResolvedValue(false);
+    onboardingState.mockResolvedValue('incomplete');
 
     const result = await runGuard();
 
@@ -62,17 +62,33 @@ describe('onboardingGuard', () => {
   });
 
   it('remembers the displaced URL so the assistant can hand it back', async () => {
-    isOnboardingComplete.mockResolvedValue(false);
+    onboardingState.mockResolvedValue('incomplete');
 
     await runGuard('/bite/shared-123');
 
     expect(requestedUrlService.consume()).toBe('/bite/shared-123');
   });
 
+  // Issue #1903: a refused read is not evidence the account never onboarded.
+  it('allows navigation when the onboarding state cannot be read', async () => {
+    onboardingState.mockResolvedValue('unknown');
+
+    await expect(runGuard()).resolves.toBe(true);
+    expect(parseUrl).not.toHaveBeenCalled();
+  });
+
+  it('does not remember the URL when the state cannot be read', async () => {
+    onboardingState.mockResolvedValue('unknown');
+
+    await runGuard('/bite/shared-123');
+
+    expect(requestedUrlService.consume()).toBeUndefined();
+  });
+
   it('allows navigation after a session dismissal without reading state', async () => {
     dismissedForSession.mockReturnValue(true);
 
     await expect(runGuard()).resolves.toBe(true);
-    expect(isOnboardingComplete).not.toHaveBeenCalled();
+    expect(onboardingState).not.toHaveBeenCalled();
   });
 });

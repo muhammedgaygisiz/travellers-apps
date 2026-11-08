@@ -24,6 +24,11 @@ with an answer - including a declined one.
 ## Flow
 
 - User registers or logs in without the onboarding completion flag.
+- Only a user document that was read and has no completion flag holds the
+  gate. A read that fails (refused, offline) releases it for that navigation,
+  and the next navigation reads again. A failed read is not evidence that an
+  account never finished onboarding, and treating it as one sent finished
+  accounts back into the assistant (issue [#1903]).
 - Registration acknowledges the submit immediately and stays blocked until the assistant is on screen or a localized error is shown, because sign-up, the verification mail, and the onboarding gate are three round-trips that would otherwise look like a dropped tap (issue [#1185]).
 - A blocking assistant guides the user through:
   - a unique display name (case-insensitive) with an optional profile photo
@@ -295,6 +300,8 @@ permission surface, so the purpose strings are read here before any other screen
 - Issue [#1798] (finishing onboarding is celebrated), part of epic [#1741]
 - Issue [#1883] (the step navigation no longer covers a focused input while the
   keyboard is open, and a field low on a step is scrolled into view)
+- Issue [#1903] (a failed read of the completion state no longer routes a
+  finished account into the assistant)
 
 ## Related Domains
 
@@ -346,3 +353,4 @@ permission surface, so the purpose strings are read here before any other screen
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
 [#1883]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1883
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894
+[#1903]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1903

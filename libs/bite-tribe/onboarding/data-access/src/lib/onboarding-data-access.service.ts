@@ -38,6 +38,12 @@ const LANGUAGE_PREFERENCE_KEY = 'lang';
  */
 export const ONBOARDING_VERSION = 1;
 
+/**
+ * Whether the current user finished the assistant. `unknown` means the user
+ * document could not be read, which is not the same as `incomplete`.
+ */
+export type OnboardingState = 'complete' | 'incomplete' | 'unknown';
+
 export interface DisplayNameAvailability {
   available: boolean;
   normalizedDisplayName: string;
@@ -68,8 +74,22 @@ export class OnboardingDataAccessService {
   readonly dismissedForSession = signal(false);
 
   async isOnboardingComplete(): Promise<boolean> {
+    return (await this.onboardingState()) === 'complete';
+  }
+
+  /**
+   * The completion state as far as it could be read.
+   *
+   * `unknown` is a read of `/users/{uid}` that failed. It is kept apart from
+   * `incomplete` because the two call for opposite answers: a member whose
+   * document could not be read is far more likely onboarded than not, and
+   * sending them into the assistant shows a finished account "Step 7 of 7"
+   * (issue #1903). Nothing is cached for `unknown`, so the next navigation
+   * reads again.
+   */
+  async onboardingState(): Promise<OnboardingState> {
     if (this.completed()) {
-      return true;
+      return 'complete';
     }
 
     // The entry gate runs alongside `authGuard`, not after it, so on a cold
@@ -81,7 +101,7 @@ export class OnboardingDataAccessService {
 
     const uid = this.authService.getUser()?.uid;
     if (!uid) {
-      return false;
+      return 'incomplete';
     }
 
     try {
@@ -90,16 +110,17 @@ export class OnboardingDataAccessService {
       });
 
       const user = result.snapshot?.data as PublicUser | undefined;
-      const isComplete = !!user?.onboardingCompletedAt;
 
-      if (isComplete) {
-        this.completed.set(true);
+      if (!user?.onboardingCompletedAt) {
+        return 'incomplete';
       }
 
-      return isComplete;
+      this.completed.set(true);
+
+      return 'complete';
     } catch (error) {
       console.warn('Failed to read onboarding completion state:', error);
-      return false;
+      return 'unknown';
     }
   }
 

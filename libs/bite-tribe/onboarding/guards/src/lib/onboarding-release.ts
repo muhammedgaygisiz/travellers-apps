@@ -11,8 +11,14 @@ import { OnboardingDataAccessService } from 'bite-tribe/onboarding-data-access';
  * assistant standing in front of a restaurant's menu.
  *
  * The dismissal is read first, so a dismissed session reads no state.
+ *
+ * Only a user document read without a completion flag holds the gate. A read
+ * that failed releases it: the assistant is a first-run convenience, not a
+ * security boundary, and holding it on a failed read sent finished accounts
+ * back into the assistant (issue #1903). The next navigation reads again.
  */
 export const isReleasedFromOnboarding = async (
   dataAccess: OnboardingDataAccessService,
 ): Promise<boolean> =>
-  dataAccess.dismissedForSession() || dataAccess.isOnboardingComplete();
+  dataAccess.dismissedForSession() ||
+  (await dataAccess.onboardingState()) !== 'incomplete';

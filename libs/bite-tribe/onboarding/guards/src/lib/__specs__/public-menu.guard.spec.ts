@@ -19,7 +19,7 @@ describe('publicMenuGuard', () => {
   const memberGuard = publicMenuMemberGuard as jest.MockedFunction<
     typeof publicMenuMemberGuard
   >;
-  let isOnboardingComplete: jest.Mock;
+  let onboardingState: jest.Mock;
   let dismissedForSession: jest.Mock;
 
   const runGuard = (): Promise<GuardResult> =>
@@ -33,14 +33,14 @@ describe('publicMenuGuard', () => {
 
   beforeEach(() => {
     memberGuard.mockReset();
-    isOnboardingComplete = jest.fn(async () => true);
+    onboardingState = jest.fn(async () => 'complete');
     dismissedForSession = jest.fn(() => false);
 
     TestBed.configureTestingModule({
       providers: [
         {
           provide: OnboardingDataAccessService,
-          useValue: { isOnboardingComplete, dismissedForSession },
+          useValue: { onboardingState, dismissedForSession },
         },
       ],
     });
@@ -59,7 +59,7 @@ describe('publicMenuGuard', () => {
    */
   it('leaves a member who has not finished onboarding on the public page', async () => {
     memberGuard.mockResolvedValue(IN_APP_MENU);
-    isOnboardingComplete.mockResolvedValue(false);
+    onboardingState.mockResolvedValue('incomplete');
 
     await expect(runGuard()).resolves.toBe(true);
   });
@@ -69,7 +69,7 @@ describe('publicMenuGuard', () => {
     dismissedForSession.mockReturnValue(true);
 
     await expect(runGuard()).resolves.toBe(IN_APP_MENU);
-    expect(isOnboardingComplete).not.toHaveBeenCalled();
+    expect(onboardingState).not.toHaveBeenCalled();
   });
 
   /**
@@ -82,6 +82,6 @@ describe('publicMenuGuard', () => {
 
     await expect(runGuard()).resolves.toBe(true);
     expect(dismissedForSession).not.toHaveBeenCalled();
-    expect(isOnboardingComplete).not.toHaveBeenCalled();
+    expect(onboardingState).not.toHaveBeenCalled();
   });
 });

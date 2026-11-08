@@ -12,8 +12,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import * as storageUtils from 'firebase/storage';
 import * as simulatorUtils from '../provide-firestore-simulator';
 import {
-  enableMultiTabIndexedDbPersistence,
   initializeFirestore,
+  persistentLocalCache,
+  persistentSingleTabManager,
 } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import * as appCheckUtils from '../initialize-firebase-app-check';
@@ -72,9 +73,6 @@ describe(provideFirestoreUtils.name, () => {
     jest.clearAllMocks();
     jest.mocked(initializeApp).mockReturnValue(firebaseApp);
     jest.mocked(initializeFirestore).mockReturnValue(firestore);
-    jest
-      .mocked(enableMultiTabIndexedDbPersistence)
-      .mockImplementation(jest.fn());
     jest
       .mocked(appCheckUtils.initializeFirebaseAppCheck)
       .mockResolvedValue(READY);
@@ -576,42 +574,74 @@ describe(provideFirestoreUtils.name, () => {
     });
   });
 
-  describe('persistence error handling', () => {
-    beforeAll(() => {
-      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+  // GitHub issue #1902: with the multi-tab cache, one tab sent every tab's
+  // reads, so a tab with a dead App Check token got all of them refused.
+  describe('the Firestore cache', () => {
+    const originalIsDev = process.env['NX_APP_BITE_TRIBE_IS_DEV'];
+    const SINGLE_TAB_MANAGER = { kind: 'persistentSingleTab' };
+    const PERSISTENT_CACHE = { kind: 'persistent' };
+    const EMULATORS = {
+      host: 'localhost',
+      firestorePort: 8080,
+      functionsPort: 5001,
+      storagePort: 9199,
+      authUrl: 'http://localhost:9099',
+    } as unknown as Emulators;
+
+    beforeEach(() => {
+      jest
+        .mocked(persistentSingleTabManager)
+        .mockReturnValue(
+          SINGLE_TAB_MANAGER as unknown as ReturnType<
+            typeof persistentSingleTabManager
+          >,
+        );
+      jest
+        .mocked(persistentLocalCache)
+        .mockReturnValue(
+          PERSISTENT_CACHE as unknown as ReturnType<
+            typeof persistentLocalCache
+          >,
+        );
+      jest
+        .spyOn(simulatorUtils, 'provideFirestoreSimulator')
+        .mockReturnValue([]);
     });
 
-    it('should handle persistence errors gracefully', () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn');
+    afterEach(() => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = originalIsDev;
+    });
 
-      const persistenceError = new Error('Persistence failed');
-      jest.mocked(enableMultiTabIndexedDbPersistence).mockImplementation(() => {
-        throw persistenceError;
+    it('is a persistent cache owned by a single tab in production', () => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'false';
+
+      provideFirestoreUtils({}, false);
+
+      expect(persistentLocalCache).toHaveBeenCalledWith({
+        tabManager: SINGLE_TAB_MANAGER,
       });
+      expect(initializeFirestore).toHaveBeenCalledWith(firebaseApp, {
+        localCache: PERSISTENT_CACHE,
+      });
+    });
 
-      const FIREBASE_OPTIONS = {};
-      const WITHOUT_ANALYTICS = false;
+    it('is the persistent single-tab cache in dev mode without emulators', () => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
 
-      const providers = provideFirestoreUtils(
-        FIREBASE_OPTIONS,
-        WITHOUT_ANALYTICS,
-      );
+      provideFirestoreUtils({}, false);
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Firebase persistence error: ',
-        expect.anything(),
-      );
+      expect(initializeFirestore).toHaveBeenCalledWith(firebaseApp, {
+        localCache: PERSISTENT_CACHE,
+      });
+    });
 
-      expect(getRegularProviders(providers)).toEqual(
-        expect.arrayContaining([
-          {
-            provide: FIREBASE_APP,
-            useFactory: expect.anything(),
-          },
-        ]),
-      );
+    it('is left to the SDK default against the emulators', () => {
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
 
-      consoleWarnSpy.mockRestore();
+      provideFirestoreUtils({}, false, EMULATORS);
+
+      expect(persistentLocalCache).not.toHaveBeenCalled();
+      expect(initializeFirestore).toHaveBeenCalledWith(firebaseApp, {});
     });
   });
 

@@ -161,8 +161,9 @@
   calls the move. That is a surface after [#1096] rather than [#1096] itself.
 
   Issue [#1096] made the staff view survive the room it is used in. Reads already
-  did: `enableMultiTabIndexedDbPersistence` runs in every production build, so the
-  plan keeps drawing from Firestore's own cache without a signal. What had no
+  did: a persistent Firestore cache runs in every production build (owned by one
+  tab since [#1902]), so the plan keeps drawing from Firestore's own cache
+  without a signal. What had no
   answer was the writes. A transition made offline is now written to device
   storage rather than sent, carries an idempotency key minted once per _intent_,
   and is replayed one at a time in the order it was made - so two tables seated in
@@ -482,6 +483,7 @@ No use case covers public acquisition today. One is written when the epic starts
 [#1094]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1094
 [#1095]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1095
 [#1096]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1096
+[#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902
 [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
 [#1104]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1104

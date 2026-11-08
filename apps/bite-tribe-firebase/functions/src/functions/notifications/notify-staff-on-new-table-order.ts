@@ -2,6 +2,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onDocumentCreated } from 'firebase-functions/firestore';
 import {
+  ownerUserIdsOf,
   RESTAURANT_COLLECTION,
   RESTAURANT_STAFF_COLLECTION,
   TABLES_COLLECTION,
@@ -60,18 +61,13 @@ const staffOf = async (restaurantId: string): Promise<string[]> => {
       .get(),
   ]);
 
-  const ownerUserId = restaurant.data()?.['ownerUserId'];
   const uids = associations.docs.map((snapshot) => snapshot.id);
 
   // A `Set`, because the owner of a one-person restaurant is plausibly also on
   // the staff list - and two entries would be two notifications for one order.
-  return [
-    ...new Set(
-      typeof ownerUserId === 'string' && ownerUserId
-        ? [ownerUserId, ...uids]
-        : uids,
-    ),
-  ];
+  // Every owner is notified (epic #1614), read through the same union the
+  // authority checks.
+  return [...new Set([...ownerUserIdsOf(restaurant.data()), ...uids])];
 };
 
 /**

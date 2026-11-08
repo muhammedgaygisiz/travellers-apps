@@ -14,6 +14,7 @@ import {
 import { scanRateLimitState } from '../shared/utils/scan-rate-limit';
 import { recordScanAnomaly } from './record-scan-anomaly';
 import {
+  ownerUserIdsOf,
   RESTAURANT_COLLECTION,
   TABLES_COLLECTION,
 } from './restaurant-authority';
@@ -155,7 +156,7 @@ export const normalizeScannedToken = (value: unknown): string | undefined => {
  * it, so this reads the fact they write rather than a copy of it.
  */
 const isRestaurantActive = (restaurant: DocumentData): boolean =>
-  getString(restaurant, 'ownerUserId') !== '' &&
+  ownerUserIdsOf(restaurant).length > 0 &&
   restaurant['claimStatus'] !== 'revoked';
 
 /**
@@ -510,7 +511,7 @@ export const resolveScan = async (
   const roomName = getString(room?.data(), 'name');
   const image = getString(restaurant, 'image');
 
-  // Assembled field by field. The restaurant document carries `ownerUserId`
+  // Assembled field by field. The restaurant document carries its owners
   // and the table document carries the geometry of a floor plan, and a guest
   // is entitled to neither - so nothing below is a spread of a document, and a
   // field added to one of them tomorrow does not reach a guest by accident.

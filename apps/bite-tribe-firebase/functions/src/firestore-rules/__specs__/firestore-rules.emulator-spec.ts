@@ -8,6 +8,8 @@ import {
 } from '@firebase/rules-unit-testing';
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
   collectionGroup,
   deleteDoc,
@@ -209,6 +211,11 @@ const asConsumer = (): Firestore =>
 
 const asStranger = (): Firestore =>
   testEnv.authenticatedContext(STRANGER).firestore();
+
+const CO_OWNER = 'co-owner-uid';
+
+const asCoOwner = (): Firestore =>
+  testEnv.authenticatedContext(CO_OWNER, { roles: ['business'] }).firestore();
 
 const asStaff = (): Firestore =>
   testEnv.authenticatedContext(STRANGER, { roles: ['staff'] }).firestore();
@@ -830,6 +837,177 @@ describe('restaurants', () => {
         }),
       );
     });
+  });
+});
+
+/**
+ * Ownership as a set (epic #1614, issue #1750).
+ *
+ * A restaurant held only through `ownerUserIds` - the shape the migration of
+ * issue #1752 leaves behind - gives every member the rights the single owner
+ * has, and nobody else any. The set is an ownership field like `ownerUserId`:
+ * only the operator callables write it, through the Admin SDK.
+ */
+describe('restaurants held through the owner set (epic #1614)', () => {
+  const SET_RESTAURANT = 'set-held-restaurant';
+  const SET_MENU = 'set-held-menu';
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+
+      await setDoc(doc(db, 'restaurants', SET_RESTAURANT), {
+        name: 'Two Owners',
+        ownerUserIds: [OWNER, CO_OWNER],
+        claimStatus: 'claimed',
+        menuId: SET_MENU,
+      });
+      await setDoc(doc(db, 'menus', SET_MENU), {
+        restaurantId: SET_RESTAURANT,
+        categories: [],
+      });
+    });
+  });
+
+  it.each([
+    ['the first owner', asOwner],
+    ['the second owner', asCoOwner],
+  ])('lets %s edit the restaurant', async (_, as) => {
+    await assertSucceeds(
+      updateDoc(doc(as(), 'restaurants', SET_RESTAURANT), {
+        description: 'Run by two people',
+      }),
+    );
+  });
+
+  it('refuses a business account in neither field', async () => {
+    await assertFails(
+      updateDoc(doc(asOtherBusiness(), 'restaurants', SET_RESTAURANT), {
+        description: 'Not mine to write',
+      }),
+    );
+  });
+
+  it.each([
+    ['the first owner', asOwner],
+    ['the second owner', asCoOwner],
+  ])('lets %s save the menu', async (_, as) => {
+    await assertSucceeds(
+      updateDoc(doc(as(), 'menus', SET_MENU), {
+        restaurantId: SET_RESTAURANT,
+        categories: [{ title: 'Starters', items: [] }],
+      }),
+    );
+  });
+
+  it('refuses the menu to a business account in neither field', async () => {
+    await assertFails(
+      updateDoc(doc(asOtherBusiness(), 'menus', SET_MENU), {
+        restaurantId: SET_RESTAURANT,
+        categories: [{ title: 'Injected', items: [] }],
+      }),
+    );
+  });
+
+  it.each([
+    ['the first owner', asOwner],
+    ['the second owner', asCoOwner],
+  ])('lets %s save the floor plan', async (_, as) => {
+    await assertSucceeds(
+      setDoc(
+        doc(as(), 'restaurants', SET_RESTAURANT, 'rooms', 'terrace'),
+        roomAtVersion(1),
+      ),
+    );
+  });
+
+  it('refuses the floor plan to a business account in neither field', async () => {
+    await assertFails(
+      setDoc(
+        doc(
+          asOtherBusiness(),
+          'restaurants',
+          SET_RESTAURANT,
+          'rooms',
+          'terrace',
+        ),
+        roomAtVersion(1),
+      ),
+    );
+  });
+
+  it('refuses a business account adding itself to an unheld restaurant', async () => {
+    await assertFails(
+      updateDoc(doc(asOtherBusiness(), 'restaurants', 'unowned-restaurant'), {
+        ownerUserIds: [OTHER_BUSINESS],
+        claimStatus: 'claimed',
+      }),
+    );
+  });
+
+  it('refuses a business account adding itself to a held restaurant', async () => {
+    await assertFails(
+      updateDoc(doc(asOtherBusiness(), 'restaurants', SET_RESTAURANT), {
+        ownerUserIds: arrayUnion(OTHER_BUSINESS),
+      }),
+    );
+  });
+
+  it('refuses an owner adding another account to the set', async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'restaurants', SET_RESTAURANT), {
+        ownerUserIds: arrayUnion(OTHER_BUSINESS),
+      }),
+    );
+  });
+
+  it('refuses an owner removing another owner from the set', async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'restaurants', SET_RESTAURANT), {
+        ownerUserIds: arrayRemove(CO_OWNER),
+      }),
+    );
+  });
+
+  it('refuses an owner replacing the set', async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'restaurants', SET_RESTAURANT), {
+        ownerUserIds: [OWNER],
+      }),
+    );
+  });
+
+  it('refuses an owner removing the set', async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'restaurants', SET_RESTAURANT), {
+        ownerUserIds: deleteField(),
+      }),
+    );
+  });
+
+  it('refuses the single owner adding a set to its restaurant', async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+        ownerUserIds: [OWNER, OTHER_BUSINESS],
+      }),
+    );
+  });
+
+  it('refuses an operator writing the set from a client', async () => {
+    await assertFails(
+      updateDoc(doc(asOperator(), 'restaurants', 'unowned-restaurant'), {
+        ownerUserIds: [OWNER],
+      }),
+    );
+  });
+
+  it('refuses an operator creating a restaurant that carries the set', async () => {
+    await assertFails(
+      setDoc(doc(asOperator(), 'restaurants', 'operator-created'), {
+        name: 'Verified Place',
+        ownerUserIds: [OWNER],
+      }),
+    );
   });
 });
 

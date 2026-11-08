@@ -1,7 +1,10 @@
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
-import { RESTAURANT_COLLECTION } from '../restaurants/restaurant-authority';
+import {
+  ownerUserIdsOf,
+  RESTAURANT_COLLECTION,
+} from '../restaurants/restaurant-authority';
 import { MENUS_COLLECTION } from '../restaurants/resolve-table-qr-token';
 import { backfillMenuIds, StoredMenuCategory } from '../shared/utils/menu-ids';
 
@@ -14,7 +17,7 @@ import { backfillMenuIds, StoredMenuCategory } from '../shared/utils/menu-ids';
  * A menu page needs two documents and neither is readable without a session.
  * Opening `/menus/{menuId}` would be defensible on its own - a menu is
  * information a restaurant wants read - but the page cannot render without a
- * restaurant name, and `/restaurants/{id}` carries `ownerUserId`, `claimStatus`
+ * restaurant name, and `/restaurants/{id}` carries its owners, `claimStatus`
  * and the whole `tableOrdering` configuration. Issue #1102's own criterion is
  * that the public path exposes the menu and not restaurant operations data, so
  * the restaurant half is assembled field by field here, exactly as
@@ -110,7 +113,7 @@ const menuIdOf = (restaurant: DocumentData): string =>
  * restaurant's name states prices nobody there ever confirmed.
  */
 const isRestaurantActive = (restaurant: DocumentData): boolean =>
-  getString(restaurant, 'ownerUserId') !== '' &&
+  ownerUserIdsOf(restaurant).length > 0 &&
   restaurant['claimStatus'] !== 'revoked';
 
 /**

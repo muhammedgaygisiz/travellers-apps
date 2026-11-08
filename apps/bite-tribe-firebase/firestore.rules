@@ -150,7 +150,23 @@ service cloud.firestore {
      * account, and any business account could take an unheld one.
      */
     function ownershipFields() {
-      return ['ownerUserId', 'claimStatus', 'claimedAt', 'claimedAtTimestamp'];
+      return ['ownerUserId', 'ownerUserIds', 'claimStatus', 'claimedAt', 'claimedAtTimestamp'];
+    }
+
+    /**
+     * Whether the caller holds the restaurant `data` describes (epic #1614).
+     *
+     * Ownership is moving from one uid in `ownerUserId` to a set in
+     * `ownerUserIds`. Until the single-owner field is removed (issue #1754),
+     * an account named in either one holds the restaurant, so a restaurant
+     * keeps its owner on whichever side of the migration it is. Both fields
+     * are in `ownershipFields()`, so no client can put itself in either.
+     *
+     * `owns()` stays the check for every single-owner document.
+     */
+    function holds(data) {
+      return owns(data, 'ownerUserId')
+        || (signedIn() && uid() in data.get('ownerUserIds', []));
     }
 
     function restaurantData(restaurantId) {
@@ -165,7 +181,7 @@ service cloud.firestore {
 
     function ownsRestaurant(restaurantId) {
       return restaurantExists(restaurantId)
-        && owns(restaurantData(restaurantId), 'ownerUserId');
+        && holds(restaurantData(restaurantId));
     }
 
     match /restaurants/{restaurantId} {
@@ -183,7 +199,7 @@ service cloud.firestore {
       allow create: if isOperator() && absentAll(ownershipFields());
 
       allow update: if unchangedAll(ownershipFields())
-        && (isOperator() || owns(resource.data, 'ownerUserId'));
+        && (isOperator() || holds(resource.data));
 
       allow delete: if isOperator();
     }
@@ -195,7 +211,7 @@ service cloud.firestore {
      * and timestamps, and the only link to a restaurant is `Restaurant.menuId`
      * pointing the other way. Rules cannot query, so the caller names the
      * restaurant it is acting for and the rule verifies the claim against that
-     * restaurant document — which already carries both `ownerUserId` and
+     * restaurant document — which already carries both its owners and
      * `menuId`. Checking `menuId` is what stops an owner naming their own
      * restaurant to reach somebody else's menu.
      *

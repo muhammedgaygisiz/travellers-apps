@@ -176,6 +176,56 @@ describe('OnboardingDataAccessService', () => {
     await expect(service.isOnboardingComplete()).resolves.toBe(false);
   });
 
+  // Issue #1903: a refused read sent a finished account into the assistant.
+  describe('onboardingState', () => {
+    it('is unknown when the user document cannot be read', async () => {
+      setup();
+      getDocument.mockRejectedValue(
+        new Error('Missing or insufficient permissions.'),
+      );
+
+      await expect(service.onboardingState()).resolves.toBe('unknown');
+    });
+
+    it('reads again after an unknown answer instead of caching it', async () => {
+      setup();
+      getDocument
+        .mockRejectedValueOnce(new Error('offline'))
+        .mockResolvedValueOnce({
+          snapshot: { data: { onboardingCompletedAt: 1 } },
+        });
+
+      await expect(service.onboardingState()).resolves.toBe('unknown');
+      await expect(service.onboardingState()).resolves.toBe('complete');
+      expect(getDocument).toHaveBeenCalledTimes(2);
+    });
+
+    it('is incomplete when the document has no completion flag', async () => {
+      setup();
+      getDocument.mockResolvedValue({
+        snapshot: { data: { userId: 'user-1' } },
+      });
+
+      await expect(service.onboardingState()).resolves.toBe('incomplete');
+    });
+
+    it('is incomplete without an authenticated user', async () => {
+      setup(null);
+
+      await expect(service.onboardingState()).resolves.toBe('incomplete');
+      expect(getDocument).not.toHaveBeenCalled();
+    });
+
+    it('is complete when onboardingCompletedAt is set', async () => {
+      setup();
+      getDocument.mockResolvedValue({
+        snapshot: { data: { onboardingCompletedAt: 1 } },
+      });
+
+      await expect(service.onboardingState()).resolves.toBe('complete');
+    });
+  });
+
   it('tracks a session-scoped dismissal', () => {
     setup();
 

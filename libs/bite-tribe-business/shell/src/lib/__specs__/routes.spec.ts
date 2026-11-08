@@ -161,7 +161,7 @@ describe('business ROUTES', () => {
    * unlinked from the list (issue #1079).
    *
    * The staff route is here rather than under the role gate alone because
-   * `Restaurant.ownerUserId` is the only thing that separates the owner from
+   * `Restaurant.ownerUserIds` is the only thing that separates the owner from
    * its own staff: both hold a role the app admits, and only one of them may
    * hire (issue #1537).
    *
@@ -191,7 +191,7 @@ describe('business ROUTES', () => {
      *
      * The live room (issue \#1093) and the order queue (issue \#1105). They are
      * listed apart from `EDIT_PATHS` because the guard differs: those check
-     * `Restaurant.ownerUserId`, which a staff account never holds, and these
+     * `Restaurant.ownerUserIds`, which never name a staff account, and these
      * check the two halves of `worksAt()`.
      */
     const TABLES_PATH = 'restaurant/:restaurantId/tables';
@@ -223,9 +223,9 @@ describe('business ROUTES', () => {
           ) as Promise<boolean | UrlTree>,
       );
 
-    const assignedTo = (ownerUserId: string): void => {
+    const assignedTo = (owner: string): void => {
       jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
-        snapshot: { id: 'restaurant-1', data: { ownerUserId } },
+        snapshot: { id: 'restaurant-1', data: { ownerUserIds: [owner] } },
       } as unknown as Awaited<
         ReturnType<typeof FirebaseFirestore.getDocument>
       >);
@@ -331,6 +331,24 @@ describe('business ROUTES', () => {
       },
     );
 
+    /**
+     * The single-owner field is gone (issue #1754): an account named only in
+     * a leftover one is refused, or the field would silently grant access if
+     * it ever reappeared.
+     */
+    it.each(EDIT_PATHS)(
+      'refuses an account named only in a leftover single-owner field on %s',
+      async (path) => {
+        jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+          snapshot: { id: 'restaurant-1', data: { ownerUserId: 'user-1' } },
+        } as unknown as Awaited<
+          ReturnType<typeof FirebaseFirestore.getDocument>
+        >);
+
+        await expect(run(path)).resolves.toEqual({ url: '/restaurants' });
+      },
+    );
+
     it.each(STAFF_PATHS)(
       'admits an account listed only in the owner set on %s',
       async (path) => {
@@ -355,7 +373,10 @@ describe('business ROUTES', () => {
             Promise.resolve({
               snapshot: reference.startsWith('restaurantStaff/')
                 ? { id: 'user-1', data: { restaurantId } }
-                : { id: 'restaurant-1', data: { ownerUserId: 'someone-else' } },
+                : {
+                    id: 'restaurant-1',
+                    data: { ownerUserIds: ['someone-else'] },
+                  },
             } as unknown as Awaited<
               ReturnType<typeof FirebaseFirestore.getDocument>
             >),
@@ -439,7 +460,7 @@ describe('business ROUTES', () => {
    * Where a sign-in lands, for an account the landing page has nothing to show
    * (issue #1097).
    *
-   * The dashboard lists restaurants by `Restaurant.ownerUserId`, so a staff
+   * The dashboard lists restaurants by `Restaurant.ownerUserIds`, so a staff
    * account has so far arrived at an empty map and two sections leading to two
    * more empty lists, with the one surface its role has reachable only by
    * typing a URL. The guard turns the association into that URL.

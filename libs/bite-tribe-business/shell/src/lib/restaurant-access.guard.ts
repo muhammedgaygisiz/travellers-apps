@@ -12,7 +12,7 @@ import {
  * it (GitHub issue #1093).
  *
  * `ownedRestaurantGuard` is the same question with half the answer: it checks
- * `Restaurant.ownerUserId`, which a staff account never holds, so it is the
+ * `Restaurant.ownerUserIds`, which never name a staff account, so it is the
  * right gate for the editor, the menu and the staff list and the wrong one for
  * the surface staff open at the start of a shift. The live view is the first
  * route in this app that a non-owner is supposed to reach, and a guard that

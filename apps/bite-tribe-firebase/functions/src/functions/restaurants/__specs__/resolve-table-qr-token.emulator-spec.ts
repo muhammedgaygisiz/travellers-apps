@@ -67,7 +67,7 @@ const seed = async (): Promise<void> => {
   await restaurantRef().set({
     name: 'Owned Bistro',
     image: 'https://example.test/bistro.jpg',
-    ownerUserId: OWNER,
+    ownerUserIds: [OWNER],
     claimStatus: 'claimed',
     menuId: MENU,
     openingHours: [
@@ -246,7 +246,7 @@ describe('resolve table QR token', () => {
     /**
      * The acceptance criterion that the response contains no data the guest
      * should not see, asserted against the fields rather than against a
-     * promise. `ownerUserId` is on the restaurant document this answer was
+     * promise. `ownerUserIds` is on the restaurant document this answer was
      * built from, and the table document carries the geometry of a floor plan.
      */
     it('carries no ownership, no geometry and no other table', async () => {
@@ -316,7 +316,7 @@ describe('resolve table QR token', () => {
       await restaurantRef().set(
         {
           name: 'Owned Bistro',
-          ownerUserId: OWNER,
+          ownerUserIds: [OWNER],
           claimStatus: 'claimed',
           menuId: MENU,
         },
@@ -493,12 +493,12 @@ describe('resolve table QR token', () => {
      * "Active" is not a field: a restaurant is active while a business account
      * holds it, and a revoked assignment is exactly a restaurant that used to
      * be able to take an order and no longer can. `revokeRestaurantOwner`
-     * deletes `ownerUserId` and writes `claimStatus: 'revoked'`, so the state
+     * deletes `ownerUserIds` and writes `claimStatus: 'revoked'`, so the state
      * this asserts against is the one that callable leaves behind.
      */
     it('refuses a restaurant whose assignment was revoked', async () => {
       await restaurantRef().update({
-        ownerUserId: FieldValue.delete(),
+        ownerUserIds: FieldValue.delete(),
         claimStatus: 'revoked',
       });
 
@@ -509,26 +509,13 @@ describe('resolve table QR token', () => {
     });
 
     /**
-     * Ownership as a set (epic #1614, issue #1750): a restaurant held only
-     * through `ownerUserIds` - the shape the migration of issue #1752 leaves -
-     * is held, and takes orders.
+     * The single-owner field is gone (issue #1754): a restaurant that carries
+     * only a leftover one is held by nobody, and takes no orders.
      */
-    it('resolves a restaurant held only through the owner set', async () => {
+    it('refuses a restaurant held only through a leftover single-owner field', async () => {
       await restaurantRef().update({
-        ownerUserId: FieldValue.delete(),
-        ownerUserIds: [OWNER],
-      });
-
-      expect(await resolved()).toMatchObject({
-        ok: true,
-        ordering: { available: true },
-      });
-    });
-
-    it('refuses a restaurant whose owner set is empty', async () => {
-      await restaurantRef().update({
-        ownerUserId: FieldValue.delete(),
-        ownerUserIds: [],
+        ownerUserIds: FieldValue.delete(),
+        ['ownerUserId']: OWNER,
       });
 
       expect(await refused()).toMatchObject({
@@ -536,8 +523,16 @@ describe('resolve table QR token', () => {
       });
     });
 
+    it('refuses a restaurant whose owner set is empty', async () => {
+      await restaurantRef().update({ ownerUserIds: [] });
+
+      expect(await refused()).toMatchObject({
+        reason: 'restaurantInactive',
+      });
+    });
+
     it('refuses a restaurant nobody has ever held', async () => {
-      await restaurantRef().update({ ownerUserId: FieldValue.delete() });
+      await restaurantRef().update({ ownerUserIds: FieldValue.delete() });
 
       expect(await refused()).toMatchObject({
         reason: 'restaurantInactive',
@@ -652,7 +647,7 @@ describe('resolve table QR token', () => {
   describe('the order of the checks', () => {
     it('names the restaurant before the table when both are wrong', async () => {
       await restaurantRef().update({
-        ownerUserId: FieldValue.delete(),
+        ownerUserIds: FieldValue.delete(),
         claimStatus: 'revoked',
       });
       await restaurantRef().collection('tables').doc(TABLE_12).delete();

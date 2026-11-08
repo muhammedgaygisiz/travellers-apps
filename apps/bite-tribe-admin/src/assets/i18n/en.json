@@ -113,7 +113,7 @@
   "migration-bite-countries-hint": "Rebuilds meta/biteCountries, the countries the About page's globe lights up, from the country of every Bite. The list is kept by the address and delete triggers as Bites are written; this replaces it rather than adding to it, so it fills it the first time and repairs any drift. Safe to run again.",
   "migration-count-countries": "Countries listed",
   "migration-restaurant-owner-ids": "Restaurant owner ids",
-  "migration-restaurant-owner-ids-hint": "Moves each restaurant's owner from the single ownerUserId field into the ownerUserIds set, and removes the single field in the same write. A restaurant already in the new shape is skipped. A restaurant whose two fields name different accounts is counted as conflicting and left unchanged; its id is in the operator log entry of the run. Removing the single field from the apps waits until a production run reports no conflicts.",
+  "migration-restaurant-owner-ids-hint": "Moves each restaurant's owner from the single ownerUserId field into the ownerUserIds set, and removes the single field in the same write. A restaurant already in the new shape is skipped. A restaurant whose two fields name different accounts is counted as conflicting and left unchanged; its id is in the operator log entry of the run. The apps no longer read the single field, so a restaurant this has not reached is held by nobody until it runs.",
   "migration-count-migrated": "Migrated",
   "migration-count-conflicting": "Conflicting",
   "migration-count-uploaded": "Set to uploaded",

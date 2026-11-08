@@ -97,10 +97,18 @@ It is the one collection migration that decides **inside a transaction per
 document** rather than in batched writes. A batch decides from a read taken
 before the commit, so a `revokeRestaurantOwner` landing in between would be
 undone: the revoked owner written back into the set. It also has an **ordering
-constraint after it**: issue [#1754] removes the `ownerUserId` read fallback
+constraint after it**: issue [#1754] removed the `ownerUserId` read fallback
 from the rules, the functions and both apps, which is only safe once this has
-run in production and reported zero conflicts. See
+run in production and reported zero conflicts. After [#1754] a restaurant this
+has not reached is held by nobody until it runs. See
 [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md).
+
+**It stays registered after [#1754], deliberately.** It is idempotent, so a
+press writes nothing once every restaurant is in the new shape. It is the only
+tool that repairs a leftover single field. And removing a deployed function
+blocks the CI functions deploy until it is deleted by hand. It and its spec
+are the only code that still names `ownerUserId`, outside the rules'
+locked-field list.
 
 `bite-countries` rebuilds `meta/biteCountries`, the countries the About page's globe
 lights up, from every Bite's `countryCode`, and reports how many it lists. Like

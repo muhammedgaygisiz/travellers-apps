@@ -146,7 +146,7 @@ describe(`${RestaurantsDataAccessService.name} ownership`, () => {
             id: 'r1',
             data: {
               name: 'Cafe Central',
-              ownerUserId: 'owner-1',
+              ownerUserIds: ['owner-1'],
               claimStatus: 'claimed',
             },
           },
@@ -162,7 +162,7 @@ describe(`${RestaurantsDataAccessService.name} ownership`, () => {
         {
           id: 'r1',
           name: 'Cafe Central',
-          ownerUserId: 'owner-1',
+          ownerUserIds: ['owner-1'],
           claimStatus: 'claimed',
         },
         { id: 'r2', name: 'Pizza Palace' },

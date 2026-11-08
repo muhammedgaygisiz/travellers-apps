@@ -68,7 +68,7 @@ const seed = async (): Promise<void> => {
   await restaurantRef().set({
     name: 'Sakura Kitchen',
     image: 'https://example.test/sakura.jpg',
-    ownerUserId: OWNER,
+    ownerUserIds: [OWNER],
     claimStatus: 'claimed',
     menuId: MENU,
     // Everything below is operations data a reader is not entitled to, seeded
@@ -284,20 +284,20 @@ describe('load public menu', () => {
      * nobody there ever confirmed.
      */
     /**
-     * Ownership as a set (epic #1614, issue #1750): a restaurant held only
-     * through `ownerUserIds` serves its menu.
+     * The single-owner field is gone (issue #1754): a restaurant that carries
+     * only a leftover one is held by nobody, and serves no menu.
      */
-    it('serves a restaurant held only through the owner set', async () => {
+    it('refuses a restaurant held only through a leftover single-owner field', async () => {
       await restaurantRef().update({
-        ownerUserId: FieldValue.delete(),
-        ownerUserIds: [OWNER],
+        ownerUserIds: FieldValue.delete(),
+        ['ownerUserId']: OWNER,
       });
 
-      expect((await loaded()).menu['id']).toBe(MENU);
+      expect((await refused()).reason).toBe('restaurantInactive');
     });
 
     it('refuses a restaurant no business account holds', async () => {
-      await restaurantRef().update({ ownerUserId: '' });
+      await restaurantRef().update({ ownerUserIds: [] });
 
       expect((await refused()).reason).toBe('restaurantInactive');
     });

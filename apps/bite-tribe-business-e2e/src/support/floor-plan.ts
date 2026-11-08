@@ -69,8 +69,8 @@ export interface SeededTable {
 export interface SeedPublishedPlanOptions {
   restaurantId: string;
   restaurantName: string;
-  /** The account named on `Restaurant.ownerUserId`. */
-  ownerUserId: string;
+  /** The account named in `Restaurant.ownerUserIds`. */
+  owner: string;
   rooms: readonly SeededRoom[];
   tables: readonly SeededTable[];
   position?: { latitude: number; longitude: number };
@@ -96,7 +96,7 @@ export const seedPublishedPlan = async (
   {
     restaurantId,
     restaurantName,
-    ownerUserId,
+    owner,
     rooms,
     tables,
     position = DEFAULT_POSITION,
@@ -106,7 +106,9 @@ export const seedPublishedPlan = async (
     id: { stringValue: restaurantId },
     name: { stringValue: restaurantName },
     description: { stringValue: '' },
-    ownerUserId: { stringValue: ownerUserId },
+    ownerUserIds: {
+      arrayValue: { values: [{ stringValue: owner }] },
+    },
     claimStatus: { stringValue: 'claimed' },
     position: {
       mapValue: {

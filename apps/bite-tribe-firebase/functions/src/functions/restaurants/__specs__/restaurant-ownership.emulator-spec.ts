@@ -148,7 +148,6 @@ describe('restaurant ownership with several owners', () => {
     const data = await restaurant();
     expect(data).toMatchObject({ claimStatus: 'revoked' });
     expect(data).not.toHaveProperty('ownerUserIds');
-    expect(data).not.toHaveProperty('ownerUserId');
     expect(data).not.toHaveProperty('claimedAt');
     expect(data).not.toHaveProperty('claimedAtTimestamp');
   });

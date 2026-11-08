@@ -259,7 +259,7 @@ const seed = async (): Promise<void> => {
 
   await restaurantRef().set({
     name: 'Owned Bistro',
-    ownerUserId: OWNER,
+    ownerUserIds: [OWNER],
     claimStatus: 'claimed',
     menuId: MENU,
     openingHours: [

@@ -10,7 +10,7 @@ import type { Menu } from './menu';
  * `/menus/{menuId}` and `/restaurants/{restaurantId}`. Opening the first would
  * be defensible on its own - a menu is information a restaurant *wants* read -
  * but opening the second is not, and the page cannot render without a name.
- * `/restaurants/{id}` carries `ownerUserId`, `claimStatus` and the whole
+ * `/restaurants/{id}` carries `ownerUserIds`, `claimStatus` and the whole
  * `tableOrdering` configuration, and issue #1102's own criterion is that the
  * public path exposes the menu and not restaurant operations data.
  *

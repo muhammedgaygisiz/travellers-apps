@@ -85,11 +85,15 @@ export const decideRestaurantOwnerIds = (data: DocumentData): Decision => {
  * One-off migration of restaurant ownership from `ownerUserId` to
  * `ownerUserIds` (epic #1614, issue #1752).
  *
- * Every reader accepts either field since issues #1750 and #1751, and the
- * callables write only the set since this issue, so this moves the
- * assignments made before it. Issue #1754 then removes the single field from
- * the readers, which is only safe once this has run in production and
- * reported no conflicts.
+ * The callables write only the set since issue #1752, so this moves the
+ * assignments made before it. Since issue #1754 nothing reads the single
+ * field any more, so a restaurant this has not reached is held by nobody.
+ *
+ * **Kept registered after #1754 on purpose.** It is idempotent and harmless,
+ * it is the only tool that can repair a leftover single field, and removing a
+ * deployed function blocks the CI functions deploy until it is deleted by
+ * hand. This module and its spec are the only code that still names the
+ * single field outside the rules' locked-field list.
  *
  * **One transaction per restaurant**, rather than the batched writes the other
  * collection migrations use. A batch would decide from a read taken before the

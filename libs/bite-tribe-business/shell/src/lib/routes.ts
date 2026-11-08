@@ -23,7 +23,6 @@ import { staffEntryGuard } from './staff-entry.guard';
 const ownedRestaurantGuard = documentOwnerGuard({
   collection: 'restaurants',
   paramName: 'restaurantId',
-  ownerField: 'ownerUserId',
   ownerSetField: 'ownerUserIds',
   refusalMessageKey: 'restaurant-not-assigned-to-account',
   redirectTo: '/restaurants',
@@ -72,8 +71,8 @@ export const ROUTES: Routes = withAuthRoutes([
    * (issue #1097).
    *
    * `AFTER_LOGIN_PAGE` is one string for the whole app, and this page is the
-   * owner's: it lists restaurants by `Restaurant.ownerUserId`, which a staff
-   * account never holds. `staffEntryGuard` reads the association and sends
+   * owner's: it lists restaurants by `Restaurant.ownerUserIds`, which never name a
+   * staff account. `staffEntryGuard` reads the association and sends
    * such an account to the room it works in before this component is ever
    * constructed, so the live view is one step after sign-in rather than a URL
    * a waiter has to be told.
@@ -127,8 +126,8 @@ export const ROUTES: Routes = withAuthRoutes([
   /**
    * Managing staff is the **owner's** route, not the restaurant's.
    *
-   * `ownedRestaurantGuard` checks `Restaurant.ownerUserId`, which a staff
-   * account never holds, so a staff account cannot reach the page that would
+   * `ownedRestaurantGuard` checks `Restaurant.ownerUserIds`, which never name a
+   * staff account, so a staff account cannot reach the page that would
    * let it add more staff — and the callables behind it refuse the same
    * account for the same reason (issue #1537). The guard is what makes that
    * true of a shared or bookmarked URL as well as of the links.
@@ -154,8 +153,8 @@ export const ROUTES: Routes = withAuthRoutes([
    * read in `firestore.rules` once there was a published state to open it to,
    * and deliberately left this gate alone - the surface staff get is the live
    * view of issue #1093, not the editor at a different permission.
-   * `ownedRestaurantGuard` checks `Restaurant.ownerUserId`, which a staff
-   * account never holds, and the rules refuse a draft write from the same
+   * `ownedRestaurantGuard` checks `Restaurant.ownerUserIds`, which never name a
+   * staff account, and the rules refuse a draft write from the same
    * account for the same reason (issue #1082).
    */
   {
@@ -174,7 +173,7 @@ export const ROUTES: Routes = withAuthRoutes([
    * The live room, and the first route in this app a **staff** account was
    * meant to reach (issue #1093). The order queue below is the second.
    *
-   * Not `ownedRestaurantGuard`, which checks `Restaurant.ownerUserId` and would
+   * Not `ownedRestaurantGuard`, which checks `Restaurant.ownerUserIds` and would
    * therefore refuse every account this page exists for.
    * `restaurantAccessGuard` admits the owner and the staff of the one
    * restaurant, which is the two halves of `worksAt()` in `firestore.rules`, so

@@ -111,15 +111,21 @@ const table = (
 const seed = async (): Promise<void> => {
   const db = getFirestore();
 
-  await db.collection('restaurants').doc(RESTAURANT).set({
-    name: 'Owned Bistro',
-    ownerUserId: OWNER,
-    claimStatus: 'claimed',
-  });
-  await db.collection('restaurants').doc('foreign-restaurant').set({
-    name: 'Someone Else',
-    ownerUserId: OTHER_BUSINESS,
-  });
+  await db
+    .collection('restaurants')
+    .doc(RESTAURANT)
+    .set({
+      name: 'Owned Bistro',
+      ownerUserIds: [OWNER],
+      claimStatus: 'claimed',
+    });
+  await db
+    .collection('restaurants')
+    .doc('foreign-restaurant')
+    .set({
+      name: 'Someone Else',
+      ownerUserIds: [OTHER_BUSINESS],
+    });
 
   await Promise.all([
     tableRef(TABLE_12).set(table('12', DINING_ROOM)),

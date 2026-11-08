@@ -57,22 +57,21 @@ const callerWith = (
   }) as unknown as CallableRequest<unknown>;
 
 /**
- * Ownership read as a set (epic #1614, issue #1750).
- *
- * Until issue #1754 removes the single-owner field, an account named in
- * `ownerUserId` or listed in `ownerUserIds` holds the restaurant.
+ * Ownership read as a set (epic #1614): an account listed in `ownerUserIds`
+ * holds the restaurant. Since issue #1754 an account named only in a leftover
+ * single-owner field holds nothing.
  */
 describe('restaurant authority', () => {
   beforeEach(() => {
     documents.clear();
-    documents.set('restaurants/legacy', { ownerUserId: SINGLE });
+    documents.set('restaurants/legacy', { ['ownerUserId']: SINGLE });
     documents.set('restaurants/set', { ownerUserIds: [FIRST, SECOND] });
     documents.set('restaurants/unheld', { name: 'Nobody' });
   });
 
   describe('ownerUserIdsOf', () => {
-    it('reads the single-owner field', () => {
-      expect(ownerUserIdsOf({ ownerUserId: SINGLE })).toEqual([SINGLE]);
+    it('ignores a leftover single-owner field', () => {
+      expect(ownerUserIdsOf({ ['ownerUserId']: SINGLE })).toEqual([]);
     });
 
     it('reads the set', () => {
@@ -82,16 +81,16 @@ describe('restaurant authority', () => {
       ]);
     });
 
-    it('returns the union, deduplicated', () => {
-      expect(
-        ownerUserIdsOf({ ownerUserId: FIRST, ownerUserIds: [FIRST, SECOND] }),
-      ).toEqual([FIRST, SECOND]);
+    it('deduplicates the set', () => {
+      expect(ownerUserIdsOf({ ownerUserIds: [FIRST, FIRST, SECOND] })).toEqual([
+        FIRST,
+        SECOND,
+      ]);
     });
 
     it.each([
       [undefined],
       [{}],
-      [{ ownerUserId: '' }],
       [{ ownerUserIds: 'not-a-list' }],
       [{ ownerUserIds: ['', 7, null] }],
     ])('reads %p as unheld', (data) => {
@@ -104,10 +103,10 @@ describe('restaurant authority', () => {
   });
 
   describe('requireRestaurantAuthority', () => {
-    it('admits the single owner', async () => {
+    it('refuses an account named only in a leftover single-owner field', async () => {
       await expect(
         requireRestaurantAuthority(callerWith(SINGLE), 'legacy'),
-      ).resolves.toBe(SINGLE);
+      ).rejects.toMatchObject({ code: 'permission-denied' });
     });
 
     it.each([FIRST, SECOND])('admits %s, a member of the set', async (uid) => {
@@ -117,7 +116,7 @@ describe('restaurant authority', () => {
     });
 
     it.each(['legacy', 'set', 'unheld'])(
-      'refuses a business account that holds %s through neither field',
+      'refuses a business account outside the set of %s',
       async (restaurantId) => {
         await expect(
           requireRestaurantAuthority(callerWith(STRANGER), restaurantId),
@@ -149,12 +148,22 @@ describe('restaurant authority', () => {
       ).toBe(true);
     });
 
-    it('does not hold for an account in neither field', () => {
+    it('does not hold for an account outside the set', () => {
       expect(
         holdsRestaurant(
           callerWith(STRANGER),
-          { ownerUserId: SINGLE, ownerUserIds: [FIRST] },
+          { ownerUserIds: [FIRST] },
           STRANGER,
+        ),
+      ).toBe(false);
+    });
+
+    it('does not hold for an account named only in a leftover single field', () => {
+      expect(
+        holdsRestaurant(
+          callerWith(SINGLE),
+          { ['ownerUserId']: SINGLE, ownerUserIds: [FIRST] },
+          SINGLE,
         ),
       ).toBe(false);
     });

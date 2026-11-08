@@ -56,7 +56,7 @@ listed under _Not roles_ in [User Roles](../product/user-roles.md).
 above the Restaurant Owner in capability: it may maintain every Restaurant, claimed or
 unclaimed, without owning any — delivered through an Admin App restaurant-edit surface
 plus an `admin` allowance in the ownership-scoped Firestore rules, never by granting
-`business` and never by writing `Restaurant.ownerUserId`. In the code `admin` and
+`business` and never by writing `Restaurant.ownerUserIds`. In the code `admin` and
 `business` are still deliberately _not_ a hierarchy — settled rather than open, by
 `RD-UR-6` and issue [#1164].
 **The rules half is delivered:** [#1078] names `admin` as an explicit clause, so an

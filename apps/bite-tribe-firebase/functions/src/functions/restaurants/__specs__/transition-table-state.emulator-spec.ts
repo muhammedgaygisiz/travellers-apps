@@ -142,12 +142,12 @@ const seed = async (): Promise<void> => {
   await Promise.all([
     restaurantRef(RESTAURANT).set({
       name: 'Owned Bistro',
-      ownerUserId: OWNER,
+      ownerUserIds: [OWNER],
       claimStatus: 'claimed',
     }),
     restaurantRef(FOREIGN_RESTAURANT).set({
       name: 'Someone Else',
-      ownerUserId: OTHER_BUSINESS,
+      ownerUserIds: [OTHER_BUSINESS],
     }),
   ]);
 

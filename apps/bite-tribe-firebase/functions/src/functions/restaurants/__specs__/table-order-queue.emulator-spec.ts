@@ -123,7 +123,7 @@ const seed = async (): Promise<void> => {
   await Promise.all([
     restaurantRef().set({
       name: 'Owned Bistro',
-      ownerUserId: OWNER,
+      ownerUserIds: [OWNER],
       claimStatus: 'claimed',
       menuId: MENU,
       openingHours: [
@@ -137,7 +137,7 @@ const seed = async (): Promise<void> => {
     }),
     restaurantRef(OTHER_RESTAURANT).set({
       name: 'Somebody Else',
-      ownerUserId: 'other-business-uid',
+      ownerUserIds: ['other-business-uid'],
       claimStatus: 'claimed',
     }),
   ]);

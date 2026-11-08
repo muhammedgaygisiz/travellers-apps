@@ -38,9 +38,8 @@
               >
                 <ion-label>
                   <h3>{{ restaurant.name }}</h3>
-                  @for (ownerUserId of ownerIdsOf(restaurant); track
-                  ownerUserId) {
-                  <p>{{ accountLabel(ownerUserId) }}</p>
+                  @for (owner of ownerIdsOf(restaurant); track owner) {
+                  <p>{{ accountLabel(owner) }}</p>
                   }
                   <p>
                     <ion-badge [color]="claimStatusColor(restaurant)"
@@ -87,22 +86,20 @@
                   }
                 </ion-label>
               </ion-item>
-              @for (ownerUserId of ownerUserIds(); track ownerUserId) {
-              <ion-item
-                [attr.data-testid]="'admin-restaurant-owner-' + ownerUserId"
-              >
+              @for (owner of ownerUserIds(); track owner) {
+              <ion-item [attr.data-testid]="'admin-restaurant-owner-' + owner">
                 <ion-label>
                   <h3 data-testid="admin-restaurant-owner">
-                    {{ accountLabel(ownerUserId) }}
+                    {{ accountLabel(owner) }}
                   </h3>
                 </ion-label>
                 <ion-button
                   slot="end"
                   fill="outline"
                   color="danger"
-                  [attr.data-testid]="'admin-restaurant-revoke-' + ownerUserId"
+                  [attr.data-testid]="'admin-restaurant-revoke-' + owner"
                   [disabled]="!canRevoke() || saving()"
-                  (click)="onRevoke(ownerUserId)"
+                  (click)="onRevoke(owner)"
                 >
                   {{ 'admin-restaurant-ownership-revoke' | transloco }}
                 </ion-button>

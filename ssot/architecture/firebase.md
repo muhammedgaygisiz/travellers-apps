@@ -76,19 +76,20 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   being protected ([#1863]). See the `Profile Visibility Contract` in
   [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
 - **A write is allowed by ownership, not by a role.** The document names the
-  account that may write it: `Restaurant.ownerUserIds` (or the deprecated
-  `ownerUserId`, until [#1754]), `Bite.userId`,
+  account that may write it: `Restaurant.ownerUserIds`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
   id itself for the per-account documents (`settings/{uid}`, a reaction, a
   rating, a follow relationship, a push installation).
 - **Backend-owned fields are named.** A field the Admin SDK owns can sit on a
   document the client may otherwise write, so the rule names the field.
-  `ownerUserIds`, `ownerUserId`, `claimStatus`, `claimedAt` and
-  `claimedAtTimestamp` on a restaurant are **writable by no client at all**, including the account that
+  `ownerUserIds`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` on a
+  restaurant are **writable by no client at all**, including the account that
   owns it, because they are written by `assignRestaurantOwner` and
   `revokeRestaurantOwner` — which bypass rules entirely, so denying every client
   write to them costs the backend nothing and closes the forgery path recorded
-  on [Current State - Known Issues](../current-state/known-issues.md). The same holds for the entitlement and
+  on [Current State - Known Issues](../current-state/known-issues.md). The
+  retired single-owner field `ownerUserId` stays on that list after [#1754]
+  removed every reader of it, so no client can write it back. The same holds for the entitlement and
   counter fields on `/users`: `subscriptionTier`, `biteCount`, the follow
   counts, `normalizedDisplayName`, `countryCodes`, the last-seen stamps and the
   email-verification state. The comparison is by value, so a client that reads a
@@ -110,7 +111,7 @@ work with no backfill: a menu written before the field existed is still writable
 by its owner and gains the field on its next save.
 
 **`staff` still grants no write here, and now has one anyway.** The rules scope
-a write by `Restaurant.ownerUserId`, and a staff account never holds it. Issue
+a write by `Restaurant.ownerUserIds`, and a staff account is never in it. Issue
 [#1537] wrote the record that was missing — `/restaurantStaff/{uid}`, one document
 per staff account naming its restaurant — and deliberately did not make the
 rules read it. Issue [#1092] gave the role its first write, and deliberately did
@@ -292,7 +293,7 @@ exists the collection grows: a document per bucket per minute.
 
 **`/menus` stayed shut, and that is the decision rather than an omission**
 (issue [#1102], `RD-TS-7`). A public menu page needs the restaurant's name as
-well as its dishes, and `/restaurants/{id}` carries `ownerUserId`,
+well as its dishes, and `/restaurants/{id}` carries `ownerUserIds`,
 `claimStatus` and the whole `tableOrdering` configuration - so opening a read
 rule wide enough to render the page would publish operations data with it.
 `loadPublicMenu` assembles both halves field by field instead, which is what

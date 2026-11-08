@@ -177,7 +177,6 @@ describe('assignRestaurantOwner', () => {
       expect.objectContaining({ path: 'restaurants/restaurant-1' }),
       expect.objectContaining({
         ownerUserIds: ['owner-1'],
-        ownerUserId: 'DELETED',
         claimStatus: 'claimed',
         claimedAt: expect.any(String),
         claimedAtTimestamp: expect.any(Number),
@@ -195,7 +194,7 @@ describe('assignRestaurantOwner', () => {
   // Repeating an assignment is the same decision, not a second one. It returns
   // the current state rather than writing a fresh timestamp over the grant.
   it('is idempotent when the restaurant already belongs to that account', async () => {
-    restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' });
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
 
     const result = await assignRestaurantOwner(request(assign));
 
@@ -205,7 +204,7 @@ describe('assignRestaurantOwner', () => {
 
   /**
    * More than one owner (epic #1614, issue #1753): an assignment adds the
-   * account to whoever already holds the restaurant, through either field.
+   * account to whoever already holds the restaurant.
    */
   it('adds a second owner beside the first and keeps the grant timestamps', async () => {
     restaurant({
@@ -219,7 +218,6 @@ describe('assignRestaurantOwner', () => {
     const [, written] = updateMock.mock.calls[0];
     expect(written).toMatchObject({
       ownerUserIds: ['owner-2', 'owner-1'],
-      ownerUserId: 'DELETED',
       claimStatus: 'claimed',
     });
     expect(written).not.toHaveProperty('claimedAt');
@@ -230,16 +228,20 @@ describe('assignRestaurantOwner', () => {
     });
   });
 
-  it('moves an unmigrated single owner into the set when adding a second', async () => {
-    restaurant({ ownerUserId: 'owner-2', claimStatus: 'claimed' });
+  /**
+   * The single-owner field is gone (issue #1754): an account named only in a
+   * leftover one holds nothing, so the restaurant is assigned as if unheld.
+   */
+  it('ignores a leftover single-owner field when assigning', async () => {
+    restaurant({ ownerUserId: 'owner-2', claimStatus: 'revoked' });
 
     await assignRestaurantOwner(request(assign));
 
     expect(updateMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        ownerUserIds: ['owner-2', 'owner-1'],
-        ownerUserId: 'DELETED',
+        ownerUserIds: ['owner-1'],
+        claimedAt: expect.any(String),
       }),
     );
   });
@@ -350,7 +352,7 @@ describe('assignRestaurantOwner', () => {
 
 describe('revokeRestaurantOwner', () => {
   it('deletes the last owner and the grant timestamps and records the revocation', async () => {
-    restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' });
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
 
     const result = await revokeRestaurantOwner(request(revoke));
 
@@ -358,7 +360,6 @@ describe('revokeRestaurantOwner', () => {
       expect.objectContaining({ path: 'restaurants/restaurant-1' }),
       expect.objectContaining({
         ownerUserIds: 'DELETED',
-        ownerUserId: 'DELETED',
         claimedAt: 'DELETED',
         claimedAtTimestamp: 'DELETED',
         claimStatus: 'revoked',
@@ -381,7 +382,6 @@ describe('revokeRestaurantOwner', () => {
       expect.objectContaining({ path: 'restaurants/restaurant-1' }),
       expect.objectContaining({
         ownerUserIds: 'DELETED',
-        ownerUserId: 'DELETED',
         claimedAt: 'DELETED',
         claimedAtTimestamp: 'DELETED',
         claimStatus: 'revoked',
@@ -402,7 +402,6 @@ describe('revokeRestaurantOwner', () => {
     const [, written] = updateMock.mock.calls[0];
     expect(written).toMatchObject({
       ownerUserIds: ['owner-2'],
-      ownerUserId: 'DELETED',
     });
     expect(written).not.toHaveProperty('claimStatus');
     expect(written).not.toHaveProperty('claimedAt');
@@ -472,7 +471,7 @@ describe('revokeRestaurantOwner', () => {
   });
 
   it('requires a reason', async () => {
-    restaurant({ ownerUserId: 'owner-1' });
+    restaurant({ ownerUserIds: ['owner-1'] });
 
     const code = await codeOf(
       revokeRestaurantOwner(
@@ -484,7 +483,7 @@ describe('revokeRestaurantOwner', () => {
   });
 
   it('records the operator, the target and the reason in the audit trail', async () => {
-    restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' });
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
 
     await revokeRestaurantOwner(request(revoke));
 

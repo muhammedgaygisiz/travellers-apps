@@ -248,7 +248,7 @@ test.describe('Configure a restaurant floor plan', () => {
  *
  * The assignment is the whole precondition: the route guard, the Firestore
  * rules on every room, table and draft write, and the token callable all check
- * `ownerUserId` against the signed-in account, so an unassigned fixture would
+ * `ownerUserIds` against the signed-in account, so an unassigned fixture would
  * be refused at each of them.
  */
 const seedRestaurant = async (
@@ -260,7 +260,9 @@ const seedRestaurant = async (
     id: { stringValue: restaurantId },
     name: { stringValue: name },
     description: { stringValue: '' },
-    ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+    ownerUserIds: {
+      arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+    },
     claimStatus: { stringValue: 'claimed' },
     position: {
       mapValue: {

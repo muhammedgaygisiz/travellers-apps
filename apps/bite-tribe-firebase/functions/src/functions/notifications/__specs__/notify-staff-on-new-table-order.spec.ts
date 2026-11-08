@@ -97,7 +97,7 @@ describe('notifyStaffOnNewTableOrder', () => {
 
     db.seed(`restaurants/${RESTAURANT}`, {
       name: 'Owned Bistro',
-      ownerUserId: 'owner',
+      ownerUserIds: ['owner'],
     });
     db.seed(`restaurants/${RESTAURANT}/tables/${TABLE}`, { label: '12' });
     seedInstallation('owner');

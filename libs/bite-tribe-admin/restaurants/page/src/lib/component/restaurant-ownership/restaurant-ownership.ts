@@ -213,11 +213,7 @@ export class RestaurantOwnership {
     () => this.accountFilter().trim().length > 0,
   );
 
-  /**
-   * Every owner of the selected restaurant, read through either ownership
-   * field (epic #1614), so a restaurant the `restaurant-owner-ids` migration
-   * has not reached still shows its owner.
-   */
+  /** Every owner of the selected restaurant (epic #1614). */
   readonly ownerUserIds = computed(() => restaurantOwnerIds(this.selected()));
 
   readonly assigned = computed(() => this.ownerUserIds().length > 0);
@@ -265,7 +261,7 @@ export class RestaurantOwnership {
     return this.claimStatusOf(restaurant) === 'claimed' ? 'success' : 'medium';
   }
 
-  /** Every owner of a restaurant in the list, through either field. */
+  /** Every owner of a restaurant in the list. */
   ownerIdsOf(restaurant: Restaurant): string[] {
     return restaurantOwnerIds(restaurant);
   }

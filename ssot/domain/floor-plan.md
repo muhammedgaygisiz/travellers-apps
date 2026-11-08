@@ -228,7 +228,7 @@ instead.
 
 The editor lives at `restaurant/:restaurantId/floor-plan` behind `authGuard`,
 `roleGuard('business', 'staff')` and `ownedRestaurantGuard`. The last of those
-checks `Restaurant.ownerUserId`, which a staff account never holds, so the
+checks `Restaurant.ownerUserIds`, which never names a staff account, so the
 Permissions table above holds for a shared or bookmarked URL and not only for
 the links.
 

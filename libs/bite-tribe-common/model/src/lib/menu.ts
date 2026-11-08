@@ -154,7 +154,7 @@ export interface Menu {
    * `Restaurant.menuId` pointing the other way - so the ownership-scoped rules
    * had no way to authorise a menu write. The client now names the restaurant
    * on every menu write and the rules verify the claim against that
-   * restaurant's `ownerUserId` and `menuId` (GitHub issue #1078).
+   * restaurant's `ownerUserIds` and `menuId` (GitHub issue #1078).
    *
    * Optional because menus written before that carry no value. Nothing reads
    * it: the rules read the restaurant, not this field, so a menu that predates

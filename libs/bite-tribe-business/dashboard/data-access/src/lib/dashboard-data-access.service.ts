@@ -6,8 +6,6 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
-/** The field naming the account a restaurant is assigned to (issue #1074). */
-export const RESTAURANT_OWNER_FIELD = 'ownerUserId';
 /** The field listing every account a restaurant is assigned to (epic #1614). */
 export const RESTAURANT_OWNERS_FIELD = 'ownerUserIds';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
@@ -24,8 +22,8 @@ export class DashboardDataAccessService {
    * This read used to return the whole collection, which made the business app
    * a view over every restaurant in BiteTribe: an account was listed - and
    * could open the edit form of - a restaurant assigned to somebody else
-   * (issue #1079). Ownership is `Restaurant.ownerUserId` or membership of
-   * `Restaurant.ownerUserIds` (epic #1614), written by the
+   * (issue #1079). Ownership is membership of `Restaurant.ownerUserIds`
+   * (epic #1614), written by the
    * operator callables of issue #1077, and the same fields issue #1078's rules
    * authorise a write from. The filter is strict and has no fallback to the
    * unowned restaurants: an account holding nothing sees nothing, which is the
@@ -49,17 +47,10 @@ export class DashboardDataAccessService {
 
     const docs = await FirebaseFirestore.getCollection({
       reference: RESTAURANT_COLLECTION,
-      // Either ownership field, until issue #1754 removes the single one. An
-      // `array-contains` on one field needs no composite index.
+      // An `array-contains` on one field needs no composite index.
       compositeFilter: {
-        type: 'or',
+        type: 'and',
         queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: RESTAURANT_OWNER_FIELD,
-            opStr: '==',
-            value: userId,
-          },
           {
             type: 'where',
             fieldPath: RESTAURANT_OWNERS_FIELD,

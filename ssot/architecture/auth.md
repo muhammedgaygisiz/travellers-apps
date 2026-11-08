@@ -174,7 +174,7 @@ app and run the operational migrations in it.
   narrower and belongs to the rules of issue [#1078] and the scoped dashboard of
   [#1079], not to the door. Both have landed. [#1078] gives `staff` **no write
   authority at all**, and [#1079] scopes the list and the edit routes by
-  `Restaurant.ownerUserId` \- which a staff account never holds.
+  `Restaurant.ownerUserIds` \- which never names a staff account.
   **A staff account still opens the business app to an empty list**, and
   [#1537] did not change that. It wrote the record of which restaurant a staff
   account works at, which was the thing that did not exist; it deliberately did
@@ -274,7 +274,7 @@ conversation for every new waiter will either wait or share a login.
   The rules on the new collection admit three readers — the account itself, the
   operator, and the account holding the restaurant — and no writer at all.
 - **The caller's authority is read from Firestore, not from the token.**
-  `Restaurant.ownerUserId`, written by [#1077] and read by [#1078]'s rules. A
+  `Restaurant.ownerUserIds`, written by [#1077] and read by [#1078]'s rules. A
   revoked assignment therefore stops authorising immediately rather than at the
   end of the token's hour, and there is no claim copy to disagree with the
   document. The check is repeated inside the transaction, so a revocation

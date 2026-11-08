@@ -55,15 +55,8 @@ export interface Restaurant {
   bites?: Bite[];
 
   /**
-   * The account holding the restaurant, absent while it is unowned.
-   *
-   * @deprecated Ownership is moving to {@link ownerUserIds} (epic #1614).
-   * Readers accept either field until issue #1754 removes this one.
-   */
-  ownerUserId?: string;
-  /**
-   * Every account holding the restaurant, absent while it is unowned (epic
-   * #1614). Written only by `assignRestaurantOwner` and
+   * Every account holding the restaurant, up to ten, absent while it is
+   * unowned (epic #1614). Written only by `assignRestaurantOwner` and
    * `revokeRestaurantOwner`; the Firestore rules lock it against clients.
    */
   ownerUserIds?: string[];

@@ -196,7 +196,9 @@ const seedPublishedPlan = async (
     id: { stringValue: restaurantId },
     name: { stringValue: restaurantName },
     description: { stringValue: '' },
-    ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+    ownerUserIds: {
+      arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+    },
     claimStatus: { stringValue: 'claimed' },
     position: {
       mapValue: {

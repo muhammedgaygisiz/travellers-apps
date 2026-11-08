@@ -183,11 +183,11 @@ beforeEach(() => {
 
   documents.set(`restaurants/${RESTAURANT}`, {
     name: 'Pizza Palace',
-    ownerUserId: OWNER,
+    ownerUserIds: [OWNER],
   });
   documents.set(`restaurants/${OTHER_RESTAURANT}`, {
     name: 'Someone Else',
-    ownerUserId: 'other-owner',
+    ownerUserIds: ['other-owner'],
   });
 
   account(TARGET, []);

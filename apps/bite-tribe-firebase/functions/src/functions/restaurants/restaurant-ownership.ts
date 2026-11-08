@@ -20,6 +20,15 @@ import { ownerUserIdsOf, RESTAURANT_COLLECTION } from './restaurant-authority';
  */
 const OWNER_ROLE = 'business';
 
+/**
+ * The most accounts one restaurant can be assigned to (epic #1614).
+ *
+ * A product limit rather than a technical one, and it can be raised. It keeps
+ * the set an operator has to read on the ownership surface short, and it
+ * bounds what one restaurant fans a new-order notification out to.
+ */
+export const MAX_RESTAURANT_OWNERS = 10;
+
 interface AssignRestaurantOwnerRequest {
   restaurantId?: unknown;
   ownerUserId?: unknown;
@@ -28,12 +37,15 @@ interface AssignRestaurantOwnerRequest {
 
 interface RevokeRestaurantOwnerRequest {
   restaurantId?: unknown;
+  ownerUserId?: unknown;
   reason?: unknown;
 }
 
 export interface AssignRestaurantOwnerResult {
   restaurantId: string;
   ownerUserId: string;
+  /** Every owner of the restaurant after the call. */
+  ownerUserIds: string[];
   claimStatus: 'claimed';
   /**
    * `already-assigned` is the idempotent repeat: the restaurant already belongs
@@ -46,11 +58,15 @@ export interface AssignRestaurantOwnerResult {
 export interface RevokeRestaurantOwnerResult {
   restaurantId: string;
   /**
-   * Who held it. The document no longer says, and an operator reading back what
-   * their click did should not have to find the log entry to know.
+   * The account that was removed. The document no longer says, and an operator
+   * reading back what their click did should not have to find the log entry to
+   * know.
    */
   previousOwnerUserId: string;
-  claimStatus: 'revoked';
+  /** The owners that remain, empty when the last one was removed. */
+  ownerUserIds: string[];
+  /** `revoked` only when the last owner was removed. */
+  claimStatus: 'claimed' | 'revoked';
 }
 
 /**
@@ -120,18 +136,24 @@ const requireBusinessAccount = async (ownerUserId: string): Promise<void> => {
  * "verified" is the collection, and a restaurant that is not in it is
  * `not-found` rather than refused for being unverified.
  *
- * **One owner per restaurant, enforced here.** A restaurant that already has a
- * different owner is refused and the refusal names the current one, rather than
- * being silently reassigned. Reassignment is revoke then assign, so the trail
- * shows two decisions with two reasons instead of one write that quietly
- * replaced an accountable party.
+ * **It adds an owner; it never replaces one** (epic #1614, issue #1753). A
+ * restaurant can be held by up to {@link MAX_RESTAURANT_OWNERS} accounts, each
+ * with every right an owner has. Replacing an owner is revoke then assign, so
+ * the trail shows two decisions with two reasons instead of one write that
+ * quietly removed an accountable party.
  *
  * Repeating the same assignment is idempotent — it returns the current state
  * without writing — which is the rule `verifyRestaurantCandidate` already
  * follows for the other multi-step restaurant workflow.
  *
- * The read and the write are one transaction, so two operators assigning the
- * same restaurant to two accounts cannot both see it unowned and both write.
+ * The read and the write are one transaction rather than an `arrayUnion`
+ * outside one, so the cap is checked against what is actually committed. Two
+ * operators adding two accounts at once both land: Firestore retries the
+ * transaction that lost, which then reads the other's write and adds to it.
+ *
+ * `claimStatus` becomes `claimed`, and the grant timestamps are written only
+ * when the set was empty: they say when the restaurant became held, not when
+ * each owner joined. That is in the operator log.
  *
  * The assignment is a document field, never a custom claim. It then takes
  * effect immediately rather than after up to an hour of token lifetime, there
@@ -179,28 +201,34 @@ export const assignRestaurantOwnerHandler = async (
         return {
           restaurantId,
           ownerUserId,
+          ownerUserIds: currentOwners,
           claimStatus: 'claimed',
           status: 'already-assigned',
         };
       }
 
-      if (currentOwners.length > 0) {
+      if (currentOwners.length >= MAX_RESTAURANT_OWNERS) {
         throw new HttpsError(
           'failed-precondition',
-          `Restaurant is already assigned to ${currentOwners.join(', ')}. Revoke that assignment before assigning it again.`,
+          `Restaurant already has ${MAX_RESTAURANT_OWNERS} owners, the most it can have.`,
         );
       }
 
       const now = new Date();
+      const ownerUserIds = [...currentOwners, ownerUserId];
 
-      // Only the set is written (issue #1752). The single field is deleted in
-      // case a leftover empty one is still on the document.
+      // Only the set is written (issue #1752). The single field is deleted, so
+      // a restaurant the migration has not reached moves to the set here.
       transaction.update(restaurantRef, {
-        ownerUserIds: [ownerUserId],
+        ownerUserIds,
         ownerUserId: FieldValue.delete(),
         claimStatus: 'claimed',
-        claimedAt: now.toISOString(),
-        claimedAtTimestamp: now.getTime(),
+        ...(currentOwners.length === 0
+          ? {
+              claimedAt: now.toISOString(),
+              claimedAtTimestamp: now.getTime(),
+            }
+          : {}),
         updatedAt: now.toISOString(),
         updatedAtTimestamp: now.getTime(),
       });
@@ -208,6 +236,7 @@ export const assignRestaurantOwnerHandler = async (
       return {
         restaurantId,
         ownerUserId,
+        ownerUserIds,
         claimStatus: 'claimed',
         status: 'assigned',
       };
@@ -227,17 +256,23 @@ export const assignRestaurantOwnerHandler = async (
 };
 
 /**
- * Takes a restaurant back from the account holding it.
+ * Takes a restaurant back from one of the accounts holding it.
  *
- * The owner and the grant timestamps are deleted rather than blanked, so an
- * unowned restaurant carries no field at all and the "missing means unclaimed"
- * rule on the model stays the only rule a reader needs. `claimStatus` becomes
- * `revoked` rather than `unclaimed`, because "it was taken away" and "nobody
- * ever had it" are different answers to an operator looking at the restaurant.
+ * It names the account (epic #1614, issue #1753). A restaurant can have
+ * several owners, and a revoke that took "the" owner would have to guess which
+ * one. The others keep every right they had, and `claimStatus` stays
+ * `claimed`.
  *
- * Revoking a restaurant nobody holds is refused. Writing `revoked` over an
- * `unclaimed` restaurant would record a decision that was never made, on a
- * field the ownership-scoped rules of issue #1078 will read.
+ * Removing the **last** owner deletes the set and the grant timestamps rather
+ * than blanking them, so an unowned restaurant carries no field at all and the
+ * "missing means unclaimed" rule on the model stays the only rule a reader
+ * needs. `claimStatus` then becomes `revoked` rather than `unclaimed`, because
+ * "it was taken away" and "nobody ever had it" are different answers to an
+ * operator looking at the restaurant.
+ *
+ * Revoking an account that does not hold the restaurant is refused, including
+ * on a restaurant nobody holds. Writing `revoked` over an `unclaimed`
+ * restaurant would record a decision that was never made.
  */
 export const revokeRestaurantOwnerHandler = async (
   request: CallableRequest<RevokeRestaurantOwnerRequest>,
@@ -248,6 +283,7 @@ export const revokeRestaurantOwnerHandler = async (
     request.data?.restaurantId,
     'restaurantId',
   );
+  const ownerUserId = parseRequired(request.data?.ownerUserId, 'ownerUserId');
   const reason = parseReason(request.data?.reason);
 
   const db = getFirestore();
@@ -259,6 +295,7 @@ export const revokeRestaurantOwnerHandler = async (
     targetId: restaurantId,
     outcome: 'started',
     reason,
+    details: { ownerUserId },
   });
 
   const result = await db.runTransaction<RevokeRestaurantOwnerResult>(
@@ -269,32 +306,55 @@ export const revokeRestaurantOwnerHandler = async (
         throw new HttpsError('not-found', 'Restaurant was not found.');
       }
 
-      const [previousOwnerUserId = ''] = currentOwnersOf(snapshot.data());
+      const currentOwners = currentOwnersOf(snapshot.data());
 
-      if (!previousOwnerUserId) {
+      if (!currentOwners.includes(ownerUserId)) {
         throw new HttpsError(
           'failed-precondition',
-          'Restaurant is not assigned to an account.',
+          `Restaurant is not assigned to ${ownerUserId}.`,
         );
       }
 
       const now = new Date();
+      const ownerUserIds = currentOwners.filter((uid) => uid !== ownerUserId);
+      const timestamps = {
+        updatedAt: now.toISOString(),
+        updatedAtTimestamp: now.getTime(),
+      };
 
-      // Both fields, so a restaurant the migration has not reached yet is
-      // left as unheld as one it has.
+      if (ownerUserIds.length > 0) {
+        // Another owner remains, so the restaurant stays held. The single
+        // field is deleted either way, so a restaurant the migration has not
+        // reached moves to the set here.
+        transaction.update(restaurantRef, {
+          ownerUserIds,
+          ownerUserId: FieldValue.delete(),
+          ...timestamps,
+        });
+
+        return {
+          restaurantId,
+          previousOwnerUserId: ownerUserId,
+          ownerUserIds,
+          claimStatus: 'claimed',
+        };
+      }
+
+      // The last owner: both fields go, so a restaurant the migration has not
+      // reached is left as unheld as one it has.
       transaction.update(restaurantRef, {
         ownerUserIds: FieldValue.delete(),
         ownerUserId: FieldValue.delete(),
         claimedAt: FieldValue.delete(),
         claimedAtTimestamp: FieldValue.delete(),
         claimStatus: 'revoked',
-        updatedAt: now.toISOString(),
-        updatedAtTimestamp: now.getTime(),
+        ...timestamps,
       });
 
       return {
         restaurantId,
-        previousOwnerUserId,
+        previousOwnerUserId: ownerUserId,
+        ownerUserIds: [],
         claimStatus: 'revoked',
       };
     },
@@ -306,7 +366,11 @@ export const revokeRestaurantOwnerHandler = async (
     targetId: restaurantId,
     outcome: 'succeeded',
     reason,
-    details: { previousOwnerUserId: result.previousOwnerUserId },
+    details: {
+      ownerUserId,
+      remainingOwnerUserIds: result.ownerUserIds,
+      claimStatus: result.claimStatus,
+    },
   });
 
   return result;
@@ -315,9 +379,9 @@ export const revokeRestaurantOwnerHandler = async (
 /**
  * The two halves live in one module because they are one invariant.
  *
- * "Exactly one accountable owner" is enforced by the pair: assign refuses a
- * restaurant that is held, revoke refuses one that is not, and each is the
- * other's precondition. Split across two files, the two would be free to drift
+ * Who holds a restaurant is decided by the pair: assign adds an account that
+ * is not yet an owner, revoke removes one that is, and each is the other's
+ * precondition. Split across two files, the two would be free to drift
  * apart on what counts as owned — which field is read, whether an empty string
  * is an owner — and the invariant would live in neither.
  */

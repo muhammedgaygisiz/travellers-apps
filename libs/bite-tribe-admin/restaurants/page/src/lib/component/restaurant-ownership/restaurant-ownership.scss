@@ -55,15 +55,4 @@
     margin-top: 0.5rem;
     font-size: 0.8125rem;
   }
-
-  /*
-   * Revoking is the one action here that takes something away. The rule is what
-   * stops it reading as the other half of the same form, and the confirmation
-   * behind the button is the second half of the same protection (issue #1474).
-   */
-  .restaurant-ownership__danger {
-    margin-top: 1.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
-  }
 }

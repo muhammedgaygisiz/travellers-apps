@@ -78,15 +78,36 @@
               </ion-item>
               <ion-item>
                 <ion-label>
-                  <p>{{ 'admin-restaurant-ownership-owner' | transloco }}</p>
+                  <p>{{ 'admin-restaurant-ownership-owners' | transloco }}</p>
+                  @if (!assigned()) {
                   <h3 data-testid="admin-restaurant-owner">
-                    @if (assigned()) { {{ accountLabel(ownerUserId()) }} } @else
-                    { {{ 'admin-restaurant-ownership-status-unclaimed' |
-                    transloco }} }
+                    {{ 'admin-restaurant-ownership-status-unclaimed' | transloco
+                    }}
                   </h3>
+                  }
                 </ion-label>
               </ion-item>
-              @if (restaurant.claimedAt) {
+              @for (ownerUserId of ownerUserIds(); track ownerUserId) {
+              <ion-item
+                [attr.data-testid]="'admin-restaurant-owner-' + ownerUserId"
+              >
+                <ion-label>
+                  <h3 data-testid="admin-restaurant-owner">
+                    {{ accountLabel(ownerUserId) }}
+                  </h3>
+                </ion-label>
+                <ion-button
+                  slot="end"
+                  fill="outline"
+                  color="danger"
+                  [attr.data-testid]="'admin-restaurant-revoke-' + ownerUserId"
+                  [disabled]="!canRevoke() || saving()"
+                  (click)="onRevoke(ownerUserId)"
+                >
+                  {{ 'admin-restaurant-ownership-revoke' | transloco }}
+                </ion-button>
+              </ion-item>
+              } @if (restaurant.claimedAt) {
               <ion-item>
                 <ion-label>
                   <p>{{ 'admin-restaurant-ownership-since' | transloco }}</p>
@@ -96,9 +117,10 @@
               }
             </ion-list>
 
-            @if (!assigned()) {
+            @if (canAddOwner()) {
             <h4 class="restaurant-ownership__section">
-              {{ 'admin-restaurant-ownership-account' | transloco }}
+              {{ (assigned() ? 'admin-restaurant-ownership-add-owner-account' :
+              'admin-restaurant-ownership-account') | transloco }}
             </h4>
             <ion-searchbar
               [value]="accountFilter()"
@@ -126,6 +148,8 @@
                 <p data-testid="admin-restaurant-accounts-empty">
                   @if (accountFiltered()) { {{
                   'admin-restaurant-ownership-no-account-matches' | transloco }}
+                  } @else if (assigned()) { {{
+                  'admin-restaurant-ownership-no-other-accounts' | transloco }}
                   } @else { {{ 'admin-restaurant-ownership-no-accounts' |
                   transloco }} }
                 </p>
@@ -138,9 +162,9 @@
             } @else {
             <ion-note
               class="restaurant-ownership__hint"
-              data-testid="admin-restaurant-reassign-hint"
+              data-testid="admin-restaurant-owner-limit"
             >
-              {{ 'admin-restaurant-ownership-reassign-hint' | transloco }}
+              {{ 'admin-restaurant-ownership-owner-limit' | transloco }}
             </ion-note>
             }
 
@@ -163,7 +187,7 @@
               {{ 'admin-restaurant-ownership-reason-hint' | transloco }}
             </ion-note>
 
-            @if (!assigned()) {
+            @if (canAddOwner()) {
             <ion-button
               expand="block"
               class="ion-margin-top"
@@ -173,23 +197,9 @@
             >
               @if (saving()) {
               <ion-spinner name="crescent" slot="start" />
-              } {{ 'admin-restaurant-ownership-assign' | transloco }}
+              } {{ (assigned() ? 'admin-restaurant-ownership-add-owner' :
+              'admin-restaurant-ownership-assign') | transloco }}
             </ion-button>
-            } @else {
-            <div class="restaurant-ownership__danger">
-              <ion-button
-                expand="block"
-                class="ion-margin-top"
-                color="danger"
-                data-testid="admin-restaurant-revoke"
-                [disabled]="!canRevoke() || saving()"
-                (click)="onRevoke()"
-              >
-                @if (saving()) {
-                <ion-spinner name="crescent" slot="start" />
-                } {{ 'admin-restaurant-ownership-revoke' | transloco }}
-              </ion-button>
-            </div>
             }
           </ion-card-content>
         </ion-card>

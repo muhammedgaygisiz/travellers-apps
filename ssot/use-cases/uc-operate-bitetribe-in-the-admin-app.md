@@ -48,9 +48,9 @@ Only the roles, the subscription tier and the account's access are editable. The
 Blocking sits below both editable sections, separated by a rule and behind a confirmation that names the account. It is the one action on the form that takes something away, and it would otherwise be a misclick away from the role checkboxes.
 
 6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue [#1473].
-7. **Restaurant ownership** assigns a verified restaurant to an account holding `business`, and revokes that assignment. Both go through admin-only callables that write the fields on the restaurant document (issue [#1077]). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
+7. **Restaurant ownership** assigns a verified restaurant to up to ten accounts holding `business`, and revokes any one of them ([#1753]). Both go through admin-only callables that write the fields on the restaurant document (issue [#1077]). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
 
-A restaurant that already has an owner offers no picker at all: reassignment is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Revoking sits below a rule and behind a confirmation naming the restaurant and the account, on the same terms as blocking.
+A held restaurant lists every owner and offers "add owner", without the accounts that already hold it, until it has ten. Replacing an owner is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Each owner has its own revoke action, behind a confirmation naming the restaurant and the account, on the same terms as blocking. The confirmation says when other owners keep the restaurant.
 
 8. **Bite search** finds a Bite by its name or one of its tags and shows what BiteTribe holds about it. It calls `searchBites`, the same callable the consumer app's search drives. Selecting a Bite is where deleting an improper one will attach (issue [#1475]).
 
@@ -204,3 +204,4 @@ page is where the queue the reports arrive in lives.
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
+[#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753

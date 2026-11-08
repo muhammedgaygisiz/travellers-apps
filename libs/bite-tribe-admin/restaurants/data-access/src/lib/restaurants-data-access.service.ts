@@ -114,6 +114,8 @@ export interface AssignRestaurantOwnerRequest {
 export interface AssignRestaurantOwnerResult {
   restaurantId: string;
   ownerUserId: string;
+  /** Every owner of the restaurant after the call (epic #1614). */
+  ownerUserIds: string[];
   claimStatus: 'claimed';
   /** `already-assigned` is the idempotent repeat: nothing was written. */
   status: 'assigned' | 'already-assigned';
@@ -121,6 +123,8 @@ export interface AssignRestaurantOwnerResult {
 
 export interface RevokeRestaurantOwnerRequest {
   restaurantId: string;
+  /** The one owner to remove; the others keep the restaurant (issue #1753). */
+  ownerUserId: string;
   reason: string;
 }
 
@@ -159,9 +163,12 @@ interface RemoveRestaurantStaffRequest extends RestaurantStaffRequest {
 
 export interface RevokeRestaurantOwnerResult {
   restaurantId: string;
-  /** Who held it. The document no longer says. */
+  /** The account that was removed. The document no longer says. */
   previousOwnerUserId: string;
-  claimStatus: 'revoked';
+  /** The owners that remain, empty when the last one was removed. */
+  ownerUserIds: string[];
+  /** `revoked` only when the last owner was removed. */
+  claimStatus: 'claimed' | 'revoked';
 }
 
 /** The cursor of the first page: nothing to start after. */
@@ -692,7 +699,7 @@ export class RestaurantsDataAccessService {
   }
 
   /**
-   * Takes a restaurant back from the account holding it.
+   * Takes a restaurant back from one of the accounts holding it (issue #1753).
    *
    * Its own callable rather than `assignRestaurantOwner` with an empty owner,
    * because reassignment is deliberately two decisions: the operator log then
@@ -701,6 +708,7 @@ export class RestaurantsDataAccessService {
    */
   async revokeRestaurantOwner(
     restaurantId: string,
+    ownerUserId: string,
     reason: string,
   ): Promise<RevokeRestaurantOwnerResult> {
     const { data } = await FirebaseFunctions.callByName<
@@ -708,7 +716,7 @@ export class RestaurantsDataAccessService {
       RevokeRestaurantOwnerResult
     >({
       name: 'revokeRestaurantOwner',
-      data: { restaurantId, reason },
+      data: { restaurantId, ownerUserId, reason },
     });
 
     this.restaurants.reload();

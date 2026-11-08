@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -86,6 +86,8 @@ List the five with restaurant and author, plus two or three local alternatives, 
   - its bio or posts give the same name and the same street or city as the Bite's place.
 
   A similar name alone is not enough: small places often have no account, and a chain or a namesake in another city often shares the name. If no account can be confirmed, the restaurant gets no tag and appears in the caption by name only. Note each handle together with how it was confirmed.
+
+  A confirmed account can still be missing from the tag search when it blocks tags: London's `@chickenshop` never appeared, only look-alikes such as `@chickenshopdate`. Then keep the handle in the caption, leave the slide untagged, and never pick a look-alike. Clear the search box with its ✕ and move on with the slide arrow. Never press Escape.
 
   Two things the Bern dry run showed:
   - **Find the place's address first.** Start with the city printed on the Bite card: it already names the branch when a chain has one per city (Pittaria in Solothurn and Bern). Where a chain has several branches in the same city, or the name is too generic for Maps to find (Budapest's "the goulash", a stall in the Great Market Hall), read the pin. Neither the restaurant page (`/bite/<id>/restaurant/place/<name>`) nor the Bite's own page (`/bite/<id>`) shows an address, but both have a map. Read the pin's position from the Leaflet tiles with the snippet below, and match it to the Google Maps listing. For Bern's Yikou Sushi, this showed that the Bite came from the Garden branch, not the Old Town shop that has the Yikou accounts.

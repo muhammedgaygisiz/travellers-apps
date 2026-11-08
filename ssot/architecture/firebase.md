@@ -419,6 +419,32 @@ The flag says what the build does about App Check, not what the Console
 enforces, and the two drift (issue [#1369]); a recovery runs only after a live
 request was refused, so by then the flag has already been contradicted.
 
+### One Tab Owns The Firestore Cache
+
+**On web, a tab's App Check token covers only that tab's own requests.** It is
+not enough for every tab to hold a token; each tab also has to send its own
+reads. The multi-tab cache (`enableMultiTabIndexedDbPersistence`) broke that:
+it made one tab per browser profile the only one that talks to Firestore, and
+every other tab passed its reads through it. A tab left open for days, on an old
+build behind the update dialog and with a dead App Check token, turned every
+read in a fresh tab into _Missing or insufficient permissions_, including the
+account's own documents. Reloading the fresh tab did not help, and closing the
+old one did (issue [#1902]).
+
+`provideFirestoreUtils` therefore initializes Firestore with
+`persistentLocalCache({ tabManager: persistentSingleTabManager() })`. The first
+tab keeps the IndexedDB cache that the offline staff view reads from (issue
+[#1096]). A later tab cannot take the lease, so the SDK falls it back to a
+memory cache and logs `Error using user provided cache. Falling back to memory
+cache`. That warning is expected for every tab after the first. Against the
+emulators the cache is left at the SDK default.
+
+The failure reproduces signed out, on production. The rule
+`tableTokens/{token}` allows `get` to anyone, so a read of a missing token can
+only be refused by App Check. Stripping `x-firebase-appcheck` from the body of
+one tab's opening `Listen/channel` POST stands in for the dead tab. The recipe
+and its results are on [#1902].
+
 ## Google Maps Platform Trust Boundary
 
 Google Maps Platform is reached only from the backend. The apps call the `searchPlaces`, `searchNearbyPlaces`, `getPlaceDetails`, `searchBitesByCity`, `getCurrencyByPosition`, and `backfillBiteAddress` callables, and the functions call `places.googleapis.com` and `maps.googleapis.com` server-to-server with the backend-only `GOOGLE_GEOCODING_API_KEY`. No app, library, or native project links a Maps or Places SDK.
@@ -588,3 +614,4 @@ libs/bite-tribe/api
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894
+[#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902

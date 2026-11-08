@@ -8,9 +8,11 @@ import {
 import { Capacitor } from '@capacitor/core';
 import { FirebaseOptions, initializeApp } from 'firebase/app';
 import {
-  enableMultiTabIndexedDbPersistence,
   Firestore,
+  FirestoreSettings,
   initializeFirestore,
+  persistentLocalCache,
+  persistentSingleTabManager,
 } from 'firebase/firestore';
 import {
   Auth,
@@ -91,6 +93,30 @@ const enableNativeAnalyticsCollection = (): void => {
   });
 };
 
+/**
+ * The persistent cache, owned by one tab at a time (GitHub issue #1902).
+ *
+ * The multi-tab cache that was here before makes one tab per browser profile
+ * the only one that talks to Firestore; every other tab sends its reads
+ * through it. App Check is enforced on Firestore, so a tab whose App Check
+ * token had died - a tab left open for days, still on an old build behind
+ * the update dialog - turned every read in every other tab into "Missing or
+ * insufficient permissions", including reads of the account's own data, and
+ * reloading the affected tab did not help.
+ *
+ * With a single-tab manager the first tab keeps the IndexedDB cache, which is
+ * what the offline staff view of issue #1096 reads from. A second tab cannot
+ * take the lease, and the SDK falls it back to a memory cache with a warning
+ * (`Error using user provided cache. Falling back to memory cache`). That tab
+ * then holds its own connection and sends its own App Check token, so no tab
+ * depends on another's.
+ */
+const firestoreCacheSettings = (): FirestoreSettings => ({
+  localCache: persistentLocalCache({
+    tabManager: persistentSingleTabManager(undefined),
+  }),
+});
+
 export const provideFirestoreUtils = (
   firebaseOptions: FirebaseOptions,
   withAnalytics?: boolean,
@@ -98,7 +124,12 @@ export const provideFirestoreUtils = (
   appCheckRuntimeContext?: FirebaseAppCheckRuntimeContext,
 ): (EnvironmentProviders | Provider)[] => {
   const app = initializeApp(firebaseOptions || {});
-  const firestore: Firestore = initializeFirestore(app, {});
+  const usesEmulators =
+    process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true' && Boolean(emulators);
+  const firestore: Firestore = initializeFirestore(
+    app,
+    usesEmulators ? {} : firestoreCacheSettings(),
+  );
   const startupInitializer = provideFirebaseStartupInitializer(
     app,
     appCheckRuntimeContext,
@@ -318,12 +349,6 @@ const provideStandardFirestoreUtils = (
   firestore: Firestore,
   withAnalytics: boolean,
 ): Provider[] => {
-  try {
-    enableMultiTabIndexedDbPersistence(firestore);
-  } catch (err) {
-    console.warn('Firebase persistence error: ', err);
-  }
-
   const auth: Auth = Capacitor.isNativePlatform()
     ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
     : getAuth(app);

@@ -1,5 +1,56 @@
 # Changelog
 
+## build-100 (2026-11-08)
+<!-- changelog-start-rev: 1c7b9a0b -->
+<!-- changelog-end-rev: 2613c4e8 -->
+
+### Features
+- **bite-tribe-admin**: an operator assigns and revokes more than one owner per restaurant (#1753) (#1912) (d546b9e8)
+- **bite-tribe**: show the countries with Bites on a globe on the About page (#1893) (#1896) (baa86c2a)
+- **functions**: send new users who aren't active a day-30 email (#1894) (#1895) (6545c36d)
+- a skill that builds and publishes the city Top 5 dishes Instagram carousel (#1886) (#1887) (a0bc1a08)
+- **bite-tribe**: offer the app in simplified chinese (#1880) (#1890) (4e858411)
+- **bite-tribe**: offer the app in japanese (#1882) (#1888) (0d05ea1b)
+- **bite-tribe**: offer the app in korean (#1881) (#1885) (d8b88aea)
+- **analytics**: attribute arrivals to their source and count web store hand-offs (#1759) (#1884) (d2eba637)
+- **functions**: send new users who haven't come back a day-7 email (#1874) (#1875) (55988a63)
+- **bite-tribe**: report a profile for harassment or hate (#1829) (#1867) (95676d50)
+- **bite-tribe-business**: restaurants state whether they have a gender-neutral restroom (#1830) (#1866) (6762b3c3)
+- **bite-tribe**: optional pronouns on a profile (#1826) (#1865) (be798e12)
+
+### Bug Fixes
+- **bite-tribe**: a hidden tab applies a ready app update instead of waiting behind the dialog (#1904) (#1908) (13171d6f)
+- **bite-tribe**: a failed onboarding read must not send an onboarded account to onboarding (#1903) (#1907) (8c70f078)
+- **ta-firestore**: let every web tab send its own Firestore reads (#1902) (#1906) (d10a9623)
+- **bite-tribe**: keep the focused onboarding field clear of the keyboard (#1883) (#1901) (dc15fd89)
+- **bite-tribe**: hide email updates until there is a newsletter (#1879) (#1900) (01a0a1c0)
+- **bite-tribe**: hide the free and pro tier until subscriptions exist (#1878) (#1897) (94b864eb)
+- **bite-tribe**: the followers list loads faster and stays visible while it reloads (#1876) (#1877) (0c740ead)
+- **bite-tribe**: scrolling a page no longer presses what the thumb landed on (#1872) (#1873) (55f876ba)
+- **bite-tribe-firebase**: refuse a private profile to every other account (#1863) (#1871) (d3e11ec3)
+- **bite-tribe-firebase**: a changed display name leaves no trace of the old one (#1827) (#1856) (34333948)
+
+### Refactoring
+- **functions**: remove the single-owner field (#1754) (#1913) (4cdee1cd)
+- **functions**: write restaurant ownership as a set and migrate existing restaurants (#1752) (#1911) (9714d230)
+- **bite-tribe-business**: read restaurant ownership as a set in the business and admin apps (#1751) (#1910) (68c1d7c6)
+- **functions**: read restaurant ownership as a set on the server (#1750) (#1909) (79a66050)
+
+### Documentation
+- record the Granada Top 5 post with the other city posts (#1898) (#1899) (2db6a502)
+- record the Mostar Top 5 post with the other city posts (#1891) (#1892) (46394a53)
+
+### Continuous Integration
+- e2e, loki and the builds no longer wait for the unit tests (#1812) (#1870) (117e06b3)
+- unit tests run across parallel runners with jest workers sized to the runner (#1813) (#1862) (7677e6a9)
+- the consumer e2e suite runs as parallel shards (#1817) (#1861) (0d65ca5d)
+- the app and functions builds run as one affected build job (#1819) (#1858) (2c12a73b)
+
+### Chores
+- sync the 1.1.2 marketing version into the native projects (#1922) (2613c4e8)
+- bump marketing version to 1.1.2 (#1921) (6edb5122)
+- prepare build 1.1.1-99 release (#1860) (0d732a96)
+
 ## build-99 (2026-10-30)
 <!-- changelog-start-rev: e8b915de -->
 <!-- changelog-end-rev: 1c7b9a0b -->

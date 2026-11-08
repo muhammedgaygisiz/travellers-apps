@@ -32,6 +32,12 @@ with an answer - including a declined one.
   - app language
   - location priming before the OS permission prompt, followed by the optional home city shown on the profile
   - push notification priming before the OS permission prompt
+- The **Back** and **Next** step navigation stays pinned to the bottom of the
+  screen, except while the on-screen keyboard is open: then it follows the step,
+  so it never covers the field being typed into, and it is pinned again as soon
+  as the keyboard closes. A field that would end up under the keyboard, such as
+  the home city, is scrolled into view above it (issue [#1883], see
+  `Keyboard Resize Rule` in [Architecture - Capacitor](../architecture/capacitor.md)).
 - Onboarding is the primary first-run permission surface. Permission prompts
   may also follow an explicit later setup or recovery action, such as **Receive
   notifications on this device** in Settings; they never appear cold from
@@ -287,6 +293,8 @@ permission surface, so the purpose strings are read here before any other screen
 - Issue [#1894] (the day-30 mail to new users who are not active), part of epic
   [#907]
 - Issue [#1798] (finishing onboarding is celebrated), part of epic [#1741]
+- Issue [#1883] (the step navigation no longer covers a focused input while the
+  keyboard is open, and a field low on a step is scrolled into view)
 
 ## Related Domains
 
@@ -336,4 +344,5 @@ permission surface, so the purpose strings are read here before any other screen
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#914]: https://github.com/muhammedgaygisiz/travellers-apps/issues/914
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
+[#1883]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1883
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894

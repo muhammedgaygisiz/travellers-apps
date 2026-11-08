@@ -663,6 +663,47 @@ dependency, and that plays the platform's own haptic primitive:
   either platform, and the setting above stays on the device and is never
   collected.
 
+## Keyboard Resize Rule
+
+`@capacitor/keyboard` runs with its defaults: no `Keyboard` block in either
+`capacitor.config.ts`, so the resize mode is `native`. When the on-screen
+keyboard opens, the plugin shrinks the web view to the space above it - but
+only once the keyboard animation has run, so `keyboardDidShow` can arrive while
+`window.innerHeight` is still the full screen. The `resize` event follows when
+the frame changes.
+
+Nothing scrolls a focused field into view inside a page. `getIonicConfig()`
+turns Ionic's `scrollAssist` and `scrollPadding` off, and WebKit only scrolls
+the document, never the `ion-content` scroller in its shadow root. On the iOS
+simulator `scrollIntoView` on the field moved that scroller by one pixel.
+
+- **Anything pinned to the bottom of a scroll area lands on the focused input.**
+  `position: sticky; bottom: 0` or `fixed` follows the shrunken edge, which is
+  where the input sits. The onboarding step navigation did exactly that on iOS
+  (issue [#1883]).
+- **A page with a bottom-pinned control takes it out of pinning while the
+  keyboard is open**, and pins it again when the keyboard closes. Both plugins
+  fire `keyboardWillShow` / `keyboardWillHide` on `window` before the keyboard
+  animates; Ionic's `ion-app` relays the `Did` pair as `ionKeyboardDidShow` /
+  `ionKeyboardDidHide`, which also fire in a browser through the visual
+  viewport. Listen for both.
+- **A page with a field low enough to end up under the keyboard scrolls it into
+  view itself.** Measure how far the field overhangs the visible bottom and
+  call `scrollByPoint` on its `ion-content` by that much, on `keyboardDidShow`,
+  `ionKeyboardDidShow` and every `resize` while the keyboard is open. The calls
+  made before the web view shrank find no overhang and do nothing.
+  `OnboardingPage` is the reference for both rules.
+- **The resize mode stays app-wide `native`.** Switching it to `none` or `body`
+  would change the keyboard on every screen to fix one layout, and `none` puts
+  the burden of keeping an input visible on each page instead.
+- **Checking it.** A browser cannot open a keyboard: shrink the viewport to the
+  space above the keyboard, scroll the field to the bottom edge and fire the
+  `window` event. On the iOS simulator, switch the software keyboard on before
+  tapping the field - a hardware keyboard hides it, and a field focused before
+  the keyboard appeared gets no keyboard events. `console.log` does not reach
+  the system log in a dev build, so read layout values from text written into
+  the page.
+
 ## Social Share Hand-Off Rule
 
 The share image composer of [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) opens Instagram and
@@ -750,6 +791,7 @@ libs/bite-tribe-common/bite/src/lib/likes/likes.component.ts
 libs/bite-tribe/followers/page/src/lib/components/followers-list/followers-list.component.ts
 libs/bite-tribe/profile/page/src/lib/components/profile-page/profile.component.ts
 libs/common/push-notifications
+libs/bite-tribe/onboarding/page/src/lib/components/onboarding-page
 libs/common/networkstatus/feature
 libs/common/image-compression
 libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
@@ -793,3 +835,4 @@ libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
+[#1883]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1883

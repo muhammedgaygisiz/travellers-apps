@@ -37,6 +37,14 @@
   &__next {
     margin-left: auto;
   }
+
+  // With the keyboard up the visible area ends just below the focused input,
+  // which is exactly where a sticky footer would land. The navigation follows
+  // the step instead, and sticks to the bottom again once the keyboard closes
+  // (#1883).
+  &--keyboard-open &__nav {
+    position: static;
+  }
 }
 
 @media (max-width: 480px) {

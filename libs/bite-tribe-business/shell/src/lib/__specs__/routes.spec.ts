@@ -301,6 +301,46 @@ describe('business ROUTES', () => {
     );
 
     /**
+     * Ownership as a set (epic #1614): an account listed only in
+     * `ownerUserIds` opens every owner route, and one in neither field does
+     * not.
+     */
+    const heldBySet = (ownerUserIds: string[]): void => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: { id: 'restaurant-1', data: { ownerUserIds } },
+      } as unknown as Awaited<
+        ReturnType<typeof FirebaseFirestore.getDocument>
+      >);
+    };
+
+    it.each(EDIT_PATHS)(
+      'admits an account listed only in the owner set on %s',
+      async (path) => {
+        heldBySet(['another-business-account', 'user-1']);
+
+        await expect(run(path)).resolves.toBe(true);
+      },
+    );
+
+    it.each(EDIT_PATHS)(
+      'refuses an account missing from the owner set on %s',
+      async (path) => {
+        heldBySet(['another-business-account']);
+
+        await expect(run(path)).resolves.toEqual({ url: '/restaurants' });
+      },
+    );
+
+    it.each(STAFF_PATHS)(
+      'admits an account listed only in the owner set on %s',
+      async (path) => {
+        heldBySet(['user-1']);
+
+        await expect(run(path)).resolves.toBe(true);
+      },
+    );
+
+    /**
      * The live view is the one route in this app a **staff** account is meant
      * to reach (issue #1093), so it carries the owner-or-staff gate rather than
      * the owner-only one. Asserted here rather than trusted, because the two

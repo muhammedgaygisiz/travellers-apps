@@ -7,6 +7,7 @@ import {
   DashboardDataAccessService,
   RESTAURANT_COLLECTION,
   RESTAURANT_OWNER_FIELD,
+  RESTAURANT_OWNERS_FIELD,
 } from '../dashboard-data-access.service';
 import { BiteTrail } from 'model';
 import { signal } from '@angular/core';
@@ -71,12 +72,18 @@ describe(DashboardDataAccessService.name, () => {
       expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith({
         reference: RESTAURANT_COLLECTION,
         compositeFilter: {
-          type: 'and',
+          type: 'or',
           queryConstraints: [
             {
               type: 'where',
               fieldPath: RESTAURANT_OWNER_FIELD,
               opStr: '==',
+              value: 'user-1',
+            },
+            {
+              type: 'where',
+              fieldPath: RESTAURANT_OWNERS_FIELD,
+              opStr: 'array-contains',
               value: 'user-1',
             },
           ],

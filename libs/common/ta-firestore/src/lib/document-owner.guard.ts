@@ -11,6 +11,12 @@ export interface DocumentOwnerGuardOptions {
   paramName: string;
   /** Field on the document naming the account that holds it. */
   ownerField: string;
+  /**
+   * Field on the document listing several accounts that hold it, each with
+   * the same rights (epic #1614). When given, an account named in either
+   * field is admitted; a document held by one account leaves it out.
+   */
+  ownerSetField?: string;
   /** Transloco key for the refusal the visitor is shown. */
   refusalMessageKey: string;
   /** Where a refused visitor is sent instead. */
@@ -49,6 +55,7 @@ export const documentOwnerGuard =
     collection,
     paramName,
     ownerField,
+    ownerSetField,
     refusalMessageKey,
     redirectTo,
   }: DocumentOwnerGuardOptions): CanActivateFn =>
@@ -78,7 +85,13 @@ export const documentOwnerGuard =
           reference: `${collection}/${documentId}`,
         });
 
-        return snapshot?.data?.[ownerField] === uid;
+        const data = snapshot?.data;
+        const set = ownerSetField ? data?.[ownerSetField] : undefined;
+
+        return (
+          data?.[ownerField] === uid ||
+          (Array.isArray(set) && set.includes(uid))
+        );
       } catch {
         return false;
       }

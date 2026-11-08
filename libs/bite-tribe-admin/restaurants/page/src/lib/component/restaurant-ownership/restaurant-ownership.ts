@@ -27,7 +27,7 @@ import {
   IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { Restaurant, RestaurantClaimStatus } from 'model';
+import { Restaurant, RestaurantClaimStatus, restaurantOwnerIds } from 'model';
 import { PageComponent } from 'common/ui/page';
 import { AdminUser } from 'bite-tribe-admin/user-management-data-access';
 import { RestaurantStaffMember } from 'bite-tribe-admin/restaurants-data-access';
@@ -200,7 +200,14 @@ export class RestaurantOwnership {
     () => this.accountFilter().trim().length > 0,
   );
 
-  readonly ownerUserId = computed(() => this.selected()?.ownerUserId ?? '');
+  /**
+   * Read through either ownership field (epic #1614), so a restaurant the
+   * `restaurant-owner-ids` migration has moved still shows its owner. Until
+   * issue #1753 a restaurant has at most one.
+   */
+  readonly ownerUserId = computed(
+    () => restaurantOwnerIds(this.selected())[0] ?? '',
+  );
 
   readonly assigned = computed(() => !!this.ownerUserId());
 
@@ -249,6 +256,11 @@ export class RestaurantOwnership {
    * is no longer in the list is still an owner, and a blank line would read as
    * "unowned" on the one screen where that distinction is the whole point.
    */
+  /** Every owner of a restaurant in the list, through either field. */
+  ownerIdsOf(restaurant: Restaurant): string[] {
+    return restaurantOwnerIds(restaurant);
+  }
+
   accountLabel(uid: string): string {
     const account = this.accounts().find((candidate) => candidate.uid === uid);
 

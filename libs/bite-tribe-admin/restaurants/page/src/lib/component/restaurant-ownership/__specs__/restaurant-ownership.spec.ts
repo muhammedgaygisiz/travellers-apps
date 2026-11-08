@@ -243,6 +243,37 @@ describe(RestaurantOwnership.name, () => {
     expect(query('admin-restaurant-owner')?.textContent).toContain('owner-1');
   });
 
+  /**
+   * A restaurant moved by the `restaurant-owner-ids` migration (epic #1614)
+   * carries its owner in the set only, and still shows it.
+   */
+  it('shows the owner of a restaurant held through the owner set', () => {
+    setInputs({
+      accounts: [account()],
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
+    });
+
+    expect(component.assigned()).toBe(true);
+    expect(query('admin-restaurant-owner')?.textContent).toContain(
+      'owner@example.com',
+    );
+  });
+
+  it('lists the owner of a restaurant held through the owner set', () => {
+    const held = restaurant({
+      ownerUserIds: ['owner-1'],
+      claimStatus: 'claimed',
+    });
+    setInputs({ accounts: [account()], restaurants: [held] });
+
+    expect(query('admin-restaurant-list')?.textContent).toContain(
+      'owner@example.com',
+    );
+  });
+
   it('reads a missing claim status as unclaimed', () => {
     expect(component.claimStatusOf(restaurant())).toBe('unclaimed');
     expect(component.claimStatusKey(restaurant())).toBe(

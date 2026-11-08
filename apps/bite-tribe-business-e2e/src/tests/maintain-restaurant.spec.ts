@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { DashboardPage } from '../pages/dashboard.page';
 import { EditRestaurantPage } from '../pages/edit-restaurant.page';
+import { FloorPlanPage } from '../pages/floor-plan.page';
 import { loginAsBusinessUser } from '../support/auth';
 import {
   deleteFirestoreDocument,
@@ -183,6 +184,74 @@ test.describe('Maintain restaurants in the business app', () => {
    * `firestore-rules.emulator-spec.ts`, which can reach the write without a
    * form to reach it through.
    */
+  /**
+   * Ownership as a set (epic #1614, issue #1751): a restaurant held only
+   * through `ownerUserIds` - the shape the `restaurant-owner-ids` migration
+   * leaves - is on the dashboard of every account in the set, and each of
+   * them can save it and open its owner routes.
+   */
+  test('lists and saves a restaurant held only through the owner set', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const restaurantId = `set-held-restaurant-${runId}`;
+    const restaurantName = `Shared Bistro ${runId}`;
+    const description = `Run by two people since ${runId}.`;
+
+    seededRestaurantIds.push(restaurantId);
+    await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
+      id: { stringValue: restaurantId },
+      name: { stringValue: restaurantName },
+      description: { stringValue: '' },
+      ownerUserIds: {
+        arrayValue: {
+          values: [
+            { stringValue: 'another-business-account-uid' },
+            { stringValue: TEST_USERS.organisation.uid },
+          ],
+        },
+      },
+      claimStatus: { stringValue: 'claimed' },
+      position: {
+        mapValue: {
+          fields: {
+            latitude: { doubleValue: POSITION.latitude },
+            longitude: { doubleValue: POSITION.longitude },
+          },
+        },
+      },
+    });
+
+    await loginAsBusinessUser(page);
+
+    const dashboard = new DashboardPage(page);
+    await dashboard.openRestaurants();
+    await dashboard.expectRestaurant(restaurantName);
+    await dashboard.openRestaurant(restaurantName, restaurantId);
+
+    const editRestaurant = new EditRestaurantPage(page);
+    await editRestaurant.expectRestaurantName(restaurantName);
+    await editRestaurant.fillDescription(description);
+    await editRestaurant.expectSavedToast(
+      'About the restaurant saved successfully!',
+    );
+
+    await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {
+      description,
+    });
+
+    // The floor-plan route sits behind the same owner guard as the editor,
+    // and its empty state renders only once the guard has let the account in.
+    const floorPlan = new FloorPlanPage(page);
+    await floorPlan.goto(restaurantId);
+    await expect(floorPlan.empty).toBeVisible({ timeout: 20_000 });
+    await expect(page).toHaveURL(
+      new RegExp(`/restaurant/${restaurantId}/floor-plan$`),
+    );
+  });
+
   test('hides a restaurant assigned to another account and refuses it by direct URL', async ({
     page,
   }) => {

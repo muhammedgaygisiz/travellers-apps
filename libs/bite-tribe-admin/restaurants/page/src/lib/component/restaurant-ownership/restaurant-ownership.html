@@ -38,7 +38,8 @@
               >
                 <ion-label>
                   <h3>{{ restaurant.name }}</h3>
-                  @if (restaurant.ownerUserId; as ownerUserId) {
+                  @for (ownerUserId of ownerIdsOf(restaurant); track
+                  ownerUserId) {
                   <p>{{ accountLabel(ownerUserId) }}</p>
                   }
                   <p>

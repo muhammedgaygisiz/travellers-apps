@@ -1,28 +1,34 @@
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { isRestaurantOwner, RestaurantOwnership } from 'model';
 
 /** Where the account-to-restaurant association lives (issue #1537). */
 export const RESTAURANT_STAFF_COLLECTION = 'restaurantStaff';
 export const RESTAURANT_COLLECTION = 'restaurants';
-export const RESTAURANT_OWNER_FIELD = 'ownerUserId';
 export const STAFF_RESTAURANT_FIELD = 'restaurantId';
 
 /**
- * One field off one document, or `undefined` if anything at all went wrong.
+ * One document, or one field off it, or `undefined` if anything at all went
+ * wrong.
  *
  * A read that fails and a field that is absent are the same answer on purpose:
  * offline, a deleted document and a rule that has since narrowed all mean "not
  * established", and none of them mean "and therefore yes". Every caller here
  * is deciding access, so they fail closed on `undefined`.
  */
-const fieldOf = async (reference: string, field: string): Promise<unknown> => {
+const dataOf = async (
+  reference: string,
+): Promise<Record<string, unknown> | undefined> => {
   try {
     const { snapshot } = await FirebaseFirestore.getDocument({ reference });
 
-    return snapshot?.data?.[field];
+    return snapshot?.data ?? undefined;
   } catch {
     return undefined;
   }
 };
+
+const fieldOf = async (reference: string, field: string): Promise<unknown> =>
+  (await dataOf(reference))?.[field];
 
 /**
  * The one restaurant this account works at, or `undefined` if it works at none
@@ -50,12 +56,16 @@ export const staffRestaurantIdOf = async (
     : undefined;
 };
 
-/** Whether this account is the one named on the restaurant document. */
+/**
+ * Whether this account is one of the owners named on the restaurant document,
+ * through either ownership field (epic #1614).
+ */
 export const holdsRestaurant = async (
   uid: string,
   restaurantId: string,
 ): Promise<boolean> =>
-  (await fieldOf(
-    `${RESTAURANT_COLLECTION}/${restaurantId}`,
-    RESTAURANT_OWNER_FIELD,
-  )) === uid;
+  isRestaurantOwner(
+    (await dataOf(`${RESTAURANT_COLLECTION}/${restaurantId}`)) as
+      RestaurantOwnership | undefined,
+    uid,
+  );

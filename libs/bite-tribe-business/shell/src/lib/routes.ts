@@ -24,6 +24,7 @@ const ownedRestaurantGuard = documentOwnerGuard({
   collection: 'restaurants',
   paramName: 'restaurantId',
   ownerField: 'ownerUserId',
+  ownerSetField: 'ownerUserIds',
   refusalMessageKey: 'restaurant-not-assigned-to-account',
   redirectTo: '/restaurants',
 });

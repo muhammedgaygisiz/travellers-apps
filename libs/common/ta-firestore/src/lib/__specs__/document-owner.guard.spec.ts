@@ -102,6 +102,65 @@ describe('documentOwnerGuard', () => {
     expect(present).toHaveBeenCalled();
   });
 
+  /**
+   * Membership mode (epic #1614): a document held by a set of accounts admits
+   * every member, and the single-owner field keeps working beside it.
+   */
+  describe('with an owner set field', () => {
+    const runSetGuard = (): Promise<boolean | UrlTree> =>
+      TestBed.runInInjectionContext(
+        () =>
+          documentOwnerGuard({ ...OPTIONS, ownerSetField: 'ownerUserIds' })(
+            routeWith({ restaurantId: 'restaurant-1' }),
+            { url: '/restaurant/restaurant-1' } as RouterStateSnapshot,
+          ) as Promise<boolean | UrlTree>,
+      );
+
+    const documentWith = (data: Record<string, unknown>): void => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: { id: 'restaurant-1', data },
+      } as unknown as Awaited<
+        ReturnType<typeof FirebaseFirestore.getDocument>
+      >);
+    };
+
+    it('admits a member of the set', async () => {
+      documentWith({ ownerUserIds: ['another-account', 'user-1'] });
+
+      await expect(runSetGuard()).resolves.toBe(true);
+    });
+
+    it('still admits the account named in the single field', async () => {
+      documentWith({ ownerUserId: 'user-1' });
+
+      await expect(runSetGuard()).resolves.toBe(true);
+    });
+
+    it('refuses an account in neither field', async () => {
+      documentWith({
+        ownerUserId: 'another-account',
+        ownerUserIds: ['a-third-account'],
+      });
+
+      await expect(runSetGuard()).resolves.toEqual({ url: '/restaurants' });
+      expect(present).toHaveBeenCalled();
+    });
+
+    it('refuses when the set is not a list', async () => {
+      documentWith({ ownerUserIds: 'user-1' });
+
+      await expect(runSetGuard()).resolves.toEqual({ url: '/restaurants' });
+    });
+  });
+
+  it('ignores a set field it was not told about', async () => {
+    jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+      snapshot: { id: 'restaurant-1', data: { ownerUserIds: ['user-1'] } },
+    } as unknown as Awaited<ReturnType<typeof FirebaseFirestore.getDocument>>);
+
+    await expect(runGuard()).resolves.toEqual({ url: '/restaurants' });
+  });
+
   it('refuses when the document cannot be read', async () => {
     jest
       .spyOn(FirebaseFirestore, 'getDocument')

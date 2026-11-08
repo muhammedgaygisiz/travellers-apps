@@ -76,14 +76,15 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   being protected ([#1863]). See the `Profile Visibility Contract` in
   [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
 - **A write is allowed by ownership, not by a role.** The document names the
-  account that may write it: `Restaurant.ownerUserId`, `Bite.userId`,
+  account that may write it: `Restaurant.ownerUserIds` (or the deprecated
+  `ownerUserId`, until [#1754]), `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
   id itself for the per-account documents (`settings/{uid}`, a reaction, a
   rating, a follow relationship, a push installation).
 - **Backend-owned fields are named.** A field the Admin SDK owns can sit on a
   document the client may otherwise write, so the rule names the field.
-  `ownerUserId`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` on a
-  restaurant are **writable by no client at all**, including the account that
+  `ownerUserIds`, `ownerUserId`, `claimStatus`, `claimedAt` and
+  `claimedAtTimestamp` on a restaurant are **writable by no client at all**, including the account that
   owns it, because they are written by `assignRestaurantOwner` and
   `revokeRestaurantOwner` — which bypass rules entirely, so denying every client
   write to them costs the backend nothing and closes the forgery path recorded
@@ -615,3 +616,4 @@ libs/bite-tribe/api
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894
 [#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902
+[#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754

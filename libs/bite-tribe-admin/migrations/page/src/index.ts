@@ -1,6 +1,7 @@
 export { NewVersionNotificationContainer } from './lib/integration/new-version-notification-container';
 export { ReviewTimestampsBackfillContainer } from './lib/integration/review-timestamps-backfill-container';
 export { MenuItemIdsBackfillContainer } from './lib/integration/menu-item-ids-backfill-container';
+export { RestaurantOwnerIdsMigrationContainer } from './lib/integration/restaurant-owner-ids-migration-container';
 export { BiteImageStatusBackfillContainer } from './lib/integration/bite-image-status-backfill-container';
 export { BiteCountriesRebuildContainer } from './lib/integration/bite-countries-rebuild-container';
 export { MenuItemStatsRecomputeContainer } from './lib/integration/menu-item-stats-recompute-container';

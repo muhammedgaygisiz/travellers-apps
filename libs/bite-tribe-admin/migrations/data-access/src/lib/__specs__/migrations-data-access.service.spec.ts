@@ -327,6 +327,33 @@ describe(MigrationsDataAccessService.name, () => {
     });
   });
 
+  describe('migrateRestaurantOwnerIds', () => {
+    it('calls the migration and keeps only the counts the page renders', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: {
+          processed: 5,
+          migrated: 3,
+          skipped: 1,
+          conflicting: 1,
+          conflicts: ['restaurant-9'],
+        },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.migrateRestaurantOwnerIds();
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'migrateRestaurantOwnerIdsCallable',
+      });
+      expect(result).toEqual({
+        processed: 5,
+        migrated: 3,
+        skipped: 1,
+        conflicting: 1,
+      });
+    });
+  });
+
   describe('logout', () => {
     it('should log out through the store', () => {
       const service = TestBed.inject(MigrationsDataAccessService);

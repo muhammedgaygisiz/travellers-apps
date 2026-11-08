@@ -16,6 +16,7 @@ export const COLLECTION_MIGRATIONS = [
   'menu-item-stats',
   'bite-image-status',
   'bite-countries',
+  'restaurant-owner-ids',
 ] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];

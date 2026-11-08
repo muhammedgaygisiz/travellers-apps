@@ -8,8 +8,7 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
 import { isBiteTribeRole, requireAdmin, ROLES_CLAIM } from '../shared/roles';
-
-const RESTAURANT_COLLECTION = 'restaurants';
+import { ownerUserIdsOf, RESTAURANT_COLLECTION } from './restaurant-authority';
 
 /**
  * The role an account has to hold before a restaurant can be assigned to it.
@@ -54,8 +53,15 @@ export interface RevokeRestaurantOwnerResult {
   claimStatus: 'revoked';
 }
 
-const getString = (data: DocumentData, field: string): string =>
-  typeof data[field] === 'string' ? data[field] : '';
+/**
+ * Who holds the restaurant, through either field (epic #1614).
+ *
+ * Both callables read the union, so a restaurant the `restaurant-owner-ids`
+ * migration has not reached yet is still held - and still cannot be assigned
+ * a second time.
+ */
+const currentOwnersOf = (data: DocumentData | undefined): string[] =>
+  ownerUserIdsOf(data);
 
 const parseRequired = (value: unknown, field: string): string => {
   const parsed = typeof value === 'string' ? value.trim() : '';
@@ -167,12 +173,9 @@ export const assignRestaurantOwnerHandler = async (
         throw new HttpsError('not-found', 'Restaurant was not found.');
       }
 
-      const currentOwnerUserId = getString(
-        snapshot.data() ?? {},
-        'ownerUserId',
-      );
+      const currentOwners = currentOwnersOf(snapshot.data());
 
-      if (currentOwnerUserId === ownerUserId) {
+      if (currentOwners.includes(ownerUserId)) {
         return {
           restaurantId,
           ownerUserId,
@@ -181,17 +184,20 @@ export const assignRestaurantOwnerHandler = async (
         };
       }
 
-      if (currentOwnerUserId) {
+      if (currentOwners.length > 0) {
         throw new HttpsError(
           'failed-precondition',
-          `Restaurant is already assigned to ${currentOwnerUserId}. Revoke that assignment before assigning it again.`,
+          `Restaurant is already assigned to ${currentOwners.join(', ')}. Revoke that assignment before assigning it again.`,
         );
       }
 
       const now = new Date();
 
+      // Only the set is written (issue #1752). The single field is deleted in
+      // case a leftover empty one is still on the document.
       transaction.update(restaurantRef, {
-        ownerUserId,
+        ownerUserIds: [ownerUserId],
+        ownerUserId: FieldValue.delete(),
         claimStatus: 'claimed',
         claimedAt: now.toISOString(),
         claimedAtTimestamp: now.getTime(),
@@ -263,10 +269,7 @@ export const revokeRestaurantOwnerHandler = async (
         throw new HttpsError('not-found', 'Restaurant was not found.');
       }
 
-      const previousOwnerUserId = getString(
-        snapshot.data() ?? {},
-        'ownerUserId',
-      );
+      const [previousOwnerUserId = ''] = currentOwnersOf(snapshot.data());
 
       if (!previousOwnerUserId) {
         throw new HttpsError(
@@ -277,7 +280,10 @@ export const revokeRestaurantOwnerHandler = async (
 
       const now = new Date();
 
+      // Both fields, so a restaurant the migration has not reached yet is
+      // left as unheld as one it has.
       transaction.update(restaurantRef, {
+        ownerUserIds: FieldValue.delete(),
         ownerUserId: FieldValue.delete(),
         claimedAt: FieldValue.delete(),
         claimedAtTimestamp: FieldValue.delete(),

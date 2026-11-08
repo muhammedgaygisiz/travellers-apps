@@ -110,6 +110,7 @@ describe(AdminDashboard.name, () => {
       '/new-version-notification',
       '/review-timestamps-backfill',
       '/menu-item-ids-backfill',
+      '/restaurant-owner-ids-migration',
       '/bite-image-status-backfill',
       '/bite-countries-rebuild',
       '/menu-item-stats-recompute',

@@ -24,7 +24,7 @@ type Access =
    *
    * The second half is the part a classification cannot check, so this class
    * is deliberately narrow: it is for a callable that acts on one restaurant
-   * and reads the authority off `Restaurant.ownerUserId` (issue #1537). An
+   * and reads the authority off `Restaurant.ownerUserIds` (issue #1537). An
    * operator is admitted alongside the owner by `RD-UR-6`, and that is a
    * decision per callable rather than a property of the `business` role.
    */

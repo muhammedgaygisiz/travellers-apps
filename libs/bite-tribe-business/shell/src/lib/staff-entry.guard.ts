@@ -7,8 +7,8 @@ import { staffRestaurantIdOf } from './restaurant-staff-association';
  * Sends a staff account to the room it works in instead of the owner's
  * dashboard (GitHub issue #1097).
  *
- * The dashboard lists restaurants by `Restaurant.ownerUserId`, which a staff
- * account never holds, so a waiter signing in has so far landed on a page
+ * The dashboard lists restaurants by `Restaurant.ownerUserIds`, which never
+ * name a staff account, so a waiter signing in has so far landed on a page
  * showing an empty map and two sections that lead to two more empty lists.
  * Everything the role may actually do lives at
  * `restaurant/:restaurantId/tables`, and until now nothing linked there: the

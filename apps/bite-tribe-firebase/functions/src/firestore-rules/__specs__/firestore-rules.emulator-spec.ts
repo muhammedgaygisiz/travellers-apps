@@ -277,13 +277,13 @@ beforeEach(async () => {
 
     await setDoc(doc(db, 'restaurants', OWNED_RESTAURANT), {
       name: 'Owned Bistro',
-      ownerUserId: OWNER,
+      ownerUserIds: [OWNER],
       claimStatus: 'claimed',
       menuId: OWNED_MENU,
     });
     await setDoc(doc(db, 'restaurants', FOREIGN_RESTAURANT), {
       name: 'Someone Else',
-      ownerUserId: OTHER_BUSINESS,
+      ownerUserIds: [OTHER_BUSINESS],
       claimStatus: 'claimed',
       menuId: FOREIGN_MENU,
     });
@@ -845,7 +845,7 @@ describe('restaurants', () => {
  *
  * A restaurant held only through `ownerUserIds` - the shape the migration of
  * issue #1752 leaves behind - gives every member the rights the single owner
- * has, and nobody else any. The set is an ownership field like `ownerUserId`:
+ * has, and nobody else any. The set is an ownership field like `claimStatus`:
  * only the operator callables write it, through the Admin SDK.
  */
 describe('restaurants held through the owner set (epic #1614)', () => {
@@ -985,12 +985,50 @@ describe('restaurants held through the owner set (epic #1614)', () => {
     );
   });
 
-  it('refuses the single owner adding a set to its restaurant', async () => {
+  it('refuses an owner adding another account to its restaurant', async () => {
     await assertFails(
       updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
         ownerUserIds: [OWNER, OTHER_BUSINESS],
       }),
     );
+  });
+
+  /**
+   * The single-owner field is gone (issue #1754). It stays a locked field, so
+   * no client can write it back, and a leftover one on a document grants
+   * nothing - or it would silently reopen access the migration closed.
+   */
+  describe('a leftover single-owner field (issue #1754)', () => {
+    const LEFTOVER_RESTAURANT = 'leftover-restaurant';
+
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(
+          doc(context.firestore(), 'restaurants', LEFTOVER_RESTAURANT),
+          {
+            name: 'Leftover',
+            ownerUserId: OTHER_BUSINESS,
+            claimStatus: 'claimed',
+          },
+        );
+      });
+    });
+
+    it('grants the account it names nothing', async () => {
+      await assertFails(
+        updateDoc(doc(asOtherBusiness(), 'restaurants', LEFTOVER_RESTAURANT), {
+          description: 'Not mine any more',
+        }),
+      );
+    });
+
+    it('refuses a client writing it, including the owner of the restaurant', async () => {
+      await assertFails(
+        updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+          ownerUserId: OWNER,
+        }),
+      );
+    });
   });
 
   it('refuses an operator writing the set from a client', async () => {

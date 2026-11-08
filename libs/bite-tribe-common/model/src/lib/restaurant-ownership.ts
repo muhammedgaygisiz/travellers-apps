@@ -7,17 +7,16 @@ import type { Restaurant } from './restaurant';
  * fields are whatever the document happens to carry.
  */
 export type RestaurantOwnership = Partial<
-  Record<keyof Pick<Restaurant, 'ownerUserId' | 'ownerUserIds'>, unknown>
+  Record<keyof Pick<Restaurant, 'ownerUserIds'>, unknown>
 >;
 
 /**
- * Every account holding a restaurant (epic #1614).
+ * Every account holding a restaurant (epic #1614): the `ownerUserIds` set, the
+ * same field `firestore.rules` and the server's `restaurant-authority.ts`
+ * check.
  *
- * Ownership is moving from one uid in `ownerUserId` to a set in
- * `ownerUserIds`. Until the single-owner field is removed (issue #1754), an
- * account named in either one holds the restaurant - the same union
- * `firestore.rules` and the server's `restaurant-authority.ts` check - so a
- * restaurant keeps its owner on whichever side of the migration it is.
+ * The single-owner field the set replaced is not read (issue #1754): an
+ * account named only in a leftover one holds nothing.
  *
  * Deduplicated, and anything that is not a non-empty string is dropped, so a
  * malformed document reads as unheld rather than as held by `''`.
@@ -25,15 +24,13 @@ export type RestaurantOwnership = Partial<
 export const restaurantOwnerIds = (
   restaurant: RestaurantOwnership | undefined,
 ): string[] => {
-  const single =
-    typeof restaurant?.ownerUserId === 'string' ? [restaurant.ownerUserId] : [];
   const set = Array.isArray(restaurant?.ownerUserIds)
     ? (restaurant.ownerUserIds as unknown[])
     : [];
 
   return [
     ...new Set(
-      [...single, ...set].filter(
+      set.filter(
         (value): value is string => typeof value === 'string' && value !== '',
       ),
     ),

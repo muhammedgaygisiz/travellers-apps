@@ -66,7 +66,7 @@ test.describe('Staff entry and permissions', () => {
    * link a waiter has to be told about.
    *
    * `AFTER_LOGIN_PAGE` sends every account to `/dashboard`, which lists
-   * restaurants by `Restaurant.ownerUserId` and therefore showed this account
+   * restaurants by `Restaurant.ownerUserIds` and therefore showed this account
    * an empty page. The assertion is on the URL the browser settles at, so a
    * dashboard that rendered first and redirected afterwards would still pass -
    * which is fine, because what the criterion is about is where the account
@@ -114,7 +114,7 @@ test.describe('Staff entry and permissions', () => {
    * reaching them by URL is refused rather than shown an empty page.
    *
    * The refusal is `ownedRestaurantGuard`, which reads
-   * `Restaurant.ownerUserId`. The data-layer half of the same boundary is in
+   * `Restaurant.ownerUserIds`. The data-layer half of the same boundary is in
    * `firestore-rules.emulator-spec.ts`, where the write itself is refused.
    */
   test('refuses the owner routes by direct URL', async ({ page }) => {
@@ -190,7 +190,7 @@ const signInAsStaff = async (page: Page): Promise<void> => {
 /**
  * The restaurant is owned by the **organisation** account, not by the staff
  * one. That is the whole point: a staff account never appears on
- * `Restaurant.ownerUserId`, and everything it reaches, it reaches through the
+ * `Restaurant.ownerUserIds`, and everything it reaches, it reaches through the
  * association instead.
  */
 const seedPlan = (
@@ -201,7 +201,7 @@ const seedPlan = (
   seedPublishedPlan(page, {
     restaurantId,
     restaurantName,
-    ownerUserId: TEST_USERS.organisation.uid,
+    owner: TEST_USERS.organisation.uid,
     rooms: [DINING],
     tables: TABLES,
   });

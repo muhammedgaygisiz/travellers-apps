@@ -205,7 +205,7 @@ const seedPlanForThisRoom = (
   seedPublishedPlan(page, {
     restaurantId,
     restaurantName,
-    ownerUserId: TEST_USERS.organisation.uid,
+    owner: TEST_USERS.organisation.uid,
     rooms: [DINING, TERRACE],
     tables: TABLES,
     position: POSITION,

@@ -162,7 +162,9 @@ export const seedOrderableTable = async (
     name: { stringValue: fixture.restaurantName },
     description: { stringValue: 'A restaurant whose wifi drops things.' },
     menuId: { stringValue: fixture.menuId },
-    ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+    ownerUserIds: {
+      arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+    },
     claimStatus: { stringValue: 'claimed' },
     openingHours,
     tableOrdering: {

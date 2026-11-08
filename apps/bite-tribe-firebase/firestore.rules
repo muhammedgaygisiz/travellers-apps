@@ -5,8 +5,8 @@ rules_version = '2';
  *
  * Until this file was written, every collection was covered by one match on
  * `/{document=**}` allowing read and write to any signed-in account. That made
- * the ownership model decorative: a business account could write
- * `ownerUserId` onto any restaurant and hold it, without going near the
+ * the ownership model decorative: a business account could write itself
+ * onto any restaurant as its owner and hold it, without going near the
  * operator callables that exist to make the decision accountable.
  *
  * Three rules of thumb hold everywhere below, and reading them once is cheaper
@@ -154,19 +154,17 @@ service cloud.firestore {
     }
 
     /**
-     * Whether the caller holds the restaurant `data` describes (epic #1614).
+     * Whether the caller holds the restaurant `data` describes: it is one of
+     * the accounts in `ownerUserIds` (epic #1614).
      *
-     * Ownership is moving from one uid in `ownerUserId` to a set in
-     * `ownerUserIds`. Until the single-owner field is removed (issue #1754),
-     * an account named in either one holds the restaurant, so a restaurant
-     * keeps its owner on whichever side of the migration it is. Both fields
-     * are in `ownershipFields()`, so no client can put itself in either.
+     * The single-owner field the set replaced is not read (issue #1754), so an
+     * account named only in a leftover one holds nothing. It stays in
+     * `ownershipFields()` all the same, so no client can ever write it back.
      *
      * `owns()` stays the check for every single-owner document.
      */
     function holds(data) {
-      return owns(data, 'ownerUserId')
-        || (signedIn() && uid() in data.get('ownerUserIds', []));
+      return signedIn() && uid() in data.get('ownerUserIds', []);
     }
 
     function restaurantData(restaurantId) {

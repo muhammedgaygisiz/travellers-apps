@@ -1,9 +1,5 @@
 import { getAuth } from 'firebase-admin/auth';
-import {
-  DocumentData,
-  FieldValue,
-  getFirestore,
-} from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
@@ -68,16 +64,6 @@ export interface RevokeRestaurantOwnerResult {
   /** `revoked` only when the last owner was removed. */
   claimStatus: 'claimed' | 'revoked';
 }
-
-/**
- * Who holds the restaurant, through either field (epic #1614).
- *
- * Both callables read the union, so a restaurant the `restaurant-owner-ids`
- * migration has not reached yet is still held - and still cannot be assigned
- * a second time.
- */
-const currentOwnersOf = (data: DocumentData | undefined): string[] =>
-  ownerUserIdsOf(data);
 
 const parseRequired = (value: unknown, field: string): string => {
   const parsed = typeof value === 'string' ? value.trim() : '';
@@ -195,7 +181,7 @@ export const assignRestaurantOwnerHandler = async (
         throw new HttpsError('not-found', 'Restaurant was not found.');
       }
 
-      const currentOwners = currentOwnersOf(snapshot.data());
+      const currentOwners = ownerUserIdsOf(snapshot.data());
 
       if (currentOwners.includes(ownerUserId)) {
         return {
@@ -217,11 +203,8 @@ export const assignRestaurantOwnerHandler = async (
       const now = new Date();
       const ownerUserIds = [...currentOwners, ownerUserId];
 
-      // Only the set is written (issue #1752). The single field is deleted, so
-      // a restaurant the migration has not reached moves to the set here.
       transaction.update(restaurantRef, {
         ownerUserIds,
-        ownerUserId: FieldValue.delete(),
         claimStatus: 'claimed',
         ...(currentOwners.length === 0
           ? {
@@ -306,7 +289,7 @@ export const revokeRestaurantOwnerHandler = async (
         throw new HttpsError('not-found', 'Restaurant was not found.');
       }
 
-      const currentOwners = currentOwnersOf(snapshot.data());
+      const currentOwners = ownerUserIdsOf(snapshot.data());
 
       if (!currentOwners.includes(ownerUserId)) {
         throw new HttpsError(
@@ -323,12 +306,9 @@ export const revokeRestaurantOwnerHandler = async (
       };
 
       if (ownerUserIds.length > 0) {
-        // Another owner remains, so the restaurant stays held. The single
-        // field is deleted either way, so a restaurant the migration has not
-        // reached moves to the set here.
+        // Another owner remains, so the restaurant stays held.
         transaction.update(restaurantRef, {
           ownerUserIds,
-          ownerUserId: FieldValue.delete(),
           ...timestamps,
         });
 
@@ -340,11 +320,9 @@ export const revokeRestaurantOwnerHandler = async (
         };
       }
 
-      // The last owner: both fields go, so a restaurant the migration has not
-      // reached is left as unheld as one it has.
+      // The last owner: the set goes, rather than being left empty.
       transaction.update(restaurantRef, {
         ownerUserIds: FieldValue.delete(),
-        ownerUserId: FieldValue.delete(),
         claimedAt: FieldValue.delete(),
         claimedAtTimestamp: FieldValue.delete(),
         claimStatus: 'revoked',

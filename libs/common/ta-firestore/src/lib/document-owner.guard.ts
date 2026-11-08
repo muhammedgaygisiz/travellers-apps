@@ -9,12 +9,12 @@ export interface DocumentOwnerGuardOptions {
   collection: string;
   /** Route parameter carrying the document id. */
   paramName: string;
-  /** Field on the document naming the account that holds it. */
-  ownerField: string;
+  /** Field on the document naming the one account that holds it. */
+  ownerField?: string;
   /**
    * Field on the document listing several accounts that hold it, each with
-   * the same rights (epic #1614). When given, an account named in either
-   * field is admitted; a document held by one account leaves it out.
+   * the same rights (epic #1614). A document held by one account names
+   * `ownerField` instead; one that names both admits an account in either.
    */
   ownerSetField?: string;
   /** Transloco key for the refusal the visitor is shown. */
@@ -89,7 +89,7 @@ export const documentOwnerGuard =
         const set = ownerSetField ? data?.[ownerSetField] : undefined;
 
         return (
-          data?.[ownerField] === uid ||
+          (!!ownerField && data?.[ownerField] === uid) ||
           (Array.isArray(set) && set.includes(uid))
         );
       } catch {

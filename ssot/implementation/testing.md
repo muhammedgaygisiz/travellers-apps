@@ -124,7 +124,7 @@ for a day of manual work, without anything being wrong with the code.
 The case that has actually cost time: `maintain-restaurant.spec.ts` asserts
 that the business account's restaurant list is _empty_ before checking that a
 restaurant belonging to somebody else is refused. The seeded restaurant
-`Sam's` carries no `ownerUserId` in the export, so any earlier session that
+`Sam's` carries no `ownerUserIds` in the export, so any earlier session that
 claimed or assigned it to `organisation@test.com` leaves that row on the list
 and the spec red.
 

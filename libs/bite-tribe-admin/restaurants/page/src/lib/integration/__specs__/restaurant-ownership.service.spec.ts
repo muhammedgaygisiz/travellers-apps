@@ -95,10 +95,10 @@ describe(RestaurantOwnershipService.name, () => {
     expect(service.selected()?.claimStatus).toBeUndefined();
 
     restaurants.set([
-      restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' }),
     ]);
 
-    expect(service.selected()?.ownerUserId).toBe('owner-1');
+    expect(service.selected()?.ownerUserIds).toEqual(['owner-1']);
   });
 
   it('forgets a selection the list no longer holds', () => {

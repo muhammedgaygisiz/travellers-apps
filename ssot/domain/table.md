@@ -360,7 +360,7 @@ alternative is a seated party the staff view cannot clear.
 
 Authorisation is the role's first write of any kind. `requireTableStateAuthority`
 admits `staff`, `business` and `admin` and then decides which restaurant each of
-them reaches: the owner and the operator through `Restaurant.ownerUserId` as
+them reaches: the owners and the operator through `Restaurant.ownerUserIds` as
 everywhere else, and a staff account only through `/restaurantStaff/{uid}`
 naming this restaurant - the same pair `worksAt()` checks in `firestore.rules`,
 never the `staff` role alone. It is a separate function from

@@ -54,13 +54,15 @@ test.describe('Maintain restaurants in the business app', () => {
     seededRestaurantIds.push(restaurantId);
     // The restaurant is assigned to the account the suite signs in as. Since
     // issue #1078 the Firestore rules authorise a restaurant write from
-    // `ownerUserId`, so an unassigned fixture is refused rather than saved -
+    // `ownerUserIds`, so an unassigned fixture is refused rather than saved -
     // which is the same refusal a real unassigned restaurant now gets.
     await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
       id: { stringValue: restaurantId },
       name: { stringValue: restaurantName },
       description: { stringValue: '' },
-      ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+      ownerUserIds: {
+        arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+      },
       claimStatus: { stringValue: 'claimed' },
       position: {
         mapValue: {
@@ -115,7 +117,9 @@ test.describe('Maintain restaurants in the business app', () => {
     await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
       id: { stringValue: restaurantId },
       name: { stringValue: restaurantName },
-      ownerUserId: { stringValue: TEST_USERS.organisation.uid },
+      ownerUserIds: {
+        arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+      },
       claimStatus: { stringValue: 'claimed' },
       position: {
         mapValue: {
@@ -266,7 +270,11 @@ test.describe('Maintain restaurants in the business app', () => {
       id: { stringValue: restaurantId },
       name: { stringValue: restaurantName },
       description: { stringValue: '' },
-      ownerUserId: { stringValue: 'another-business-account-uid' },
+      ownerUserIds: {
+        arrayValue: {
+          values: [{ stringValue: 'another-business-account-uid' }],
+        },
+      },
       claimStatus: { stringValue: 'claimed' },
       position: {
         mapValue: {

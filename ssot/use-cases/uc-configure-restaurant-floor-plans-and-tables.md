@@ -21,11 +21,11 @@ This is not a construction plan. It is a practical, easy-to-maintain top-down re
 
 - **Restaurant Owner** (`business`) — acts: creates the rooms, places the geometry and the
   tables, publishes the plan and prints its QR sheets, for a restaurant it holds. Every
-  route here sits behind `ownedRestaurantGuard`, so the authority is `Restaurant.ownerUserId`
+  route here sits behind `ownedRestaurantGuard`, so the authority is `Restaurant.ownerUserIds`
   rather than the role.
 - **Restaurant Staff** — not an actor, although this is the room it works in: the editor and
-  the QR sheet are behind that same `ownedRestaurantGuard`, and a staff account never holds
-  `ownerUserId`. What staff does with the published plan is
+  the QR sheet are behind that same `ownedRestaurantGuard`, and a staff account is never in
+  `ownerUserIds`. What staff does with the published plan is
   [UC - Manage Tables During Service](uc-manage-tables-during-service.md).
 - **BiteTribe Operator** — not an actor, and named because `RD-UR-6` would suggest otherwise.
   It reads a plan at the data layer, deliberately - `readsFloorPlan()` admits it so support

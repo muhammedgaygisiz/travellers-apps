@@ -357,7 +357,10 @@ describe(RestaurantOwnership.name, () => {
   it('names the owner rather than showing a bare uid when the account is known', () => {
     setInputs({
       accounts: [account()],
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
 
     expect(query('admin-restaurant-owner')?.textContent).toContain(
@@ -368,16 +371,32 @@ describe(RestaurantOwnership.name, () => {
   it('falls back to the uid for an owner whose account is no longer listed', () => {
     setInputs({
       accounts: [],
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
 
     expect(query('admin-restaurant-owner')?.textContent).toContain('owner-1');
   });
 
   /**
-   * A restaurant moved by the `restaurant-owner-ids` migration (epic #1614)
-   * carries its owner in the set only, and still shows it.
+   * A leftover single-owner field (issue #1754) names nobody: the restaurant
+   * reads as unassigned, so an operator is not shown an owner the rules no
+   * longer admit.
    */
+  it('reads a restaurant with only a leftover single-owner field as unassigned', () => {
+    setInputs({
+      accounts: [account()],
+      selected: {
+        ...restaurant(),
+        ownerUserId: 'owner-1',
+      } as Restaurant,
+    });
+
+    expect(component.assigned()).toBe(false);
+  });
+
   it('shows the owner of a restaurant held through the owner set', () => {
     setInputs({
       accounts: [account()],
@@ -414,7 +433,10 @@ describe(RestaurantOwnership.name, () => {
 
   it('refuses to revoke until a reason is given', () => {
     setInputs({
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
 
     expect(component.canRevoke()).toBe(false);
@@ -429,7 +451,10 @@ describe(RestaurantOwnership.name, () => {
     component.revoke.subscribe((event) => emitted.push(event));
     setInputs({
       accounts: [account()],
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
     component.onReasonChange('Restaurant closed.');
 
@@ -454,7 +479,10 @@ describe(RestaurantOwnership.name, () => {
 
   it('does not open the confirmation when no reason was given', async () => {
     setInputs({
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
 
     await component.onRevoke('owner-1');

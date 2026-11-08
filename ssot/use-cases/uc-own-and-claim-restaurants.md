@@ -41,13 +41,13 @@ Rewritten on 8 September 2026, implemented by [#1077], [#1078], [#1079] and [#15
 - Assignment adds the account to `ownerUserIds` and sets `claimStatus: claimed` in one transaction ([#1753]). The grant timestamps are written only when the set was empty. A restaurant that already has ten owners is refused with `failed-precondition`. Replacing an owner is revoke then assign, so the log shows two decisions. Repeating an assignment the restaurant already has returns the current state rather than writing again.
 - The `restaurant-ownership` surface lists every owner of the selected restaurant and offers "add owner", without the accounts that already hold it, while there are fewer than ten.
 - An account that does not hold `business` is refused as an assignment target, because every business-app route is gated on the role and an owner without it could not open the restaurant they own.
-- Ownership is revoked one account at a time, by an operator with an attributable reason. `revokeRestaurantOwner` requires the account, and each owner on the surface has its own revoke action behind a confirmation. Revoking one of several owners removes only that account: the others keep every right and `claimStatus` stays `claimed`. Revoking the last owner deletes the set (and, on a restaurant not yet migrated, `ownerUserId`) and the grant timestamps, and sets `claimStatus: revoked`. Revoking an account that does not hold the restaurant is refused, which also refuses writing `revoked` over `unclaimed`.
-- The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserId` equals the caller's uid or `ownerUserIds` contains it ([#1751]), so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
+- Ownership is revoked one account at a time, by an operator with an attributable reason. `revokeRestaurantOwner` requires the account, and each owner on the surface has its own revoke action behind a confirmation. Revoking one of several owners removes only that account: the others keep every right and `claimStatus` stays `claimed`. Revoking the last owner deletes the set and the grant timestamps, and sets `claimStatus: revoked`. Revoking an account that does not hold the restaurant is refused, which also refuses writing `revoked` over `unclaimed`.
+- The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserIds` contains the caller's uid ([#1751], [#1754]), so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
 - A restaurant assigned elsewhere is absent from that list **and refused at the route**. `documentOwnerGuard` sits on `restaurant/:restaurantId` and `restaurant/:restaurantId/menu/:menuId` and reads the same fields, so a bookmark, a shared link, or a session that outlived a revocation lands back on the account's own list with one sentence and no detail about who does hold the restaurant.
 - An account holding nothing sees an empty state naming BiteTribe support rather than an empty list, because there is nothing it can do here to fix it: self-service claiming is closed as not planned ([#1076]).
 - **The account holding a restaurant adds and removes its staff, and cannot touch a restaurant it does not hold** ([#1537]). It adds an existing BiteTribe account by the email address it signed up with, from `restaurant/:restaurantId/staff` behind the same `documentOwnerGuard` the edit routes carry - so a staff account, which holds no restaurant, cannot reach the page that would let it hire. The `staff` claim and the `/restaurantStaff/{uid}` record are written together and neither is left behind by a failure; an account holding `admin` or `business` is refused as a target in both directions; and every grant and removal reaches Cloud Logging with the caller, the target and the restaurant. An operator can do all of it from the staff card on `restaurant-ownership`, which is the way back when a restaurant removes its last account with access.
 - **A removed staff account keeps its session for up to an hour** - the ID token's lifetime - and is then returned to the login page by `roleGuard`, not to a broken screen. Both surfaces say so in the removal confirmation rather than implying it is instant.
-- **[#1537] made the role grantable; later issues made it usable.** [#1537] put what staff may see and do out of scope by name. [#1088], [#1092] and [#1097] then gave the role its reads, its first write through a callable, and an entry that lands a staff account in the room it works in instead of on the dashboard, which still lists restaurants by `ownerUserId` ([#1079]). The resulting permission set is [User Roles](../product/user-roles.md)'s.
+- **[#1537] made the role grantable; later issues made it usable.** [#1537] put what staff may see and do out of scope by name. [#1088], [#1092] and [#1097] then gave the role its reads, its first write through a callable, and an entry that lands a staff account in the room it works in instead of on the dashboard, which still lists restaurants by their owners ([#1079]). The resulting permission set is [User Roles](../product/user-roles.md)'s.
 
 **[#1079] closed the gap between the assignment and what the account can _see_.** Verified against the emulator on 8 September 2026, before it: `restaurantsLoader` read the whole `restaurants` collection with no owner filter, so a business account was shown a restaurant assigned to a _different_ account and could open its edit form. The list had never been ownership-driven, so that was not something [#1077] regressed - it was the half of the epic's "the effect is visible in the business app" criterion [#1079] owned. [#1078] had already refused the _save_, which left the account reaching a form it could not submit and being told only that something went wrong; [#1079] removed the form from the list rather than improving that message.
 
@@ -84,7 +84,7 @@ claimed restaurants assumed a capability that did not exist.
 Added in issue [#1074], all optional so existing documents stay valid:
 
 - `Restaurant.ownerUserIds` - the accounts holding the restaurant, absent when unowned. Added by epic [#1614]: [#1750] and [#1751] taught every reader to accept it, and since [#1752] it is the only ownership field `assignRestaurantOwner` writes. Like every ownership field it is in the rules' `ownershipFields()`, so no client can write it.
-- `Restaurant.ownerUserId` - the single owner, **deprecated**. Every reader still accepts an account named here as an owner, so a restaurant the `restaurant-owner-ids` migration (see [UC - Run Operational Migrations](uc-run-operational-migrations.md)) has not reached keeps its owner. The migration moves it into `ownerUserIds`, and [#1754] removes it from the readers once the migration has run in production with no conflicts.
+- `Restaurant.ownerUserId` - the single owner [#1074] added, **retired by [#1754]**. The `restaurant-owner-ids` migration (see [UC - Run Operational Migrations](uc-run-operational-migrations.md)) moved every one into `ownerUserIds`, and nothing reads it any more: an account named only in a leftover one holds nothing. It stays in the rules' `ownershipFields()`, so no client can write it back.
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after [#1077] reduced it. A missing value means `unclaimed`.
 - `Restaurant.claimedAt` and `claimedAtTimestamp` - when the restaurant became held: set by the first assignment and deleted by the last revoke (`RD-UR-10`).
 
@@ -141,12 +141,12 @@ This stops being true the moment a business or admin client is submitted to a st
 
 ## Supported Evidence
 
-- `libs/bite-tribe-common/model/src/lib/restaurant.ts`, the `ownerUserIds`, `ownerUserId`,
+- `libs/bite-tribe-common/model/src/lib/restaurant.ts`, the `ownerUserIds`,
   `claimStatus`, `claimedAt` and `claimedAtTimestamp` fields, and `restaurantOwnerIds()` in
-  `restaurant-ownership.ts`, the client's read of the two ownership fields
+  `restaurant-ownership.ts`, the client's read of the owner set
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/restaurant-authority.ts`
-  (`ownerUserIdsOf`), the server's read of the same two fields, and
-  `migrate-restaurant-owner-ids.ts`, the migration between them
+  (`ownerUserIdsOf`), the server's read of the same set, and
+  `migrate-restaurant-owner-ids.ts`, the migration that moved the single field into it
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/restaurant-ownership.ts`
   (`assignRestaurantOwner`, `revokeRestaurantOwner`) and `restaurant-staff.ts`
   (`addRestaurantStaff`, `removeRestaurantStaff`), both logged through
@@ -156,7 +156,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - `libs/common/ta-firestore/src/lib/document-owner.guard.ts` (`documentOwnerGuard`), on
   `restaurant/:restaurantId` and its menu route, and `restaurantsLoader` in
   `libs/bite-tribe-business/dashboard/data-access/src/lib/dashboard-data-access.service.ts`,
-  which queries `restaurants` where `ownerUserId` equals the caller or `ownerUserIds` contains it
+  which queries `restaurants` where `ownerUserIds` contains the caller
 - `apps/bite-tribe-firebase/firestore.rules`, the ownership-scoped rules, verified by
   `apps/bite-tribe-firebase/functions/src/firestore-rules/__specs__/firestore-rules.emulator-spec.ts`
   (allow and deny cases, including the ownership-forgery deny test)
@@ -170,7 +170,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - Issue [#1078] - ownership-scoped Firestore rules replacing the open ones; done
 - Issue [#1079] - scope the business app to the restaurants assigned to the caller; done
 - Issue [#1537] - a business account manages the staff on its restaurant; done
-- Epic [#1614] - a restaurant held by more than one business account; [#1750], [#1751] and [#1752] moved ownership into a set without changing behaviour
+- Epic [#1614] - a restaurant held by more than one business account; [#1750], [#1751] and [#1752] moved ownership into a set without changing behaviour, [#1753] allowed more than one owner, and [#1754] retired the single-owner field
 - Issue [#1371] - removed the organisation fields this was first specified against
 - Issue [#288] - concept of restaurant as a business entity
 - Issue [#952] and [#130] - App Check, which protects the transport but not authorization

@@ -256,7 +256,7 @@ export type TableOrderingAvailability =
  * The ordering context a good scan resolves to.
  *
  * Assembled field by field rather than by handing back the documents it was
- * read from. `/restaurants/{id}` carries `ownerUserId`, the table document
+ * read from. `/restaurants/{id}` carries `ownerUserIds`, the table document
  * carries the geometry of a floor plan, and a guest is entitled to neither -
  * the acceptance criterion of issue #1100 is that the response contains no
  * data the guest should not see, and the only way to keep that true as those

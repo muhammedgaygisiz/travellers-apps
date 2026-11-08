@@ -116,7 +116,7 @@ would close at four in the afternoon.
 A refusal never says more than it has to, and a resolution says only what the
 guest needs: the restaurant's name and picture, the room's name, the table's
 label and seats, and the menu's id. The answer is built field by field and is
-never a spread of the documents it came from, so `ownerUserId` on the restaurant
+never a spread of the documents it came from, so `ownerUserIds` on the restaurant
 and the floor-plan geometry on the table stay where they are.
 
 ## Key Behaviours

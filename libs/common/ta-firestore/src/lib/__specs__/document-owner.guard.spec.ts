@@ -153,6 +153,35 @@ describe('documentOwnerGuard', () => {
     });
   });
 
+  /**
+   * Set-only mode, the shape the business app uses once the single-owner
+   * field is gone (issue #1754): a value in a field the guard was not told
+   * about grants nothing.
+   */
+  it('admits only by the set when no single field is named', async () => {
+    jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+      snapshot: {
+        id: 'restaurant-1',
+        data: { ownerUserId: 'user-1', ownerUserIds: ['another-account'] },
+      },
+    } as unknown as Awaited<ReturnType<typeof FirebaseFirestore.getDocument>>);
+
+    await expect(
+      TestBed.runInInjectionContext(
+        () =>
+          documentOwnerGuard({
+            collection: OPTIONS.collection,
+            paramName: OPTIONS.paramName,
+            ownerSetField: 'ownerUserIds',
+            refusalMessageKey: OPTIONS.refusalMessageKey,
+            redirectTo: OPTIONS.redirectTo,
+          })(routeWith({ restaurantId: 'restaurant-1' }), {
+            url: '/restaurant/restaurant-1',
+          } as RouterStateSnapshot) as Promise<boolean | UrlTree>,
+      ),
+    ).resolves.toEqual({ url: '/restaurants' });
+  });
+
   it('ignores a set field it was not told about', async () => {
     jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
       snapshot: { id: 'restaurant-1', data: { ownerUserIds: ['user-1'] } },

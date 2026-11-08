@@ -44,7 +44,7 @@ with `business` is contradictory and `setUserRoles` refuses the combination.
 **Hierarchy in two senses, and only one of them holds.** In _capability_ the Operator is
 above the Restaurant Owner: `RD-UR-6` gives it maintenance of every Restaurant, claimed or
 not. In _claims_ it is not: `admin` does not confer `business`, an Operator never signs
-into the Business App and never appears as a `Restaurant.ownerUserId`. The superset is
+into the Business App and never appears in `Restaurant.ownerUserIds`. The superset is
 delivered by the Operator's own surfaces and an `admin` allowance in the rules, which is
 what keeps the Business App owner-scoped (issue [#1079]) and the ownership record
 truthful.
@@ -52,9 +52,11 @@ truthful.
 _Operator_ is the accepted short form in prose, matching
 [UC - Operate BiteTribe In The Admin App](../use-cases/uc-operate-bitetribe-in-the-admin-app.md); the other two are used in full.
 
-Ownership is **written, enforced and visible**. `Restaurant.ownerUserId` and `claimStatus` got an
+Ownership is **written, enforced and visible**. The restaurant's owner field and `claimStatus` got an
 operator writer in [#1077] (`assignRestaurantOwner`, `revokeRestaurantOwner`), `firestore.rules` began
 reading it in [#1078], and [#1079] scoped the business dashboard and its edit routes to it.
+Since epic [#1614] that field is the set `Restaurant.ownerUserIds`, holding up to ten equal
+owners (`RD-UR-10`).
 Since [#1537] the same field decides which restaurant's staff an account may change. One
 caveat: nothing in production is assigned today. The rules themselves bind on
 merge - they deploy from CI on every push to `develop` since [#1567]. There is **no self-service claim** - [#1076] was closed as not planned and
@@ -129,7 +131,7 @@ at a **13+** age rating, and Apple's user-generated-content guideline asks for f
 timely reporting, blocking and published contact details, with an equivalent Google Play
 policy.
 
-⁶ Issue [#1537]. The Restaurant Owner is authorised by `Restaurant.ownerUserId` rather than
+⁶ Issue [#1537]. The Restaurant Owner is authorised by `Restaurant.ownerUserIds` rather than
 by holding `business`, so the role alone reaches no restaurant. The Operator is authorised
 by `RD-UR-6` and reaches every one, which is the way back when a Restaurant removes its
 last account with access. Neither can grant `admin` or `business` through these callables,
@@ -276,7 +278,7 @@ others.
 ⁷ And lands in the room it works at rather than on the owner dashboard ([#1097]):
 `staffEntryGuard` reads `/restaurantStaff/{uid}` on `/dashboard` and redirects to
 `restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
-`Restaurant.ownerUserId`, so without the redirect a staff account arrives at an empty page and
+`Restaurant.ownerUserIds`, so without the redirect a staff account arrives at an empty page and
 the surfaces its role has are reachable only by typing a URL.
 
 ⁸ The split is what made the read safe to open at all ([#1088]). The published arrangement is
@@ -312,7 +314,7 @@ shipped the grant rather than the permission on 10 September 2026, so for a day 
 account could sign in and do nothing. [#1088] gave the role its first read, [#1092] its first
 write, [#1093] and [#1094] the room and the actions, [#1097] the entry that leads to them, and
 [#1105] and [#1106] the order queue and the assistance signals. Throughout, the dashboard has
-scoped by `Restaurant.ownerUserId` and listed a staff account nothing: the fix was never to
+scoped by the restaurant's owners and listed a staff account nothing: the fix was never to
 widen that list but to stop sending the account to it.
 
 ## Recorded Decisions
@@ -373,3 +375,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1565]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1565
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
+[#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614

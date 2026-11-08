@@ -54,8 +54,39 @@ const RESTAURANT_AUTHORITY_ROLES: readonly BiteTribeRole[] = [
   'admin',
 ];
 
-const ownerUserIdOf = (data: DocumentData): string =>
-  typeof data['ownerUserId'] === 'string' ? data['ownerUserId'] : '';
+/**
+ * Every account holding a restaurant (epic #1614).
+ *
+ * Ownership is moving from one uid in `ownerUserId` to a set in
+ * `ownerUserIds`. Until the single-owner field is removed (issue #1754), an
+ * account named in either one holds the restaurant - the same union the
+ * `holds()` function in `firestore.rules` checks - so a restaurant keeps its
+ * owner on whichever side of the migration it is.
+ *
+ * Deduplicated, and anything that is not a non-empty string is dropped, so a
+ * malformed document reads as unheld rather than as held by `''`.
+ */
+export const ownerUserIdsOf = (data: DocumentData | undefined): string[] => {
+  const single =
+    typeof data?.['ownerUserId'] === 'string' ? [data['ownerUserId']] : [];
+  const set = Array.isArray(data?.['ownerUserIds'])
+    ? (data['ownerUserIds'] as unknown[])
+    : [];
+
+  return [
+    ...new Set(
+      [...single, ...set].filter(
+        (value): value is string => typeof value === 'string' && value !== '',
+      ),
+    ),
+  ];
+};
+
+/** Whether `uid` is one of the accounts holding the restaurant. */
+export const isRestaurantOwner = (
+  data: DocumentData | undefined,
+  uid: string,
+): boolean => uid !== '' && ownerUserIdsOf(data).includes(uid);
 
 /**
  * Admits the caller and decides which restaurant it may act on.
@@ -68,8 +99,9 @@ const ownerUserIdOf = (data: DocumentData): string =>
  * cannot check by reading one file.
  *
  * A `business` caller is authorised by **the restaurant document, not the
- * token**: `Restaurant.ownerUserId`, written by `assignRestaurantOwner`
- * (issue #1077), is the same field `firestore.rules` reads. A claim copy of it
+ * token**: the restaurant's owners, written by `assignRestaurantOwner`
+ * (issue #1077) and read through {@link ownerUserIdsOf}, are the same fields
+ * `firestore.rules` reads. A claim copy of it
  * would be a second version of one fact that can disagree, and it also means a
  * revoked assignment stops authorising immediately rather than at the end of
  * the token's hour.
@@ -100,7 +132,7 @@ export const requireRestaurantAuthority = async (
     return actingUid;
   }
 
-  if (ownerUserIdOf(snapshot.data() ?? {}) !== actingUid) {
+  if (!isRestaurantOwner(snapshot.data(), actingUid)) {
     throw new HttpsError(
       'permission-denied',
       'This restaurant is not assigned to your account.',
@@ -117,14 +149,14 @@ export const requireRestaurantAuthority = async (
  * assignment can be revoked in between. A callable that writes therefore
  * re-checks against the restaurant it read transactionally, and this is that
  * check: an operator passes, an owner passes only while the document still
- * names it.
+ * names it among its owners.
  */
 export const holdsRestaurant = (
   request: CallableRequest<unknown>,
   restaurant: DocumentData,
   actingUid: string,
 ): boolean =>
-  hasRole(request, 'admin') || ownerUserIdOf(restaurant) === actingUid;
+  hasRole(request, 'admin') || isRestaurantOwner(restaurant, actingUid);
 
 /**
  * The roles a caller acting on a restaurant's *live table state* must hold one

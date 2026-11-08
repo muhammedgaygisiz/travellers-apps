@@ -1,5 +1,9 @@
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
-import { DocumentReference, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentReference,
+  FieldValue,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { CallableRequest } from 'firebase-functions/https';
 import {
   LoadPublicMenuRequest,
@@ -279,6 +283,19 @@ describe('load public menu', () => {
      * Bites, and publishing that under the restaurant's name states prices
      * nobody there ever confirmed.
      */
+    /**
+     * Ownership as a set (epic #1614, issue #1750): a restaurant held only
+     * through `ownerUserIds` serves its menu.
+     */
+    it('serves a restaurant held only through the owner set', async () => {
+      await restaurantRef().update({
+        ownerUserId: FieldValue.delete(),
+        ownerUserIds: [OWNER],
+      });
+
+      expect((await loaded()).menu['id']).toBe(MENU);
+    });
+
     it('refuses a restaurant no business account holds', async () => {
       await restaurantRef().update({ ownerUserId: '' });
 

@@ -508,6 +508,34 @@ describe('resolve table QR token', () => {
       });
     });
 
+    /**
+     * Ownership as a set (epic #1614, issue #1750): a restaurant held only
+     * through `ownerUserIds` - the shape the migration of issue #1752 leaves -
+     * is held, and takes orders.
+     */
+    it('resolves a restaurant held only through the owner set', async () => {
+      await restaurantRef().update({
+        ownerUserId: FieldValue.delete(),
+        ownerUserIds: [OWNER],
+      });
+
+      expect(await resolved()).toMatchObject({
+        ok: true,
+        ordering: { available: true },
+      });
+    });
+
+    it('refuses a restaurant whose owner set is empty', async () => {
+      await restaurantRef().update({
+        ownerUserId: FieldValue.delete(),
+        ownerUserIds: [],
+      });
+
+      expect(await refused()).toMatchObject({
+        reason: 'restaurantInactive',
+      });
+    });
+
     it('refuses a restaurant nobody has ever held', async () => {
       await restaurantRef().update({ ownerUserId: FieldValue.delete() });
 

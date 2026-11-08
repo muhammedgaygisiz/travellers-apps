@@ -193,6 +193,29 @@ describe('notifyStaffOnNewTableOrder', () => {
     expect(notifiedTokens().sort()).toEqual(['token-host', 'token-owner']);
   });
 
+  /**
+   * Ownership as a set (epic #1614, issue #1750): every owner is told, and an
+   * account that is both an owner and on the staff list is told once.
+   */
+  it('tells every owner in the set and each member of staff exactly once', async () => {
+    db.seed(`restaurants/${RESTAURANT}`, {
+      name: 'Owned Bistro',
+      ownerUserIds: ['owner', 'co-owner'],
+    });
+    seedInstallation('co-owner');
+    seedStaff('co-owner');
+    seedStaff('chef');
+
+    await runTrigger();
+
+    expect(notifiedTokens().sort()).toEqual([
+      'token-chef',
+      'token-co-owner',
+      'token-host',
+      'token-owner',
+    ]);
+  });
+
   it('sends nothing at all when there is nobody to tell', async () => {
     db = createFakeFirestore();
     db.seed(`restaurants/${RESTAURANT}`, { name: 'Owned Bistro' });

@@ -5,7 +5,10 @@
     showFooter: false,
   }"
 >
-  <div class="onboarding-shell">
+  <div
+    class="onboarding-shell"
+    [class.onboarding-shell--keyboard-open]="keyboardOpen()"
+  >
     <header class="onboarding-shell__progress">
       <p class="onboarding-shell__step-count">
         {{ 'onboarding-progress' | transloco: { current: stepNumber(), total:

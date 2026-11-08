@@ -38,11 +38,11 @@ pages for those behaviours.
 Rewritten on 8 September 2026, implemented by [#1077], [#1078], [#1079] and [#1537]. There is **no self-service claim**: a restaurant is assigned by an operator, not requested by the restaurant.
 
 - An operator picks a verified restaurant and an account holding `business` on the `restaurant-ownership` surface in the admin app, and links them with a reason. Both lists are the ones that already exist — the account list [#1476] built, and the restaurants collection — rather than a third way to find either.
-- Assignment sets `ownerUserId`, `claimStatus: claimed` and the timestamps in one transaction. A restaurant that already has an owner is refused and the refusal names the current owner; reassignment is revoke then assign, so the log shows two decisions. Repeating the same assignment returns the current state rather than writing again.
+- Assignment sets `ownerUserIds` to the one account, `claimStatus: claimed` and the timestamps in one transaction ([#1752]). A restaurant that already has an owner is refused and the refusal names the current owner; reassignment is revoke then assign, so the log shows two decisions. Repeating the same assignment returns the current state rather than writing again.
 - An account that does not hold `business` is refused as an assignment target, because every business-app route is gated on the role and an owner without it could not open the restaurant they own.
-- Ownership is revoked by an operator with an attributable reason. Revoking deletes the owner and the grant timestamps and sets `claimStatus: revoked`; revoking a restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`.
-- The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserId` equals the caller's uid, so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
-- A restaurant assigned elsewhere is absent from that list **and refused at the route**. `documentOwnerGuard` sits on `restaurant/:restaurantId` and `restaurant/:restaurantId/menu/:menuId` and reads the same field, so a bookmark, a shared link, or a session that outlived a revocation lands back on the account's own list with one sentence and no detail about who does hold the restaurant.
+- Ownership is revoked by an operator with an attributable reason. Revoking deletes the owner - both `ownerUserIds` and, on a restaurant not yet migrated, `ownerUserId` - and the grant timestamps, and sets `claimStatus: revoked`; revoking a restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`.
+- The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserId` equals the caller's uid or `ownerUserIds` contains it ([#1751]), so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
+- A restaurant assigned elsewhere is absent from that list **and refused at the route**. `documentOwnerGuard` sits on `restaurant/:restaurantId` and `restaurant/:restaurantId/menu/:menuId` and reads the same fields, so a bookmark, a shared link, or a session that outlived a revocation lands back on the account's own list with one sentence and no detail about who does hold the restaurant.
 - An account holding nothing sees an empty state naming BiteTribe support rather than an empty list, because there is nothing it can do here to fix it: self-service claiming is closed as not planned ([#1076]).
 - **The account holding a restaurant adds and removes its staff, and cannot touch a restaurant it does not hold** ([#1537]). It adds an existing BiteTribe account by the email address it signed up with, from `restaurant/:restaurantId/staff` behind the same `documentOwnerGuard` the edit routes carry - so a staff account, which holds no restaurant, cannot reach the page that would let it hire. The `staff` claim and the `/restaurantStaff/{uid}` record are written together and neither is left behind by a failure; an account holding `admin` or `business` is refused as a target in both directions; and every grant and removal reaches Cloud Logging with the caller, the target and the restaurant. An operator can do all of it from the staff card on `restaurant-ownership`, which is the way back when a restaurant removes its last account with access.
 - **A removed staff account keeps its session for up to an hour** - the ID token's lifetime - and is then returned to the login page by `roleGuard`, not to a broken screen. Both surfaces say so in the removal confirmation rather than implying it is instant.
@@ -82,13 +82,14 @@ claimed restaurants assumed a capability that did not exist.
 
 Added in issue [#1074], all optional so existing documents stay valid:
 
-- `Restaurant.ownerUserId` - the current owner, absent when unowned.
+- `Restaurant.ownerUserIds` - the accounts holding the restaurant, absent when unowned. Added by epic [#1614]: [#1750] and [#1751] taught every reader to accept it, and since [#1752] it is the only ownership field `assignRestaurantOwner` writes. Like every ownership field it is in the rules' `ownershipFields()`, so no client can write it.
+- `Restaurant.ownerUserId` - the single owner, **deprecated**. Every reader still accepts an account named here as an owner, so a restaurant the `restaurant-owner-ids` migration (see [UC - Run Operational Migrations](uc-run-operational-migrations.md)) has not reached keeps its owner. The migration moves it into `ownerUserIds`, and [#1754] removes it from the readers once the migration has run in production with no conflicts.
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after [#1077] reduced it. A missing value means `unclaimed`.
 - `Restaurant.claimedAt` and `claimedAtTimestamp` - when the current ownership was granted, deleted when it is revoked.
 
 `RestaurantClaim`, once at `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
 
-There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it would duplicate `ownerUserId`, and who assigned it and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
+There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it would duplicate the owner field, and who assigned it and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## Key Behaviours
 
@@ -137,8 +138,12 @@ This stops being true the moment a business or admin client is submitted to a st
 
 ## Supported Evidence
 
-- `libs/bite-tribe-common/model/src/lib/restaurant.ts`, the `ownerUserId`, `claimStatus`,
-  `claimedAt` and `claimedAtTimestamp` fields
+- `libs/bite-tribe-common/model/src/lib/restaurant.ts`, the `ownerUserIds`, `ownerUserId`,
+  `claimStatus`, `claimedAt` and `claimedAtTimestamp` fields, and `restaurantOwnerIds()` in
+  `restaurant-ownership.ts`, the client's read of the two ownership fields
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/restaurant-authority.ts`
+  (`ownerUserIdsOf`), the server's read of the same two fields, and
+  `migrate-restaurant-owner-ids.ts`, the migration between them
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/restaurant-ownership.ts`
   (`assignRestaurantOwner`, `revokeRestaurantOwner`) and `restaurant-staff.ts`
   (`addRestaurantStaff`, `removeRestaurantStaff`), both logged through
@@ -148,7 +153,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - `libs/common/ta-firestore/src/lib/document-owner.guard.ts` (`documentOwnerGuard`), on
   `restaurant/:restaurantId` and its menu route, and `restaurantsLoader` in
   `libs/bite-tribe-business/dashboard/data-access/src/lib/dashboard-data-access.service.ts`,
-  which queries `restaurants` where `ownerUserId` equals the caller
+  which queries `restaurants` where `ownerUserId` equals the caller or `ownerUserIds` contains it
 - `apps/bite-tribe-firebase/firestore.rules`, the ownership-scoped rules, verified by
   `apps/bite-tribe-firebase/functions/src/firestore-rules/__specs__/firestore-rules.emulator-spec.ts`
   (allow and deny cases, including the ownership-forgery deny test)
@@ -162,6 +167,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - Issue [#1078] - ownership-scoped Firestore rules replacing the open ones; done
 - Issue [#1079] - scope the business app to the restaurants assigned to the caller; done
 - Issue [#1537] - a business account manages the staff on its restaurant; done
+- Epic [#1614] - a restaurant held by more than one business account; [#1750], [#1751] and [#1752] moved ownership into a set without changing behaviour
 - Issue [#1371] - removed the organisation fields this was first specified against
 - Issue [#288] - concept of restaurant as a business entity
 - Issue [#952] and [#130] - App Check, which protects the transport but not authorization
@@ -198,6 +204,11 @@ This stops being true the moment a business or admin client is submitted to a st
 [#1088]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1088
 [#1092]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1092
 [#1097]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1097
+[#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
+[#1750]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1750
+[#1751]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1751
+[#1752]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1752
+[#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
 [#1371]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1371
 [#1469]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1469
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472

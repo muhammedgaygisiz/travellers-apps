@@ -72,6 +72,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   backfillBiteAddress: 'operator',
   backfillBiteImageStatusCallable: 'operator',
   backfillMenuItemIdsCallable: 'operator',
+  migrateRestaurantOwnerIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
   // Rebuilds meta/biteCountries from every Bite (issue #1893).

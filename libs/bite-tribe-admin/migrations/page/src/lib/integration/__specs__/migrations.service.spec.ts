@@ -229,6 +229,26 @@ describe(MigrationsService.name, () => {
       });
     });
 
+    it('should call the restaurant owner migration for its own name', async () => {
+      const result = { processed: 3, migrated: 2, skipped: 1, conflicting: 0 };
+      const migrateRestaurantOwnerIds = jest.fn().mockResolvedValue(result);
+      const backfillMenuItemIds = jest.fn();
+      const service = configure(
+        aDataAccess({
+          migrateRestaurantOwnerIds,
+          backfillMenuItemIds,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('restaurant-owner-ids');
+
+      expect(migrateRestaurantOwnerIds).toHaveBeenCalledTimes(1);
+      expect(backfillMenuItemIds).not.toHaveBeenCalled();
+      expect(service.collectionMigrations()).toEqual({
+        'restaurant-owner-ids': { status: 'done', result },
+      });
+    });
+
     it('should call the Bite image status backfill for its own name', async () => {
       const result = { inspected: 3, uploaded: 1, failed: 1, skipped: 1 };
       const backfillBiteImageStatus = jest.fn().mockResolvedValue(result);

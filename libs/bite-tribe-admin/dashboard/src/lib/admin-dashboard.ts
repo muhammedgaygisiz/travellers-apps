@@ -225,6 +225,13 @@ export class AdminDashboard {
       testId: 'admin-tool-menu-item-ids-backfill',
     },
     {
+      titleKey: 'admin-tool-restaurant-owner-ids-migration',
+      descriptionKey: 'admin-tool-restaurant-owner-ids-migration-description',
+      icon: 'people-outline',
+      path: '/restaurant-owner-ids-migration',
+      testId: 'admin-tool-restaurant-owner-ids-migration',
+    },
+    {
       titleKey: 'admin-tool-bite-image-status-backfill',
       descriptionKey: 'admin-tool-bite-image-status-backfill-description',
       icon: 'images-outline',

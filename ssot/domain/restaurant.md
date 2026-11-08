@@ -33,7 +33,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant has at most one owner. Assigning a Restaurant that already has one is refused and the refusal names the current owner; reassignment is revoke then assign, so the operator log carries two decisions with two reasons.
 - Assigning is idempotent: repeating the same assignment returns the current state instead of writing a second grant, matching the `verifyRestaurantCandidate` rule below.
 - An assignment target has to hold the `business` role. An owner without it would be named on a restaurant they cannot open, because every business-app route is gated on the role.
-- Revoking deletes `ownerUserId`, `claimedAt` and `claimedAtTimestamp` and sets `claimStatus: revoked`. Revoking a Restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`, because "it was taken away" and "nobody ever held it" are different answers.
+- Revoking deletes the owner (`ownerUserIds`, and `ownerUserId` on a Restaurant the `restaurant-owner-ids` migration has not reached), `claimedAt` and `claimedAtTimestamp`, and sets `claimStatus: revoked`. Revoking a Restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`, because "it was taken away" and "nobody ever held it" are different answers.
 - Both operator actions require a reason. Cloud Logging is the only record an ownership change leaves; see [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 - Ownership grants maintenance rights only. Nothing moves when it changes: the Restaurant's Bites, menu and profile are untouched.
 - **A Restaurant has staff, and the account holding it decides who they are.** Staff turns over with ordinary hiring, so it is not an operator decision (issue [#1537]). An owner adds and removes staff on the Restaurants it holds and on no others; an operator can do the same on any Restaurant, which is the way back when a Restaurant locks itself out.
@@ -41,7 +41,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - An account holding `admin` or `business` cannot be made staff, and cannot have a role taken from it through the staff surface. Staff is the narrowed set, so an account that already holds a wider one is not a staff account.
 - A Restaurant will be able to have one Floor Plan, containing Rooms and Tables. See [Floor Plan](floor-plan.md) and [Table](table.md).
 - **A Restaurant decides whether guests may order from the table, and it is off until it says otherwise.** `tableOrdering` holds the decision (issue [#1100]): `enabled`, the IANA `timeZone` its `openingHours` are written in, and an optional `pausedUntilTimestamp` for a staff-side stop. Absent on every Restaurant that has never been asked, and absent reads as off - ordering at the table is a commitment somebody has to watch a queue and carry food for, so a scanned code at a Restaurant that never opted in is refused rather than starting an order nobody is reading.
-- **A Restaurant is "active" for ordering while a business account holds it.** There is no `active` field and adding one would be a third state nothing writes. An order placed at a Restaurant nobody holds lands in a queue no account can open, and `claimStatus: 'revoked'` is exactly a Restaurant that used to be able to take one. The scan resolution reads `ownerUserId` and `claimStatus`, which the assignment callables already write.
+- **A Restaurant is "active" for ordering while a business account holds it.** There is no `active` field and adding one would be a third state nothing writes. An order placed at a Restaurant nobody holds lands in a queue no account can open, and `claimStatus: 'revoked'` is exactly a Restaurant that used to be able to take one. The scan resolution reads the owners and `claimStatus`, which the assignment callables already write.
 - **The time zone belongs to `tableOrdering` rather than to `openingHours`.** A `DaySchedule` is a weekday and a pair of `HH:mm` strings and says nothing about where in the world that is, which cost nothing while nothing evaluated it. The scan resolution is the first reader that has to turn "18:00 to 23:00 on Friday" into an instant, and it runs on a server in UTC.
 - **A Restaurant states its own facilities, and nobody else does.** `facilities` holds them (issue [#1830]), with `genderNeutralRestroom` as its first and only field. Every facility has three states: `true` is yes, `false` is no, and an absent field is a Restaurant that has not said - which is never shown as no. The account holding the Restaurant writes it in the business app; there is no way for a guest to suggest or correct a value, because a user-sourced flag would be unverifiable and could be used to target a venue. A nested object rather than a top-level key, so the next facility is a new field on it - the reasoning `tableOrdering` gives.
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue [#1389] and [issue-1389](../records/issue-1389.md).
@@ -67,7 +67,8 @@ Current model fields:
 - `restaurantCandidateId`
 - `biteIds`
 - `bites`
-- `ownerUserId`
+- `ownerUserIds`
+- `ownerUserId` (deprecated; read until [#1754] removes it - see [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md))
 - `claimStatus`
 - `claimedAt`
 - `claimedAtTimestamp`
@@ -286,3 +287,4 @@ images/restaurants/{restaurantId}/{filename}
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1498]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1498
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830
+[#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754

@@ -52,6 +52,7 @@ export class MigrationsService {
     'menu-item-stats': () => this.dataAccess.recomputeMenuItemStats(),
     'bite-image-status': () => this.dataAccess.backfillBiteImageStatus(),
     'bite-countries': () => this.dataAccess.rebuildBiteCountries(),
+    'restaurant-owner-ids': () => this.dataAccess.migrateRestaurantOwnerIds(),
   };
 
   /** What the last run of one migration did, or nothing if it never ran here. */

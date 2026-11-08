@@ -125,6 +125,14 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'restaurant-owner-ids-migration',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.RestaurantOwnerIdsMigrationContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'bite-image-status-backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(

@@ -166,13 +166,14 @@ describe('restaurant ownership authorization', () => {
 });
 
 describe('assignRestaurantOwner', () => {
-  it('writes the owner, the claim state and the grant timestamps', async () => {
+  it('writes the owner set, the claim state and the grant timestamps', async () => {
     const result = await assignRestaurantOwner(request(assign));
 
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ path: 'restaurants/restaurant-1' }),
       expect.objectContaining({
-        ownerUserId: 'owner-1',
+        ownerUserIds: ['owner-1'],
+        ownerUserId: 'DELETED',
         claimStatus: 'claimed',
         claimedAt: expect.any(String),
         claimedAtTimestamp: expect.any(Number),
@@ -215,6 +216,30 @@ describe('assignRestaurantOwner', () => {
     );
 
     expect(code).toBe('failed-precondition');
+  });
+
+  /**
+   * The one-owner rule still holds until issue #1753, and it reads the union
+   * (issue #1752): a restaurant held through either field is held.
+   */
+  it('is idempotent when the owner set already names that account', async () => {
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
+
+    const result = await assignRestaurantOwner(request(assign));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(result.status).toBe('already-assigned');
+  });
+
+  it('refuses a restaurant another account holds through the owner set, and names it', async () => {
+    restaurant({ ownerUserIds: ['owner-2'], claimStatus: 'claimed' });
+
+    const promise = assignRestaurantOwner(request(assign)) as Promise<unknown>;
+    const error = await promise.catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({ code: 'failed-precondition' });
+    expect((error as Error).message).toContain('owner-2');
+    expect(updateMock).not.toHaveBeenCalled();
   });
 
   it('refuses an account that does not hold the business role', async () => {
@@ -305,6 +330,7 @@ describe('revokeRestaurantOwner', () => {
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ path: 'restaurants/restaurant-1' }),
       expect.objectContaining({
+        ownerUserIds: 'DELETED',
         ownerUserId: 'DELETED',
         claimedAt: 'DELETED',
         claimedAtTimestamp: 'DELETED',
@@ -316,6 +342,24 @@ describe('revokeRestaurantOwner', () => {
       previousOwnerUserId: 'owner-1',
       claimStatus: 'revoked',
     });
+  });
+
+  it('revokes a restaurant held through the owner set and deletes both fields', async () => {
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
+
+    const result = await revokeRestaurantOwner(request(revoke));
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ path: 'restaurants/restaurant-1' }),
+      expect.objectContaining({
+        ownerUserIds: 'DELETED',
+        ownerUserId: 'DELETED',
+        claimedAt: 'DELETED',
+        claimedAtTimestamp: 'DELETED',
+        claimStatus: 'revoked',
+      }),
+    );
+    expect(result.previousOwnerUserId).toBe('owner-1');
   });
 
   // `revoked` over `unclaimed` would record a decision nobody made, on the

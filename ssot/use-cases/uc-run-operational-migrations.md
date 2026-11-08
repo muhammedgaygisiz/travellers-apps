@@ -4,9 +4,9 @@
 
 **Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
-`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Five collection-wide
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Six collection-wide
 migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats`,
-`bite-image-status` and `bite-countries` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
+`bite-image-status`, `bite-countries` and `restaurant-owner-ids` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
 removed rather than carried over, for the reasons below.
 
 ## Goal
@@ -37,6 +37,9 @@ means, and what an operator is shown when a run succeeds or fails.
 - **Menu item ids backfill** gives every stored category, menu item and variant
   the stable id an order line references, and reports how many of each it had
   to fill.
+- **Restaurant owner ids migration** moves each restaurant's owner from
+  `ownerUserId` into the `ownerUserIds` set, and reports how many it migrated,
+  skipped and found conflicting.
 - **Bite image status backfill** marks every Bite that predates the upload
   states `uploaded` or `failed` from what Storage holds, and reports how many it
   inspected, set each way and skipped.
@@ -77,8 +80,27 @@ collection itself.
   entry — not another copy of the state handling.
 
 Registered today: `review-timestamps` ([issue-1283](../records/issue-1283.md)), `menu-item-ids`
-(issue [#1099]), `menu-item-stats` (issue [#1113]), `bite-image-status` (issue [#1717]) and
-`bite-countries` (issue [#1893]).
+(issue [#1099]), `menu-item-stats` (issue [#1113]), `bite-image-status` (issue [#1717]),
+`bite-countries` (issue [#1893]) and `restaurant-owner-ids` (issue [#1752]).
+
+`restaurant-owner-ids` moves restaurant ownership from the single `ownerUserId`
+field to the `ownerUserIds` set (epic [#1614]). For each restaurant that still
+carries `ownerUserId`, it writes the set and deletes the single field in one
+write. A restaurant without the single field is skipped. A restaurant whose set
+already contains the single owner only loses the redundant field, and an empty
+`ownerUserId` is dropped without inventing an owner. A restaurant whose two
+fields name different accounts, or whose set is not a list, is **counted as
+conflicting and left unchanged**. The page shows the counts, and the
+conflicting restaurant ids are in the operator log entry of the run.
+
+It is the one collection migration that decides **inside a transaction per
+document** rather than in batched writes. A batch decides from a read taken
+before the commit, so a `revokeRestaurantOwner` landing in between would be
+undone: the revoked owner written back into the set. It also has an **ordering
+constraint after it**: issue [#1754] removes the `ownerUserId` read fallback
+from the rules, the functions and both apps, which is only safe once this has
+run in production and reported zero conflicts. See
+[UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md).
 
 `bite-countries` rebuilds `meta/biteCountries`, the countries the About page's globe
 lights up, from every Bite's `countryCode`, and reports how many it lists. Like
@@ -193,6 +215,8 @@ reaches a device is the new version announcement, whose store considerations bel
 - `backfillBiteImageStatusCallable`, started from the Bite image status
   backfill surface.
 - `rebuildBiteCountriesCallable`, started from the Bite countries surface.
+- `migrateRestaurantOwnerIdsCallable`, started from the restaurant owner ids
+  migration surface.
 - `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
   surface. It leaves an operator-log entry on both sides of the work - `started` and `succeeded` - because it reads every linked
   Bite and can time out halfway, and a `started` with no `succeeded` is exactly
@@ -221,6 +245,8 @@ reaches a device is the new version announcement, whose store considerations bel
   lists only Bites with an uploaded photo goes live. Open.
 - Issue [#1893] added `rebuildBiteCountriesCallable`, the first fill and repair of the
   About page's country list. Open.
+- Issue [#1752], part of epic [#1614], added `migrateRestaurantOwnerIdsCallable`, which moves
+  restaurant ownership into the `ownerUserIds` set. Open.
 - Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005]. Closed.
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
   delivered by pull request [#948]. Closed.
@@ -257,6 +283,9 @@ reaches a device is the new version announcement, whose store considerations bel
 [#1194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1194
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
+[#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
+[#1752]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1752
+[#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
 [#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593

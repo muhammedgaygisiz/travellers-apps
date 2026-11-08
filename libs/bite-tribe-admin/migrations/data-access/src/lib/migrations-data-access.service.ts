@@ -88,6 +88,24 @@ export interface SendNewVersionNotificationResult {
  */
 export type CollectionMigrationResult = Record<string, number>;
 
+/**
+ * What the `restaurant-owner-ids` migration reports (epic #1614, issue #1752).
+ *
+ * Counts only, like every collection migration on this page. The callable also
+ * returns the ids of the conflicting restaurants; they are dropped here because
+ * the page renders counts, and they stay in the operator log entry of the run.
+ */
+export interface MigrateRestaurantOwnerIdsResult extends CollectionMigrationResult {
+  /** Every restaurant document the migration looked at. */
+  processed: number;
+  /** Restaurants whose single owner was moved into the owner set. */
+  migrated: number;
+  /** Restaurants already in the new shape, or never held. */
+  skipped: number;
+  /** Restaurants left alone because their two ownership fields disagree. */
+  conflicting: number;
+}
+
 export interface BackfillMenuItemIdsResult extends CollectionMigrationResult {
   /** Every menu document the migration looked at. */
   processed: number;
@@ -330,6 +348,23 @@ export class MigrationsDataAccessService {
     >({ name: 'backfillMenuItemIdsCallable' });
 
     return result.data;
+  }
+
+  /**
+   * Moves restaurant ownership from `ownerUserId` into `ownerUserIds`
+   * (epic #1614, issue #1752).
+   *
+   * No resource is reloaded: the restaurant-ownership page reads the
+   * restaurants afresh, and through either field.
+   */
+  async migrateRestaurantOwnerIds(): Promise<MigrateRestaurantOwnerIdsResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      MigrateRestaurantOwnerIdsResult & { conflicts?: string[] }
+    >({ name: 'migrateRestaurantOwnerIdsCallable' });
+    const { processed, migrated, skipped, conflicting } = result.data;
+
+    return { processed, migrated, skipped, conflicting };
   }
 
   /**

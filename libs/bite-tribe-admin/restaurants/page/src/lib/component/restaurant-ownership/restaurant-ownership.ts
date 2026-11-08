@@ -36,6 +36,12 @@ import { RestaurantStaffMember } from 'bite-tribe-admin/restaurants-data-access'
 const OWNER_ROLE = 'business';
 
 /**
+ * The most owners a restaurant can have (epic #1614). The callable enforces
+ * it; this only stops offering an assignment the callable would refuse.
+ */
+export const MAX_RESTAURANT_OWNERS = 10;
+
+/**
  * Accepts anything with an `@` and a dot after it, and nothing else.
  *
  * The callable is the authority on whether an account exists; this only stops
@@ -134,7 +140,11 @@ export class RestaurantOwnership {
     ownerUserId: string;
     reason: string;
   }>();
-  readonly revoke = output<{ restaurantId: string; reason: string }>();
+  readonly revoke = output<{
+    restaurantId: string;
+    ownerUserId: string;
+    reason: string;
+  }>();
   readonly addStaff = output<{ restaurantId: string; email: string }>();
   readonly removeStaff = output<{
     restaurantId: string;
@@ -181,8 +191,11 @@ export class RestaurantOwnership {
   /** The accounts an assignment may point at, narrowed by what was typed. */
   readonly assignableAccounts = computed<AdminUser[]>(() => {
     const term = this.accountFilter().trim().toLocaleLowerCase();
-    const business = this.accounts().filter((account) =>
-      account.roles.includes(OWNER_ROLE),
+    const owners = this.ownerUserIds();
+    // An account that already holds the restaurant is not offered again.
+    const business = this.accounts().filter(
+      (account) =>
+        account.roles.includes(OWNER_ROLE) && !owners.includes(account.uid),
     );
 
     if (!term) {
@@ -201,15 +214,18 @@ export class RestaurantOwnership {
   );
 
   /**
-   * Read through either ownership field (epic #1614), so a restaurant the
-   * `restaurant-owner-ids` migration has moved still shows its owner. Until
-   * issue #1753 a restaurant has at most one.
+   * Every owner of the selected restaurant, read through either ownership
+   * field (epic #1614), so a restaurant the `restaurant-owner-ids` migration
+   * has not reached still shows its owner.
    */
-  readonly ownerUserId = computed(
-    () => restaurantOwnerIds(this.selected())[0] ?? '',
-  );
+  readonly ownerUserIds = computed(() => restaurantOwnerIds(this.selected()));
 
-  readonly assigned = computed(() => !!this.ownerUserId());
+  readonly assigned = computed(() => this.ownerUserIds().length > 0);
+
+  /** Another owner can be added until the restaurant has the most it may. */
+  readonly canAddOwner = computed(
+    () => this.ownerUserIds().length < MAX_RESTAURANT_OWNERS,
+  );
 
   readonly draftOwnerUserId = computed<string | undefined>(() => {
     // Reading the id registers the dependency that resets the draft.
@@ -227,7 +243,7 @@ export class RestaurantOwnership {
    */
   readonly canAssign = computed(
     () =>
-      !this.assigned() &&
+      this.canAddOwner() &&
       !!this.draftOwnerUserId() &&
       this.reason().trim().length > 0,
   );
@@ -249,6 +265,11 @@ export class RestaurantOwnership {
     return this.claimStatusOf(restaurant) === 'claimed' ? 'success' : 'medium';
   }
 
+  /** Every owner of a restaurant in the list, through either field. */
+  ownerIdsOf(restaurant: Restaurant): string[] {
+    return restaurantOwnerIds(restaurant);
+  }
+
   /**
    * How an account reads to an operator.
    *
@@ -256,11 +277,6 @@ export class RestaurantOwnership {
    * is no longer in the list is still an owner, and a blank line would read as
    * "unowned" on the one screen where that distinction is the whole point.
    */
-  /** Every owner of a restaurant in the list, through either field. */
-  ownerIdsOf(restaurant: Restaurant): string[] {
-    return restaurantOwnerIds(restaurant);
-  }
-
   accountLabel(uid: string): string {
     const account = this.accounts().find((candidate) => candidate.uid === uid);
 
@@ -371,11 +387,18 @@ export class RestaurantOwnership {
    * same reason field the assignment uses. The alert repeats the restaurant and
    * the account rather than trusting that the form behind it is still the one
    * being read — the same shape blocking an account uses (issue #1474).
+   *
+   * It names one owner (issue #1753): every other owner keeps the restaurant,
+   * and the confirmation says so when there is one.
    */
-  async onRevoke(): Promise<void> {
+  async onRevoke(ownerUserId: string): Promise<void> {
     const restaurant = this.selected();
 
-    if (!restaurant || !this.canRevoke()) {
+    if (
+      !restaurant ||
+      !this.canRevoke() ||
+      !this.ownerUserIds().includes(ownerUserId)
+    ) {
       return;
     }
 
@@ -384,9 +407,11 @@ export class RestaurantOwnership {
       header: this.transloco.translate(
         'admin-restaurant-ownership-revoke-confirm-title',
       ),
-      subHeader: `${restaurant.name} — ${this.accountLabel(this.ownerUserId())}`,
+      subHeader: `${restaurant.name} — ${this.accountLabel(ownerUserId)}`,
       message: this.transloco.translate(
-        'admin-restaurant-ownership-revoke-confirm-message',
+        this.ownerUserIds().length > 1
+          ? 'admin-restaurant-ownership-revoke-confirm-message-others-remain'
+          : 'admin-restaurant-ownership-revoke-confirm-message',
       ),
       buttons: [
         { text: this.transloco.translate('cancel'), role: 'cancel' },
@@ -394,7 +419,11 @@ export class RestaurantOwnership {
           text: this.transloco.translate('admin-restaurant-ownership-revoke'),
           role: 'destructive',
           handler: (): void => {
-            this.revoke.emit({ restaurantId: restaurant.id, reason });
+            this.revoke.emit({
+              restaurantId: restaurant.id,
+              ownerUserId,
+              reason,
+            });
             this.reason.set('');
           },
         },

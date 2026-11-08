@@ -4,7 +4,7 @@
 
 **Level:** L1
 
-Implemented for a single owner. Specified through issue [#1069] as stage 0 of issue [#735].
+Implemented. A restaurant can be held by up to ten business accounts ([#1753], `RD-UR-10`). Specified through issue [#1069] as stage 0 of issue [#735].
 The roles are Firebase Auth custom claims ([#1469], [#1472]), the ownership fields are on the
 shared model ([#1074]), and an operator writes them from the admin app ([#1077]). **The rules
 enforce it** ([#1078]): a Restaurant and its Menu are writable by the assigned account and by
@@ -15,7 +15,7 @@ production from the merge.
 
 ## Goal
 
-A restaurant has exactly one accountable owner: a normal BiteTribe user carrying the `business` role. Accounts can write only the restaurants assigned to them, and the business app shows them only those; the restaurants themselves stay readable, because the consumer app shows them. Staff can act on those restaurants within a narrower permission set. Operators assign and revoke ownership.
+A restaurant has one or more accountable owners, up to ten, each a normal BiteTribe user carrying the `business` role and each with every owner right (`RD-UR-10`). Accounts can write only the restaurants assigned to them, and the business app shows them only those; the restaurants themselves stay readable, because the consumer app shows them. Staff can act on those restaurants within a narrower permission set. Operators assign and revoke ownership.
 
 This page owns who holds a restaurant, how that hold is granted and revoked, and what
 reads and writes it gates - in the callables, in `firestore.rules`, and in the business
@@ -38,9 +38,10 @@ pages for those behaviours.
 Rewritten on 8 September 2026, implemented by [#1077], [#1078], [#1079] and [#1537]. There is **no self-service claim**: a restaurant is assigned by an operator, not requested by the restaurant.
 
 - An operator picks a verified restaurant and an account holding `business` on the `restaurant-ownership` surface in the admin app, and links them with a reason. Both lists are the ones that already exist — the account list [#1476] built, and the restaurants collection — rather than a third way to find either.
-- Assignment sets `ownerUserIds` to the one account, `claimStatus: claimed` and the timestamps in one transaction ([#1752]). A restaurant that already has an owner is refused and the refusal names the current owner; reassignment is revoke then assign, so the log shows two decisions. Repeating the same assignment returns the current state rather than writing again.
+- Assignment adds the account to `ownerUserIds` and sets `claimStatus: claimed` in one transaction ([#1753]). The grant timestamps are written only when the set was empty. A restaurant that already has ten owners is refused with `failed-precondition`. Replacing an owner is revoke then assign, so the log shows two decisions. Repeating an assignment the restaurant already has returns the current state rather than writing again.
+- The `restaurant-ownership` surface lists every owner of the selected restaurant and offers "add owner", without the accounts that already hold it, while there are fewer than ten.
 - An account that does not hold `business` is refused as an assignment target, because every business-app route is gated on the role and an owner without it could not open the restaurant they own.
-- Ownership is revoked by an operator with an attributable reason. Revoking deletes the owner - both `ownerUserIds` and, on a restaurant not yet migrated, `ownerUserId` - and the grant timestamps, and sets `claimStatus: revoked`; revoking a restaurant nobody holds is refused rather than writing `revoked` over `unclaimed`.
+- Ownership is revoked one account at a time, by an operator with an attributable reason. `revokeRestaurantOwner` requires the account, and each owner on the surface has its own revoke action behind a confirmation. Revoking one of several owners removes only that account: the others keep every right and `claimStatus` stays `claimed`. Revoking the last owner deletes the set (and, on a restaurant not yet migrated, `ownerUserId`) and the grant timestamps, and sets `claimStatus: revoked`. Revoking an account that does not hold the restaurant is refused, which also refuses writing `revoked` over `unclaimed`.
 - The assignment becomes visible to the assigned account on its next load. `DashboardDataAccessService.restaurantsLoader` queries `restaurants` where `ownerUserId` equals the caller's uid or `ownerUserIds` contains it ([#1751]), so the dashboard map and the restaurants list hold exactly what the account was given. There is no token to refresh, because ownership is a document field rather than a claim.
 - A restaurant assigned elsewhere is absent from that list **and refused at the route**. `documentOwnerGuard` sits on `restaurant/:restaurantId` and `restaurant/:restaurantId/menu/:menuId` and reads the same fields, so a bookmark, a shared link, or a session that outlived a revocation lands back on the account's own list with one sentence and no detail about who does hold the restaurant.
 - An account holding nothing sees an empty state naming BiteTribe support rather than an empty list, because there is nothing it can do here to fix it: self-service claiming is closed as not planned ([#1076]).
@@ -85,11 +86,11 @@ Added in issue [#1074], all optional so existing documents stay valid:
 - `Restaurant.ownerUserIds` - the accounts holding the restaurant, absent when unowned. Added by epic [#1614]: [#1750] and [#1751] taught every reader to accept it, and since [#1752] it is the only ownership field `assignRestaurantOwner` writes. Like every ownership field it is in the rules' `ownershipFields()`, so no client can write it.
 - `Restaurant.ownerUserId` - the single owner, **deprecated**. Every reader still accepts an account named here as an owner, so a restaurant the `restaurant-owner-ids` migration (see [UC - Run Operational Migrations](uc-run-operational-migrations.md)) has not reached keeps its owner. The migration moves it into `ownerUserIds`, and [#1754] removes it from the readers once the migration has run in production with no conflicts.
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after [#1077] reduced it. A missing value means `unclaimed`.
-- `Restaurant.claimedAt` and `claimedAtTimestamp` - when the current ownership was granted, deleted when it is revoked.
+- `Restaurant.claimedAt` and `claimedAtTimestamp` - when the restaurant became held: set by the first assignment and deleted by the last revoke (`RD-UR-10`).
 
 `RestaurantClaim`, once at `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
 
-There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it would duplicate the owner field, and who assigned it and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
+There is no `claimedByUserId` on `Restaurant`. It would duplicate the owner set, and who assigned each owner, when and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## Key Behaviours
 
@@ -99,7 +100,8 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 - **Which restaurants an account is assigned to is a Firestore document, never a custom claim.** An assignment change then takes effect immediately rather than after up to an hour, there is no 1000-byte claim payload to grow into, and [#1078]'s rules read the same field \- a claim copy would be a second version of one fact that can silently disagree with it.
 - **Who may grant which role is not uniform.** `admin` and `business` are operator decisions through the admin-only `setUserRoles`. `staff` turns over with ordinary hiring, so a business account grants it itself, for the restaurants it holds only \- a callable that let any `business` caller grant `staff` to any uid would be a privilege-escalation path into the business app dressed as a convenience. See [#1537].
 - Assignment is idempotent, matching the existing `verifyRestaurantCandidate` rule.
-- No restaurant can end up claimed by two owners. The read and the write are one transaction, so two operators assigning the same restaurant cannot both see it unowned and both write.
+- Owners are equal, and only an operator adds or removes one (`RD-UR-10`). An owner adding or removing another owner is out of scope.
+- The read and the write are one transaction rather than an `arrayUnion` outside one, so the ten-owner cap is checked against what is committed. Two operators adding two different accounts at once both land, because Firestore retries the losing transaction on top of the winning one.
 - Existing unowned restaurants keep working for consumer read paths and are visible to admins for triage.
 - **[#1079] shipped the strict filter: a business account sees the restaurants assigned to it and nothing else.** Decided 8 September 2026, when [#1077] gave the assignment a writer. The alternative considered was falling back to the unowned restaurants so that nobody loses access on the day it deploys - refused, because it is a rule that [#1078] then has to contradict, and a boundary with an exception is not a boundary. The consequence is accepted rather than designed around: nothing in production is assigned today, so every business account sees an empty list until an operator assigns it something. Assigning the existing restaurants is operator work that has to happen before or alongside [#1079], not a migration.
 
@@ -110,6 +112,7 @@ There is no `claimedByUserId` on `Restaurant`. With one owner per restaurant it 
 - A revoked role stops working within one token refresh cycle.
 - A business account can add and remove the staff on a restaurant it holds, and is refused with `permission-denied` on one it does not. Proven by the callable's own spec; the association's read boundary is proven against the emulator.
 - Both apps' existing flows still work end to end after the rules change.
+- Two business accounts assigned to one restaurant can each save it, its menu and its floor plan, and a third business account cannot, proven by emulator rule tests. Revoking one leaves the other with full access ([#1753]).
 
 ## Risk
 
@@ -215,3 +218,4 @@ This stops being true the moment a business or admin client is submitted to a st
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753

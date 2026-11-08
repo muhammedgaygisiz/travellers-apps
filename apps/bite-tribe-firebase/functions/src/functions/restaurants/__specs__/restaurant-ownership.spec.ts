@@ -91,7 +91,11 @@ const assign = {
   ownerUserId: 'owner-1',
   reason: 'Verified on the phone.',
 };
-const revoke = { restaurantId: 'restaurant-1', reason: 'Restaurant closed.' };
+const revoke = {
+  restaurantId: 'restaurant-1',
+  ownerUserId: 'owner-1',
+  reason: 'Restaurant closed.',
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -182,6 +186,7 @@ describe('assignRestaurantOwner', () => {
     expect(result).toEqual({
       restaurantId: 'restaurant-1',
       ownerUserId: 'owner-1',
+      ownerUserIds: ['owner-1'],
       claimStatus: 'claimed',
       status: 'assigned',
     });
@@ -198,48 +203,70 @@ describe('assignRestaurantOwner', () => {
     expect(result.status).toBe('already-assigned');
   });
 
-  it('refuses a restaurant that another account holds, and names that account', async () => {
-    restaurant({ ownerUserId: 'owner-2', claimStatus: 'claimed' });
+  /**
+   * More than one owner (epic #1614, issue #1753): an assignment adds the
+   * account to whoever already holds the restaurant, through either field.
+   */
+  it('adds a second owner beside the first and keeps the grant timestamps', async () => {
+    restaurant({
+      ownerUserIds: ['owner-2'],
+      claimStatus: 'claimed',
+      claimedAt: '2026-01-01T00:00:00.000Z',
+    });
 
-    const promise = assignRestaurantOwner(request(assign)) as Promise<unknown>;
-    const message = await messageOf(promise);
+    const result = await assignRestaurantOwner(request(assign));
 
-    expect(message).toContain('owner-2');
-    expect(updateMock).not.toHaveBeenCalled();
+    const [, written] = updateMock.mock.calls[0];
+    expect(written).toMatchObject({
+      ownerUserIds: ['owner-2', 'owner-1'],
+      ownerUserId: 'DELETED',
+      claimStatus: 'claimed',
+    });
+    expect(written).not.toHaveProperty('claimedAt');
+    expect(written).not.toHaveProperty('claimedAtTimestamp');
+    expect(result).toMatchObject({
+      status: 'assigned',
+      ownerUserIds: ['owner-2', 'owner-1'],
+    });
   });
 
-  it('refuses a restaurant that another account holds with failed-precondition', async () => {
+  it('moves an unmigrated single owner into the set when adding a second', async () => {
     restaurant({ ownerUserId: 'owner-2', claimStatus: 'claimed' });
+
+    await assignRestaurantOwner(request(assign));
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownerUserIds: ['owner-2', 'owner-1'],
+        ownerUserId: 'DELETED',
+      }),
+    );
+  });
+
+  it('refuses an eleventh owner with failed-precondition and writes nothing', async () => {
+    restaurant({
+      ownerUserIds: Array.from({ length: 10 }, (_, index) => `other-${index}`),
+      claimStatus: 'claimed',
+    });
 
     const code = await codeOf(
       assignRestaurantOwner(request(assign)) as Promise<unknown>,
     );
 
     expect(code).toBe('failed-precondition');
+    expect(updateMock).not.toHaveBeenCalled();
   });
 
-  /**
-   * The one-owner rule still holds until issue #1753, and it reads the union
-   * (issue #1752): a restaurant held through either field is held.
-   */
-  it('is idempotent when the owner set already names that account', async () => {
-    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
+  it('admits a tenth owner', async () => {
+    restaurant({
+      ownerUserIds: Array.from({ length: 9 }, (_, index) => `other-${index}`),
+      claimStatus: 'claimed',
+    });
 
-    const result = await assignRestaurantOwner(request(assign));
-
-    expect(updateMock).not.toHaveBeenCalled();
-    expect(result.status).toBe('already-assigned');
-  });
-
-  it('refuses a restaurant another account holds through the owner set, and names it', async () => {
-    restaurant({ ownerUserIds: ['owner-2'], claimStatus: 'claimed' });
-
-    const promise = assignRestaurantOwner(request(assign)) as Promise<unknown>;
-    const error = await promise.catch((caught: unknown) => caught);
-
-    expect(error).toMatchObject({ code: 'failed-precondition' });
-    expect((error as Error).message).toContain('owner-2');
-    expect(updateMock).not.toHaveBeenCalled();
+    await expect(assignRestaurantOwner(request(assign))).resolves.toMatchObject(
+      { status: 'assigned' },
+    );
   });
 
   it('refuses an account that does not hold the business role', async () => {
@@ -322,7 +349,7 @@ describe('assignRestaurantOwner', () => {
 });
 
 describe('revokeRestaurantOwner', () => {
-  it('deletes the owner and the grant timestamps and records the revocation', async () => {
+  it('deletes the last owner and the grant timestamps and records the revocation', async () => {
     restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' });
 
     const result = await revokeRestaurantOwner(request(revoke));
@@ -340,6 +367,7 @@ describe('revokeRestaurantOwner', () => {
     expect(result).toEqual({
       restaurantId: 'restaurant-1',
       previousOwnerUserId: 'owner-1',
+      ownerUserIds: [],
       claimStatus: 'revoked',
     });
   });
@@ -360,6 +388,54 @@ describe('revokeRestaurantOwner', () => {
       }),
     );
     expect(result.previousOwnerUserId).toBe('owner-1');
+  });
+
+  it('removes only the named owner and leaves the restaurant claimed', async () => {
+    restaurant({
+      ownerUserIds: ['owner-1', 'owner-2'],
+      claimStatus: 'claimed',
+      claimedAt: '2026-01-01T00:00:00.000Z',
+    });
+
+    const result = await revokeRestaurantOwner(request(revoke));
+
+    const [, written] = updateMock.mock.calls[0];
+    expect(written).toMatchObject({
+      ownerUserIds: ['owner-2'],
+      ownerUserId: 'DELETED',
+    });
+    expect(written).not.toHaveProperty('claimStatus');
+    expect(written).not.toHaveProperty('claimedAt');
+    expect(result).toEqual({
+      restaurantId: 'restaurant-1',
+      previousOwnerUserId: 'owner-1',
+      ownerUserIds: ['owner-2'],
+      claimStatus: 'claimed',
+    });
+  });
+
+  it('refuses revoking an account that does not hold the restaurant', async () => {
+    restaurant({ ownerUserIds: ['owner-2'], claimStatus: 'claimed' });
+
+    const code = await codeOf(
+      revokeRestaurantOwner(request(revoke)) as Promise<unknown>,
+    );
+
+    expect(code).toBe('failed-precondition');
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it('requires the account to revoke', async () => {
+    restaurant({ ownerUserIds: ['owner-1'], claimStatus: 'claimed' });
+
+    const code = await codeOf(
+      revokeRestaurantOwner(
+        request({ restaurantId: 'restaurant-1', reason: 'Closed.' }),
+      ) as Promise<unknown>,
+    );
+
+    expect(code).toBe('invalid-argument');
+    expect(firestoreMock.runTransaction).not.toHaveBeenCalled();
   });
 
   // `revoked` over `unclaimed` would record a decision nobody made, on the
@@ -400,7 +476,7 @@ describe('revokeRestaurantOwner', () => {
 
     const code = await codeOf(
       revokeRestaurantOwner(
-        request({ restaurantId: 'restaurant-1' }),
+        request({ restaurantId: 'restaurant-1', ownerUserId: 'owner-1' }),
       ) as Promise<unknown>,
     );
 
@@ -421,7 +497,11 @@ describe('revokeRestaurantOwner', () => {
         targetType: 'restaurant',
         targetId: 'restaurant-1',
         reason: 'Restaurant closed.',
-        details: { previousOwnerUserId: 'owner-1' },
+        details: {
+          ownerUserId: 'owner-1',
+          remainingOwnerUserIds: [],
+          claimStatus: 'revoked',
+        },
       }),
     );
   });

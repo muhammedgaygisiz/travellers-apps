@@ -157,10 +157,11 @@ describe(RestaurantOwnershipService.name, () => {
   });
 
   it('revokes through the data access and reports it', async () => {
-    await service.revoke('r1', 'Restaurant closed.');
+    await service.revoke('r1', 'owner-1', 'Restaurant closed.');
 
     expect(dataAccessMock.revokeRestaurantOwner).toHaveBeenCalledWith(
       'r1',
+      'owner-1',
       'Restaurant closed.',
     );
     expect(toastMock.present).toHaveBeenCalledWith({
@@ -175,7 +176,7 @@ describe(RestaurantOwnershipService.name, () => {
     );
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    await service.revoke('r1', 'Restaurant closed.');
+    await service.revoke('r1', 'owner-1', 'Restaurant closed.');
 
     expect(toastMock.present).toHaveBeenCalledWith({
       messageKey: 'admin-restaurant-ownership-revoke-failed',

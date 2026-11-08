@@ -210,17 +210,148 @@ describe(RestaurantOwnership.name, () => {
     ]);
   });
 
-  // Reassignment is revoke and then assign, so the log carries two decisions.
-  // An assigned restaurant therefore offers no picker and no assign button.
-  it('offers no account picker for a restaurant that already has an owner', () => {
+  /**
+   * More than one owner (epic #1614, issue #1753): a held restaurant offers
+   * the picker again, as "add owner", without the accounts that already hold
+   * it - until it has the most owners it may.
+   */
+  it('offers to add another owner to a held restaurant, without its owners', () => {
     setInputs({
-      accounts: [account()],
-      selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
+      accounts: [
+        account(),
+        account({ uid: 'owner-2', email: 'second@example.com' }),
+      ],
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
     });
 
+    expect(component.canAddOwner()).toBe(true);
+    expect(component.assignableAccounts().map((each) => each.uid)).toEqual([
+      'owner-2',
+    ]);
+    expect(query('admin-restaurant-accounts')).not.toBeNull();
+    expect(query('admin-restaurant-assign')?.textContent).toContain(
+      'admin-restaurant-ownership-add-owner',
+    );
+  });
+
+  it('emits an added owner for a held restaurant', () => {
+    const emitted: unknown[] = [];
+    component.assign.subscribe((event) => emitted.push(event));
+    setInputs({
+      accounts: [account({ uid: 'owner-2' })],
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
+    });
+    component.onOwnerChange('owner-2');
+    component.onReasonChange('Co-owner, verified on the phone.');
+
+    component.onAssign();
+
+    expect(emitted).toEqual([
+      {
+        restaurantId: 'r1',
+        ownerUserId: 'owner-2',
+        reason: 'Co-owner, verified on the phone.',
+      },
+    ]);
+  });
+
+  it('says every business account already owns it rather than that none exists', () => {
+    setInputs({
+      accounts: [account()],
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
+    });
+
+    expect(query('admin-restaurant-accounts-empty')?.textContent).toContain(
+      'admin-restaurant-ownership-no-other-accounts',
+    );
+  });
+
+  it('stops offering another owner at ten', () => {
+    setInputs({
+      accounts: [account({ uid: 'owner-11' })],
+      selected: restaurant({
+        ownerUserIds: Array.from({ length: 10 }, (_, index) => `o-${index}`),
+        claimStatus: 'claimed',
+      }),
+    });
+    component.onOwnerChange('owner-11');
+    component.onReasonChange('One too many.');
+
+    expect(component.canAssign()).toBe(false);
     expect(query('admin-restaurant-accounts')).toBeNull();
     expect(query('admin-restaurant-assign')).toBeNull();
-    expect(query('admin-restaurant-reassign-hint')).not.toBeNull();
+    expect(query('admin-restaurant-owner-limit')).not.toBeNull();
+  });
+
+  it('lists every owner of the selected restaurant, each with its own revoke', () => {
+    setInputs({
+      accounts: [account()],
+      selected: restaurant({
+        ownerUserIds: ['owner-1', 'owner-2'],
+        claimStatus: 'claimed',
+      }),
+    });
+
+    expect(query('admin-restaurant-owner-owner-1')?.textContent).toContain(
+      'owner@example.com',
+    );
+    expect(query('admin-restaurant-owner-owner-2')?.textContent).toContain(
+      'owner-2',
+    );
+    expect(query('admin-restaurant-revoke-owner-1')).not.toBeNull();
+    expect(query('admin-restaurant-revoke-owner-2')).not.toBeNull();
+  });
+
+  it('revokes only the owner whose action was taken, and says the others keep it', async () => {
+    const emitted: unknown[] = [];
+    component.revoke.subscribe((event) => emitted.push(event));
+    setInputs({
+      selected: restaurant({
+        ownerUserIds: ['owner-1', 'owner-2'],
+        claimStatus: 'claimed',
+      }),
+    });
+    component.onReasonChange('Left the business.');
+
+    await component.onRevoke('owner-2');
+
+    expect(lastAlert().subHeader).toContain('owner-2');
+    expect(lastAlert().message).toBe(
+      'admin-restaurant-ownership-revoke-confirm-message-others-remain',
+    );
+
+    pressAlertButton('destructive');
+
+    expect(emitted).toEqual([
+      {
+        restaurantId: 'r1',
+        ownerUserId: 'owner-2',
+        reason: 'Left the business.',
+      },
+    ]);
+  });
+
+  it('does not revoke an account that is not an owner', async () => {
+    setInputs({
+      selected: restaurant({
+        ownerUserIds: ['owner-1'],
+        claimStatus: 'claimed',
+      }),
+    });
+    component.onReasonChange('Closed.');
+
+    await component.onRevoke('owner-9');
+
+    expect(alerts).toEqual([]);
   });
 
   it('names the owner rather than showing a bare uid when the account is known', () => {
@@ -302,15 +433,22 @@ describe(RestaurantOwnership.name, () => {
     });
     component.onReasonChange('Restaurant closed.');
 
-    await component.onRevoke();
+    await component.onRevoke('owner-1');
 
     expect(emitted).toEqual([]);
     expect(lastAlert().subHeader).toContain('owner@example.com');
+    expect(lastAlert().message).toBe(
+      'admin-restaurant-ownership-revoke-confirm-message',
+    );
 
     pressAlertButton('destructive');
 
     expect(emitted).toEqual([
-      { restaurantId: 'r1', reason: 'Restaurant closed.' },
+      {
+        restaurantId: 'r1',
+        ownerUserId: 'owner-1',
+        reason: 'Restaurant closed.',
+      },
     ]);
   });
 
@@ -319,7 +457,7 @@ describe(RestaurantOwnership.name, () => {
       selected: restaurant({ ownerUserId: 'owner-1', claimStatus: 'claimed' }),
     });
 
-    await component.onRevoke();
+    await component.onRevoke('owner-1');
 
     expect(alerts).toEqual([]);
   });

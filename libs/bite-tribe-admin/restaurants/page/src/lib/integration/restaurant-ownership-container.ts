@@ -20,7 +20,9 @@ import { RestaurantOwnershipService } from './restaurant-ownership.service';
       (assign)="
         service.assign($event.restaurantId, $event.ownerUserId, $event.reason)
       "
-      (revoke)="service.revoke($event.restaurantId, $event.reason)"
+      (revoke)="
+        service.revoke($event.restaurantId, $event.ownerUserId, $event.reason)
+      "
       (addStaff)="service.addStaff($event.restaurantId, $event.email)"
       (removeStaff)="service.removeStaff($event.restaurantId, $event.member)"
       (logoutClick)="service.logout()"

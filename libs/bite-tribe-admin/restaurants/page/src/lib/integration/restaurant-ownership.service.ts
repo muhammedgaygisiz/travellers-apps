@@ -170,11 +170,19 @@ export class RestaurantOwnershipService {
     }
   }
 
-  async revoke(restaurantId: string, reason: string): Promise<void> {
+  async revoke(
+    restaurantId: string,
+    ownerUserId: string,
+    reason: string,
+  ): Promise<void> {
     this.savingId.set(restaurantId);
 
     try {
-      await this.dataAccess.revokeRestaurantOwner(restaurantId, reason);
+      await this.dataAccess.revokeRestaurantOwner(
+        restaurantId,
+        ownerUserId,
+        reason,
+      );
       await this.toastService.present({
         messageKey: 'admin-restaurant-ownership-revoked',
         outcome: 'success',

@@ -210,23 +210,29 @@ describe(`${RestaurantsDataAccessService.name} ownership`, () => {
   describe('revokeRestaurantOwner', () => {
     // Its own callable rather than an assignment with an empty owner, so the
     // log carries a reason for the removal and a reason for the next grant.
-    it('should call the operator callable with the restaurant and the reason', async () => {
+    it('should call the operator callable with the restaurant, the owner and the reason', async () => {
       jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
         data: {
           restaurantId: 'r1',
           previousOwnerUserId: 'owner-1',
+          ownerUserIds: [],
           claimStatus: 'revoked',
         },
       });
 
       const result = await service.revokeRestaurantOwner(
         'r1',
+        'owner-1',
         'Restaurant closed.',
       );
 
       expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
         name: 'revokeRestaurantOwner',
-        data: { restaurantId: 'r1', reason: 'Restaurant closed.' },
+        data: {
+          restaurantId: 'r1',
+          ownerUserId: 'owner-1',
+          reason: 'Restaurant closed.',
+        },
       });
       expect(result.previousOwnerUserId).toBe('owner-1');
     });

@@ -30,7 +30,7 @@
  * is the narrowed set — and `setUserRoles` refuses the pair.
  *
  * `staff` still grants nothing at the data layer, and issue #1078 left it that
- * way on purpose. The rules scope a write by `Restaurant.ownerUserId`, and
+ * way on purpose. The rules scope a write by the restaurant's owners, and
  * there is no equivalent record of which restaurant a staff account works at:
  * writing it is issue #1537. A rule admitting `staff` before that record exists
  * could only admit every staff account to every restaurant, which is the shape

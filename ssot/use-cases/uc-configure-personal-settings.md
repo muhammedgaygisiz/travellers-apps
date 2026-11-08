@@ -5,9 +5,9 @@
 **Level:** L1
 Supported today. The settings page carries theme, the device's haptic feedback switch on native
 builds, currency with a favourites shortlist, language, the location-permission state, and the
-per-installation notification list [#1184] put in place of the old account-wide switch. Two fields on the `Settings` model are not controls
-here: `nearby`, which nothing in settings sets, and `pushNotifications`, retired by [#1184]. The
-email-updates switch is present and disabled.
+per-installation notification list [#1184] put in place of the old account-wide switch. Three fields on the `Settings` model are not controls
+here: `nearby`, which nothing in settings sets, `pushNotifications`, retired by [#1184], and
+`emailUpdates`, whose switch [#1879] removed until there is a newsletter.
 
 ## Goal
 
@@ -45,9 +45,12 @@ belongs to [UC - Receive App Notifications And Engagement Updates](uc-receive-ap
   the app's own page in the system settings when it is not. The permission is collected during
   onboarding ([#1023]); `Settings.location` records the answer rather than being a preference
   set here.
-- **Email updates** - the switch is rendered and is **disabled**, and nothing in the app sends
-  an email update. It is the same shape of control [#1184] removed for push: visible, and
-  backed by nothing. Whether it is built or dropped is undecided ([#1606]).
+- **Email updates** - no control. Nothing in the app sends an email update, and the disabled
+  switch that stood here read as broken to testers, so [#1879] removed it from the page until
+  a newsletter exists ([#329]). `Settings.emailUpdates` stays on the model and on existing
+  documents, and a save carries the stored value through unchanged, the same way it carries
+  `location`. Bringing the switch back means real marketing consent and a matching contact-use
+  entry in [Implementation - Store Declarations](../implementation/store-declarations.md).
 - `Settings.nearby` is on the model and is not a control on this page. It holds the radius the
   Home feed's optional nearby filter uses, in metres; nothing writes it but the store's initial
   value, so the filter is effectively a constant. Whether it becomes a control is undecided
@@ -117,7 +120,7 @@ and at the point of use, not here, and the data types behind them are declared i
 - Issue [#1023] is where the location permission this page reports is collected, during onboarding (part of the closed epic-850).
 - Issue [#1386] is the OS-permission-vs-delivery-flag distinction the current installation's row reflects. Closed as completed.
 - Issue [#1746] added the per-device haptic feedback switch, part of epic [#1740], which reversed epic [#1633]'s reliance on the OS setting alone.
-- Issue [#1606] tracks two undecided items this page still carries: whether the disabled email-updates switch is built or dropped, and whether `Settings.nearby` becomes a control here. Open.
+- Issue [#1606] tracked two undecided items. Its email half is settled by issue [#1879] - hide the switch now, build it with the newsletter ([#329]); whether `Settings.nearby` becomes a control here is still open.
 
 ## Related Domains
 
@@ -134,6 +137,7 @@ and at the point of use, not here, and the data types behind them are declared i
 - [Architecture - Capacitor](../architecture/capacitor.md) - `Haptic Feedback Rule`, which owns how the haptic feedback switch
   reaches the haptics
 
+[#329]: https://github.com/muhammedgaygisiz/travellers-apps/issues/329
 [#1023]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1023
 [#1184]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1184
 [#1386]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1386
@@ -141,3 +145,4 @@ and at the point of use, not here, and the data types behind them are declared i
 [#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
 [#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746
+[#1879]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1879

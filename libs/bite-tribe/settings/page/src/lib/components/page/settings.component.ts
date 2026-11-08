@@ -137,7 +137,6 @@ export class PageSettings {
   currencies = currencyCodes;
 
   settingsForm = this.formBuilder.nonNullable.group({
-    emailUpdates: [{ value: false, disabled: true }, Validators.required],
     theme: ['light', Validators.required],
     currency: ['EUR', Validators.required],
     favoriteCurrencies: [[] as string[]],
@@ -328,11 +327,13 @@ export class PageSettings {
 
     this.submitSettings.emit({
       ...newSettings,
-      // The location grant is recorded by onboarding and has no control on this
-      // page. It is carried through explicitly because the settings write
-      // replaces the document, so anything the form does not know about is lost.
+      // The location grant is recorded by onboarding, and email updates has no
+      // switch until there is a newsletter (#1879); neither has a control on
+      // this page. They are carried through explicitly because the settings
+      // write replaces the document, so anything the form does not know about
+      // is lost.
       location: !!this.settings()?.location,
-      emailUpdates: !!newSettings.emailUpdates,
+      emailUpdates: !!this.settings()?.emailUpdates,
       theme,
       currency: newSettings.currency || 'EUR',
       favoriteCurrencies,

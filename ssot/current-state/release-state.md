@@ -261,7 +261,32 @@ carried forward from the 31 August caveats:
   in normal operation, a signed-out client retrying, or the App Check lockout
   filed as [#1621] and [#1622] on 16 September. The digest counts them and the
   threshold does not fire, so they have been visible and unexamined since the
-  launch. Filed as [#1624].
+  launch. Filed as [#1624] and **split on 9 November 2026** from the BigQuery
+  export, 31 August to 8 November: 118 permission and `Unauthenticated`
+  events, from only nine clients. Each group lines up with what that client
+  was doing when the denial arrived:
+  - **33 are development noise** ([#1466]). One signed-out `localhost` client
+    sends one `Unauthenticated` and three denials on every page load.
+  - **26 are web App Check denials.** They come from one signed-in client on
+    `www.bitetribe.app` reading its own data, mostly right after sign-in as
+    onboarding starts. The 8 November page loads are the incident behind
+    [#1902]: a stale second tab held the Firestore lease without an App Check
+    token.
+  - **27 are one Android user on 1.0.1 and 1.0.2 opening the app straight
+    into Bite Details**, presumably from a notification. Two denials arrive
+    with `session_start` and the Bite still renders, so this reads as a read
+    issued before sign-in resolves. It never happens mid-session.
+  - **12 are cold starts with an expired session.** `The user's credential is
+no longer valid` or `1 out of 2 underlying tasks failed` comes with three
+    denials and lands the user on Start. That is expected.
+  - **20 are a real user-facing failure.** One Android user on 1.1.1 opens
+    their following and followers lists from 1 November onward and gets a
+    denial each time. The rule from [#1863], which refuses a private profile
+    to every other account, deployed from CI on 1 November. The 1.1.1 client
+    still reads every listed profile in one `try`, so a single private account
+    in the list empties the whole list. 1.1.2 tolerates the refusal, so the
+    failure lasts as long as 1.1.1 stays installed. The rule shipped ahead of
+    the client that can handle it.
 
 ### October 2026: reach without measurable conversion
 
@@ -332,8 +357,11 @@ Before public launch, the release should be stable enough to learn from real use
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
+[#1466]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1466
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
 [#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
 [#1623]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1623
 [#1624]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1624
 [#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
+[#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
+[#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902

@@ -1,7 +1,7 @@
 // Builds BiteTribe for an iOS simulator against a chosen Firebase backend and
 // launches it with a known App Check debug token (issue 1221).
 //
-//   npm run ios:simulator -- --backend=qa [--udid=<UDID>] [--enforced] [--skip-web]
+//   npm run ios:simulator -- --backend=qa [--udid=<UDID>] [--skip-web]
 //
 // The web bundle is always `--configuration=production`, so the simulator runs
 // the same bundle TestFlight ships (issue 1219). Only the backend varies: the
@@ -34,7 +34,6 @@ const { values } = parseArgs({
   options: {
     backend: { type: 'string' },
     udid: { type: 'string' },
-    enforced: { type: 'boolean', default: false },
     'skip-web': { type: 'boolean', default: false },
   },
 });
@@ -59,10 +58,9 @@ if (backend === 'production' && debugToken) {
 }
 
 if (!values['skip-web']) {
+  // QA's qa.json turns the client-side App Check gate on, as native-release.yml
+  // does for production native builds; production capture runs keep .env's.
   const buildEnv = { ...process.env, ...backendEnv(backend) };
-  if (values.enforced) {
-    buildEnv.NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED = 'true';
-  }
   run(
     'npx',
     [

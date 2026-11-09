@@ -19,8 +19,8 @@ production web bundle with the backend's values, runs the UTF-8-safe sync, then
 `xcodebuild` with `BITETRIBE_FIREBASE_BACKEND`. It checks that the built app
 carries the expected `PROJECT_ID`, then installs and launches with the debug
 token. Use `--backend=production` for capture work, `--udid=<UDID>` when more
-than one simulator is booted, `--enforced` to turn the client-side App Check
-gate on, and `--skip-web` to reuse the last sync.
+than one simulator is booted, and `--skip-web` to reuse the last sync. A QA
+build has the client-side App Check gate on, as production native builds do.
 
 A simulator is not a substitute for a device. The release-candidate charter is
 explicit that simulators do not count for permissions, notifications, camera or

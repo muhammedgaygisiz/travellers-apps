@@ -23,7 +23,11 @@ const TAG_PATTERN = /^build-(.+)-(\d+)$/;
 const workspaceRoot = process.cwd();
 const { version } = require(resolve(workspaceRoot, 'package.json'));
 const buildNumber = readBuildNumber(workspaceRoot);
-const commit = process.env.GITHUB_SHA ?? git('rev-parse', 'HEAD');
+// HEAD, not GITHUB_SHA. In a `workflow_call` or `workflow_dispatch` run
+// GITHUB_SHA is the commit the dispatch started from, while the job checked out
+// the release tag. Build 100 recorded 6edb512 although it was built from
+// 2613c4e, the tagged tree. HEAD is what was actually checked out and built.
+const commit = gitOrNull('rev-parse', 'HEAD') ?? process.env.GITHUB_SHA;
 const shortCommit = commit.slice(0, 7);
 // In a `workflow_call` run GITHUB_REF names the workflow that did the calling,
 // not the commit being built, so an explicit override wins where one is set.
@@ -31,7 +35,9 @@ const shortCommit = commit.slice(0, 7);
 // this tests truthiness rather than nullishness.
 const releaseRef = process.env.BITETRIBE_RELEASE_REF || null;
 const ref =
-  releaseRef ?? process.env.GITHUB_REF ?? git('rev-parse', '--abbrev-ref', 'HEAD');
+  releaseRef ??
+  process.env.GITHUB_REF ??
+  git('rev-parse', '--abbrev-ref', 'HEAD');
 const refName = releaseRef ?? process.env.GITHUB_REF_NAME ?? ref;
 
 const provenance = {
@@ -134,4 +140,12 @@ function warn(message) {
 
 function git(...args) {
   return execFileSync('git', args, { encoding: 'utf8' }).trim();
+}
+
+function gitOrNull(...args) {
+  try {
+    return git(...args) || null;
+  } catch {
+    return null;
+  }
 }

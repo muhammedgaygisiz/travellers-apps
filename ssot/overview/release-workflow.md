@@ -21,10 +21,11 @@ only when someone decides the release is a `1.0.2` or a `1.1.0`. That decision
 is a deliberate edit to `package.json`, not something the release performs.
 
 The marketing version is bumped in `package.json` and nowhere else. The release
-propagates it into the Android and iOS projects and then refuses to continue if
-the three disagree, so `versionName` and `MARKETING_VERSION` are outputs rather
-than places to edit. On the usual release the propagation is a no-op, because
-the version it writes is the one already there. See
+propagates it into the Android and iOS projects, as a commit of its own on the
+release branch, and then refuses to continue if the three disagree, so
+`versionName` and `MARKETING_VERSION` are outputs rather than places to edit. On
+the usual release the propagation is a no-op and no commit is made, because the
+version it would write is the one already there. See
 [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md).
 
 Development happens against the next build number.
@@ -88,12 +89,14 @@ git checkout -b bump-version-<x>
 npm run increment-build-number-and-generate-changelog
 ```
 
-The helper generates the changelog section for build `x`, writes the
-`package.json` marketing version into both native projects, increments the
-shared build number to `x+1`, commits as
-`chore: prepare build <version>-<x> release`, creates the annotated tag
-`build-<version>-<x>` **pointing at the commit the release branch started
-from**, verifies that the tagged tree really declares build `x`, pushes the
+The helper first writes the `package.json` marketing version into both native
+projects when they still declare an older one, committing that as
+`chore: sync the <version> marketing version into the native projects`. It then
+generates the changelog section for build `x`, increments the shared build
+number to `x+1`, commits as `chore: prepare build <version>-<x> release`,
+creates the annotated tag `build-<version>-<x>` **pointing at the commit before
+the changelog and the bump** (the sync commit when there is one, otherwise the
+commit the release branch started from), verifies that the tagged tree really declares build `x`, pushes the
 branch and the tag, publishes the GitHub release `Build <x>`, and opens the
 release pull request back to `develop`.
 
@@ -104,8 +107,12 @@ another workflow - GitHub blocks that to prevent recursion, and relying on it
 would build nothing and do it silently.
 
 - If this release changes the marketing version, bump it in `package.json`
-  before cutting. The helper writes it into both native projects and fails if
-  `package.json`, Android, and iOS do not agree afterwards.
+  on `develop` before cutting - that one-line pull request is the only edit.
+  The helper syncs both native projects into the tagged tree itself and fails if
+  `package.json`, Android, and iOS do not agree afterwards. Builds 99 and 100
+  each needed a second pull request running `npm run sync-native-version`
+  first, because the helper used to refuse instead of syncing; that is no longer
+  needed.
 - The tag is created after the commit, so a failure earlier leaves no tag
   behind, but it names the pre-release commit. If the two ever disagree the
   helper deletes the tag and refuses, rather than pushing a tag that lies about
@@ -186,7 +193,8 @@ npm run release:notes
 5. Merge the release branch.
    - The helper already opened the pull request in step 1, titled from the
      release commit.
-   - Confirm it contains only the changelog section and the build-number bump.
+   - Confirm it contains only the changelog section and the build-number bump,
+     plus the native version sync when the marketing version moved.
    - Squash and merge, then delete the branch.
    - Resume normal development on `develop`, where web and development now use
      build `x+1` while native stores still serve build `x`.
@@ -264,7 +272,12 @@ Each release should produce:
 - `package.json`, Android `versionName`, and every iOS `MARKETING_VERSION` name
   the same marketing version after the helper runs.
 - Pull request back to `develop` contains only the changelog section and the next
-  build-number bump.
+  build-number bump, plus the native version sync when the marketing version
+  moved.
+- `build-provenance.json` names the commit the tag points at. It records the
+  checked-out `HEAD` rather than `GITHUB_SHA`, which in a dispatched run is the
+  commit the dispatch started from; build 100's provenance recorded `6edb512`
+  for artifacts built from `2613c4e` before that was fixed.
 - Both store submissions are sent for review, not just uploaded.
 - GitHub release published from the pushed tag.
 

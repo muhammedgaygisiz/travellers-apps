@@ -22,25 +22,24 @@ const releaseFiles = [
 
 ensureCleanWorkingTree();
 
-// Captured before anything is written. This is the tree the release artifacts
+// `package.json` is the single source of truth for the marketing version
+// (issue #1303). Read first, because a version bump has to reach the tagged
+// tree before that tree is captured below.
+const version = readPackageVersion();
+const buildNumber = readBuildNumber(process.cwd());
+const tagName = `build-${version}-${buildNumber}`;
+
+ensureTagDoesNotExist(tagName);
+commitNativeVersionSyncIfNeeded(version);
+
+// Captured before the changelog and the build-number bump are written. This is the tree the release artifacts
 // are built from, and the tag has to point here rather than at the bump commit
 // created below - see issue #1441. Tagging the bump commit made the tag name a
 // build it did not contain: `build-1.0.1-96` pointed at a tree carrying 97, so
 // a tag-triggered CI run produced 97 artifacts under a tag named 96.
 const releaseCommit = git(['rev-parse', 'HEAD']).stdout;
 
-const buildNumber = readBuildNumber(process.cwd());
-// `package.json` is the single source of truth for the marketing version
-// (issue #1303). The native projects are written from it below, so reading them
-// here would only re-read whatever the previous release happened to leave.
-const version = readPackageVersion();
-const tagName = `build-${version}-${buildNumber}`;
-
-ensureTagDoesNotExist(tagName);
-ensureTaggedTreeCarriesVersion(version);
-
 run('npm', ['run', 'generate-changelog']);
-run('npm', ['run', 'sync-native-version']);
 run('npm', ['run', 'increment-build-number']);
 
 ensureNativeVersionMatches(version);
@@ -218,41 +217,45 @@ function ensureTagDoesNotExist(tagName) {
 }
 
 /**
- * Refuses a release whose tagged tree does not already carry the version.
+ * Writes the `package.json` marketing version into the native projects as its
+ * own commit, before the tagged tree is captured.
  *
- * `sync-native-version` runs below, and its output lands in the release commit
- * - which the tag does not point at. The tag names `releaseCommit`, the tree
- * captured before anything was written, and that is the tree the artifacts are
- * built from. So the version the artifacts carry is the one the native
- * projects declare **now**, not the one the sync is about to write.
+ * The tag names `releaseCommit`, the tree captured before the changelog and the
+ * build-number bump, and that is the tree the artifacts are built from. So the
+ * version the artifacts carry is the one the native projects declare in that
+ * tree. Syncing in the bump commit instead - which the tag does not point at -
+ * would build the old version: build 1.0.2-98 was nearly tagged at a tree still
+ * declaring 1.0.1, which App Store review refuses as error 90062 25 minutes in
+ * while Android publishes the wrong version without complaint.
  *
- * While the marketing version stands still the two are the same string and the
- * difference cannot be seen. On a bump it is the whole difference: build
- * 1.0.2-98 was tagged on 20 September 2026 at a tree still declaring 1.0.1,
- * and its artifacts would have been 1.0.1 (98) - the version App Store review
- * had already approved and refuses, which `altool` reports 25 minutes later as
- * error 90062 while Android publishes the wrong version without complaint.
+ * This used to refuse and ask for a separate sync pull request to `develop`,
+ * which builds 99 (#1857) and 100 (#1922) each needed. Committing the sync on
+ * the release branch puts it in the tagged tree without that round trip, and
+ * the release pull request carries it back to `develop`.
  *
- * A marketing-version bump therefore has to reach the release branch already
- * synced. See `Marketing Version` in Implementation - Release And Build
- * Workflow.
+ * While the marketing version stands still the sync writes nothing and no
+ * commit is made.
  */
-function ensureTaggedTreeCarriesVersion(version) {
-  const nativeVersion = readNativeVersion();
-
-  if (nativeVersion === version) {
+function commitNativeVersionSyncIfNeeded(version) {
+  if (readNativeVersion() === version) {
     return;
   }
 
-  throw new Error(
-    [
-      `package.json declares version ${version}, but the native projects in`,
-      `the tree this release would tag declare ${nativeVersion}, so the`,
-      `artifacts would be built as ${nativeVersion}. Run`,
-      '`npm run sync-native-version` and land that commit on the release',
-      'branch before cutting.',
-    ].join(' '),
-  );
+  run('npm', ['run', 'sync-native-version']);
+  run('git', ['add', ANDROID_BUILD_GRADLE_PATH, IOS_PROJECT_PATH]);
+  run('git', [
+    'commit',
+    '-m',
+    `chore: sync the ${version} marketing version into the native projects`,
+  ]);
+
+  const synced = readNativeVersion();
+
+  if (synced !== version) {
+    throw new Error(
+      `package.json declares ${version}, but the native projects still declare ${synced} after the sync.`,
+    );
+  }
 }
 
 /**

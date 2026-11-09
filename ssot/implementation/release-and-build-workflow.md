@@ -52,25 +52,30 @@ workspace sync-generator command and does not sync Capacitor.
 2. Reads the version from `package.json` and the build number from the native
    projects, and refuses if the resulting tag already exists locally or on
    `origin`. It also refuses a `package.json` still holding `0.0.0`.
-3. Runs `generate-changelog`, then `sync-native-version`, then
-   `increment-build-number`.
-4. Verifies afterwards that `package.json`, Android `versionName`, and every
-   iOS `MARKETING_VERSION` name the same version, and fails the release if they
-   do not.
-5. Stages `CHANGELOG.md` and both native version files, and commits as
+3. If the native projects declare a different marketing version, runs
+   `sync-native-version` and commits the result as
+   `chore: sync the <version> marketing version into the native projects`.
+   Otherwise it makes no commit.
+4. Captures `HEAD` as the release commit - the tree the tag will name and the
+   artifacts will be built from.
+5. Runs `generate-changelog`, then `increment-build-number`.
+6. Verifies that `package.json`, Android `versionName`, and every iOS
+   `MARKETING_VERSION` name the same version, and fails the release if they do
+   not.
+7. Stages `CHANGELOG.md` and both native version files, and commits as
    `chore: prepare build <version>-<build number> release`.
-6. Creates the annotated tag `build-<version>-<build number>` using the build
-   number captured **before** the increment.
-7. Pushes the branch and the tag.
-8. Publishes the GitHub release `Build <build number>` from that tag, using the
-   full changelog range as the body. `BITETRIBE_RELEASE_DRAFT=1` creates it as a
-   draft instead. A failure here is reported explicitly with a retry command,
-   and does not undo the push that already happened.
+8. Creates the annotated tag `build-<version>-<build number>` on the release
+   commit captured in step 4, and verifies that the tagged tree declares that
+   build number.
+9. Pushes the branch and the tag.
+10. Publishes the GitHub release `Build <build number>` from that tag, using the
+    full changelog range as the body. `BITETRIBE_RELEASE_DRAFT=1` creates it as a
+    draft instead. A failure here is reported explicitly with a retry command,
+    and does not undo the push that already happened.
 
 Because it pushes, no separate `git push` or `git push --tags` is needed after
-it. The tag is created on the bump commit, which already carries the next build
-number, so the tag names the released build but does not point at the released
-source tree.
+it. The tag points at the released source tree, not at the bump commit: see
+[The Tag Names What It Contains](#the-tag-names-what-it-contains).
 
 ## Native Release Jobs In CI
 
@@ -182,6 +187,12 @@ bite-tribe-1.0.1-96-297f8be-dsyms.zip
 The provenance file travels inside every uploaded artifact and adds the full
 commit, the ref, the build timestamp, and the workflow run URL. Neither store
 exposes the source commit, so this is where the answer lives.
+
+The commit is the checked-out `HEAD`, not `GITHUB_SHA`. On a tag push the two
+are the same, but in a run dispatched through `release.yml` `GITHUB_SHA` is the
+`develop` commit the dispatch started from, while the job checked out the tag.
+Build 100 recorded `6edb512` and named its artifacts after it, although the
+tagged tree it was built from was `2613c4e`.
 
 The iOS dSYMs are retained for the same reason. A crash reported against a CI
 artifact can then be symbolicated from CI output rather than from whichever
@@ -480,17 +491,17 @@ Rules:
   Android has no equivalent rule, which is why that half published and the
   draft then had to be discarded to keep the two platforms on one build.
 
-- **A bump has to reach the release branch already synced, and the helper now
-  refuses otherwise.** `increment-build-number-and-generate-changelog` captures
-  the commit it will tag before it runs `sync-native-version`, because the tag
-  has to name the tree the artifacts are built from ([#1441]). The synced
-  version therefore lands only in the `chore: prepare ...` commit, which the tag
-  does not point at, so a bump that has not already been synced produces
-  artifacts carrying the old version. `ensureTaggedTreeCarriesVersion` reads the
-  native projects before anything is written and refuses with the remedy, so the
-  release fails in seconds at `prepare` rather than 25 minutes later at
-  `altool`. Run `npm run sync-native-version` in the same pull request that
-  edits `package.json`.
+- **The sync has to reach the tagged tree, so the helper commits it before
+  capturing that tree.** The tag names the tree the artifacts are built from
+  ([#1441]), which is captured before the changelog and the build-number bump.
+  A sync that landed only in the `chore: prepare ...` commit would therefore
+  build the old version. `commitNativeVersionSyncIfNeeded` runs
+  `sync-native-version` first and commits it on the release branch, so the tag
+  points at a tree that already carries the new version and the release pull
+  request carries the sync back to `develop`. Until build 101 the helper refused
+  instead and asked for a separate sync pull request to `develop`, which builds
+  99 ([#1857]) and 100 ([#1922]) each needed. Bumping `package.json` on `develop` is
+  now the whole edit.
 
 - Do not edit `versionName` or `MARKETING_VERSION` by hand. They are release
   outputs, in the same sense the build number already was.
@@ -570,3 +581,5 @@ reason it is safe.
 [#1303]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1303
 [#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
 [#1441]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1441
+[#1857]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1857
+[#1922]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1922

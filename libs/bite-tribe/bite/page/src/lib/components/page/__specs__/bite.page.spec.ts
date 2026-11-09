@@ -378,6 +378,7 @@ describe('BitePage', () => {
         name: 'Test Burger',
         place: 'Test Place',
         tags: ['fish healthy'],
+        taggedUserIds: [],
         price: '9.99',
         rating: 0,
         currency: 'EUR',
@@ -460,6 +461,72 @@ describe('BitePage', () => {
       );
     });
 
+    // Issue #1917: the tagged users travel in the form value, which is what
+    // reaches Firestore - a field outside the form group never would.
+    describe('tagged users', () => {
+      const fillValidBite = (): void => {
+        component.biteFormGroup.patchValue({
+          image: 'data:image/jpeg;base64,test',
+          name: 'Test Burger',
+          place: 'Test Place',
+          price: '9.99',
+          currency: 'EUR',
+          position: { latitude: 0, longitude: 0 },
+        });
+      };
+
+      it('emits the tagged users picked on the form', () => {
+        fillValidBite();
+        component.setTaggedUserIds(['friend-1', 'friend-2']);
+
+        const emitSpy = jest.spyOn(component.submitBite, 'emit');
+        component.saveBite();
+
+        expect(emitSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ taggedUserIds: ['friend-1', 'friend-2'] }),
+        );
+      });
+
+      it('loads the tagged users of an edited Bite and drops a removed one', () => {
+        componentRef.setInput('bite', {
+          id: 'bite-1',
+          name: 'Test Burger',
+          place: 'Test Place',
+          image: 'data:image/jpeg;base64,test',
+          price: 9.99,
+          currency: 'EUR',
+          position: { latitude: 0, longitude: 0 },
+          taggedUserIds: ['friend-1', 'friend-2'],
+        });
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(component.biteFormGroup.controls['taggedUserIds'].value).toEqual(
+          ['friend-1', 'friend-2'],
+        );
+
+        component.setTaggedUserIds(['friend-2']);
+
+        const emitSpy = jest.spyOn(component.submitBite, 'emit');
+        component.saveBite();
+
+        expect(emitSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ taggedUserIds: ['friend-2'] }),
+        );
+      });
+
+      it('refuses to submit more than ten tagged users', () => {
+        fillValidBite();
+        component.setTaggedUserIds(
+          Array.from({ length: 11 }, (_, index) => `friend-${index}`),
+        );
+
+        const emitSpy = jest.spyOn(component.submitBite, 'emit');
+        component.saveBite();
+
+        expect(emitSpy).not.toHaveBeenCalled();
+      });
+    });
+
     it('should not emit form value on saveBite when invalid', () => {
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
       component.saveBite();
@@ -481,6 +548,7 @@ describe('BitePage', () => {
         name: 'Test Burger',
         place: 'Test Place',
         tags: ['fish healthy'],
+        taggedUserIds: [],
         price: '9.99',
         rating: 0,
         currency: 'EUR',
@@ -513,6 +581,7 @@ describe('BitePage', () => {
       name: 'Test Burger',
       place: 'Test Place',
       tags: ['fish', 'healthy'],
+      taggedUserIds: [],
       price: '9.99',
       rating: 4,
       currency: 'CHF',
@@ -688,6 +757,7 @@ describe('BitePage', () => {
         restaurantId: '',
         description: '',
         tags: ['test', 'food'],
+        taggedUserIds: [],
         position: { latitude: 42, longitude: 24 },
         // A Bite stored before the source was recorded carries none.
         positionSource: null,

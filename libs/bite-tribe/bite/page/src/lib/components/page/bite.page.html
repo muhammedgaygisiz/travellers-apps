@@ -79,6 +79,14 @@
         (tagChanges)="setTags($event)"
       />
 
+      <bt-ate-with-picker
+        class="ion-padding-top"
+        [candidates]="taggableUsers()"
+        [knownUsers]="taggedUsers()"
+        [selectedIds]="biteFormGroup.controls['taggedUserIds'].value || []"
+        (selectedIdsChange)="setTaggedUserIds($event)"
+      />
+
       <div class="ion-padding-top">
         <ion-label class="ion-display-block map-label">
           {{ 'location-label' | transloco }}

@@ -66,7 +66,10 @@
           "nx run bite-tribe:serve --configuration=development --host=0.0.0.0",
           "nx run bite-tribe-ios:run --configuration=ios-dev"
         ],
-        "parallel": true
+        "parallel": true,
+        "env": {
+          "BITETRIBE_APP_ICON": "AppIcon-Dev"
+        }
       }
     }
   }

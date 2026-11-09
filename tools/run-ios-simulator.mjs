@@ -90,6 +90,9 @@ run('xcodebuild', [
   '-derivedDataPath',
   DERIVED_DATA,
   `BITETRIBE_FIREBASE_BACKEND=${backend}`,
+  // The home-screen icon names the stage too: AppIcon-QA for QA, the
+  // production icon otherwise. Only the Debug configuration honours it.
+  `BITETRIBE_APP_ICON=${backend === 'qa' ? 'AppIcon-QA' : 'AppIcon'}`,
   'build',
 ]);
 

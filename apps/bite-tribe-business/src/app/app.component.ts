@@ -7,7 +7,11 @@ import {
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { NetworkStatusService } from 'common/networkstatus';
-import { AppCheckGateComponent, AppCheckReadinessService } from 'ta-firestore';
+import {
+  AppCheckGateComponent,
+  AppCheckReadinessService,
+  StageRibbonComponent,
+} from 'ta-firestore';
 import { addNecessaryIcons } from 'bite-tribe-business/shell';
 
 @Component({
@@ -19,10 +23,16 @@ import { addNecessaryIcons } from 'bite-tribe-business/shell';
       } @else {
         <ion-router-outlet />
       }
+      <bite-stage-ribbon />
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonApp, IonRouterOutlet, AppCheckGateComponent],
+  imports: [
+    IonApp,
+    IonRouterOutlet,
+    AppCheckGateComponent,
+    StageRibbonComponent,
+  ],
 })
 export class AppComponent implements OnDestroy {
   title = 'bite-tribe-business';

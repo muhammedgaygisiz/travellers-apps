@@ -599,6 +599,43 @@ There is deliberately no simulator-specific Angular configuration. Issue
 1219 lived only in the production bundle, so a separate bundle would rebuild
 that blind spot.
 
+### Telling The Stages Apart
+
+A dev or QA build says so in three places, and production shows none of them.
+**Dev** means the local emulators. **QA** means `bite-tribe-qa`.
+
+| Surface             | Dev                                          | QA                            | Mechanism                                                                   |
+| ------------------- | -------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
+| UI                  | purple `DEV` corner ribbon                   | orange `QA` corner ribbon     | `StageRibbonComponent` in `ta-firestore`, in the root of all three web apps |
+| App icon            | iOS `AppIcon-Dev`; every Android debug build | iOS `AppIcon-QA`              | asset sets made by `tools/generate-stage-icons.mjs`                         |
+| Mail from functions | `[DEV]` subject, purple banner               | `[QA]` subject, orange banner | `markEmailForStage` in `createRawMessage`                                   |
+
+- **No new environment key.** The client's `resolveDeploymentStage` reads
+  `NX_APP_BITE_TRIBE_IS_DEV`, which production bundles strip, and the project
+  ID. The functions' version reads `FUNCTIONS_EMULATOR` and the runtime's
+  project (`GCLOUD_PROJECT`, then `FIREBASE_CONFIG`). An unknown project counts
+  as production, so a production mail is never branded as a test.
+- **The ribbon ignores pointer events** and changes no layout. Storybook has no
+  stage, so Loki never captures it.
+- **The iOS icon is a Debug-only setting.** Debug's
+  `ASSETCATALOG_COMPILER_APPICON_NAME` is `$(BITETRIBE_APP_ICON:default=AppIcon)`,
+  and Release hard-codes `AppIcon`, so an archive carries the production icon
+  even when the variable is set. `npm run ios:simulator` passes it per backend,
+  and `nx run bite-tribe-ios:dev` sets `AppIcon-Dev` through the environment,
+  which xcodebuild reads as a build setting.
+- **Android has no QA build**, so `app/src/debug/res` marks every debug build
+  `DEV`. Release uses `app/src/main/res`.
+- **Firebase Auth's own mails** (verification, password reset) come from the QA
+  project's templates. The Admin API refuses to edit them on a new project
+  (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`). Their sender name and `[QA]` subject
+  are set in the console, under Authentication, then Templates.
+
+Regenerate the icons whenever the production icon changes:
+
+```bash
+node tools/generate-stage-icons.mjs
+```
+
 ### Native API Key
 
 In a packaged native build the WebView origin is `capacitor://localhost`, and
@@ -653,7 +690,10 @@ Recorded on 9 November 2026, when the project was set up:
 
 ```text
 apps/bite-tribe-firebase/backends/qa.json
+apps/bite-tribe-firebase/functions/src/functions/shared/utils/deployment-stage.ts
 apps/bite-tribe-ios/ios/firebase/select-firebase-backend.sh
+libs/common/ta-firestore/src/lib/deployment-stage
+tools/generate-stage-icons.mjs
 tools/run-ios-simulator.mjs
 apps/bite-tribe-firebase/firebase.json
 apps/bite-tribe-firebase/firestore.rules

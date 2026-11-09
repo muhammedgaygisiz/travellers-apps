@@ -1,0 +1,12 @@
+{
+  "$comment": "Public web config of the bite-tribe-qa Firebase project (issue 1221). tools/run-ios-simulator.mjs builds the production bundle from these values alone, with Nx .env loading switched off, so nothing from apps/bite-tribe/.env reaches a QA build. Secrets never go here: the simulator debug token lives in the gitignored apps/bite-tribe-ios/.env.",
+  "NX_APP_BITE_TRIBE_API_KEY": "AIzaSyBa_ByedD8r7sj15rVBDlFF2ARFijPK8KY",
+  "NX_APP_BITE_TRIBE_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
+  "NX_APP_BITE_TRIBE_PROJECT_ID": "bite-tribe-qa",
+  "NX_APP_BITE_TRIBE_STORAGE_BUCKET": "bite-tribe-qa.firebasestorage.app",
+  "NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID": "140281642700",
+  "NX_APP_BITE_TRIBE_MEASSUREMENT_ID": "G-FERDKVC4SY",
+  "NX_APP_BITE_TRIBE_APP_ID": "1:140281642700:web:44a53f2f6bccdadafa4c69",
+  "NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY": "",
+  "NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED": ""
+}

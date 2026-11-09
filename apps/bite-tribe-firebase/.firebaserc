@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "bite-tribe"
+    "default": "bite-tribe",
+    "qa": "bite-tribe-qa"
   }
 }

@@ -36,6 +36,11 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    sourceSets {
+        // QA attests like debug: the debug App Check provider, whose secret
+        // is registered on bite-tribe-qa. Shared rather than copied.
+        qa.java.srcDirs += 'src/debug/java'
+    }
     signingConfigs {
         if (hasReleaseSigning) {
             release {
@@ -47,6 +52,16 @@ android {
         }
     }
     buildTypes {
+        // A debuggable build against the bite-tribe-qa project (issue 1221).
+        // Same application ID, so it matches the QA Firebase Android app; the
+        // QA google-services.json and the QA launcher icon live in src/qa.
+        //   ./gradlew installQa      (or npm run android:qa)
+        qa {
+            initWith debug
+            // Library modules (Capacitor and its plugins) have no qa build
+            // type; they build as debug.
+            matchingFallbacks = ['debug']
+        }
         release {
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
@@ -72,6 +87,7 @@ dependencies {
     // Debug variant only: lets a locally signed build obtain an App Check
     // token, which Play Integrity cannot issue outside a Play install.
     debugImplementation "com.google.firebase:firebase-appcheck-debug:$firebaseAppCheckPlayIntegrityVersion"
+    qaImplementation "com.google.firebase:firebase-appcheck-debug:$firebaseAppCheckPlayIntegrityVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

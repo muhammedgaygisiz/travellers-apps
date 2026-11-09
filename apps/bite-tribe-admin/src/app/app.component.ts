@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { AppCheckGateComponent, AppCheckReadinessService } from 'ta-firestore';
+import {
+  AppCheckGateComponent,
+  AppCheckReadinessService,
+  StageRibbonComponent,
+} from 'ta-firestore';
 import { addNecessaryIcons } from 'bite-tribe-admin/shell';
 
 @Component({
@@ -12,10 +16,16 @@ import { addNecessaryIcons } from 'bite-tribe-admin/shell';
       } @else {
         <ion-router-outlet />
       }
+      <bite-stage-ribbon />
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonApp, IonRouterOutlet, AppCheckGateComponent],
+  imports: [
+    IonApp,
+    IonRouterOutlet,
+    AppCheckGateComponent,
+    StageRibbonComponent,
+  ],
 })
 export class AppComponent {
   title = 'bite-tribe-admin';

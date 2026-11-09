@@ -95,7 +95,12 @@ jobs:
       - name: Build the production web bundle
         run: npx nx build bite-tribe --configuration=production --skip-nx-cache
         env:
-          NX_APP_BITE_TRIBE_API_KEY: ${{ secrets.NX_APP_BITE_TRIBE_API_KEY }}
+          # The WebView origin is capacitor://localhost, which the web key's
+          # HTTP-referrer restriction cannot express, so Installations,
+          # Analytics and Remote Config got 403 on native (issue 1221). The
+          # native key is restricted by API only. Until that secret exists
+          # the web key is used, which is the old behaviour.
+          NX_APP_BITE_TRIBE_API_KEY: ${{ secrets.NX_APP_BITE_TRIBE_NATIVE_API_KEY || secrets.NX_APP_BITE_TRIBE_API_KEY }}
           NX_APP_BITE_TRIBE_AUTH_DOMAIN: ${{ secrets.NX_APP_BITE_TRIBE_AUTH_DOMAIN }}
           NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
           NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}

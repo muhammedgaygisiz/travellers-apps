@@ -567,6 +567,14 @@ physical device.
 
 **The emulator does not write roles back.** `firebase-serve` runs without `--export-on-exit`, so a claim granted against the running emulator through the Identity Toolkit REST API lasts only for that session. A durable fixture has to be added to the export file itself.
 
+## Environments
+
+BiteTribe runs against three backends: the local emulators (dev), the
+`bite-tribe-qa` project (QA) and `bite-tribe` (production). How each build
+picks its backend, how a dev or QA build marks itself, and how QA is
+provisioned and deployed is in
+[Architecture - Environments](environments.md).
+
 ## Code Anchors
 
 ```text

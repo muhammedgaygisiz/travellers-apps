@@ -11,7 +11,11 @@ import {
   NavController,
   Platform,
 } from '@ionic/angular/standalone';
-import { AppCheckGateComponent, AppCheckReadinessService } from 'ta-firestore';
+import {
+  AppCheckGateComponent,
+  AppCheckReadinessService,
+  StageRibbonComponent,
+} from 'ta-firestore';
 import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
@@ -31,10 +35,16 @@ import { Preferences } from '@capacitor/preferences';
       } @else {
         <ion-router-outlet />
       }
+      <bite-stage-ribbon />
     </ion-app>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonApp, IonRouterOutlet, AppCheckGateComponent],
+  imports: [
+    IonApp,
+    IonRouterOutlet,
+    AppCheckGateComponent,
+    StageRibbonComponent,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';

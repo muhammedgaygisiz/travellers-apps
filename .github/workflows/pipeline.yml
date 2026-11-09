@@ -1187,6 +1187,82 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/functions-deploy-key.json"
 
+  # Keeps the QA project (`bite-tribe-qa`, issue 1221) on the same backend as
+  # production: the same rules, indexes and functions, deployed from the same
+  # commit. QA is where App Check enforcement is rehearsed, which only means
+  # something if its backend is the one production runs.
+  #
+  # One job rather than a mirror of the three production ones. QA holds
+  # disposable data, so an index that is still building costs a failed QA call
+  # rather than a production outage. The same gates still apply: rules wait for
+  # the emulator suite in `firestore-rules`, functions wait for `build`.
+  #
+  # Independent of the production deploys in both directions. A QA failure
+  # does not hold production back, and a production failure does not hide one
+  # here.
+  #
+  # Its credential is the QA project's own deploy account, provisioned with
+  # `FIREBASE_PROJECT_ID=bite-tribe-qa bash tools/set-functions-deploy-service-account.sh`.
+  # It has no rights on `bite-tribe`.
+  deploy-qa-backend:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - firestore-rules
+      - lint
+      - stylelint
+      - tests
+
+    concurrency:
+      group: deploy-backend-bite-tribe-qa
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Install Firebase Functions dependencies
+        working-directory: apps/bite-tribe-firebase/functions
+        run: npm ci
+
+      - name: Write the deploy credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA" ]; then
+            echo '::error::FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA is not set. Run FIREBASE_PROJECT_ID=bite-tribe-qa bash tools/set-functions-deploy-service-account.sh.'
+            exit 1
+          fi
+
+          umask 077
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA" > "$RUNNER_TEMP/qa-deploy-key.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/qa-deploy-key.json" >> "$GITHUB_ENV"
+
+      - name: Deploy rules, indexes and functions to QA
+        working-directory: apps/bite-tribe-firebase
+        run: npx --no-install firebase deploy --only firestore,storage,functions --project bite-tribe-qa --non-interactive
+
+      - name: Wait for every declared QA index to reach READY
+        run: npm run firestore:assert-indexes-ready
+        env:
+          FIREBASE_PROJECT_ID: bite-tribe-qa
+
+      - name: Record the deployed commit
+        run: |
+          {
+            echo '### QA backend deployed'
+            echo
+            echo "Commit \`${GITHUB_SHA}\` to \`bite-tribe-qa\`: Firestore rules and indexes, Storage rules, Functions."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the deploy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/qa-deploy-key.json"
+
   # BiteTribe Storybook
 
   # Gated on `loki` as well as `tests`, so the published Storybook is always one

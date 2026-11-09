@@ -5,6 +5,7 @@ import {
   SupportedLanguage,
 } from '../shared/i18n/supported-languages';
 import { createTranslate } from '../shared/i18n/translate';
+import { markEmailForStage } from '../shared/utils/deployment-stage';
 
 const GOOGLE_WORKSPACE_PRIVATE_KEY_ENV = 'GOOGLE_WORKSPACE_PRIVATE_KEY';
 const GOOGLE_WORKSPACE_CLIENT_EMAIL_ENV = 'GOOGLE_WORKSPACE_CLIENT_EMAIL';
@@ -174,12 +175,10 @@ export interface RenderedEmail {
  *
  * Exported for tests: the rendered message is the contract, not the send.
  */
-export const createRawMessage = ({
-  to,
-  subject,
-  html,
-  headers = {},
-}: RenderedEmail): string => {
+export const createRawMessage = (email: RenderedEmail): string => {
+  // A QA or emulator mail carries its stage in the subject and above the body,
+  // so it is never mistaken for a production one. Production is untouched.
+  const { to, subject, html, headers = {} } = markEmailForStage(email);
   // Never the delegated user: which Workspace mailbox performs the Gmail API
   // delegation is infrastructure, and building `From` from it published a
   // personal address to every user who requested a resend (issue \#1265).

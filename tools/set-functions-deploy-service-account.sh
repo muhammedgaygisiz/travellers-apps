@@ -36,7 +36,16 @@ set -euo pipefail
 PROJECT="${FIREBASE_PROJECT_ID:-bite-tribe}"
 ACCOUNT_ID=functions-deploy
 ACCOUNT="${ACCOUNT_ID}@${PROJECT}.iam.gserviceaccount.com"
-SECRET=FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS
+# Production keeps the secret name it has always had. The QA project (issue
+# 1221) gets its own, so a QA credential can never be the one a production
+# deploy job reads:
+#
+#   FIREBASE_PROJECT_ID=bite-tribe-qa bash tools/set-functions-deploy-service-account.sh
+case "$PROJECT" in
+  bite-tribe) SECRET=FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_FUNCTIONS ;;
+  bite-tribe-qa) SECRET=FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA ;;
+  *) echo "Error: no deploy secret is defined for project '$PROJECT'." >&2; exit 1 ;;
+esac
 
 # The key never outlives the script. The trap covers a failure between creating
 # the key and handing it to `gh`; the happy path removes it inline. It is set
@@ -173,7 +182,7 @@ set_secret() {
     --project "$PROJECT" \
     > /dev/null
 
-  gh secret set "$SECRET" < "$KEY_FILE" > /dev/null
+  gh secret set "$SECRET" --repo muhammedgaygisiz/travellers-apps < "$KEY_FILE" > /dev/null
   rm -f "$KEY_FILE"
 
   echo "    set $SECRET"

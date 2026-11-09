@@ -584,7 +584,7 @@ exists. Nothing else varies:
 | ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Web bundle   | `--configuration=production`, values from `apps/bite-tribe/.env` | the same configuration, values only from `apps/bite-tribe-firebase/backends/qa.json`                    |
 | iOS plist    | `App/App/GoogleService-Info.plist`                               | `ios/firebase/qa/GoogleService-Info.plist`, chosen by the `BITETRIBE_FIREBASE_BACKEND=qa` build setting |
-| Android json | `app/google-services.json`                                       | `android/firebase/qa/google-services.json`, copied to the gitignored `app/src/debug/` for a debug build |
+| Android json | `app/google-services.json`                                       | `app/src/qa/google-services.json`, used by the `qa` build type (`npm run android:qa`)                   |
 
 The **Select Firebase Backend** build phase in the App target copies the right
 plist into the bundle on every build, the production one included. That way a
@@ -604,11 +604,11 @@ that blind spot.
 A dev or QA build says so in three places, and production shows none of them.
 **Dev** means the local emulators. **QA** means `bite-tribe-qa`.
 
-| Surface             | Dev                                          | QA                            | Mechanism                                                                   |
-| ------------------- | -------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
-| UI                  | purple `DEV` corner ribbon                   | orange `QA` corner ribbon     | `StageRibbonComponent` in `ta-firestore`, in the root of all three web apps |
-| App icon            | iOS `AppIcon-Dev`; every Android debug build | iOS `AppIcon-QA`              | asset sets made by `tools/generate-stage-icons.mjs`                         |
-| Mail from functions | `[DEV]` subject, purple banner               | `[QA]` subject, orange banner | `markEmailForStage` in `createRawMessage`                                   |
+| Surface             | Dev                                           | QA                                        | Mechanism                                                                   |
+| ------------------- | --------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
+| UI                  | purple `DEV` corner ribbon                    | orange `QA` corner ribbon                 | `StageRibbonComponent` in `ta-firestore`, in the root of all three web apps |
+| App icon            | iOS `AppIcon-Dev`; Android `debug` build type | iOS `AppIcon-QA`; Android `qa` build type | asset sets made by `tools/generate-stage-icons.mjs`                         |
+| Mail from functions | `[DEV]` subject, purple banner                | `[QA]` subject, orange banner             | `markEmailForStage` in `createRawMessage`                                   |
 
 - **No new environment key.** The client's `resolveDeploymentStage` reads
   `NX_APP_BITE_TRIBE_IS_DEV`, which production bundles strip, and the project
@@ -623,8 +623,14 @@ A dev or QA build says so in three places, and production shows none of them.
   even when the variable is set. `npm run ios:simulator` passes it per backend,
   and `nx run bite-tribe-ios:dev` sets `AppIcon-Dev` through the environment,
   which xcodebuild reads as a build setting.
-- **Android has no QA build**, so `app/src/debug/res` marks every debug build
-  `DEV`. Release uses `app/src/main/res`.
+- **Android picks the icon by build type.** `debug` takes `app/src/debug/res`
+  (DEV) and `qa` takes `app/src/qa/res` (QA). Release uses `app/src/main/res`.
+  The `qa` build type is `initWith debug` with the same application ID, so it
+  matches the QA Firebase Android app. It shares the debug App Check provider
+  through `qa.java.srcDirs += 'src/debug/java'` and `qaImplementation` of
+  `firebase-appcheck-debug`, and its library modules fall back to `debug`.
+  Register the debug secret it logs on first launch on the `bite-tribe-qa`
+  Android app, never on production.
 - **Firebase Auth's own mails** (registration verification, password reset)
   come from the QA project's templates, and those cannot be branded: the Admin
   API answers `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, and the console says

@@ -9,9 +9,9 @@
 // configuration can select them (BITETRIBE_APP_ICON); Release hard-codes
 // AppIcon, so an archive always carries the production icon.
 //
-// Android: a DEV icon under app/src/debug/res, which the debug variant uses in
-// place of app/src/main/res. Android has no QA-specific build, so every debug
-// build is marked DEV and release keeps the production icon.
+// Android: a DEV icon under app/src/debug/res and a QA icon under
+// app/src/qa/res, which the debug and qa build types use in place of
+// app/src/main/res. Release keeps the production icon.
 import { mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import sharp from 'sharp';
@@ -85,24 +85,28 @@ for (const [key, stage] of Object.entries(STAGES)) {
   console.log(`ios ${name}`);
 }
 
-// Android: every launcher bitmap of every density, DEV only.
+// Android: every launcher bitmap of every density, into the source set of the
+// build type that names the stage (debug for DEV, qa for QA).
+const ANDROID_SOURCE_SET = { dev: 'debug', qa: 'qa' };
 const mipmaps = readdirSync(join(ANDROID_RES, 'main/res')).filter(
   (dir) => dir.startsWith('mipmap-') && !dir.includes('anydpi'),
 );
-for (const dir of mipmaps) {
-  for (const file of readdirSync(join(ANDROID_RES, 'main/res', dir))) {
-    if (!file.startsWith('ic_launcher') || file.includes('background')) {
-      continue;
+for (const [key, stage] of Object.entries(STAGES)) {
+  for (const dir of mipmaps) {
+    for (const file of readdirSync(join(ANDROID_RES, 'main/res', dir))) {
+      if (!file.startsWith('ic_launcher') || file.includes('background')) {
+        continue;
+      }
+      await stamp(
+        join(ANDROID_RES, 'main/res', dir, file),
+        join(ANDROID_RES, ANDROID_SOURCE_SET[key], 'res', dir, file),
+        stage,
+        file.includes('foreground')
+          ? { top: 0.6, height: 0.14 }
+          : { top: 0.64, height: 0.18 },
+        file.includes('foreground') ? 'over' : 'atop',
+      );
     }
-    await stamp(
-      join(ANDROID_RES, 'main/res', dir, file),
-      join(ANDROID_RES, 'debug/res', dir, file),
-      STAGES.dev,
-      file.includes('foreground')
-        ? { top: 0.6, height: 0.14 }
-        : { top: 0.64, height: 0.18 },
-      file.includes('foreground') ? 'over' : 'atop',
-    );
   }
-  console.log(`android ${dir}`);
+  console.log(`android ${ANDROID_SOURCE_SET[key]} ${stage.label}`);
 }

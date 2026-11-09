@@ -17,6 +17,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import { backendEnv } from './firebase-backend-env.mjs';
 
 const BACKENDS = ['qa', 'production'];
 const BUNDLE_ID = 'com.bitetribe.app';
@@ -132,21 +133,6 @@ console.log(
       : '. No debug token configured: the app prints a per-install one ' +
         '(see Implementation - iOS Simulator Testing).'),
 );
-
-function backendEnv(name) {
-  if (name === 'production') {
-    return {};
-  }
-  const file = resolve(`apps/bite-tribe-firebase/backends/${name}.json`);
-  const entries = Object.entries(JSON.parse(readFileSync(file, 'utf8')));
-  return {
-    ...Object.fromEntries(entries.filter(([key]) => key.startsWith('NX_'))),
-    // Without this Nx still merges apps/bite-tribe/.env underneath, and
-    // dotenv-expand treats an empty shell value as unset, so a key this file
-    // blanks (the reCAPTCHA site key) came back with its production value.
-    NX_LOAD_DOT_ENV_FILES: 'false',
-  };
-}
 
 function syncedWebProject() {
   for (const file of readdirSync(PUBLIC_DIR)) {

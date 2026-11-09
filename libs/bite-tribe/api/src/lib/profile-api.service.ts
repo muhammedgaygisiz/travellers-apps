@@ -664,38 +664,37 @@ export class ProfileApiService {
     }
   }
 
+  /**
+   * A refused read resolves to an empty list and logs nothing. The empty list
+   * is the outcome every caller already handles, and a `console.error` for it
+   * buried the failures that matter in the web console (issue #1905).
+   */
   async fetchFollowers(
     userId: string,
   ): Promise<DocumentSnapshot<DocumentData>[]> {
-    return new Promise((resolve) => {
-      FirebaseFirestore.getCollection({
-        reference: `${USERS_COLLECTION}/${userId}/followers`,
-      })
-        .then((result) => {
-          resolve(result.snapshots);
-        })
-        .catch((error) => {
-          console.error('Error fetching followers:', error);
-          resolve([]);
-        });
-    });
+    return this.fetchFollowCollection(userId, 'followers');
   }
 
+  /** See {@link fetchFollowers}. */
   async fetchFollowing(
     userId: string,
   ): Promise<DocumentSnapshot<DocumentData>[]> {
-    return new Promise((resolve) => {
-      FirebaseFirestore.getCollection({
-        reference: `${USERS_COLLECTION}/${userId}/following`,
-      })
-        .then((result) => {
-          resolve(result.snapshots);
-        })
-        .catch((error) => {
-          console.error('Error fetching following:', error);
-          resolve([]);
-        });
-    });
+    return this.fetchFollowCollection(userId, 'following');
+  }
+
+  private async fetchFollowCollection(
+    userId: string,
+    collection: 'followers' | 'following',
+  ): Promise<DocumentSnapshot<DocumentData>[]> {
+    try {
+      const result = await FirebaseFirestore.getCollection({
+        reference: `${USERS_COLLECTION}/${userId}/${collection}`,
+      });
+
+      return result.snapshots;
+    } catch {
+      return [];
+    }
   }
 
   async isCurrentUserFollowing(

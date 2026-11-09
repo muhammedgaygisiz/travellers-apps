@@ -1356,23 +1356,23 @@ describe(ProfileApiService.name, () => {
     ));
 
     describe('given an error', () => {
-      it('should handle the error and return empty array', inject(
+      it('should return an empty array without logging an error', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
           const consoleErrorSpy = jest
             .spyOn(console, 'error')
             .mockImplementation();
 
+          const refusal = new Error('Failed to fetch followers');
           jest
             .spyOn(FirebaseFirestore, 'getCollection')
-            .mockRejectedValue(new Error('Failed to fetch followers'));
+            .mockRejectedValue(refusal);
 
           const result = await service.fetchFollowers('user-id-123');
 
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error fetching followers:',
-            expect.any(Error),
-          );
+          // Only the refusal itself: an earlier test's unawaited unfollow
+          // can still log into the same spy.
+          expect(consoleErrorSpy.mock.calls.flat()).not.toContain(refusal);
           expect(result).toEqual([]);
         },
       ));
@@ -1402,23 +1402,23 @@ describe(ProfileApiService.name, () => {
     ));
 
     describe('given an error', () => {
-      it('should handle the error and return empty array', inject(
+      it('should return an empty array without logging an error', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
           const consoleErrorSpy = jest
             .spyOn(console, 'error')
             .mockImplementation();
 
+          const refusal = new Error('Failed to fetch following');
           jest
             .spyOn(FirebaseFirestore, 'getCollection')
-            .mockRejectedValue(new Error('Failed to fetch following'));
+            .mockRejectedValue(refusal);
 
           const result = await service.fetchFollowing('user-id-123');
 
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            'Error fetching following:',
-            expect.any(Error),
-          );
+          // Only the refusal itself: an earlier test's unawaited unfollow
+          // can still log into the same spy.
+          expect(consoleErrorSpy.mock.calls.flat()).not.toContain(refusal);
           expect(result).toEqual([]);
         },
       ));

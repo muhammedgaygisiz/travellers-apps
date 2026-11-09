@@ -62,6 +62,20 @@ describe('PageComponent', () => {
       expect(popoverControllerCreateSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('sizes the menu to its labels through the app-menu-popover class', async () => {
+      const popoverControllerCreateSpy = jest
+        .spyOn(component.popoverController, 'create')
+        .mockReturnValue({ present: jest.fn() } as unknown as ReturnType<
+          typeof component.popoverController.create
+        >);
+
+      await component.showMenuPopover({} as MouseEvent);
+
+      expect(popoverControllerCreateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ cssClass: 'app-menu-popover' }),
+      );
+    });
+
     it('forwards the merged menu flags to the popover', async () => {
       componentRef.setInput('menuConfig', {
         settings: true,

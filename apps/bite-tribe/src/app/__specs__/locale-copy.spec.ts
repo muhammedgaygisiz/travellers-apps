@@ -212,6 +212,25 @@ describe('locale copy', () => {
   });
 
   /**
+   * `about` labels the menu entry and the heading of the app's About page;
+   * `about-me` labels the profile field about yourself. With one key for both,
+   * Japanese chose 自己紹介 ("self-introduction") and the menu entry for the
+   * app's About page read "Introduce yourself". See GitHub issue #1944.
+   */
+  describe('about the app versus about yourself', () => {
+    it.each([
+      ['ja.json', '自己紹介'],
+      ['zh.json', '简介'],
+    ])(
+      'does not label the app About page as a self-introduction in %s',
+      (file, selfIntro) => {
+        expect(readLocale(file)['about']).not.toBe(selfIntro);
+        expect(readLocale(file)['about-me']).toBe(selfIntro);
+      },
+    );
+  });
+
+  /**
    * The theme row names the setting, not one of its two options. Every other
    * locale uses the neutral word, and `Theme` was left untranslated in German
    * and French. See GitHub issue #1416.

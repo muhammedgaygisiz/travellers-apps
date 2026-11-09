@@ -34,4 +34,9 @@ module.exports = {
   },
   transformIgnorePatterns: ['/node_modules/(?!jose/)'],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  // Many specs race two Firestore transactions on one document. The loser is
+  // retried with the Admin SDK's backoff, which starts at about a second and
+  // grows, so on a slow CI runner a test can pass 5 s without a wrong result.
+  // These specs assert results, not speed. See GitHub issue #1946.
+  testTimeout: 30_000,
 };

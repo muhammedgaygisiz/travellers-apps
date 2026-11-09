@@ -1,0 +1,29 @@
+@use 'globals';
+
+:host {
+  display: block;
+
+  .selected,
+  .matches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .selected {
+    margin-bottom: 0.5rem;
+  }
+
+  ion-input {
+    @include globals.input-styles;
+  }
+
+  .hint {
+    display: block;
+    font-size: 0.875rem;
+  }
+
+  bt-chip.match {
+    cursor: pointer;
+  }
+}

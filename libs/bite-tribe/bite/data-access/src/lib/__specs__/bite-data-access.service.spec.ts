@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { BiteTribeApiService, ProfileApiService } from 'bite-tribe/api';
 import { NetworkStatusService } from 'common/networkstatus';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -66,6 +66,8 @@ describe(BiteDataAccessService.name, () => {
     clearCachedBite: jest.Mock;
   };
   let analytics: { logEvent: jest.Mock };
+  let profileApi: { fetchFollowingWithDetails: jest.Mock };
+  let blockedUserIds$: BehaviorSubject<string[]>;
   const biteIdFromUrl = signal<string | undefined>(undefined);
   let publicUser$: BehaviorSubject<Partial<PublicUser> | undefined>;
   const user = signal<{ uid: string } | undefined>(undefined);
@@ -105,6 +107,8 @@ describe(BiteDataAccessService.name, () => {
       clearCachedBite: jest.fn(),
     };
     analytics = { logEvent: jest.fn() };
+    profileApi = { fetchFollowingWithDetails: jest.fn().mockResolvedValue([]) };
+    blockedUserIds$ = new BehaviorSubject<string[]>([]);
 
     TestBed.configureTestingModule({
       providers: [
@@ -112,6 +116,7 @@ describe(BiteDataAccessService.name, () => {
         BiteDataAccessService,
         { provide: BiteTribeApiService, useValue: api },
         { provide: AnalyticsService, useValue: analytics },
+        { provide: ProfileApiService, useValue: profileApi },
         {
           provide: NetworkStatusService,
           useValue: { status: (): undefined => undefined },
@@ -128,6 +133,7 @@ describe(BiteDataAccessService.name, () => {
             nearbyRestaurants$: of(undefined),
             tagSuggestionsForEditingBite$: of(undefined),
             publicUser$,
+            blockedUserIds$,
             user,
           },
         },
@@ -140,6 +146,49 @@ describe(BiteDataAccessService.name, () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  // Issue #1917: who the "Ate with" picker may offer.
+  describe('taggableUsers', () => {
+    const profile = (
+      userId: string,
+      overrides: Partial<PublicUser> = {},
+    ): PublicUser => ({
+      userId,
+      displayName: userId,
+      email: '',
+      photoUrl: '',
+      public: true,
+      ...overrides,
+    });
+
+    it('offers followed public accounts and leaves out private and blocked ones', async () => {
+      profileApi.fetchFollowingWithDetails.mockResolvedValue([
+        profile('anna'),
+        profile('private-1', { public: false, displayName: '' }),
+        profile('blocked-1'),
+      ]);
+      blockedUserIds$.next(['blocked-1']);
+      publicUser$.next({ userId: 'leela' });
+
+      TestBed.tick();
+      await jest.advanceTimersByTimeAsync(0);
+      TestBed.tick();
+
+      expect(profileApi.fetchFollowingWithDetails).toHaveBeenCalledWith(
+        'leela',
+      );
+      expect(service.taggableUsers().map((user) => user.userId)).toEqual([
+        'anna',
+      ]);
+    });
+
+    it('offers nobody before the profile is known', () => {
+      TestBed.tick();
+
+      expect(service.taggableUsers()).toEqual([]);
+      expect(profileApi.fetchFollowingWithDetails).not.toHaveBeenCalled();
+    });
   });
 
   describe('hasOwnBites', () => {

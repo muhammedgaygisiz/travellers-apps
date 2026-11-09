@@ -1,0 +1,48 @@
+<div id="ate-with-label" class="ion-margin-bottom">
+  {{ 'ate-with-label' | transloco }}
+</div>
+
+@if (selectedUsers().length > 0) {
+  <div class="selected">
+    @for (user of selectedUsers(); track user.userId) {
+      <bt-chip
+        [label]="user.displayName || ('ate-with-unnamed-user' | transloco)"
+        [removable]="true"
+        (removeClick)="remove(user.userId)"
+      />
+    }
+  </div>
+}
+
+@if (atLimit()) {
+  <ion-note class="hint" data-testid="ate-with-limit">
+    {{ 'ate-with-limit-reached' | transloco: { max: maxTaggedUsers } }}
+  </ion-note>
+} @else if (candidates().length === 0) {
+  <ion-note class="hint" data-testid="ate-with-no-candidates">
+    {{ 'ate-with-no-candidates' | transloco }}
+  </ion-note>
+} @else {
+  <ion-input
+    aria-labelledby="ate-with-label"
+    fill="outline"
+    mode="md"
+    enterkeyhint="search"
+    [placeholder]="'ate-with-placeholder' | transloco"
+    [value]="query()"
+    (ionInput)="onQuery($event.detail.value)"
+  />
+
+  @if (matches().length > 0) {
+    <div class="matches ion-margin-top">
+      @for (user of matches(); track user.userId) {
+        <bt-chip
+          [label]="user.displayName"
+          icon="add-circle-outline"
+          class="match"
+          (chipClick)="add(user.userId)"
+        />
+      }
+    </div>
+  }
+}

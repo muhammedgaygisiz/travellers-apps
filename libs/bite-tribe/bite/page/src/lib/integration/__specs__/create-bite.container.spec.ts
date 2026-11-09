@@ -52,6 +52,8 @@ describe(CreateBiteContainer.name, () => {
             favCurrencies: signal([]),
             nearbyRestaurants: signal([]),
             tagSuggestionsForEditingBite: signal([]),
+            taggableUsers: signal([]),
+            taggedUsers: signal([]),
             googlePlaces: signal([]),
             googlePlacesLoading: signal(false),
             nearbyGooglePlaces: signal([]),

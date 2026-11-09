@@ -1,4 +1,5 @@
 import {
+  computed,
   inject,
   Injectable,
   resource,
@@ -14,9 +15,15 @@ import type {
   CreateAndUploadImageCallbackParams,
   GooglePlace,
   Geopoint,
+  PublicUser,
   UploadParams,
 } from 'model';
-import { BiteTribeApiService, type LocalImageFile } from 'bite-tribe/api';
+import {
+  BiteTribeApiService,
+  loadVisibleProfile,
+  ProfileApiService,
+  type LocalImageFile,
+} from 'bite-tribe/api';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { resourceFailed, resourceValue } from 'utils';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
@@ -50,6 +57,7 @@ export class BiteDataAccessService {
   private readonly networkStatusService = inject(NetworkStatusService);
 
   private readonly api = inject(BiteTribeApiService);
+  private readonly profileApi = inject(ProfileApiService);
   private readonly analytics = inject(AnalyticsService);
 
   biteLoader: ResourceLoader<Bite | undefined, { biteId: string | undefined }> =
@@ -95,6 +103,76 @@ export class BiteDataAccessService {
   );
 
   private readonly myProfile = toSignal(this.storeService.publicUser$);
+
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
+
+  private readonly followingResource = resource<
+    PublicUser[],
+    string | undefined
+  >({
+    params: () => this.myProfile()?.userId,
+    loader: ({ params }) =>
+      params
+        ? this.profileApi.fetchFollowingWithDetails(params)
+        : Promise.resolve([]),
+  });
+
+  private readonly following = resourceValue(
+    this.followingResource,
+    [] as PublicUser[],
+  );
+
+  /**
+   * Who the creator may tag as somebody they ate with (GitHub issue #1917):
+   * the accounts they follow, minus private profiles and accounts they
+   * blocked. An account that blocked the creator cannot be seen from here;
+   * `validateBiteTaggedUsersOnWrite` drops it after the write.
+   */
+  readonly taggableUsers = computed((): PublicUser[] => {
+    const blocked = new Set(this.blockedUserIds());
+    const me = this.myProfile()?.userId;
+
+    return this.following().filter(
+      (user) =>
+        user.public === true &&
+        !!user.displayName &&
+        user.userId !== me &&
+        !blocked.has(user.userId),
+    );
+  });
+
+  private readonly taggedUsersResource = resource<
+    PublicUser[],
+    string[] | undefined
+  >({
+    params: () => {
+      const ids = this.biteValue()?.taggedUserIds;
+
+      return ids?.length ? ids : undefined;
+    },
+    loader: async ({ params }) => {
+      const profiles = await Promise.all(
+        (params ?? []).map((userId) =>
+          loadVisibleProfile(userId).catch(() => undefined),
+        ),
+      );
+
+      return profiles.filter((user): user is PublicUser => !!user);
+    },
+  });
+
+  /**
+   * The profiles behind the edited Bite's tagged users, so a chip keeps its
+   * name after the creator unfollowed that user. Private ones come back
+   * nameless and are shown as such.
+   */
+  readonly taggedUsers = resourceValue(
+    this.taggedUsersResource,
+    [] as PublicUser[],
+  );
 
   networkStatus = this.networkStatusService.status;
 

@@ -53,6 +53,7 @@ import type {
   GooglePlace,
   NearbyRestaurant,
   PositionSource,
+  PublicUser,
 } from 'model';
 import { FloatNumberDotNotationValidator } from '../../validators/float-number-dot-notation.validator';
 import { StarRatingComponent } from 'common/ui/star-rating';
@@ -66,6 +67,10 @@ import {
 } from './utils/restaurants-near-bite';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PriceInputComponent } from './price-input/price-input.component';
+import {
+  AteWithPickerComponent,
+  MAX_TAGGED_USERS,
+} from './ate-with/ate-with-picker.component';
 import {
   POSITION_SOURCE_COLORS,
   POSITION_SOURCE_LABEL_KEYS,
@@ -91,6 +96,7 @@ import {
     MapComponent,
     StarRatingComponent,
     TagsInputComponent,
+    AteWithPickerComponent,
     IonTextarea,
     IonModal,
     PriceInputComponent,
@@ -132,6 +138,18 @@ export class BitePage {
   position = input<Geopoint>();
 
   suggestedTags = input<string[]>([]);
+
+  /**
+   * The accounts the creator may tag as somebody they ate with: followed,
+   * public, and not blocked (GitHub issue #1917).
+   */
+  taggableUsers = input<PublicUser[]>([]);
+
+  /**
+   * Profiles of users the Bite already tags, so a chip keeps its name when
+   * the creator has unfollowed that user since.
+   */
+  taggedUsers = input<PublicUser[]>([]);
 
   fallbackPosition = linkedSignal(() => this.position());
 
@@ -193,6 +211,9 @@ export class BitePage {
       ],
       currency: ['EUR', Validators.required],
       tags: [[] as string[]],
+      // A real control, because the form value is what reaches Firestore: a
+      // Bite field outside the form group is silently dropped (issue #1917).
+      taggedUserIds: [[] as string[], Validators.maxLength(MAX_TAGGED_USERS)],
       position: [this.position(), Validators.required],
       // Null rather than undefined: the whole form value is handed to Firestore,
       // which rejects an undefined field and takes the Bite down with it. That
@@ -229,6 +250,7 @@ export class BitePage {
       price,
       currency: bite.currency,
       tags: bite.tags || [],
+      taggedUserIds: bite.taggedUserIds || [],
       position: bite.position,
       positionSource: bite.positionSource ?? null,
       restaurantId: bite.restaurantId || '',
@@ -837,6 +859,10 @@ export class BitePage {
     if (tagsControl) {
       tagsControl.setValue(tags);
     }
+  }
+
+  setTaggedUserIds(taggedUserIds: string[]): void {
+    this.biteFormGroup.controls['taggedUserIds'].setValue(taggedUserIds);
   }
 
   resetImagePath(): void {

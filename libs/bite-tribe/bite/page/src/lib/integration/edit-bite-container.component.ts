@@ -19,6 +19,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [image]="service.image() || ''"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
+      [taggableUsers]="service.taggableUsers()"
+      [taggedUsers]="service.taggedUsers()"
       [googlePlaces]="service.googlePlaces()"
       [googlePlacesLoading]="service.googlePlacesLoading()"
       (submitBite)="service.submitEditedBite($event)"

@@ -1,4 +1,8 @@
-import { DocumentData, QuerySnapshot, getFirestore } from 'firebase-admin/firestore';
+import {
+  DocumentData,
+  QuerySnapshot,
+  getFirestore,
+} from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import {
   onDocumentCreated,
@@ -31,9 +35,7 @@ const getEmptyLikeCounts = (): LikeCounts => ({
   mindblown: 0,
 });
 
-const countLikes = (
-  likesSnap: QuerySnapshot<DocumentData>,
-): LikeCounts =>
+const countLikes = (likesSnap: QuerySnapshot<DocumentData>): LikeCounts =>
   likesSnap.docs.reduce<LikeCounts>((counts, likeSnap) => {
     const like = likeSnap.data() as Like;
     const likeType = like.likeType;

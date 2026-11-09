@@ -297,12 +297,31 @@ class FakeWriteBatch {
   }
 }
 
+/**
+ * Reads straight through and queues writes until the body resolves, so a body
+ * that throws leaves the store untouched - the part of a transaction the
+ * callables under test rely on. Contention and retries are not modelled.
+ */
+export interface FakeTransaction {
+  get(ref: FakeDocumentReference): Promise<DocumentSnapshot>;
+  set(
+    ref: FakeDocumentReference,
+    data: DocData,
+    options?: { merge?: boolean },
+  ): FakeTransaction;
+  update(ref: FakeDocumentReference, data: DocData): FakeTransaction;
+  delete(ref: FakeDocumentReference): FakeTransaction;
+}
+
 export interface FakeFirestore {
   collection(name: string): FakeCollectionReference;
   doc(path: string): FakeDocumentReference;
   getAll(...refs: FakeDocumentReference[]): Promise<DocumentSnapshot[]>;
   collectionGroup(name: string): FakeQuery;
   batch(): FakeWriteBatch;
+  runTransaction<T>(
+    run: (transaction: FakeTransaction) => Promise<T>,
+  ): Promise<T>;
   seed(path: string, data: DocData): void;
   read(path: string): DocData | undefined;
   exists(path: string): boolean;
@@ -325,6 +344,34 @@ export const createFakeFirestore = (): FakeFirestore => {
         return segments.length > 2 && segments[segments.length - 2] === name;
       }),
     batch: () => new FakeWriteBatch(store),
+    runTransaction: async <T>(
+      run: (transaction: FakeTransaction) => Promise<T>,
+    ): Promise<T> => {
+      const writes = new FakeWriteBatch(store);
+      const transaction: FakeTransaction = {
+        get: (ref) => ref.get(),
+        set: (ref, data, options) => {
+          writes.set(ref, data, options);
+
+          return transaction;
+        },
+        update: (ref, data) => {
+          writes.update(ref, data);
+
+          return transaction;
+        },
+        delete: (ref) => {
+          writes.delete(ref);
+
+          return transaction;
+        },
+      };
+      const result = await run(transaction);
+
+      await writes.commit();
+
+      return result;
+    },
     seed: (path, data) => store.set(path, { ...data }),
     read: (path): DocData | undefined => {
       const data = store.get(path);

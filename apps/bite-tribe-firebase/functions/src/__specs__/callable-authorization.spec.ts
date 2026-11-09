@@ -178,6 +178,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // A signed-in account reporting a profile (issue #1829), for the same
   // reasons as `reportBite`.
   reportUser: 'member',
+  // A tagged user taking themselves off a Bite (issue #1920). Acts for the
+  // caller alone, and a table guest is never tagged.
+  removeSelfFromBiteTags: 'member',
   resendEmailVerification: 'member',
   searchBites: 'member',
   searchBitesByCity: 'member',

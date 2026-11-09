@@ -465,6 +465,11 @@ export class BiteTribeApiService {
     return this.biteApiService.reportBite(biteId, reason);
   }
 
+  /** The caller leaves a Bite they were tagged in (GitHub issue #1920). */
+  async removeSelfFromBiteTags(biteId: string): Promise<void> {
+    return this.biteApiService.removeSelfFromBiteTags(biteId);
+  }
+
   async biteById(biteId: string): Promise<Bite> {
     return this.biteApiService.loadBiteById(biteId);
   }

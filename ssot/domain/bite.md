@@ -49,6 +49,7 @@ A good Bite makes one concrete dish understandable enough that another person ca
     off the other's Bites, and the trigger drops a blocked uid from any Bite
     written afterwards.
   - Deleting an account takes its uid off every Bite that lists it.
+  - A tagged user can take themselves off a Bite with the `removeSelfFromBiteTags` callable, which removes the caller's uid and nothing else; only the Bite's owner may write the Bite under the rules, so it cannot be a client write. Nothing stops the creator tagging them again (issue [#1920]).
 - A Bite can be liked, but not by its own creator. On their own Bite the
   creator still sees the reaction chip, as a read-only label rather than a
   control, and it is left out entirely while the Bite has no reactions yet. See
@@ -415,3 +416,4 @@ images/bites/{biteId}/{filename}
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916
+[#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920

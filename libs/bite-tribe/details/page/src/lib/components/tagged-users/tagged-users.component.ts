@@ -30,7 +30,16 @@ export const VISIBLE_TAGGED_USERS = 2;
 export class TaggedUsersComponent {
   users = input<PublicUser[]>([]);
 
+  /**
+   * Whether the viewer is tagged in this Bite, which offers them "Remove me"
+   * (GitHub issue #1920). The row then shows even when no name is visible,
+   * because a tagged viewer with a private profile is in no list of names.
+   */
+  viewerIsTagged = input(false);
+
   readonly openProfile = output<PublicUser>();
+
+  readonly removeMe = output<void>();
 
   readonly expanded = signal(false);
 

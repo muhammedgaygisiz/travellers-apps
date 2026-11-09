@@ -456,6 +456,15 @@ export class DetailsDataAccessService {
   }
 
   /**
+   * Takes the signed-in user off this Bite's tagged users (GitHub issue
+   * #1920), then reads the Bite again so the row and the action reflect it.
+   */
+  async removeSelfFromBiteTags(biteId: string): Promise<void> {
+    await this.api.removeSelfFromBiteTags(biteId);
+    this.reloadBite();
+  }
+
+  /**
    * The signed-in user's own Bites, read for the share image to tell which
    * first a Bite was (issue #1837). Straight from Firestore: the store holds
    * them only after My Bites or My Profile loaded them. Empty when signed out.

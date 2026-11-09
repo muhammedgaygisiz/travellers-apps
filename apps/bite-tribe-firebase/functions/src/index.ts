@@ -33,6 +33,7 @@ export {
 } from './functions/bites/bite-reports-as-operator';
 export { deleteBiteReportsOnBiteDelete } from './functions/bites/delete-bite-reports-on-bite-delete';
 export { validateBiteTaggedUsersOnWrite } from './functions/bites/validate-bite-tagged-users-on-write';
+export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
 export { reportUser } from './functions/users/report-user';
 export {
   dismissUserReports,

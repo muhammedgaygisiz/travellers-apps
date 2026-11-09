@@ -1,4 +1,4 @@
-@if (users().length > 0) {
+@if (users().length > 0 || viewerIsTagged()) {
   <div class="tagged-users" data-testid="tagged-users">
     <span class="label">{{ 'ate-with-label' | transloco }}</span>
     @for (user of shownUsers(); track user.userId; let last = $last) {
@@ -20,6 +20,16 @@
         (click)="expanded.set(true)"
       >
         {{ 'ate-with-more' | transloco: { count: hiddenCount() } }}
+      </button>
+    }
+    @if (viewerIsTagged()) {
+      <button
+        type="button"
+        class="remove-me"
+        data-testid="tagged-users-remove-me"
+        (click)="removeMe.emit()"
+      >
+        {{ 'ate-with-remove-me' | transloco }}
       </button>
     }
   </div>

@@ -64,7 +64,9 @@
 
       <bt-tagged-users
         [users]="taggedUsers()"
+        [viewerIsTagged]="viewerIsTagged()"
         (openProfile)="goToProfile.emit($event)"
+        (removeMe)="confirmRemoveSelfFromTags()"
       />
 
       <div

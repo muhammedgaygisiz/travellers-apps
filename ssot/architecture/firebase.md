@@ -625,10 +625,16 @@ A dev or QA build says so in three places, and production shows none of them.
   which xcodebuild reads as a build setting.
 - **Android has no QA build**, so `app/src/debug/res` marks every debug build
   `DEV`. Release uses `app/src/main/res`.
-- **Firebase Auth's own mails** (verification, password reset) come from the QA
-  project's templates. The Admin API refuses to edit them on a new project
-  (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`). Their sender name and `[QA]` subject
-  are set in the console, under Authentication, then Templates.
+- **Firebase Auth's own mails** (registration verification, password reset)
+  come from the QA project's templates, and those cannot be branded: the Admin
+  API answers `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, and the console says
+  "Email template updates are currently unavailable for this project" (a
+  restriction on new projects, lifted only through Firebase Support). They are
+  still distinguishable: the sender is `noreply@bite-tribe-qa.firebaseapp.com`
+  with no display name, and the action link points at
+  `bite-tribe-qa.firebaseapp.com`, where production shows "Bite Tribe" and
+  `bite-tribe.firebaseapp.com`. The resend button's mail goes through the
+  functions and carries the `[QA]` mark.
 
 Regenerate the icons whenever the production icon changes:
 

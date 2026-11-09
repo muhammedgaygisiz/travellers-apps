@@ -222,6 +222,9 @@ export class PageComponent {
   async showMenuPopover($event: MouseEvent): Promise<void> {
     const popover = await this.popoverController.create({
       component: AppMenuComponent,
+      // Sized in _globals.scss: Ionic's fixed 200px broke longer Japanese
+      // labels mid-word (#1944).
+      cssClass: 'app-menu-popover',
       event: $event,
       dismissOnSelect: true,
       componentProps: {

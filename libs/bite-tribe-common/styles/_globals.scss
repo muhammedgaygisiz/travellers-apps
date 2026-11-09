@@ -283,3 +283,13 @@ $bt-pressable-surfaces: 'ion-button, ion-fab-button, ion-tab-button, ion-back-bu
     --height: min(92vh, 960px);
   }
 }
+
+// The app menu grows with its longest label instead of keeping the fixed 200px
+// of Ionic's iOS mode, which broke Japanese labels such as マイバケットリスト
+// mid-word. It never gets narrower than before, and stays inside the viewport.
+// See issue #1944.
+ion-popover.app-menu-popover {
+  --width: auto;
+  --min-width: 200px;
+  --max-width: calc(100vw - 32px);
+}

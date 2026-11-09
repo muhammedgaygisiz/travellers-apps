@@ -1253,6 +1253,88 @@ account is still Personal, so the full music library is available - see
 [Open: Instagram Account Type](#open-instagram-account-type), which a switch to
 Business would change.
 
+## The Languages Post
+
+Published 10 November 2026: **BiteTribe now speaks Korean, Japanese and
+Chinese.** Build 1.1.2 added the three languages ([#1880], [#1881], [#1882]),
+which brings the app to 14. Asia is a main target, so this post shows the app
+itself in each new language rather than an illustration of it.
+
+![Languages post](../assets/social/languages-post.png)
+
+### The Slides
+
+Six slides, 1080x1440, in the city posts' dark style:
+
+| Slide | Content                                                                                                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------- |
+| 0     | "BiteTribe now speaks" over 한국어, 日本語 and 中文, and Leela saying 안녕하세요! こんにちは! 你好!                     |
+| 1-3   | The same real screen in each language, in a phone frame: the home feed with the app menu open, showing "Version 1.1.2". |
+| 4     | "14 languages": every language by its own name, as the language picker lists it, with the three new ones marked NEW.    |
+| 5     | Leela: "Update to version 1.1.2 and pick your language in Settings!", the handle and "Available on iOS and Android".    |
+
+The menu is the screen with the most interface text; a Bite's own page is
+mostly the author's words. The open menu also covers the feed card's distance,
+so the screens show no location.
+
+### Capturing The Screens
+
+The screens are the deployed web app, signed in, without changing the
+account's language:
+
+- The web app reads its display language from the local key
+  `CapacitorStorage.lang` at start-up (`app.component.ts`), not from the
+  account's settings document. Set it, load the page, and set it back.
+- A same-origin `<iframe>` of the app at 390x760 with CSS `zoom: 1.8`, laid over
+  the signed-in tab, shares the sign-in. Two screenshots of it, stitched, give a
+  702x1368 phone screen.
+- Remove the frame before applying an app update. Twice the tab came back
+  signed out after an update restart while the frame had run as a second app
+  instance; a restart without it kept the session.
+
+Signed out, the app shows only its start page, and a headless browser fails
+App Check. The hosted Storybook renders every locale but only with placeholder
+fixtures.
+
+### What The Capture Caught
+
+Looking at the app in each language found three bugs that shipped in 1.1.2,
+all fixed on the web before the post went up:
+
+- **The theme picker offered 中文** between Light and Dark: the `zh` option
+  landed in both selects ([#1942]).
+- **The Japanese menu's About read 自己紹介** ("self-introduction"): one `about`
+  key served the menu and the profile's About field. The profile field now has
+  `about-me` ([#1944]).
+- **Japanese menu labels broke mid-word** (マイバケットリス / ト): the popover
+  kept a fixed width, and the first fix was checked on an already-open menu
+  rather than a fresh open ([#1944], [#1948]).
+
+The App Store and Play builds keep them until the next store release.
+
+### The Caption
+
+```text
+BiteTribe now speaks Korean, Japanese and Chinese! 🇰🇷🇯🇵🇨🇳
+Version 1.1.2 brings the app to 14 languages. Update and pick yours in Settings.
+
+🇰🇷 이제 BiteTribe를 한국어로 사용할 수 있어요.
+🇯🇵 BiteTribeが日本語に対応しました。
+🇨🇳 BiteTribe现已支持简体中文。
+
+📲 Available on iOS and Android, link in bio.
+#foodie #foodapp #travelfood #realfood #맛집 #グルメ #美食 #asia
+```
+
+The Korean, Japanese and Chinese lines have not been read by a native speaker.
+
+### Published 10 November 2026
+
+Posted from `instagram.com` on desktop, crop set to `Original`, no location, no
+tags, Facebook sharing off: `instagram.com/p/Dfifjx8jEiy/`. The post waited for
+the three fixes to reach the web app, so the Japanese and Chinese screens show
+the corrected menu.
+
 ## The City Top 5 Posts
 
 **The account's recurring format: a carousel of five rated Bites from one
@@ -1531,3 +1613,9 @@ yet reflected.
 [#1627]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1627
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1886]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1886
+[#1880]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1880
+[#1881]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1881
+[#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882
+[#1942]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1942
+[#1944]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1944
+[#1948]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1948

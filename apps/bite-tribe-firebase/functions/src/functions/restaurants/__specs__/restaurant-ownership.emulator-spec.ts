@@ -100,20 +100,15 @@ describe('restaurant ownership with several owners', () => {
     });
   });
 
-  /**
-   * The losing transaction is retried with the Admin SDK's backoff, which
-   * starts at about a second and grows. On a slow CI runner that pushed the
-   * test past jest's default 5 s, so it failed for taking long, not for a
-   * wrong result. This test is about the result, so it gets the time a few
-   * retries need.
-   */
+  // The losing transaction retries with backoff; the suite's 30 s timeout in
+  // jest.emulator.config.cjs gives it the time (#1946).
   it('lands two concurrent assignments of different accounts', async () => {
     await Promise.all([assign('owner-a'), assign('owner-b')]);
 
     expect(((await restaurant())?.['ownerUserIds'] as string[]).sort()).toEqual(
       ['owner-a', 'owner-b'],
     );
-  }, 30_000);
+  });
 
   it('returns already-assigned on a repeat and writes nothing', async () => {
     await assign('owner-a');

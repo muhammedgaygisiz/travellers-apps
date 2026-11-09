@@ -240,13 +240,21 @@ expected consequence of the two substitutions above rather than a surprise:
   and their engagement rather than any growth.
 - **Bites created are falling with it**: 69 against 93.
 
-Two signals from the monitoring itself are still unresolved, both carried
-forward from the 31 August caveats:
+Two signals from the monitoring itself were unresolved on 16 September, both
+carried forward from the 31 August caveats:
 
-- **The 100% crash-free rate has never been cross-checked against the
-  console.** An `app_exception` pipeline that never fires looks identical to an
-  app that never crashes, and after sixteen days of an unvarying 100% the check
-  is overdue. Filed as [#1623].
+- **The 100% crash-free rate had never been cross-checked.** An
+  `app_exception` pipeline that never fires looks identical to an app that
+  never crashes. Filed as [#1623] and **answered on 9 November 2026 from GA4
+  rather than the console**: `app_exception` fired four times in 2026, all on
+  Android (8 January, 21 June and 21 July on 1.0.1, 22 September on 1.0.2), so
+  the Android path is proven end to end and the 100% was a real absence of
+  crashes. iOS has never emitted one, which is either no crashes among very few
+  iOS users or a broken path. GA4 cannot tell those apart. The web app cannot
+  emit `app_exception` at all, because only the native Crashlytics SDK logs it,
+  so web stability shows only in the `exception` count. Closed without the
+  console comparison or the deliberate device crash. The iOS path stays
+  unproven.
 - **9 to 11 `Missing or insufficient permissions` errors arrive every week**,
   every week since the promotion, alongside a smaller `PERMISSION_DENIED` and
   `Unauthenticated` count. Nothing has examined whether those are rules denials

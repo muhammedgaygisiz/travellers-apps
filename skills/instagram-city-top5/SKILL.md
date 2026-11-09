@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -55,7 +55,7 @@ Steps 2 and 5 are **gates**. Stop and wait for the user's answer.
 
 The user's Chrome (Claude in Chrome), signed in to `https://bitetribe.app` - not the built-in browser. If it is not signed in, ask the user to sign in; never type a password.
 
-1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the city's country. The country search returns every Bite in the country, so keep only the ones in or near the city. A city search would miss nearby places.
+1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the city's country. The country search returns every Bite in the country, so keep only the ones in or near the city. A city search would miss nearby places. The cards do not show a city, though, so for a country with many Bites (Thailand had 165) use the **City** filter instead and add nearby places from the map view if needed.
 2. Read the cards with JavaScript rather than screenshots: `document.querySelectorAll('bt-bite')`, the title from the card's first line, the stars from `star-rating ion-icon.filled`.
 3. Shortlist five-star Bites, **preferring local dishes** (Pašticada in Split, bryndzové halušky in Bratislava) over pizza, burgers, ramen and coffee. A Bite from a nearby place (Hvar for Split) is fine - the cover names the city.
 

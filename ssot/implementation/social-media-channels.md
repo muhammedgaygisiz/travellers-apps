@@ -1264,8 +1264,8 @@ there are seven, with Leela added. Malta (5 November 2026) was the first post
 made with the skill end to end. It was also the first to cover a whole country
 rather than a city, the first with restaurant tags and a dish list in the
 caption from the start, and the first with a cover line written for the place.
-Mostar (7 November 2026), Granada (8 November 2026) and London (9 November 2026)
-followed the same way.
+Mostar (7 November 2026), Granada (8 November 2026), London and Chiang Mai
+(both 9 November 2026) followed the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1333,7 +1333,7 @@ matching name and address. A restaurant without one appears in the caption by
 name only.
 
 **@bitetribeapp follows every account it tags.** As of 9 November 2026 it
-follows all 42 featured so far, across all twelve posts. That count includes
+follows all 44 featured so far, across all thirteen posts. That count includes
 `@chickenshop`, which London names in its caption but could not tag.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
@@ -1418,6 +1418,16 @@ in the caption only. Sussex Fish Bar (fish and chips) has no account. Purezza,
 Chicken Shop and Arôme are chains, and each has one London-wide account.
 Leela's cover line is "Fish & chips, a proper curry and a vegan pizza: my
 London favourites".
+
+**Chiang Mai** (9 November 2026) tags two of five dish slides:
+`@huenphenrestaurant` (khao soi, its bio and the Bite's pin both on
+Ratchamankha Road) and `@chef_tao_thai_cuisine` (soft-shell crab, bio and pin
+both on Ratchapakhinai Road). Yook Samai, Eat Roti Fusion (a night-market
+stall) and Mango Addict have no account that could be confirmed; the only
+look-alike, `@mangoaddict___`, has no posts and no address. The Thailand
+country search returned 165 Bites with no city on the cards, so the five came
+from the City filter instead. Leela's cover line is "Khao soi, night-market
+roti and fresh mango: my Chiang Mai favourites".
 
 ## Wiring Back Into The Product
 

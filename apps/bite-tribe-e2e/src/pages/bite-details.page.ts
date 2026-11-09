@@ -15,6 +15,8 @@ export class BiteDetailsPage {
   readonly reviewThreads: Locator;
   readonly imageStatus: Locator;
   readonly image: Locator;
+  readonly taggedUsers: Locator;
+  readonly removeMe: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -48,6 +50,19 @@ export class BiteDetailsPage {
       name: 'Add your review',
     });
     this.reviewThreads = this.root.locator('bt-review-thread');
+    // The "Ate with" row (issues #1918 and #1920).
+    this.taggedUsers = this.root.getByTestId('tagged-user');
+    this.removeMe = this.root.getByTestId('tagged-users-remove-me');
+  }
+
+  /** Takes the signed-in user off the Bite, confirming the question. */
+  async removeMeFromBite(): Promise<void> {
+    await this.removeMe.click();
+    const confirm = this.page.getByRole('alertdialog', {
+      name: 'Remove yourself from this Bite?',
+    });
+    await confirm.getByRole('button', { name: 'Remove', exact: true }).click();
+    await expect(confirm).toHaveCount(0);
   }
 
   /** One conversation under the Bite, addressed by the review that opened it. */

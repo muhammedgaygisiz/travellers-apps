@@ -113,7 +113,10 @@ export class BiteDataAccessService {
     PublicUser[],
     string | undefined
   >({
-    params: () => this.myProfile()?.userId,
+    // The signed-in account, not the store's profile: the profile is a
+    // one-off snapshot taken at login and can be missing, which left the
+    // picker telling a creator who follows people to go and follow some.
+    params: () => this.storeService.user()?.uid,
     loader: ({ params }) =>
       params
         ? this.profileApi.fetchFollowingWithDetails(params)
@@ -133,7 +136,7 @@ export class BiteDataAccessService {
    */
   readonly taggableUsers = computed((): PublicUser[] => {
     const blocked = new Set(this.blockedUserIds());
-    const me = this.myProfile()?.userId;
+    const me = this.storeService.user()?.uid;
 
     return this.following().filter(
       (user) =>

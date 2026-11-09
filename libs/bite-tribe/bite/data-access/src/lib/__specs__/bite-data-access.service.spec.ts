@@ -169,7 +169,6 @@ describe(BiteDataAccessService.name, () => {
         profile('blocked-1'),
       ]);
       blockedUserIds$.next(['blocked-1']);
-      publicUser$.next({ userId: 'leela' });
 
       TestBed.tick();
       await jest.advanceTimersByTimeAsync(0);
@@ -183,7 +182,22 @@ describe(BiteDataAccessService.name, () => {
       ]);
     });
 
-    it('offers nobody before the profile is known', () => {
+    // The store's profile is a login-time snapshot that can be missing; the
+    // signed-in account is what the list belongs to.
+    it('loads the following list without waiting for the profile', async () => {
+      profileApi.fetchFollowingWithDetails.mockResolvedValue([profile('anna')]);
+
+      TestBed.tick();
+      await jest.advanceTimersByTimeAsync(0);
+      TestBed.tick();
+
+      expect(service.taggableUsers().map((user) => user.userId)).toEqual([
+        'anna',
+      ]);
+    });
+
+    it('offers nobody while nobody is signed in', () => {
+      user.set(undefined);
       TestBed.tick();
 
       expect(service.taggableUsers()).toEqual([]);

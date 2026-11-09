@@ -35,6 +35,9 @@ export class CreateBitePage {
   readonly filledStars: Locator;
   readonly imagePreview: Locator;
   readonly creatingOverlay: Locator;
+  readonly ateWithSearch: Locator;
+  readonly ateWithCandidates: Locator;
+  readonly ateWithChips: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -89,6 +92,17 @@ export class CreateBitePage {
     // dismiss, so waiting for it to disappear is how the next Bite of an
     // "add another" session avoids being typed against the backdrop.
     this.creatingOverlay = page.locator('ion-loading.bite-creating-loading');
+    // The "Ate with" picker (issue #1917): the accounts offered, and the ones
+    // already picked as removable chips.
+    this.ateWithSearch = page.locator(
+      'bite bt-ate-with-picker ion-input input',
+    );
+    this.ateWithCandidates = page.locator(
+      'bite bt-ate-with-picker bt-chip.match',
+    );
+    this.ateWithChips = page.locator(
+      'bite bt-ate-with-picker .selected bt-chip',
+    );
   }
 
   /**
@@ -144,6 +158,15 @@ export class CreateBitePage {
     // The pick is read and compressed asynchronously; the preview is the form
     // saying it now holds the photo.
     await expect(this.imagePreview).toBeVisible();
+  }
+
+  /** Filters the "Ate with" candidates by display name and picks one. */
+  async tagPerson(displayName: string): Promise<void> {
+    await this.ateWithSearch.fill(displayName);
+    await this.ateWithCandidates.filter({ hasText: displayName }).click();
+    await expect(
+      this.ateWithChips.filter({ hasText: displayName }),
+    ).toBeVisible();
   }
 
   async fillName(name: string): Promise<void> {

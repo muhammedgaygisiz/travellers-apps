@@ -279,6 +279,25 @@ export class DetailsService {
    * second tap could ask for. A failure says so, because a reporter told their
    * report went through when it did not will not file it again.
    */
+  /** "Remove me" on the tagged-users row (GitHub issue #1920). */
+  async removeSelfFromBiteTags(biteId: string): Promise<void> {
+    try {
+      await this.dataAccess.removeSelfFromBiteTags(biteId);
+
+      await this.toast.present({
+        messageKey: 'ate-with-removed',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to remove the user from the Bite:', error);
+
+      await this.toast.present({
+        messageKey: 'ate-with-remove-failed',
+        outcome: 'failure',
+      });
+    }
+  }
+
   async reportBite(report: {
     biteId: string;
     reason: BiteReportReason;

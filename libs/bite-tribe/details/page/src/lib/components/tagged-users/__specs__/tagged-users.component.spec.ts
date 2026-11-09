@@ -82,4 +82,38 @@ describe('TaggedUsersComponent', () => {
 
     expect(names()).toEqual(['ANNA', 'BEN', 'CEM', 'DANA']);
   });
+
+  describe('Remove me (issue #1920)', () => {
+    const removeMe = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="tagged-users-remove-me"]',
+      );
+
+    it('is offered to a tagged viewer only', () => {
+      render([user('anna')]);
+      expect(removeMe()).toBeNull();
+
+      fixture.componentRef.setInput('viewerIsTagged', true);
+      fixture.detectChanges();
+      expect(removeMe()).not.toBeNull();
+    });
+
+    it('shows the row for a tagged viewer nobody can see by name', () => {
+      fixture.componentRef.setInput('viewerIsTagged', true);
+      render([]);
+
+      expect(removeMe()).not.toBeNull();
+    });
+
+    it('asks to remove the viewer when tapped', () => {
+      const asked = jest.fn();
+      fixture.componentInstance.removeMe.subscribe(asked);
+      fixture.componentRef.setInput('viewerIsTagged', true);
+      render([user('anna')]);
+
+      removeMe()?.click();
+
+      expect(asked).toHaveBeenCalledTimes(1);
+    });
+  });
 });

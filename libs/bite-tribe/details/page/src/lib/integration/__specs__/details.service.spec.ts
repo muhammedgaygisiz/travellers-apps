@@ -76,6 +76,7 @@ const createMockDataAccess = (
     saveBiteImage: jest.fn().mockResolvedValue(undefined),
     reloadBite: jest.fn(),
     reportBite: jest.fn().mockResolvedValue({ reported: true }),
+    removeSelfFromBiteTags: jest.fn().mockResolvedValue(undefined),
     ownBites: jest.fn().mockResolvedValue([]),
   };
   return { ...base, ...overrides } as MockDetailsDataAccessService;
@@ -1380,6 +1381,37 @@ describe('DetailsService', () => {
       mockModalController.create.mock.calls[0][0].componentProps.closed.emit();
 
       expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  /** A tagged user taking themselves off a Bite (issue #1920). */
+  describe('removeSelfFromBiteTags', () => {
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('removes the viewer and says so', async () => {
+      await service.removeSelfFromBiteTags('bite123');
+
+      expect(service.dataAccess.removeSelfFromBiteTags).toHaveBeenCalledWith(
+        'bite123',
+      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'ate-with-removed',
+        outcome: 'success',
+      });
+    });
+
+    it('says it failed rather than pretending it went through', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.removeSelfFromBiteTags)
+        .mockRejectedValueOnce(new Error('failed-precondition'));
+
+      await service.removeSelfFromBiteTags('bite123');
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'ate-with-remove-failed',
+        outcome: 'failure',
+      });
     });
   });
 

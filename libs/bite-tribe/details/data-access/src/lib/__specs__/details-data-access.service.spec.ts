@@ -153,7 +153,11 @@ describe(DetailsDataAccessService.name, () => {
         },
         {
           provide: BiteTribeApiService,
-          useValue: { reportBite: jest.fn(), bitesByUser: jest.fn() },
+          useValue: {
+            reportBite: jest.fn(),
+            bitesByUser: jest.fn(),
+            removeSelfFromBiteTags: jest.fn(),
+          },
         },
         {
           provide: BiteTribeStoreService,
@@ -188,6 +192,20 @@ describe(DetailsDataAccessService.name, () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  /** Issue #1920: the callable, then a fresh read of the Bite. */
+  it('removes the viewer from the tags and reads the Bite again', async () => {
+    const api = TestBed.inject(BiteTribeApiService) as unknown as {
+      removeSelfFromBiteTags: jest.Mock;
+    };
+    api.removeSelfFromBiteTags.mockResolvedValue(undefined);
+    const reload = jest.spyOn(service.bite, 'reload');
+
+    await service.removeSelfFromBiteTags('bite-1');
+
+    expect(api.removeSelfFromBiteTags).toHaveBeenCalledWith('bite-1');
+    expect(reload).toHaveBeenCalled();
   });
 
   /** Reporting goes straight to the callable, not through the store (#1608). */

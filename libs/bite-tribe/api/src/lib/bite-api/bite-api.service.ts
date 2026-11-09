@@ -21,6 +21,7 @@ import { searchNearbyPlaces } from './utils/search-nearby-places';
 import { getPlaceDetails } from './utils/get-place-details';
 import { getCurrencyByPosition } from './utils/get-currency-by-position';
 import { reportBite } from './utils/report-bite';
+import { removeSelfFromBiteTags } from './utils/remove-self-from-bite-tags';
 import { BITE_COLLECTION } from '../utils/constants';
 import { loadBitesByUser } from './utils/load-bites-by-user';
 import { hasBitesByUser } from './utils/has-bites-by-user';
@@ -231,6 +232,10 @@ export class BiteApiService {
     reason: BiteReportReason,
   ): Promise<ReportBiteResult> {
     return reportBite(biteId, reason);
+  }
+
+  public async removeSelfFromBiteTags(biteId: string): Promise<void> {
+    return removeSelfFromBiteTags(biteId);
   }
 
   public async deleteBite(bite: Bite): Promise<Bite> {

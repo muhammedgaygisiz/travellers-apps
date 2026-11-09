@@ -176,6 +176,9 @@ export class DetailsPage {
   readonly retryLoad = output();
   readonly reportBite = output<{ biteId: string; reason: BiteReportReason }>();
 
+  /** The viewer takes themselves off this Bite's tagged users (#1920). */
+  readonly removeSelfFromTags = output<string>();
+
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
   private readonly platform = inject(Platform);
@@ -422,6 +425,41 @@ export class DetailsPage {
 
   likeCounts = computed(() => getLikeCounts(this.bite()));
   userLikeType = computed(() => getUserLikeType(this.bite(), this.userId()));
+
+  /**
+   * Whether the viewer is one of the people this Bite tags. Read off the
+   * Bite's ids rather than the shown names: a tagged viewer with a private
+   * profile is not in the row, and must still be able to leave it.
+   */
+  viewerIsTagged = computed(() => {
+    const userId = this.userId();
+
+    return !!userId && (this.bite()?.taggedUserIds ?? []).includes(userId);
+  });
+
+  /** Asks before the viewer leaves the Bite's tagged users (#1920). */
+  async confirmRemoveSelfFromTags(): Promise<void> {
+    const biteId = this.bite()?.id;
+
+    if (!biteId) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('ate-with-remove-me-header'),
+      message: this.transloco.translate('ate-with-remove-me-message'),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('ate-with-remove-me-confirm'),
+          role: 'destructive',
+          handler: (): void => this.removeSelfFromTags.emit(biteId),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
 
   /**
    * A Bite the viewer created. Their own likes chip stays visible but is not a

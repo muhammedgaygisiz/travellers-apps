@@ -297,6 +297,21 @@ export const WithManyTaggedUsers: Story = {
   },
 };
 
+/**
+ * The viewer is one of the people tagged, so the row offers them "Remove me"
+ * (issue #1920).
+ */
+export const TaggedViewer: Story = {
+  args: {
+    ...WithTaggedUsers.args,
+    userId: 'ben',
+    bite: {
+      ...Default.args?.bite,
+      taggedUserIds: ['anna', 'ben'],
+    } as unknown as Bite,
+  },
+};
+
 /** A Bite whose place is known while the reader's position is not. */
 export const WithoutReaderPosition: Story = {
   args: {

@@ -26,6 +26,7 @@ nothing, and how a review and its thread are attributed.
 - The page shows the food experience in context.
 - A public creator profile identifies who shared the Bite.
 - Under the creator, an `Ate with` row names the people the creator tagged, each name opening that profile (issue [#1918], epic [#1915]). Two names show and the rest fold into `+N more`, which unfolds in place; it is a label followed by names rather than a sentence, so no language has to fit names into one word order. A tagged user whose profile is private or whose account is gone is left out, as is anybody the viewer blocked, and a Bite with nobody left to show renders no row, under the `Absent Field Contract` below. Which uids a Bite may carry is [Bite](../domain/bite.md)'s.
+- A viewer who is tagged in the Bite is offered `Remove me` at the end of that row, and only they are. It asks for confirmation, then takes their uid off the Bite through `removeSelfFromBiteTags` and reads the Bite again. Whether the viewer is tagged is read off the Bite's ids rather than the shown names, so a tagged viewer with a private profile, who appears in no list of names, still gets the row and the action (issue [#1920]).
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
   The message is the price and rating, or a fallback line, followed by the Bite's link, which
@@ -307,6 +308,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card. Closed.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
 - Issue [#1918] is the `Ate with` row, part of epic [#1915]. Open.
+- Issue [#1920] is `Remove me` on that row - the user-generated-content control that lets a user leave somebody else's Bite. Open.
 
 ## Related Domains
 
@@ -343,3 +345,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1775]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1775
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1918]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1918
+[#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920

@@ -87,6 +87,7 @@ class BiteApiMock {
   updateImagePathInBite = jest.fn();
   setImageStatus = jest.fn();
   reportBite = jest.fn();
+  removeSelfFromBiteTags = jest.fn();
   findLocalImage = jest.fn();
   uploadImageFromLocalFile = jest.fn();
 }
@@ -185,6 +186,21 @@ describe(BiteTribeApiService.name, () => {
           reported: true,
         });
         expect(spy).toHaveBeenCalledWith('bite-id', 'spam');
+      },
+    ));
+  });
+
+  describe('removeSelfFromBiteTags', () => {
+    it('should call removeSelfFromBiteTags on BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        const spy = jest
+          .spyOn(biteApiService, 'removeSelfFromBiteTags')
+          .mockResolvedValue(undefined);
+
+        await service.removeSelfFromBiteTags('bite-id');
+
+        expect(spy).toHaveBeenCalledWith('bite-id');
       },
     ));
   });

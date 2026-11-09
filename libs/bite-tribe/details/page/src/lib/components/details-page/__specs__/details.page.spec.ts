@@ -104,6 +104,53 @@ describe('DetailsPage', () => {
     expect(component.reviewThreads()).toMatchSnapshot();
   });
 
+  /** A tagged user taking themselves off the Bite (issue #1920). */
+  describe('Remove me', () => {
+    const taggedBite = {
+      id: 'bite-1',
+      name: 'Pizza',
+      userId: 'creator-1',
+      taggedUserIds: ['friend-1'],
+    } as Bite;
+
+    it('knows the viewer is tagged from the ids, not the shown names', () => {
+      componentRef.setInput('bite', taggedBite);
+      componentRef.setInput('userId', 'friend-1');
+
+      expect(component.viewerIsTagged()).toBe(true);
+
+      componentRef.setInput('userId', 'stranger');
+
+      expect(component.viewerIsTagged()).toBe(false);
+    });
+
+    it('asks first, and removes the viewer only on confirmation', async () => {
+      const present = jest.fn().mockResolvedValue(undefined);
+      let created: Parameters<AlertController['create']>[0] | undefined;
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async (options) => {
+          created = options;
+          return { present } as never;
+        });
+      const emit = jest.spyOn(component.removeSelfFromTags, 'emit');
+      componentRef.setInput('bite', taggedBite);
+
+      await component.confirmRemoveSelfFromTags();
+
+      expect(present).toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+
+      const buttons = created?.buttons as {
+        role?: string;
+        handler?: () => void;
+      }[];
+      buttons.find((button) => button.role === 'destructive')?.handler?.();
+
+      expect(emit).toHaveBeenCalledWith('bite-1');
+    });
+  });
+
   describe('Image viewer', () => {
     it('opens the viewer with the photo that was tapped', () => {
       componentRef.setInput('bite', {

@@ -15,7 +15,7 @@ export default [
           prefix: 'lib',
           style: 'camelCase',
         },
-      ]
+      ],
     },
   },
   {

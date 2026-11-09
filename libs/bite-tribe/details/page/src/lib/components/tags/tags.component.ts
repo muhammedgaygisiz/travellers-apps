@@ -6,7 +6,7 @@ import { IonChip } from '@ionic/angular/standalone';
   imports: [IonChip],
   template: `
     @for (tag of tags(); track tag) {
-    <ion-chip>{{ tag }}</ion-chip>
+      <ion-chip>{{ tag }}</ion-chip>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

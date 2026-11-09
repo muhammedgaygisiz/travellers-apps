@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { removeTagsBetween } from '../bites/bite-tagged-users';
 import {
   BLOCKED_BY_SUBCOLLECTION,
   BLOCKED_SUBCOLLECTION,
@@ -49,6 +50,12 @@ const targetUidOf = (request: CallableRequest<BlockUserRequest>): string => {
  * Deleting an edge that does not exist is a no-op, and the follow-count
  * triggers fire only for the ones that did, so the counts stay right.
  *
+ * The tags between the two accounts go too, in both directions (GitHub issue
+ * #1916): the blocked account off the blocker's Bites and the blocker off the
+ * blocked account's. They are removed after the block is committed, so a
+ * failure there leaves the block in place, and the tagged-users trigger drops
+ * a blocked uid from any Bite written afterwards regardless.
+ *
  * Nothing is written anywhere the blocked account reads, and no notification
  * is sent: the block is invisible to them.
  */
@@ -84,6 +91,8 @@ export const blockUserForCaller = async (
   batch.delete(blocker.collection(FOLLOWERS_SUBCOLLECTION).doc(blockedUid));
 
   await batch.commit();
+
+  await removeTagsBetween(db, blockerUid, blockedUid);
 };
 
 /**

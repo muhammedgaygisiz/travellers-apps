@@ -11,6 +11,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { deleteBiteReportsByReporter } from '../bites/bite-report';
+import { removeTaggedUserFromBites } from '../bites/bite-tagged-users';
 import { deleteUserReportsForUser } from './user-report';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
@@ -506,6 +507,7 @@ export const deleteAccountForUser = async (
 
   try {
     const anonymizedBites = await anonymizeBitesByUser(db, uid);
+    const removedBiteTags = await removeTaggedUserFromBites(db, uid);
     const deletedLikes = await deleteLikesByUser(db, uid);
     const deletedReviews = await deleteReviewsByUser(db, uid);
     const deletedBucketlists = await deleteBucketlistsByUser(db, uid);
@@ -534,6 +536,7 @@ export const deleteAccountForUser = async (
         completedAt: completedAt.toISOString(),
         completedAtTimestamp: completedAt.getTime(),
         anonymizedBites,
+        removedBiteTags,
         deletedLikes,
         deletedReviews,
         deletedBucketlists,
@@ -552,6 +555,7 @@ export const deleteAccountForUser = async (
     logger.info('deleteOwnAccount: account deleted', {
       uid,
       anonymizedBites,
+      removedBiteTags,
       deletedLikes,
       deletedReviews,
       deletedBucketlists,

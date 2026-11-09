@@ -1006,9 +1006,26 @@ service cloud.firestore {
     // ------------------------------------------------------------------ bites
 
     match /bites/{biteId} {
+      /**
+       * The users the creator ate with (GitHub issue #1916): a list of at most
+       * ten uids that does not name the Bite's own creator. Absent on most
+       * Bites. Whether each uid is followed, public and unblocked is a read
+       * per entry that rules cannot make, so the
+       * `validateBiteTaggedUsersOnWrite` trigger checks it after the write.
+       */
+      function hasValidTaggedUsers() {
+        let data = request.resource.data;
+
+        return !('taggedUserIds' in data)
+          || (data.taggedUserIds is list
+            && data.taggedUserIds.size() <= 10
+            && !(data.get('userId', null) in data.taggedUserIds));
+      }
+
       allow read: if isMember();
 
-      allow create: if owns(request.resource.data, 'userId');
+      allow create: if owns(request.resource.data, 'userId')
+        && hasValidTaggedUsers();
 
       /**
        * The operator clause is the admin app's Bite migrations — geohash,
@@ -1022,7 +1039,8 @@ service cloud.firestore {
        * save. They are cosmetic, they feed no entitlement, and the Bite's own
        * owner is the only account that can touch them.
        */
-      allow update: if isOperator() || owns(resource.data, 'userId');
+      allow update: if (isOperator() || owns(resource.data, 'userId'))
+        && hasValidTaggedUsers();
 
       allow delete: if isOperator() || owns(resource.data, 'userId');
 

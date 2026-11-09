@@ -32,6 +32,7 @@ export {
   listBiteReports,
 } from './functions/bites/bite-reports-as-operator';
 export { deleteBiteReportsOnBiteDelete } from './functions/bites/delete-bite-reports-on-bite-delete';
+export { validateBiteTaggedUsersOnWrite } from './functions/bites/validate-bite-tagged-users-on-write';
 export { reportUser } from './functions/users/report-user';
 export {
   dismissUserReports,

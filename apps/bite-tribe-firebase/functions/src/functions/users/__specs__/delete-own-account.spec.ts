@@ -1,7 +1,11 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { CallableRequest } from 'firebase-functions/https';
 import type { FakeFirestore } from './fake-firestore';
-import { createFakeFirestore, DELETE_SENTINEL } from './fake-firestore';
+import {
+  arrayRemove,
+  createFakeFirestore,
+  DELETE_SENTINEL,
+} from './fake-firestore';
 
 let db: FakeFirestore;
 
@@ -26,6 +30,7 @@ jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     delete: (): typeof DELETE_SENTINEL => DELETE_SENTINEL,
     serverTimestamp: (): string => 'server-timestamp',
+    arrayRemove: (...values: unknown[]): unknown => arrayRemove(...values),
   },
 }));
 
@@ -244,6 +249,28 @@ describe('deleteAccountForUser', () => {
     });
   });
 
+  it('takes the account off every Bite it is tagged in', async () => {
+    seedFullAccount();
+    db.seed('bites/bite-3', {
+      userId: 'someone-else',
+      name: 'Dumplings',
+      taggedUserIds: [UID, 'friend-1'],
+    });
+    db.seed('bites/bite-4', {
+      userId: 'friend-1',
+      name: 'Tacos',
+      taggedUserIds: [UID],
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.read('bites/bite-3')?.['taggedUserIds']).toEqual(['friend-1']);
+    expect(db.read('bites/bite-4')?.['taggedUserIds']).toEqual([]);
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      removedBiteTags: 2,
+    });
+  });
+
   it('keeps BiteTrail purchase records and clears the buyer', async () => {
     seedFullAccount();
 
@@ -415,6 +442,7 @@ describe('deleteAccountForUser', () => {
       userId: UID,
       status: 'completed',
       anonymizedBites: 1,
+      removedBiteTags: 0,
       deletedLikes: 1,
       deletedReviews: 1,
       deletedBucketlists: 1,

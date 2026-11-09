@@ -1,12 +1,15 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { CallableRequest } from 'firebase-functions/https';
 import type { FakeFirestore } from './fake-firestore';
-import { createFakeFirestore } from './fake-firestore';
+import { arrayRemove, createFakeFirestore } from './fake-firestore';
 
 let db: FakeFirestore;
 
 jest.mock('firebase-admin/firestore', () => ({
   getFirestore: (): FakeFirestore => db,
+  FieldValue: {
+    arrayRemove: (...values: unknown[]): unknown => arrayRemove(...values),
+  },
 }));
 
 jest.mock('firebase-functions', () => ({
@@ -79,6 +82,32 @@ describe('blockUserHandler', () => {
     expect(db.exists(`users/${BLOCKED}/followers/${BLOCKER}`)).toBe(false);
     expect(db.exists(`users/${BLOCKED}/following/${BLOCKER}`)).toBe(false);
     expect(db.exists(`users/${BLOCKER}/followers/${BLOCKED}`)).toBe(false);
+  });
+
+  it('removes the tags between the two accounts in both directions', async () => {
+    db.seed('bites/blockers-bite', {
+      userId: BLOCKER,
+      taggedUserIds: [BLOCKED, BYSTANDER],
+    });
+    db.seed('bites/blockeds-bite', {
+      userId: BLOCKED,
+      taggedUserIds: [BLOCKER],
+    });
+    db.seed('bites/bystanders-bite', {
+      userId: BYSTANDER,
+      taggedUserIds: [BLOCKER, BLOCKED],
+    });
+
+    await blockUserHandler(asBlocker(BLOCKED));
+
+    expect(db.read('bites/blockers-bite')?.['taggedUserIds']).toEqual([
+      BYSTANDER,
+    ]);
+    expect(db.read('bites/blockeds-bite')?.['taggedUserIds']).toEqual([]);
+    expect(db.read('bites/bystanders-bite')?.['taggedUserIds']).toEqual([
+      BLOCKER,
+      BLOCKED,
+    ]);
   });
 
   it('leaves follow relations with anybody else alone', async () => {

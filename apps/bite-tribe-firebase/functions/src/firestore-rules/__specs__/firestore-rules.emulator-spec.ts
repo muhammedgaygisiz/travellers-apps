@@ -2792,6 +2792,65 @@ describe('bites', () => {
     await assertFails(deleteDoc(doc(asStranger(), 'bites', 'consumer-bite')));
   });
 
+  /** Tagged users, GitHub issue #1916. */
+  const taggedUsers = (count: number): string[] =>
+    Array.from({ length: count }, (_, index) => `friend-${index}`);
+
+  it('lets an account save a Bite with up to ten tagged users', async () => {
+    await assertSucceeds(
+      setDoc(doc(asConsumer(), 'bites', 'tagged-bite'), {
+        userId: CONSUMER,
+        name: 'Hot pot',
+        taggedUserIds: taggedUsers(10),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        taggedUserIds: [STRANGER],
+      }),
+    );
+  });
+
+  it('refuses a Bite with eleven tagged users', async () => {
+    await assertFails(
+      setDoc(doc(asConsumer(), 'bites', 'crowded-bite'), {
+        userId: CONSUMER,
+        name: 'Hot pot',
+        taggedUserIds: taggedUsers(11),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        taggedUserIds: taggedUsers(11),
+      }),
+    );
+  });
+
+  it('refuses a Bite that tags its own creator', async () => {
+    await assertFails(
+      setDoc(doc(asConsumer(), 'bites', 'self-tagged-bite'), {
+        userId: CONSUMER,
+        name: 'Hot pot',
+        taggedUserIds: [CONSUMER],
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        taggedUserIds: [STRANGER, CONSUMER],
+      }),
+    );
+  });
+
+  it('refuses tagged users that are not a list', async () => {
+    await assertFails(
+      setDoc(doc(asConsumer(), 'bites', 'odd-bite'), {
+        userId: CONSUMER,
+        name: 'Hot pot',
+        taggedUserIds: STRANGER,
+      }),
+    );
+  });
+
   /** The admin app's Bite migrations rewrite Bites belonging to every account. */
   it('lets an operator edit any Bite', async () => {
     await assertSucceeds(

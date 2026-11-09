@@ -71,6 +71,15 @@ export interface Bite {
    */
   variantId?: string;
   tags?: string[];
+  /**
+   * The BiteTribe users the creator ate with (GitHub issue #1915), by uid.
+   *
+   * Not the free-text {@link tags}: a tagged user is an account. At most ten,
+   * never the creator, and only accounts the creator follows with a public
+   * profile and no block in either direction may be added - rules enforce the
+   * first two, `validateBiteTaggedUsersOnWrite` the rest. Absent on most Bites.
+   */
+  taggedUserIds?: string[];
   rating?: number;
   description?: string;
 

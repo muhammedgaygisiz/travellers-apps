@@ -32,6 +32,23 @@ A good Bite makes one concrete dish understandable enough that another person ca
   leaving the field, and by submitting the form. The field is live state that
   nothing else drains, so a tag left in it used to be posted as nothing at all.
   See issue [#1391] and [issue-1391](../records/issue-1391.md).
+- **A Bite can name the BiteTribe users its creator ate with** - its _tagged
+  users_, stored as uids in `taggedUserIds`. They are not the free-text `tags`
+  above, and the two are never named interchangeably. See epic [#1915].
+  - At most ten, and never the creator. `firestore.rules` refuses a write that
+    breaks either.
+  - Only an account the creator follows, with a public profile, and with no
+    block in either direction may be **added**. Rules cannot read that per uid,
+    so the `validateBiteTaggedUsersOnWrite` trigger drops every uid that fails
+    after the write, and writes back only when the list changed (issue
+    [#1916]).
+  - Following and a public profile gate the act of tagging, not the tag:
+    unfollowing somebody later, or them turning private, leaves the uid on the
+    Bite. A tagged user who turned private is left out where the list renders.
+  - A block in either direction removes the tag. `blockUser` takes each account
+    off the other's Bites, and the trigger drops a blocked uid from any Bite
+    written afterwards.
+  - Deleting an account takes its uid off every Bite that lists it.
 - A Bite can be liked, but not by its own creator. On their own Bite the
   creator still sees the reaction chip, as a read-only label rather than a
   control, and it is left out entirely while the Bite has no reactions yet. See
@@ -119,6 +136,7 @@ Required by product intent, but optional or not strictly enforced in the shared 
 
 - `description`
 - `tags`
+- `taggedUserIds` - the users the creator ate with (epic [#1915])
 - `restaurantId`
 - `geohash`
 - `imagePath`
@@ -395,3 +413,5 @@ images/bites/{biteId}/{filename}
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
+[#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
+[#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916

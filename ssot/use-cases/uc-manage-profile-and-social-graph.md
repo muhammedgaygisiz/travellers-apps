@@ -319,6 +319,9 @@ account for everybody.
 - The blocked account's profile, opened directly, shows who it is and the way to unblock,
   and none of its content.
 - Blocking removes the follow relation in both directions. Unblocking does not restore it.
+- Blocking removes the tagged users between the two accounts in both directions: the
+  blocked account comes off the blocker's Bites and the blocker off the blocked account's
+  (issue [#1916]). Unblocking does not restore those either.
 - The blocked account is not told and sees no change. Nothing it can read records the
   block, so a refusal it could observe would itself be the notification.
 - A block takes effect on what the blocker already has loaded, not only on the next read.
@@ -535,3 +538,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
+[#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916

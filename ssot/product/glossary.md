@@ -33,6 +33,8 @@ existing name already or the term belongs here.
   - Business relevance: Engagement signal that can support ranking, recommendations, and creator feedback.
 - **Star** — The rating a Bite creator gives the dish, shown as stars on the Bite and on Bite detail. Optional. Distinct from a BiteTrail rating, which rates a curated trail rather than a dish. See [Bite](../domain/bite.md).
   - Business relevance: The one comparable quality signal a Bite carries. Everything else on a Bite is description, price or place, none of which ranks.
+- **Tagged user** — A BiteTribe user the Bite creator named as somebody they ate with, stored on the Bite as a uid in `taggedUserIds`. Not a _Bite tag_, which is a free-text label in `tags`; the two are never used interchangeably. See [Bite](../domain/bite.md).
+  - Business relevance: Turns a shared meal into shared content, so the people at the table find the Bite and each other.
 - **Content quality** — Usefulness, authenticity, completeness, and trustworthiness of bites and related profile data.
   - Business relevance: Determines whether discovery feels reliable enough for users and businesses.
 

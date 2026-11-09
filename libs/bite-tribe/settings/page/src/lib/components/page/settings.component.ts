@@ -340,8 +340,15 @@ export class PageSettings {
     });
   }
 
+  /**
+   * Anything but light or dark counts as unset. Build 1.1.2 offered 中文 in the
+   * theme select by mistake (#1942), so an account can hold `theme: 'zh'`; it
+   * falls back to the system theme on its next save.
+   */
   calculateTheme(theme: string | null): 'light' | 'dark' {
-    return (theme || this.systemTheme()) as 'light' | 'dark';
+    return theme === 'light' || theme === 'dark'
+      ? theme
+      : (this.systemTheme() as 'light' | 'dark');
   }
 
   onThemeChange(event: { detail: { value: string } }): void {

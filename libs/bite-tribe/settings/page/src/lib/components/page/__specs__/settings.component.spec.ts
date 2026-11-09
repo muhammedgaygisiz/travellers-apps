@@ -236,6 +236,38 @@ describe(PageSettings.name, () => {
         expect(component.calculateTheme('light')).toBe('light');
       });
     });
+
+    describe('given a value that is not a theme', () => {
+      it('should fall back to the system theme for a saved language code', () => {
+        component.systemTheme.set('dark');
+
+        expect(component.calculateTheme('zh')).toBe('dark');
+      });
+    });
+  });
+
+  describe('Theme select', () => {
+    it('should offer only light and dark', () => {
+      const element = fixture.nativeElement as HTMLElement;
+      const options = [
+        ...element.querySelectorAll(
+          '[data-testid="settings-theme"] ion-select-option',
+        ),
+      ].map((option) => option.getAttribute('value'));
+
+      expect(options).toEqual(['light', 'dark']);
+    });
+
+    it('should keep Chinese in the language select', () => {
+      const element = fixture.nativeElement as HTMLElement;
+      const options = [
+        ...element.querySelectorAll(
+          '[formcontrolname="language"] ion-select-option',
+        ),
+      ].map((option) => option.getAttribute('value'));
+
+      expect(options).toContain('zh');
+    });
   });
 
   describe('settingsEffect', () => {

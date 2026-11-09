@@ -24,6 +24,8 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.268978529027-r92nsfol8lsg55th4dtr9p43gf5di14n</string>
+				<!-- bite-tribe-qa (issue 1221): the Google sign-in redirect of a QA-backed run. Kept in every build so QA runs the binary TestFlight ships. -->
+				<string>com.googleusercontent.apps.140281642700-fb0slaqpjet1jl613tchbob117rm37qp</string>
 			</array>
 		</dict>
 	</array>

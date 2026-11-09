@@ -2,9 +2,26 @@
 
 ## Purpose
 
-How to run BiteTribe on an iOS simulator against the **production** Firebase
-project, which is what capture sessions, layout checks and reproduction work
-need. The Android counterpart is [Implementation - Android Device Testing](android-device-testing.md).
+How to run BiteTribe on an iOS simulator against a real Firebase project.
+Capture sessions and reproducing production content use **production**
+(`bite-tribe`). Anything that writes test data, or rehearses App Check
+enforcement, uses **QA** (`bite-tribe-qa`); see `The QA Project` in
+[Architecture - Firebase](../architecture/firebase.md). The Android counterpart
+is [Implementation - Android Device Testing](android-device-testing.md).
+
+## One Command
+
+```bash
+npm run ios:simulator -- --backend=qa
+```
+
+`tools/run-ios-simulator.mjs` does the whole sequence below. It makes the
+production web bundle with the backend's values, runs the UTF-8-safe sync, then
+`xcodebuild` with `BITETRIBE_FIREBASE_BACKEND`. It checks that the built app
+carries the expected `PROJECT_ID`, then installs and launches with the debug
+token. Use `--backend=production` for capture work, `--udid=<UDID>` when more
+than one simulator is booted, `--enforced` to turn the client-side App Check
+gate on, and `--skip-web` to reuse the last sync.
 
 A simulator is not a substitute for a device. The release-candidate charter is
 explicit that simulators do not count for permissions, notifications, camera or
@@ -105,6 +122,36 @@ It prints as:
 Register that value in the Firebase console under **App Check → Apps → the iOS
 app row → ⋮ → Manage debug tokens**. The token survives reinstalls of the same
 app on the same simulator, so it only has to be registered once per simulator.
+
+### A Known Token Instead Of A Per-Install One
+
+A per-install token has to be fished out of the log and registered again for
+every new simulator. Instead, register one token and supply it at launch. Put it
+in the gitignored `apps/bite-tribe-ios/.env`:
+
+```bash
+BITETRIBE_IOS_APP_CHECK_DEBUG_TOKEN=<UUID registered in the console>
+```
+
+`npm run ios:simulator` passes it to the app as the `AppCheckDebugToken`
+environment variable. `xcrun simctl launch` ignores the Xcode scheme's
+environment, so it goes in as `SIMCTL_CHILD_AppCheckDebugToken`. When you run
+from Xcode instead, add the same variable to a **non-shared** copy of the
+scheme (Product → Scheme → Manage Schemes → duplicate, untick Shared).
+`xcuserdata` is gitignored. Never add it to the shared `App.xcscheme`.
+
+**Use `AppCheckDebugToken`, not `FIRAAppCheckDebugToken`.** Both are read by
+`GACAppCheckDebugProvider`, but its empty check on the legacy name compares the
+pointer with `0` rather than the length. An empty `FIRAAppCheckDebugToken` is
+therefore sent as the token instead of falling back to the per-install one.
+The new name is length-checked.
+
+**Rotation.** Register the token on `bite-tribe-qa`, where it bypasses App
+Check only for disposable data. Rotate it by adding the new token in the
+console, then updating `.env`, then deleting the old one. Do this when a
+machine or person stops working on the project, and whenever the token
+appeared anywhere outside the `.env`. A token on production is still
+per-session, as described next.
 
 **A registered debug token is a standing App Check bypass for whoever holds
 it.** Issue one per session and delete it afterwards; the rotation list is on

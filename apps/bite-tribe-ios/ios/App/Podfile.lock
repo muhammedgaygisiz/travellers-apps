@@ -1204,7 +1204,7 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.37):
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Interface (0.0.37)
-  - Capacitor (8.4.2):
+  - Capacitor (8.4.3):
     - CapacitorCordova
   - CapacitorApp (8.1.1):
     - Capacitor
@@ -1213,7 +1213,7 @@ PODS:
   - CapacitorCamera (8.2.1):
     - Capacitor
     - IONCameraLib (~> 1.0.4)
-  - CapacitorCordova (8.4.2)
+  - CapacitorCordova (8.4.3)
   - CapacitorDevice (8.0.3):
     - Capacitor
   - CapacitorFilesystem (8.1.2):
@@ -1678,11 +1678,11 @@ SPEC CHECKSUMS:
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
-  Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
+  Capacitor: 833166823399794cc4dfbf409a84185cdd99ce2b
   CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
   CapacitorAppLauncher: 43949ccc5aaa5139a1ebe27a98c0a4d76c883fa7
   CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
-  CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorCordova: 63cd8487d6305205acb5ccaa5c4d2b824c6bf2b0
   CapacitorDevice: 708e742b60a61572cd593e44c809592e8f31da14
   CapacitorFilesystem: 2db285a1ac6e475cc27cae2e1bea999000f9e2be
   CapacitorFirebaseAnalytics: 0cdb216fd543a6a1e0ef1c83f9b5c8ed744c634d

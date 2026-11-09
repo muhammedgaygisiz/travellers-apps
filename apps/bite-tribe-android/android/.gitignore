@@ -104,3 +104,7 @@ app/src/main/res/xml/config.xml
 keystore.properties
 *.jks
 *.keystore
+
+# A QA-backed debug build (issue 1221): copy firebase/qa/google-services.json here.
+# The google-services plugin prefers it for debug variants; release keeps app/google-services.json.
+app/src/debug/google-services.json

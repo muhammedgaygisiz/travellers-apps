@@ -292,4 +292,12 @@ ion-popover.app-menu-popover {
   --width: auto;
   --min-width: 200px;
   --max-width: calc(100vw - 32px);
+
+  // Japanese may break between any two characters, so without this the auto
+  // width collapses when Ionic measures the popover beside the menu button,
+  // and the labels still break mid-word. One line per label makes the widest
+  // label the width. See issue #1948.
+  ion-item {
+    white-space: nowrap;
+  }
 }

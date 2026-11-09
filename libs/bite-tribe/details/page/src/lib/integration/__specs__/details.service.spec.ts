@@ -53,6 +53,7 @@ const createMockDataAccess = (
     },
     biteValue: signal(mockBite),
     biteCreatorValue: signal(undefined),
+    taggedUsers: signal([]),
     reviewThreads: signal([]),
     highlightedThreadId: signal(undefined),
     bucketlists: signal([]),

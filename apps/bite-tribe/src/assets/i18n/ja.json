@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "タグ付けできるのは{{max}}人までです。",
   "ate-with-no-candidates": "Biteでタグ付けするには、その人をフォローしてください。",
   "ate-with-unnamed-user": "BiteTribeユーザー",
+  "ate-with-more": "他{{count}}人",
   "get-the-app": "アプリを入手",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "スマートフォンのカメラでコードをスキャンして、BiteTribeをインストールしてください。",
   "download-on-the-app-store": "App Storeからダウンロード",

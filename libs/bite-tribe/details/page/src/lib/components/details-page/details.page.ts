@@ -58,6 +58,7 @@ import { Platform } from '@ionic/angular';
 import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
+import { TaggedUsersComponent } from '../tagged-users/tagged-users.component';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
@@ -94,6 +95,7 @@ const NEW_LIST_NAME_INPUT = 'name';
     LikesComponent,
     StarRatingComponent,
     TagsInputComponent,
+    TaggedUsersComponent,
     RoundDistancePipe,
     CalcDistancePipe,
     ConvertToPreferredCurrencyPipe,
@@ -127,6 +129,12 @@ export class DetailsPage {
   userId = input<string>();
   isAuthenticated = input(false);
   biteCreator = input<PublicUser>();
+
+  /**
+   * The people the creator ate with, already filtered to what this viewer may
+   * see (GitHub issue #1918). Empty hides the row.
+   */
+  taggedUsers = input<PublicUser[]>([]);
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();

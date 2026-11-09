@@ -124,6 +124,7 @@ export class DetailsService {
    */
   biteValue = this.dataAccess.biteValue;
   biteCreatorValue = this.dataAccess.biteCreatorValue;
+  taggedUsers = this.dataAccess.taggedUsers;
   reviewThreads = this.dataAccess.reviewThreads;
   highlightedThreadId = this.dataAccess.highlightedThreadId;
   bucketlists = this.dataAccess.bucketlists;

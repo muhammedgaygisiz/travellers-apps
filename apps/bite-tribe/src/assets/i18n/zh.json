@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "最多可以标记 {{max}} 人。",
   "ate-with-no-candidates": "关注对方后，即可在你的 Bite 中标记。",
   "ate-with-unnamed-user": "一位 BiteTribe 用户",
+  "ate-with-more": "等另外 {{count}} 人",
   "get-the-app": "下载应用",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "用手机相机扫码安装BiteTribe。",
   "download-on-the-app-store": "在App Store下载",

@@ -102,6 +102,22 @@ const BITE_LOAD_RETRY_DELAY_MS = 700;
 /** What a Bite read needs. Undefined means nothing was asked for at all. */
 type BiteRequest = { biteId: string; userId?: string };
 
+/**
+ * The tagged users a viewer is shown (GitHub issue #1918): public profiles
+ * only - a private profile and a deleted account both fail that - and nobody
+ * the viewer blocked.
+ */
+export const visibleTaggedUsers = (
+  users: PublicUser[],
+  blockedUserIds: readonly string[],
+): PublicUser[] => {
+  const blocked = new Set(blockedUserIds);
+
+  return users.filter(
+    (user) => user.public === true && !blocked.has(user.userId),
+  );
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -339,6 +355,51 @@ export class DetailsDataAccessService {
    * take the whole Bite down with it, over a name and an avatar.
    */
   biteCreatorValue = resourceValue(this.biteCreator);
+
+  private readonly blockedUserIds = toSignal(
+    this.storeService.blockedUserIds$,
+    { initialValue: [] as string[] },
+  );
+
+  private readonly taggedUserIds = computed(
+    () => this.biteValue()?.taggedUserIds ?? [],
+    {
+      equal: (a, b) => a.length === b.length && a.every((id, i) => id === b[i]),
+    },
+  );
+
+  taggedUsersLoader: ResourceLoader<PublicUser[], string[]> = async ({
+    params,
+  }) => {
+    const profiles = await Promise.all(
+      params.map((userId) =>
+        // One profile that cannot be read costs that name, never the row.
+        loadVisibleProfile(userId).catch(() => undefined),
+      ),
+    );
+
+    return profiles.filter((user): user is PublicUser => !!user);
+  };
+
+  private readonly taggedUsersResource = resource({
+    params: () => this.taggedUserIds(),
+    loader: this.taggedUsersLoader.bind(this),
+  });
+
+  private readonly loadedTaggedUsers = resourceValue(
+    this.taggedUsersResource,
+    [] as PublicUser[],
+  );
+
+  /**
+   * The people the creator ate with, as this viewer may see them (GitHub
+   * issue #1918): public profiles only, so a tagged user who turned private
+   * or deleted their account is left out, and nobody the viewer blocked.
+   * Kept in the order the creator tagged them.
+   */
+  taggedUsers = computed((): PublicUser[] =>
+    visibleTaggedUsers(this.loadedTaggedUsers(), this.blockedUserIds()),
+  );
 
   saveNewReview(newReview: { review: string; biteId: string }): void {
     this.storeService.saveReview(newReview);

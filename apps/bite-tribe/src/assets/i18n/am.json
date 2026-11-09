@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "እስከ {{max}} ሰዎችን መለያ መስጠት ይችላሉ።",
   "ate-with-no-candidates": "በBiteዎችዎ ውስጥ መለያ ለመስጠት ሰዎችን ይከተሉ።",
   "ate-with-unnamed-user": "የBiteTribe ተጠቃሚ",
+  "ate-with-more": "+{{count}} ተጨማሪ",
   "get-the-app": "መተግበሪያውን ያግኙ",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "BiteTribe ን ለመጫን በስልክዎ ካሜራ አንድ ኮድ ይቃኙ።",
   "download-on-the-app-store": "ከApp Store ያውርዱ",

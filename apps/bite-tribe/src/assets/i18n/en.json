@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "You can tag up to {{max}} people.",
   "ate-with-no-candidates": "Follow people to tag them in your Bites.",
   "ate-with-unnamed-user": "A BiteTribe user",
+  "ate-with-more": "+{{count}} more",
   "get-the-app": "Get the app",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Scan a code with your phone camera to install BiteTribe.",
   "download-on-the-app-store": "Download on the App Store",

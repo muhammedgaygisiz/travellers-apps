@@ -1,0 +1,42 @@
+:host {
+  display: block;
+
+  .tagged-users {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    row-gap: 0.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .label {
+    color: var(--ion-color-medium);
+  }
+
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  // Inline flex drops the template's whitespace around the name, which would
+  // otherwise open a gap before the comma.
+  .link {
+    display: inline-flex;
+    color: var(--ion-color-primary);
+  }
+
+  // The comma belongs to the name before it, so no layout gap can open
+  // between the two; it is not a link and takes the text colour.
+  .link.followed::after {
+    content: ',';
+    color: var(--ion-text-color);
+  }
+
+  .more {
+    color: var(--ion-color-medium);
+  }
+}

@@ -1,4 +1,7 @@
-import { DetailsDataAccessService } from '../details-data-access.service';
+import {
+  DetailsDataAccessService,
+  visibleTaggedUsers,
+} from '../details-data-access.service';
 import { BiteNotFoundError } from '../bite-not-found-error';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
@@ -14,7 +17,7 @@ import {
 } from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from 'geolocation';
-import { Bite, LikeClick } from 'model';
+import { Bite, LikeClick, PublicUser } from 'model';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem } from '@capacitor/filesystem';
@@ -164,6 +167,7 @@ describe(DetailsDataAccessService.name, () => {
             imageUploads$: of(),
             userId$: of(),
             isAuthenticated$: of(),
+            blockedUserIds$: of([]),
             saveReview: jest.fn(),
             saveReviewReply: jest.fn(),
             saveToBucketList: jest.fn(),
@@ -612,6 +616,43 @@ describe(DetailsDataAccessService.name, () => {
         expect(loadVisibleProfile).toHaveBeenCalledWith('test-user-id');
         expect(result).toBe(creator);
       });
+    });
+  });
+
+  describe('tagged users (issue #1918)', () => {
+    const profile = (userId: string, isPublic: boolean): PublicUser =>
+      ({ userId, displayName: userId, public: isPublic }) as PublicUser;
+
+    it('loads every tagged profile and drops one that cannot be read', async () => {
+      jest
+        .mocked(loadVisibleProfile)
+        .mockImplementation(async (userId: string) => {
+          if (userId === 'broken') {
+            throw new Error('offline');
+          }
+
+          return userId === 'gone' ? undefined : profile(userId, true);
+        });
+
+      const result = await service.taggedUsersLoader(
+        loaderParams(['anna', 'broken', 'gone', 'ben']),
+      );
+
+      expect(result.map((user) => user.userId)).toEqual(['anna', 'ben']);
+    });
+
+    it('shows public profiles only, and nobody the viewer blocked', () => {
+      expect(
+        visibleTaggedUsers(
+          [
+            profile('anna', true),
+            profile('private-1', false),
+            profile('blocked-1', true),
+            profile('ben', true),
+          ],
+          ['blocked-1'],
+        ).map((user) => user.userId),
+      ).toEqual(['anna', 'ben']);
     });
   });
 

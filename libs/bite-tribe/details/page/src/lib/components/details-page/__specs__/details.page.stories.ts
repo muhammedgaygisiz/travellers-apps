@@ -269,6 +269,34 @@ export const WithoutTags: Story = {
   },
 };
 
+const taggedPerson = (userId: string, displayName: string): PublicUser =>
+  ({ userId, displayName, public: true }) as PublicUser;
+
+/**
+ * The creator tagged two people they ate with (issue #1918). Each name opens
+ * that profile.
+ */
+export const WithTaggedUsers: Story = {
+  args: {
+    ...Default.args,
+    taggedUsers: [taggedPerson('anna', 'Anna'), taggedPerson('ben', 'Ben')],
+  },
+};
+
+/** Past the second name the rest fold into "+N more". */
+export const WithManyTaggedUsers: Story = {
+  args: {
+    ...Default.args,
+    taggedUsers: [
+      taggedPerson('anna', 'Anna'),
+      taggedPerson('ben', 'Ben'),
+      taggedPerson('chiara', 'Chiara'),
+      taggedPerson('dev', 'Dev'),
+      taggedPerson('emre', 'Emre'),
+    ],
+  },
+};
+
 /** A Bite whose place is known while the reader's position is not. */
 export const WithoutReaderPosition: Story = {
   args: {

@@ -8,6 +8,7 @@ Part of the [SSOT index](../README.md).
 - [Architecture - Auth](auth.md)
 - [Architecture - Capacitor](capacitor.md)
 - [Architecture - Data Access](data-access.md)
+- [Architecture - Environments](environments.md)
 - [Architecture - Firebase](firebase.md)
 - [Architecture - Internationalization](internationalization.md)
 - [Architecture - Nx Workspace](nx-workspace.md)

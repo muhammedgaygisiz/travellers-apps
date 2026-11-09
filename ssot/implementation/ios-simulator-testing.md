@@ -5,8 +5,7 @@
 How to run BiteTribe on an iOS simulator against a real Firebase project.
 Capture sessions and reproducing production content use **production**
 (`bite-tribe`). Anything that writes test data, or rehearses App Check
-enforcement, uses **QA** (`bite-tribe-qa`); see `The QA Project` in
-[Architecture - Firebase](../architecture/firebase.md). The Android counterpart
+enforcement, uses **QA** (`bite-tribe-qa`); see [Architecture - Environments](../architecture/environments.md). The Android counterpart
 is [Implementation - Android Device Testing](android-device-testing.md).
 
 ## One Command

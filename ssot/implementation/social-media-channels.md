@@ -1264,7 +1264,8 @@ there are seven, with Leela added. Malta (5 November 2026) was the first post
 made with the skill end to end. It was also the first to cover a whole country
 rather than a city, the first with restaurant tags and a dish list in the
 caption from the start, and the first with a cover line written for the place.
-Mostar (7 November 2026) and Granada (8 November 2026) followed the same way.
+Mostar (7 November 2026), Granada (8 November 2026) and London (9 November 2026)
+followed the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1331,8 +1332,9 @@ is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
 name only.
 
-**@bitetribeapp follows every account it tags.** As of 8 November 2026 it
-follows all 38 tagged so far, across all eleven posts.
+**@bitetribeapp follows every account it tags.** As of 9 November 2026 it
+follows all 42 featured so far, across all twelve posts. That count includes
+`@chickenshop`, which London names in its caption but could not tag.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
@@ -1406,6 +1408,16 @@ the tomato toast stays untagged. Leela's cover line is "Free tapas, croquetas
 and tostadas below the Alhambra: my Granada favourites". Sharing the post to
 the story with music works only in the mobile app, so it is not part of the
 skill.
+
+**London** (9 November 2026) tags three of five dish slides: `@kachori_london`
+(Dilli butter chicken), `@purezza` (vegan pepperoni pizza) and
+`@aromebakerylondon` (apple miso pie). `@chickenshop` (cheesy fries) never
+appeared in Instagram's tag search, only look-alikes such as
+`@chickenshopdate`, most likely because the account blocks tags. It is named
+in the caption only. Sussex Fish Bar (fish and chips) has no account. Purezza,
+Chicken Shop and Arôme are chains, and each has one London-wide account.
+Leela's cover line is "Fish & chips, a proper curry and a vegan pizza: my
+London favourites".
 
 ## Wiring Back Into The Product
 

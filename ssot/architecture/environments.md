@@ -147,6 +147,17 @@ Recorded on 9 November 2026, when the project was set up:
   all. The same run set the Artifact Registry cleanup policy (`--force`, once,
   by hand). Without that policy `firebase deploy` exits non-zero even after a
   clean deploy, which would have failed the CI job on every push.
+- First CI run, 9 November 2026: `deploy-qa-backend` failed with
+  `403 The caller does not have permission` on
+  `identitytoolkit … config?updateMask=blockingFunctions`. The QA project had
+  `beforeCreate` registered under the old `cloudfunctions.net` URL, so the
+  deploy tried to rewrite the Auth config to the `run.app` one, and the deploy
+  account has no Identity Toolkit admin role. Neither project's deploy
+  account needs one as long as the registered URL already matches.
+  Production's was rewritten once by an owner on 5 September 2026; QA's by
+  redeploying `createUserOnAuthCreate` as an owner, after which the re-run
+  passed. **On a new project, or after moving the function's region, deploy
+  `beforeCreate` once as an owner before CI deploys it.**
 
 ## Code Anchors
 

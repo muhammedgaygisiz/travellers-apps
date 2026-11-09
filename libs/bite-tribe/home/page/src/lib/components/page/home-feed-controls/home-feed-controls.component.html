@@ -13,6 +13,27 @@
         <ion-text color="secondary">{{ 'filter' | transloco }}</ion-text>
       </ion-chip>
     </div>
+
+    <!--
+      The modal lives inside the same @if as its trigger. Rendered while the
+      chip is not, Ionic warns twice that "select-tags" is missing (#1905).
+    -->
+    <ion-modal trigger="select-tags" #modal>
+      <ng-template>
+        <app-type-ahead
+          class="ion-page"
+          [title]="'filters' | transloco"
+          [items]="allTags()"
+          [selectedItems]="selectedFilters()"
+          [distance]="distance()"
+          [currency]="preferedCurrency()"
+          [price]="maxPriceFilter()"
+          (selectionChange)="onFilterChange($event, modal)"
+          (selectionCancel)="modal.dismiss()"
+          (clearFilters)="onFiltersClear(modal)"
+        />
+      </ng-template>
+    </ion-modal>
   }
 
   @if (showSearchChip()) {
@@ -64,20 +85,3 @@
     </ion-chip>
   </div>
 </div>
-
-<ion-modal trigger="select-tags" #modal>
-  <ng-template>
-    <app-type-ahead
-      class="ion-page"
-      [title]="'filters' | transloco"
-      [items]="allTags()"
-      [selectedItems]="selectedFilters()"
-      [distance]="distance()"
-      [currency]="preferedCurrency()"
-      [price]="maxPriceFilter()"
-      (selectionChange)="onFilterChange($event, modal)"
-      (selectionCancel)="modal.dismiss()"
-      (clearFilters)="onFiltersClear(modal)"
-    />
-  </ng-template>
-</ion-modal>

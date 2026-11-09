@@ -9,6 +9,7 @@ import {
 } from 'bite-tribe/onboarding-guards';
 import { OnboardingContainerComponent } from 'bite-tribe/onboarding';
 import { PATH, PUBLIC_MENU_RESTAURANT_PARAM } from 'utils';
+import { withUnknownRoute } from './with-unknown-route';
 
 const APP_ROUTES: Routes = [
   {
@@ -388,7 +389,9 @@ const ONBOARDING_ROUTE: Route = {
   canActivate: [authGuard, onboardingCompletedGuard],
 };
 
-export const ROUTES: Routes = withAuthRoutes([
-  ...gateAuthenticatedRoutes(APP_ROUTES, authGuard),
-  ONBOARDING_ROUTE,
-]);
+export const ROUTES: Routes = withUnknownRoute(
+  withAuthRoutes([
+    ...gateAuthenticatedRoutes(APP_ROUTES, authGuard),
+    ONBOARDING_ROUTE,
+  ]),
+);

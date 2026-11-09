@@ -48,6 +48,15 @@ describe('HomeFeedControlsComponent', () => {
     expect(fixture.nativeElement.querySelector('#select-tags')).toBeNull();
   });
 
+  it('should not render the filter modal without its trigger chip', () => {
+    fixture.componentRef.setInput('showFilters', false);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('ion-modal[trigger="select-tags"]'),
+    ).toBeNull();
+  });
+
   it('should show the number of active filters', () => {
     fixture.componentRef.setInput('selectedFilters', ['filter1', 'filter2']);
     fixture.componentRef.setInput('distance', 5);

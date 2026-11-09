@@ -98,6 +98,45 @@ Regenerate the icons whenever the production icon changes:
 node tools/generate-stage-icons.mjs
 ```
 
+## App Check Enforcement On QA
+
+QA enforces App Check exactly like production: on Authentication, Firestore and
+Storage at the server, and with the client gate on (`NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED`
+is `true` in `qa.json`, as `native-release.yml` sets it for production native
+builds). A QA build therefore needs a registered debug token, on the matching
+QA app, before it can do anything.
+
+| Platform           | Token                                                                                              | Registered under                            |
+| ------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| iOS simulator      | `BITETRIBE_IOS_APP_CHECK_DEBUG_TOKEN` in `apps/bite-tribe-ios/.env`, passed at launch              | App Check, iOS app, Manage debug tokens     |
+| Android `qa` build | the secret the debug provider logs on first launch (`Enter this debug secret into the allow list`) | App Check, Android app, Manage debug tokens |
+
+The Android secret lives in the app's data, so **a reinstall over a different
+build, or clearing the app's data, makes a new one**. Register it again.
+
+### Rehearsal, 9 November 2026
+
+- iOS simulator: sign-up, every onboarding step, the profile photo upload to
+  Storage and the resend-verification callable all succeeded under
+  enforcement. Every callable logged `Callable request verification passed`.
+- Android emulator: sign-in and the feed succeeded under enforcement. An
+  unregistered secret ended on the "Extra security check needed" gate, as
+  designed.
+- No token at all: QA Authentication answered
+  `401 Firebase App Check token is invalid.`
+
+### Limits Of QA On Android
+
+- **Google sign-in does not work against QA on Android.** An Android OAuth
+  client for `com.bitetribe.app` with a given certificate can exist in only one
+  Google project, and production holds it, so QA's Android app has the two
+  SHA-256 fingerprints (Play Integrity) but not the SHA-1s. Email and password
+  work. iOS is unaffected.
+- **Emulator traps.** After a cold boot the app's DNS can fail while the shell
+  resolves (`Unable to resolve host`); start the emulator with
+  `-dns-server 8.8.8.8`. Booting without `-no-snapshot-load` restores the AVD's
+  quick-boot snapshot, including whatever build was installed then.
+
 ## Native API Key
 
 In a packaged native build the WebView origin is `capacitor://localhost`, and
@@ -147,6 +186,17 @@ Recorded on 9 November 2026, when the project was set up:
   all. The same run set the Artifact Registry cleanup policy (`--force`, once,
   by hand). Without that policy `firebase deploy` exits non-zero even after a
   clean deploy, which would have failed the CI job on every push.
+- First CI run, 9 November 2026: `deploy-qa-backend` failed with
+  `403 The caller does not have permission` on
+  `identitytoolkit … config?updateMask=blockingFunctions`. The QA project had
+  `beforeCreate` registered under the old `cloudfunctions.net` URL, so the
+  deploy tried to rewrite the Auth config to the `run.app` one, and the deploy
+  account has no Identity Toolkit admin role. Neither project's deploy
+  account needs one as long as the registered URL already matches.
+  Production's was rewritten once by an owner on 5 September 2026; QA's by
+  redeploying `createUserOnAuthCreate` as an owner, after which the re-run
+  passed. **On a new project, or after moving the function's region, deploy
+  `beforeCreate` once as an owner before CI deploys it.**
 
 ## Code Anchors
 

@@ -596,11 +596,15 @@ dependency, and that plays the platform's own haptic primitive:
   place of `release` (below); the value modifies the surfaces under it and does
   not make its own element pressable. On `pointerdown` the `bt-pressed` class is added and `press` is
   played in the same handler, so what is seen and what is felt start on the same
-  frame. A surface inside `ion-content` waits 150 ms (`SCROLL_INTENT_MS`) before
-  doing either, because every scroll starts with a touch-down on whatever is
-  under the thumb: a scroll or swipe that declares itself within the wait plays
-  nothing at all, and a tap that lifts sooner plays `press` on the lift and
-  `release` 70 ms later (`TAP_PRESS_MS`) (issue [#1872]). Surfaces outside it - toolbars, the tab
+  frame. A surface inside `ion-content` waits until the finger has rested for
+  50 ms (`SCROLL_INTENT_MS`) before doing either, because every scroll starts
+  with a touch-down on whatever is under the thumb (issue [#1872]): a finger
+  moving more than 3 px (`REST_JITTER_PX`) starts the wait over, and a scroll or
+  swipe that declares itself plays nothing at all. A tap that lifts sooner plays
+  only the `press` haptic: its click may start a page transition on that lift,
+  so no press animation or second tick may be left to run behind it. The wait is
+  short so that an ordinary tap is still down when it runs out and gives way
+  under the finger. Surfaces outside it - toolbars, the tab
   bar - and an `ion-alert`'s buttons have nothing scrolling under them and press
   on touch-down. A cancel - `pointercancel`, which is also how the browser reports a
   scroll taking the gesture over, the pointer leaving the surface, a touch-up

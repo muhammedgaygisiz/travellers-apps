@@ -13,7 +13,7 @@ jest.mock('utils', () => ({
 const RECIPIENT = 'user-1';
 
 describe(toNotificationTarget.name, () => {
-  it.each(['NEW_BITE', 'NEW_BITE_REVIEW', 'NEW_BITE_LIKE'])(
+  it.each(['NEW_BITE', 'NEW_BITE_REVIEW', 'NEW_BITE_LIKE', 'BITE_TAGGED'])(
     'targets the bite of a %s notification',
     (type) => {
       expect(

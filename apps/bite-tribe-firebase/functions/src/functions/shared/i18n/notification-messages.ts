@@ -35,6 +35,8 @@ export type NotificationMessageKey =
   | 'newBite.bodyWithName'
   | 'newFollower.title'
   | 'newFollower.body'
+  | 'biteTagged.title'
+  | 'biteTagged.body'
   | 'newLike.title'
   | 'newLike.body'
   | 'newReview.title'

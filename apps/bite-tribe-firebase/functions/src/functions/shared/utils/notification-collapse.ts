@@ -61,6 +61,7 @@ export const buildCollapseKey = (
     case 'NEW_BITE':
     case 'NEW_BITE_REVIEW':
     case 'NEW_BITE_LIKE':
+    case 'BITE_TAGGED':
       return buildKey(type, data['biteId']);
 
     case 'NEW_REVIEW_REPLY':

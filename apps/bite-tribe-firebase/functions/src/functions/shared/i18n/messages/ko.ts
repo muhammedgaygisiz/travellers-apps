@@ -22,6 +22,8 @@ export const ko: NotificationMessages = {
   'newBite.bodyWithName': '{{author}}님이 새 Bite를 만들었어요: {{bite}}',
   'newFollower.title': '새 팔로워!',
   'newFollower.body': '{{follower}}님이 나를 팔로우해요',
+  'biteTagged.title': 'Bite에 태그되었어요',
+  'biteTagged.body': '{{creator}}님이 Bite에 나를 태그했어요: {{bite}}',
   'newLike.title': '누군가 내 Bite를 좋아해요!',
   'newLike.body': '{{liker}}님이 내 Bite를 좋아해요: "{{bite}}"',
   'newReview.title': '내 Bite에 새 리뷰가 달렸어요!',

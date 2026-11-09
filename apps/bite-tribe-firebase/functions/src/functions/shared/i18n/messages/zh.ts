@@ -21,6 +21,8 @@ export const zh: NotificationMessages = {
   'newBite.bodyWithName': '{{author}}刚刚发布了一个新Bite：{{bite}}',
   'newFollower.title': '新粉丝！',
   'newFollower.body': '{{follower}}关注了你。',
+  'biteTagged.title': '你在一个 Bite 中被标记了',
+  'biteTagged.body': '{{creator}}在 Bite 中标记了你：{{bite}}',
   'newLike.title': '你的Bite收到了点赞！',
   'newLike.body': '{{liker}}赞了你的Bite“{{bite}}”。',
   'newReview.title': '你的Bite有了新评价！',

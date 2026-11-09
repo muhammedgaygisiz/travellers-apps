@@ -36,6 +36,7 @@ clear, and which installations they are delivered to.
 - Notification text arrives in the language the user chose in settings, not in English.
 - Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
 - A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
+- A user the creator tags in a Bite is told so with `BITE_TAGGED`, and tapping it opens the Bite. See the Tagged User Contract below.
 
 ## Notification Navigation Contract
 
@@ -201,6 +202,26 @@ extends review notifications from one recipient to a conversation. Implemented b
 - The copy follows the Localization Contract, so `newReviewReply` keys are added
   to every catalog rather than to English alone.
 
+## Tagged User Contract
+
+Issue [#1919], part of epic [#1915], tells a user they were tagged in somebody's
+Bite, so they know and can take themselves off it:
+
+- The type is `BITE_TAGGED`, carrying `biteId`. It opens the Bite under the
+  Notification Navigation Contract, and its collapse key is `BITE_TAGGED:<biteId>`,
+  so the Bite is its surface like every other notification about a Bite and
+  opening the Bite clears it.
+- It is sent by the trigger that validates the tags,
+  `validateBiteTaggedUsersOnWrite`, after the validation: a uid the trigger
+  removes is never told.
+- Only the uids a write adds are told. Re-saving a Bite without adding anybody
+  sends nothing, and the trigger's own correcting write tells nobody again.
+- Nobody is told while the Bite is not listable, because it would open as a Bite
+  that does not exist. When its photo finishes uploading, every tagged user who
+  passes the tagging checks at that moment is told at once.
+- The copy is `biteTagged` and follows the Localization Contract. It names the
+  creator only when the creator's profile is public, and says "Someone" otherwise.
+
 ## Installation Contract
 
 Issue [#1184]
@@ -285,6 +306,7 @@ Relevant.
 - Issue [#1194] is the Release Announcement Contract above - an operator-fired, per-platform new-version notification. Closed.
 - Issue [#1212] is the Country Badge Contract above - a profile's first Bite in a new country becomes an engagement signal. Closed.
 - Issue [#1283] is the Review Thread Contract above - a reply fans out to every thread participant, not just the Bite creator. Closed. Shared with [UC - Inspect Bite Details](uc-inspect-bite-details.md), which owns the thread UI this fan-out targets.
+- Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915]. Open.
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
@@ -310,3 +332,5 @@ Relevant.
 [#1244]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1244
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1366]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1366
+[#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
+[#1919]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1919

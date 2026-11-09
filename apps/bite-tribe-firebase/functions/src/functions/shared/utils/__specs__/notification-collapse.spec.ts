@@ -5,6 +5,9 @@ describe('buildCollapseKey', () => {
     expect(buildCollapseKey({ type: 'NEW_BITE_LIKE', biteId: 'bite1' })).toBe(
       'NEW_BITE_LIKE:bite1',
     );
+    expect(buildCollapseKey({ type: 'BITE_TAGGED', biteId: 'bite1' })).toBe(
+      'BITE_TAGGED:bite1',
+    );
     expect(buildCollapseKey({ type: 'NEW_BITE_REVIEW', biteId: 'bite1' })).toBe(
       'NEW_BITE_REVIEW:bite1',
     );

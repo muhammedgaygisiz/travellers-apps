@@ -23,6 +23,8 @@ export const ar: NotificationMessages = {
   'newBite.bodyWithName': 'Bite جديد من {{author}}: {{bite}}',
   'newFollower.title': 'متابعة جديدة!',
   'newFollower.body': 'متابعة جديدة من {{follower}}.',
+  'biteTagged.title': 'تمت الإشارة إليك في Bite',
+  'biteTagged.body': 'أشار {{creator}} إليك في Bite: {{bite}}',
   'newLike.title': 'إعجاب جديد على Bite الخاص بك!',
   'newLike.body': 'إعجاب من {{liker}} بـ Bite «{{bite}}» الخاص بك.',
   'newReview.title': 'مراجعة جديدة على Bite الخاص بك!',

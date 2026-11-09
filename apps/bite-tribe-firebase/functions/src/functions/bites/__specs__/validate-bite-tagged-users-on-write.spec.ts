@@ -21,6 +21,13 @@ jest.mock('firebase-functions/firestore', () => ({
   onDocumentWritten: jest.fn((_document, handler) => handler),
 }));
 
+const notifyTaggedUsers = jest.fn();
+
+jest.mock('../../notifications/notify-tagged-users', () => ({
+  notifyTaggedUsers: (...args: unknown[]): unknown =>
+    notifyTaggedUsers(...args),
+}));
+
 import { validateBiteTaggedUsersOnWrite } from '../validate-bite-tagged-users-on-write';
 import { MAX_TAGGED_USERS } from '../bite-tagged-users';
 
@@ -215,5 +222,82 @@ describe('validateBiteTaggedUsersOnWrite', () => {
   it('ignores a deleted Bite', async () => {
     await expect(write(bite([FRIEND]), undefined)).resolves.toBeUndefined();
     expect(updateSpy).not.toHaveBeenCalled();
+  });
+});
+
+/** Issue #1919: who is told they were tagged. */
+describe('validateBiteTaggedUsersOnWrite notifications', () => {
+  const listable = (taggedUserIds?: unknown): Record<string, unknown> => ({
+    ...bite(taggedUserIds),
+    imageStatus: 'uploaded',
+  });
+  const pending = (taggedUserIds?: unknown): Record<string, unknown> => ({
+    ...bite(taggedUserIds),
+    imageStatus: 'pending',
+  });
+  const notified = (): string[][] =>
+    notifyTaggedUsers.mock.calls.map((call) => call[3] as string[]);
+
+  beforeEach(() => {
+    db = createFakeFirestore();
+    db.seed(`users/${CREATOR}`, { userId: CREATOR, public: true });
+    seedTaggable(FRIEND);
+    seedTaggable(OTHER_FRIEND);
+    notifyTaggedUsers.mockReset().mockResolvedValue(undefined);
+  });
+
+  it('tells each user a write to a listable Bite adds, once', async () => {
+    await write(listable([FRIEND]), listable([FRIEND, OTHER_FRIEND]));
+
+    expect(notified()).toEqual([[OTHER_FRIEND]]);
+    expect(notifyTaggedUsers.mock.calls[0][1]).toBe('bite-1');
+  });
+
+  it('tells nobody when a re-save adds nobody', async () => {
+    await write(listable([FRIEND, OTHER_FRIEND]), {
+      ...listable([FRIEND, OTHER_FRIEND]),
+      name: 'Ramen, renamed',
+    });
+
+    expect(notifyTaggedUsers).not.toHaveBeenCalled();
+  });
+
+  it('never tells a user the trigger removed', async () => {
+    db.seed('users/stranger', { userId: 'stranger', public: true });
+
+    await write(listable([FRIEND]), listable([FRIEND, 'stranger']));
+
+    expect(notifyTaggedUsers).not.toHaveBeenCalled();
+    expect(tagged()).toEqual([FRIEND]);
+  });
+
+  it('tells nobody until the photo has uploaded, then everybody valid', async () => {
+    db.seed('users/stranger', { userId: 'stranger', public: true });
+
+    await write(undefined, pending([FRIEND, OTHER_FRIEND]));
+    expect(notifyTaggedUsers).not.toHaveBeenCalled();
+
+    // The photo landed before the trigger had checked a stray uid.
+    await write(
+      pending([FRIEND, OTHER_FRIEND, 'stranger']),
+      listable([FRIEND, OTHER_FRIEND, 'stranger']),
+    );
+
+    expect(notified()).toEqual([[FRIEND, OTHER_FRIEND]]);
+  });
+
+  it('tells the users of a Bite created listable', async () => {
+    await write(undefined, listable([FRIEND]));
+
+    expect(notified()).toEqual([[FRIEND]]);
+  });
+
+  it('does not tell anybody again when its own correction lands', async () => {
+    db.seed('users/stranger', { userId: 'stranger', public: true });
+
+    await write(listable([]), listable([FRIEND, 'stranger']));
+    await write(listable([FRIEND, 'stranger']), listable([FRIEND]));
+
+    expect(notified()).toEqual([[FRIEND]]);
   });
 });

@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "Tu peux identifier jusqu'à {{max}} personnes.",
   "ate-with-no-candidates": "Suis des personnes pour les identifier dans tes Bites.",
   "ate-with-unnamed-user": "Un utilisateur BiteTribe",
+  "ate-with-more": "+{{count}} de plus",
   "get-the-app": "Obtenir l'application",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "Scannez un code avec l'appareil photo de votre téléphone pour installer BiteTribe.",
   "download-on-the-app-store": "Télécharger dans l'App Store",

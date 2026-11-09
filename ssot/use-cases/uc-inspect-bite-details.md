@@ -25,6 +25,7 @@ nothing, and how a review and its thread are attributed.
 - User opens a Bite detail page.
 - The page shows the food experience in context.
 - A public creator profile identifies who shared the Bite.
+- Under the creator, an `Ate with` row names the people the creator tagged, each name opening that profile (issue [#1918], epic [#1915]). Two names show and the rest fold into `+N more`, which unfolds in place; it is a label followed by names rather than a sentence, so no language has to fit names into one word order. A tagged user whose profile is private or whose account is gone is left out, as is anybody the viewer blocked, and a Bite with nobody left to show renders no row, under the `Absent Field Contract` below. Which uids a Bite may carry is [Bite](../domain/bite.md)'s.
 - The page shows the Bite's distance from the user's current position and converts its price into the user's preferred currency.
 - User can share the Bite through the device share sheet, including WhatsApp when available.
   The message is the price and rating, or a fallback line, followed by the Bite's link, which
@@ -305,6 +306,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker. Closed.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card. Closed.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
+- Issue [#1918] is the `Ate with` row, part of epic [#1915]. Open.
 
 ## Related Domains
 
@@ -339,3 +341,5 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1775]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1775
+[#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
+[#1918]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1918

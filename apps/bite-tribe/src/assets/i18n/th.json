@@ -820,6 +820,7 @@
   "ate-with-limit-reached": "แท็กได้สูงสุด {{max}} คน",
   "ate-with-no-candidates": "ติดตามผู้คนเพื่อแท็กพวกเขาใน Bite ของคุณ",
   "ate-with-unnamed-user": "ผู้ใช้ BiteTribe",
+  "ate-with-more": "อีก {{count}} คน",
   "get-the-app": "ดาวน์โหลดแอป",
   "scan-a-code-with-your-phone-camera-to-install-bite-tribe": "สแกนโค้ดด้วยกล้องโทรศัพท์ของคุณเพื่อติดตั้ง BiteTribe",
   "download-on-the-app-store": "ดาวน์โหลดบน App Store",

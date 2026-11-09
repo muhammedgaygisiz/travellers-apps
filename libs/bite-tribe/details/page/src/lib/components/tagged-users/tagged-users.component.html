@@ -1,0 +1,26 @@
+@if (users().length > 0) {
+  <div class="tagged-users" data-testid="tagged-users">
+    <span class="label">{{ 'ate-with-label' | transloco }}</span>
+    @for (user of shownUsers(); track user.userId; let last = $last) {
+      <button
+        type="button"
+        class="link"
+        data-testid="tagged-user"
+        [class.followed]="!last || hiddenCount() > 0"
+        (click)="openProfile.emit(user)"
+      >
+        {{ user.displayName }}
+      </button>
+    }
+    @if (hiddenCount() > 0) {
+      <button
+        type="button"
+        class="more"
+        data-testid="tagged-users-more"
+        (click)="expanded.set(true)"
+      >
+        {{ 'ate-with-more' | transloco: { count: hiddenCount() } }}
+      </button>
+    }
+  </div>
+}

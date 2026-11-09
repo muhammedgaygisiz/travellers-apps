@@ -54,6 +54,7 @@ describe(DetailsContainer.name, () => {
             },
             biteValue: biteSignal,
             biteCreatorValue: signal(undefined),
+            taggedUsers: signal([]),
             position: {
               value: signal(undefined),
               error: signal(undefined),

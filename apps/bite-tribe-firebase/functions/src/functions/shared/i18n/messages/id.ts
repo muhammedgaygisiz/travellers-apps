@@ -25,6 +25,8 @@ export const id: NotificationMessages = {
   'newBite.bodyWithName': '{{author}} baru saja membuat Bite baru: {{bite}}',
   'newFollower.title': 'Pengikut baru!',
   'newFollower.body': '{{follower}} sekarang mengikutimu.',
+  'biteTagged.title': 'Kamu ditandai di sebuah Bite',
+  'biteTagged.body': '{{creator}} menandaimu di sebuah Bite: {{bite}}',
   'newLike.title': 'Suka baru untuk Bite-mu!',
   'newLike.body': '{{liker}} menyukai Bite-mu "{{bite}}".',
   'newReview.title': 'Ulasan baru untuk Bite-mu!',

@@ -22,6 +22,8 @@ export const am: NotificationMessages = {
   'newBite.bodyWithName': '{{author}} አዲስ Bite ፈጥረዋል፦ {{bite}}',
   'newFollower.title': 'አዲስ ተከታይ!',
   'newFollower.body': '{{follower}} አሁን ይከተሉዎታል።',
+  'biteTagged.title': 'በBite ውስጥ መለያ ተሰጥቶዎታል',
+  'biteTagged.body': '{{creator}} በBite ውስጥ መለያ ሰጥተውዎታል፦ {{bite}}',
   'newLike.title': 'በBite ላይ አዲስ ውዴታ!',
   'newLike.body': '{{liker}} የእርስዎን Bite «{{bite}}» ወደዋል።',
   'newReview.title': 'በBite ላይ አዲስ ግምገማ!',

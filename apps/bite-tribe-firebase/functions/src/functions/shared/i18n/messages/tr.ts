@@ -24,6 +24,8 @@ export const tr: NotificationMessages = {
   'newBite.bodyWithName': '{{author}} yeni bir Bite oluşturdu: {{bite}}',
   'newFollower.title': 'Yeni takipçi!',
   'newFollower.body': '{{follower}} artık seni takip ediyor.',
+  'biteTagged.title': "Bir Bite'ta etiketlendin",
+  'biteTagged.body': "{{creator}} seni bir Bite'ta etiketledi: {{bite}}",
   'newLike.title': "Bite'ına yeni beğeni!",
   'newLike.body': '{{liker}}, "{{bite}}" adlı Bite\'ını beğendi.',
   'newReview.title': "Bite'ına yeni yorum!",

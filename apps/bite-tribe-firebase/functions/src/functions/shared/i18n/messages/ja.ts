@@ -24,6 +24,9 @@ export const ja: NotificationMessages = {
   'newBite.bodyWithName': '{{author}}さんが新しいBiteを作成しました: {{bite}}',
   'newFollower.title': '新しいフォロワー！',
   'newFollower.body': '{{follower}}さんがあなたをフォローしました。',
+  'biteTagged.title': 'Biteでタグ付けされました',
+  'biteTagged.body':
+    '{{creator}}さんがBiteであなたをタグ付けしました: {{bite}}',
   'newLike.title': 'あなたのBiteにいいねが付きました！',
   'newLike.body': '{{liker}}さんがあなたのBite「{{bite}}」にいいねしました。',
   'newReview.title': 'あなたのBiteに新しいレビューが付きました！',

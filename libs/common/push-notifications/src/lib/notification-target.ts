@@ -56,6 +56,7 @@ export const toNotificationTarget = (
     case 'NEW_BITE':
     case 'NEW_BITE_REVIEW':
     case 'NEW_BITE_LIKE':
+    case 'BITE_TAGGED':
       return data['biteId']
         ? { commands: [PATH.BITE, data['biteId']] }
         : undefined;

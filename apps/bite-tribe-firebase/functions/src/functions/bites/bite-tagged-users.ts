@@ -1,4 +1,5 @@
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
+import { isListableBite } from '../shared/utils/bite-listability';
 import {
   BLOCKED_BY_SUBCOLLECTION,
   BLOCKED_SUBCOLLECTION,
@@ -173,6 +174,44 @@ export const taggedUserIdsToWrite = async (
   return Array.isArray(stored) && sameList(storedList as string[], valid)
     ? undefined
     : valid;
+};
+
+/**
+ * Who a write to a Bite should tell they were tagged (GitHub issue #1919).
+ *
+ * Nobody while the Bite is not listable: its photo has not uploaded, so the
+ * Bite would open as one that does not exist. The moment it becomes
+ * listable, every valid tagged user is told at once - they were added while
+ * nobody could see the Bite. After that, only the uids a write adds.
+ *
+ * `valid` is the list the write leaves behind once checked, so a uid the
+ * trigger removes is never told. On the listability transition the stored
+ * list may not have been checked yet - the photo can land before the
+ * trigger of the write that added a uid has run - so every uid is checked
+ * there as though it had just been added.
+ */
+export const taggedUserIdsToNotify = async (
+  db: Firestore,
+  before: unknown,
+  after: unknown,
+  valid: readonly string[],
+): Promise<string[]> => {
+  if (!after || !isListableBite(after as { imageStatus?: unknown })) {
+    return [];
+  }
+
+  const wasListable =
+    !!before && isListableBite(before as { imageStatus?: unknown });
+
+  if (wasListable) {
+    const previous = new Set(taggedUserIdsOf(before));
+
+    return valid.filter((uid) => !previous.has(uid));
+  }
+
+  const checked = new Set(await validTaggedUserIds(db, undefined, after));
+
+  return valid.filter((uid) => checked.has(uid));
 };
 
 /**

@@ -24,6 +24,8 @@ export const th: NotificationMessages = {
   'newBite.bodyWithName': '{{author}} เพิ่งสร้าง Bite ใหม่: {{bite}}',
   'newFollower.title': 'ผู้ติดตามใหม่!',
   'newFollower.body': '{{follower}} กำลังติดตามคุณแล้ว',
+  'biteTagged.title': 'คุณถูกแท็กใน Bite',
+  'biteTagged.body': '{{creator}} แท็กคุณใน Bite: {{bite}}',
   'newLike.title': 'มีคนถูกใจ Bite ของคุณ!',
   'newLike.body': '{{liker}} ถูกใจ Bite "{{bite}}" ของคุณ',
   'newReview.title': 'มีรีวิวใหม่ใน Bite ของคุณ!',

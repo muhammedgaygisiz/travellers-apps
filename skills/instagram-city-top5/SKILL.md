@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -55,15 +55,31 @@ Steps 2 and 5 are **gates**. Stop and wait for the user's answer.
 
 The user's Chrome (Claude in Chrome), signed in to `https://bitetribe.app` - not the built-in browser. If it is not signed in, ask the user to sign in; never type a password.
 
-1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the city's country. The country search returns every Bite in the country, so keep only the ones in or near the city. A city search would miss nearby places. The cards do not show a city, though, so for a country with many Bites (Thailand had 165) use the **City** filter instead and add nearby places from the map view if needed.
+1. Open `https://bitetribe.app/search`, pick the **Country** filter and select the city's country. The country search returns every Bite in the country, so keep only the ones in or near the city. A city search would miss nearby places. The cards do not show a city, though. For a country with many Bites (Thailand had 165, Türkiye 809), read the country search's response instead: it carries each Bite's `position` and `rating`. Wrap `window.fetch` before picking the country, then filter the `searchBitesByCountry` response to a box around the city:
+   ```js
+   window.__cap = [];
+   const f = window.fetch;
+   window.fetch = async (...a) => {
+     const r = await f(...a);
+     if (/searchBitesByCountry/.test(String(a[0]?.url ?? a[0])))
+       r.clone()
+         .text()
+         .then((t) => window.__cap.push(t));
+     return r;
+   };
+   // pick the country (pick another one first if it is already selected), then:
+   const bites = JSON.parse(window.__cap.at(-1)).result;
+   bites.filter((b) => b.position?.latitude > 38.55 && b.position.latitude < 38.83 && b.position.longitude > 35.25 && b.position.longitude < 35.7);
+   ```
+   Do not rely on the **City** filter alone. It returns at most 20 Bites from a 15 km circle, taken in geohash order rather than by distance, so further searches near the city return the same 20. Kayseri showed 52 Bites over ten district searches, while the map showed 129. Open `/bite/<id>` for the author, the district and the reactions.
 2. Read the cards with JavaScript rather than screenshots: `document.querySelectorAll('bt-bite')`, the title from the card's first line, the stars from `star-rating ion-icon.filled`.
 3. Shortlist five-star Bites, **preferring local dishes** (Pašticada in Split, bryndzové halušky in Bratislava) over pizza, burgers, ramen and coffee. A Bite from a nearby place (Hvar for Split) is fine - the cover names the city.
 
 ### 2. Gate: the user approves the five
 
-List the five with restaurant and author, plus two or three local alternatives, and state what Leela will say on the cover and the closing slide.
+List the five with restaurant and author, plus two or three local alternatives, and state what Leela will say on the cover and the closing slide. Include a draft description for each dish (step 4).
 
-**Write Leela's cover line for the place; do not reuse the generic greeting** (user's call, 5 November 2026). Start it with "Hi, I'm Leela!" and end it with 👉. In between, name something local: the dishes in this post, or the island or region it covers. For Malta it was "From ftira to fenek, here are my favourite bites across Malta & Gozo". Keep it to four lines in the bubble, about 90 characters, and check the cover after rendering. The closing line stays the default.
+**Write Leela's cover line for the place; do not reuse the generic greeting** (user's call, 5 November 2026). Start it with "Hi, I'm Leela!" and end it with 👉. In between, name something local: the dishes in this post, or the island or region it covers. For Malta it was "From ftira to fenek, here are my favourite bites across Malta & Gozo". Vary its shape from post to post: after several "From X to Y" lines, the user asked for something different, and Kayseri got "Kayseri is mantı country, but wait till you see the rest". Keep it to four lines in the bubble, about 90 characters, and check the cover after rendering. The closing line stays the default.
 
 **Any shared Bite can be used, whoever posted it.** The product owner confirmed this on 5 November 2026, so [#1772](https://github.com/muhammedgaygisiz/travellers-apps/issues/1772) does not block these posts. Still list each Bite's author, which shows on the Bite's detail page.
 
@@ -122,6 +138,8 @@ Write a config next to the photos, shaped like [scripts/example-bratislava.json]
 - `leela.cover` is the place-specific line from step 2; always set it. `leela.outro` is optional and defaults to the closing line. The cover default exists only as a fallback.
 - `cityFontSize` is optional and defaults to 190. Lower it for a city name longer than about ten letters.
 - Each Bite takes `name`, `place`, `stars`, `emojis`, `count` and `photo`, plus an optional `where` that overrides the config's.
+- Each Bite takes a `description`: one or two sentences, about 120 characters, on what the dish is, drawn under the card. Draft them at the gate in step 2, and have the user check any you are not sure of. The Kayseri draft got pöç wrong.
+- `stars: 0` (an unrated Bite) draws no star row instead of five empty stars.
 - Each Bite can also take an `instagram` handle (without `@`). It is not drawn on the slides. It is kept in the config as the record for the caption and the tags.
 - Paths resolve against the config's folder.
 

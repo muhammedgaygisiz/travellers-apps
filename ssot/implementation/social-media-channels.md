@@ -1347,7 +1347,8 @@ made with the skill end to end. It was also the first to cover a whole country
 rather than a city, the first with restaurant tags and a dish list in the
 caption from the start, and the first with a cover line written for the place.
 Mostar (7 November 2026), Granada (8 November 2026), London and Chiang Mai
-(both 9 November 2026) followed the same way.
+(both 9 November 2026) followed the same way. Kayseri (10 November 2026) was
+the first with a short description of each dish under its card.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1369,7 +1370,10 @@ Filed as [#1886].
    the Bite's original photo, its stars and its reactions. The cards are
    redrawn, not screenshotted, because a search card is 458px wide at the web
    app's device pixel ratio of 1, and a screenshot of it is too soft for a
-   1080px slide.
+   1080px slide. From Kayseri on, each card has a description of the dish
+   under it, about 120 characters long, so that someone who has never eaten
+   it knows what it is. The card moves up to make room. A Bite with no rating
+   shows no star row, not five empty stars.
 3. **The closing slide.** Leela asks people to follow @bitetribeapp and try
    the app, above the handle and "Available on iOS and Android".
 
@@ -1384,6 +1388,18 @@ The dishes come from the web app's country search rather than a city search, so
 a nearby place counts: the Split post includes a squid from Hvar. **Local
 dishes are preferred** over pizza, burgers or coffee, and the product owner
 approves the five before anything is rendered.
+
+**The city search shows only 20 Bites, and not the nearest 20.**
+`searchBitesByCity` takes the first 20 visible Bites inside a 15 km circle in
+geohash order, so several searches around one city return the same cut. For
+Kayseri it showed 52 Bites over ten district searches, while the map had 129.
+The full list is the country search's response: `searchBitesByCountry` returns
+every Bite with its `position` and `rating` (809 for Türkiye), so filtering
+that response to a box around the city lists them all.
+
+**The descriptions are checked with the product owner.** The first draft
+called pöç a lamb's rump. It is the beef tail and tail root, which the product
+owner corrected before the post went up.
 
 **Any shared Bite can be used, whoever posted it.** The product owner
 confirmed this on 5 November 2026, so [#1772] does not block these posts. The
@@ -1414,8 +1430,8 @@ is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
 name only.
 
-**@bitetribeapp follows every account it tags.** As of 9 November 2026 it
-follows all 44 featured so far, across all thirteen posts. That count includes
+**@bitetribeapp follows every account it tags.** As of 10 November 2026 it
+follows all 48 featured so far, across all fourteen posts. That count includes
 `@chickenshop`, which London names in its caption but could not tag.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
@@ -1510,6 +1526,19 @@ look-alike, `@mangoaddict___`, has no posts and no address. The Thailand
 country search returned 165 Bites with no city on the cards, so the five came
 from the City filter instead. Leela's cover line is "Khao soi, night-market
 roti and fresh mango: my Chiang Mai favourites".
+
+**Kayseri** (10 November 2026) tags four of five dish slides:
+`@ananinsofrasii` (Kayseri mantısı; "Ana'nın Sofrası Kayseri", mantı in the
+bio, several branches), `@sinanchefofficial` (kuzu kaburga dolma; bio address
+Yukarı Mah., Talas, where the Bite's pin is), `@tarihikayserikelletavapoc`
+(pöç tandır; the exact name, with pöç tandır in the bio) and
+`@dikbaserkellepaca` (yarım kelle; bio gives Camikebir, Kayseri). Mülhem
+Kayseri Mutfağı (yağlama), run by the city's culinary arts centre in Kayseri
+Castle, has no account that could be found. The Bite spells it "Mühlem"; the
+slide and caption use the restaurant's own spelling. Develi and the Develi
+cıvıklısı places were left out for a post of their own, as was Cappadocia.
+Yarım kelle has no rating, so its card has no star row. Leela's cover line is
+"Kayseri is mantı country, but wait till you see the rest".
 
 ## Wiring Back Into The Product
 

@@ -90,10 +90,14 @@ const head = `
   .card .sub .loc { grid-column: 3; text-align: end; color: #ababab; }
   .card .content { background: #191e26; display: flex; justify-content: space-between; align-items: flex-end; min-height: ${px(80)}; padding: ${px(8)} 0 0 ${px(16)}; }
   .card .stars { display: flex; gap: ${px(4)}; margin: ${px(16)} 0 ${px(24)}; }
+  .card .stars:empty { height: ${px(32)}; }
   .card .stars svg { width: ${px(32)}; height: ${px(32)}; fill: #fec56b; stroke: #434a51; stroke-width: 16; }
   .card .stars svg.empty { fill: none; stroke: #fec56b; stroke-width: 24; }
   .card .likes { background: rgba(255,255,255,.12); border-radius: ${px(16)} 0 0 0; padding: ${px(14)} ${px(30)} ${px(14)} ${px(16)}; font-size: ${px(24)}; color: #fff; display: flex; gap: ${px(6)}; align-items: center; }
   .dish .brand { margin-top: auto; margin-bottom: 120px; }
+  /* Optional dish description under the card; the card moves up to make room */
+  .dish.described .card { margin-top: 90px; }
+  .dish .about { width: ${px(458)}; margin-top: 44px; font-size: 41px; line-height: 1.35; color: #e4e0da; text-align: center; }
 
   /* Leela: a round crop of her comic panel plus a speech bubble */
   .leela { border-radius: 50%; overflow: hidden; border: 8px solid #fff; box-shadow: 0 12px 40px rgba(0,0,0,.45); flex: none; }
@@ -136,7 +140,7 @@ const stars = (n = 5) =>
 
 const dish = (b) =>
   page(`
-<div class="dish">
+<div class="dish${b.description ? ' described' : ''}">
   <div class="card">
     <div class="photo"><img src="${fromConfig(b.photo)}"></div>
     <header>
@@ -144,10 +148,11 @@ const dish = (b) =>
       <div class="sub"><span>${escape(b.place)}</span><span class="loc">${escape(b.where ?? config.where)}</span></div>
     </header>
     <div class="content">
-      <div class="stars">${stars(b.stars)}</div>
+      <div class="stars">${b.stars ? stars(b.stars) : ''}</div>
       ${b.count ? `<div class="likes"><span>${b.emojis}</span><span>${b.count}</span></div>` : ''}
     </div>
   </div>
+  ${b.description ? `<p class="about">${escape(b.description)}</p>` : ''}
   ${brand}
 </div>`);
 

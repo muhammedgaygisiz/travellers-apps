@@ -80,6 +80,17 @@ Use `libs/bite-tribe/api` for shared Firebase, Firestore, and Storage operations
 
 Do not duplicate shared Firebase access logic inside unrelated feature libraries.
 
+## Choosing A Form Mechanism
+
+**New forms use Signal Forms (`@angular/forms/signals`).** The API is public and stable as of Angular 22, the workspace is signal-first, and the API works with Ionic's inputs through `[formField]` with no adapter. The business menu editor (`libs/bite-tribe-business/edit-menu/page`) is the reference: a signal model, a `form()` schema with `required` and `min`, `[formField]` bindings on `ion-input` and `ion-toggle`, and an explicit Save that appears once the form is `dirty` ([#1377]).
+
+- **Save on an action, not from an effect on the value.** An effect that writes whenever the model changes saves every half-typed state, and in the menu editor, where a save then also left the page, it threw the owner out mid-word. Show Save and Cancel while `form().dirty()`, emit from the Save handler, and put the stored value back with `form().reset(value)` on Cancel.
+- **Follow the stored value only while the form is not `dirty`.** An effect that copies a reloaded input into the form must skip when the user has an edit in progress, and should write through `reset(value)` inside `untracked()` so the form stays pristine. Refilling on any other condition, such as "the field is empty", fights the user and hides `required`. An edit the stored value now holds is no longer an edit: reset it too, which is how Save and Cancel go away after a save that re-reads the data. Return early when the form is pristine and already holds the stored value - `reset(value)` writes a new value object, so an effect that resets unconditionally re-triggers itself forever.
+- **Debounce in the schema, not by hand.** `debounce(path, ms)` delays the write to the model, so effects and validators reading the model see only the settled value. Do not wrap a signal-form field in RxJS `debounceTime` or a timer.
+- **Async validation uses `validateAsync` or `validateHttp`.** Give them their own `debounce` option rather than debouncing the input. Call `reloadValidation()` when external state changes the answer without the value changing. This replaces the reactive-forms pattern of `updateValueAndValidity` described below.
+- **Read one error with `getError(kind)`** instead of searching the `errors()` list.
+- **An existing reactive form stays reactive.** When you extend a feature that already has a `FormGroup`, keep the classic API there; do not mix the two inside one form. Migrating the remaining reactive forms is a separate decision, not something to do on the side of an unrelated change.
+
 ## Signals And Reactive Forms
 
 Effects that write to a reactive form need care. These have all caused real defects.
@@ -202,3 +213,4 @@ imagePath || image || ''
 [#1168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1168
 [#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
 [#1287]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1287
+[#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377

@@ -7,6 +7,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import {
   IonButton,
@@ -19,6 +20,29 @@ import type { MenuItem } from 'model';
 import { createEntityId } from 'utils';
 import { FormField, form, min, required } from '@angular/forms/signals';
 import { TranslocoPipe } from '@jsverse/transloco';
+
+type VariantFormValue = {
+  name: string;
+  description: string;
+  ingredients: string;
+  notes: string;
+  price: number;
+  isAvailable: boolean;
+};
+
+const toFormValue = (item: MenuItem): VariantFormValue => ({
+  name: item.name || '',
+  description: item.description || '',
+  ingredients: item.ingredients || '',
+  notes: item.notes || '',
+  price: item.price || 0,
+  isAvailable: item.isAvailable !== false,
+});
+
+const sameFormValue = (a: VariantFormValue, b: VariantFormValue): boolean =>
+  (Object.keys(b) as (keyof VariantFormValue)[]).every(
+    (key) => a[key] === b[key],
+  );
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,7 +58,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
     TranslocoPipe,
   ],
   selector: 'business-menu-variant',
-  standalone: true,
 })
 export class BusinessMenuVariantComponent {
   item = input<MenuItem>();
@@ -74,16 +97,35 @@ export class BusinessMenuVariantComponent {
     min(schemaPath.price, 0.000001);
   });
 
+  /**
+   * Follows the stored item into the form, but never over an edit in progress.
+   *
+   * It used to copy every field over on each change of `item`, and the editor
+   * now re-reads the menu after every save instead of leaving (issue #1377) -
+   * so a save of one item would have wiped an unsaved edit on every other one.
+   * An edit the stored item already holds is no longer an edit, which is how a
+   * successful save hides Save and Cancel again.
+   */
   onItemChange = effect(() => {
     const item = this.item();
-    if (item) {
-      this.itemForm.name().value.set(item.name);
-      this.itemForm.description().value.set(item.description || '');
-      this.itemForm.ingredients().value.set(item.ingredients || '');
-      this.itemForm.notes().value.set(item.notes || '');
-      this.itemForm.price().value.set(item.price || 0);
-      this.itemForm.isAvailable().value.set(item.isAvailable !== false);
+
+    if (!item) {
+      return;
     }
+
+    const stored = toFormValue(item);
+    const form = this.itemForm();
+
+    const holdsStored = sameFormValue(form.value(), stored);
+
+    // Pristine and already showing the stored item: nothing to do, and
+    // resetting anyway would write a new value object and run this effect
+    // again. Dirty and different: an edit in progress, left alone.
+    if (holdsStored === !form.dirty()) {
+      return;
+    }
+
+    untracked(() => form.reset(stored));
   });
 
   isChangeButtonsHidden = computed(() => {
@@ -126,14 +168,7 @@ export class BusinessMenuVariantComponent {
   resetForm(): void {
     const item = this.item();
     if (item) {
-      this.itemForm().reset({
-        name: item.name,
-        description: item.description,
-        ingredients: item.ingredients || '',
-        notes: item.notes || '',
-        price: item.price,
-        isAvailable: item.isAvailable !== false,
-      });
+      this.itemForm().reset(toFormValue(item));
     }
   }
 }

@@ -7,6 +7,7 @@ import {
   linkedSignal,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import {
   IonButton,
@@ -25,8 +26,8 @@ import {
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
 import { BusinessMenuItemComponent } from '../business-menu-item/business-menu-item.component';
 import { ItemReorderEventDetail } from '@ionic/angular';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { debounce, FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required } from '@angular/forms/signals';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,10 +42,9 @@ import { debounce, FormField, form, required } from '@angular/forms/signals';
     IonReorderGroup,
     IonIcon,
     IonReorder,
-    FormsModule,
     IonInput,
-    ReactiveFormsModule,
     FormField,
+    TranslocoPipe,
   ],
   selector: 'business-category',
 })
@@ -72,40 +72,87 @@ export class BusinessCategoryComponent {
 
   categoryForm = form(this.categoryModel, (schemaPath) => {
     required(schemaPath.title);
-    debounce(schemaPath.title, 500);
-    debounce(schemaPath.subtitle, 500);
   });
 
+  /**
+   * Whether the title or subtitle holds an edit that has not been saved yet.
+   * The Save and Cancel buttons only show while it does.
+   */
+  isTitleEdited = computed(() => this.categoryForm().dirty());
+
+  /**
+   * Follows the stored category into the form, but never over an edit in
+   * progress.
+   *
+   * It used to refill the form only when the title was empty, which turned a
+   * cleared title straight back into the stored one, so `required` could never
+   * show. Now a stored change is taken while the form is pristine, and an edit
+   * the stored category already holds is no longer an edit: that is how a
+   * successful save hides Save and Cancel again, since the editor re-reads the
+   * menu after one (issue #1377). Any other edit is left alone until the owner
+   * saves or cancels it - the same rule the reactive forms follow (see
+   * Implementation - Feature Patterns).
+   */
   onLinkedCategoryChange = effect(() => {
     const category = this.category();
-    const titleHasValue =
-      !!this.categoryForm.title().value() &&
-      this.categoryForm.title().value() !== '';
-    if (!titleHasValue) {
-      this.categoryForm.title().value.set(category?.title || '');
-      this.categoryForm.subtitle().value.set(category?.subtitle || '');
+    const stored = {
+      title: category?.title || '',
+      subtitle: category?.subtitle || '',
+    };
+    const form = this.categoryForm();
+    const { title, subtitle } = form.value();
+    const holdsStored = title === stored.title && subtitle === stored.subtitle;
+
+    // Nothing to do, and resetting anyway would write a new value object and
+    // run this effect again.
+    if (holdsStored && !form.dirty()) {
+      return;
     }
+
+    if (!holdsStored && form.dirty()) {
+      return;
+    }
+
+    untracked(() => form.reset(stored));
   });
 
-  onTitleSubtitleChange = effect(() => {
-    const newTitle = this.categoryForm.title().value();
-    const newSubtitle = this.categoryForm.subtitle().value();
-    const linkedCategory = this.linkedCategory();
-    if (
-      newTitle !== linkedCategory?.title ||
-      newSubtitle !== linkedCategory?.subtitle
-    ) {
-      // The id travels with the rename (issue #1099). The editor keys by it,
-      // and the title being edited is precisely the thing it used to key by.
-      this.categoryChanged.emit({
-        ...linkedCategory,
-        id: linkedCategory?.id ?? createEntityId(),
-        items: linkedCategory?.items || [],
-        title: newTitle,
-        subtitle: newSubtitle,
-      });
+  /**
+   * Saves the title and subtitle.
+   *
+   * An explicit action rather than an effect on the form value. The effect
+   * saved on every pause in typing, and a menu save then also left the editor,
+   * so a half-typed title was stored and the owner was put back on the
+   * restaurant page mid-word (issue #1377).
+   *
+   * The id travels with the rename (issue #1099). The editor keys by it, and the
+   * title being edited is precisely the thing it used to key by.
+   */
+  saveTitle(): void {
+    if (!this.categoryForm().valid()) {
+      return;
     }
-  });
+
+    const { title, subtitle } = this.categoryForm().value();
+    const linkedCategory = this.linkedCategory();
+
+    this.categoryChanged.emit({
+      ...linkedCategory,
+      id: linkedCategory?.id ?? createEntityId(),
+      items: linkedCategory?.items || [],
+      title,
+      subtitle,
+    });
+  }
+
+  /** Puts the stored title and subtitle back and drops the edit. */
+  cancelTitle(): void {
+    const category = this.category();
+
+    this.categoryForm().reset({
+      title: category?.title || '',
+      subtitle: category?.subtitle || '',
+    });
+  }
 
   shouldShowAddItem = computed(() => {
     return this.presentShowAddItem();

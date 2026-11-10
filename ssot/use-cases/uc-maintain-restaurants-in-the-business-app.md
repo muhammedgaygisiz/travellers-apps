@@ -38,6 +38,7 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 - The Restaurant Owner publishes the menu, by taking the code on the restaurant's page (issue [#370]). It is a QR code and the same address as plain text, because publishing a menu should not require owning a printer - the text goes on a Google listing, an Instagram bio or the restaurant's own site, and the code goes in a window, on a menu card or on a table tent. A restaurant with no menu is shown what is missing instead of a code: one for a restaurant with no menu tells whoever scans it that there is nothing to read. What the reader then sees is [UC - View Restaurant Menus](uc-view-restaurant-menus.md); which restaurants may publish at all is `RD-PM-5`.
 - The Restaurant Owner states the Restaurant's facilities (issue [#1830]). Today that is one: whether it has a gender-neutral restroom, answered `Yes`, `No` or `Not stated`. `Not stated` removes the field rather than writing no, because the consumer page shows nothing for a Restaurant that has not said and would otherwise tell a guest "no" on the owner's behalf. Only the account holding the Restaurant states it; the rule is the Restaurant's, in [Restaurant](../domain/restaurant.md).
 - The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
+- In the edit-menu page every change is saved by the Restaurant Owner's own Save, never by a pause in typing, and a save keeps the owner in the editor (issue [#1377]). It writes the whole menu under a loading overlay, the same feedback creating a Bite gives, and a toast reports the outcome. On success the menu is read again and the saved field's Save and Cancel go away; any other unsaved edit keeps them. On failure the edit stays for another try. A save used to return to the restaurant page, which together with the old autosave put the owner out of the editor mid-word. The category title and the item name each show Save and Cancel once edited; an empty title or name cannot be saved, and a price must be above zero. Renaming an item renames the variants that still carry its old name, because an order line prints both.
 
 This page owns producing the code and not what it leads to, which is the split
 `RD-PM-1` draws: the code is made here because a restaurant that wants nothing
@@ -111,6 +112,7 @@ all be reviewed for the first time.
 - `restaurant/:restaurantId`
 - `restaurant/:restaurantId/menu/:menuId`
 - `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, stating the gender-neutral restroom across a reload and taking the answer back as a removed field, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
+- `apps/bite-tribe-business-e2e/src/tests/edit-menu.spec.ts` covers the edit-menu page: a category title and an item name stay unsaved through a pause in typing and persist on Save, which keeps the owner in the editor with a toast and hides the field's buttons, an empty title, empty name, or zero price cannot be saved, and a renamed item's variant is renamed with it
 
 ## Related GitHub Scope
 
@@ -133,6 +135,9 @@ all be reviewed for the first time.
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
+- Issue [#1377] moved the edit-menu page onto the public Signal Forms API and replaced the
+  title and name autosave with an explicit Save, fixing an item rename that was never stored. A menu
+  save no longer leaves the editor; it reports itself with a loading overlay and a toast.
 
 ## Related Domains
 
@@ -162,3 +167,4 @@ all be reviewed for the first time.
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830
+[#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377

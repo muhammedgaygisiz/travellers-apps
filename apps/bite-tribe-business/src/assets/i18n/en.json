@@ -460,6 +460,8 @@
   "menu-currency-hint": "Every price on this menu is shown in this currency. Leave it unset and prices show as plain numbers.",
   "menu-currency-none": "Not set",
   "menu-currency-saved": "Currency saved",
+  "menu-saving": "Saving the menu…",
+  "menu-saved": "Menu saved",
   "menu-qr-title": "Menu code",
   "menu-qr-hint": "Print this code for your window, your menu card or a table tent. Anyone who scans it reads your menu on their phone - no app, no account.",
   "menu-qr-caption": "Scan for the menu",

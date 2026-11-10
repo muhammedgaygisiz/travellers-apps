@@ -81,9 +81,9 @@ export class EditMenuPage {
    *
    * Its own output rather than a {@link saveMenu} carrying the whole menu.
    * Emitting a menu made choosing a currency a full menu save: it wrote back a
-   * categories array the owner might still have been editing, and it ended the
-   * editing session, because that is what a menu save means here - so picking a
-   * currency routed the owner off the page. "Not set" is `''` rather than a
+   * categories array the owner might still have been editing, and at the time
+   * a menu save also left the editor (it no longer does since issue #1377) -
+   * so picking a currency routed the owner off the page. "Not set" is `''` rather than a
    * menu with the key stripped, because the model reads a *missing field* as
    * "not stated" and only the write can express that; a stripped key on the way
    * to a merging update says nothing at all, which is what made unsetting a

@@ -6,6 +6,7 @@
       fill="outline"
       mode="md"
       class="ion-margin-top"
+      data-testid="category-title"
     />
   </h2>
   <ion-input
@@ -13,7 +14,26 @@
     fill="outline"
     mode="md"
     class="ion-margin-top"
+    data-testid="category-subtitle"
   />
+  @if (isTitleEdited()) {
+    <div class="ion-display-flex ion-justify-content-end ion-margin-top">
+      <ion-button
+        fill="outline"
+        data-testid="cancel-category-title"
+        (click)="cancelTitle()"
+      >
+        {{ 'cancel' | transloco }}
+      </ion-button>
+      <ion-button
+        data-testid="save-category-title"
+        [disabled]="!categoryForm().valid()"
+        (click)="saveTitle()"
+      >
+        {{ 'save' | transloco }}
+      </ion-button>
+    </div>
+  }
   @if (categoryData?.items?.length) {
     <ion-reorder-group (ionItemReorder)="handleReorder($any($event))">
       @for (item of categoryData?.items; let index = $index; track item.id) {

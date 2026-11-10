@@ -37,6 +37,10 @@ describe('BusinessMenuItemComponent', () => {
         remove: { imports: [TranslocoPipe] },
         add: { imports: [MockTranslocoPipe] },
       })
+      .overrideComponent(BusinessMenuItemComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
       .compileComponents();
 
     fixture = TestBed.createComponent(BusinessMenuItemComponent);
@@ -69,6 +73,94 @@ describe('BusinessMenuItemComponent', () => {
       componentRef.setInput('item', testItem);
 
       expect(component.itemForm.name().value()).toBe('');
+    });
+  });
+
+  describe('name editing', () => {
+    let emitSpy: SpyInstance;
+
+    beforeEach(() => {
+      emitSpy = jest.spyOn(component.itemChanged, 'emit');
+    });
+
+    it('should not overwrite a name being typed when the item reloads', () => {
+      componentRef.setInput('item', createMenuItem({ id: 'item-1' }));
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.name().value.set('Typing');
+      component.itemForm.name().markAsDirty();
+      componentRef.setInput(
+        'item',
+        createMenuItem({ id: 'item-1', name: 'Reloaded' }),
+      );
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.itemForm.name().value()).toBe('Typing');
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should emit the renamed item on save, renaming variants that carry the old name', () => {
+      const item = createMenuItem({
+        id: 'item-1',
+        name: 'Margherita',
+        variants: [
+          createMenuItem({ id: 'v-1', name: 'Margherita', price: 9 }),
+          createMenuItem({ id: 'v-2', name: 'Family size', price: 19 }),
+        ],
+      });
+      componentRef.setInput('item', item);
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.name().value.set('Pizza Margherita');
+
+      component.saveName();
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...item,
+        name: 'Pizza Margherita',
+        variants: [
+          { ...item.variants?.[0], name: 'Pizza Margherita' },
+          item.variants?.[1],
+        ],
+      });
+    });
+
+    it('should not emit on save when the name is empty', () => {
+      componentRef.setInput('item', createMenuItem({ id: 'item-1' }));
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.name().value.set('');
+
+      component.saveName();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(component.itemForm.name().getError('required')).toBeDefined();
+    });
+
+    // The editor re-reads the menu after a save instead of leaving (#1377).
+    it('should hide Save and Cancel once the stored item holds the new name', () => {
+      componentRef.setInput('item', createMenuItem({ id: 'item-1' }));
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.name().value.set('Renamed');
+      component.itemForm.name().markAsDirty();
+      componentRef.changeDetectorRef.detectChanges();
+
+      componentRef.setInput(
+        'item',
+        createMenuItem({ id: 'item-1', name: 'Renamed' }),
+      );
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isNameEdited()).toBe(false);
+    });
+
+    it('should put the stored name back on cancel', () => {
+      componentRef.setInput('item', createMenuItem({ id: 'item-1' }));
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.name().value.set('Typing');
+      component.itemForm.name().markAsDirty();
+
+      component.cancelName();
+
+      expect(component.itemForm.name().value()).toBe('Test Item');
+      expect(component.isNameEdited()).toBe(false);
     });
   });
 

@@ -8,6 +8,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { BiteTribeApiService, loadVisibleProfile } from 'bite-tribe/api';
+import { ProfilePhotoUploadService } from './profile-photo-upload.service';
 import type {
   Bite,
   LikeClick,
@@ -15,7 +16,7 @@ import type {
   ReportUserResult,
   UserReportReason,
 } from 'model';
-import { resourceValue } from 'utils';
+import { isBase64String, resourceValue } from 'utils';
 
 interface ProfileResourceParams {
   userId: string | undefined;
@@ -25,6 +26,7 @@ interface ProfileResourceParams {
 export class ProfileDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
+  private readonly photoUpload = inject(ProfilePhotoUploadService);
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
@@ -102,8 +104,40 @@ export class ProfileDataAccessService {
     this.storeService.submitLikeClick(likeClick);
   }
 
-  savePublicProfile(publicUser: PublicUser): void {
-    this.storeService.savePublicProfile(publicUser);
+  /**
+   * Writes the own profile and syncs the store. A failed write is thrown for
+   * the page to report.
+   *
+   * A newly chosen photo is not part of the write: the document is marked as
+   * waiting for it and keeps the current photo, and the photo uploads in the
+   * background with its own status and retry, as a Bite photo does (GitHub
+   * issue #1953).
+   */
+  async savePublicProfile(publicUser: PublicUser): Promise<void> {
+    if (!isBase64String(publicUser.photoUrl)) {
+      this.storeService.notifySavedProfile(
+        await this.api.saveProfile(publicUser),
+      );
+
+      return;
+    }
+
+    const photo = publicUser.photoUrl;
+    const saved = await this.api.saveProfile(
+      { ...publicUser, photoUrl: this.myUser()?.photoUrl ?? '' },
+      Date.now(),
+    );
+
+    this.storeService.notifySavedProfile(saved);
+    this.photoUpload.start(saved, photo);
+  }
+
+  /** See {@link ProfilePhotoUploadService.pendingPhoto}. */
+  readonly pendingProfilePhoto = this.photoUpload.pendingPhoto;
+
+  /** See {@link ProfilePhotoUploadService.retry}. */
+  retryProfilePhotoUpload(): Promise<boolean> {
+    return this.photoUpload.retry();
   }
 
   claimDisplayName(

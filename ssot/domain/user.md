@@ -58,6 +58,7 @@
 - `city`
 - `about`
 - `public`
+- `photoStatus` (`pending`, `uploaded` or `failed`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953]).
 - `biteCount`
 - `countryCodes`
 - `subscriptionTier`
@@ -271,3 +272,4 @@
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
 [#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916
+[#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953

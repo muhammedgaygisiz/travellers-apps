@@ -46,9 +46,11 @@ signed-in user's directory on a device, where one owner is a safe assumption,
 and deleted in a browser, where the previous account is exactly who they might
 belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-gallery-support.md) and GitHub issue [#1328].
 
-## Bite Image Trigger
+## Image Triggers
 
 `setBiteImagePathOnUpload` listens to finalized storage objects for Bite images and updates the matching Bite document with `imagePath`.
+
+`setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]).
 
 ## Storage Rules
 
@@ -169,3 +171,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#1234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1234
 [#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
+[#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953

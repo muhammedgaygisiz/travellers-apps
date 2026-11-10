@@ -162,7 +162,6 @@ export const reducer = createReducer<AppSlice>(
   on(
     AppActions.setPublicProfile,
     AppActions.savedPublicProfile,
-    AppActions.updatedPhotoUrlInProfile,
     (state, { profile }) => {
       return {
         ...state,

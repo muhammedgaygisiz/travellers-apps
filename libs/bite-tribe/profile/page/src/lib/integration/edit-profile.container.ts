@@ -17,6 +17,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       class="ion-page"
       [isAuthenticated]="service.isAuthenticated()"
       [publicUser]="service.myUser()"
+      [saving]="service.profileSaving()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       [emailVerificationResendRunning]="
         service.emailVerificationResendRunning()

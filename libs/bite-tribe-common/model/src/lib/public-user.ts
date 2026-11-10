@@ -10,6 +10,17 @@ export interface PublicUser {
   pronouns?: string;
   email: string;
   photoUrl: string;
+  /**
+   * Where a newly chosen profile photo stands (GitHub issue #1953), as
+   * `Bite.imageStatus` does for a Bite photo. `photoUrl` keeps the previous
+   * photo while a new one is `pending`; the storage finalize trigger
+   * `setUserPhotoUrlOnUpload` points it at the new object and writes
+   * `uploaded`, and the client writes `failed` when the transfer errors or
+   * stalls. Absent on a profile whose photo was never replaced this way.
+   */
+  photoStatus?: 'pending' | 'uploaded' | 'failed';
+  /** When the `pending` upload started, so an abandoned one can read as failed. */
+  photoUploadStartedAtTimestamp?: number;
   userId: string;
   city?: string;
   about?: string;

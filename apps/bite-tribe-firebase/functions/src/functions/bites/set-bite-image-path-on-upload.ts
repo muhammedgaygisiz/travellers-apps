@@ -1,32 +1,12 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
+import { storageDownloadUrl } from '../shared/utils/storage-download-url';
 import { logger } from 'firebase-functions';
 
 const db = getFirestore();
 
 // Matches: images/bites/{biteId}/{filename}
 const BITE_IMAGE_PATH_REGEX = /^images\/bites\/([^/]+)\/[^/]+$/;
-
-type FileMetadata = { metadata?: object | undefined };
-
-function normalizeStorageDownloadToken(rawToken?: string): string | undefined {
-  return rawToken
-    ?.split(',')
-    .map((token) => token.trim())
-    .filter(Boolean)[0];
-}
-
-const getToken = (metadata: FileMetadata): string | undefined => {
-  const tokens = (metadata.metadata as Record<string, string> | undefined)
-    ?.firebaseStorageDownloadTokens;
-
-  if (tokens) {
-    return normalizeStorageDownloadToken(tokens);
-  }
-
-  return undefined;
-};
 
 export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
   const objectPath = event.data.name;
@@ -52,29 +32,11 @@ export const setBiteImagePathOnUpload = onObjectFinalized(async (event) => {
     return;
   }
 
-  const bucket = event.data.bucket;
-
   logger.info(
     `setBiteImagePathOnUpload: processing bite ${biteId}, path: ${objectPath}`,
   );
 
-  // Firebase Storage automatically adds a download token to the file metadata.
-  // Use it to construct the same URL format the client SDK produces.
-  const file = getStorage().bucket(bucket).file(objectPath);
-  const [metadata] = await file.getMetadata();
-  const token = getToken(metadata);
-
-  // When the Storage emulator is running, FIREBASE_STORAGE_EMULATOR_HOST is set
-  // automatically (e.g. "localhost:9199"). Use it so the generated URL resolves locally.
-  const storageEmulatorHost = process.env.FIREBASE_STORAGE_EMULATOR_HOST;
-  const storageBaseUrl = storageEmulatorHost
-    ? `http://${storageEmulatorHost}`
-    : 'https://firebasestorage.googleapis.com';
-
-  const encodedPath = encodeURIComponent(objectPath);
-  const downloadUrl = token
-    ? `${storageBaseUrl}/v0/b/${bucket}/o/${encodedPath}?alt=media&token=${token}`
-    : `${storageBaseUrl}/v0/b/${bucket}/o/${encodedPath}?alt=media`;
+  const downloadUrl = await storageDownloadUrl(event.data.bucket, objectPath);
 
   await db.doc(`bites/${biteId}`).update({
     imagePath: downloadUrl,

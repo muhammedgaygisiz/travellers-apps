@@ -372,6 +372,7 @@ incrementBiteLikeCountOnLikeCreate
 decrementBiteLikeCountOnLikeDelete
 updateBiteLikeCountOnLikeUpdate
 setBiteImagePathOnUpload
+setUserPhotoUrlOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 notifyBiteCreatorOnReview

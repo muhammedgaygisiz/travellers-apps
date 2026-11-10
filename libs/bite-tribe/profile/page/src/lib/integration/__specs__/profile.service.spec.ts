@@ -9,6 +9,9 @@ import { ToastService } from 'toast';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import { Bite, PublicUser } from 'model';
 import { AnalyticsService } from 'ta-firestore';
+import { provideRouter, Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { signal } from '@angular/core';
 
 const logEvent = jest.fn();
 
@@ -27,7 +30,8 @@ class Mock {
   navigateForward = jest.fn();
   submitLikeClick = jest.fn();
   submitFollowClick = jest.fn();
-  savePublicProfile = jest.fn();
+  savePublicProfile = jest.fn().mockResolvedValue(undefined);
+  retryProfilePhotoUpload = jest.fn().mockResolvedValue(true);
   submitUnfollowClick = jest.fn();
   reportUser = jest.fn();
   claimDisplayName = jest.fn().mockResolvedValue({
@@ -74,10 +78,15 @@ describe(ProfileService.name, () => {
         { provide: ToastService, useValue: toastServiceMock },
         { provide: AnalyticsService, useValue: { logEvent } },
         provideMockStore(),
+        provideRouter([]),
       ],
     }).compileComponents();
     service = TestBed.inject(ProfileService);
     profileDataAccessService = TestBed.inject(ProfileDataAccessService);
+    // A save ends in a navigation, which an empty router cannot resolve.
+    jest
+      .spyOn(service['navController'], 'navigateBack')
+      .mockResolvedValue(true);
   });
 
   it('should create the service', () => {
@@ -242,6 +251,117 @@ describe(ProfileService.name, () => {
         messageKey: 'display-name-already-taken',
         outcome: 'failure',
       });
+    });
+
+    /** GitHub issue #1953. */
+    describe('leaving Edit Profile', () => {
+      const givenPreviousNavigation = (hasPrevious: boolean): void => {
+        const router = TestBed.inject(Router);
+        jest
+          .spyOn(router, 'lastSuccessfulNavigation', 'get')
+          .mockReturnValue(
+            signal(
+              hasPrevious
+                ? ({ previousNavigation: {} } as never)
+                : ({ previousNavigation: null } as never),
+            ),
+          );
+      };
+
+      it('goes back once the profile is written', async () => {
+        givenPreviousNavigation(true);
+        const backSpy = jest
+          .spyOn(TestBed.inject(Location), 'back')
+          .mockImplementation();
+
+        await service.saveProfile({ userId: 'user123' } as PublicUser);
+
+        expect(backSpy).toHaveBeenCalled();
+      });
+
+      it('opens the own profile when Edit Profile was the first page', async () => {
+        givenPreviousNavigation(false);
+        const backSpy = jest
+          .spyOn(TestBed.inject(Location), 'back')
+          .mockImplementation();
+        const navigateBackSpy = jest
+          .spyOn(service['navController'], 'navigateBack')
+          .mockResolvedValue(true);
+
+        await service.saveProfile({ userId: 'user123' } as PublicUser);
+
+        expect(backSpy).not.toHaveBeenCalled();
+        expect(navigateBackSpy).toHaveBeenCalledWith(['my-profile']);
+      });
+
+      it('stays on the form and says so when the write fails', async () => {
+        jest
+          .spyOn(profileDataAccessService, 'savePublicProfile')
+          .mockRejectedValueOnce(new Error('denied'));
+        const backSpy = jest
+          .spyOn(TestBed.inject(Location), 'back')
+          .mockImplementation();
+        jest.spyOn(console, 'error').mockImplementation();
+
+        await service.saveProfile({ userId: 'user123' } as PublicUser);
+
+        expect(backSpy).not.toHaveBeenCalled();
+        expect(toastPresent).toHaveBeenCalledWith({
+          messageKey: 'profile-could-not-be-saved',
+          outcome: 'failure',
+        });
+        expect(service.profileSaving()).toBe(false);
+      });
+
+      it('marks the save as running until it is written', async () => {
+        givenPreviousNavigation(true);
+        jest.spyOn(TestBed.inject(Location), 'back').mockImplementation();
+        let finishWrite = (): void => undefined;
+        jest
+          .spyOn(profileDataAccessService, 'savePublicProfile')
+          .mockReturnValueOnce(
+            new Promise<void>((resolve) => (finishWrite = resolve)),
+          );
+
+        const saving = service.saveProfile({ userId: 'user123' } as PublicUser);
+        await Promise.resolve();
+
+        expect(service.profileSaving()).toBe(true);
+
+        finishWrite();
+        await saving;
+
+        expect(service.profileSaving()).toBe(false);
+      });
+    });
+  });
+
+  /** GitHub issue #1953. */
+  describe('retryProfilePhotoUpload', () => {
+    it('sends the photo again', async () => {
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+
+      await service.retryProfilePhotoUpload();
+
+      expect(
+        profileDataAccessService.retryProfilePhotoUpload,
+      ).toHaveBeenCalled();
+      expect(navigateSpy).not.toHaveBeenCalled();
+    });
+
+    it('has the photo chosen again when this device no longer holds it', async () => {
+      jest
+        .spyOn(profileDataAccessService, 'retryProfilePhotoUpload')
+        .mockResolvedValueOnce(false);
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+
+      await service.retryProfilePhotoUpload();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['edit-profile']);
     });
   });
 

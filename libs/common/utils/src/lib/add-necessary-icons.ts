@@ -29,6 +29,7 @@ import {
   construct,
   copyOutline,
   createOutline,
+  refreshOutline,
   cropOutline,
   downloadOutline,
   earthOutline,
@@ -164,6 +165,8 @@ export const addNecessaryIcons = (): void => {
     cropOutline,
     trashOutline,
     cloudOfflineOutline,
+    // The retry of a failed photo upload, on a Bite and a profile (#1953).
+    refreshOutline,
     chevronForwardOutline,
     createOutline,
     construct,

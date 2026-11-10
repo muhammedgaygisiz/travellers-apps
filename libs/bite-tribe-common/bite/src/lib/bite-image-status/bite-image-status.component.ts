@@ -9,13 +9,9 @@ import {
   output,
   signal,
 } from '@angular/core';
-import {
-  IonButton,
-  IonIcon,
-  IonSpinner,
-  IonText,
-} from '@ionic/angular/standalone';
+import { IonIcon, IonSpinner, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { RetryUploadButtonComponent } from '../retry-upload-button/retry-upload-button.component';
 import { NetworkStatusService } from 'common/networkstatus';
 import type { Bite } from 'model';
 import {
@@ -34,7 +30,13 @@ import {
  */
 @Component({
   selector: 'bt-bite-image-status',
-  imports: [IonButton, IonIcon, IonSpinner, IonText, TranslocoPipe],
+  imports: [
+    IonIcon,
+    IonSpinner,
+    IonText,
+    RetryUploadButtonComponent,
+    TranslocoPipe,
+  ],
   templateUrl: 'bite-image-status.component.html',
   styleUrl: 'bite-image-status.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { ProfileDataAccessService } from 'bite-tribe/profile-data-access';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
@@ -12,6 +12,7 @@ import {
 } from 'utils';
 import { ToastService } from 'toast';
 import { Location } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   EmailVerificationService,
   type EmailVerificationSurface,
@@ -26,6 +27,7 @@ export class ProfileService {
   private readonly localImagePicker = inject(LocalImagePickerService);
   private readonly navController = inject(NavController);
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly emailVerification = inject(EmailVerificationService);
   private readonly toast = inject(ToastService);
   private readonly analytics = inject(AnalyticsService);
@@ -37,6 +39,8 @@ export class ProfileService {
   /** Read guarded: `value()` throws once a read has failed (#1232). */
   userValue = this.dataAccess.userValue;
   userId = this.dataAccess.userId;
+  /** The new own profile photo while it is still uploading (#1953). */
+  pendingProfilePhoto = this.dataAccess.pendingProfilePhoto;
   bitesByUser = this.dataAccess.bitesByUser;
   myBites = this.dataAccess.myBites;
   isPublicProfile = this.dataAccess.isPublicProfile;
@@ -50,6 +54,9 @@ export class ProfileService {
   isMyProfileLoading = computed((): boolean => {
     return this.isAuthenticated() && !this.myUser();
   });
+
+  /** True while an Edit Profile save is being written, photo upload included. */
+  readonly profileSaving = signal(false);
 
   logout(): void {
     this.dataAccess.logout();
@@ -100,7 +107,30 @@ export class ProfileService {
     this.navController.navigateForward(['bite', bite.id]);
   }
 
+  /**
+   * Saves the Edit Profile form and goes back once the profile is written. A
+   * new photo keeps uploading after that, with its status on the own profile.
+   *
+   * A failed write keeps the user on the form and says so (GitHub issue
+   * #1953).
+   */
   async saveProfile(publicUser: PublicUser): Promise<void> {
+    if (this.profileSaving()) {
+      return;
+    }
+
+    this.profileSaving.set(true);
+
+    try {
+      if (await this.writeProfile(publicUser)) {
+        this.leaveEditProfile();
+      }
+    } finally {
+      this.profileSaving.set(false);
+    }
+  }
+
+  private async writeProfile(publicUser: PublicUser): Promise<boolean> {
     const previousDisplayName = this.myUser()?.displayName ?? '';
     const displayNameChanged =
       (publicUser.displayName ?? '').trim() !== previousDisplayName.trim();
@@ -116,13 +146,48 @@ export class ProfileService {
           outcome: 'failure',
         });
 
-        return;
+        return false;
       }
     }
 
-    this.dataAccess.savePublicProfile(publicUser);
+    try {
+      await this.dataAccess.savePublicProfile(publicUser);
+    } catch (error) {
+      console.error('Failed to save the profile:', error);
 
-    this.location.back();
+      await this.toast.present({
+        messageKey: 'profile-could-not-be-saved',
+        outcome: 'failure',
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Goes back to where Edit Profile was opened from, or to the own profile
+   * when it was the first page of this app instance. Going back from there
+   * would leave the app - after a reload, or from a link - and unload it with
+   * the photo upload still running (GitHub issue #1953).
+   */
+  private leaveEditProfile(): void {
+    if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
+      this.location.back();
+    } else {
+      void this.navController.navigateBack([PATH.MY_PROFILE]);
+    }
+  }
+
+  /**
+   * Sends a profile photo whose upload failed again, or has the user choose
+   * it again when this device no longer holds it (GitHub issue #1953).
+   */
+  async retryProfilePhotoUpload(): Promise<void> {
+    if (!(await this.dataAccess.retryProfilePhotoUpload())) {
+      this.gotoEditProfile();
+    }
   }
 
   private getDisplayNameErrorKey(reason: DisplayNameFailureReason): string {

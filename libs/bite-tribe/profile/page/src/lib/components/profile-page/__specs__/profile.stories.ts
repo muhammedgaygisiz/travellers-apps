@@ -114,6 +114,67 @@ export const OwnProfile: Story = {
   },
 };
 
+/**
+ * A newly chosen photo still uploading: the previous one stays on show
+ * (GitHub issue #1953). No start time, so the story never turns into the
+ * failed state while it is being captured.
+ */
+export const OwnProfilePhotoUploading: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      photoStatus: 'pending',
+    },
+    pendingPhoto: 'assets/demo/bite-demo.png',
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
+/** The new photo never arrived; the owner is offered a retry (#1953). */
+export const OwnProfilePhotoFailed: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      photoStatus: 'failed',
+    },
+    pendingPhoto: 'assets/demo/bite-demo.png',
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
+/**
+ * After a reload on a device that no longer holds the new photo, the
+ * previous one is blurred instead - here the placeholder (#1953).
+ */
+export const OwnProfilePhotoFailedWithoutLocalCopy: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      photoStatus: 'failed',
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
+/** Somebody else's photo upload is nobody else's business (#1953). */
+export const OtherProfilePhotoFailed: Story = {
+  args: {
+    user: { ...baseUser, photoStatus: 'failed' },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 export const OwnPrivateProfile: Story = {
   args: {
     user: {

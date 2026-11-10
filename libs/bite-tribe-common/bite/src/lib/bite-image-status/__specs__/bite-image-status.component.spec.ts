@@ -250,7 +250,7 @@ describe(BiteImageStatusComponent.name, () => {
       const emitted: Bite[] = [];
       component.retryImageUpload.subscribe((value) => emitted.push(value));
 
-      queryRetryButton()?.click();
+      queryRetryButton()?.querySelector('ion-button')?.click();
 
       expect(emitted).toEqual([expect.objectContaining({ id: 'bite1' })]);
     });

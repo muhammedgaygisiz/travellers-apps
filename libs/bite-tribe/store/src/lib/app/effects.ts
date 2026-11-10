@@ -8,7 +8,6 @@ import {
   filter,
   from,
   map,
-  of,
   switchMap,
   take,
   tap,
@@ -21,7 +20,6 @@ import { routerNavigatedAction } from '@ngrx/router-store';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
 import {
   getLocalizedCountryName,
-  isBase64String,
   isEmailVerificationPromptVisible,
   PATH,
 } from 'utils';
@@ -39,7 +37,6 @@ import { isProfilePage } from './utils/is-profile-page';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { userId } from '../router/selectors';
 import { publicUser } from './selectors';
-import { CreateAndUploadImageCallbackParams } from 'model';
 import { ToastService } from 'toast';
 import { CelebrationService } from 'celebration';
 import { TranslocoService } from '@jsverse/transloco';
@@ -264,96 +261,6 @@ export class AppEffect {
       );
     }
   }
-
-  saveProfileToFirestore$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AppActions.savePublicProfile),
-      switchMap(({ profile }) => {
-        if (isBase64String(profile.photoUrl)) {
-          const { photoUrl, ...profileDocWithoutImage } = profile;
-
-          return from(
-            this.api.updateUser({ ...profileDocWithoutImage, photoUrl: '' }),
-          ).pipe(
-            map((updatedUser) => {
-              return AppActions.savedPublicProfile({ profile: updatedUser });
-            }),
-            tap(({ profile }) => {
-              this.store.dispatch(
-                AppActions.uploadProfileImage({
-                  profile: { ...profile, photoUrl },
-                }),
-              );
-            }),
-            catchError(() => of(AppActions.errorSavingPublicProfile())),
-          );
-        }
-
-        return from(this.api.updateUser(profile)).pipe(
-          map((updatedUser) => {
-            return AppActions.savedPublicProfile({ profile: updatedUser });
-          }),
-          catchError(() => of(AppActions.errorSavingPublicProfile())),
-        );
-      }),
-    );
-  });
-
-  uploadProfileImage$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(AppActions.uploadProfileImage),
-        switchMap(({ profile }) => {
-          return from(
-            this.api.uploadProfileImage(
-              profile,
-              (p: CreateAndUploadImageCallbackParams): void => {
-                if (p.uploadParams?.evt?.completed === false) {
-                  this.store.dispatch(
-                    AppActions.uploadingProfileImage({
-                      progress: p.uploadParams,
-                      profile,
-                      imagePath: p.imagePath,
-                    }),
-                  );
-                } else if (p.uploadParams?.evt?.completed === true) {
-                  this.store.dispatch(
-                    AppActions.uploadedProfileImage({
-                      profile,
-                      imagePath: p.imagePath,
-                    }),
-                  );
-                }
-              },
-            ),
-          ).pipe(
-            catchError(() =>
-              of(AppActions.errorUploadingProfileImage({ profile })),
-            ),
-          );
-        }),
-      );
-    },
-    { dispatch: false },
-  );
-
-  updatePhotoUrlInProfile$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(AppActions.uploadedProfileImage),
-      switchMap(({ profile, imagePath }) => {
-        return from(this.api.updatePhotoUrlInUser(profile, imagePath)).pipe(
-          map((updatedUser) => {
-            return AppActions.updatedPhotoUrlInProfile({
-              profile: updatedUser,
-            });
-          }),
-          catchError(() =>
-            of(AppActions.errorUpdatingPhotoUrlInProfile({ profile })),
-          ),
-        );
-      }),
-    );
-  });
 
   reloadGpsOnPageChangeToCreateBite$ = createEffect(
     () => {

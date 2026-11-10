@@ -311,26 +311,48 @@ export class BiteTribeApiService {
     );
   }
 
-  uploadProfileImage(
-    profile: PublicUser,
-    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
-  ): Promise<void> {
-    return this.profileApiService.uploadImage(profile, callbackFn);
-  }
-
   updateImagePathInBite(bite: Bite, imagePath: string): Promise<Bite> {
     return this.biteApiService.updateImagePathInBite(bite, imagePath);
   }
 
-  updatePhotoUrlInUser(
-    profile: PublicUser,
-    photoUrl: string,
-  ): Promise<PublicUser> {
-    return this.profileApiService.updatePhotoUrlInUser(profile, photoUrl);
-  }
-
   updateUser(publicUser: PublicUser): Promise<PublicUser> {
     return this.profileApiService.updateUser(publicUser);
+  }
+
+  /** See {@link ProfileApiService.saveProfile}: a failure is thrown. */
+  saveProfile(
+    publicUser: PublicUser,
+    photoUploadStartedAt?: number,
+  ): Promise<PublicUser> {
+    return this.profileApiService.saveProfile(publicUser, photoUploadStartedAt);
+  }
+
+  uploadProfilePhoto(
+    userId: string,
+    photo: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    return this.profileApiService.uploadProfilePhoto(userId, photo, callbackFn);
+  }
+
+  findLocalProfilePhoto(userId: string): Promise<string | undefined> {
+    return this.profileApiService.findLocalProfilePhoto(userId);
+  }
+
+  setUploadedProfilePhoto(userId: string, imagePath: string): Promise<string> {
+    return this.profileApiService.setUploadedProfilePhoto(userId, imagePath);
+  }
+
+  setProfilePhotoStatus(
+    userId: string,
+    photoStatus: 'pending' | 'failed',
+    photoUploadStartedAt?: number,
+  ): Promise<void> {
+    return this.profileApiService.setProfilePhotoStatus(
+      userId,
+      photoStatus,
+      photoUploadStartedAt,
+    );
   }
 
   saveUser(): void {

@@ -2,17 +2,29 @@
 
 <div class="profile-header ion-display-flex ion-justify-content-between">
   <div class="photo-column">
-    @if (validPhotoUrl()) {
-    <ion-avatar class="profile-avatar ion-display-flex">
-      <img
-        [src]="$safeNavigationMigration(userData?.photoUrl)"
-        [alt]="$safeNavigationMigration(userData?.displayName)"
-        (error)="onImageError()"
+    <div class="avatar-frame" [class.photo-in-flight]="photoInFlight()">
+      @if (statusPhoto(); as photo) {
+      <ion-avatar class="profile-avatar ion-display-flex">
+        <img [src]="photo" alt="" />
+      </ion-avatar>
+      } @else if (validPhotoUrl()) {
+      <ion-avatar class="profile-avatar ion-display-flex">
+        <img
+          [src]="$safeNavigationMigration(userData?.photoUrl)"
+          [alt]="$safeNavigationMigration(userData?.displayName)"
+          (error)="onImageError()"
+        />
+      </ion-avatar>
+      } @else {
+      <ion-icon name="person-circle-outline" class="profile-image" />
+      } @if (photoInFlight()) {
+      <profile-photo-status
+        class="avatar-overlay"
+        [user]="userData"
+        (retryPhotoUpload)="retryPhotoUpload.emit()"
       />
-    </ion-avatar>
-    } @else {
-    <ion-icon name="person-circle-outline" class="profile-image" />
-    }
+      }
+    </div>
   </div>
 
   <div

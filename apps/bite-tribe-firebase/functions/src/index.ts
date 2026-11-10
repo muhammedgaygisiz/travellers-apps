@@ -18,6 +18,7 @@ export { handleDownloadLink } from './functions/web/handle-download-link';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';
+export { setUserPhotoUrlOnUpload } from './functions/users/set-user-photo-url-on-upload';
 export {
   backfillBiteAddress,
   enrichBiteAddressOnWrite,

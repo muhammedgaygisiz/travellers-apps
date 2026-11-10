@@ -146,10 +146,12 @@
 
       <div class="button-container safe-padding-bottom">
         <ion-button
-          [disabled]="isFormInvalid() || isFormPristine()"
+          [disabled]="saving() || isFormInvalid() || isFormPristine()"
           (click)="saveProfile()"
         >
-          {{ 'save-changes' | transloco }}
+          @if (saving()) {
+          <ion-spinner name="crescent" slot="start" />
+          } {{ 'save-changes' | transloco }}
         </ion-button>
       </div>
     </form>

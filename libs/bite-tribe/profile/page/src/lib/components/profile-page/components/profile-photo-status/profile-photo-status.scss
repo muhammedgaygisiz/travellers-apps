@@ -1,0 +1,24 @@
+:host {
+  display: block;
+
+  .photo-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.25);
+
+    ion-spinner,
+    ion-icon {
+      width: 28px;
+      height: 28px;
+      color: #fff;
+    }
+  }
+
+  [data-testid='profile-photo-failed'] {
+    cursor: pointer;
+  }
+}

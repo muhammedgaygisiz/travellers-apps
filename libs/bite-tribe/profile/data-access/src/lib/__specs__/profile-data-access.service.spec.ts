@@ -7,11 +7,17 @@ import { ProfileDataAccessService } from '../profile-data-access.service';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { LikeClick, PublicUser } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { ProfilePhotoUploadService } from '../profile-photo-upload.service';
+
+const photoUploadMock = { start: jest.fn(), retry: jest.fn() };
 
 class Mock {
   isAuthenticated$ = of(true);
   bitesByUser$ = of([]);
-  publicUser$ = of(null);
+  publicUser$ = of({
+    userId: 'user-id',
+    photoUrl: 'current-url',
+  } as PublicUser);
   bites$ = of([]);
   userId$ = of('user-id');
   isPublicProfile$ = of(true);
@@ -22,7 +28,7 @@ class Mock {
   userIdFromUrl = jest.fn();
   logout = jest.fn();
   submitLikeClick = jest.fn();
-  savePublicProfile = jest.fn();
+  notifySavedProfile = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
   blockUser = jest.fn();
@@ -30,6 +36,7 @@ class Mock {
 }
 
 const ApiMock = {
+  saveProfile: jest.fn(),
   bitesByUser: jest.fn(),
   claimDisplayName: jest.fn(),
   reportUser: jest.fn(),
@@ -71,6 +78,7 @@ describe('ProfileDataAccessService', () => {
         ProfileDataAccessService,
         { provide: BiteTribeStoreService, useClass: Mock },
         { provide: BiteTribeApiService, useValue: ApiMock },
+        { provide: ProfilePhotoUploadService, useValue: photoUploadMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -116,16 +124,54 @@ describe('ProfileDataAccessService', () => {
   });
 
   describe('savePublicProfile', () => {
-    it('should call savePublicProfile on storeService', inject(
+    it('writes the profile and syncs the store', inject(
       [ProfileDataAccessService],
-      (service: ProfileDataAccessService) => {
-        const savePublicProfileSpy = jest.spyOn(
-          storeService,
-          'savePublicProfile',
+      async (service: ProfileDataAccessService) => {
+        const saved = { ...MOCK_PUBLIC_USER, city: 'Munich' };
+        ApiMock.saveProfile.mockResolvedValue(saved);
+
+        await service.savePublicProfile(MOCK_PUBLIC_USER);
+
+        expect(ApiMock.saveProfile).toHaveBeenCalledWith(MOCK_PUBLIC_USER);
+        expect(storeService.notifySavedProfile).toHaveBeenCalledWith(saved);
+        expect(photoUploadMock.start).not.toHaveBeenCalled();
+      },
+    ));
+
+    /** GitHub issue #1953. */
+    it('marks a new photo pending, keeps the current one and uploads in the background', inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        const photo = 'data:image/jpeg;base64,AAAA';
+        const saved = { ...MOCK_PUBLIC_USER, photoStatus: 'pending' as const };
+        ApiMock.saveProfile.mockResolvedValue(saved);
+
+        await service.savePublicProfile({
+          ...MOCK_PUBLIC_USER,
+          photoUrl: photo,
+        });
+
+        expect(ApiMock.saveProfile).toHaveBeenCalledWith(
+          { ...MOCK_PUBLIC_USER, photoUrl: 'current-url' },
+          expect.any(Number),
         );
-        const mockUser = MOCK_PUBLIC_USER;
-        service.savePublicProfile(mockUser);
-        expect(savePublicProfileSpy).toHaveBeenCalledWith(mockUser);
+        expect(storeService.notifySavedProfile).toHaveBeenCalledWith(saved);
+        expect(photoUploadMock.start).toHaveBeenCalledWith(saved, photo);
+      },
+    ));
+
+    it('lets a failed write through and uploads nothing', inject(
+      [ProfileDataAccessService],
+      async (service: ProfileDataAccessService) => {
+        ApiMock.saveProfile.mockRejectedValue(new Error('denied'));
+
+        await expect(
+          service.savePublicProfile({
+            ...MOCK_PUBLIC_USER,
+            photoUrl: 'data:image/jpeg;base64,AAAA',
+          }),
+        ).rejects.toThrow('denied');
+        expect(photoUploadMock.start).not.toHaveBeenCalled();
       },
     ));
   });

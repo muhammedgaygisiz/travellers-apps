@@ -17,10 +17,6 @@ describe('App Actions', () => {
     expect(AppActions.savedSettings).toBeDefined();
   });
 
-  it('should have a savePublicProfile action', () => {
-    expect(AppActions.savePublicProfile).toBeDefined();
-  });
-
   it('should have a loadedSettingsFromApi action', () => {
     expect(AppActions.loadedSettingsFromAPI).toBeDefined();
   });

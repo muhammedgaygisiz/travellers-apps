@@ -1,0 +1,39 @@
+@switch (photoStatus()) { @case ('pending') {
+<div
+  class="photo-state"
+  role="status"
+  aria-live="polite"
+  data-testid="profile-photo-pending"
+  [attr.aria-label]="'uploading-keep-app-open' | transloco"
+>
+  <ion-spinner name="crescent" />
+</div>
+} @case ('failed') { @if (canRetry()) {
+<!-- The whole avatar retries: the button alone is a small target. -->
+<div
+  class="photo-state"
+  role="status"
+  data-testid="profile-photo-failed"
+  [attr.aria-label]="'image-upload-failed' | transloco"
+  (click)="retryPhotoUpload.emit()"
+>
+  <bt-retry-upload-button
+    short
+    data-testid="profile-photo-retry"
+    (retry)="retryPhotoUpload.emit()"
+  />
+</div>
+} @else {
+<div
+  class="photo-state"
+  role="status"
+  data-testid="profile-photo-failed"
+  [attr.aria-label]="'retry-upload-offline' | transloco"
+>
+  <ion-icon
+    name="cloud-offline-outline"
+    aria-hidden="true"
+    data-testid="profile-photo-retry-offline"
+  />
+</div>
+} } }

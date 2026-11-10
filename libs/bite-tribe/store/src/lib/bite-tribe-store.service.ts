@@ -270,17 +270,12 @@ export class BiteTribeStoreService implements StoreService {
   /**
    * Syncs an already-persisted profile into the store.
    *
-   * For callers that write the profile themselves instead of going through
-   * {@link savePublicProfile}. The store profile is loaded once at login, so a
-   * write that skips it leaves every reader on the stale login snapshot until
-   * the app is reloaded.
+   * Every profile write goes through the API and reports here afterwards. The
+   * store profile is loaded once at login, so a write that skips this leaves
+   * every reader on the stale login snapshot until the app is reloaded.
    */
   notifySavedProfile(profile: PublicUser): void {
     this.store.dispatch(AppActions.savedPublicProfile({ profile }));
-  }
-
-  savePublicProfile(profile: PublicUser): void {
-    this.store.dispatch(AppActions.savePublicProfile({ profile }));
   }
 
   saveReview(newReview: { review: string; biteId: string }): void {

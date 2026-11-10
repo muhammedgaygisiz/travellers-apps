@@ -27,14 +27,10 @@
       }
 
       @if (canRetry()) {
-        <ion-button
-          fill="outline"
-          size="small"
+        <bt-retry-upload-button
           data-testid="bite-image-retry"
-          (click)="retryImageUpload.emit(bite())"
-        >
-          {{ 'retry-upload' | transloco }}
-        </ion-button>
+          (retry)="retryImageUpload.emit(bite())"
+        />
       } @else if (showOfflineHint()) {
         <ion-text
           class="image-state-text smalltext"

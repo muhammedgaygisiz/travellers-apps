@@ -39,6 +39,9 @@
         [followingCount]="followingCount()"
         (followersClick)="followersClick.emit($event)"
         (followingClick)="followingClick.emit($event)"
+        [showPhotoStatus]="isOwnProfile()"
+        [pendingPhoto]="pendingPhoto()"
+        (retryPhotoUpload)="retryPhotoUpload.emit()"
       />
 
       <div class="profile-summary">

@@ -26,10 +26,9 @@ import {
   isBase64String,
   loadAppRelease,
 } from 'utils';
-import { deleteCurrentImage } from './utils/delete-current-image';
+import { findLocalUploadedImage } from './utils/local-image-file';
+import { readLocalImageAsDataUrl } from './utils/read-local-image-as-data-url';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
-import { updateProfileWithImagePathFromFirebaseStorage } from './bite-api/utils/update-profile-with-image-path-from-firestorage';
-import { loadProfileById } from './bite-api/utils/load-profile-by-id';
 import { withPronounsWrite } from './utils/pronouns-write';
 import {
   markUserMetadataUpdated,
@@ -184,47 +183,152 @@ export class ProfileApiService {
     }
   }
 
+  /**
+   * Writes the profile, uploading a newly chosen photo first, and swallows a
+   * failure: the caller's copy comes back unchanged.
+   *
+   * Onboarding's path, which waits for the photo. Edit Profile uploads in the
+   * background instead, through {@link saveProfile} and
+   * {@link uploadProfilePhoto}. The replaced object is removed by the storage
+   * finalize trigger in either case.
+   */
   async updateUser(publicUser: PublicUser): Promise<PublicUser> {
     try {
       const photoUrl = publicUser.photoUrl;
 
-      if (isBase64String(photoUrl)) {
-        console.log('You must upload the image before updating the user.');
-
-        await deleteCurrentImage(publicUser);
-
-        const newPhotoRef = await uploadBase64ToFirebaseStorage({
-          base64: photoUrl,
-          docId: publicUser.userId,
-          collection: USERS_COLLECTION,
-        });
-
-        const newPhotoUrl =
-          await getDownloadUrlFromFirebaseStorage(newPhotoRef);
-
-        const updatedUser = this.toProfileUpdate(publicUser, newPhotoUrl || '');
-
-        await FirebaseFirestore.updateDocument({
-          reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-          data: withPronounsWrite(updatedUser),
-        });
-
-        return this.toUpdatedUser(publicUser, updatedUser);
+      if (!isBase64String(photoUrl)) {
+        return await this.saveProfile(publicUser);
       }
 
-      const updatedUser = this.toProfileUpdate(publicUser, publicUser.photoUrl);
-
-      await FirebaseFirestore.updateDocument({
-        reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-        data: withPronounsWrite(updatedUser),
+      const newPhotoRef = await uploadBase64ToFirebaseStorage({
+        base64: photoUrl,
+        docId: publicUser.userId,
+        collection: USERS_COLLECTION,
       });
 
-      return this.toUpdatedUser(publicUser, updatedUser);
+      const newPhotoUrl = await getDownloadUrlFromFirebaseStorage(newPhotoRef);
+
+      return await this.saveProfile({
+        ...publicUser,
+        photoUrl: newPhotoUrl || '',
+      });
     } catch (error) {
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);
 
       return publicUser;
+    }
+  }
+
+  /**
+   * Writes the profile's user-owned fields and lets a failure through, for a
+   * page that has to tell the user a save failed.
+   *
+   * With `photoUploadStartedAt`, the document is marked as waiting for a new
+   * photo: `photoUrl` must then still be the current one, which stays on show
+   * until the upload lands (GitHub issue #1953).
+   */
+  async saveProfile(
+    publicUser: PublicUser,
+    photoUploadStartedAt?: number,
+  ): Promise<PublicUser> {
+    const updatedUser = {
+      ...this.toProfileUpdate(publicUser, publicUser.photoUrl),
+      ...(photoUploadStartedAt === undefined
+        ? {}
+        : {
+            photoStatus: 'pending' as const,
+            photoUploadStartedAtTimestamp: photoUploadStartedAt,
+          }),
+    };
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${USERS_COLLECTION}/${publicUser.userId}`,
+      data: withPronounsWrite(updatedUser),
+    });
+
+    return this.toUpdatedUser(publicUser, updatedUser);
+  }
+
+  /**
+   * Uploads a profile photo, reporting progress, completion and failure
+   * through `callbackFn` as a Bite photo upload does. Started, not awaited, by
+   * the caller.
+   */
+  async uploadProfilePhoto(
+    userId: string,
+    photo: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    await uploadBase64ToFirebaseStorage({
+      base64: photo,
+      docId: userId,
+      collection: USERS_COLLECTION,
+      callbackFn,
+    });
+  }
+
+  /**
+   * The copy of the last profile photo this device uploaded, as a data URL,
+   * so a failed upload can be sent again after a reload. `undefined` when the
+   * copy is gone or was never written here.
+   */
+  async findLocalProfilePhoto(userId: string): Promise<string | undefined> {
+    const localCopy = await findLocalUploadedImage(USERS_COLLECTION, userId);
+
+    if (!localCopy) {
+      return undefined;
+    }
+
+    try {
+      return await readLocalImageAsDataUrl(localCopy.uri);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Points the profile at a finished upload. The finalize trigger writes the
+   * same thing; the client does too so its own profile shows the photo at
+   * once, without waiting for the trigger or a reload.
+   */
+  async setUploadedProfilePhoto(
+    userId: string,
+    imagePath: string,
+  ): Promise<string> {
+    const photoUrl = (await getDownloadUrlFromFirebaseStorage(imagePath)) || '';
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${USERS_COLLECTION}/${userId}`,
+      data: { photoUrl, photoStatus: 'uploaded' },
+    });
+
+    return photoUrl;
+  }
+
+  /**
+   * Records an upload attempt's status. Not awaited by the upload flow:
+   * offline the write lands in the local cache at once but only resolves once
+   * the server acknowledges it (see GitHub issue #1390).
+   */
+  async setProfilePhotoStatus(
+    userId: string,
+    photoStatus: 'pending' | 'failed',
+    photoUploadStartedAt?: number,
+  ): Promise<void> {
+    try {
+      await FirebaseFirestore.updateDocument({
+        reference: `${USERS_COLLECTION}/${userId}`,
+        data: {
+          photoStatus,
+          ...(photoUploadStartedAt === undefined
+            ? {}
+            : { photoUploadStartedAtTimestamp: photoUploadStartedAt }),
+        },
+      });
+    } catch (error) {
+      console.error('Error writing the profile photo status:', error);
+      this.errorHandler.handleError(error);
     }
   }
 
@@ -788,36 +892,5 @@ export class ProfileApiService {
     const users = await Promise.all(userIds.map(loadVisibleProfile));
 
     return users.filter((user): user is PublicUser => !!user);
-  }
-
-  public async uploadImage(
-    profile: PublicUser,
-    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
-  ): Promise<void> {
-    const { photoUrl, ...profileWithoutImage } = profile;
-    void profileWithoutImage;
-
-    uploadBase64ToFirebaseStorage({
-      base64: photoUrl,
-      docId: profile.userId,
-      collection: USERS_COLLECTION,
-      callbackFn,
-    });
-  }
-
-  public async updatePhotoUrlInUser(
-    profile: PublicUser,
-    photoUrl: string,
-  ): Promise<PublicUser> {
-    const { photoUrl: base64Photo, ...profileWithoutImage } = profile;
-    void base64Photo;
-
-    await updateProfileWithImagePathFromFirebaseStorage(
-      photoUrl,
-      profileWithoutImage,
-      profile.userId,
-    );
-
-    return loadProfileById(profile.userId);
   }
 }

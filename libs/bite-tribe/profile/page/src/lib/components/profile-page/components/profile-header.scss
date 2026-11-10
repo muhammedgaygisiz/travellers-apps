@@ -41,4 +41,32 @@ $avatar-ratio: 96px;
       }
     }
   }
+
+  /* Only an anchor for the overlay: sized by its content, so a profile
+   * without an upload lays out exactly as before. */
+  .avatar-frame {
+    position: relative;
+  }
+
+  /* The photo under an upload status is blurred, so the status reads as the
+   * state of the photo rather than as the photo itself (GitHub issue #1953). */
+  .photo-in-flight {
+    .profile-avatar img,
+    .profile-image {
+      filter: blur(6px);
+    }
+
+    .profile-avatar {
+      overflow: hidden;
+      border-radius: 50%;
+    }
+  }
+
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: $avatar-ratio;
+    height: $avatar-ratio;
+  }
 }

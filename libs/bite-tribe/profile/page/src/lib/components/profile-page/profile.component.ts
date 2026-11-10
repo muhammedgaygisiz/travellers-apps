@@ -177,6 +177,11 @@ export class ProfileComponent {
   readonly logoutClick = output();
   readonly menuNavigate = output<PageMenuTarget>();
   readonly gotoEditProfile = output();
+  /** The own new photo while it uploads, shown blurred (#1953). */
+  readonly pendingPhoto = input<string | undefined>();
+
+  /** Sends the own profile photo again after its upload failed (#1953). */
+  readonly retryPhotoUpload = output();
 
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();

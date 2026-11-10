@@ -11,10 +11,9 @@ import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
 import { ErrorHandler } from '@angular/core';
 import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
-import { deleteCurrentImage } from '../utils/delete-current-image';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
-import { updateProfileWithImagePathFromFirebaseStorage } from '../bite-api/utils/update-profile-with-image-path-from-firestorage';
-import { loadProfileById } from '../bite-api/utils/load-profile-by-id';
+import { findLocalUploadedImage } from '../utils/local-image-file';
+import { readLocalImageAsDataUrl } from '../utils/read-local-image-as-data-url';
 
 /**
  * The automock, plus the deletion marker it leaves undefined: `FieldValue` is a
@@ -40,23 +39,16 @@ jest.mock('utils', () => ({
     .mockResolvedValue({ version: '1.0.1', buildNumber: '93' }),
 }));
 
-jest.mock('../utils/delete-current-image', () => ({
-  deleteCurrentImage: jest.fn(),
+jest.mock('../utils/local-image-file', () => ({
+  findLocalUploadedImage: jest.fn(),
+}));
+
+jest.mock('../utils/read-local-image-as-data-url', () => ({
+  readLocalImageAsDataUrl: jest.fn(),
 }));
 
 jest.mock('../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest.fn(),
-}));
-
-jest.mock(
-  '../bite-api/utils/update-profile-with-image-path-from-firestorage',
-  () => ({
-    updateProfileWithImagePathFromFirebaseStorage: jest.fn(),
-  }),
-);
-
-jest.mock('../bite-api/utils/load-profile-by-id', () => ({
-  loadProfileById: jest.fn(),
 }));
 
 jest.mock('../utils/user-metadata-throttle', () => ({
@@ -477,7 +469,6 @@ describe(ProfileApiService.name, () => {
     describe('given a user with base64 string as photoUrl', () => {
       beforeEach(() => {
         (isBase64String as jest.Mock).mockReturnValue(true);
-        (deleteCurrentImage as jest.Mock).mockImplementation();
         (uploadBase64ToFirebaseStorage as jest.Mock).mockResolvedValue(
           Promise.resolve('new-photo-url'),
         );
@@ -489,7 +480,7 @@ describe(ProfileApiService.name, () => {
           .mockResolvedValue(Promise.resolve());
       });
 
-      it('should delete current image, upload base64 image and update the user', inject(
+      it('should upload the base64 image and point the user at it', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
           const publicUser = {
@@ -500,11 +491,6 @@ describe(ProfileApiService.name, () => {
 
           await service.updateUser(publicUser);
 
-          expect(deleteCurrentImage).toHaveBeenCalledWith({
-            name: 'Updated User',
-            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-            userId: '123',
-          });
           expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
             'new-photo-url',
           );
@@ -1954,53 +1940,156 @@ describe(ProfileApiService.name, () => {
     });
   });
 
-  describe('uploadImage', () => {
-    it('should call uploadBase64ToFirebaseStorage and return download url', inject(
+  describe('saveProfile (issue #1953)', () => {
+    const written = (): Record<string, unknown> => {
+      const calls = jest.mocked(FirebaseFirestore.updateDocument).mock.calls;
+
+      return calls[calls.length - 1][0].data as Record<string, unknown>;
+    };
+
+    beforeEach(() => {
+      jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
+    });
+
+    it('marks the photo pending and keeps the current one on show', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {
-        const BASE64_PHOTO =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA';
-
-        await service.uploadImage(
-          {
-            photoUrl: BASE64_PHOTO,
-            userId: '123',
-          } as PublicUser,
-          () => {
-            /** Something */
-          },
+        const result = await service.saveProfile(
+          { userId: '123', photoUrl: 'current-url' } as PublicUser,
+          1700000000000,
         );
 
+        expect(written()).toMatchObject({
+          photoUrl: 'current-url',
+          photoStatus: 'pending',
+          photoUploadStartedAtTimestamp: 1700000000000,
+        });
+        expect(result.photoStatus).toBe('pending');
+      },
+    ));
+
+    it('leaves the photo status alone without an upload', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        await service.saveProfile({
+          userId: '123',
+          photoUrl: 'current-url',
+        } as PublicUser);
+
+        expect(written()).not.toHaveProperty('photoStatus');
+      },
+    ));
+
+    it('lets a failed write through', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockRejectedValue(new Error('denied'));
+
+        await expect(
+          service.saveProfile({ userId: '123' } as PublicUser),
+        ).rejects.toThrow('denied');
+      },
+    ));
+  });
+
+  describe('uploadProfilePhoto', () => {
+    it('uploads into the user folder and reports through the callback', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const callbackFn = jest.fn();
+        (uploadBase64ToFirebaseStorage as jest.Mock).mockResolvedValue('path');
+
+        await service.uploadProfilePhoto('123', 'data:photo', callbackFn);
+
         expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
-          base64: BASE64_PHOTO,
-          collection: 'users',
+          base64: 'data:photo',
           docId: '123',
-          callbackFn: expect.any(Function),
+          collection: 'users',
+          callbackFn,
         });
       },
     ));
   });
 
-  describe('updatePhotoUrlInUser', () => {
-    it('should call updateProfileWithImagePathFromFirebaseStorage, load and return profile', inject(
+  describe('findLocalProfilePhoto', () => {
+    it('reads the local copy back as a data URL', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {
-        await service.updatePhotoUrlInUser(
-          { userId: 'user-id-123' } as PublicUser,
-          'new-photo-url',
+        jest
+          .mocked(findLocalUploadedImage)
+          .mockResolvedValue({ name: 'users_123.jpg', uri: 'file://copy' });
+        jest.mocked(readLocalImageAsDataUrl).mockResolvedValue('data:copy');
+
+        await expect(service.findLocalProfilePhoto('123')).resolves.toBe(
+          'data:copy',
+        );
+        expect(findLocalUploadedImage).toHaveBeenCalledWith('users', '123');
+      },
+    ));
+
+    it('answers undefined when there is no copy', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(findLocalUploadedImage).mockResolvedValue(undefined);
+
+        await expect(
+          service.findLocalProfilePhoto('123'),
+        ).resolves.toBeUndefined();
+      },
+    ));
+  });
+
+  describe('setUploadedProfilePhoto', () => {
+    it('points the user at the uploaded object', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
+        (getDownloadUrlFromFirebaseStorage as jest.Mock).mockResolvedValue(
+          'download-url',
         );
 
-        expect(
-          updateProfileWithImagePathFromFirebaseStorage,
-        ).toHaveBeenCalledWith(
-          'new-photo-url',
-          {
-            userId: 'user-id-123',
-          },
-          'user-id-123',
+        const photoUrl = await service.setUploadedProfilePhoto(
+          '123',
+          'images/users/123/new.jpg',
         );
 
-        expect(loadProfileById).toHaveBeenCalledWith('user-id-123');
+        expect(photoUrl).toBe('download-url');
+        expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+          reference: 'users/123',
+          data: { photoUrl: 'download-url', photoStatus: 'uploaded' },
+        });
+      },
+    ));
+  });
+
+  describe('setProfilePhotoStatus', () => {
+    it('writes the status and the start time', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
+
+        await service.setProfilePhotoStatus('123', 'pending', 42);
+
+        expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
+          reference: 'users/123',
+          data: { photoStatus: 'pending', photoUploadStartedAtTimestamp: 42 },
+        });
+      },
+    ));
+
+    it('reports a failed write instead of throwing', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const error = new Error('offline');
+        jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockRejectedValue(error);
+
+        await service.setProfilePhotoStatus('123', 'failed');
+
+        expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
       },
     ));
   });

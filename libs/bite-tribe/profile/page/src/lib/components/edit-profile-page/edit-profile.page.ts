@@ -80,23 +80,35 @@ export class EditProfilePage {
   isAuthenticated = input(false);
 
   publicUser = input<PublicUser>();
+  /** A save is being written; Save Changes waits for it (issue #1953). */
+  saving = input(false);
   showEmailVerificationPrompt = input(false);
   emailVerificationResendRunning = input(false);
 
   submitPublicUser = output<PublicUser>();
   resendEmailVerification = output<void>();
 
+  /**
+   * The form is filled from the profile only until the user changes it. The
+   * store hands over a new copy of the profile whenever any of it is written -
+   * the email verification sync does so while this page is open - and
+   * patching that in replaced what was being edited: a photo picked here was
+   * gone again by the time Save Changes was pressed (GitHub issue #1953).
+   */
   setDisplayNameEffect = effect(() => {
     const publicUser = this.publicUser();
 
-    this.profileForm.patchValue({
-      displayName: publicUser?.displayName || 'Anonymous',
-    });
+    if (this.profileForm.pristine) {
+      this.profileForm.patchValue({
+        displayName: publicUser?.displayName || 'Anonymous',
+      });
+    }
   });
 
   profileEffect = afterRenderEffect(() => {
     const publicUser = this.publicUser();
-    if (publicUser) {
+
+    if (publicUser && this.profileForm.pristine) {
       this.profileForm.patchValue(publicUser);
     }
   });

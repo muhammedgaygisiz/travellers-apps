@@ -169,6 +169,32 @@ describe(EditProfilePage.name, () => {
       });
     });
 
+    /** GitHub issue #1953. */
+    describe('given a new copy of the profile while the user is editing', () => {
+      it('keeps what the user changed', () => {
+        const publicUser = {
+          displayName: 'Test User',
+          email: 'e@mail.com',
+          photoUrl: 'old.jpg',
+          userId: 'user123',
+        } as PublicUser;
+        compRef.setInput('publicUser', publicUser);
+        fixture.detectChanges();
+
+        component.profileForm.controls.photoUrl.setValue('data:new');
+        component.profileForm.markAsDirty();
+
+        compRef.setInput('publicUser', {
+          ...publicUser,
+          emailVerified: false,
+        });
+        fixture.detectChanges();
+
+        expect(component.profileForm.value.photoUrl).toBe('data:new');
+        expect(component.profileForm.value.displayName).toBe('Test User');
+      });
+    });
+
     describe('given no public user', () => {
       it('should not modify form values', () => {
         compRef.setInput('publicUser', undefined);

@@ -29,6 +29,45 @@ describe(ProfileHeader.name, () => {
     compRef = fixture.componentRef;
   });
 
+  /** GitHub issue #1953. */
+  describe('photo upload status', () => {
+    const owner = (photoStatus?: PublicUser['photoStatus']): PublicUser =>
+      ({ userId: 'me', photoUrl: 'old.jpg', photoStatus }) as PublicUser;
+
+    it('blurs the new photo under the status on the own profile', () => {
+      compRef.setInput('user', owner('failed'));
+      compRef.setInput('showPhotoStatus', true);
+      compRef.setInput('pendingPhoto', 'data:new');
+
+      expect(component.photoInFlight()).toBe(true);
+      expect(component.statusPhoto()).toBe('data:new');
+    });
+
+    it('falls back to the previous photo when this device has no new one', () => {
+      compRef.setInput('user', owner('pending'));
+      compRef.setInput('showPhotoStatus', true);
+
+      expect(component.photoInFlight()).toBe(true);
+      expect(component.statusPhoto()).toBeUndefined();
+    });
+
+    it("shows nothing of it on somebody else's profile", () => {
+      compRef.setInput('user', owner('failed'));
+      compRef.setInput('pendingPhoto', 'data:new');
+
+      expect(component.photoInFlight()).toBe(false);
+      expect(component.statusPhoto()).toBeUndefined();
+    });
+
+    it('shows nothing once the photo landed', () => {
+      compRef.setInput('user', owner('uploaded'));
+      compRef.setInput('showPhotoStatus', true);
+      compRef.setInput('pendingPhoto', 'data:new');
+
+      expect(component.photoInFlight()).toBe(false);
+    });
+  });
+
   describe('badgeColor', () => {
     it('should return "green" if biteCount is between 50 and 99', () => {
       compRef.setInput('biteCount', 75);

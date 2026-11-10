@@ -392,6 +392,19 @@ of harm rather than a stale label.
   anybody, the previous holder included. Holding it would not expose it, and releasing
   it is how account deletion already treats a name.
 
+## Profile Photo Upload Contract
+
+A new photo chosen on `Edit Profile` uploads in the background, the way a Bite photo does ([#1953]):
+
+- `Save Changes` writes the other fields at once, marks the user document `photoStatus: pending` with `photoUploadStartedAtTimestamp`, and goes back. A write that fails keeps the user on the form with a `profile-could-not-be-saved` toast.
+- The previous photo stays in `photoUrl` until the new one lands, so nobody else ever sees a missing photo. The status is shown to the owner alone, on the own avatar: the new photo blurred, with a spinner while it uploads, the retry button once it failed, or an offline mark while a retry could not work. The whole avatar retries, and the wording is read out to a screen reader rather than shown. Where the device no longer holds the new photo, the previous one is blurred instead.
+- The retry button is `bt-retry-upload-button`, shared with the Bite photo status so both read as the same action: outline, with a refresh icon and the card background. The avatar uses its short label (`retry-upload-short`, "Retry"), the Bite card the full one.
+- The storage finalize trigger `setUserPhotoUrlOnUpload` points `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the older objects in `images/users/{uid}/`. The device writes the same URL itself for an immediate update; the trigger is what makes the save independent of that device staying open.
+- The device writes `failed` when the transfer errors, or reports nothing for 30 seconds. A `pending` status older than 10 minutes reads as failed, as on a Bite.
+- A retry sends the photo kept from this session, else the device's local copy (`users_{uid}.*`). With neither, it opens `Edit Profile` to choose the photo again. While the device reports no connection, the retry is replaced by the offline hint.
+- `Edit Profile` fills its form from the profile only while the form is untouched. A new copy of the profile (the email verification sync writes one while the page is open) used to overwrite a photo the user had just picked.
+- Leaving `Edit Profile` goes back inside the app. When it was the first page (a reload or a link), it opens the own profile instead, because going back would unload the app with the upload still running.
+
 ## Out Of Scope
 
 - A profile is not a shareable destination. There is no profile share action, no
@@ -495,6 +508,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the content filter that is to cover pronouns with the display name.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
+- Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
 
@@ -539,3 +553,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916
+[#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953

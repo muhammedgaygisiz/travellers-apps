@@ -178,9 +178,9 @@ client, because the image is composed there. It is a licence boundary, not a con
 one: it decides what BiteTribe produces and hands on, and cannot stop a viewer taking a
 screenshot of a Bite they can already see.
 
-**Not enforced.** `storage.rules` still lets any signed-in user overwrite any image, and profile
-photos stay readable even for private accounts - both [#1350], open. This use case neither
-widens that hole nor depends on it: it only reads, and it never draws a profile photo (`R-9`).
+`storage.rules` lets only an image's owner overwrite it ([#1350]). This use case does not
+depend on that: it only reads, through the tokenised download URL, and it never draws a
+profile photo (`R-9`).
 
 ## MVP Classification
 

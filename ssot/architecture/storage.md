@@ -50,6 +50,58 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 `setBiteImagePathOnUpload` listens to finalized storage objects for Bite images and updates the matching Bite document with `imagePath`.
 
+## Storage Rules
+
+`storage.rules` scopes every path by owner (issue [#1350], the Storage
+counterpart of [#1078]). There is no catch-all: only the four Main Paths above
+can be written, and anything else is refused to every account, operators
+included.
+
+| Path                                  | Owner, as the rule reads it                  | Operator (`admin`) |
+| ------------------------------------- | -------------------------------------------- | ------------------ |
+| `images/users/{userId}/…`             | the path: `request.auth.uid == userId`       | read only          |
+| `images/bites/{biteId}/…`             | `bites/{biteId}.userId`, via `firestore.get` | read, write        |
+| `images/restaurants/{restaurantId}/…` | `restaurants/{restaurantId}.ownerUserIds`    | read, write        |
+| `images/biteTrails/{biteTrailId}/…`   | `biteTrails/{biteTrailId}.ownerId`           | read, write        |
+
+- **Writes** go to the owner only, and must be an `image/*` content type under
+  10 MB. An anonymous table guest writes nothing.
+- **A Bite that does not exist yet may receive its photo.** `createBite` writes
+  the document without awaiting it, so the upload can land first. The window
+  grants nothing: Bite ids are client-made UUIDs nobody knows before the
+  document exists, and the Bite Image Trigger skips an object whose Bite is
+  missing.
+- **Reads are scoped like writes, and that does not hide any image.** The apps
+  show every image through the tokenised download URL on its document, and a
+  token URL bypasses the rules. A rules read only gates `getDownloadUrl` and
+  metadata, which the apps call on what they have just uploaded. A private
+  profile photo stays private because `firestore.rules` does not let a
+  stranger read the user document that holds its URL.
+- The Admin SDK is not subject to the rules: account deletion removes
+  `images/users/{uid}/` and keeps the photos of surviving Bites ([#1234]), and
+  `deleteBiteAsOperator` removes a Bite's photo.
+
+**Cross-service lookups need a one-time IAM grant per project.** `firestore.get`
+in Storage rules runs as the Storage service agent,
+`service-<project number>@gcp-sa-firebasestorage.iam.gserviceaccount.com`, and
+needs `roles/firebaserules.firestoreServiceAgent`. CI deploys with
+`--non-interactive`, which skips the grant firebase-tools offers interactively,
+and the CI accounts cannot read or change IAM. Without the role every lookup
+errors, and every Bite, restaurant and Bite Trail upload is refused. Grant it
+before the first deploy to a new project:
+
+```bash
+gcloud projects add-iam-policy-binding <project> --member=serviceAccount:service-<project number>@gcp-sa-firebasestorage.iam.gserviceaccount.com --role=roles/firebaserules.firestoreServiceAgent
+```
+
+The suite is `src/storage-rules/__specs__/storage-rules.emulator-spec.ts`, run
+by `npx nx firebase-test-rules bite-tribe-firebase` next to the Firestore one,
+with the Storage and Firestore emulators together. It has an allow and a deny
+case per path; against the old blanket rule 13 of them fail. It seeds the
+project `emulators:exec --project` names, because the Storage emulator answers
+`firestore.get` from that project's database whatever project the request
+names.
+
 ## Display Rule
 
 Use `imagePath || image || ''` for image display.
@@ -92,6 +144,7 @@ The Storage emulator ignores the policy, so development needs no `http://localho
 
 ```text
 apps/bite-tribe-firebase/storage.rules
+apps/bite-tribe-firebase/functions/src/storage-rules/__specs__/storage-rules.emulator-spec.ts
 apps/bite-tribe-firebase/storage.cors.json
 apps/bite-tribe-firebase/functions/src/functions/bites/set-bite-image-path-on-upload.ts
 libs/bite-tribe/api/src/lib/utils/upload-base64-to-firebase-storage.ts
@@ -112,4 +165,7 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 - Backgrounding the app can make upload flows fragile.
 - Different domains use slightly different image update flows.
 
+[#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
+[#1234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1234
 [#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328
+[#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350

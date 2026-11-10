@@ -12,7 +12,7 @@
 
   **Why it matters:** blanket authenticated access stops being acceptable the moment accounts nobody vouches for can register.
 
-  `apps/bite-tribe-firebase/storage.rules` still allows read and write on `/{allPaths=**}`, so any signed-in user can overwrite another user's Bite photo or profile image. That half is [issue 1350](https://github.com/muhammedgaygisiz/travellers-apps/issues/1350) and is still open.
+  **Storage is closed too.** [Issue 1350](https://github.com/muhammedgaygisiz/travellers-apps/issues/1350) replaced the blanket `/{allPaths=**}` match in `storage.rules` with per-path ownership; the table and the one-time IAM precondition are on [Architecture - Storage](../architecture/storage.md#storage-rules).
 
   **Accepted as a documented launch risk on 19 August 2026 under [issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177)**, because ownership-scoped rules carry high regression risk and do not fit the launch window. Replacing them had to be its own change with its own verification pass against both apps.
 

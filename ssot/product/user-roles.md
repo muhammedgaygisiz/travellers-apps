@@ -147,8 +147,8 @@ app not being findable is consistent with awaiting review rather than evidence o
 them too.** `firestore.rules` scopes every **write** by the account named on the document;
 most **reads** it does not, and `bites` still allows read to any signed-in account. The
 ruleset is live - confirmed in the Firebase console on 11 September 2026, ending in a
-default-deny. `storage.rules` is untouched and still open ([#1350]), and nothing in CI deploys
-either ruleset ([#1567]). The detail is owned by [Current State - Known Issues](../current-state/known-issues.md).
+default-deny. `storage.rules` is scoped by owner too since [#1350], and both rulesets deploy
+from CI on every push to `develop` since [#1567]. The detail is owned by [Current State - Known Issues](../current-state/known-issues.md).
 
 ## Not roles
 

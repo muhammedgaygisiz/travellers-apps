@@ -6,8 +6,8 @@
 Partly in place, and the rest is tracked elsewhere. App Check is enforced on every callable -
 41 go through the `onAppCheck` wrapper, and the other two (`getCurrencyByPosition`,
 `backfillBiteAddress`) call `onCall` directly but set `enforceAppCheck` themselves - and the
-control in front of Google Places is written down rather than implied ([issue-1245](../records/issue-1245.md)). Still open:
-`storage.rules` ([#1350]) and App Check replay protection on sensitive callables ([#952]). CI
+control in front of Google Places is written down rather than implied ([issue-1245](../records/issue-1245.md)). `storage.rules`
+is scoped by owner ([#1350]). Still open: App Check replay protection on sensitive callables ([#952]). CI
 now deploys `firestore.rules`, `storage.rules` and `firestore.indexes.json` from `develop` and
 waits for indexes to be READY before functions deploy, closing [#1567].
 
@@ -40,8 +40,7 @@ of any third-party API App Check cannot reach. Both ship.
 closing an open door.
 
 Not on this page: the Firestore and Storage rulesets themselves, which belong to
-[Architecture - Firebase](../architecture/firebase.md). `storage.rules` is still open to any signed-in account and that is
-[#1350], a release risk carried by [Current State - Known Issues](../current-state/known-issues.md) rather than classified here.
+[Architecture - Firebase](../architecture/firebase.md) and [Architecture - Storage](../architecture/storage.md#storage-rules).
 
 ## App Store Review Area
 
@@ -58,7 +57,7 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 
 ## Related GitHub Scope
 
-- Issue [#1350] - `storage.rules` is still open to any signed-in account. Open.
+- Issue [#1350] - `storage.rules` scoped by owner, per path.
 - Issue [#1567] - CI now deploys the committed rules and indexes from `develop`. Closed as completed.
 - Issue [#952] - App Check replay protection on sensitive callables, classified `[Secondary]`. Open.
 - Issue [#1621] - App Check readiness is re-evaluated while the app runs, so a

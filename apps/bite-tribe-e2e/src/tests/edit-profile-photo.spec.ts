@@ -19,13 +19,18 @@ const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 const USER = TEST_USERS.fresh;
 const USER_DOC = `users/${USER.uid}`;
 
-const STORAGE_FOLDER_URL =
-  'http://localhost:9199/v0/b/bite-tribe.firebasestorage.app/o' +
-  `?prefix=${encodeURIComponent(`images/users/${USER.uid}/`)}`;
-
-/** The objects in the user's photo folder, by full path. */
-async function listPhotoObjects(page: Page): Promise<string[]> {
-  const response = await page.request.get(STORAGE_FOLDER_URL, {
+/**
+ * The objects in the user's photo folder, by full path.
+ *
+ * The bucket comes from the photo's own download URL: it is set at build time
+ * (`NX_APP_BITE_TRIBE_STORAGE_BUCKET`) and differs between CI and a local
+ * `.env`, and the emulator lists an unknown bucket as empty.
+ */
+async function listPhotoObjects(page: Page, bucket: string): Promise<string[]> {
+  const folderUrl =
+    `http://localhost:9199/v0/b/${bucket}/o` +
+    `?prefix=${encodeURIComponent(`images/users/${USER.uid}/`)}`;
+  const response = await page.request.get(folderUrl, {
     headers: { Authorization: 'Bearer owner' },
   });
 
@@ -37,6 +42,10 @@ async function listPhotoObjects(page: Page): Promise<string[]> {
 
   return (items ?? []).map((item) => item.name);
 }
+
+/** The bucket a download URL points at, or `undefined` for any other URL. */
+const bucketOf = (photoUrl: string): string | undefined =>
+  photoUrl.match(/\/b\/([^/]+)\/o\//)?.[1];
 
 /** The Storage path a download URL points at, or `undefined` for any other URL. */
 const objectPathOf = (photoUrl: unknown): string | undefined => {
@@ -124,13 +133,15 @@ test.describe('Edit Profile photo', () => {
 
     const newUrl = await photoUrl(page);
     const newObject = objectPathOf(newUrl);
+    const bucket = bucketOf(newUrl);
 
     expect(newUrl).not.toBe(previousUrl);
     expect(newObject).toMatch(new RegExp(`^images/users/${USER.uid}/[^/]+$`));
+    expect(bucket).toBeTruthy();
 
     // The finalize trigger leaves only the current photo in the folder.
     await expect
-      .poll(() => listPhotoObjects(page), { timeout: 15_000 })
+      .poll(() => listPhotoObjects(page, String(bucket)), { timeout: 15_000 })
       .toEqual([newObject]);
 
     await expect(

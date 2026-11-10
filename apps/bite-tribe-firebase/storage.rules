@@ -1,13 +1,158 @@
 rules_version = '2';
 
-// Craft rules based on data in your Firestore database
-// allow write: if firestore.get(
-//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+/**
+ * Ownership-scoped Storage rules (GitHub issue #1350, the Storage counterpart
+ * of #1078).
+ *
+ * The apps only ever write `images/{collection}/{docId}/{uuid}.{ext}`, through
+ * `uploadBlobToFirebasestorage` in `libs/bite-tribe/api`. Each collection gets
+ * its own match below, and **everything else is refused**: there is no
+ * catch-all, so a path no app writes cannot be written.
+ *
+ * **Who owns an object.** A profile image is named after its account, so the
+ * path decides. A Bite, restaurant or Bite Trail image is named after its
+ * Firestore document, so the rule reads that document with `firestore.get` and
+ * applies the same owner field `firestore.rules` does. Those cross-service
+ * reads need the Storage service agent to hold
+ * `roles/firebaserules.firestoreServiceAgent` on the project. CI deploys with
+ * `--non-interactive`, which skips firebase-tools' offer to grant it, so the
+ * role is granted once per project by hand; without it every lookup errors and
+ * every such upload is refused. See `ssot/architecture/firebase.md`.
+ *
+ * **Reads are not how the apps show images.** Every image is shown through
+ * the tokenised download URL stored on its document, and a token URL bypasses
+ * these rules. A rules read only gates `getDownloadUrl`, metadata and listing,
+ * which the apps call on objects they have just uploaded themselves. So read is
+ * scoped to whoever may write the object. What keeps a private account's
+ * profile image private is that its URL lives on a user document
+ * `firestore.rules` does not let strangers read.
+ *
+ * The Admin SDK (account deletion, operator Bite deletion, the upload trigger,
+ * the backfill) is not subject to these rules.
+ */
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow write: if request.auth != null;
-      allow read: if request.auth != null;
+
+    // ---------------------------------------------------------------- helpers
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    /** A signed-in account that is not an anonymous table guest (#1565). */
+    function isMember() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    /** `admin` on the verified token, absent- and wrong-shape-safe (#1164). */
+    function isOperator() {
+      return signedIn()
+        && request.auth.token.get('roles', []) is list
+        && 'admin' in request.auth.token.get('roles', []);
+    }
+
+    function isSelf(userId) {
+      return isMember() && request.auth.uid == userId;
+    }
+
+    /**
+     * An image no larger than the client could plausibly send. Photos are
+     * compressed to 2048 px before upload; mirrored IdP avatars are tiny.
+     */
+    function isImageWrite() {
+      return request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    function docPath(collection, docId) {
+      return /databases/(default)/documents/$(collection)/$(docId);
+    }
+
+    /** The document's single-owner field names the caller. */
+    function ownsDoc(collection, docId, field) {
+      return isMember()
+        && firestore.exists(docPath(collection, docId))
+        && firestore.get(docPath(collection, docId)).data.get(field, '') == request.auth.uid;
+    }
+
+    // ------------------------------------------------------- profile images
+
+    /**
+     * Written by the edit-profile form and by the first-sign-in mirror of an
+     * identity-provider avatar, both for the signed-in account. Account
+     * deletion removes the folder through the Admin SDK (#1234).
+     */
+    match /images/users/{userId}/{fileName} {
+      allow read: if isSelf(userId) || isOperator();
+      allow create, update: if isSelf(userId) && isImageWrite();
+      allow delete: if isSelf(userId);
+    }
+
+    // ----------------------------------------------------------- Bite images
+
+    /**
+     * The owner is `bites/{biteId}.userId`. Operators write here too: the admin
+     * app's migration moves inline images into Storage for any Bite.
+     *
+     * **A Bite that does not exist yet may receive its photo.** `createBite`
+     * writes the document without awaiting it (it must work offline) and the
+     * upload follows, so the object can arrive before the document. Refusing
+     * that would fail the upload whenever the write is slow. The window grants
+     * nothing: Bite ids are client-made UUIDs, unknown to anybody until the
+     * document exists, and `setBiteImagePathOnUpload` skips an object whose
+     * Bite is missing. Once the document exists only its owner may write.
+     *
+     * Delete is the owner's, before the client deletes the document; an
+     * operator deletes through `deleteBiteAsOperator` instead. Images of a
+     * deleted account's surviving Bites stay, as #1234 decided.
+     */
+    match /images/bites/{biteId}/{fileName} {
+      function ownsBite() {
+        return ownsDoc('bites', biteId, 'userId');
+      }
+
+      function bitePending() {
+        return isMember() && !firestore.exists(docPath('bites', biteId));
+      }
+
+      allow read: if ownsBite() || isOperator();
+      allow create, update: if isImageWrite()
+        && (ownsBite() || bitePending() || isOperator());
+      allow delete: if ownsBite() || isOperator();
+    }
+
+    // ----------------------------------------------------- restaurant images
+
+    /**
+     * Uploaded by the admin app once it has created the restaurant, and by a
+     * holder replacing the photo. Holding is `ownerUserIds` (epic #1614), as
+     * in `firestore.rules`.
+     */
+    match /images/restaurants/{restaurantId}/{fileName} {
+      function holdsRestaurant() {
+        return isMember()
+          && firestore.exists(docPath('restaurants', restaurantId))
+          && request.auth.uid in firestore.get(docPath('restaurants', restaurantId)).data.get('ownerUserIds', []);
+      }
+
+      allow read: if holdsRestaurant() || isOperator();
+      allow create, update: if isImageWrite()
+        && (holdsRestaurant() || isOperator());
+      allow delete: if holdsRestaurant() || isOperator();
+    }
+
+    // ---------------------------------------------------- Bite Trail images
+
+    /** The trail document is created and awaited before its photo uploads. */
+    match /images/biteTrails/{biteTrailId}/{fileName} {
+      function ownsTrail() {
+        return ownsDoc('biteTrails', biteTrailId, 'ownerId');
+      }
+
+      allow read: if ownsTrail() || isOperator();
+      allow create, update: if isImageWrite() && (ownsTrail() || isOperator());
+      allow delete: if ownsTrail() || isOperator();
     }
   }
 }

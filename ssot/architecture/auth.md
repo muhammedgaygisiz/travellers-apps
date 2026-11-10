@@ -340,8 +340,8 @@ suite and the deploy.
 together and needs the rules emulator suite, so merging [#1078] is what changes
 production. Issue [#1567] moved the deploy there; it was a workstation command
 until then, and the role gate sat over an open database for as long as nobody
-ran it. `storage.rules` is published as committed, including its still-open
-state, which is issue [#1350].
+ran it. `storage.rules` deploys in the same job and has been scoped by owner
+since [#1350].
 
 ## Operator Audit Trail
 
@@ -610,7 +610,7 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 - Onboarding after registration is still a product gap.
 - Public/private profile intent needs clearer user guidance.
 - Backend callable auth checks need to remain consistent as more write/query logic moves server-side.
-- Ownership, not the role, is what the Firestore rules enforce ([#1078]). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is still open ([#1350]), so an image can still be written by any signed-in account.
+- Ownership, not the role, is what the Firestore rules enforce ([#1078]). An account that holds `business` but is assigned no restaurant can write no restaurant, which is the intended boundary rather than a gap. `storage.rules` is scoped the same way since [#1350]: an image is written only by the account that owns its document, or by an operator.
 - The rules deploy from CI on every push to `develop` ([#1567]), so a merged rules change is live without a further step. Deploying by hand is still how a rollout is watched or a rollback is made.
 
 [#1075]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1075

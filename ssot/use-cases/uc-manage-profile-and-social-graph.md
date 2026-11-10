@@ -117,8 +117,8 @@ account can read are the harm.
   it, so the rules refuse the read rather than trim it: nothing of a private profile -
   real name, email, city, about, photo URL, pronouns, flags, counts - leaves the backend
   to another account's device. Operators and Functions read it through the Admin SDK and
-  are not affected. The photo file itself is governed by `storage.rules`, which still
-  lets any signed-in user read it by path; that is [#1350], open.
+  are not affected. The photo file itself can be read by path only by its owner and by
+  operators since [#1350]; its download URL lives on the user document these rules guard.
 - **The switch takes effect with the save.** The rule reads the stored `public` flag, so
   the write that makes a profile private is the write that closes it, and the one that
   makes it public opens it. There is no copy of the profile elsewhere to fall behind and

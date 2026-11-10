@@ -340,8 +340,10 @@ npx nx firebase-deploy-rules bite-tribe-firebase
 
 Rolling back is deploying the previous version of the file, which takes about a
 minute - by hand for speed, or by pushing the revert. `storage.rules` deploys
-through the same job as committed, including its current unscoped state, which
-is issue [#1350].
+through the same job and has been ownership-scoped since issue [#1350]. Its
+cross-service lookups need a one-time IAM grant on each project before the
+first deploy, which CI cannot make; see
+[Architecture - Storage](storage.md#storage-rules).
 
 ## Functions Pattern
 

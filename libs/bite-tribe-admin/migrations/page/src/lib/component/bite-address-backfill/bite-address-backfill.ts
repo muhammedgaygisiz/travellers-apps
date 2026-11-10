@@ -9,6 +9,7 @@ import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import { Bite } from 'model';
+import { formatPosition } from '../format-position';
 
 /**
  * Resolves a street address for Bites that carry a position but no address.
@@ -25,6 +26,8 @@ import { Bite } from 'model';
 })
 export class BiteAddressBackfill {
   readonly bites = input<Bite[]>([]);
+
+  protected readonly formatPosition = formatPosition;
 
   readonly backfillBiteAddress = output<Bite>();
   readonly logoutClick = output<void>();

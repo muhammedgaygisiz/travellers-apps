@@ -9,6 +9,7 @@ import { IonButton, IonContent } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import { Bite } from 'model';
+import { formatPosition } from '../format-position';
 
 /**
  * Gives a Bite the geohash the proximity queries index on, derived from the
@@ -26,6 +27,8 @@ import { Bite } from 'model';
 })
 export class GeohashMigration {
   readonly bites = input<Bite[]>([]);
+
+  protected readonly formatPosition = formatPosition;
 
   readonly addGeohash = output<Bite>();
   readonly logoutClick = output<void>();

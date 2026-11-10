@@ -43,10 +43,7 @@ their own action and press, and never also open the card. See GitHub issue
         <ion-card-title>
           <span class="bite-title">
             <ion-text color="secondary" class="copytext">
-              {{
-                $safeNavigationMigration(biteData?.name)
-                  | withFirstLetterUpperCase: activeLang()
-              }}
+              {{ biteData?.name | withFirstLetterUpperCase: activeLang() }}
             </ion-text>
           </span>
         </ion-card-title>
@@ -63,7 +60,7 @@ their own action and press, and never also open the card. See GitHub issue
             search result, which carries no distance. See GitHub issue #1791. -->
             @if (biteData?.distance || hasErrorLoadingGpsPosition()) {
               <bt-distance
-                [distance]="$safeNavigationMigration(biteData?.distance)"
+                [distance]="biteData?.distance"
                 [hasErrorLoadingGpsPosition]="hasErrorLoadingGpsPosition()"
               />
             }
@@ -75,10 +72,7 @@ their own action and press, and never also open the card. See GitHub issue
       <ion-card-content [class.with-edit]="showEditButton()">
         <div class="rating-container ion-margin-top">
           @if (biteData?.rating) {
-            <star-rating
-              [rating]="$safeNavigationMigration(biteData?.rating)"
-              readonly
-            />
+            <star-rating [rating]="biteData?.rating" readonly />
           } @else if (isOwnUnratedBite()) {
             <ion-button
               fill="outline"

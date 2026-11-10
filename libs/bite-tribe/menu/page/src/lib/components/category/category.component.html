@@ -15,7 +15,7 @@
             [canCreateBite]="canCreateBite()"
             [canAddToCart]="canAddToCart()"
             [extras]="extras()"
-            [stats]="stats()[item.id ?? '']"
+            [stats]="stats()[item.id]"
             (biteSignalClick)="biteSignalClick.emit($event)"
             (createBiteClick)="createBiteClick.emit($event)"
             (addToCartClick)="addToCartClick.emit($event)"
@@ -36,9 +36,9 @@
   -->
   @if (showExtrasBlock()) {
     <div class="extras-block" data-testid="category-extras">
-      @if (categoryData?.extrasBlock?.description) {
+      @if (categoryData?.extrasBlock?.description; as description) {
         <p class="extras-description">
-          {{ categoryData?.extrasBlock?.description }}
+          {{ description }}
         </p>
       }
       <ul class="extras-list">

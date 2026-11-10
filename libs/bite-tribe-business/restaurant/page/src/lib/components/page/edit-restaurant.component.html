@@ -273,9 +273,7 @@
 
         <div class="ion-margin-top">
           <bt-opening-hours
-            [openingHours]="
-              $safeNavigationMigration(restaurantData?.openingHours)
-            "
+            [openingHours]="restaurantData?.openingHours"
             (submitOpeningHours)="submitOpeningHours.emit($event)"
           />
         </div>

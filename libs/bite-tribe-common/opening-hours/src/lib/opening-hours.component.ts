@@ -53,6 +53,9 @@ type RawDayEntry = {
 export class OpeningHoursComponent {
   private readonly formBuilder = inject(FormBuilder);
 
+  /** The rows of {@link form}, in order. Each row's label reads its day from here. */
+  protected readonly days = DAYS;
+
   openingHours = input<DaySchedule[]>();
 
   /**

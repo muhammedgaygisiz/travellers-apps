@@ -28,10 +28,7 @@
             <br />
             <span>{{ bite.id }}</span>
           </td>
-          <td>
-            {{ bite.position?.latitude ?? '-' }}, {{ bite.position?.longitude ??
-            '-' }}
-          </td>
+          <td>{{ formatPosition(bite.position) }}</td>
           <td>{{ bite.geohash || '-' }}</td>
           <td>
             <ion-button

@@ -11,10 +11,7 @@
       @for (dayGroup of schedule.controls; track $index; let i = $index) {
         <tr [formGroupName]="i">
           <td class="day-cell">
-            <ion-label>{{
-              'day-' + $safeNavigationMigration(dayGroup.get('day')?.value)
-                | transloco
-            }}</ion-label>
+            <ion-label>{{ 'day-' + days[i] | transloco }}</ion-label>
           </td>
           <td class="open-cell">
             <ion-checkbox formControlName="isOpen" />

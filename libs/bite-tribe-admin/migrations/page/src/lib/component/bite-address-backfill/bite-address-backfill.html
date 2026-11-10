@@ -27,10 +27,7 @@
             <br />
             <span>{{ bite.id }}</span>
           </td>
-          <td>
-            {{ bite.position?.latitude ?? '-' }}, {{ bite.position?.longitude ??
-            '-' }}
-          </td>
+          <td>{{ formatPosition(bite.position) }}</td>
           <td>{{ bite.addressStatus || 'missing' }}</td>
           <td>
             <ion-button fill="outline" (click)="backfillBiteAddress.emit(bite)">

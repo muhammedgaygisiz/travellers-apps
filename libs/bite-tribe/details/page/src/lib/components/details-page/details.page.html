@@ -121,10 +121,7 @@
       </div>
 
       <div class="star-rating ion-margin-bottom">
-        <star-rating
-          readonly
-          [rating]="$safeNavigationMigration(biteData?.rating)"
-        />
+        <star-rating readonly [rating]="biteData?.rating" />
       </div>
 
       <div
@@ -166,7 +163,7 @@
           biteData?.priceInPreferredCurrencySymbol) {
           <span class="price">
             @if (biteData?.priceInPreferredCurrency) { {{
-            $safeNavigationMigration(biteData?.priceInPreferredCurrency) |
+            biteData?.priceInPreferredCurrency |
             currency:(biteData?.priceInPreferredCurrencySymbol || 'USD') }} }
           </span>
           } @else if (biteData?.price && biteData?.currency !==
@@ -177,8 +174,7 @@
           </span>
           } @if (biteData?.price) {
           <span class="price">
-            {{ $safeNavigationMigration(biteData?.price) |
-            currency:(biteData?.currency || 'USD') }}
+            {{ biteData?.price | currency:(biteData?.currency || 'USD') }}
           </span>
           }
         </div>
@@ -218,10 +214,7 @@
         />
         }
 
-        <span
-          >{{ $safeNavigationMigration(biteData?.createdAt) | timeAgo:
-          activeLang() }}</span
-        >
+        <span>{{ biteData?.createdAt | timeAgo: activeLang() }}</span>
       </div>
 
       <div
@@ -296,10 +289,7 @@
 
       <div class="map ion-margin-bottom">
         @if (biteData?.position) {
-        <bt-map
-          [geopoints]="[$safeNavigationMigration(biteData?.position)!]"
-          readonly
-        />
+        <bt-map [geopoints]="[biteData.position]" readonly />
         }
       </div>
 
@@ -307,9 +297,8 @@
       no way to add any. Rendering it anyway left a "Tags" heading over an empty
       row, announcing an absent optional field as though it had failed to load.
       The tag skeletons below still cover the loading state. -->
-      @let biteTags = $safeNavigationMigration(biteData?.tags); @if
-      (biteTags?.length) {
-      <bt-tags-input [readonly]="true" [tags]="biteTags!" />
+      @let biteTags = biteData?.tags; @if (biteTags?.length) {
+      <bt-tags-input [readonly]="true" [tags]="biteTags" />
       } @if (!biteData) {
       <div class="ion-display-flex ion-flex-row">
         <ion-skeleton-text
@@ -356,7 +345,7 @@
         } @else { @for (thread of reviewThreads(); track thread.root.id) {
         <bt-review-thread
           [thread]="thread"
-          [biteCreatorId]="$safeNavigationMigration(biteCreatorData?.userId)"
+          [biteCreatorId]="biteCreatorData?.userId"
           [canReply]="isAuthenticated()"
           [highlighted]="thread.root.id === highlightedThreadId()"
           [activeLang]="activeLang()"

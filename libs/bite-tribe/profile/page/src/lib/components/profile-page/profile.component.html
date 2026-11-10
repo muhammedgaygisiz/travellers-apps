@@ -110,7 +110,7 @@
       } @else {
         @if (showVisibilityStatus()) {
           <profile-visibility
-            [isPublic]="$safeNavigationMigration(userData?.public)"
+            [isPublic]="userData?.public"
             (editClick)="gotoEditProfile.emit()"
           />
         }
@@ -119,9 +119,7 @@
           {{ userData?.about || ('no-description-available' | transloco) }}
         </p>
 
-        <country-flags
-          [countryCodes]="$safeNavigationMigration(userData?.countryCodes)"
-        />
+        <country-flags [countryCodes]="userData?.countryCodes" />
 
         @if (hasCountries() && userData) {
           <ion-button
@@ -185,7 +183,7 @@ surfaces read the same sentence in the same language. See GitHub issue #1343. --
     header="{{ 'stop-following' | transloco }}"
     message="{{
       'are-you-sure-you-want-to-stop-following-username'
-        | transloco: { username: $safeNavigationMigration(user()?.displayName) }
+        | transloco: { username: user()?.displayName }
     }}"
     [buttons]="confirmationButtons()"
     (didDismiss)="handleConfirmationDismiss($event)"

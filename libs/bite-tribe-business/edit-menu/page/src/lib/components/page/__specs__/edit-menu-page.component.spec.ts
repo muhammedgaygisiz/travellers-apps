@@ -97,8 +97,9 @@ describe(EditMenuPage.name, () => {
   });
 
   /**
-   * Choosing a currency must not end the editing session, so it is not a menu
-   * save. Emitting one routed the owner off the page they were editing.
+   * Choosing a currency writes the currency and nothing else, so it is not a
+   * menu save. Emitting one wrote back every category the editor held, and
+   * routed the owner off the page while a menu save still did that.
    */
   it('never reports it as a menu save', () => {
     withMenu(MENU);

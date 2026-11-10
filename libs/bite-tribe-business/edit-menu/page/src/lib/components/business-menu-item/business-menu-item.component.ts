@@ -7,18 +7,26 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { IonButton, IonInput } from '@ionic/angular/standalone';
 import type { MenuItem } from 'model';
 import { BusinessMenuVariantComponent } from '../business-menu-item-editor/business-menu-variant.component';
-import { debounce, FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, required } from '@angular/forms/signals';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'business-menu-item',
   templateUrl: './business-menu-item.component.html',
   styleUrl: './business-menu-item.component.scss',
-  imports: [IonButton, BusinessMenuVariantComponent, IonInput, FormField],
+  imports: [
+    IonButton,
+    BusinessMenuVariantComponent,
+    IonInput,
+    FormField,
+    TranslocoPipe,
+  ],
 })
 export class BusinessMenuItemComponent {
   item = input<MenuItem>();
@@ -39,15 +47,77 @@ export class BusinessMenuItemComponent {
 
   itemForm = form(this.itemModel, (schemaPath) => {
     required(schemaPath.name);
-    debounce(schemaPath.name, 500);
   });
 
+  /** Whether the name holds an edit that has not been saved yet. */
+  isNameEdited = computed(() => this.itemForm().dirty());
+
+  /**
+   * Follows the stored item into the form, but never over an edit in progress:
+   * a menu that reloads while the owner is typing would otherwise put the
+   * stored name back under their cursor. A name the stored item already holds
+   * is no longer an edit, which is how a successful save hides Save and Cancel
+   * again (issue #1377).
+   */
   onItemChange = effect(() => {
     const item = this.item();
-    if (item) {
-      this.itemForm.name().value.set(item?.name || '');
+
+    if (!item) {
+      return;
     }
+
+    const stored = item.name || '';
+    const form = this.itemForm();
+
+    const holdsStored = form.value().name === stored;
+
+    // Nothing to do, and resetting anyway would write a new value object and
+    // run this effect again.
+    if (holdsStored === !form.dirty()) {
+      return;
+    }
+
+    untracked(() => form.reset({ name: stored }));
   });
+
+  /**
+   * Saves the renamed item.
+   *
+   * Before this, the name field had no way out of the component: it updated
+   * its own form and nothing else, so a rename showed on screen and was gone
+   * the next time the menu loaded.
+   *
+   * A variant is created carrying its item's name (see the category's
+   * `onAddVariant`), and an order line prints both. A variant still holding the
+   * old name is renamed with the item, so a guest's order does not read
+   * "New name (Old name)". A variant with a name of its own keeps it.
+   */
+  saveName(): void {
+    const item = this.item();
+
+    if (!item || !this.itemForm().valid()) {
+      return;
+    }
+
+    const name = this.itemForm.name().value();
+
+    this.itemChanged.emit({
+      ...item,
+      name,
+      ...(item.variants
+        ? {
+            variants: item.variants.map((variant) =>
+              variant.name === item.name ? { ...variant, name } : variant,
+            ),
+          }
+        : {}),
+    });
+  }
+
+  /** Puts the stored name back and drops the edit. */
+  cancelName(): void {
+    this.itemForm().reset({ name: this.item()?.name || '' });
+  }
 
   showNewVariantComponent = computed(() => {
     return this.presentAddVariant();

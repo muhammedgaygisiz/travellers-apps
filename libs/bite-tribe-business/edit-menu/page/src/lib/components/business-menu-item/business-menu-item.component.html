@@ -10,8 +10,27 @@
         fill="outline"
         mode="md"
         class="ion-margin-top"
+        data-testid="menu-item-name"
       />
     </h3>
+    @if (isNameEdited()) {
+      <div class="ion-display-flex ion-justify-content-end">
+        <ion-button
+          fill="outline"
+          data-testid="cancel-menu-item-name"
+          (click)="cancelName()"
+        >
+          {{ 'cancel' | transloco }}
+        </ion-button>
+        <ion-button
+          data-testid="save-menu-item-name"
+          [disabled]="!itemForm().valid()"
+          (click)="saveName()"
+        >
+          {{ 'save' | transloco }}
+        </ion-button>
+      </div>
+    }
     <business-menu-variant
       [currencySymbol]="currencySymbol()"
       [item]="itemData"

@@ -1,3 +1,4 @@
+import type { MenuItem } from 'model';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BusinessMenuVariantComponent } from '../business-menu-variant.component';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
@@ -12,6 +13,14 @@ class MockTranslocoPipe implements PipeTransform {
     return value;
   }
 }
+
+const createItem = (overrides: Partial<MenuItem> = {}): MenuItem => ({
+  id: 'item-1',
+  name: 'Margherita',
+  description: 'Tomato',
+  price: 9,
+  ...overrides,
+});
 
 describe('BusinessAddItemComponent', () => {
   let component: BusinessMenuVariantComponent;
@@ -69,6 +78,39 @@ describe('BusinessAddItemComponent', () => {
       expect(component.itemForm.notes().value()).toBe('');
       expect(component.itemForm.price().value()).toBe(0);
       expect(component.itemForm.isAvailable().value()).toBe(true);
+    });
+
+    /**
+     * The editor re-reads the menu after every save (issue #1377), so `item`
+     * changes under an edit that has nothing to do with that save. Copying it
+     * over would wipe the edit and leave its Save button up.
+     */
+    it('should keep an edit when the stored item reloads unchanged', () => {
+      const item = createItem({ price: 10 });
+      componentRef.setInput('item', item);
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.price().value.set(12);
+      component.itemForm.price().markAsDirty();
+
+      componentRef.setInput('item', { ...item });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.itemForm.price().value()).toBe(12);
+      expect(component.isChangeButtonsHidden()).toBe(false);
+    });
+
+    it('should hide Save and Cancel once the stored item holds the edit', () => {
+      const item = createItem({ price: 10 });
+      componentRef.setInput('item', item);
+      componentRef.changeDetectorRef.detectChanges();
+      component.itemForm.price().value.set(12);
+      component.itemForm.price().markAsDirty();
+
+      componentRef.setInput('item', { ...item, price: 12 });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.itemForm.price().value()).toBe(12);
+      expect(component.isChangeButtonsHidden()).toBe(true);
     });
   });
 

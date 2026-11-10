@@ -1,5 +1,7 @@
 import { BusinessCategoryComponent } from '../business-category.component';
 import { BusinessCategoryExtrasComponent } from '../../business-category-extras/business-category-extras.component';
+import { BusinessMenuItemComponent } from '../../business-menu-item/business-menu-item.component';
+import { BusinessMenuVariantComponent } from '../../business-menu-item-editor/business-menu-variant.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, Pipe, PipeTransform } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -57,6 +59,18 @@ describe('BusinessCategoryComponent', () => {
       imports: [BusinessCategoryComponent],
     })
       .overrideComponent(BusinessCategoryExtrasComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .overrideComponent(BusinessCategoryComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .overrideComponent(BusinessMenuItemComponent, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
+      .overrideComponent(BusinessMenuVariantComponent, {
         remove: { imports: [TranslocoPipe] },
         add: { imports: [MockTranslocoPipe] },
       })
@@ -148,17 +162,20 @@ describe('BusinessCategoryComponent', () => {
       });
     });
 
-    it('should add category items as empty array if none provided', () => {
+    // This used to expect `items: []` and passed only because the old title
+    // effect emitted a second, stray category on load whenever the stored
+    // subtitle was missing - the autosave issue #1377 removed.
+    it('should start from an empty item list if the category has none', () => {
       componentRef.setInput('category', { id: 'cat1' } as unknown as Category);
       componentRef.changeDetectorRef.detectChanges();
 
       component.onChangeItem(mockMenuItem, 0);
 
+      expect(emitSpy).toHaveBeenCalledTimes(1);
       expect(emitSpy).toHaveBeenCalledWith({
-        ...mockCategory,
-        title: mockCategory.title || '',
-        subtitle: mockCategory.subtitle || '',
-        items: [],
+        id: 'cat1',
+        title: '',
+        items: [mockMenuItem],
       });
     });
   });
@@ -291,63 +308,126 @@ describe('BusinessCategoryComponent', () => {
   });
 
   describe('onLinkedCategoryChange', () => {
-    it('should set form title and subtitle from category when form title is empty', () => {
-      component.categoryForm.title().value.set('');
-      component.categoryForm.subtitle().value.set('');
-      const cat: Category = {
-        id: 'category-test',
-        title: 'Test',
-        subtitle: 'Sub',
-        items: [],
-      };
+    const cat: Category = {
+      id: 'category-test',
+      title: 'Test',
+      subtitle: 'Sub',
+      items: [],
+    };
+
+    it('should set form title and subtitle from the category', () => {
       componentRef.setInput('category', cat);
       componentRef.changeDetectorRef.detectChanges();
+
       expect(component.categoryForm.title().value()).toBe('Test');
       expect(component.categoryForm.subtitle().value()).toBe('Sub');
+      expect(component.categoryForm().dirty()).toBe(false);
     });
 
-    it('should set form title and subtitle category if provided', () => {
-      const cat: Category = {
-        id: 'category-test',
-        title: 'Test',
-        subtitle: 'Sub',
-        items: [],
-      };
-      componentRef.setInput('category', cat);
+    it('should set form title and subtitle as empty when the category has none', () => {
+      componentRef.setInput('category', { items: [] } as unknown as Category);
       componentRef.changeDetectorRef.detectChanges();
-      expect(component.categoryForm.title().value()).toBe('Test');
-      expect(component.categoryForm.subtitle().value()).toBe('Sub');
-    });
 
-    it('should set form title and subtitle as empty when form title is empty and no title or subtitle provided', () => {
-      component.categoryForm.title().value.set(null as unknown as string);
-      component.categoryForm.subtitle().value.set(null as unknown as string);
-      const cat = { items: [] } as unknown as Category;
-      componentRef.setInput('category', cat);
-      componentRef.changeDetectorRef.detectChanges();
       expect(component.categoryForm.title().value()).toBe('');
       expect(component.categoryForm.subtitle().value()).toBe('');
     });
+
+    it('should follow a reloaded category while nothing is edited', () => {
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      componentRef.setInput('category', { ...cat, title: 'Reloaded' });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.categoryForm.title().value()).toBe('Reloaded');
+    });
+
+    it('should not overwrite an edit in progress when the category reloads', () => {
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      component.categoryForm.title().value.set('Typing');
+      component.categoryForm.title().markAsDirty();
+      componentRef.setInput('category', { ...cat, title: 'Reloaded' });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.categoryForm.title().value()).toBe('Typing');
+    });
+
+    it('should keep a cleared title empty and report it as required', () => {
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      component.categoryForm.title().value.set('');
+      component.categoryForm.title().markAsDirty();
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.categoryForm.title().value()).toBe('');
+      expect(component.categoryForm.title().getError('required')).toBeDefined();
+      expect(component.categoryForm().valid()).toBe(false);
+    });
   });
 
-  describe('onTitleSubtitleChange', () => {
+  describe('after a save', () => {
+    const cat: Category = {
+      id: 'category-test',
+      title: 'Test',
+      subtitle: 'Sub',
+      items: [],
+    };
+
+    beforeEach(() => {
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
+      component.categoryForm.title().value.set('Saved Title');
+      component.categoryForm.title().markAsDirty();
+      componentRef.changeDetectorRef.detectChanges();
+    });
+
+    // The editor re-reads the menu after a save instead of leaving (#1377).
+    it('should hide Save and Cancel once the stored category holds the edit', () => {
+      componentRef.setInput('category', { ...cat, title: 'Saved Title' });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.categoryForm.title().value()).toBe('Saved Title');
+      expect(component.isTitleEdited()).toBe(false);
+    });
+
+    it('should keep the buttons when the reload does not hold the edit', () => {
+      componentRef.setInput('category', { ...cat });
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.categoryForm.title().value()).toBe('Saved Title');
+      expect(component.isTitleEdited()).toBe(true);
+    });
+  });
+
+  describe('title editing', () => {
     let emitSpy: SpyInstance;
+    const cat: Category = {
+      id: 'category-test',
+      title: 'Test',
+      subtitle: 'Sub',
+      items: [createMenuItem()],
+    };
 
     beforeEach(() => {
       emitSpy = jest.spyOn(component.categoryChanged, 'emit');
+      componentRef.setInput('category', cat);
+      componentRef.changeDetectorRef.detectChanges();
     });
 
-    it('should emit categoryChanged when title or subtitle changes', () => {
-      const cat: Category = {
-        id: 'category-test',
-        title: 'Test',
-        subtitle: 'Sub',
-        items: [],
-      };
-      componentRef.setInput('category', cat);
+    it('should not emit while the title is being typed', () => {
+      component.categoryForm.title().value.set('New Title');
+      component.categoryForm.title().markAsDirty();
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(component.isTitleEdited()).toBe(true);
+    });
+
+    it('should emit the category with the new title and subtitle on save', () => {
       component.categoryForm.title().value.set('New Title');
       component.categoryForm.subtitle().value.set('New Subtitle');
-      componentRef.changeDetectorRef.detectChanges();
+
+      component.saveTitle();
 
       expect(emitSpy).toHaveBeenCalledWith({
         ...cat,
@@ -356,18 +436,22 @@ describe('BusinessCategoryComponent', () => {
       });
     });
 
-    it('should not emit categoryChanged if title and subtitle are unchanged', () => {
-      const cat: Category = {
-        id: 'category-test',
-        title: 'Test',
-        subtitle: 'Sub',
-        items: [],
-      };
-      componentRef.setInput('category', cat);
-      component.categoryForm.title().value.set('Test');
-      component.categoryForm.subtitle().value.set('Sub');
-      componentRef.changeDetectorRef.detectChanges();
+    it('should not emit on save when the title is empty', () => {
+      component.categoryForm.title().value.set('');
 
+      component.saveTitle();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should put the stored title back on cancel', () => {
+      component.categoryForm.title().value.set('New Title');
+      component.categoryForm.title().markAsDirty();
+
+      component.cancelTitle();
+
+      expect(component.categoryForm.title().value()).toBe('Test');
+      expect(component.isTitleEdited()).toBe(false);
       expect(emitSpy).not.toHaveBeenCalled();
     });
   });

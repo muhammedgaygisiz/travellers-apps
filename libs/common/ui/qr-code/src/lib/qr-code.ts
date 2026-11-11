@@ -18,15 +18,13 @@ type QrFactory = (typeNumber: 0, errorCorrectionLevel: 'Q') => QrMatrix;
  *
  * `qrcode-generator` is a UMD package declared with `export =`. The app build
  * bundles its ES module, where the factory is the default export; Jest loads
- * its CommonJS build, where the factory *is* `module.exports`; and the two
- * tsconfigs involved disagree about `esModuleInterop`, so no single import
- * form is both callable at runtime and accepted by the compiler in all four
- * combinations. Taking the default when there is one, and the namespace
- * itself when there is not, is correct under every one of them.
+ * its CommonJS build, where the factory *is* `module.exports`, so no single
+ * import form is callable at runtime in both. Taking the default when there
+ * is one, and the namespace itself when there is not, is correct under each.
  *
- * The shape above is declared here rather than imported for the same reason:
- * the package's own types are ambient globals, which resolve differently under
- * the same two settings.
+ * The shape above is declared here rather than imported because the
+ * package's own types are an ambient global re-exported with `export =`,
+ * which the two runtime shapes above see differently.
  */
 const qrcode = ((qrcodeModule as unknown as { default?: unknown }).default ??
   qrcodeModule) as unknown as QrFactory;

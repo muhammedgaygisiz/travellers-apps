@@ -206,7 +206,7 @@ describe(GalleryPage.name, () => {
       .spyOn(TestBed.inject(AlertController), 'create')
       .mockImplementation(async (options) => {
         destructiveHandler = (
-          options.buttons as { role?: string; handler?: () => void }[]
+          options?.buttons as { role?: string; handler?: () => void }[]
         ).find(({ role }) => role === 'destructive')?.handler;
         return { present } as never;
       });

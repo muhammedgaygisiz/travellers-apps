@@ -4,253 +4,255 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2022",
     "module": "esnext",
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "auth": ["libs/common/ui/auth/src/index.ts"],
+      "auth": ["./libs/common/ui/auth/src/index.ts"],
       "bite-tribe-admin/bites": [
-        "libs/bite-tribe-admin/bites/page/src/index.ts"
+        "./libs/bite-tribe-admin/bites/page/src/index.ts"
       ],
       "bite-tribe-admin/bites-data-access": [
-        "libs/bite-tribe-admin/bites/data-access/src/index.ts"
+        "./libs/bite-tribe-admin/bites/data-access/src/index.ts"
       ],
       "bite-tribe-admin/dashboard": [
-        "libs/bite-tribe-admin/dashboard/src/index.ts"
+        "./libs/bite-tribe-admin/dashboard/src/index.ts"
       ],
       "bite-tribe-admin/migrations": [
-        "libs/bite-tribe-admin/migrations/page/src/index.ts"
+        "./libs/bite-tribe-admin/migrations/page/src/index.ts"
       ],
       "bite-tribe-admin/migrations-data-access": [
-        "libs/bite-tribe-admin/migrations/data-access/src/index.ts"
+        "./libs/bite-tribe-admin/migrations/data-access/src/index.ts"
       ],
       "bite-tribe-admin/restaurants": [
-        "libs/bite-tribe-admin/restaurants/page/src/index.ts"
+        "./libs/bite-tribe-admin/restaurants/page/src/index.ts"
       ],
       "bite-tribe-admin/restaurants-data-access": [
-        "libs/bite-tribe-admin/restaurants/data-access/src/index.ts"
+        "./libs/bite-tribe-admin/restaurants/data-access/src/index.ts"
       ],
-      "bite-tribe-admin/shell": ["libs/bite-tribe-admin/shell/src/index.ts"],
-      "bite-tribe-admin/start": ["libs/bite-tribe-admin/start/src/index.ts"],
+      "bite-tribe-admin/shell": ["./libs/bite-tribe-admin/shell/src/index.ts"],
+      "bite-tribe-admin/start": ["./libs/bite-tribe-admin/start/src/index.ts"],
       "bite-tribe-admin/user-management": [
-        "libs/bite-tribe-admin/user-management/page/src/index.ts"
+        "./libs/bite-tribe-admin/user-management/page/src/index.ts"
       ],
       "bite-tribe-admin/user-management-data-access": [
-        "libs/bite-tribe-admin/user-management/data-access/src/index.ts"
+        "./libs/bite-tribe-admin/user-management/data-access/src/index.ts"
       ],
       "bite-tribe-business/dashboard": [
-        "libs/bite-tribe-business/dashboard/page/src/index.ts"
+        "./libs/bite-tribe-business/dashboard/page/src/index.ts"
       ],
       "bite-tribe-business/dashboard-data-access": [
-        "libs/bite-tribe-business/dashboard/data-access/src/index.ts"
+        "./libs/bite-tribe-business/dashboard/data-access/src/index.ts"
       ],
       "bite-tribe-business/edit-menu": [
-        "libs/bite-tribe-business/edit-menu/page/src/index.ts"
+        "./libs/bite-tribe-business/edit-menu/page/src/index.ts"
       ],
       "bite-tribe-business/floor-plan": [
-        "libs/bite-tribe-business/floor-plan/page/src/index.ts"
+        "./libs/bite-tribe-business/floor-plan/page/src/index.ts"
       ],
       "bite-tribe-business/floor-plan-data-access": [
-        "libs/bite-tribe-business/floor-plan/data-access/src/index.ts"
+        "./libs/bite-tribe-business/floor-plan/data-access/src/index.ts"
       ],
       "bite-tribe-business/floor-plan-ui": [
-        "libs/bite-tribe-business/floor-plan/ui/src/index.ts"
+        "./libs/bite-tribe-business/floor-plan/ui/src/index.ts"
       ],
       "bite-tribe-business/restaurant": [
-        "libs/bite-tribe-business/restaurant/page/src/index.ts"
+        "./libs/bite-tribe-business/restaurant/page/src/index.ts"
       ],
       "bite-tribe-business/restaurant-data-access": [
-        "libs/bite-tribe-business/restaurant/data-access/src/index.ts"
+        "./libs/bite-tribe-business/restaurant/data-access/src/index.ts"
       ],
       "bite-tribe-business/staff": [
-        "libs/bite-tribe-business/staff/page/src/index.ts"
+        "./libs/bite-tribe-business/staff/page/src/index.ts"
       ],
       "bite-tribe-business/staff-data-access": [
-        "libs/bite-tribe-business/staff/data-access/src/index.ts"
+        "./libs/bite-tribe-business/staff/data-access/src/index.ts"
       ],
       "bite-tribe-business/table-management": [
-        "libs/bite-tribe-business/table-management/page/src/index.ts"
+        "./libs/bite-tribe-business/table-management/page/src/index.ts"
       ],
       "bite-tribe-business/table-management-data-access": [
-        "libs/bite-tribe-business/table-management/data-access/src/index.ts"
+        "./libs/bite-tribe-business/table-management/data-access/src/index.ts"
       ],
       "bite-tribe-business/shell": [
-        "libs/bite-tribe-business/shell/src/index.ts"
+        "./libs/bite-tribe-business/shell/src/index.ts"
       ],
       "bite-tribe-business/start": [
-        "libs/bite-tribe-business/start/src/index.ts"
+        "./libs/bite-tribe-business/start/src/index.ts"
       ],
-      "bite-tribe-common/bite": ["libs/bite-tribe-common/bite/src/index.ts"],
-      "bite-tribe-common/map": ["libs/bite-tribe-common/map/src/index.ts"],
+      "bite-tribe-common/bite": ["./libs/bite-tribe-common/bite/src/index.ts"],
+      "bite-tribe-common/map": ["./libs/bite-tribe-common/map/src/index.ts"],
       "bite-tribe-common/map/globe": [
-        "libs/bite-tribe-common/map/src/globe.ts"
+        "./libs/bite-tribe-common/map/src/globe.ts"
       ],
-      "bite-tribe/api": ["libs/bite-tribe/api/src/index.ts"],
-      "bite-tribe/coach-mark": ["libs/bite-tribe/coach-mark/src/index.ts"],
-      "bite-tribe/onboarding": ["libs/bite-tribe/onboarding/page/src/index.ts"],
+      "bite-tribe/api": ["./libs/bite-tribe/api/src/index.ts"],
+      "bite-tribe/coach-mark": ["./libs/bite-tribe/coach-mark/src/index.ts"],
+      "bite-tribe/onboarding": [
+        "./libs/bite-tribe/onboarding/page/src/index.ts"
+      ],
       "bite-tribe/onboarding-guards": [
-        "libs/bite-tribe/onboarding/guards/src/index.ts"
+        "./libs/bite-tribe/onboarding/guards/src/index.ts"
       ],
       "bite-tribe/onboarding-data-access": [
-        "libs/bite-tribe/onboarding/data-access/src/index.ts"
+        "./libs/bite-tribe/onboarding/data-access/src/index.ts"
       ],
       "bite-tribe/account-data-access": [
-        "libs/bite-tribe/account/data-access/src/index.ts"
+        "./libs/bite-tribe/account/data-access/src/index.ts"
       ],
-      "bite-tribe/bite": ["libs/bite-tribe/bite/page/src/index.ts"],
+      "bite-tribe/bite": ["./libs/bite-tribe/bite/page/src/index.ts"],
       "bite-tribe/bite-data-access": [
-        "libs/bite-tribe/bite/data-access/src/index.ts"
+        "./libs/bite-tribe/bite/data-access/src/index.ts"
       ],
-      "bite-tribe/bucketlist": ["libs/bite-tribe/bucketlist/page/src/index.ts"],
+      "bite-tribe/bucketlist": [
+        "./libs/bite-tribe/bucketlist/page/src/index.ts"
+      ],
       "bite-tribe/bucketlist-data-access": [
-        "libs/bite-tribe/bucketlist/data-access/src/index.ts"
+        "./libs/bite-tribe/bucketlist/data-access/src/index.ts"
       ],
-      "bite-tribe/details": ["libs/bite-tribe/details/page/src/index.ts"],
+      "bite-tribe/details": ["./libs/bite-tribe/details/page/src/index.ts"],
       "bite-tribe/details-data-access": [
-        "libs/bite-tribe/details/data-access/src/index.ts"
+        "./libs/bite-tribe/details/data-access/src/index.ts"
       ],
       "bite-tribe/email-verification-data-access": [
-        "libs/bite-tribe/email-verification/data-access/src/index.ts"
+        "./libs/bite-tribe/email-verification/data-access/src/index.ts"
       ],
-      "bite-tribe/followers": ["libs/bite-tribe/followers/page/src/index.ts"],
+      "bite-tribe/followers": ["./libs/bite-tribe/followers/page/src/index.ts"],
       "bite-tribe/followers-data-access": [
-        "libs/bite-tribe/followers/data-access/src/index.ts"
+        "./libs/bite-tribe/followers/data-access/src/index.ts"
       ],
       "bite-tribe/follow-suggestions-data-access": [
-        "libs/bite-tribe/follow-suggestions/data-access/src/index.ts"
+        "./libs/bite-tribe/follow-suggestions/data-access/src/index.ts"
       ],
       "bite-tribe/follow-suggestions-ui": [
-        "libs/bite-tribe/follow-suggestions/ui/src/index.ts"
+        "./libs/bite-tribe/follow-suggestions/ui/src/index.ts"
       ],
       "bite-tribe/leaderboard": [
-        "libs/bite-tribe/leaderboard/page/src/index.ts"
+        "./libs/bite-tribe/leaderboard/page/src/index.ts"
       ],
       "bite-tribe/leaderboard-data-access": [
-        "libs/bite-tribe/leaderboard/data-access/src/index.ts"
+        "./libs/bite-tribe/leaderboard/data-access/src/index.ts"
       ],
-      "bite-tribe/home": ["libs/bite-tribe/home/page/src/index.ts"],
+      "bite-tribe/home": ["./libs/bite-tribe/home/page/src/index.ts"],
       "bite-tribe/home-data-access": [
-        "libs/bite-tribe/home/data-access/src/index.ts"
+        "./libs/bite-tribe/home/data-access/src/index.ts"
       ],
-      "bite-tribe/search": ["libs/bite-tribe/search/page/src/index.ts"],
+      "bite-tribe/search": ["./libs/bite-tribe/search/page/src/index.ts"],
       "bite-tribe/search-data-access": [
-        "libs/bite-tribe/search/data-access/src/index.ts"
+        "./libs/bite-tribe/search/data-access/src/index.ts"
       ],
-      "bite-tribe/gallery": ["libs/bite-tribe/gallery/page/src/index.ts"],
-      "bite-tribe/map": ["libs/bite-tribe/map/page/src/index.ts"],
+      "bite-tribe/gallery": ["./libs/bite-tribe/gallery/page/src/index.ts"],
+      "bite-tribe/map": ["./libs/bite-tribe/map/page/src/index.ts"],
       "bite-tribe/map-data-access": [
-        "libs/bite-tribe/map/data-access/src/index.ts"
+        "./libs/bite-tribe/map/data-access/src/index.ts"
       ],
-      "bite-tribe/menu": ["libs/bite-tribe/menu/page/src/index.ts"],
+      "bite-tribe/menu": ["./libs/bite-tribe/menu/page/src/index.ts"],
       "bite-tribe/menu-data-access": [
-        "libs/bite-tribe/menu/data-access/src/index.ts"
+        "./libs/bite-tribe/menu/data-access/src/index.ts"
       ],
-      "bite-tribe/profile": ["libs/bite-tribe/profile/page/src/index.ts"],
+      "bite-tribe/profile": ["./libs/bite-tribe/profile/page/src/index.ts"],
       "bite-tribe/profile-data-access": [
-        "libs/bite-tribe/profile/data-access/src/index.ts"
+        "./libs/bite-tribe/profile/data-access/src/index.ts"
       ],
-      "bite-tribe/restaurant": ["libs/bite-tribe/restaurant/page/src/index.ts"],
+      "bite-tribe/restaurant": [
+        "./libs/bite-tribe/restaurant/page/src/index.ts"
+      ],
       "bite-tribe/restaurant-data-access": [
-        "libs/bite-tribe/restaurant/data-access/src/index.ts"
+        "./libs/bite-tribe/restaurant/data-access/src/index.ts"
       ],
-      "bite-tribe/settings": ["libs/bite-tribe/settings/page/src/index.ts"],
+      "bite-tribe/settings": ["./libs/bite-tribe/settings/page/src/index.ts"],
       "bite-tribe/settings-data-access": [
-        "libs/bite-tribe/settings/data-access/src/index.ts"
+        "./libs/bite-tribe/settings/data-access/src/index.ts"
       ],
-      "bite-tribe/shell": ["libs/bite-tribe/shell/src/index.ts"],
-      "bite-tribe/start": ["libs/bite-tribe/start/src/index.ts"],
-      "bite-tribe/store-links": ["libs/bite-tribe/store-links/src/index.ts"],
-      "bite-tribe/store": ["libs/bite-tribe/store/src/index.ts"],
-      "chart": ["libs/common/ui/chart/src/index.ts"],
+      "bite-tribe/shell": ["./libs/bite-tribe/shell/src/index.ts"],
+      "bite-tribe/start": ["./libs/bite-tribe/start/src/index.ts"],
+      "bite-tribe/store-links": ["./libs/bite-tribe/store-links/src/index.ts"],
+      "bite-tribe/store": ["./libs/bite-tribe/store/src/index.ts"],
+      "chart": ["./libs/common/ui/chart/src/index.ts"],
       "common/networkstatus": [
-        "libs/common/networkstatus/feature/src/index.ts"
+        "./libs/common/networkstatus/feature/src/index.ts"
       ],
       "common/password-validator": [
-        "libs/common/ui/password-validator/src/index.ts"
+        "./libs/common/ui/password-validator/src/index.ts"
       ],
-      "common/ui/card": ["libs/common/ui/card/src/index.ts"],
-      "common/ui/chip": ["libs/common/ui/chip/src/index.ts"],
-      "common/ui/coach-mark": ["libs/common/ui/coach-mark/src/index.ts"],
-      "country-selector": ["libs/common/ui/country-selector/src/index.ts"],
-      "currency-selector": ["libs/common/ui/currency-selector/src/index.ts"],
+      "common/ui/card": ["./libs/common/ui/card/src/index.ts"],
+      "common/ui/chip": ["./libs/common/ui/chip/src/index.ts"],
+      "common/ui/coach-mark": ["./libs/common/ui/coach-mark/src/index.ts"],
+      "country-selector": ["./libs/common/ui/country-selector/src/index.ts"],
+      "currency-selector": ["./libs/common/ui/currency-selector/src/index.ts"],
       "restaurant-selector": [
-        "libs/common/ui/restaurant-selector/src/index.ts"
+        "./libs/common/ui/restaurant-selector/src/index.ts"
       ],
-      "common/ui/page": ["libs/common/ui/page/src/index.ts"],
-      "common/ui/qr-code": ["libs/common/ui/qr-code/src/index.ts"],
-      "common/ui/star-rating": ["libs/common/ui/star-rating/src/index.ts"],
-      "common/ui/tags": ["libs/common/ui/tags/src/index.ts"],
-      "opening-hours": ["libs/bite-tribe-common/opening-hours/src/index.ts"],
-      "common/distance": ["libs/common/distance/src/index.ts"],
-      "app-settings": ["libs/common/app-settings/src/index.ts"],
-      "geolocation": ["libs/common/geolocation/src/index.ts"],
-      "media-location": ["libs/common/media-location/src/index.ts"],
-      "image-compression": ["libs/common/image-compression/src/index.ts"],
-      "model": ["libs/bite-tribe-common/model/src/index.ts"],
-      "social-share": ["libs/common/social-share/src/index.ts"],
-      "ta-firestore": ["libs/common/ta-firestore/src/index.ts"],
-      "toast": ["libs/common/toast/src/index.ts"],
-      "haptics": ["libs/common/haptics/src/index.ts"],
-      "celebration": ["libs/common/celebration/src/index.ts"],
-      "utils": ["libs/common/utils/src/index.ts"],
-      "bite-tribe/about": ["libs/bite-tribe/about/page/src/index.ts"],
+      "common/ui/page": ["./libs/common/ui/page/src/index.ts"],
+      "common/ui/qr-code": ["./libs/common/ui/qr-code/src/index.ts"],
+      "common/ui/star-rating": ["./libs/common/ui/star-rating/src/index.ts"],
+      "common/ui/tags": ["./libs/common/ui/tags/src/index.ts"],
+      "opening-hours": ["./libs/bite-tribe-common/opening-hours/src/index.ts"],
+      "common/distance": ["./libs/common/distance/src/index.ts"],
+      "app-settings": ["./libs/common/app-settings/src/index.ts"],
+      "geolocation": ["./libs/common/geolocation/src/index.ts"],
+      "media-location": ["./libs/common/media-location/src/index.ts"],
+      "image-compression": ["./libs/common/image-compression/src/index.ts"],
+      "model": ["./libs/bite-tribe-common/model/src/index.ts"],
+      "social-share": ["./libs/common/social-share/src/index.ts"],
+      "ta-firestore": ["./libs/common/ta-firestore/src/index.ts"],
+      "toast": ["./libs/common/toast/src/index.ts"],
+      "haptics": ["./libs/common/haptics/src/index.ts"],
+      "celebration": ["./libs/common/celebration/src/index.ts"],
+      "utils": ["./libs/common/utils/src/index.ts"],
+      "bite-tribe/about": ["./libs/bite-tribe/about/page/src/index.ts"],
       "bite-tribe/about-data-access": [
-        "libs/bite-tribe/about/data-access/src/index.ts"
+        "./libs/bite-tribe/about/data-access/src/index.ts"
       ],
       "bite-tribe/market-place": [
-        "libs/bite-tribe/market-place/page/src/index.ts"
+        "./libs/bite-tribe/market-place/page/src/index.ts"
       ],
       "bite-tribe/market-place-data-access": [
-        "libs/bite-tribe/market-place/data-access/src/index.ts"
+        "./libs/bite-tribe/market-place/data-access/src/index.ts"
       ],
-      "bite-tribe/bite-trail": ["libs/bite-tribe/bite-trail/page/src/index.ts"],
+      "bite-tribe/bite-trail": [
+        "./libs/bite-tribe/bite-trail/page/src/index.ts"
+      ],
       "bite-tribe/bite-trail-data-access": [
-        "libs/bite-tribe/bite-trail/data-access/src/index.ts"
+        "./libs/bite-tribe/bite-trail/data-access/src/index.ts"
       ],
-      "push-notifications": ["libs/common/push-notifications/src/index.ts"],
-      "image-upload": ["libs/common/ui/image-upload/src/index.ts"],
-      "common/ui/image-viewer": ["libs/common/ui/image-viewer/src/index.ts"],
+      "push-notifications": ["./libs/common/push-notifications/src/index.ts"],
+      "image-upload": ["./libs/common/ui/image-upload/src/index.ts"],
+      "common/ui/image-viewer": ["./libs/common/ui/image-viewer/src/index.ts"],
       "bite-tribe/privacy-policy": [
-        "libs/bite-tribe/privacy-policy/src/index.ts"
+        "./libs/bite-tribe/privacy-policy/src/index.ts"
       ],
-      "bite-tribe/support": ["libs/bite-tribe/support/src/index.ts"],
+      "bite-tribe/support": ["./libs/bite-tribe/support/src/index.ts"],
       "bite-tribe/table-session": [
-        "libs/bite-tribe/table-session/page/src/index.ts"
+        "./libs/bite-tribe/table-session/page/src/index.ts"
       ],
       "bite-tribe/table-order-data-access": [
-        "libs/bite-tribe/table-order/data-access/src/index.ts"
+        "./libs/bite-tribe/table-order/data-access/src/index.ts"
       ],
       "bite-tribe/table-session-data-access": [
-        "libs/bite-tribe/table-session/data-access/src/index.ts"
+        "./libs/bite-tribe/table-session/data-access/src/index.ts"
       ],
       "bite-tribe/delete-account": [
-        "libs/bite-tribe/delete-account/src/index.ts"
+        "./libs/bite-tribe/delete-account/src/index.ts"
       ],
-      "bite-trail": ["libs/bite-tribe-common/bite-trail/src/index.ts"],
+      "bite-trail": ["./libs/bite-tribe-common/bite-trail/src/index.ts"],
       "bite-tribe-business/create-bite-trail": [
-        "libs/bite-tribe-business/create-bite-trail/page/src/index.ts"
+        "./libs/bite-tribe-business/create-bite-trail/page/src/index.ts"
       ],
       "bite-tribe-business/create-bite-trail-data-access": [
-        "libs/bite-tribe-business/create-bite-trail/data-access/src/index.ts"
+        "./libs/bite-tribe-business/create-bite-trail/data-access/src/index.ts"
       ],
       "visit-summary": ["./libs/bite-tribe-common/visit-summary/src/index.ts"],
       "visits-page": ["./libs/bite-tribe/visits/page/src/index.ts"],
       "bite-tribe/share-image-ui": [
         "./libs/bite-tribe/share-image/ui/src/index.ts"
       ]
-    },
-    "strict": false,
-    "noUncheckedSideEffectImports": false,
-    "types": ["*"],
-    "esModuleInterop": false,
-    "ignoreDeprecations": "6.0"
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

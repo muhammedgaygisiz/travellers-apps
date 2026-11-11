@@ -251,10 +251,10 @@ runtime dependency for this: MIT, no dependencies of its own, and about 15 kB.
 Hand-rolling it would mean Reed-Solomon, mask selection and BCH format
 information, where a subtle bug does not throw - it prints a room full of
 stickers that no camera reads, and the cost of finding out is physical. The
-package publishes both a CommonJS and an ES build behind `export =`, and this
-workspace compiles the file under two tsconfigs that disagree about
-`esModuleInterop`, so `table-qr-code.ts` takes the default export when there is
-one and the namespace itself when there is not. It lands in the lazy chunk
+package publishes both a CommonJS and an ES build behind `export =`, and the
+app bundle and Jest load different ones, so the shared `common/ui/qr-code`
+encoder takes the default export when there is one and the namespace itself
+when there is not. It lands in the lazy chunk
 behind the floor-plan route; neither app's initial bundle carries it.
 
 A sheet is one DOM tree relaid by a print stylesheet rather than a second

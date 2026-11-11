@@ -1,4 +1,5 @@
-import { ComponentFixture, ComponentRef, TestBed } from '@angular/core/testing';
+import { ComponentRef } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';

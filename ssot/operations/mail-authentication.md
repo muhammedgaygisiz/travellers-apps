@@ -15,11 +15,11 @@ Part of [issue 1516][#1516].
 
 All three live in Cloudflare DNS for `bitetribe.app`.
 
-| Record                                         | Value                                                                                       | What it does                                                          |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| SPF, `TXT` on the apex                         | `v=spf1 include:_spf.google.com include:_spf.firebasemail.com ~all`                         | Names the infrastructure allowed to send for the domain.              |
-| DKIM, `TXT`/`CNAME` on `<selector>._domainkey` | selector `google` (Workspace), `firebase1` and `firebase2` (CNAMEs into `firebasemail.com`) | Publishes the keys that sign outgoing mail.                           |
-| DMARC, `TXT` on `_dmarc`                       | `v=DMARC1; p=reject; sp=reject; rua=mailto:dmarc@bitetribe.app; fo=1; adkim=s; aspf=s`      | Tells receivers to refuse mail that fails, and where to send reports. |
+| Record                                         | Value                                                                                                                              | What it does                                                          |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| SPF, `TXT` on the apex                         | `v=spf1 include:_spf.google.com include:_spf.firebasemail.com ~all`                                                                | Names the infrastructure allowed to send for the domain.              |
+| DKIM, `TXT`/`CNAME` on `<selector>._domainkey` | selector `google` (Workspace), `firebase1` and `firebase2` (CNAMEs into `firebasemail.com`)                                        | Publishes the keys that sign outgoing mail.                           |
+| DMARC, `TXT` on `_dmarc`                       | `v=DMARC1; p=reject; sp=reject; rua=mailto:dmarc@bitetribe.app,mailto:re+edc8bqxon6j@dmarc.postmarkapp.com; fo=1; adkim=s; aspf=s` | Tells receivers to refuse mail that fails, and where to send reports. |
 
 `adkim=s` and `aspf=s` are strict: a signature for a subdomain does not satisfy
 a `From` on the apex. Both senders sign as `d=bitetribe.app`, so strict costs
@@ -64,8 +64,19 @@ a message count, the SPF and DKIM results, and the disposition the receiver
 applied. What matters is a source that is not Google, or a record whose
 evaluated result is not `pass`.
 
+`rua` lists two addresses. The group keeps the raw XML; the second is
+Postmark's free DMARC Digests, which turns the reports into one plain-language
+summary a week. A report address outside the domain only works if the receiving
+domain authorises it, and Postmark publishes a wildcard
+`*._report._dmarc.dmarc.postmarkapp.com` record that covers every domain
+pointed at it.
+
+The free tier shows the top ten sources with five IPs each and seven days of
+history, which suits a domain sending a few dozen mails a day: the question it
+answers is "has something new started sending", not forensics.
+
 Google Postmaster Tools has no domain registered for `bitetribe.app`.
-Registering it would replace per-day XML with an aggregated view.
+Registering it would add a delivery and reputation dashboard.
 
 ## History
 
@@ -76,7 +87,11 @@ Registering it would replace per-day XML with an aggregated view.
 - **5–11 November 2026** — 7 reports, 32 messages, no failures, no source
   outside Google. Outlook.com had started reporting by then.
 - **11 November 2026** — policy raised straight to `p=reject; sp=reject`,
-  skipping the planned `p=quarantine` step after two months at `p=none`.
+  skipping the planned `p=quarantine` step after two months at `p=none`. A
+  verification mail sent after the change passed with `d=bitetribe.app`,
+  selector `firebase2`. Postmark DMARC Digests was added as a second `rua`
+  address, and a Gmail filter now files the raw reports under a
+  `DMARC Reports` label instead of the inbox.
 
 ## Related Pages
 

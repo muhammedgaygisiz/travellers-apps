@@ -301,10 +301,12 @@ been selected for this track`. Follow **Add countries / regions**, select
    territories with no production build behind them.
 8. **Submit N changes for review** and confirm.
 
-Two warnings appear on every promotion and do not block it: no deobfuscation
-file for R8/proguard, and no native debug symbols. Both degrade the readability
-of crash and ANR stack traces, which matters more now that stability is
-monitored daily - see [Analytics Operations](../operations/analytics-operations.md).
+One warning appears on every promotion and does not block it: no native debug
+symbols. It is accepted, because the only native libraries are stripped AndroidX
+prebuilts; see
+[R8 And The Crash Mapping](release-and-build-workflow.md#r8-and-the-crash-mapping).
+Since [issue #1449][#1449] the bundle carries its own R8 mapping, so the deobfuscation
+warning that earlier builds raised no longer appears.
 
 ### Release Notes Are One Block Per Locale
 
@@ -358,3 +360,4 @@ Rules:
 - [Current State - Release State](../current-state/release-state.md)
 
 [#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1449]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1449

@@ -151,6 +151,7 @@ export const seatsParty = (status: TableStatus): boolean =>
  * Written by `transitionTableState` and by nothing else - `firestore.rules`
  * refuses every client write, so "state changes are applied by the backend"
  * is enforced by the database rather than by the app being the only caller.
+ * Deleted with its table by `deleteTableStateOnTableDelete` (issue #1590).
  */
 export const TABLE_STATES_COLLECTION = 'tableStates';
 

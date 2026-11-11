@@ -95,6 +95,11 @@ Package-tree audit under Node `24.18.0` records the following non-official Nx / 
 
 After Phase 2 (issue [#1033]), only `@ionic/angular-toolkit` (Angular Devkit 20) still loads an older generation, and it has an explicit follow-up decision. The `@nxext/capacitor` Nx 21 nesting that drove the documented multi-generation project-graph risk is resolved: the tree now carries a single Nx 23 generation.
 
+Two declared dependencies that the upgrades carried without any use were removed in issue [#1380]:
+
+- `@angular/animations` — deprecated by Angular 22, imported nowhere, and no app registers `provideAnimations`, `provideNoopAnimations` or `BrowserAnimationsModule`. It is only an optional peer of `@angular/platform-browser` and `@storybook/angular`, and Angular Material 22 no longer uses it. Storybook's Angular preset checks whether the package resolves and skips its animations modules when it does not. A future feature that needs animation uses `animate.enter` / `animate.leave`, which need no package.
+- `@ngrx/component-store` — never imported. The workspace keeps state in the global `@ngrx/store` and in Angular `resource()`.
+
 ### Phase 0 validation gate
 
 - Nx can construct and print the project graph.
@@ -340,7 +345,7 @@ Two defects were found during the run and filed as `P0`, neither caused by this 
 
 Two environment observations that are not defects in the app. The Gradle build requires a JDK 21 toolchain and fails on a Homebrew JDK 25 default, which [Implementation - Store Release Steps](../implementation/store-release-steps.md) documents for the release script but which the debug `:run` path had no written answer for until [Implementation - Android Device Testing](../implementation/android-device-testing.md). And the WebView logs two `403`s from `firebase.googleapis.com/.../webConfig` and `firebaseinstallations.googleapis.com`, reading `Requests from referer https://localhost/ are blocked` — an HTTP-referrer restriction on the Firebase web API key that does not cover the Capacitor origin. Those are the Firebase JS SDK's own internal fetches and never pass through Angular's `HttpClient`, so Angular 22 cannot have caused them; Analytics falls back to the local measurement id, while Installations fails outright, which is what FCM registration depends on.
 
-Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. The package is still a direct dependency at `22.1.3` but is imported nowhere in the workspace and is an optional peer of `@angular/platform-browser`, so removing it is adoption work rather than part of this version move.
+Angular 22 deprecates `@angular/animations` in favour of `animate.enter`/`animate.leave`. It was left out of this version move because removing it is adoption work, and issue [#1380] has since removed it; see Dependency inventory.
 
 ## Inferred Targets
 
@@ -552,5 +557,6 @@ The roadmap is complete when:
 [#1375]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1375
 [#1378]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1378
 [#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
+[#1380]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1380
 [#1381]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1381
 [#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382

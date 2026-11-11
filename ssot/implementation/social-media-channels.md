@@ -1349,6 +1349,9 @@ caption from the start, and the first with a cover line written for the place.
 Mostar (7 November 2026), Granada (8 November 2026), London and Chiang Mai
 (both 9 November 2026) followed the same way. Kayseri (10 November 2026) was
 the first with a short description of each dish under its card.
+Cologne (11 November 2026, the first day of the Karneval season) was the first
+with a themed Leela: a Rote Funken costume on the cover and the closing slide,
+generated with ChatGPT.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1364,7 +1367,9 @@ Filed as [#1886].
    - a free Unsplash photo of the city under a dark overlay;
    - the logo and wordmark;
    - the city name in italic Playfair Display, with "Top 5 dishes" beneath;
-   - Leela in a round frame with a greeting bubble.
+   - Leela in a round frame with a greeting bubble. From Cologne on, she wears
+     an outfit for the place, here and on the closing slide, generated with
+     ChatGPT from her reference crops for each post.
 2. **Five Bite cards.** Each is redrawn from the web search card's styles in
    `libs/bite-tribe-common/bite/src/lib/bite.component.scss`, scaled 2.2x, with
    the Bite's original photo, its stars and its reactions. The cards are
@@ -1380,7 +1385,9 @@ Filed as [#1886].
 **Leela sits in a round frame because no clean artwork of her exists.** The
 only artwork is the reference crops in
 [Implementation - Brand Characters](brand-characters.md#her-current-look). Each
-is `480x560` and carries the comic's café behind her.
+is `480x560` and carries the comic's café behind her. From Cologne on, each
+post asks ChatGPT for two new pictures of her from those crops, dressed for
+the place: one for the cover and one, holding her phone, for the closing slide.
 
 ### Choosing The Dishes
 
@@ -1430,8 +1437,8 @@ is used: one linked from its website or Google Maps listing, or with a
 matching name and address. A restaurant without one appears in the caption by
 name only.
 
-**@bitetribeapp follows every account it tags.** As of 10 November 2026 it
-follows all 48 featured so far, across all fourteen posts. That count includes
+**@bitetribeapp follows every account it tags.** As of 11 November 2026 it
+follows all 51 featured so far, across all fifteen posts. That count includes
 `@chickenshop`, which London names in its caption but could not tag.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit

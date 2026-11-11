@@ -66,8 +66,13 @@ android {
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
             }
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8 shrinks and obfuscates the release build (issue #1449). AGP
+            // embeds the resulting mapping in the bundle, which Play reads on
+            // upload, and the Crashlytics plugin uploads it during the build,
+            // so traces in both read as source. proguard-rules.pro says what
+            // has to be kept for Capacitor's reflection.
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

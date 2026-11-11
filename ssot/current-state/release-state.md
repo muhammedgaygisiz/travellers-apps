@@ -153,9 +153,11 @@ Two facts the promotion exposed, both now in [Implementation - Store Release Ste
 
 Play's listing had already been published on 30 August 2026 under submission 51,
 along with the ten translations, so nothing was outstanding there. The two
-promotion warnings - no R8 deobfuscation file and no native debug symbols - do
-not block release but do degrade crash and ANR stack traces, which is worth
-closing now that stability is monitored daily.
+promotion warnings - no R8 deobfuscation file and no native debug symbols - did
+not block release. Neither file existed: R8 was off, and the native libraries
+are stripped AndroidX prebuilts. R8 has since been turned on, with its mapping
+embedded in the bundle; the native-symbols warning is accepted. See
+[R8 And The Crash Mapping](../implementation/release-and-build-workflow.md#r8-and-the-crash-mapping).
 
 **iOS was submitted the same evening** and went to `Waiting for Review`, with up
 to 48 hours quoted; it cleared on 15 September 2026, recorded below. Build 96 was attached, the App Store version corrected from

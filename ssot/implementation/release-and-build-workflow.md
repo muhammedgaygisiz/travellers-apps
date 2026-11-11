@@ -198,6 +198,52 @@ The iOS dSYMs are retained for the same reason. A crash reported against a CI
 artifact can then be symbolicated from CI output rather than from whichever
 workstation happened to build it.
 
+### R8 And The Crash Mapping
+
+The Android `release` build type runs R8 (`minifyEnabled true`), which shrinks
+and obfuscates the Java/Kotlin layer. Its `mapping.txt` reaches both readers
+without a step of its own in the workflow:
+
+- AGP embeds it in the bundle as
+  `BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map`, which Play
+  reads on upload. That is what clears Play's "no deobfuscation file" warning.
+- The Crashlytics Gradle plugin runs `uploadCrashlyticsMappingFileRelease` as
+  part of `bundleRelease`, so `npm run release:android` uploads it, in CI and on
+  a workstation alike.
+
+`proguard-rules.pro` keeps `SourceFile` and `LineNumberTable`, so a mapped trace
+names the line, not just the method. Capacitor's consumer rules keep every
+`Plugin` subclass by name with all members, which covers the plugins in
+`src/main` and the reflective `SystemBars` lookup in `@capacitor/keyboard`. Two
+rules are added on top:
+
+- **The Capacitor annotation types are kept.** Capacitor reads
+  `@CapacitorPlugin`, `@Permission` and `@PluginMethod` at runtime, and R8 full
+  mode, the AGP 8 default, drops an annotation whose type is not itself kept.
+  Without the rule `getPluginAnnotation()` returns null and the first
+  `checkPermissions()` call, Geolocation's on the feed, crashes the app on
+  launch.
+- **`-dontwarn com.facebook.**`.** `@capacitor-firebase/authentication` compiles
+  a Facebook handler against an SDK the app deliberately leaves out, since only
+  `google.com` and `apple.com` are configured.
+
+A new native plugin that reaches its own classes by reflection or Gson needs its
+own keep rule. R8 fails the build on a missing class, but not on a class or
+annotation that is only reached at runtime, so an R8 build has to be run on a
+device before it ships. [Issue #1449][#1449]
+
+**Test R8 on a non-debuggable build.** For a debuggable build type R8 only
+shrinks: it neither obfuscates nor runs full-mode optimization, and it keeps the
+annotations. The `qa` type is `initWith debug`, so a `qa` build with
+`minifyEnabled true` alone ran cleanly and hid the launch crash above. Add
+`debuggable false` as well for the run. A non-debuggable build also logs no
+Capacitor plugin traffic, so check results on screen rather than in logcat.
+
+Play's second warning, missing native debug symbols, is accepted. The bundle's
+only native libraries are prebuilt AndroidX DataStore and CameraX `.so` files,
+shipped already stripped, so there are no symbols to extract. The app also does
+not include `firebase-crashlytics-ndk`, so Crashlytics records no native crashes.
+
 ### The Tag Names What It Contains
 
 `build-<version>-<x>` points at a tree that declares build `x`, so a
@@ -442,6 +488,15 @@ workflow is not on the pull-request path.
   are produced, signed and named; they do not prove either one runs.
   [issue #1181][#1181]
   asks for an install of each, and that is what remains of it.
+- **Part of the R8 build is unverified.** A non-debuggable R8 build of the `qa`
+  type, on an emulator against `bite-tribe-qa`, covered App Check, email sign-in,
+  the feed, Firestore reads and writes, the camera, the gallery picker, a Bite
+  posted with its Storage upload, haptics and the share sheet. Not covered:
+  Google and Apple sign-in, which QA cannot do on Android; push registration;
+  save-image, which is only reachable through the Instagram and Facebook share
+  composer; and a real location fix, since the emulator had none. The first R8
+  release should be checked on a device for those before promotion.
+  [Issue #1449][#1449]
 - The Xcode version is whatever `macos-latest` carries, so an artifact is
   reproducible against a commit but not against a toolchain.
 
@@ -581,5 +636,6 @@ reason it is safe.
 [#1303]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1303
 [#1428]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1428
 [#1441]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1441
+[#1449]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1449
 [#1857]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1857
 [#1922]: https://github.com/muhammedgaygisiz/travellers-apps/pull/1922

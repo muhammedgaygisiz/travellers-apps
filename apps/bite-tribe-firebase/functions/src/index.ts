@@ -79,6 +79,7 @@ export {
   rotateTableQrTokens,
 } from './functions/restaurants/table-qr-tokens';
 export { syncTableQrTokenOnTableWrite } from './functions/restaurants/sync-table-qr-token-on-table-write';
+export { deleteTableStateOnTableDelete } from './functions/restaurants/delete-table-state-on-table-delete';
 export { resolveTableQrToken } from './functions/restaurants/resolve-table-qr-token';
 export { loadPublicMenu } from './functions/menus/load-public-menu';
 export { startTableSession } from './functions/restaurants/start-table-session';

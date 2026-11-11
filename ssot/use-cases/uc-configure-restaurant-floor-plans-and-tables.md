@@ -124,6 +124,7 @@ Implemented:
 - `apps/bite-tribe-firebase/firestore.rules` room and table scoping, the version rule, the draft's own revision rule, the staff read of the published plan, the backend-only `qrTokenId`, and the public `get` on `/tableTokens`
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/table-qr-tokens.ts` the token generator and the issue and rotate callables
 - `apps/bite-tribe-firebase/functions/src/functions/restaurants/sync-table-qr-token-on-table-write.ts` the mirror and the revocation on delete
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/delete-table-state-on-table-delete.ts` the deletion of a deleted table's live state, which leaves its audit trail and visits in place (issue [#1590])
 - `/restaurants/{restaurantId}/rooms/{roomId}`, `/restaurants/{restaurantId}/rooms/{roomId}/drafts/current`, `/restaurants/{restaurantId}/tables/{tableId}` and `/tableTokens/{token}`
 - `apps/bite-tribe-business-e2e/src/tests/floor-plan-editor.spec.ts` the build, publish and reload journey, and `.../table-qr-codes.spec.ts` the printable-sheet journey, both against the stored documents
 
@@ -174,3 +175,4 @@ Built since, and owned elsewhere:
 [#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
 [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1590]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1590

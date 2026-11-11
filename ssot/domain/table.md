@@ -57,6 +57,8 @@ These two are different and must not be conflated.
 
 Stored separately from the Table, at `/restaurants/{restaurantId}/tableStates/{tableId}`, one document per table. Issue [#1091] made these states the model rather than a proposal.
 
+The state goes with its table: deleting a table deletes its state document, through `deleteTableStateOnTableDelete` (issue [#1590]). The audit entries in `tableStateTransitions` and the `visits` naming the table are deliberately kept - they are the record of what happened at a table that no longer exists. Moving a table between rooms keeps its id and therefore its state.
+
 | State             | Meaning                                         |
 | ----------------- | ----------------------------------------------- |
 | `available`       | Free and ready                                  |
@@ -459,3 +461,4 @@ uses.
 [#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
 [#1164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1164
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1590]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1590

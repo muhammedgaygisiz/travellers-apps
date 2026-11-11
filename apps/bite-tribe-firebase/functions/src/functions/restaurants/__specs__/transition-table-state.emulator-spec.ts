@@ -4,6 +4,7 @@ import {
   DocumentReference,
   getFirestore,
 } from 'firebase-admin/firestore';
+import { handleDeleteTableStateOnTableDelete } from '../delete-table-state-on-table-delete';
 import {
   TransitionTableStateResult,
   transitionTableStateHandler,
@@ -352,6 +353,80 @@ describe('table state transitions', () => {
       await tableRef(TABLE_12).delete();
 
       expect(await readTransitions()).toHaveLength(1);
+    });
+  });
+
+  /**
+   * A table's live state goes with the table, and its record stays (GitHub
+   * issue #1590).
+   *
+   * The trigger is driven by its handler, as the QR-token trigger's spec does:
+   * the emulator run starts Firestore and Storage, not Functions.
+   */
+  describe('deleting or moving a table', () => {
+    const deleteTable = async (tableId = TABLE_12): Promise<void> => {
+      await tableRef(tableId).delete();
+      await handleDeleteTableStateOnTableDelete(RESTAURANT, tableId);
+    };
+
+    const readVisits = async (): Promise<DocumentData[]> =>
+      (await restaurantRef(RESTAURANT).collection('visits').get()).docs.map(
+        (entry) => entry.data(),
+      );
+
+    it('removes the state of a deleted table', async () => {
+      await move('occupied', 'available');
+
+      await deleteTable();
+
+      expect(await readState()).toBeUndefined();
+    });
+
+    it('keeps the audit trail and the visit of a deleted table', async () => {
+      const seated = await move('occupied', 'available');
+      const visitsBefore = await readVisits();
+
+      await deleteTable();
+
+      expect(seated.visitId).toBeDefined();
+      expect(await readTransitions()).toHaveLength(1);
+      expect(await readVisits()).toEqual(visitsBefore);
+      expect(visitsBefore).toEqual([
+        expect.objectContaining({ id: seated.visitId, tableId: TABLE_12 }),
+      ]);
+    });
+
+    it('leaves the state of every other table alone', async () => {
+      await move('occupied', 'available');
+      await transition(asHost, {
+        restaurantId: RESTAURANT,
+        tableId: TABLE_13,
+        status: 'occupied',
+        expectedStatus: 'available',
+      });
+
+      await deleteTable();
+
+      expect((await readState(TABLE_13))?.['status']).toBe('occupied');
+    });
+
+    it('does nothing for a deleted table that never had a state', async () => {
+      await deleteTable(TABLE_13);
+
+      expect(await readState(TABLE_13)).toBeUndefined();
+    });
+
+    /**
+     * A move is an update of `roomId` that keeps the table's id, so the state
+     * keyed on that id is untouched and the delete trigger never fires.
+     */
+    it('changes no state when a table moves to another room', async () => {
+      await move('occupied', 'available');
+      const before = await readState();
+
+      await tableRef(TABLE_12).update({ roomId: 'terrace' });
+
+      expect(await readState()).toEqual(before);
     });
   });
 

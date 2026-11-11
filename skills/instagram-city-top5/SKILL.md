@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -45,7 +45,7 @@ Seven slides, 1080x1440 (3:4):
 | 1-5   | One Bite card each on `#1a1c22`, drawn with the web card's own styles, logo + wordmark below.                                                  |
 | 6     | Leela asking people to follow @bitetribeapp and try the app, with the handle and "Available on iOS and Android".                               |
 
-Leela is in a round frame because only reference crops of her exist (`ssot/assets/characters/leela/`), each with the comic's café painted behind her. Do not stretch them past their 480x560 size.
+Leela is in a round frame because only reference crops of her exist (`ssot/assets/characters/leela/`), each with the comic's café painted behind her. Do not stretch them past their 480x560 size. On the cover and the closing slide she wears an outfit for the place, generated for each post (step 3).
 
 ## Workflow
 
@@ -97,6 +97,14 @@ List the five with restaurant and author, plus two or three local alternatives, 
   Download all five in one script, about a second apart. Chrome blocks the second and later downloads until the user allows "multiple downloads" for bitetribe.app - ask them, then retry. The files land in `~/Downloads`.
 - **Reactions.** Search cards are `readonly` and hide them. Click each card's `ion-card`, and read the emoji and count from the detail page text, under the price and place. Use `history.back()` to return to the results.
 - **Cover photo.** Use a free Unsplash photo (`https://unsplash.com/s/photos/<city>?license=free`), portrait if possible, with calm sky or street at the top for the title. Download it with `curl -sL -o <id>.jpg "https://unsplash.com/photos/<id>/download?force=true&w=2000"`. Skip Unsplash+ results.
+- **A Leela dressed for the place.** Every cover and closing slide gets a Leela themed for the city (user's call, 11 November 2026; Cologne was the first, in a Rote Funken Karneval uniform). Ask ChatGPT for her, in the same Chrome at `https://chatgpt.com/`, signed in as the user. If it is not signed in, ask the user to sign in; never type a password.
+  1. Attach `ssot/assets/characters/leela/leela-vienna-first-bite.png` and `leela-vienna-reference-sheet.png` with the file-upload tool on the "Attach photos" `input[type=file]`. Do not click it.
+  2. Ask for the same character, face, hair, art style and colours, in a costume or outfit typical of the place (a Karneval uniform, a dirndl, a local football shirt, a festival look). Ask for her waving or holding a local dish, with a big smile, head and shoulders, face in the upper half so it survives a round crop, a simple warm blurred background, and no text or speech bubbles.
+  3. Look at the result before using it. It has to read as Leela in the cover's style. Ask again with a correction if it does not.
+  4. In the same conversation, attach `leela-vienna-shows-her-phone.png` and ask for the same costumed Leela in that pose, showing her phone towards the viewer, for the closing slide.
+  5. Save both from the page with the blob-link snippet above (`main img`, the last one wider than 400px), and copy them into the working folder as `photos/leela-<city>.png` and `photos/leela-<city>-phone.png`. Set `leela.coverImage` and `leela.outroImage` to them (step 4).
+
+  Name the costume at the gate in step 2, so the user can steer it.
 - **Restaurant accounts.** Instagram allows one location per post, and that stays the city. The restaurants are named instead: tagged on their own slide, and listed in the caption. A tag notifies the account, so **tag only an account you have confirmed as the restaurant's own**, in one of these ways:
   - the restaurant's website or Google Maps listing links to it;
   - its bio or posts give the same name and the same street or city as the Bite's place.
@@ -135,6 +143,7 @@ Copy everything into a working folder in the scratchpad, never into the reposito
 Write a config next to the photos, shaped like [scripts/example-bratislava.json](scripts/example-bratislava.json):
 
 - `city`, `where` and `coverPhoto` are required.
+- `leela.coverImage` and `leela.outroImage` are the themed Leelas from step 3; always set both. They replace the stock crops on the cover and the closing slide, centred at `50% 35%`. Use `leela.coverPosition` or `leela.outroPosition` (a CSS `object-position`) if her face sits elsewhere in an image.
 - `leela.cover` is the place-specific line from step 2; always set it. `leela.outro` is optional and defaults to the closing line. The cover default exists only as a fallback.
 - `cityFontSize` is optional and defaults to 190. Lower it for a city name longer than about ten letters.
 - Each Bite takes `name`, `place`, `stars`, `emojis`, `count` and `photo`, plus an optional `where` that overrides the config's.

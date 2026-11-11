@@ -47,6 +47,25 @@ const leela = (file) =>
 const leelaCover =
   config.leela?.cover ??
   `Hi, I'm Leela! Here are my favourite bites in ${config.city} 👉`;
+// A Leela dressed for the place (generated per post, see SKILL.md step 3) replaces
+// the stock crops on the cover and the closing slide. Generated images keep her
+// face higher than the stock crops, so they default to a centred crop instead of
+// a bottom-anchored one.
+const themed = (key, stock) => {
+  const custom = config.leela?.[`${key}Image`];
+  return [
+    custom ? fromConfig(custom) : leela(stock),
+    config.leela?.[`${key}Position`] ?? (custom ? '50% 35%' : '50% 100%'),
+  ];
+};
+const [leelaCoverImage, leelaCoverPosition] = themed(
+  'cover',
+  'leela-vienna-first-bite.png',
+);
+const [leelaOutroImage, leelaOutroPosition] = themed(
+  'outro',
+  'leela-vienna-shows-her-phone.png',
+);
 const leelaOutro =
   config.leela?.outro ??
   'Liked these? Follow us for more city picks, and try BiteTribe to find your own!';
@@ -128,7 +147,7 @@ const cover = page(`
   ${brand}
   <div class="city"><h1 style="font-size: ${config.cityFontSize ?? 190}px">${escape(config.city)}</h1><h2>Top 5 dishes</h2></div>
   <div class="say">
-    <div class="leela"><img src="${leela('leela-vienna-first-bite.png')}"></div>
+    <div class="leela"><img src="${leelaCoverImage}" style="object-position: ${leelaCoverPosition}"></div>
     <div class="bubble">${escape(leelaCover)}</div>
   </div>
 </div>`);
@@ -158,7 +177,7 @@ const dish = (b) =>
 
 const outro = page(`
 <div class="outro">
-  <div class="leela"><img src="${leela('leela-vienna-shows-her-phone.png')}"></div>
+  <div class="leela"><img src="${leelaOutroImage}" style="object-position: ${leelaOutroPosition}"></div>
   <div class="bubble">${escape(leelaOutro)}</div>
   <div class="handle">@bitetribeapp</div>
   <div class="stores">📲 Available on iOS and Android</div>

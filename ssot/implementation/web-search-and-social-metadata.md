@@ -537,33 +537,38 @@ properties of their own. `bite-tribe.web.app` serves the consumer build with
 its canonical pointing at `bitetribe.app`, so its pages consolidate there; the
 two tools have nothing to report.
 
+### The Instagram Property
+
+**`@bitetribeapp` is a Search Console property of its own**, added on 12
+November 2026 under `muhammed.gaygisiz@bitetribe.app`. Search Console holds a
+social account as a property next to the website: the property selector's
+`Add property` offers Instagram, TikTok, X and YouTube beside `Add a website`.
+It is not on the Associations page, which offers Google Analytics only.
+
+Adding one links the account to the Google Account that is signed in, through
+the platform's own consent and sign-in, so it is done by the account's owner.
+The property is visible only to that Google Account: the `gmail.com` owner of
+the website property does not see it in the selector.
+
 ### Not Done
 
 - **Bing Webmaster Tools.** It can import a verified Search Console property.
   Optional in [#1982] and left for a later day.
-- **Social channels.** Search Console can hold a social account as a property
-  of its own: the property selector's `Add property` offers Instagram, TikTok,
-  X and YouTube next to `Add a website`. Adding one links the account to the
-  Google Account through the platform's own consent screen, so it is done by
-  the account's owner, signed in to both. `@bitetribeapp` on Instagram was not
-  yet added when this was written. It is not on the Associations page, which
-  offers Google Analytics only.
-
-[#345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/345
-[#628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/628
-[#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
-[#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
-[#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
-[#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
-[#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
-[#1651]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1651
-[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
-[#1488]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1488
-[#1489]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1489
-[#1490]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1490
-[#1491]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1491
-[#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
-[#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
-[#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
-[#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
-[#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982
+  [#345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/345
+  [#628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/628
+  [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
+  [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
+  [#1454]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1454
+  [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
+  [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
+  [#1651]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1651
+  [#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+  [#1488]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1488
+  [#1489]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1489
+  [#1490]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1490
+  [#1491]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1491
+  [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
+  [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
+  [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
+  [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
+  [#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982

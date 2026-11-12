@@ -1351,7 +1351,8 @@ Mostar (7 November 2026), Granada (8 November 2026), London and Chiang Mai
 the first with a short description of each dish under its card.
 Cologne (11 November 2026, the first day of the Karneval season) was the first
 with a themed Leela: a Rote Funken costume on the cover and the closing slide,
-generated with ChatGPT.
+generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
+lifesaver Leela, and was the first post whose city page went up with it.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1362,7 +1363,8 @@ Filed as [#1886].
 **Every post also has a city page** at `https://bitetribe.app/eat/<city>`
 with the same five Bites, as the skill's last step. The first fourteen were
 published on 12 November 2026 from the existing posts; Vienna has none, its
-dishes are not local. The page itself is owned by
+dishes are not local. Adelaide's page (`/eat/adelaide`) went up the same day,
+with its post. The page itself is owned by
 [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md#city-landing-pages).
 
 ### The Slides
@@ -1444,7 +1446,7 @@ matching name and address. A restaurant without one appears in the caption by
 name only.
 
 **@bitetribeapp follows every account it tags.** As of 11 November 2026 it
-follows all 51 featured so far, across all fifteen posts. That count includes
+follows all 55 featured so far, across all sixteen posts. That count includes
 `@chickenshop`, which London names in its caption but could not tag.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
@@ -1552,6 +1554,19 @@ slide and caption use the restaurant's own spelling. Develi and the Develi
 cıvıklısı places were left out for a post of their own, as was Cappadocia.
 Yarım kelle has no rating, so its card has no star row. Leela's cover line is
 "Kayseri is mantı country, but wait till you see the rest".
+
+**Adelaide** (12 November 2026) tags four of five dish slides:
+`@somertonslsc` (beef schnitzel; the club's own account, same name as the
+Bite's place), `@amalfiadelaide` (salt and pepper squid; bio gives 29 Frome
+Street, where the Bite's pin is), `@svagocucina` (fiori di zucchini; bio gives
+55 Unley Road, where the pin is) and `@bottegagelateria` (stracciatella gelato;
+the chain's one account, which lists Glenelg). Barking Gecko Cafe (meat pie)
+is inside Cleland Wildlife Park and has no account of its own; the park's
+`@clelandwildlifepark` was not tagged in its place. All 55 Bites around the
+city come from one member. Leela wears a surf lifesaver's red-and-yellow cap
+and shirt, after the surf club's schnitzel, and the cover photo is Glenelg's
+Moseley Square, where the gelato is from. Leela's cover line is "A meat pie
+with the koalas, then gelato on Glenelg beach".
 
 ## Wiring Back Into The Product
 

@@ -78,6 +78,8 @@ export const AnalyticsEvent = {
   CelebrationShown: 'celebration_shown',
   // Acquisition, consumer web app (issue #1759)
   StoreLinkClicked: 'store_link_clicked',
+  // Acquisition, a visit arriving from a city landing page (issue #1492)
+  CityPageArrived: 'city_page_arrived',
 } as const;
 
 export type AnalyticsEventName =
@@ -383,6 +385,15 @@ export interface AnalyticsEventParamMap {
     store: StoreListing;
     surface: StoreLinkSurface;
   };
+  // `city_page` is the city of the page the visitor came from, which is also
+  // its `landingPages` document id and URL (`/eat/<city>`);
+  // `destination` is where its link pointed: the call to action opens the
+  // root (`start`), an entry opens its Bite (`bite`). Logged once, at start-up,
+  // whether or not the visitor is signed in.
+  [AnalyticsEvent.CityPageArrived]: {
+    city_page: string;
+    destination: 'start' | 'bite';
+  };
 }
 
 /** Which store listing a store link points at (issue #1759). */
@@ -598,6 +609,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.WorldGlobeZoomed]: 'consumer',
   [AnalyticsEvent.CelebrationShown]: 'consumer',
   [AnalyticsEvent.StoreLinkClicked]: 'consumer',
+  [AnalyticsEvent.CityPageArrived]: 'consumer',
 };
 
 /**

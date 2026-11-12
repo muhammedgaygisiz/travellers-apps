@@ -311,4 +311,67 @@ describe('renderCityPage', () => {
       expect(body).not.toContain('<url>');
     });
   });
+
+  describe('call to action', () => {
+    it('renders exactly one primary call to action, carrying the city', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(body.match(/data-cta="primary"/g)).toHaveLength(1);
+      expect(body).toContain(
+        '<a class="cta" data-cta="primary" href="https://bitetribe.app/?city_page=berlin">',
+      );
+    });
+
+    it('links every entry to its Bite in the app, carrying the city', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      for (const n of [1, 2, 3]) {
+        expect(body).toContain(
+          `<a class="entry" href="https://bitetribe.app/bite/bite-${n}?city_page=berlin">`,
+        );
+      }
+    });
+
+    it('offers the store badges and QR codes the web app already ships', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(body).toContain(
+        'src="https://bitetribe.app/assets/store/app-store-qr.svg"',
+      );
+      expect(body).toContain(
+        'src="https://bitetribe.app/assets/store/google-play-qr.svg"',
+      );
+      expect(body).toContain(
+        'src="https://bitetribe.app/assets/store/app-store-badge-black.svg"',
+      );
+      expect(body).toContain(
+        'srcset="https://bitetribe.app/assets/store/app-store-badge-white.svg" media="(prefers-color-scheme: dark)"',
+      );
+      expect(body).toContain(
+        'src="https://bitetribe.app/assets/store/google-play-badge.png"',
+      );
+      expect(body).toContain('aria-label="Download on the App Store"');
+      expect(body).toContain('aria-label="Get it on Google Play"');
+      expect(body).toContain('href="https://apps.apple.com/app/id6746098595"');
+      expect(body).toContain(
+        'href="https://play.google.com/store/apps/details?id=com.bitetribe.app"',
+      );
+    });
+
+    it('adds no analytics, cookie or storage to the page', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body, headers } = await respond('/eat/berlin');
+
+      expect(body).not.toMatch(/gtag|googletagmanager|analytics/i);
+      expect(body).not.toMatch(/document\.cookie|localStorage|sessionStorage/);
+      expect(Object.keys(headers)).not.toContain('Set-Cookie');
+    });
+  });
 });

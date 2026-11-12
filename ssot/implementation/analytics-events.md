@@ -88,6 +88,7 @@
   | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                   | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
   | Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                       | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
   | Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
+  | Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
 
   The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
   issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
@@ -138,6 +139,17 @@
   directly. `store` was added to `provision-ga4.mjs`; `surface` reuses the
   already registered, shared `surface` dimension, so a breakdown by it needs an
   event filter.
+
+  `city_page_arrived` belongs to issue [#1492] (epic [#1487]). The public city
+  landing pages at `/eat/<city>` carry no analytics, cookie or storage,
+  so attribution is recorded at the destination instead: every link into the
+  app carries `?city_page=<city>`, and an app initializer logs the event before
+  the first navigation, because `authGuard` sends a signed-out visitor to
+  `/start` and the query string does not survive the redirect. `destination`
+  is `start` for the page's call to action (the site root) and `bite` for an
+  entry (`/bite/<id>`). Only a city in the editor's own shape on one of those
+  two paths is recorded. `city_page` was added to `provision-ga4.mjs`;
+  `destination` reads fine as an event filter and is not registered.
 
 - ## App Check Telemetry
 
@@ -895,3 +907,5 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1795]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1795
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+[#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492

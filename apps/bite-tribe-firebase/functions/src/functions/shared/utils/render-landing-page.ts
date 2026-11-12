@@ -1,6 +1,7 @@
 import { LandingPage, LandingPageItem } from '../model/landing-page';
 import { BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
 import { escapeHtml, renderSocialMeta } from './render-html';
+import { APP_STORE_URL, PLAY_STORE_URL } from './store-urls';
 
 /**
  * The full document for a city landing page (issue #1489). Unlike the share
@@ -32,8 +33,43 @@ const STYLE = `
   .loc { color:var(--muted); font-size:14px; margin:2px 0 0; }
   footer { border-top:1px solid var(--line); padding-top:16px; padding-bottom:32px; color:var(--muted); font-size:14px; }
   footer a { margin-right:16px; }
-  @media (min-width:720px) { h1 { font-size:36px; } ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; } }
+  .entry { display:block; text-decoration:none; }
+  .entry:hover h2 { text-decoration:underline; }
+  .cta { display:block; text-align:center; text-decoration:none; font-weight:600; padding:14px 20px; border-radius:12px; background:#e8590c; color:#fff; }
+  .stores { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:8px; }
+  .store { display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; }
+  .store .qr { display:none; }
+  .badge-app-store { width:120px; height:40px; margin:4px 0; display:block; }
+  .badge-google-play { width:154px; height:60px; display:block; margin:-10px 0; }
+  /* A phone gets the call to action as a bar pinned to the bottom, with the
+     store badges under it: on a phone they install the app directly. */
+  main { padding-bottom:148px; }
+  .get { position:fixed; left:0; right:0; bottom:0; margin:0; padding:12px 16px; background:var(--bg); border-top:1px solid var(--line); }
+  .get-lead { display:none; margin:0; font-weight:600; }
+  @media (min-width:720px) {
+    h1 { font-size:36px; }
+    ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    main { padding-bottom:0; }
+    .get { position:static; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px; border:1px solid var(--line); border-radius:12px; margin:0 0 32px; }
+    .get-lead { display:block; }
+    .cta { flex:none; }
+    .stores { gap:16px; margin-top:0; align-items:flex-start; }
+    .store .qr { display:block; width:96px; height:96px; background:#fff; border-radius:8px; padding:4px; }
+    .badge-app-store { width:96px; height:32px; }
+    .badge-google-play { width:124px; height:48px; margin:-8px 0; }
+  }
 `;
+
+/** The query parameter every link into the app carries (issue #1492). */
+export const CITY_PAGE_PARAM = 'city_page';
+
+/**
+ * A link into the app that says which city page it came from. The consumer
+ * app records it as `city_page_arrived` at start-up; the page itself carries
+ * no analytics, cookie or storage (epic #1487).
+ */
+export const appLink = (path: string, city: string): string =>
+  `${BITE_TRIBE_ORIGIN}${path}?${CITY_PAGE_PARAM}=${encodeURIComponent(city)}`;
 
 /**
  * The app's own logo, served by the web build, so the page carries the same
@@ -42,21 +78,65 @@ const STYLE = `
  */
 const LOGO_URL = `${BITE_TRIBE_ORIGIN}/assets/icons/logo.svg`;
 
+/**
+ * The store badges and QR codes the web app's start page shows (issue #1453),
+ * served from the same build so there is one drawing of each. Apple ships a
+ * black badge for light backgrounds and a white one for dark; Google ships
+ * one, whose PNG already carries its clear space - hence its taller box.
+ */
+const STORE_ASSETS = `${BITE_TRIBE_ORIGIN}/assets/store`;
+
 /** `/eat/<city>` on the canonical host, never `bite-tribe.web.app`. */
 export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
   `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}`;
 
-const renderItem = (item: LandingPageItem, index: number): string => {
-  const name = escapeHtml(item.name);
-  const location = [item.place, item.locality].filter(Boolean).join(' · ');
+/**
+ * One Bite. The whole entry links to the Bite in the app: a member lands on
+ * it, and a signed-out visitor is sent to sign up by `authGuard`, which
+ * remembers the Bite and opens it once they have (decided on #1487).
+ */
+const renderItem =
+  (city: string) =>
+  (item: LandingPageItem, index: number): string => {
+    const name = escapeHtml(item.name);
+    const location = [item.place, item.locality].filter(Boolean).join(' · ');
+    const href = appLink(`/bite/${encodeURIComponent(item.biteId)}`, city);
 
-  return `
+    return `
       <li>
-        <img src="${escapeHtml(item.imageUrl)}" alt="${name}" loading="${index === 0 ? 'eager' : 'lazy'}" width="800" height="800" />
-        <h2>${name}</h2>
-        <p class="loc">${escapeHtml(location)}</p>
+        <a class="entry" href="${escapeHtml(href)}">
+          <img src="${escapeHtml(item.imageUrl)}" alt="${name}" loading="${index === 0 ? 'eager' : 'lazy'}" width="800" height="800" />
+          <h2>${name}</h2>
+          <p class="loc">${escapeHtml(location)}</p>
+        </a>
       </li>`;
-};
+  };
+
+/**
+ * The page's one call to action, and on a wide screen the store QR codes
+ * beside it (issue #1492). The codes are the ones the web app's start page
+ * shows (issue #1453), served from the same build, so there is one drawing of
+ * each. A phone gets a bar pinned to the bottom with the button alone: it
+ * cannot scan its own screen.
+ */
+const renderCallToAction = (city: string): string => `
+    <section class="get" aria-label="BiteTribe">
+      <p class="get-lead">See every dish, price and photo on BiteTribe</p>
+      <a class="cta" data-cta="primary" href="${escapeHtml(appLink('/', city))}">Open BiteTribe</a>
+      <div class="stores">
+        <a class="store" href="${APP_STORE_URL}" rel="noopener" aria-label="Download on the App Store">
+          <img class="qr" src="${STORE_ASSETS}/app-store-qr.svg" alt="" loading="lazy" />
+          <picture>
+            <source srcset="${STORE_ASSETS}/app-store-badge-white.svg" media="(prefers-color-scheme: dark)" />
+            <img class="badge badge-app-store" src="${STORE_ASSETS}/app-store-badge-black.svg" alt="" width="120" height="40" />
+          </picture>
+        </a>
+        <a class="store" href="${PLAY_STORE_URL}" rel="noopener" aria-label="Get it on Google Play">
+          <img class="qr" src="${STORE_ASSETS}/google-play-qr.svg" alt="" loading="lazy" />
+          <img class="badge badge-google-play" src="${STORE_ASSETS}/google-play-badge.png" alt="" width="154" height="60" />
+        </a>
+      </div>
+    </section>`;
 
 /**
  * Structured data for the page (issue #1491): an `ItemList` of the Bites in
@@ -155,7 +235,8 @@ export const renderLandingPage = (page: LandingPage): string => {
     <p class="eyebrow">${escapeHtml(eyebrow)}</p>
     <h1>${escapeHtml(page.title)}</h1>
     <p class="intro">${escapeHtml(page.intro)}</p>
-    <ol>${page.items.map(renderItem).join('')}
+    ${renderCallToAction(page.city)}
+    <ol>${page.items.map(renderItem(page.city)).join('')}
     </ol>
   </main>
   <footer>

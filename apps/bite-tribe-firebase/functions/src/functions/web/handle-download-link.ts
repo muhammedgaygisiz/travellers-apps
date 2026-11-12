@@ -1,6 +1,7 @@
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
 import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import { APP_STORE_URL, PLAY_STORE_URL } from '../shared/utils/store-urls';
 
 /**
  * The one link that belongs in a post, a story, a bio or a QR code.
@@ -17,11 +18,7 @@ import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
  * are exactly where a script-based redirect is least reliable.
  */
 
-/** No storefront segment, so the visitor lands in their own country's store. */
-export const APP_STORE_URL = 'https://apps.apple.com/app/id6746098595';
-
-export const PLAY_STORE_URL =
-  'https://play.google.com/store/apps/details?id=com.bitetribe.app';
+export { APP_STORE_URL, PLAY_STORE_URL } from '../shared/utils/store-urls';
 
 /**
  * Neither store has anything to offer a desktop visitor, so they get the web

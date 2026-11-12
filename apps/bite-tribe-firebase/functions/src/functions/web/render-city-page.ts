@@ -30,6 +30,14 @@ export const PUBLISHED_CACHE_CONTROL =
  */
 export const MISSING_CACHE_CONTROL = 'public, max-age=60, s-maxage=60';
 
+/**
+ * The sitemap's job is to change when the published set does, so it is
+ * cached for minutes, not a day (issue #1980). With the pages' header the CDN
+ * kept serving the empty sitemap from before the first publication, and
+ * Search Console could not read the pages from it.
+ */
+export const SITEMAP_CACHE_CONTROL = 'public, max-age=300, s-maxage=300';
+
 /** The city segment the admin editor accepts: lowercase letters, digits, hyphens. */
 const CITY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -87,7 +95,7 @@ export const renderCityPage = onRequest(async (req, res) => {
         .map((doc) => ({ ...(doc.data() as LandingPage), city: doc.id }))
         .sort((a, b) => a.city.localeCompare(b.city));
 
-      res.set('Cache-Control', PUBLISHED_CACHE_CONTROL);
+      res.set('Cache-Control', SITEMAP_CACHE_CONTROL);
       res.set('Content-Type', 'application/xml; charset=utf-8');
       res.status(200).send(renderSitemap(pages));
       return;

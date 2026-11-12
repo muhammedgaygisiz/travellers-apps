@@ -147,6 +147,28 @@ describe('renderCityPage', () => {
     expect(headers['Cache-Control']).toBe(PUBLISHED_CACHE_CONTROL);
   });
 
+  it('links the header to the Instagram account with its own glyph', async () => {
+    mockGet.mockResolvedValue(snapshot(page));
+
+    const { body } = await respond('/eat/berlin');
+    const header = body.slice(
+      body.indexOf('<header>'),
+      body.indexOf('</header>'),
+    );
+
+    expect(header).toContain(
+      '<a class="ig" href="https://www.instagram.com/bitetribeapp/" rel="noopener" aria-label="BiteTribe on Instagram">',
+    );
+    expect(header).toContain(
+      'src="https://bitetribe.app/assets/social/instagram-glyph-black.svg"',
+    );
+    expect(header).toContain(
+      'srcset="https://bitetribe.app/assets/social/instagram-glyph-white.svg" media="(prefers-color-scheme: dark)"',
+    );
+    // Nothing is loaded from an Instagram host: the glyph is ours to serve.
+    expect(body).not.toMatch(/src="https:\/\/[^"/]*(instagram|fbcdn)/);
+  });
+
   it('carries the BiteTribe logo in its header', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 

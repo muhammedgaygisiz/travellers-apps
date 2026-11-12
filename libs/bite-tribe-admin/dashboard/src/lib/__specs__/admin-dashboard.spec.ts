@@ -122,14 +122,60 @@ describe(AdminDashboard.name, () => {
     ]);
   });
 
-  it('renders an entry per tool', () => {
+  it('renders an entry per tool, across the two cards', () => {
     createComponent();
 
-    const items = fixture.nativeElement.querySelectorAll(
-      '[data-testid="admin-tools"] ion-item',
+    const primary = fixture.nativeElement.querySelectorAll(
+      '[data-testid="admin-tools-primary"] ion-item',
+    );
+    const secondary = fixture.nativeElement.querySelectorAll(
+      '[data-testid="admin-tools-secondary"] ion-item',
     );
 
-    expect(items).toHaveLength(component.tools.length);
+    expect(primary.length + secondary.length).toBe(component.tools.length);
+  });
+
+  // The daily work on the left, the one-off migrations and backfills on the
+  // right, so the list an operator scans every day stops growing with every
+  // migration ever written.
+  it('puts the daily surfaces in the primary card, City pages included', () => {
+    createComponent();
+
+    const [primary] = component.groups;
+
+    expect(primary.key).toBe('primary');
+    expect(primary.tools.map((tool) => tool.path)).toEqual([
+      '/user-management',
+      '/bite-reports',
+      '/profile-reports',
+      '/bite-search',
+      '/landing-pages',
+      '/restaurant-candidates',
+      '/restaurant-ownership',
+      '/table-sessions',
+      '/bite-places',
+    ]);
+  });
+
+  it('puts the migrations and backfills in the secondary card', () => {
+    createComponent();
+
+    const [, secondary] = component.groups;
+
+    expect(secondary.key).toBe('secondary');
+    expect(secondary.tools.map((tool) => tool.path)).toEqual([
+      '/new-version-notification',
+      '/review-timestamps-backfill',
+      '/menu-item-ids-backfill',
+      '/restaurant-owner-ids-migration',
+      '/bite-image-status-backfill',
+      '/bite-countries-rebuild',
+      '/menu-item-stats-recompute',
+      '/bite-address-backfill',
+      '/restaurant-clustering',
+      '/image-migration',
+      '/geohash-migration',
+    ]);
   });
 
   it('routes to the tool that was clicked', () => {

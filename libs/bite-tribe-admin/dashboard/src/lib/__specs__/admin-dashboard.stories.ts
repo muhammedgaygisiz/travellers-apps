@@ -37,7 +37,8 @@ export default {
 type Story = StoryObj<AdminDashboard>;
 
 /**
- * Every operator surface the admin app offers, in the order an operator meets
- * them, with the signed-in account named at the foot of the page.
+ * Every operator surface the admin app offers, in two cards: the daily work on
+ * the left and the migrations and backfills on the right, with the signed-in
+ * account named at the foot of the page.
  */
 export const Default: Story = {};

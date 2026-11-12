@@ -31,5 +31,11 @@ Disallow: /weekly-bites
 
 # /s/bite/<id> is deliberately not disallowed. It is the shared-link function,
 # which serves its own title, description and image for unfurlers.
+#
+# /eat/ is deliberately not disallowed either, and must never be added to the
+# list above by symmetry with the app routes. It holds the city landing pages
+# (epic #1487): server-rendered, public, and the one part of the site written
+# for search engines. Its published set is listed in the second sitemap below.
 
 Sitemap: https://bitetribe.app/sitemap.xml
+Sitemap: https://bitetribe.app/eat/sitemap.xml

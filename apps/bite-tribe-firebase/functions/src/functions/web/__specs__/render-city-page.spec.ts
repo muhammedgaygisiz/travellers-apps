@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase-admin/firestore';
 import {
   MISSING_CACHE_CONTROL,
   PUBLISHED_CACHE_CONTROL,
@@ -6,12 +7,24 @@ import {
 
 const mockGet = jest.fn();
 const mockDoc = jest.fn(() => ({ get: mockGet }));
+const mockQueryGet = jest.fn();
+const mockWhere = jest.fn(() => ({ get: mockQueryGet }));
 
-jest.mock('firebase-admin/firestore', () => ({
-  getFirestore: jest.fn(() => ({
-    collection: jest.fn(() => ({ doc: mockDoc })),
-  })),
-}));
+jest.mock('firebase-admin/firestore', () => {
+  class Timestamp {
+    constructor(private readonly ms: number) {}
+    toDate(): Date {
+      return new Date(this.ms);
+    }
+  }
+
+  return {
+    Timestamp,
+    getFirestore: jest.fn(() => ({
+      collection: jest.fn(() => ({ doc: mockDoc, where: mockWhere })),
+    })),
+  };
+});
 
 jest.mock('firebase-functions', () => ({
   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -75,6 +88,15 @@ const page = {
   items: [item(1), item(2), item(3)],
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- parsed JSON-LD
+const jsonLd = (body: string): any => {
+  const match = body.match(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+  );
+  expect(match).not.toBeNull();
+  return JSON.parse(match?.[1] ?? '{}');
+};
+
 describe('renderCityPage', () => {
   afterEach(() => jest.clearAllMocks());
 
@@ -113,13 +135,16 @@ describe('renderCityPage', () => {
     expect(body).not.toContain('bite-tribe.web.app');
   });
 
-  it('does not redirect and carries no script', async () => {
+  it('does not redirect and carries no executable script', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 
     const { body } = await respond('/eat/berlin/best-sushi');
 
     expect(body).not.toContain('http-equiv="refresh"');
-    expect(body).not.toContain('<script');
+    // The one script element is the JSON-LD block, which never runs.
+    expect(body.match(/<script[^>]*>/g)).toEqual([
+      '<script type="application/ld+json">',
+    ]);
   });
 
   it('renders operator text with repeated metacharacters as text', async () => {
@@ -135,8 +160,13 @@ describe('renderCityPage', () => {
 
     const { body } = await respond('/eat/berlin/best-sushi');
 
-    expect(body).not.toContain('<script');
+    expect(body).not.toContain('<script>');
+    expect(body).not.toMatch(/<\/script>[^\n]*<\/script>/);
     expect(body).toContain('&lt;&gt;&amp;&#039;&quot;&quot;');
+    // Inside the JSON-LD the crafted name cannot close the element.
+    expect(jsonLd(body).itemListElement[0].item.hasMenu.hasMenuItem.name).toBe(
+      crafted,
+    );
   });
 
   it.each([
@@ -169,5 +199,103 @@ describe('renderCityPage', () => {
 
     expect(status).toBe(410);
     expect(body).toBe('Gone');
+  });
+
+  describe('structured data', () => {
+    it('declares an ItemList of restaurants carrying each dish, in order', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const data = jsonLd((await respond('/eat/berlin/best-sushi')).body);
+
+      expect(data).toMatchObject({
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'The best sushi in Berlin',
+        url: 'https://bitetribe.app/eat/berlin/best-sushi',
+        numberOfItems: 3,
+      });
+      expect(data.itemListElement).toHaveLength(3);
+      expect(data.itemListElement[1]).toEqual({
+        '@type': 'ListItem',
+        position: 2,
+        item: {
+          '@type': 'Restaurant',
+          name: 'Place 2',
+          image: 'https://example.test/2.jpg',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Mitte, Berlin',
+            addressCountry: 'DE',
+          },
+          hasMenu: {
+            '@type': 'Menu',
+            hasMenuItem: {
+              '@type': 'MenuItem',
+              name: 'Dish 2',
+              image: 'https://example.test/2.jpg',
+            },
+          },
+        },
+      });
+    });
+
+    it('carries an absolute image in Open Graph and Twitter', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin/best-sushi');
+
+      expect(body).toContain(
+        '<meta property="og:image" content="https://example.test/1.jpg" />',
+      );
+      expect(body).toContain(
+        '<meta name="twitter:image" content="https://example.test/1.jpg" />',
+      );
+    });
+  });
+
+  describe('sitemap', () => {
+    const doc = (
+      id: string,
+      data: Record<string, unknown>,
+    ): { id: string; data: () => Record<string, unknown> } => ({
+      id,
+      data: (): Record<string, unknown> => data,
+    });
+
+    it('lists the published pages with their publication date', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [
+          doc('best-sushi', {
+            ...page,
+            publishedAt: new Timestamp(Date.UTC(2026, 10, 12)),
+          }),
+          doc('brunch', { ...page, city: 'hamburg' }),
+        ],
+      });
+
+      const { status, body, headers } = await respond('/eat/sitemap.xml');
+
+      expect(mockWhere).toHaveBeenCalledWith('status', '==', 'published');
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(status).toBe(200);
+      expect(headers['Content-Type']).toBe('application/xml; charset=utf-8');
+      expect(body).toContain(
+        '<loc>https://bitetribe.app/eat/berlin/best-sushi</loc>\n    <lastmod>2026-11-12</lastmod>',
+      );
+      expect(body).toContain(
+        '<loc>https://bitetribe.app/eat/hamburg/brunch</loc>',
+      );
+      expect(body.match(/<url>/g)).toHaveLength(2);
+    });
+
+    it('is an empty urlset when nothing is published', async () => {
+      mockQueryGet.mockResolvedValue({ docs: [] });
+
+      const { status, body } = await respond('/eat/sitemap.xml');
+
+      expect(status).toBe(200);
+      expect(body).toContain('<urlset');
+      expect(body).not.toContain('<url>');
+    });
   });
 });

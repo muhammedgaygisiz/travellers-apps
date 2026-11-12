@@ -34,15 +34,17 @@ export const DRAG_CANCEL_PX = 10;
  * How long a finger must rest on a surface inside scrolling content before it
  * counts as a press. Every scroll starts with a touch-down on whatever is under
  * the thumb, so until then the gesture could still become a scroll, and
- * nothing plays. The same wait a native iOS scroll view gives its content.
+ * nothing plays. Short enough that an ordinary tap is still down when it runs
+ * out and gives way under the finger: at 150 ms almost every tap lifted first,
+ * and the press landed on top of the page transition it had started.
  */
-export const SCROLL_INTENT_MS = 150;
+export const SCROLL_INTENT_MS = 50;
 
 /**
- * How long a tap that lifted within {@link SCROLL_INTENT_MS} stays pressed, so
- * it still gives way and ticks twice: the press transition in `_globals.scss`.
+ * How far a finger may wander and still count as resting. Past it, a finger
+ * inside the wait is on its way to a scroll, and the wait starts over.
  */
-export const TAP_PRESS_MS = 70;
+export const REST_JITTER_PX = 3;
 
 /**
  * The class on the document element that opts it into the pressed-state
@@ -111,9 +113,10 @@ interface Press {
  * on the same frame.
  *
  * - **Press:** a `pointerdown` on a surface adds {@link PRESSED_CLASS} and
- *   plays `press`. Inside scrolling content both wait
- *   {@link SCROLL_INTENT_MS}, and a tap that lifts sooner plays them on the
- *   lift, with the release following {@link TAP_PRESS_MS} later.
+ *   plays `press`. Inside scrolling content both wait until the finger has
+ *   rested for {@link SCROLL_INTENT_MS}, and a tap that lifts sooner plays only
+ *   the `press` haptic: what it opens starts on that lift, so nothing may be
+ *   left to run behind it.
  * - **Release:** a `pointerup` that lands inside the same surface swaps the
  *   class for {@link RELEASED_CLASS}, which lets the surface spring back with
  *   an overshoot, and plays `release`, except on list rows and under
@@ -145,7 +148,7 @@ export const providePressFeedback = (): EnvironmentProviders =>
     const clearReleased = (surface: HTMLElement): void => {
       clearTimeout(releaseTimers.get(surface));
       releaseTimers.delete(surface);
-      surface.classList.remove(PRESSED_CLASS, RELEASED_CLASS);
+      surface.classList.remove(RELEASED_CLASS);
     };
 
     const press = (surface: HTMLElement): void => {
@@ -153,19 +156,12 @@ export const providePressFeedback = (): EnvironmentProviders =>
       void haptics.press();
     };
 
-    const springBack = (surface: HTMLElement, release: boolean): void => {
-      surface.classList.remove(PRESSED_CLASS);
-
-      // Rows spring back in full; only their second tick is left out.
-      surface.classList.add(RELEASED_CLASS);
-      releaseTimers.set(
-        surface,
-        setTimeout(() => clearReleased(surface), RELEASED_MS),
-      );
-
-      if (release) {
-        void haptics.release();
-      }
+    const pressOnceRested = (surface: HTMLElement): void => {
+      clearTimeout(scrollIntentTimer);
+      scrollIntentTimer = setTimeout(() => {
+        scrollIntentTimer = undefined;
+        press(surface);
+      }, SCROLL_INTENT_MS);
     };
 
     const end = (inside: boolean): void => {
@@ -178,25 +174,31 @@ export const providePressFeedback = (): EnvironmentProviders =>
       clearTimeout(scrollIntentTimer);
       scrollIntentTimer = undefined;
       active = undefined;
+      surface.classList.remove(PRESSED_CLASS);
 
       if (!inside) {
-        surface.classList.remove(PRESSED_CLASS);
+        return;
+      }
+
+      // Lifted before the wait ran out, so this was a tap after all. Its click
+      // comes next and may start a page transition, which a press animation
+      // and a second tick begun now would only get in the way of.
+      if (undecided) {
+        void haptics.press();
 
         return;
       }
 
-      if (!undecided) {
-        springBack(surface, release);
-
-        return;
-      }
-
-      // Lifted before the wait ran out, so this was a tap after all.
-      press(surface);
+      // Rows spring back in full; only their second tick is left out.
+      surface.classList.add(RELEASED_CLASS);
       releaseTimers.set(
         surface,
-        setTimeout(() => springBack(surface, release), TAP_PRESS_MS),
+        setTimeout(() => clearReleased(surface), RELEASED_MS),
       );
+
+      if (release) {
+        void haptics.release();
+      }
     };
 
     const onPointerDown = (event: PointerEvent): void => {
@@ -232,10 +234,7 @@ export const providePressFeedback = (): EnvironmentProviders =>
         return;
       }
 
-      scrollIntentTimer = setTimeout(() => {
-        scrollIntentTimer = undefined;
-        press(surface);
-      }, SCROLL_INTENT_MS);
+      pressOnceRested(surface);
     };
 
     const onPointerUp = (event: PointerEvent): void => {
@@ -264,6 +263,11 @@ export const providePressFeedback = (): EnvironmentProviders =>
 
       if (travelled > DRAG_CANCEL_PX) {
         end(false);
+      } else if (
+        scrollIntentTimer !== undefined &&
+        travelled > REST_JITTER_PX
+      ) {
+        pressOnceRested(active.surface);
       }
     };
 

@@ -8,8 +8,8 @@ import {
   providePressFeedback,
   RELEASED_CLASS,
   RELEASED_MS,
+  REST_JITTER_PX,
   SCROLL_INTENT_MS,
-  TAP_PRESS_MS,
 } from '../press-feedback';
 
 type PointerType =
@@ -559,7 +559,7 @@ describe(providePressFeedback.name, () => {
     afterEach(() => jest.useRealTimers());
 
     const expectNothingPlayed = (): void => {
-      jest.advanceTimersByTime(SCROLL_INTENT_MS + TAP_PRESS_MS + RELEASED_MS);
+      jest.advanceTimersByTime(SCROLL_INTENT_MS + RELEASED_MS);
 
       expect(query('#card').classList).not.toContain(PRESSED_CLASS);
       expect(query('#card').classList).not.toContain(RELEASED_CLASS);
@@ -612,37 +612,44 @@ describe(providePressFeedback.name, () => {
       expect(haptics.release).toHaveBeenCalledTimes(1);
     });
 
-    it('should play the whole press on the lift of a quick tap', () => {
-      tap(query('#card p'));
+    it('should wait while a finger inside the wait keeps moving', () => {
+      const start = { clientX: 50, clientY: 50 };
+      const moved = { clientX: 50, clientY: 50 + REST_JITTER_PX + 1 };
+
+      dispatch(query('#card p'), 'pointerdown', start);
+      jest.advanceTimersByTime(SCROLL_INTENT_MS - 1);
+      dispatch(query('#card p'), 'pointermove', moved);
+      jest.advanceTimersByTime(SCROLL_INTENT_MS - 1);
+
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(haptics.press).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
 
       expect(query('#card').classList).toContain(PRESSED_CLASS);
       expect(haptics.press).toHaveBeenCalledTimes(1);
-      expect(haptics.release).not.toHaveBeenCalled();
-
-      jest.advanceTimersByTime(TAP_PRESS_MS);
-
-      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
-      expect(query('#card').classList).toContain(RELEASED_CLASS);
-      expect(haptics.press).toHaveBeenCalledTimes(1);
-      expect(haptics.release).toHaveBeenCalledTimes(1);
-
-      jest.advanceTimersByTime(SCROLL_INTENT_MS + RELEASED_MS);
-
-      expect(query('#card').classList).not.toContain(RELEASED_CLASS);
-      expect(haptics.press).toHaveBeenCalledTimes(1);
     });
 
-    it('should not leave a quick tap pressed when a drag follows on the same surface', () => {
+    it('should count a finger that only trembles as resting', () => {
+      dispatch(query('#card p'), 'pointerdown', { clientX: 50, clientY: 50 });
+      jest.advanceTimersByTime(SCROLL_INTENT_MS - 1);
+      dispatch(query('#card p'), 'pointermove', {
+        clientX: 50,
+        clientY: 50 + REST_JITTER_PX,
+      });
+      jest.advanceTimersByTime(1);
+
+      expect(query('#card').classList).toContain(PRESSED_CLASS);
+    });
+
+    it('should tick once on a quick tap and leave nothing running behind it', () => {
       tap(query('#card p'));
-      dispatch(query('#card p'), 'pointerdown');
 
-      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
-
-      dispatch(query('#card p'), 'pointercancel');
-      jest.advanceTimersByTime(SCROLL_INTENT_MS + TAP_PRESS_MS);
-
-      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
       expect(haptics.press).toHaveBeenCalledTimes(1);
+      expect(haptics.release).not.toHaveBeenCalled();
+      expect(query('#card').classList).not.toContain(PRESSED_CLASS);
+      expect(query('#card').classList).not.toContain(RELEASED_CLASS);
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it.each(['#toolbar', '#confirm'])(

@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "추가 보안 확인이 필요해요",
-  "app-check-blocked-message": "BiteTribe가 보안 확인으로 이 기기를 인증하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.",
+  "app-check-blocked-title": "앱을 불러오지 못했어요",
+  "app-check-blocked-message": "연결 상태를 확인하고 다시 시도해 주세요.",
   "app-check-retry": "다시 시도",
   "create-bite": "Bite 만들기",
   "create-bite-in-progress": "Bite 만들기를 여는 중...",

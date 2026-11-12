@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "ต้องมีการตรวจสอบความปลอดภัยเพิ่มเติม",
-  "app-check-blocked-message": "BiteTribe ไม่สามารถยืนยันอุปกรณ์นี้ด้วยการตรวจสอบความปลอดภัยได้ โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้งเพื่อดำเนินการต่อ",
+  "app-check-blocked-title": "ไม่สามารถโหลดแอปได้",
+  "app-check-blocked-message": "โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
   "app-check-retry": "ลองอีกครั้ง",
   "create-bite": "สร้าง Bite",
   "create-bite-in-progress": "กำลังเปิดสร้าง Bite...",

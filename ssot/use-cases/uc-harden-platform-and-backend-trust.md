@@ -64,7 +64,11 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
   client that loses its token after startup recovers on a bounded backoff
   instead of being unable to sign anybody in until the page is reloaded. The
   SDK's one-day throttle is reported rather than left to a console. Closed as
-  completed; the terminal state's presentation belongs to issue [#1465].
+  completed.
+- Issue [#1465] - a client without an App Check token waits for one behind a
+  loading screen instead of a retry button, on a cold start and after a
+  mid-session loss alike. Only a wait that ends without a token shows a
+  message, and it does not mention the security check. Recoveries are counted.
 - Issue [#1221] - the Operator's App Check monitoring is now readable: the token preflight runs whether or not enforcement is on, and `device_class` separates simulator traffic from device traffic. Partly closed; the `capacitor://localhost` API-key restriction and the QA-project decision are still open.
 
 ## Related Domains

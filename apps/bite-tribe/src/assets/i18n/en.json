@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "Extra security check needed",
-  "app-check-blocked-message": "BiteTribe couldn't verify this device with its security check. Check your connection and try again to continue.",
+  "app-check-blocked-title": "Couldn't load the app",
+  "app-check-blocked-message": "Check your connection and try again.",
   "app-check-retry": "Try again",
   "create-bite": "Create Bite",
   "create-bite-in-progress": "Opening Create Bite...",

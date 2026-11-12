@@ -1,22 +1,38 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AppCheckReadinessService } from '../app-check-readiness.service';
 
 /**
- * Full-screen App Check retry gate.
+ * Full-screen App Check gate.
  *
  * Rendered by the root component in place of the router outlet whenever App
  * Check token readiness has not been achieved (issue #933). Because the outlet
- * is not mounted in this state, no protected Firebase screen is shown. The
- * retry button re-runs the token preflight through
- * {@link AppCheckReadinessService}; on success the service lifts the gate,
- * resuming auth and initial navigation if the app has not started yet.
+ * is not mounted in this state, no protected Firebase screen is shown.
+ *
+ * **It is a loading screen first.** While {@link AppCheckReadinessService} is
+ * `blocked` a bounded recovery is running behind it, and the logo and a
+ * spinner are all there is to see: no copy, no control, nothing that says a
+ * check is happening. The wait resolves by itself in the common case, and a
+ * panel asking for a tap made a person the retry mechanism for something the
+ * app does better alone (issue #1465).
+ *
+ * **The message is what is left when that wait ends without a token.** It
+ * says the app could not load and offers a retry, in the words any failed
+ * load would use. It does not name the security check: there is nothing a
+ * person can do about attestation, and what they can do - check the
+ * connection, try again - is the same either way. A tap puts the loading
+ * screen back while the re-check runs, so a retry that fails is visibly a
+ * retry and not a button that did nothing.
  *
  * **It is not only a startup screen.** A page that started with a token and
- * lost it afterwards lands here too, with a bounded recovery already running
- * behind it (issue #1621). The button is what is left when that recovery ends
- * without a token, which is the state this panel was built for.
+ * lost it afterwards lands here too, on the same loading screen with the same
+ * recovery behind it (issue #1621).
  */
 @Component({
   selector: 'bite-app-check-gate',
@@ -25,23 +41,33 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
   template: `
     <ion-content class="app-check-gate" [fullscreen]="true">
       <div class="app-check-gate__inner">
-        <h1 class="app-check-gate__title">
-          {{ 'app-check-blocked-title' | transloco }}
-        </h1>
-        <p class="app-check-gate__message">
-          {{ 'app-check-blocked-message' | transloco }}
-        </p>
-        <ion-button
-          class="app-check-gate__retry"
-          expand="block"
-          [disabled]="isRetrying()"
-          (click)="retry()"
-        >
-          @if (isRetrying()) {
-            <ion-spinner name="crescent" slot="start" />
-          }
-          {{ 'app-check-retry' | transloco }}
-        </ion-button>
+        @if (isLoading()) {
+          <img
+            class="app-check-gate__logo"
+            src="assets/icons/logo.svg"
+            alt=""
+          />
+          <ion-spinner
+            class="app-check-gate__spinner"
+            name="crescent"
+            role="status"
+            [attr.aria-label]="'loading' | transloco"
+          />
+        } @else {
+          <h1 class="app-check-gate__title">
+            {{ 'app-check-blocked-title' | transloco }}
+          </h1>
+          <p class="app-check-gate__message">
+            {{ 'app-check-blocked-message' | transloco }}
+          </p>
+          <ion-button
+            class="app-check-gate__retry"
+            expand="block"
+            (click)="retry()"
+          >
+            {{ 'app-check-retry' | transloco }}
+          </ion-button>
+        }
       </div>
     </ion-content>
   `,
@@ -82,6 +108,11 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
       text-align: center;
     }
 
+    .app-check-gate__logo {
+      width: auto;
+      height: 6rem;
+    }
+
     .app-check-gate__title {
       margin: 0;
       font-size: 1.25rem;
@@ -103,7 +134,15 @@ import { AppCheckReadinessService } from '../app-check-readiness.service';
 export class AppCheckGateComponent {
   private readonly readiness = inject(AppCheckReadinessService);
 
-  readonly isRetrying = this.readiness.isRetrying;
+  /**
+   * Loading for as long as something is still trying: the bounded recovery
+   * (`blocked`) or a re-check a tap started. Only the end of the wait,
+   * `unavailable` with nothing in flight, shows the message.
+   */
+  protected readonly isLoading = computed(
+    () =>
+      this.readiness.status() !== 'unavailable' || this.readiness.isRetrying(),
+  );
 
   retry(): void {
     void this.readiness.retry();

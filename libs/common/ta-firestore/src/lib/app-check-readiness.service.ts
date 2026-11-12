@@ -13,8 +13,10 @@ export type AppCheckReadinessStatus =
  * enough that an operator who is going to have to act finds that out while
  * they are still looking at the screen.
  *
- * Exported so the cold-start gate can adopt the same bound when issue #1465
- * gives that path one.
+ * The cold start walks the same backoff (issue #1465). The SDK's own retry
+ * after a failed token request is 30 seconds away at the earliest, so on that
+ * path these forced re-checks are what usually ends the wait, not a fallback
+ * to it.
  */
 export const APP_CHECK_RECOVERY_DELAYS_MS: readonly number[] = [
   1_000, 4_000, 15_000, 45_000,
@@ -30,6 +32,11 @@ export const APP_CHECK_RECOVERY_DELAYS_MS: readonly number[] = [
  */
 export type AppCheckRetryContext = {
   requireToken: boolean;
+  /**
+   * Which automatic re-check this is, counted from 1. Absent when a person
+   * tapped the button, which is what tells the two apart in telemetry.
+   */
+  attempt?: number;
 };
 
 type RetryHandler = (context: AppCheckRetryContext) => Promise<void>;
@@ -41,9 +48,15 @@ type RetryHandler = (context: AppCheckRetryContext) => Promise<void>;
  * App Check token readiness is proven (or enforcement is off), and `blocked`
  * when enforced readiness fails. While `blocked` or `unavailable`, the root
  * component renders the gate instead of the router outlet, so no protected
- * Firebase traffic starts. The gate calls {@link retry}, which delegates to the
- * handler the initializer registered (re-preflight the token, then resume auth
- * and initial navigation on success).
+ * Firebase traffic starts.
+ *
+ * **`blocked` is a wait, not a verdict.** Nobody is asked to do anything in
+ * that state: {@link startRecovery} re-checks the token on a bounded backoff
+ * and the gate shows a loading screen meanwhile (issue #1465). Only
+ * `unavailable`, the end of that wait, offers a button, and that button calls
+ * {@link retry}. Both go through the handler the initializer registered
+ * (re-preflight the token, then resume auth and initial navigation on
+ * success).
  *
  * **Readiness is not a startup question.** A page that started with a token
  * can lose it: a connectivity blip answers the App Check exchange 403, the SDK
@@ -86,10 +99,28 @@ export class AppCheckReadinessService {
   }
 
   /**
+   * Blocks the shell and waits out the bounded recovery, for a cold start
+   * that could not prove readiness (issue #1465).
+   *
+   * Until then a blocked start sat behind a button although nothing about it
+   * needed a person: the next token request usually succeeds. The caller does
+   * not await this, so the shell can render its loading screen while the wait
+   * runs.
+   */
+  async startRecovery(): Promise<void> {
+    if (this.recovering) {
+      return;
+    }
+
+    this._status.set('blocked');
+    await this.recover();
+  }
+
+  /**
    * The terminal state of a bounded recovery: the wait is over and the token
-   * did not come back. The gate stays up and its retry is tappable again, so
-   * the state ends in something an operator can act on rather than in a
-   * spinner that never stops.
+   * did not come back. The gate stays up and swaps its loading screen for a
+   * message with a retry, so the state ends in something a person can act on
+   * rather than in a spinner that never stops.
    */
   markUnavailable(): void {
     this._status.set('unavailable');
@@ -104,9 +135,8 @@ export class AppCheckReadinessService {
    * App Check token, and waits out the bounded recovery that follows.
    *
    * Only a running app enters here. A startup that never proved readiness is
-   * the gate's own business and is already blocked; re-entering would restart
-   * a recovery that is running, or overwrite the terminal state of one that
-   * finished.
+   * already blocked and has its own recovery running; re-entering would
+   * restart that one, or overwrite the terminal state of one that finished.
    */
   async reportTokenLost(): Promise<void> {
     this.tokenProvenLost = true;
@@ -119,14 +149,17 @@ export class AppCheckReadinessService {
     await this.recover();
   }
 
-  async retry(): Promise<void> {
+  async retry(attempt?: number): Promise<void> {
     if (this._retrying() || !this.retryHandler) {
       return;
     }
 
     this._retrying.set(true);
     try {
-      await this.retryHandler({ requireToken: this.tokenProvenLost });
+      await this.retryHandler({
+        requireToken: this.tokenProvenLost,
+        ...(attempt === undefined ? {} : { attempt }),
+      });
     } finally {
       this._retrying.set(false);
     }
@@ -145,14 +178,14 @@ export class AppCheckReadinessService {
     this.recovering = true;
 
     try {
-      for (const delayMs of APP_CHECK_RECOVERY_DELAYS_MS) {
+      for (const [index, delayMs] of APP_CHECK_RECOVERY_DELAYS_MS.entries()) {
         await this.wait(delayMs);
 
         if (this._status() === 'ready') {
           return;
         }
 
-        await this.retry();
+        await this.retry(index + 1);
 
         if (this._status() === 'ready') {
           return;

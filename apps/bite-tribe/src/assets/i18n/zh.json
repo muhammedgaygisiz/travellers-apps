@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "需要额外的安全验证",
-  "app-check-blocked-message": "BiteTribe无法通过安全检查验证此设备。请检查网络连接，然后重试以继续。",
+  "app-check-blocked-title": "无法加载应用",
+  "app-check-blocked-message": "请检查网络连接，然后重试。",
   "app-check-retry": "重试",
   "create-bite": "创建Bite",
   "create-bite-in-progress": "正在打开创建Bite…",

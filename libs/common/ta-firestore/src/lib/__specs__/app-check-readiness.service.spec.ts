@@ -131,7 +131,7 @@ describe(AppCheckReadinessService.name, () => {
     });
 
     it('should tell the retry handler that a token was proven missing', async () => {
-      const contexts: { requireToken: boolean }[] = [];
+      const contexts: { requireToken: boolean; attempt?: number }[] = [];
       service.markReady();
       service.registerRetryHandler(async (context) => {
         contexts.push(context);
@@ -142,7 +142,7 @@ describe(AppCheckReadinessService.name, () => {
       await runRecovery();
       await recovery;
 
-      expect(contexts).toEqual([{ requireToken: true }]);
+      expect(contexts).toEqual([{ requireToken: true, attempt: 1 }]);
     });
 
     it('should end in the terminal state when the attempts run out', async () => {
@@ -193,8 +193,56 @@ describe(AppCheckReadinessService.name, () => {
       expect(attempts).toBe(APP_CHECK_RECOVERY_DELAYS_MS.length);
     });
 
-    // A startup that never proved readiness is the gate's own business, and it
-    // is blocked already.
+    // Issue #1465: a cold start that could not prove readiness waits for its
+    // token on the same backoff, with nobody tapping anything.
+    it('should recover a blocked cold start without a tap', async () => {
+      const contexts: { requireToken: boolean; attempt?: number }[] = [];
+      service.registerRetryHandler(async (context) => {
+        contexts.push(context);
+        if (contexts.length === 2) {
+          service.markReady();
+        }
+      });
+
+      const recovery = service.startRecovery();
+      expect(service.status()).toBe('blocked');
+
+      await runRecovery();
+      await recovery;
+
+      // Nothing proved a token missing on this path, and each automatic
+      // re-check says which one it is.
+      expect(contexts).toEqual([
+        { requireToken: false, attempt: 1 },
+        { requireToken: false, attempt: 2 },
+      ]);
+      expect(service.status()).toBe('ready');
+    });
+
+    it('should end a cold start that never gets a token in the terminal state', async () => {
+      service.registerRetryHandler(async () => undefined);
+
+      const recovery = service.startRecovery();
+      await runRecovery();
+      await recovery;
+
+      expect(service.status()).toBe('unavailable');
+    });
+
+    // The button is what is left in the terminal state.
+    it('should send a tapped retry without an attempt number', async () => {
+      const contexts: { requireToken: boolean; attempt?: number }[] = [];
+      service.registerRetryHandler(async (context) => {
+        contexts.push(context);
+      });
+
+      await service.retry();
+
+      expect(contexts).toEqual([{ requireToken: false }]);
+    });
+
+    // A startup that never proved readiness is blocked already and has its own
+    // recovery.
     it('should leave a startup that never became ready alone', async () => {
       const handler = jest.fn();
       service.registerRetryHandler(handler);

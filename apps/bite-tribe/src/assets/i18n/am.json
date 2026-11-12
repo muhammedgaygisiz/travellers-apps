@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "ተጨማሪ የደህንነት ማረጋገጫ ያስፈልጋል",
-  "app-check-blocked-message": "BiteTribe ይህን መሣሪያ በደህንነት ማረጋገጫው ማረጋገጥ አልቻለም። ለመቀጠል ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+  "app-check-blocked-title": "መተግበሪያውን መጫን አልተቻለም",
+  "app-check-blocked-message": "ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
   "app-check-retry": "እንደገና ይሞክሩ",
   "create-bite": "Bite ይፍጠሩ",
   "create-bite-in-progress": "Bite መፍጠሪያው እየተከፈተ ነው...",

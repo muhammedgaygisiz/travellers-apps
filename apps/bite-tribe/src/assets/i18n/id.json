@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "Perlu pemeriksaan keamanan tambahan",
-  "app-check-blocked-message": "BiteTribe tidak dapat memverifikasi perangkat ini dengan pemeriksaan keamanannya. Periksa koneksi Anda dan coba lagi untuk melanjutkan.",
+  "app-check-blocked-title": "Aplikasi tidak dapat dimuat",
+  "app-check-blocked-message": "Periksa koneksi Anda dan coba lagi.",
   "app-check-retry": "Coba lagi",
   "create-bite": "Buat Bite",
   "create-bite-in-progress": "Membuka Buat Bite...",

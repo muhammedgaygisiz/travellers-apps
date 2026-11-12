@@ -15,9 +15,10 @@ import { AppCheckReadinessService } from '../../app-check-readiness.service';
 class TestTranslocoLoader implements TranslocoLoader {
   getTranslation(): ReturnType<TranslocoLoader['getTranslation']> {
     const translations: Translation = {
-      'app-check-blocked-title': 'Extra security check needed',
+      'app-check-blocked-title': "Couldn't load the app",
       'app-check-blocked-message': 'Check your connection and try again.',
       'app-check-retry': 'Try again',
+      loading: 'Loading',
     };
     return of(translations);
   }
@@ -62,13 +63,45 @@ describe(AppCheckGateComponent.name, () => {
     expect(retrySpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should reflect the retrying state from the readiness service', () => {
-    expect(component.isRetrying()).toBe(false);
+  const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const retryButton = (): HTMLElement | null =>
+    element().querySelector('.app-check-gate__retry');
+  const spinner = (): HTMLElement | null =>
+    element().querySelector('.app-check-gate__spinner');
 
-    // A handler that never resolves keeps the service in the retrying state.
+  // Issue #1465: while the app is still trying there is nothing to read and
+  // nothing to tap.
+  it('should show only the loading screen while the recovery is running', () => {
+    readiness.markBlocked();
+    fixture.detectChanges();
+
+    expect(spinner()).not.toBeNull();
+    expect(retryButton()).toBeNull();
+    expect(element().querySelector('.app-check-gate__title')).toBeNull();
+    expect(element().querySelector('.app-check-gate__message')).toBeNull();
+  });
+
+  it('should offer the message and the retry once the wait is over', () => {
+    readiness.markUnavailable();
+    fixture.detectChanges();
+
+    expect(spinner()).toBeNull();
+    expect(retryButton()).not.toBeNull();
+    expect(
+      element().querySelector('.app-check-gate__title')?.textContent,
+    ).toContain("Couldn't load the app");
+  });
+
+  // A tap that changes nothing on screen reads as a button that did nothing.
+  it('should go back to the loading screen while a tapped retry is running', () => {
+    readiness.markUnavailable();
     readiness.registerRetryHandler(() => new Promise<void>(() => undefined));
-    void readiness.retry();
+    fixture.detectChanges();
 
-    expect(component.isRetrying()).toBe(true);
+    retryButton()?.click();
+    fixture.detectChanges();
+
+    expect(spinner()).not.toBeNull();
+    expect(retryButton()).toBeNull();
   });
 });

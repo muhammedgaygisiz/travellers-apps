@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "Zusätzliche Sicherheitsprüfung erforderlich",
-  "app-check-blocked-message": "BiteTribe konnte dieses Gerät nicht über die Sicherheitsprüfung verifizieren. Prüfe deine Verbindung und versuche es erneut, um fortzufahren.",
+  "app-check-blocked-title": "App konnte nicht geladen werden",
+  "app-check-blocked-message": "Prüfe deine Verbindung und versuche es erneut.",
   "app-check-retry": "Erneut versuchen",
   "create-bite": "Bite erstellen",
   "create-bite-in-progress": "Bite erstellen wird geöffnet...",

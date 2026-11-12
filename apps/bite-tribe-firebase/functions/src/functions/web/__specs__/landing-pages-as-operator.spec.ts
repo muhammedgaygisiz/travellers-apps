@@ -86,7 +86,6 @@ const bite = (
 const input = (
   over: Record<string, unknown> = {},
 ): Record<string, unknown> => ({
-  slug: 'best-sushi',
   city: 'berlin',
   cityName: 'Berlin',
   countryCode: 'de',
@@ -125,7 +124,7 @@ describe('landing pages as operator', () => {
       await expect(
         call(handler as AnyHandler, input(), [], false),
       ).rejects.toMatchObject({ code: 'unauthenticated' });
-      expect(db.exists('landingPages/best-sushi')).toBe(false);
+      expect(db.exists('landingPages/berlin')).toBe(false);
     });
   });
 
@@ -138,7 +137,7 @@ describe('landing pages as operator', () => {
 
       expect(saved.status).toBe('draft');
       expect(saved.countryCode).toBe('DE');
-      const stored = db.read('landingPages/best-sushi');
+      const stored = db.read('landingPages/berlin');
       expect(stored?.['items']).toEqual([
         {
           biteId: 'b3',
@@ -159,7 +158,7 @@ describe('landing pages as operator', () => {
       expect(stored?.['updatedBy']).toBe('admin-uid');
     });
 
-    it('logs one entry naming actor, slug and action', async () => {
+    it('logs one entry naming actor, city and action', async () => {
       await call(saveLandingPageHandler, input());
 
       expect(operatorLogs()).toEqual([
@@ -167,7 +166,7 @@ describe('landing pages as operator', () => {
           operatorAction: 'saveLandingPage',
           callerUid: 'admin-uid',
           targetType: 'landingPage',
-          targetId: 'best-sushi',
+          targetId: 'berlin',
         }),
       ]);
     });
@@ -204,7 +203,7 @@ describe('landing pages as operator', () => {
         { biteIds: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'] },
       ],
       ['a repeated Bite', { biteIds: ['b1', 'b1'] }],
-      ['a slug with spaces', { slug: 'best sushi' }],
+      ['a city with spaces', { city: 'new york' }],
       ['a missing title', { title: ' ' }],
       ['a bad country code', { countryCode: 'DEU' }],
     ])('refuses %s', async (_case, over) => {
@@ -216,14 +215,14 @@ describe('landing pages as operator', () => {
     it('holds a published page to the publishing bar', async () => {
       await call(saveLandingPageHandler, input());
       await call(setLandingPageStatusHandler, {
-        slug: 'best-sushi',
+        city: 'berlin',
         status: 'published',
       });
 
       await expect(
         call(saveLandingPageHandler, input({ biteIds: ['b1', 'b2'] })),
       ).rejects.toMatchObject({ code: 'failed-precondition' });
-      expect(db.read('landingPages/best-sushi')?.['items']).toHaveLength(3);
+      expect(db.read('landingPages/berlin')?.['items']).toHaveLength(3);
     });
   });
 
@@ -232,7 +231,7 @@ describe('landing pages as operator', () => {
       await call(saveLandingPageHandler, input());
 
       const page = await call(setLandingPageStatusHandler, {
-        slug: 'best-sushi',
+        city: 'berlin',
         status: 'published',
       });
 
@@ -242,7 +241,7 @@ describe('landing pages as operator', () => {
         expect.objectContaining({
           operatorAction: 'setLandingPageStatus',
           callerUid: 'admin-uid',
-          targetId: 'best-sushi',
+          targetId: 'berlin',
           details: { from: 'draft', to: 'published' },
         }),
       );
@@ -253,11 +252,11 @@ describe('landing pages as operator', () => {
 
       await expect(
         call(setLandingPageStatusHandler, {
-          slug: 'best-sushi',
+          city: 'berlin',
           status: 'published',
         }),
       ).rejects.toMatchObject({ code: 'failed-precondition' });
-      expect(db.read('landingPages/best-sushi')?.['status']).toBe('draft');
+      expect(db.read('landingPages/berlin')?.['status']).toBe('draft');
     });
 
     it('refuses to publish without an intro or meta description', async () => {
@@ -265,7 +264,7 @@ describe('landing pages as operator', () => {
 
       await expect(
         call(setLandingPageStatusHandler, {
-          slug: 'best-sushi',
+          city: 'berlin',
           status: 'published',
         }),
       ).rejects.toMatchObject({ code: 'failed-precondition' });
@@ -274,14 +273,14 @@ describe('landing pages as operator', () => {
     it('keeps the published snapshot when a Bite is renamed or deleted', async () => {
       await call(saveLandingPageHandler, input());
       await call(setLandingPageStatusHandler, {
-        slug: 'best-sushi',
+        city: 'berlin',
         status: 'published',
       });
 
       db.seed('bites/b1', bite(1, { name: 'Renamed' }));
       await db.collection('bites').doc('b2').delete();
 
-      const items = db.read('landingPages/best-sushi')?.['items'];
+      const items = db.read('landingPages/berlin')?.['items'];
       expect(items).toHaveLength(3);
       expect(items[0].name).toBe('Dish 1');
       expect(items[1].name).toBe('Dish 2');
@@ -290,12 +289,12 @@ describe('landing pages as operator', () => {
     it('withdraws a published page and logs it', async () => {
       await call(saveLandingPageHandler, input());
       await call(setLandingPageStatusHandler, {
-        slug: 'best-sushi',
+        city: 'berlin',
         status: 'published',
       });
 
       const page = await call(setLandingPageStatusHandler, {
-        slug: 'best-sushi',
+        city: 'berlin',
         status: 'withdrawn',
       });
 
@@ -308,10 +307,10 @@ describe('landing pages as operator', () => {
       );
     });
 
-    it('answers an unknown slug with not-found', async () => {
+    it('answers an unknown city with not-found', async () => {
       await expect(
         call(setLandingPageStatusHandler, {
-          slug: 'nope',
+          city: 'nope',
           status: 'published',
         }),
       ).rejects.toMatchObject({ code: 'not-found' });
@@ -325,7 +324,7 @@ describe('landing pages as operator', () => {
       expect(html).toContain('<title>The best sushi in Berlin</title>');
       expect(html).toContain('<h2>Dish 1</h2>');
       expect(html).toContain('<h2>Dish 3</h2>');
-      expect(db.exists('landingPages/best-sushi')).toBe(false);
+      expect(db.exists('landingPages/berlin')).toBe(false);
       expect(operatorLogs()).toEqual([]);
     });
   });

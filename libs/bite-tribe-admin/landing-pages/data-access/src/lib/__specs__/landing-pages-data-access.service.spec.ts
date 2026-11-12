@@ -12,7 +12,6 @@ import {
 } from '../landing-pages-data-access.service';
 
 const draft: LandingPageDraft = {
-  slug: 'best-sushi',
   city: 'berlin',
   cityName: 'Berlin',
   countryCode: 'DE',
@@ -66,11 +65,11 @@ describe(LandingPagesDataAccessService.name, () => {
   it('publishes and withdraws through setLandingPageStatus', async () => {
     callByNameMock.mockResolvedValue({ data: {} });
 
-    await service.setStatus('best-sushi', 'withdrawn');
+    await service.setStatus('berlin', 'withdrawn');
 
     expect(callByNameMock).toHaveBeenCalledWith({
       name: 'setLandingPageStatus',
-      data: { slug: 'best-sushi', status: 'withdrawn' },
+      data: { city: 'berlin', status: 'withdrawn' },
     });
   });
 
@@ -83,8 +82,6 @@ describe(LandingPagesDataAccessService.name, () => {
   });
 
   it('builds the public URL on the canonical host', () => {
-    expect(landingPageUrl(draft)).toBe(
-      'https://bitetribe.app/eat/berlin/best-sushi',
-    );
+    expect(landingPageUrl(draft)).toBe('https://bitetribe.app/eat/berlin');
   });
 });

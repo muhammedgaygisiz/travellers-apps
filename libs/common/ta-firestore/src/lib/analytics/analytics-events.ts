@@ -385,12 +385,13 @@ export interface AnalyticsEventParamMap {
     store: StoreListing;
     surface: StoreLinkSurface;
   };
-  // `page_slug` is the `landingPages` document id the visitor came from;
+  // `city_page` is the city of the page the visitor came from, which is also
+  // its `landingPages` document id and URL (`/eat/<city>`);
   // `destination` is where its link pointed: the call to action opens the
   // root (`start`), an entry opens its Bite (`bite`). Logged once, at start-up,
   // whether or not the visitor is signed in.
   [AnalyticsEvent.CityPageArrived]: {
-    page_slug: string;
+    city_page: string;
     destination: 'start' | 'bite';
   };
 }

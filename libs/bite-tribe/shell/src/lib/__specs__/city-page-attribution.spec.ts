@@ -13,25 +13,25 @@ const at = (
 
 describe(readCityPageArrival.name, () => {
   it('reads the call to action, which opens the root', () => {
-    expect(readCityPageArrival(at('/', '?city_page=best-sushi'))).toEqual({
-      page_slug: 'best-sushi',
+    expect(readCityPageArrival(at('/', '?city_page=berlin'))).toEqual({
+      city_page: 'berlin',
       destination: 'start',
     });
   });
 
   it('reads an entry, which opens its Bite', () => {
     expect(
-      readCityPageArrival(at('/bite/abc123', '?city_page=best-sushi')),
-    ).toEqual({ page_slug: 'best-sushi', destination: 'bite' });
+      readCityPageArrival(at('/bite/abc123', '?city_page=berlin')),
+    ).toEqual({ city_page: 'berlin', destination: 'bite' });
   });
 
   it.each([
     ['no parameter', at('/', '')],
-    ['an empty slug', at('/', '?city_page=')],
-    ['a slug the editor would refuse', at('/', '?city_page=Best%20Sushi')],
-    ['an over-long slug', at('/', `?city_page=${'a'.repeat(81)}`)],
-    ['a path no city page links to', at('/home', '?city_page=best-sushi')],
-    ['a Bite sub-route', at('/bite/abc/edit', '?city_page=best-sushi')],
+    ['an empty city', at('/', '?city_page=')],
+    ['a city the editor would refuse', at('/', '?city_page=New%20York')],
+    ['an over-long city', at('/', `?city_page=${'a'.repeat(61)}`)],
+    ['a path no city page links to', at('/home', '?city_page=berlin')],
+    ['a Bite sub-route', at('/bite/abc/edit', '?city_page=berlin')],
   ])('ignores %s', (_case, location) => {
     expect(readCityPageArrival(location)).toBeUndefined();
   });
@@ -58,11 +58,11 @@ describe(provideCityPageAttribution.name, () => {
   });
 
   it('records an arrival from a city page at start-up', async () => {
-    await startAt('/bite/abc123?city_page=best-sushi');
+    await startAt('/bite/abc123?city_page=berlin');
 
     expect(logEvent).toHaveBeenCalledTimes(1);
     expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CityPageArrived, {
-      page_slug: 'best-sushi',
+      city_page: 'berlin',
       destination: 'bite',
     });
   });

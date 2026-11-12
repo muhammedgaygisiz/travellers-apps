@@ -21,7 +21,8 @@ const STYLE = `
   a { color:inherit; }
   header, main, footer { max-width:1080px; margin:0 auto; padding:0 16px; }
   header { display:flex; align-items:center; justify-content:space-between; height:56px; border-bottom:1px solid var(--line); }
-  .brand { font-weight:600; text-decoration:none; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:18px; text-decoration:none; }
+  .brand img { height:36px; width:auto; display:block; }
   .eyebrow { color:var(--muted); font-size:14px; margin:24px 0 4px; }
   h1 { font-size:28px; line-height:1.25; margin:0 0 12px; }
   .intro { color:var(--muted); max-width:680px; margin:0 0 24px; white-space:pre-line; }
@@ -35,9 +36,14 @@ const STYLE = `
   .entry { display:block; text-decoration:none; }
   .entry:hover h2 { text-decoration:underline; }
   .cta { display:block; text-align:center; text-decoration:none; font-weight:600; padding:14px 20px; border-radius:12px; background:#e8590c; color:#fff; }
-  .stores { display:none; }
-  /* A phone gets the call to action as a bar pinned to the bottom. */
-  main { padding-bottom:88px; }
+  .stores { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:8px; }
+  .store { display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; }
+  .store .qr { display:none; }
+  .badge-app-store { width:120px; height:40px; margin:4px 0; display:block; }
+  .badge-google-play { width:154px; height:60px; display:block; margin:-10px 0; }
+  /* A phone gets the call to action as a bar pinned to the bottom, with the
+     store badges under it: on a phone they install the app directly. */
+  main { padding-bottom:148px; }
   .get { position:fixed; left:0; right:0; bottom:0; margin:0; padding:12px 16px; background:var(--bg); border-top:1px solid var(--line); }
   .get-lead { display:none; margin:0; font-weight:600; }
   @media (min-width:720px) {
@@ -47,9 +53,10 @@ const STYLE = `
     .get { position:static; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px; border:1px solid var(--line); border-radius:12px; margin:0 0 32px; }
     .get-lead { display:block; }
     .cta { flex:none; }
-    .stores { display:flex; gap:16px; }
-    .stores a { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; color:var(--muted); text-decoration:none; }
-    .stores img { width:96px; height:96px; background:#fff; border-radius:8px; padding:4px; }
+    .stores { gap:16px; margin-top:0; align-items:flex-start; }
+    .store .qr { display:block; width:96px; height:96px; background:#fff; border-radius:8px; padding:4px; }
+    .badge-app-store { width:96px; height:32px; }
+    .badge-google-play { width:124px; height:48px; margin:-8px 0; }
   }
 `;
 
@@ -57,18 +64,31 @@ const STYLE = `
 export const CITY_PAGE_PARAM = 'city_page';
 
 /**
- * A link into the app that says which page it came from. The consumer app
- * records it as `city_page_arrived` at start-up; the page itself carries no
- * analytics, cookie or storage (epic #1487).
+ * A link into the app that says which city page it came from. The consumer
+ * app records it as `city_page_arrived` at start-up; the page itself carries
+ * no analytics, cookie or storage (epic #1487).
  */
-export const appLink = (path: string, slug: string): string =>
-  `${BITE_TRIBE_ORIGIN}${path}?${CITY_PAGE_PARAM}=${encodeURIComponent(slug)}`;
+export const appLink = (path: string, city: string): string =>
+  `${BITE_TRIBE_ORIGIN}${path}?${CITY_PAGE_PARAM}=${encodeURIComponent(city)}`;
 
-/** `/eat/<city>/<slug>` on the canonical host, never `bite-tribe.web.app`. */
-export const landingPageUrl = (
-  page: Pick<LandingPage, 'city' | 'slug'>,
-): string =>
-  `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}/${encodeURIComponent(page.slug)}`;
+/**
+ * The app's own logo, served by the web build, so the page carries the same
+ * mark as every other BiteTribe surface. Empty `alt`: the wordmark beside it
+ * already names the link.
+ */
+const LOGO_URL = `${BITE_TRIBE_ORIGIN}/assets/icons/logo.svg`;
+
+/**
+ * The store badges and QR codes the web app's start page shows (issue #1453),
+ * served from the same build so there is one drawing of each. Apple ships a
+ * black badge for light backgrounds and a white one for dark; Google ships
+ * one, whose PNG already carries its clear space - hence its taller box.
+ */
+const STORE_ASSETS = `${BITE_TRIBE_ORIGIN}/assets/store`;
+
+/** `/eat/<city>` on the canonical host, never `bite-tribe.web.app`. */
+export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
+  `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}`;
 
 /**
  * One Bite. The whole entry links to the Bite in the app: a member lands on
@@ -76,11 +96,11 @@ export const landingPageUrl = (
  * remembers the Bite and opens it once they have (decided on #1487).
  */
 const renderItem =
-  (slug: string) =>
+  (city: string) =>
   (item: LandingPageItem, index: number): string => {
     const name = escapeHtml(item.name);
     const location = [item.place, item.locality].filter(Boolean).join(' · ');
-    const href = appLink(`/bite/${encodeURIComponent(item.biteId)}`, slug);
+    const href = appLink(`/bite/${encodeURIComponent(item.biteId)}`, city);
 
     return `
       <li>
@@ -99,13 +119,22 @@ const renderItem =
  * each. A phone gets a bar pinned to the bottom with the button alone: it
  * cannot scan its own screen.
  */
-const renderCallToAction = (slug: string): string => `
+const renderCallToAction = (city: string): string => `
     <section class="get" aria-label="BiteTribe">
       <p class="get-lead">See every dish, price and photo on BiteTribe</p>
-      <a class="cta" data-cta="primary" href="${escapeHtml(appLink('/', slug))}">Open BiteTribe</a>
+      <a class="cta" data-cta="primary" href="${escapeHtml(appLink('/', city))}">Open BiteTribe</a>
       <div class="stores">
-        <a href="${APP_STORE_URL}" rel="noopener"><img src="${BITE_TRIBE_ORIGIN}/assets/store/app-store-qr.svg" alt="QR code for the App Store" loading="lazy" />App Store</a>
-        <a href="${PLAY_STORE_URL}" rel="noopener"><img src="${BITE_TRIBE_ORIGIN}/assets/store/google-play-qr.svg" alt="QR code for Google Play" loading="lazy" />Google Play</a>
+        <a class="store" href="${APP_STORE_URL}" rel="noopener" aria-label="Download on the App Store">
+          <img class="qr" src="${STORE_ASSETS}/app-store-qr.svg" alt="" loading="lazy" />
+          <picture>
+            <source srcset="${STORE_ASSETS}/app-store-badge-white.svg" media="(prefers-color-scheme: dark)" />
+            <img class="badge badge-app-store" src="${STORE_ASSETS}/app-store-badge-black.svg" alt="" width="120" height="40" />
+          </picture>
+        </a>
+        <a class="store" href="${PLAY_STORE_URL}" rel="noopener" aria-label="Get it on Google Play">
+          <img class="qr" src="${STORE_ASSETS}/google-play-qr.svg" alt="" loading="lazy" />
+          <img class="badge badge-google-play" src="${STORE_ASSETS}/google-play-badge.png" alt="" width="154" height="60" />
+        </a>
       </div>
     </section>`;
 
@@ -200,14 +229,14 @@ export const renderLandingPage = (page: LandingPage): string => {
 </head>
 <body>
   <header>
-    <a class="brand" href="${BITE_TRIBE_ORIGIN}/">BiteTribe</a>
+    <a class="brand" href="${BITE_TRIBE_ORIGIN}/"><img src="${LOGO_URL}" alt="" width="28" height="36" />BiteTribe</a>
   </header>
   <main>
     <p class="eyebrow">${escapeHtml(eyebrow)}</p>
     <h1>${escapeHtml(page.title)}</h1>
     <p class="intro">${escapeHtml(page.intro)}</p>
-    ${renderCallToAction(page.slug)}
-    <ol>${page.items.map(renderItem(page.slug)).join('')}
+    ${renderCallToAction(page.city)}
+    <ol>${page.items.map(renderItem(page.city)).join('')}
     </ol>
   </main>
   <footer>

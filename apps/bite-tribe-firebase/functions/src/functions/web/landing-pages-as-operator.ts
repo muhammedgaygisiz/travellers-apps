@@ -39,12 +39,12 @@ const BITES_COLLECTION = 'bites';
 export const MIN_ITEMS = 3;
 export const MAX_ITEMS = 5;
 
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** The city segment: the document id and the whole URL path after `/eat/`. */
+const CITY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/;
 const LOCALE_PATTERN = /^[a-z]{2}(?:-[A-Z]{2})?$/;
 
 const LIMITS = {
-  slug: 80,
   city: 60,
   cityName: 80,
   title: 120,
@@ -54,7 +54,6 @@ const LIMITS = {
 
 /** What the editor sends. Everything is re-validated here. */
 export interface LandingPageInput {
-  slug: string;
   city: string;
   cityName: string;
   countryCode: string;
@@ -108,11 +107,12 @@ const matching = (
   return value;
 };
 
-export const parseSlug = (value: unknown): string =>
+/** One page per city, so the city is the page's id (`/eat/<city>`). */
+export const parseCity = (value: unknown): string =>
   matching(
-    text(value, 'slug', true),
-    SLUG_PATTERN,
-    'slug',
+    text(value, 'city', true),
+    CITY_PATTERN,
+    'city',
     'lowercase letters, digits and single hyphens',
   );
 
@@ -145,13 +145,7 @@ export const parseLandingPageInput = (data: unknown): LandingPageInput => {
   const input = (data ?? {}) as Record<string, unknown>;
 
   return {
-    slug: parseSlug(input['slug']),
-    city: matching(
-      text(input['city'], 'city', true),
-      SLUG_PATTERN,
-      'city',
-      'lowercase letters, digits and single hyphens',
-    ),
+    city: parseCity(input['city']),
     cityName: text(input['cityName'], 'cityName', true),
     countryCode: matching(
       (typeof input['countryCode'] === 'string' ? input['countryCode'] : '')
@@ -261,7 +255,6 @@ const millis = (value: unknown): number | undefined =>
   value instanceof Timestamp ? value.toMillis() : undefined;
 
 const toSummary = (data: Record<string, unknown>): LandingPageSummary => ({
-  slug: String(data['slug'] ?? ''),
   city: String(data['city'] ?? ''),
   cityName: String(data['cityName'] ?? ''),
   countryCode: String(data['countryCode'] ?? ''),
@@ -289,7 +282,7 @@ export const listLandingPagesHandler = async (
   const snap = await getFirestore().collection(LANDING_PAGES_COLLECTION).get();
 
   return snap.docs
-    .map((doc) => toSummary({ ...doc.data(), slug: doc.id }))
+    .map((doc) => toSummary({ ...doc.data(), city: doc.id }))
     .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
 };
 
@@ -306,7 +299,7 @@ export const saveLandingPageHandler = async (
   const uid = requireAdmin(request);
   const input = parseLandingPageInput(request.data);
   const db = getFirestore();
-  const ref = db.collection(LANDING_PAGES_COLLECTION).doc(input.slug);
+  const ref = db.collection(LANDING_PAGES_COLLECTION).doc(input.city);
 
   const existing = await ref.get();
   const status: LandingPageStatus = existing.exists
@@ -332,7 +325,7 @@ export const saveLandingPageHandler = async (
   logOperatorAction(request, {
     action: 'saveLandingPage',
     targetType: 'landingPage',
-    targetId: input.slug,
+    targetId: input.city,
     outcome: 'succeeded',
     details: {
       created: !existing.exists,
@@ -366,7 +359,7 @@ export const previewLandingPageHandler = async (
 };
 
 interface SetStatusRequest {
-  slug?: unknown;
+  city?: unknown;
   status?: unknown;
 }
 
@@ -381,7 +374,7 @@ export const setLandingPageStatusHandler = async (
   request: CallableRequest<SetStatusRequest>,
 ): Promise<LandingPageSummary> => {
   const uid = requireAdmin(request);
-  const slug = parseSlug(request.data?.slug);
+  const city = parseCity(request.data?.city);
   const status = request.data?.status;
 
   if (status !== 'published' && status !== 'withdrawn') {
@@ -392,14 +385,14 @@ export const setLandingPageStatusHandler = async (
   }
 
   const db = getFirestore();
-  const ref = db.collection(LANDING_PAGES_COLLECTION).doc(slug);
+  const ref = db.collection(LANDING_PAGES_COLLECTION).doc(city);
   const snap = await ref.get();
 
   if (!snap.exists) {
-    throw new HttpsError('not-found', `No landing page ${slug}.`);
+    throw new HttpsError('not-found', `No landing page for ${city}.`);
   }
 
-  const stored = toSummary({ ...snap.data(), slug });
+  const stored = toSummary({ ...snap.data(), city });
   const update: Record<string, unknown> = {
     status,
     updatedAt: FieldValue.serverTimestamp(),
@@ -418,12 +411,12 @@ export const setLandingPageStatusHandler = async (
   logOperatorAction(request, {
     action: 'setLandingPageStatus',
     targetType: 'landingPage',
-    targetId: slug,
+    targetId: city,
     outcome: 'succeeded',
     details: { from: stored.status, to: status },
   });
 
-  return toSummary({ ...(await ref.get()).data(), slug });
+  return toSummary({ ...(await ref.get()).data(), city });
 };
 
 export const listLandingPages = onAppCheck(listLandingPagesHandler);

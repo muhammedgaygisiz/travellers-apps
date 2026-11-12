@@ -31,17 +31,17 @@
               </p>
             } @else {
               <ion-list lines="full" data-testid="admin-landing-list">
-                @for (page of pages(); track page.slug) {
+                @for (page of pages(); track page.city) {
                   <ion-item
                     [button]="true"
                     [color]="
-                      page.slug === current()?.slug ? 'light' : undefined
+                      page.city === current()?.city ? 'light' : undefined
                     "
                     (click)="openPage.emit(page)"
                   >
                     <ion-label>
-                      <h3>{{ page.title || page.slug }}</h3>
-                      <p>/eat/{{ page.city }}/{{ page.slug }}</p>
+                      <h3>{{ page.title || page.city }}</h3>
+                      <p>/eat/{{ page.city }}</p>
                     </ion-label>
                     <ion-badge
                       slot="end"
@@ -90,20 +90,10 @@
                 <ion-item>
                   <ion-input
                     labelPlacement="stacked"
-                    [label]="'admin-landing-field-slug' | transloco"
-                    placeholder="best-sushi"
-                    [value]="draft().slug"
-                    [disabled]="slugLocked()"
-                    data-testid="admin-landing-slug"
-                    (ionInput)="onField('slug', $event.detail.value)"
-                  />
-                </ion-item>
-                <ion-item>
-                  <ion-input
-                    labelPlacement="stacked"
                     [label]="'admin-landing-field-city' | transloco"
                     placeholder="berlin"
                     [value]="draft().city"
+                    [disabled]="cityLocked()"
                     data-testid="admin-landing-city"
                     (ionInput)="onField('city', $event.detail.value)"
                   />

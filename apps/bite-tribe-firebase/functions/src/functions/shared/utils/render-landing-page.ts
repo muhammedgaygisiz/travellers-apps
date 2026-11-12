@@ -24,13 +24,14 @@ const STYLE = `
   .eyebrow { color:var(--muted); font-size:14px; margin:24px 0 4px; }
   h1 { font-size:28px; line-height:1.25; margin:0 0 12px; }
   .intro { color:var(--muted); max-width:680px; margin:0 0 24px; white-space:pre-line; }
-  ol { list-style:none; padding:0; margin:0 0 32px; display:grid; gap:24px; }
-  li img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:var(--card); display:block; }
+  ol { list-style:none; padding:0; margin:0 0 32px; display:grid; grid-template-columns:minmax(0,1fr); gap:24px; }
+  li { min-width:0; }
+  li img { width:100%; max-width:100%; height:auto; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:var(--card); display:block; }
   h2 { font-size:18px; margin:10px 0 0; }
   .loc { color:var(--muted); font-size:14px; margin:2px 0 0; }
   footer { border-top:1px solid var(--line); padding-top:16px; padding-bottom:32px; color:var(--muted); font-size:14px; }
   footer a { margin-right:16px; }
-  @media (min-width:720px) { h1 { font-size:36px; } ol { grid-template-columns:repeat(3,1fr); gap:24px; } }
+  @media (min-width:720px) { h1 { font-size:36px; } ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; } }
 `;
 
 /** `/eat/<city>/<slug>` on the canonical host, never `bite-tribe.web.app`. */

@@ -16,6 +16,12 @@ export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-sta
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { handleDownloadLink } from './functions/web/handle-download-link';
 export { renderCityPage } from './functions/web/render-city-page';
+export {
+  listLandingPages,
+  previewLandingPage,
+  saveLandingPage,
+  setLandingPageStatus,
+} from './functions/web/landing-pages-as-operator';
 export { sendWeeklyBiteNotification } from './functions/notifications/send-weekly-bite-notification';
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';

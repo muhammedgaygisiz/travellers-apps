@@ -85,6 +85,15 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   recomputeMenuItemStatsAsOperator: 'operator',
   deleteBiteAsOperator: 'operator',
 
+  // City landing pages (issue #1490). Operator-only because what they write
+  // is public marketing content on bitetribe.app, and the business app must
+  // not reach them: a restaurant curating the list it appears on is a
+  // conflict of interest.
+  listLandingPages: 'operator',
+  previewLandingPage: 'operator',
+  saveLandingPage: 'operator',
+  setLandingPageStatus: 'operator',
+
   // The report queue (issue #1608): reading the open reports, and closing
   // them when the Bite stays up. Reports are readable by an operator only,
   // and who filed one is not something any other account may learn.

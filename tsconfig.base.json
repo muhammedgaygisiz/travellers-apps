@@ -21,6 +21,12 @@
       "bite-tribe-admin/bites-data-access": [
         "./libs/bite-tribe-admin/bites/data-access/src/index.ts"
       ],
+      "bite-tribe-admin/landing-pages": [
+        "./libs/bite-tribe-admin/landing-pages/page/src/index.ts"
+      ],
+      "bite-tribe-admin/landing-pages-data-access": [
+        "./libs/bite-tribe-admin/landing-pages/data-access/src/index.ts"
+      ],
       "bite-tribe-admin/dashboard": [
         "./libs/bite-tribe-admin/dashboard/src/index.ts"
       ],

@@ -35,6 +35,10 @@ const READ_ONLY_OPERATOR_ENDPOINTS = [
   'listUserReports',
   'listUsersWithRoles',
   'listRestaurantStaff',
+  // City landing pages (issue #1490): the list the editor opens on, and a
+  // preview rendered from the editor's own fields. Neither writes anything.
+  'listLandingPages',
+  'previewLandingPage',
 ];
 
 /**

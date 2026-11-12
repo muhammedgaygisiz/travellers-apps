@@ -59,9 +59,11 @@ export const OPERATOR_ACTIONS = [
   'recomputeMenuItemStats',
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
+  'saveLandingPage',
   'rotateTableQrToken',
   'rotateTableQrTokens',
   'sendNewVersionNotification',
+  'setLandingPageStatus',
   'setUserBlocked',
   'setUserRoles',
   'setUserSubscriptionTier',
@@ -80,6 +82,7 @@ export type OperatorAction = (typeof OPERATOR_ACTIONS)[number];
 export type OperatorTargetType =
   | 'appInstallation'
   | 'bite'
+  | 'landingPage'
   | 'menu'
   | 'restaurant'
   | 'restaurantCandidate'

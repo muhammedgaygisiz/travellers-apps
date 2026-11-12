@@ -176,6 +176,13 @@ export class AdminDashboard {
       testId: 'admin-tool-bite-search',
     },
     {
+      titleKey: 'admin-tool-landing-pages',
+      descriptionKey: 'admin-tool-landing-pages-description',
+      icon: 'globe-outline',
+      path: '/landing-pages',
+      testId: 'admin-tool-landing-pages',
+    },
+    {
       titleKey: 'admin-tool-restaurant-candidates',
       descriptionKey: 'admin-tool-restaurant-candidates-description',
       icon: 'shield-checkmark-outline',

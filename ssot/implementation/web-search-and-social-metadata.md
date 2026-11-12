@@ -547,8 +547,12 @@ It is not on the Associations page, which offers Google Analytics only.
 
 Adding one links the account to the Google Account that is signed in, through
 the platform's own consent and sign-in, so it is done by the account's owner.
-The property is visible only to that Google Account: the `gmail.com` owner of
-the website property does not see it in the selector.
+
+**It has its own user list; the website property's owners do not carry
+over.** Only the Google Account that made the link sees the property until
+others are added under its `Settings` > `Users and permissions`.
+`muhammed.gaygisiz@gmail.com` was added there as a second Owner the same day,
+so both properties have the same two owners.
 
 ### Not Done
 

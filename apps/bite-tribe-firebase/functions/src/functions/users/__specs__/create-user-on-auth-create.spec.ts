@@ -41,6 +41,7 @@ jest.mock('firebase-functions/v2/identity', () => ({
  * The last case below is the one that would have caught it.
  */
 
+ 
 require('../create-user-on-auth-create');
 
 interface EventOptions {

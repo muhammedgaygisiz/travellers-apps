@@ -222,11 +222,13 @@ app and run the operational migrations in it.
   `listUsersWithRoles`, `verifyRestaurantCandidate`, `backfillBiteAddress`,
   `backfillReviewTimestampsCallable`, `clusterRestaurantCandidateForBite` and
   `sendNewVersionNotification`.
-  Four are public, each because the person opening it has no account yet and the
+  Five are public, each because the person opening it has no account yet and the
   endpoint reads nothing an account would gate: `handleSharedLinkToBite`, the
   redirect a shared Bite link resolves through; `resolveTableQrToken` and
-  `loadPublicMenu`, the scan and the menu behind it; and `handleDownloadLink`,
-  the `bitetribe.app/download` store redirect from issue [#1628]. See issue
+  `loadPublicMenu`, the scan and the menu behind it; `handleDownloadLink`,
+  the `bitetribe.app/download` store redirect from issue [#1628]; and
+  `renderCityPage`, the published city landing pages from issue [#1489], which
+  serves only a `published` document and writes nothing. See issue
   [#1472].
   `loadPublicMenu` stayed public when issue [#370] gave its address a printed code
   and an associated-domain entry. A code in a restaurant's window is read by
@@ -637,3 +639,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
 [#1714]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1714
+[#1489]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1489

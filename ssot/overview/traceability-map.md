@@ -382,7 +382,7 @@ Three constraints came out of it and are recorded rather than rediscovered: a st
 
 ## Public City Landing Pages
 
-[epic-1487](../records/epic-1487.md) gives an operator a way to publish curated, indexable city pages over the data the product already holds. It is Priority `P3`: nothing in the launch path depends on it.
+[epic-1487](../records/epic-1487.md) gives an operator a way to publish curated, indexable city pages over the data the product already holds. Its five children were raised to Priority `P0` on 12 November 2026 and implemented as one stack of pull requests. An entry on a page is a Bite, not a restaurant, decided on [#1487] the same day; the contract as built is on [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages).
 
 | Work                                 | Use Case                                                                                                                                                                                                                | Domain                                                           | Implementation                                                                                                                                                                         |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -507,3 +507,4 @@ No use case covers public acquisition today. One is written when the epic starts
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487

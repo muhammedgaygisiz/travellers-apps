@@ -5,8 +5,8 @@
 **Level:** L1
 Supported today. The app exists, deploys, and is gated on the `admin` role as of issue [#1469].
 Account management - roles, subscription tier and blocking - the report queues for Bites and profiles, Bite search and removal,
-restaurant-candidate verification, restaurant ownership, the unmatched Bite places and the
-operational migrations are its surfaces. Epic [#1471], which grew the app into the operations
+restaurant-candidate verification, restaurant ownership, the unmatched Bite places, the
+public city landing pages and the operational migrations are its surfaces. Epic [#1471], which grew the app into the operations
 tool, is closed with every issue under it complete.
 
 ## Goal
@@ -40,7 +40,7 @@ What ships today:
 1. An operator is granted `admin` through `grant-role.mjs`, run with service-account credentials.
 2. They sign into the admin app with a normal BiteTribe account.
 3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
-4. They land on the dashboard, a list of the operator surfaces the tool offers.
+4. They land on the dashboard: the operator surfaces in two cards, the day-to-day work (account management, the report queues, Bite search, City pages, the restaurant surfaces) and, beside it, the migrations and backfills, which are run once and so are kept out of the daily list.
 5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
 
 Only the roles, the subscription tier and the account's access are editable. The identity fields are read-only rather than offering a change nothing can save.
@@ -59,6 +59,7 @@ The same card removes it. A required reason and a confirmation sit between the o
 9. **Reported Bites** is the queue of Bites accounts have reported from the consumer app ([#1608]), most-reported first. It reads `listBiteReports`, which aggregates the open reports per Bite and joins the Bite and its author, and never returns who reported it. Selecting a Bite shows its image, why it was reported and how often, and three answers: dismiss the reports and keep the Bite (`dismissBiteReports`), block the author (`setUserBlocked`, as user management does), or delete the Bite (`deleteBiteAsOperator`, as Bite search does). Dismissing and deleting take a required reason; every answer sits behind a confirmation, and deleting sits last, below a rule.
 10. **Reported profiles** is the same queue for accounts reported from their profile in the consumer app ([#1829]), most-reported first. It reads `listUserReports`, which aggregates the open reports per account and joins the profile's display name, photo and about text, its six newest Bites and whether the account is already blocked, and never returns who reported it. Selecting a profile shows those, why it was reported and how often, and two answers: block the account (`setUserBlocked`, as user management does) and close the reports (`dismissUserReports`). Closing takes a required reason; both sit behind a confirmation.
 11. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [UC - Run Operational Migrations](uc-run-operational-migrations.md).
+12. **City pages** curates the public pages at `bitetribe.app/eat/<city>`, one per city, ([#1490], epic [#1487]). The operator writes the details and an intro, picks three to five Bites with the same `searchBites` lookup as Bite search, orders them, previews the page as it will be served, and publishes or withdraws it. Every write goes through an admin-only callable that logs one operator action, and publishing copies the Bites into the page so a later change to a Bite cannot break it. The page itself is owned by [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages).
 
 ## Why It Is Needed
 
@@ -159,6 +160,7 @@ page is where the queue the reports arrive in lives.
 - Issue [#1485] - see and change an account's subscription tier for a support case
 - Issue [#1608] - a user reports a Bite, and the report queue an operator works it from
 - Issue [#1829] - a user reports a profile, and the reported-profiles queue an operator works it from, part of epic [#1823]
+- Issue [#1490] - curate and publish a city landing page, part of epic [#1487]
 - Issue [#1069] - stage 0 of [#735], restaurant ownership, claiming and authorization
 - Issue [#1075] - business roles as verified identity
 - Issue [#1077] - assign and revoke restaurant ownership, and the admin-app surface for it; done
@@ -205,3 +207,5 @@ page is where the queue the reports arrive in lives.
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
 [#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+[#1490]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1490

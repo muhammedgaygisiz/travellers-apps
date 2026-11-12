@@ -33,6 +33,8 @@ export interface LandingPageDraft {
   metaDescription: string;
   intro: string;
   biteIds: string[];
+  /** Other names that redirect to `/eat/<city>`, e.g. `koeln` (#1974). */
+  aliases: string[];
 }
 
 /** A stored page as `listLandingPages` returns it. */

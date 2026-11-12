@@ -407,6 +407,8 @@
   "admin-landing-status-withdrawn": "Withdrawn",
   "admin-landing-details": "Details",
   "admin-landing-field-city": "City in the URL (fixed once saved)",
+  "admin-landing-field-aliases": "Other names (redirect here), separated by commas",
+  "admin-landing-aliases-hint": "These redirect to this page:",
   "admin-landing-field-city-name": "City name",
   "admin-landing-field-country": "Country code",
   "admin-landing-field-locale": "Language",

@@ -34,7 +34,12 @@ jest.mock('firebase-functions/https', () => ({
   onRequest: jest.fn((handler: unknown) => handler),
 }));
 
-type Res = { status: jest.Mock; send: jest.Mock; set: jest.Mock };
+type Res = {
+  status: jest.Mock;
+  send: jest.Mock;
+  set: jest.Mock;
+  redirect: jest.Mock;
+};
 type Handler = (req: { path: string }, res: Res) => Promise<void>;
 
 const handler = renderCityPage as unknown as Handler;
@@ -45,11 +50,27 @@ const respond = async (
   status: number;
   body: string;
   headers: Record<string, string>;
+  location?: string;
 }> => {
-  const res: Res = { status: jest.fn(), send: jest.fn(), set: jest.fn() };
+  const res: Res = {
+    status: jest.fn(),
+    send: jest.fn(),
+    set: jest.fn(),
+    redirect: jest.fn(),
+  };
   res.status.mockReturnValue(res);
 
   await handler({ path }, res);
+
+  if (res.redirect.mock.calls.length) {
+    const [status, location] = res.redirect.mock.calls[0];
+    return {
+      status,
+      body: '',
+      headers: Object.fromEntries(res.set.mock.calls),
+      location,
+    };
+  }
 
   return {
     status: res.status.mock.calls[0][0],
@@ -97,6 +118,8 @@ const jsonLd = (body: string): any => {
 };
 
 describe('renderCityPage', () => {
+  // No page is found by alias unless a test says so.
+  beforeEach(() => mockQueryGet.mockResolvedValue({ docs: [] }));
   afterEach(() => jest.clearAllMocks());
 
   it('renders a published page as a complete document', async () => {
@@ -372,6 +395,71 @@ describe('renderCityPage', () => {
       expect(body).not.toMatch(/gtag|googletagmanager|analytics/i);
       expect(body).not.toMatch(/document\.cookie|localStorage|sessionStorage/);
       expect(Object.keys(headers)).not.toContain('Set-Cookie');
+    });
+  });
+
+  describe('aliases', () => {
+    const aliasOf = (data: Record<string, unknown>): unknown => ({
+      docs: [{ id: 'cologne', data: (): Record<string, unknown> => data }],
+    });
+    const cologne = {
+      ...page,
+      city: 'cologne',
+      cityName: 'Cologne',
+      aliases: ['koeln'],
+    };
+
+    it('redirects an alias of a published page, for good, to its own URL', async () => {
+      mockGet.mockResolvedValue(snapshot());
+      mockQueryGet.mockResolvedValue(aliasOf(cologne));
+
+      const { status, location, headers } = await respond('/eat/koeln');
+
+      expect(mockDoc).toHaveBeenCalledWith('koeln');
+      expect(mockWhere).toHaveBeenCalledWith(
+        'aliases',
+        'array-contains',
+        'koeln',
+      );
+      expect(status).toBe(301);
+      expect(location).toBe('https://bitetribe.app/eat/cologne');
+      expect(headers['Cache-Control']).toBe(PUBLISHED_CACHE_CONTROL);
+    });
+
+    it.each([
+      ['a draft', 'draft', 404],
+      ['a withdrawn page', 'withdrawn', 410],
+    ])(
+      'answers an alias of %s as the page itself would',
+      async (_case, status, expected) => {
+        mockGet.mockResolvedValue(snapshot());
+        mockQueryGet.mockResolvedValue(aliasOf({ ...cologne, status }));
+
+        const response = await respond('/eat/koeln');
+
+        expect(response.status).toBe(expected);
+        expect(response.location).toBeUndefined();
+      },
+    );
+
+    it('serves the page under its own city without looking for aliases', async () => {
+      mockGet.mockResolvedValue(snapshot(cologne));
+
+      const { status } = await respond('/eat/cologne');
+
+      expect(status).toBe(200);
+      expect(mockWhere).not.toHaveBeenCalled();
+    });
+
+    it('lists only the canonical URL in the sitemap', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [{ id: 'cologne', data: (): Record<string, unknown> => cologne }],
+      });
+
+      const { body } = await respond('/eat/sitemap.xml');
+
+      expect(body).toContain('<loc>https://bitetribe.app/eat/cologne</loc>');
+      expect(body).not.toContain('koeln');
     });
   });
 });

@@ -35,6 +35,11 @@ export interface LandingPageItem {
 export interface LandingPage {
   /** The document id and the URL segment, lowercase ASCII, e.g. `berlin`. */
   city: string;
+  /**
+   * Other names the page answers under, e.g. `koeln` for `cologne` (issue
+   * #1974). Each redirects to `/eat/<city>`; none serves the page itself.
+   */
+  aliases?: string[];
   /** The city as a reader sees it, e.g. `Berlin`. */
   cityName: string;
   countryCode: string;

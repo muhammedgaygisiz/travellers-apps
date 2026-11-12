@@ -101,6 +101,24 @@
                 <ion-item>
                   <ion-input
                     labelPlacement="stacked"
+                    [label]="'admin-landing-field-aliases' | transloco"
+                    placeholder="koeln"
+                    [value]="draft().aliases.join(', ')"
+                    data-testid="admin-landing-aliases"
+                    (ionChange)="aliasesChange.emit($event.detail.value ?? '')"
+                  />
+                </ion-item>
+                @if (aliasUrls().length) {
+                  <ion-note
+                    class="landing-pages__hint"
+                    data-testid="admin-landing-alias-urls"
+                    >{{ 'admin-landing-aliases-hint' | transloco }}
+                    {{ aliasUrls().join(', ') }}</ion-note
+                  >
+                }
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
                     [label]="'admin-landing-field-city-name' | transloco"
                     placeholder="Berlin"
                     [value]="draft().cityName"

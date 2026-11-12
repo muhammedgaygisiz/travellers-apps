@@ -23,6 +23,7 @@ const draft: LandingPageDraft = {
   metaDescription: 'Five sushi dishes in Berlin, picked from real Bites.',
   intro: 'Three places, one question: where is the fish best?',
   biteIds: ['b1', 'b2', 'b3'],
+  aliases: [],
 };
 
 const entries: LandingPageEntry[] = [
@@ -122,6 +123,32 @@ export const EditingPublished: Story = {
     draft,
     entries,
     results,
+    publishable: true,
+  },
+};
+
+/**
+ * A page that answers under a second name: `/eat/koeln` redirects to
+ * `/eat/cologne`, and the editor lists the alias URLs under the field.
+ */
+export const WithAlias: Story = {
+  args: {
+    editing: true,
+    current: {
+      ...pages[0],
+      city: 'cologne',
+      cityName: 'Cologne',
+      title: 'Top 5 dishes in Cologne',
+      aliases: ['koeln'],
+    },
+    draft: {
+      ...draft,
+      city: 'cologne',
+      cityName: 'Cologne',
+      title: 'Top 5 dishes in Cologne',
+      aliases: ['koeln'],
+    },
+    entries,
     publishable: true,
   },
 };

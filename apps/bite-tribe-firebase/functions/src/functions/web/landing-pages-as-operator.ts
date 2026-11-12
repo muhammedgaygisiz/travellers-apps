@@ -62,6 +62,8 @@ export interface LandingPageInput {
   metaDescription: string;
   intro: string;
   biteIds: string[];
+  /** Other names the page answers under, each redirecting to it (#1974). */
+  aliases: string[];
 }
 
 /** What the editor reads back: the stored page with plain-number times. */
@@ -116,6 +118,75 @@ export const parseCity = (value: unknown): string =>
     'lowercase letters, digits and single hyphens',
   );
 
+export const MAX_ALIASES = 5;
+
+/**
+ * Other names for the page's city, e.g. `koeln` beside `cologne` (issue
+ * #1974). Same shape as the city; repeats are dropped, and the city itself is
+ * refused rather than dropped, because an operator who typed it expected it to
+ * do something.
+ */
+const parseAliases = (value: unknown, city: string): string[] => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new HttpsError('invalid-argument', 'aliases must be a list.');
+  }
+
+  const aliases = [...new Set(value.map((alias) => parseCity(alias)))];
+
+  if (aliases.includes(city)) {
+    throw new HttpsError(
+      'invalid-argument',
+      `${city} is the page's own city, not an alias.`,
+    );
+  }
+
+  if (aliases.length > MAX_ALIASES) {
+    throw new HttpsError(
+      'invalid-argument',
+      `A page holds at most ${MAX_ALIASES} aliases.`,
+    );
+  }
+
+  return aliases;
+};
+
+/**
+ * Every name a page answers under has to lead to exactly one page. Refuses an
+ * alias that is another page's city or alias, and a city that another page
+ * already claims as an alias - either would leave one of the two pages
+ * unreachable under that name.
+ */
+const assertNamesFree = async (
+  db: Firestore,
+  city: string,
+  aliases: string[],
+): Promise<void> => {
+  const pages = db.collection(LANDING_PAGES_COLLECTION);
+
+  for (const name of [city, ...aliases]) {
+    if (name !== city && (await pages.doc(name).get()).exists) {
+      throw new HttpsError(
+        'already-exists',
+        `${name} is already the city of another page.`,
+      );
+    }
+
+    const claimed = await pages.where('aliases', 'array-contains', name).get();
+    const other = claimed.docs.find((doc) => doc.id !== city);
+
+    if (other) {
+      throw new HttpsError(
+        'already-exists',
+        `${name} is already an alias of /eat/${other.id}.`,
+      );
+    }
+  }
+};
+
 const parseBiteIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     throw new HttpsError('invalid-argument', 'biteIds must be a list.');
@@ -165,6 +236,10 @@ export const parseLandingPageInput = (data: unknown): LandingPageInput => {
     metaDescription: text(input['metaDescription'], 'metaDescription', false),
     intro: text(input['intro'], 'intro', false),
     biteIds: parseBiteIds(input['biteIds']),
+    aliases: parseAliases(
+      input['aliases'],
+      typeof input['city'] === 'string' ? input['city'].trim() : '',
+    ),
   };
 };
 
@@ -263,6 +338,7 @@ const toSummary = (data: Record<string, unknown>): LandingPageSummary => ({
   metaDescription: String(data['metaDescription'] ?? ''),
   intro: String(data['intro'] ?? ''),
   biteIds: Array.isArray(data['biteIds']) ? (data['biteIds'] as string[]) : [],
+  aliases: Array.isArray(data['aliases']) ? (data['aliases'] as string[]) : [],
   items: Array.isArray(data['items'])
     ? (data['items'] as LandingPageItem[])
     : [],
@@ -305,6 +381,7 @@ export const saveLandingPageHandler = async (
   const status: LandingPageStatus = existing.exists
     ? ((existing.data()?.['status'] as LandingPageStatus) ?? 'draft')
     : 'draft';
+  await assertNamesFree(db, input.city, input.aliases);
   const items = await snapshotBites(db, input.biteIds);
 
   if (status === 'published') {
@@ -331,6 +408,7 @@ export const saveLandingPageHandler = async (
       created: !existing.exists,
       status,
       biteIds: input.biteIds,
+      aliases: input.aliases,
     },
   });
 

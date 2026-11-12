@@ -161,13 +161,20 @@ export class BitePage {
 
   nearbyGooglePlacesLoading = input<boolean>(false);
 
-  submitBite = output<typeof this.biteFormGroup.value>();
+  /**
+   * The photo position stored privately for the Bite being edited (GitHub
+   * issue #1290). The Bite's own photo was re-encoded without its EXIF, so
+   * this is what lets the position modal offer the photo source again.
+   */
+  storedPhotoPosition = input<Geopoint>();
+
+  submitBite = output<BiteSubmission>();
 
   /**
    * Emitted when the Bite is posted but the user stays on the form to create
    * another Bite at the same place.
    */
-  submitBiteAndAddAnother = output<typeof this.biteFormGroup.value>();
+  submitBiteAndAddAnother = output<BiteSubmission>();
 
   placeChange = output<string>();
 
@@ -418,6 +425,47 @@ export class BitePage {
 
   imagePosition: WritableSignal<Geopoint | undefined> = signal(undefined);
 
+  /**
+   * Whether the photo was picked or removed in this form, rather than being the
+   * one the Bite was opened with. Only then does the edit path rewrite the
+   * stored photo position (GitHub issue #1290): a save before the stored one
+   * has loaded must not delete it.
+   */
+  private readonly photoChanged = signal(false);
+
+  /**
+   * Whether the photo being picked reported a position. Every picker reports
+   * the position before it reports the pick, so the pick can tell a photo
+   * without one from a photo that has one.
+   */
+  private positionCameWithPick = false;
+
+  storedPhotoPositionEffect = effect(() => {
+    const stored = this.storedPhotoPosition();
+
+    if (stored && !untracked(() => this.photoChanged())) {
+      this.imagePosition.set(stored);
+    }
+  });
+
+  /**
+   * The photo position handed on with the Bite, to be stored where only its
+   * author can read it. On the edit path `undefined` means the photo did not
+   * change and the stored position stays as it is; `null` means the photo now
+   * has none.
+   */
+  private photoPositionToSubmit(): Geopoint | null | undefined {
+    if (!this.isNew() && !this.photoChanged()) {
+      return undefined;
+    }
+
+    const position = this.imagePosition();
+
+    return position
+      ? { latitude: position.latitude, longitude: position.longitude }
+      : null;
+  }
+
   private readonly imageUpload = viewChild(ImageUploadComponent);
 
   /** Where the photo in the form came from; only a gallery pick can be redacted. */
@@ -658,7 +706,7 @@ export class BitePage {
     this.resetForNextBite(newBite.tags || []);
   }
 
-  private toSubmittableBite(): typeof this.biteFormGroup.value | undefined {
+  private toSubmittableBite(): BiteSubmission | undefined {
     // A tag that was typed but never separated with a space is still sitting in
     // the tag field, and was posted as nothing at all (issue #1391). Committing
     // it here means the Bite carries the tags the user can see on the form.
@@ -679,7 +727,7 @@ export class BitePage {
 
     newBite.price = normalizePriceForBackend(newBite.price);
 
-    return newBite;
+    return { ...newBite, photoPosition: this.photoPositionToSubmit() };
   }
 
   private resetForNextBite(postedTags: string[]): void {
@@ -701,6 +749,7 @@ export class BitePage {
     this.biteFormGroup.markAsUntouched();
 
     this.imagePosition.set(undefined);
+    this.photoChanged.set(false);
 
     // The position carries over to the next Bite, but the photo it came from is
     // gone, so the row stops attributing it to a source it can no longer offer.
@@ -717,6 +766,7 @@ export class BitePage {
 
   onPositionFromImage(position?: Geopoint): void {
     if (position) {
+      this.positionCameWithPick = true;
       this.imagePosition.set(position);
       this.biteFormGroup.controls['position'].patchValue(position);
       this.positionSource.set('photo');
@@ -733,6 +783,20 @@ export class BitePage {
    */
   async onImagePickedFrom(source: 'camera' | 'gallery' | 'web'): Promise<void> {
     this.imagePickedFrom.set(source);
+    this.photoChanged.set(true);
+
+    // A photo without a position must not inherit the previous photo's, or the
+    // stored one the edited Bite was opened with: that position would then be
+    // stored as this photo's (GitHub issue #1290).
+    if (!this.positionCameWithPick) {
+      this.imagePosition.set(undefined);
+
+      if (this.positionSource() === 'photo') {
+        this.positionSource.set(undefined);
+      }
+    }
+
+    this.positionCameWithPick = false;
 
     if (source === 'gallery') {
       this.mediaLocationPermission.set(await getMediaLocationPermissionState());
@@ -773,6 +837,10 @@ export class BitePage {
       // nothing else would look at it again.
       if (result === 'granted') {
         await this.imageUpload()?.rereadPositionFromLastPick();
+
+        // The reread reports after the pick, so the flag it raised belongs to
+        // no pick and must not vouch for the next one.
+        this.positionCameWithPick = false;
       }
     } finally {
       this.photoLocationRequestRunning.set(false);
@@ -868,6 +936,8 @@ export class BitePage {
   resetImagePath(): void {
     this.biteFormGroup.get('imagePath')?.reset();
     this.imagePosition.set(undefined);
+    this.photoChanged.set(true);
+    this.positionCameWithPick = false;
 
     // Clearing the photo makes `image-upload` patch the device position back
     // in, so the row must stop claiming the position came from the photo.
@@ -932,3 +1002,14 @@ export class BitePage {
 
 /** Raw value emitted by {@link BitePage.submitBite} (reactive form value). */
 export type BiteFormValue = BitePage['biteFormGroup']['value'];
+
+/**
+ * What the form hands on when the Bite is saved: the Bite, and next to it the
+ * photo's position, which the integration layer stores apart from the Bite
+ * where only its author can read it (GitHub issue #1290). It is deliberately
+ * not a form control, because the form value is what reaches the Bite
+ * document.
+ */
+export type BiteSubmission = BiteFormValue & {
+  photoPosition?: Geopoint | null;
+};

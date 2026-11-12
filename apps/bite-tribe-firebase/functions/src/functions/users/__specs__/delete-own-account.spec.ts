@@ -223,6 +223,10 @@ describe('deleteAccountForUser', () => {
     db.seed('bites/bite-1', { userId: UID, name: 'Ramen' });
     db.seed('bites/bite-2', { userId: 'someone-else', name: 'Pizza' });
     db.seed(`bites/bite-2/likes/${UID}`, { userId: UID, likeType: 'thumbup' });
+    db.seed(`bites/bite-1/authorPrivate/${UID}`, {
+      userId: UID,
+      photoPosition: { latitude: 36.74, longitude: -5.16 },
+    });
     db.seed('reviews/review-1', { authorId: UID, review: 'Great' });
     db.seed('reviews/review-2', { authorId: 'someone-else', review: 'Fine' });
     db.seed(`bucketlists/list-1`, { userId: UID, name: 'Tokyo' });
@@ -246,6 +250,27 @@ describe('deleteAccountForUser', () => {
     expect(db.read('bites/bite-2')).toEqual({
       userId: 'someone-else',
       name: 'Pizza',
+    });
+  });
+
+  /**
+   * The Bite survives with its author cleared, so the position read from its
+   * photo has to go here rather than with the Bite (GitHub issue #1290).
+   */
+  it('removes the photo positions kept privately on its own Bites', async () => {
+    seedFullAccount();
+    db.seed('bites/bite-2/authorPrivate/someone-else', {
+      userId: 'someone-else',
+      photoPosition: { latitude: 47.0, longitude: 7.4 },
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists('bites/bite-1')).toBe(true);
+    expect(db.exists(`bites/bite-1/authorPrivate/${UID}`)).toBe(false);
+    expect(db.exists('bites/bite-2/authorPrivate/someone-else')).toBe(true);
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      deletedBitePhotoPositions: 1,
     });
   });
 

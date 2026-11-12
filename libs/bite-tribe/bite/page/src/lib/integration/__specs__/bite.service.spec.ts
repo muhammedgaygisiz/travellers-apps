@@ -75,7 +75,10 @@ describe('BiteService', () => {
       const newBite = { id: '123', name: 'Test Bite' };
       await service.submitNewBite(newBite);
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        { name: 'Test Bite' },
+        undefined,
+      );
     });
 
     it('should call navigateBack to home', async () => {
@@ -107,13 +110,51 @@ describe('BiteService', () => {
 
       await service.submitNewBite(menuDerivedBite);
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({
-        name: 'Amok Trey',
-        place: 'Khmer Kitchen',
-        restaurantId: 'restaurant-1',
-        price: '5.50',
-        currency: 'EUR',
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        {
+          name: 'Amok Trey',
+          place: 'Khmer Kitchen',
+          restaurantId: 'restaurant-1',
+          price: '5.50',
+          currency: 'EUR',
+        },
+        undefined,
+      );
+    });
+  });
+
+  /**
+   * The photo position is stored where only the author can read it, so it
+   * must never reach the Bite document every member can read (GitHub issue
+   * #1290).
+   */
+  describe('the photo position', () => {
+    const photoPosition = { latitude: 36.74, longitude: -5.16 };
+
+    it('is handed on apart from a new Bite', async () => {
+      await service.submitNewBite({
+        id: '123',
+        name: 'Test Bite',
+        photoPosition,
       });
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        { name: 'Test Bite' },
+        photoPosition,
+      );
+    });
+
+    it('is handed on apart from an edited Bite, including its removal', () => {
+      service.submitEditedBite({
+        id: '123',
+        name: 'Edited Bite',
+        photoPosition: null,
+      });
+
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith(
+        { id: '123', name: 'Edited Bite' },
+        null,
+      );
     });
   });
 
@@ -122,7 +163,10 @@ describe('BiteService', () => {
       const newBite = { id: '123', name: 'Test Bite' };
       await service.submitNewBiteAndAddAnother(newBite);
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        { name: 'Test Bite' },
+        undefined,
+      );
     });
 
     it('should stay on the create form', async () => {
@@ -218,7 +262,7 @@ describe('BiteService', () => {
       const editedBite = { id: '123', name: 'Edited Bite' };
       service.submitEditedBite(editedBite);
 
-      expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite);
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite, undefined);
     });
 
     it('should navigate back to previous page', () => {
@@ -243,15 +287,18 @@ describe('BiteService', () => {
 
       service.submitEditedBite(editedBite);
 
-      expect(Mock.submitEditedBite).toHaveBeenCalledWith({
-        ...editedBite,
-        city: null,
-        region: null,
-        country: null,
-        countryCode: null,
-        formatted: null,
-        addressStatus: 'pending',
-      });
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith(
+        {
+          ...editedBite,
+          city: null,
+          region: null,
+          country: null,
+          countryCode: null,
+          formatted: null,
+          addressStatus: 'pending',
+        },
+        undefined,
+      );
     });
 
     it('leaves the address alone when the edit keeps the position', () => {
@@ -265,7 +312,7 @@ describe('BiteService', () => {
 
       service.submitEditedBite(editedBite);
 
-      expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite);
+      expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite, undefined);
     });
   });
 
@@ -350,13 +397,16 @@ describe('BiteService', () => {
         restaurantId: 'restaurant-1',
       });
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({
-        name: 'Margherita',
-        restaurantId: 'restaurant-1',
-        visitId: 'visit-1',
-        menuItemId: 'item-margherita',
-        variantId: 'variant-large',
-      });
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        {
+          name: 'Margherita',
+          restaurantId: 'restaurant-1',
+          visitId: 'visit-1',
+          menuItemId: 'item-margherita',
+          variantId: 'variant-large',
+        },
+        undefined,
+      );
     });
 
     it('reports a Bite made from a meal as coming from one', async () => {
@@ -388,10 +438,13 @@ describe('BiteService', () => {
         restaurantId: 'restaurant-2',
       });
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({
-        name: 'Margherita',
-        restaurantId: 'restaurant-2',
-      });
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        {
+          name: 'Margherita',
+          restaurantId: 'restaurant-2',
+        },
+        undefined,
+      );
     });
 
     it('leaves a hand-written Bite alone', async () => {
@@ -399,7 +452,10 @@ describe('BiteService', () => {
 
       await service.submitNewBite({ id: '123', name: 'Test Bite' });
 
-      expect(Mock.submitNewBite).toHaveBeenCalledWith({ name: 'Test Bite' });
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        { name: 'Test Bite' },
+        undefined,
+      );
     });
   });
 });

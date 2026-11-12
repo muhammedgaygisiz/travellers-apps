@@ -4,8 +4,8 @@
 
 **Level:** L1
 Supported today. The create and edit flows, the photo upload states and their retry, and
-the five-source position picker are all shipped. The one deferred capability is the
-storage of resolved candidate positions, [#1290].
+the five-source position picker are all shipped, including the photo's position offered
+again when a Bite is edited, [#1290].
 
 ## Goal
 
@@ -41,7 +41,8 @@ rest of the product reads.
 - The location section states where the position came from as a text row — `Aus Bild`, `Aus GPS`, `Aus Restaurant`, `Aus Google`, or `Manuell gesetzt` — with an edit action at the end of the row, mirroring the restaurant field. With no position resolved yet, the row is replaced by a full-width `Standort wählen` call to action. This replaced four permanently visible source buttons of equal weight, where the active source was readable only from a check mark on one of them. See GitHub issue [#1266].
 - The source is tracked explicitly at every point that writes the position, not inferred by comparing coordinates. Two sources can resolve to the same point, and a restaurant-derived position matched none of the four buttons, so the section used to report no source at all in that case.
 - The source is stored on the Bite as `positionSource`, so a Bite reopened for editing still names where its position came from. Bites written before this carry none and are reported as an unknown source rather than being given a guessed one. The field is `null` rather than absent when unknown: the whole form value is handed to Firestore, which rejects an undefined field.
-- The candidate positions themselves are not stored, only the source. Persisting them would let a user switch back to, say, the photo's location while editing — the photo position is otherwise unrecoverable, because `compressWithCanvas` strips EXIF before upload. It is deferred because stored candidates would publish the positions the user chose _not_ to use: `match /bites/{biteId}` allows read to any signed-in account, so anything written onto the Bite document is readable by every user. The original objection — that a stricter nested rule could not override the permissive `/{document=**}` wildcard — no longer applies, because [#1078] replaced that wildcard with a default deny and per-collection matches; a subcollection scoped to the owner, as `bites/{biteId}/likes` already is, is now possible. Checked against `firestore.rules` on 11 September 2026. See GitHub issue [#1290].
+- The photo's position is stored, so a Bite reopened for editing still offers `Aus Bild` and the user can switch back to it. It is the one candidate that needs storing: `compressWithCanvas` strips EXIF before upload, so it cannot be re-derived, while the restaurant and Google positions come back from `restaurantId` and `place`, the device fix stays live, and a manual pick is the position itself. It is stored whatever source the user chose, because a position the user did _not_ pick is exactly the one they may want back.
+- It is stored where only the author can read it: `bites/{biteId}/authorPrivate/{uid}`, holding `userId` and `photoPosition`, never a field on the Bite. Every member can read a Bite, so a field there would publish the location the user decided not to use. The form hands it on next to the form value, not as a control, because the form value is what reaches the Bite document. A new photo replaces it, a new photo without a position removes it, and an edit that keeps the photo leaves it alone, so a save before it has loaded cannot delete it. It goes with the Bite (the `deleteBiteAuthorPrivateOnBiteDelete` trigger) and with the account (`deleteOwnAccount`), and the privacy policy says so. See GitHub issue [#1290].
 - The edit action opens a modal that lists all five sources over a map showing the resolved candidates as colour-coded markers, one colour per source, with clustering off so nearby candidates stay distinguishable. A source with nothing to offer stays listed but disabled with the reason — no GPS in the photo, no restaurant selected, no Google place selected. Selecting a row or tapping its marker highlights it; the position is applied only on confirm.
 - The map shows the source being selected: it moves to the selected candidate and renders that marker larger, so the two routes to the same choice — the list row and the marker — leave the map in the same state. The map used to centre on the device instead and never move again, so with a photo taken 1500 km away the user confirmed a position the map had never shown, and colour alone had to carry the selection where candidates sit metres apart. The camera follows an explicit `focusedGeopointId` on the shared map component rather than a change to the GPS-first default the other maps recenter through. See GitHub issue [#1306].
 - `Manuell gesetzt` is a listed source like the others. Selecting its row turns the modal map into a picker seeded from the highlighted candidate. Reopening the modal on a manual position starts in the comparison view, so the manual point can be weighed against the other sources before being edited again.
@@ -134,9 +135,8 @@ upload states and the poster-only retry, restaurant and position selection, and 
 currency and suspicious-price handling. This is the core contribution loop and all of it
 ships today.
 
-**[Secondary]** — storing the resolved candidate positions on the Bite so a source can be
-re-chosen while editing, deferred under [#1290]. Nothing else on this page is
-unimplemented.
+**[Secondary]** — offering the photo's position again while editing, [#1290]. Shipped.
+Nothing on this page is unimplemented.
 
 ## App Store Review Area
 
@@ -188,11 +188,11 @@ each under App Functionality.
 - Issue [#1269] added the dual-origin distance labels and Bite-position ordering for the `Posting later` edge case. Closed.
 - Issue [#1394] moved the Android gallery onto the system Photo Picker, dropping its own permission prompt. Closed.
 - Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule). Closed.
-- Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what makes the deferred work under [#1290] possible. Closed.
+- Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what made the author-only photo position of [#1290] possible. Closed.
 - Issue [#1783] shows the total Bite count as a badge next to the My Bites title, sharing the profile header's count rule. Open.
 - Issue [#1796] celebrates the user's first Bite in place of the ordinary creation toast, part of epic [#1741]. Open.
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with). Open.
-- Issue [#1290] - storing the resolved candidate positions on the Bite so a source can be re-chosen while editing. Open, classified `[Secondary]`.
+- Issue [#1290] stores the photo's position at `bites/{biteId}/authorPrivate/{uid}`, readable by the author alone, so `Aus Bild` is offered again when the Bite is edited. Classified `[Secondary]`.
 
 ## Related Domains
 

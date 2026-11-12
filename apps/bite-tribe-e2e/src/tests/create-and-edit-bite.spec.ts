@@ -8,8 +8,11 @@ import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
 import {
   expectBiteFields,
+  expectFirestoreDocument,
   FIRESTORE_EMULATOR_URL,
   getBiteByName,
+  getFirestoreDocument,
+  queryDocumentsByStringField,
 } from '../support/firestore';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 import { TEST_USERS } from '../support/test-users';
@@ -384,6 +387,85 @@ test.describe('Create and maintain personal bites', () => {
       positionSource: 'photo',
       price: '11.00',
     });
+  });
+
+  /**
+   * The photo's position cannot be read again once the Bite is saved - the
+   * upload strips EXIF - so it is stored where only the author can read it,
+   * even when another source was chosen, and offered again on edit (GitHub
+   * issue #1290). The Bite document every member reads must not carry it.
+   */
+  test('offers the photo position again when the Bite is edited', async ({
+    page,
+  }) => {
+    const runId = Date.now();
+    const name = `Photo Position Kept ${runId}`;
+    const restaurant = `Trattoria Kept ${runId}`;
+
+    await mockCallable(page, 'getCurrencyByPosition', { currency: 'EUR' });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    const biteForm = new CreateBitePage(page);
+    await biteForm.open();
+    await biteForm.uploadImage(GEOTAGGED_IMAGE_FIXTURE);
+    await biteForm.expectPositionSource('From photo');
+
+    await biteForm.fillName(name);
+    await biteForm.chooseCustomRestaurant(restaurant);
+    await biteForm.fillPrice('9.00');
+    await biteForm.useGpsPosition();
+
+    await biteForm.expectPostEnabled();
+    await biteForm.submit();
+
+    await page.waitForURL('**/home');
+    await expectBiteFields(page, name, {
+      position: POSITION,
+      positionSource: 'gps',
+    });
+
+    const [saved] = await queryDocumentsByStringField(
+      page,
+      'bites',
+      'name',
+      name,
+    );
+    expect(saved.fields).not.toHaveProperty('photoPosition');
+    await expectFirestoreDocument(
+      page,
+      `${saved.path}/authorPrivate/${TEST_USERS.default.uid}`,
+      { userId: TEST_USERS.default.uid, photoPosition: PHOTO_POSITION },
+    );
+
+    const home = new HomePage(page);
+    await home.openBite(name);
+    await new BiteDetailsPage(page).openEdit();
+
+    await biteForm.expectPositionSource('From GPS');
+    await biteForm.openPositionSourceModal();
+    await expect(biteForm.positionSourceOption('photo')).not.toHaveClass(
+      /item-disabled/,
+    );
+    await biteForm.positionSourceOption('photo').click();
+    await biteForm.confirmPositionSource.click();
+    await biteForm.expectPositionSource('From photo');
+    await biteForm.expectPositionSourceModalClosed();
+    await biteForm.submit();
+
+    await expectBiteFields(page, name, {
+      position: PHOTO_POSITION,
+      positionSource: 'photo',
+    });
+    // An edit that kept the photo leaves the stored position as it was.
+    expect(
+      await getFirestoreDocument(
+        page,
+        `${saved.path}/authorPrivate/${TEST_USERS.default.uid}`,
+      ),
+    ).toMatchObject({ photoPosition: PHOTO_POSITION });
   });
 
   /**

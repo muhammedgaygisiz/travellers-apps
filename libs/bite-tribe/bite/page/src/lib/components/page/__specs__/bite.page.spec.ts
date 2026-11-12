@@ -570,6 +570,118 @@ describe('BitePage', () => {
     });
   });
 
+  /**
+   * The photo's position is handed on next to the Bite so it can be stored
+   * where only the author reads it, and offered again when the Bite is edited
+   * (GitHub issue #1290).
+   */
+  describe('the photo position', () => {
+    const photoPosition = { latitude: 36.74, longitude: -5.16 };
+    const otherPhotoPosition = { latitude: 47.0, longitude: 7.4 };
+
+    const fillValidForm = (): void => {
+      component.biteFormGroup.patchValue({
+        image: 'data:image/jpeg;base64,test',
+        name: 'Test Burger',
+        place: 'Test Place',
+        price: '9.99',
+        currency: 'EUR',
+        position: { latitude: 0, longitude: 0 },
+      });
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    const emittedPhotoPosition = (): unknown => {
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+      component.saveBite();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+
+      return emitSpy.mock.calls[0][0]?.photoPosition;
+    };
+
+    const photoCandidate = ():
+      ReturnType<BitePage['positionCandidates']>[number] | undefined =>
+      component
+        .positionCandidates()
+        .find((candidate) => candidate.source === 'photo');
+
+    describe('on a new Bite', () => {
+      beforeEach(() => componentRef.setInput('isNew', true));
+
+      it('is handed on even when another source was chosen', () => {
+        fillValidForm();
+        component.onPositionFromImage(photoPosition);
+        component.positionSource.set('restaurant');
+
+        expect(emittedPhotoPosition()).toEqual(photoPosition);
+      });
+
+      it('is handed on as none when the photo has no position', () => {
+        fillValidForm();
+
+        expect(emittedPhotoPosition()).toBeNull();
+      });
+
+      it('is never carried into the form value', () => {
+        fillValidForm();
+        component.onPositionFromImage(photoPosition);
+
+        expect(component.biteFormGroup.getRawValue()).not.toHaveProperty(
+          'photoPosition',
+        );
+      });
+
+      it('is not inherited by a next photo that has none of its own', async () => {
+        fillValidForm();
+        component.onPositionFromImage(photoPosition);
+        await component.onImagePickedFrom('camera');
+
+        await component.onImagePickedFrom('camera');
+
+        expect(emittedPhotoPosition()).toBeNull();
+        expect(photoCandidate()?.disabled).toBe(true);
+        expect(component.positionSource()).toBeUndefined();
+      });
+    });
+
+    describe('on an edited Bite', () => {
+      beforeEach(() => {
+        componentRef.setInput('isNew', false);
+        componentRef.setInput('storedPhotoPosition', photoPosition);
+        componentRef.changeDetectorRef.detectChanges();
+      });
+
+      it('offers the stored position as the photo source', () => {
+        expect(photoCandidate()).toEqual(
+          expect.objectContaining({ position: photoPosition, disabled: false }),
+        );
+      });
+
+      it('leaves the stored position alone when the photo did not change', () => {
+        fillValidForm();
+
+        expect(emittedPhotoPosition()).toBeUndefined();
+      });
+
+      it("replaces it with a new photo's position", async () => {
+        fillValidForm();
+        component.onPositionFromImage(otherPhotoPosition);
+        await component.onImagePickedFrom('camera');
+
+        expect(emittedPhotoPosition()).toEqual(otherPhotoPosition);
+      });
+
+      it('removes it when the new photo has none', async () => {
+        fillValidForm();
+        await component.onImagePickedFrom('camera');
+
+        expect(photoCandidate()?.disabled).toBe(true);
+        expect(emittedPhotoPosition()).toBeNull();
+      });
+    });
+  });
+
   describe('saveBiteAndAddAnother', () => {
     let scrollToTopSpy: jest.SpyInstance;
 

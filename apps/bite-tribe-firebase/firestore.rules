@@ -1051,6 +1051,29 @@ service cloud.firestore {
           && owns(request.resource.data, 'userId');
         allow delete: if isSelf(likeUserId);
       }
+
+      /**
+       * What the Bite's author keeps about it and nobody else may read (GitHub
+       * issue #1290): the position read from the photo's EXIF, stored even when
+       * the author chose another source, so the edit form can offer it again.
+       * The photo is re-encoded before upload, so this is the only copy.
+       *
+       * A subcollection rather than a field because the Bite itself is
+       * readable by every member, and a field on it would publish the very
+       * position the author decided not to use. Named by the author's uid, so
+       * the read needs no `get()`; the write does one, so no account can park a
+       * document under a Bite that is not its own.
+       *
+       * Removed with the Bite by `deleteBiteAuthorPrivateOnBiteDelete`, and with
+       * the account by `deleteOwnAccount`, which finds it by `userId`.
+       */
+      match /authorPrivate/{authorId} {
+        allow read, delete: if isSelf(authorId);
+        allow create, update: if isSelf(authorId)
+          && owns(request.resource.data, 'userId')
+          && request.resource.data.keys().hasOnly(['userId', 'photoPosition'])
+          && owns(get(/databases/$(database)/documents/bites/$(biteId)).data, 'userId');
+      }
     }
 
     // ---------------------------------------------------------------- reviews

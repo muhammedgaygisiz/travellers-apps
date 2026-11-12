@@ -28,6 +28,10 @@ import { hasBitesByUser } from './utils/has-bites-by-user';
 import { loadWeeklyBites } from './utils/load-weekly-bites';
 import { createBite } from './utils/create-bite';
 import { saveEditedBite } from './utils/save-edited-bite';
+import {
+  loadBitePhotoPosition,
+  saveBitePhotoPosition,
+} from './utils/bite-photo-position';
 import { loadBiteById } from './utils/load-bite-by-id';
 import { loadBitesByBucketlist } from './utils/load-bites-by-bucketlist';
 import { deleteFileInFirebaseStorage } from './utils/delete-file-in-firebasestorage';
@@ -224,6 +228,51 @@ export class BiteApiService {
       this.errorHandler.handleError(error);
 
       throw error;
+    }
+  }
+
+  /**
+   * Writes or removes the signed-in author's private photo position for a Bite
+   * (GitHub issue #1290). Not awaited by callers for the reason `createBite`
+   * gives: a Firestore write promise does not resolve while offline.
+   */
+  public async saveBitePhotoPosition(
+    biteId: string,
+    photoPosition: Geopoint | null,
+  ): Promise<void> {
+    const userId = this.authService.getUser()?.uid;
+
+    if (!userId) {
+      return;
+    }
+
+    try {
+      await saveBitePhotoPosition(biteId, userId, photoPosition);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+    }
+  }
+
+  /**
+   * The photo position the signed-in account stored for one of its Bites. A
+   * failed read is reported and answered with nothing: the edit form then
+   * offers the photo source as unavailable, the state it was in before.
+   */
+  public async loadBitePhotoPosition(
+    biteId: string,
+  ): Promise<Geopoint | undefined> {
+    const userId = this.authService.getUser()?.uid;
+
+    if (!userId) {
+      return undefined;
+    }
+
+    try {
+      return await loadBitePhotoPosition(biteId, userId);
+    } catch (error) {
+      this.errorHandler.handleError(error);
+
+      return undefined;
     }
   }
 

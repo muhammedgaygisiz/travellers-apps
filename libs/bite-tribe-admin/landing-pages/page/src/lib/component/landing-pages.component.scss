@@ -1,0 +1,97 @@
+:host {
+  /* The same 1:2 split as the Bite search: a list to pick from, a page to edit. */
+  .landing-pages {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  @media (min-width: 768px) {
+    .landing-pages {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .landing-pages {
+      flex-direction: column;
+    }
+  }
+
+  .landing-pages__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .landing-pages__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .landing-pages__status {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .landing-pages__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .landing-pages__section--danger {
+    color: var(--ion-color-danger);
+  }
+
+  .landing-pages__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  /*
+   * Tall enough to read the hero and the first row of Bites as a visitor would
+   * on a laptop, without making the editor scroll past it to reach Withdraw.
+   */
+  .landing-pages__preview iframe {
+    display: block;
+    width: 100%;
+    height: 36rem;
+    border: 1px solid var(--ion-color-step-150, #e0e0e0);
+    border-radius: 0.5rem;
+    background: #fff;
+  }
+
+  .landing-pages__preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Withdrawing takes a page out of search results; it sits across a line. */
+  .landing-pages__danger {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+  }
+}

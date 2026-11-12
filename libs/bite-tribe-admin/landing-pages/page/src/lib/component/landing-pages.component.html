@@ -1,0 +1,373 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row landing-pages">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-landing-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              data-testid="admin-landing-new"
+              (click)="newPage.emit()"
+            >
+              {{ 'admin-landing-new' | transloco }}
+            </ion-button>
+
+            @if (loading()) {
+              <div class="landing-pages__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (loadFailed()) {
+              <p data-testid="admin-landing-load-failed">
+                {{ 'admin-landing-load-failed' | transloco }}
+              </p>
+            } @else {
+              <ion-list lines="full" data-testid="admin-landing-list">
+                @for (page of pages(); track page.city) {
+                  <ion-item
+                    [button]="true"
+                    [color]="
+                      page.city === current()?.city ? 'light' : undefined
+                    "
+                    (click)="openPage.emit(page)"
+                  >
+                    <ion-label>
+                      <h3>{{ page.title || page.city }}</h3>
+                      <p>/eat/{{ page.city }}</p>
+                    </ion-label>
+                    <ion-badge
+                      slot="end"
+                      [color]="
+                        page.status === 'published'
+                          ? 'success'
+                          : page.status === 'withdrawn'
+                            ? 'medium'
+                            : 'warning'
+                      "
+                      >{{
+                        'admin-landing-status-' + page.status | transloco
+                      }}</ion-badge
+                    >
+                  </ion-item>
+                } @empty {
+                  <p>{{ 'admin-landing-empty' | transloco }}</p>
+                }
+              </ion-list>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (editing()) {
+          <ion-card data-testid="admin-landing-editor">
+            <ion-card-header>
+              <ion-card-title>
+                {{ draft().title || ('admin-landing-untitled' | transloco) }}
+                @if (status(); as status) {
+                  <ion-badge class="landing-pages__status">{{
+                    'admin-landing-status-' + status | transloco
+                  }}</ion-badge>
+                }
+              </ion-card-title>
+              @if (publicUrl(); as url) {
+                <ion-note class="landing-pages__hint">{{ url }}</ion-note>
+              }
+            </ion-card-header>
+            <ion-card-content>
+              <h4 class="landing-pages__section">
+                {{ 'admin-landing-details' | transloco }}
+              </h4>
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-city' | transloco"
+                    placeholder="berlin"
+                    [value]="draft().city"
+                    [disabled]="cityLocked()"
+                    data-testid="admin-landing-city"
+                    (ionInput)="onField('city', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-city-name' | transloco"
+                    placeholder="Berlin"
+                    [value]="draft().cityName"
+                    data-testid="admin-landing-city-name"
+                    (ionInput)="onField('cityName', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-country' | transloco"
+                    placeholder="DE"
+                    [value]="draft().countryCode"
+                    data-testid="admin-landing-country"
+                    (ionInput)="onField('countryCode', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-locale' | transloco"
+                    placeholder="en"
+                    [value]="draft().locale"
+                    data-testid="admin-landing-locale"
+                    (ionInput)="onField('locale', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-title' | transloco"
+                    [value]="draft().title"
+                    data-testid="admin-landing-page-title"
+                    (ionInput)="onField('title', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-textarea
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-meta' | transloco"
+                    [autoGrow]="true"
+                    [value]="draft().metaDescription"
+                    data-testid="admin-landing-meta"
+                    (ionInput)="onField('metaDescription', $event.detail.value)"
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-textarea
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-intro' | transloco"
+                    [autoGrow]="true"
+                    [value]="draft().intro"
+                    data-testid="admin-landing-intro"
+                    (ionInput)="onField('intro', $event.detail.value)"
+                  />
+                </ion-item>
+              </ion-list>
+
+              <h4 class="landing-pages__section">
+                {{
+                  'admin-landing-bites'
+                    | transloco
+                      : {
+                          count: entries().length,
+                          min: minItems,
+                          max: maxItems,
+                        }
+                }}
+              </h4>
+              <ion-list lines="full" data-testid="admin-landing-entries">
+                @for (
+                  entry of entries();
+                  track entry.biteId;
+                  let first = $first;
+                  let last = $last;
+                  let index = $index
+                ) {
+                  <ion-item>
+                    <ion-thumbnail slot="start">
+                      @if (entry.imageUrl) {
+                        <img [src]="entry.imageUrl" [alt]="entry.name" />
+                      }
+                    </ion-thumbnail>
+                    <ion-label>
+                      <h3>{{ index + 1 }}. {{ entry.name }}</h3>
+                      <p>{{ entry.place }}</p>
+                    </ion-label>
+                    <ion-button
+                      slot="end"
+                      fill="clear"
+                      size="small"
+                      [disabled]="first"
+                      [attr.aria-label]="'admin-landing-move-up' | transloco"
+                      (click)="
+                        moveBite.emit({ biteId: entry.biteId, offset: -1 })
+                      "
+                      >↑</ion-button
+                    >
+                    <ion-button
+                      slot="end"
+                      fill="clear"
+                      size="small"
+                      [disabled]="last"
+                      [attr.aria-label]="'admin-landing-move-down' | transloco"
+                      (click)="
+                        moveBite.emit({ biteId: entry.biteId, offset: 1 })
+                      "
+                      >↓</ion-button
+                    >
+                    <ion-button
+                      slot="end"
+                      fill="clear"
+                      size="small"
+                      color="danger"
+                      (click)="removeBite.emit(entry.biteId)"
+                      >{{ 'admin-landing-remove' | transloco }}</ion-button
+                    >
+                  </ion-item>
+                } @empty {
+                  <p>{{ 'admin-landing-no-bites' | transloco }}</p>
+                }
+              </ion-list>
+
+              @if (!full()) {
+                <ion-searchbar
+                  [value]="term()"
+                  [placeholder]="'admin-landing-search-placeholder' | transloco"
+                  data-testid="admin-landing-search"
+                  (ionInput)="onTermChange($event.detail.value ?? '')"
+                  (keyup.enter)="onSearch()"
+                />
+                <ion-button
+                  size="small"
+                  data-testid="admin-landing-search-submit"
+                  [disabled]="!canSearch() || searching()"
+                  (click)="onSearch()"
+                >
+                  @if (searching()) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-bites-search' | transloco }}
+                </ion-button>
+                <ion-list lines="full" data-testid="admin-landing-results">
+                  @for (bite of results(); track bite.id) {
+                    <ion-item>
+                      <ion-thumbnail slot="start">
+                        @if (bite.imagePath) {
+                          <img [src]="bite.imagePath" [alt]="bite.name" />
+                        }
+                      </ion-thumbnail>
+                      <ion-label>
+                        <h3>{{ bite.name || bite.id }}</h3>
+                        <p>{{ bite.place }}</p>
+                      </ion-label>
+                      <ion-button
+                        slot="end"
+                        size="small"
+                        [disabled]="chosenIds().has(bite.id) || !bite.imagePath"
+                        (click)="addBite.emit(bite)"
+                        >{{ 'admin-landing-add' | transloco }}</ion-button
+                      >
+                    </ion-item>
+                  }
+                </ion-list>
+              } @else {
+                <ion-note class="landing-pages__hint">{{
+                  'admin-landing-full' | transloco: { max: maxItems }
+                }}</ion-note>
+              }
+
+              <div class="landing-pages__actions">
+                <ion-button
+                  fill="outline"
+                  data-testid="admin-landing-save"
+                  [disabled]="busy()"
+                  (click)="save.emit()"
+                  >{{ 'admin-landing-save' | transloco }}</ion-button
+                >
+                <ion-button
+                  fill="outline"
+                  data-testid="admin-landing-preview"
+                  [disabled]="busy()"
+                  (click)="preview.emit()"
+                  >{{ 'admin-landing-preview' | transloco }}</ion-button
+                >
+                <ion-button
+                  data-testid="admin-landing-publish"
+                  [disabled]="busy() || !publishable()"
+                  (click)="publish.emit()"
+                >
+                  @if (busy()) {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{
+                    (status() === 'published'
+                      ? 'admin-landing-update'
+                      : 'admin-landing-publish'
+                    ) | transloco
+                  }}
+                </ion-button>
+              </div>
+              @if (!publishable()) {
+                <ion-note
+                  class="landing-pages__hint"
+                  data-testid="admin-landing-publish-hint"
+                  >{{
+                    'admin-landing-publish-hint'
+                      | transloco: { min: minItems, max: maxItems }
+                  }}</ion-note
+                >
+              }
+
+              @if (previewDoc(); as doc) {
+                <div class="landing-pages__preview">
+                  <div class="landing-pages__preview-bar">
+                    <h4 class="landing-pages__section">
+                      {{ 'admin-landing-preview' | transloco }}
+                    </h4>
+                    <ion-button
+                      fill="clear"
+                      size="small"
+                      (click)="closePreview.emit()"
+                      >{{
+                        'admin-landing-close-preview' | transloco
+                      }}</ion-button
+                    >
+                  </div>
+                  <iframe
+                    sandbox=""
+                    title="preview"
+                    data-testid="admin-landing-preview-frame"
+                    [srcdoc]="doc"
+                  ></iframe>
+                </div>
+              }
+
+              @if (status() === 'published') {
+                <div class="landing-pages__danger">
+                  <h4
+                    class="landing-pages__section landing-pages__section--danger"
+                  >
+                    {{ 'admin-landing-withdraw' | transloco }}
+                  </h4>
+                  <ion-note class="landing-pages__hint">{{
+                    'admin-landing-withdraw-hint' | transloco
+                  }}</ion-note>
+                  <ion-button
+                    expand="block"
+                    class="ion-margin-top"
+                    color="danger"
+                    data-testid="admin-landing-withdraw"
+                    [disabled]="busy()"
+                    (click)="onWithdraw()"
+                    >{{ 'admin-landing-withdraw' | transloco }}</ion-button
+                  >
+                </div>
+              }
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-landing-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

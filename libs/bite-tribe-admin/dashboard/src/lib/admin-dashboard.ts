@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import {
   IonCard,
   IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
   IonIcon,
   IonItem,
@@ -14,7 +16,15 @@ import { PageComponent } from 'common/ui/page';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 
 /** One operator surface the admin app offers. */
+/**
+ * Which card a tool sits in (issue #1490). `primary` is the work an operator
+ * does day to day; `secondary` is the one-off migrations and backfills, kept
+ * reachable but out of the way of the daily list.
+ */
+export type AdminToolGroup = 'primary' | 'secondary';
+
 interface AdminTool {
+  readonly group: AdminToolGroup;
   readonly titleKey: string;
   readonly descriptionKey: string;
   readonly icon: string;
@@ -38,6 +48,8 @@ interface AdminTool {
     IonContent,
     IonCard,
     IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
     IonList,
     IonItem,
     IonLabel,
@@ -46,7 +58,7 @@ interface AdminTool {
   ],
   template: `
     <ta-page
-      [chrome]="{ showFooter: false }"
+      [chrome]="{ showFooter: false, fullWidth: true }"
       [isAuthenticated]="true"
       (logoutClick)="logout()"
     >
@@ -59,29 +71,41 @@ interface AdminTool {
             {{ 'admin-dashboard-message' | transloco }}
           </p>
 
-          <ion-card>
-            <ion-card-content class="admin-dashboard__tools">
-              <ion-list lines="full" data-testid="admin-tools">
-                @for (tool of tools; track tool.path) {
-                  <ion-item
-                    [button]="true"
-                    [attr.data-testid]="tool.testId"
-                    (click)="open(tool)"
+          <div class="admin-dashboard__groups">
+            @for (group of groups; track group.key) {
+              <ion-card class="admin-dashboard__group">
+                <ion-card-header>
+                  <ion-card-title class="admin-dashboard__group-title">{{
+                    group.titleKey | transloco
+                  }}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content class="admin-dashboard__tools">
+                  <ion-list
+                    lines="full"
+                    [attr.data-testid]="'admin-tools-' + group.key"
                   >
-                    <ion-icon
-                      [name]="tool.icon"
-                      slot="start"
-                      aria-hidden="true"
-                    />
-                    <ion-label>
-                      <h3>{{ tool.titleKey | transloco }}</h3>
-                      <p>{{ tool.descriptionKey | transloco }}</p>
-                    </ion-label>
-                  </ion-item>
-                }
-              </ion-list>
-            </ion-card-content>
-          </ion-card>
+                    @for (tool of group.tools; track tool.path) {
+                      <ion-item
+                        [button]="true"
+                        [attr.data-testid]="tool.testId"
+                        (click)="open(tool)"
+                      >
+                        <ion-icon
+                          [name]="tool.icon"
+                          slot="start"
+                          aria-hidden="true"
+                        />
+                        <ion-label>
+                          <h3>{{ tool.titleKey | transloco }}</h3>
+                          <p>{{ tool.descriptionKey | transloco }}</p>
+                        </ion-label>
+                      </ion-item>
+                    }
+                  </ion-list>
+                </ion-card-content>
+              </ion-card>
+            }
+          </div>
 
           @if (email(); as signedInEmail) {
             <p class="admin-dashboard__account">
@@ -96,8 +120,35 @@ interface AdminTool {
   styles: `
     .admin-dashboard {
       margin: 0 auto;
-      max-width: 40rem;
+      max-width: 72rem;
       text-align: center;
+    }
+
+    /*
+     * Two cards side by side once there is room for two readable columns,
+     * one above the other below that. The primary card comes first in both,
+     * so a narrow screen still opens on the daily work.
+     */
+    .admin-dashboard__groups {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (min-width: 960px) {
+      .admin-dashboard__groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .admin-dashboard__group {
+      margin: 0;
+    }
+
+    .admin-dashboard__group-title {
+      font-size: 1.125rem;
+      text-align: start;
     }
 
     .admin-dashboard__heading {
@@ -153,6 +204,7 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/user-management',
       testId: 'admin-tool-user-management',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-bite-reports',
@@ -160,6 +212,7 @@ export class AdminDashboard {
       icon: 'flag-outline',
       path: '/bite-reports',
       testId: 'admin-tool-bite-reports',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-profile-reports',
@@ -167,6 +220,7 @@ export class AdminDashboard {
       icon: 'person-circle-outline',
       path: '/profile-reports',
       testId: 'admin-tool-profile-reports',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-bite-search',
@@ -174,6 +228,15 @@ export class AdminDashboard {
       icon: 'search-outline',
       path: '/bite-search',
       testId: 'admin-tool-bite-search',
+      group: 'primary',
+    },
+    {
+      titleKey: 'admin-tool-landing-pages',
+      descriptionKey: 'admin-tool-landing-pages-description',
+      icon: 'globe-outline',
+      path: '/landing-pages',
+      testId: 'admin-tool-landing-pages',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-restaurant-candidates',
@@ -181,6 +244,7 @@ export class AdminDashboard {
       icon: 'shield-checkmark-outline',
       path: '/restaurant-candidates',
       testId: 'admin-tool-restaurant-candidates',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-restaurant-ownership',
@@ -188,6 +252,7 @@ export class AdminDashboard {
       icon: 'business-outline',
       path: '/restaurant-ownership',
       testId: 'admin-tool-restaurant-ownership',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-table-sessions',
@@ -195,6 +260,7 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/table-sessions',
       testId: 'admin-tool-table-sessions',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-bite-places',
@@ -202,6 +268,7 @@ export class AdminDashboard {
       icon: 'storefront-outline',
       path: '/bite-places',
       testId: 'admin-tool-bite-places',
+      group: 'primary',
     },
     {
       titleKey: 'admin-tool-new-version-notification',
@@ -209,6 +276,7 @@ export class AdminDashboard {
       icon: 'notifications-outline',
       path: '/new-version-notification',
       testId: 'admin-tool-new-version-notification',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-review-timestamps-backfill',
@@ -216,6 +284,7 @@ export class AdminDashboard {
       icon: 'time-outline',
       path: '/review-timestamps-backfill',
       testId: 'admin-tool-review-timestamps-backfill',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-menu-item-ids-backfill',
@@ -223,6 +292,7 @@ export class AdminDashboard {
       icon: 'fast-food-outline',
       path: '/menu-item-ids-backfill',
       testId: 'admin-tool-menu-item-ids-backfill',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-restaurant-owner-ids-migration',
@@ -230,6 +300,7 @@ export class AdminDashboard {
       icon: 'people-outline',
       path: '/restaurant-owner-ids-migration',
       testId: 'admin-tool-restaurant-owner-ids-migration',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-bite-image-status-backfill',
@@ -237,6 +308,7 @@ export class AdminDashboard {
       icon: 'images-outline',
       path: '/bite-image-status-backfill',
       testId: 'admin-tool-bite-image-status-backfill',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-bite-countries-rebuild',
@@ -244,6 +316,7 @@ export class AdminDashboard {
       icon: 'earth-outline',
       path: '/bite-countries-rebuild',
       testId: 'admin-tool-bite-countries-rebuild',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-menu-item-stats-recompute',
@@ -251,6 +324,7 @@ export class AdminDashboard {
       icon: 'stats-chart-outline',
       path: '/menu-item-stats-recompute',
       testId: 'admin-tool-menu-item-stats-recompute',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-bite-address-backfill',
@@ -258,6 +332,7 @@ export class AdminDashboard {
       icon: 'location-outline',
       path: '/bite-address-backfill',
       testId: 'admin-tool-bite-address-backfill',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-restaurant-clustering',
@@ -265,6 +340,7 @@ export class AdminDashboard {
       icon: 'restaurant-outline',
       path: '/restaurant-clustering',
       testId: 'admin-tool-restaurant-clustering',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-image-migration',
@@ -272,6 +348,7 @@ export class AdminDashboard {
       icon: 'image-outline',
       path: '/image-migration',
       testId: 'admin-tool-image-migration',
+      group: 'secondary',
     },
     {
       titleKey: 'admin-tool-geohash-migration',
@@ -279,6 +356,25 @@ export class AdminDashboard {
       icon: 'map-outline',
       path: '/geohash-migration',
       testId: 'admin-tool-geohash-migration',
+      group: 'secondary',
+    },
+  ];
+
+  /** The two cards, each with its tools in the order of {@link tools}. */
+  readonly groups: readonly {
+    readonly key: AdminToolGroup;
+    readonly titleKey: string;
+    readonly tools: readonly AdminTool[];
+  }[] = [
+    {
+      key: 'primary',
+      titleKey: 'admin-dashboard-primary',
+      tools: this.tools.filter((tool) => tool.group === 'primary'),
+    },
+    {
+      key: 'secondary',
+      titleKey: 'admin-dashboard-secondary',
+      tools: this.tools.filter((tool) => tool.group === 'secondary'),
     },
   ];
 

@@ -51,6 +51,12 @@
       "target": "bite-tribe-business",
       "public": "dist/apps/bite-tribe-business",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+        }
+      ],
       "rewrites": [
         {
           "source": "**",

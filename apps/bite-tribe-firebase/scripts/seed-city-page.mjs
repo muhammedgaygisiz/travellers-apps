@@ -6,7 +6,7 @@
  * The Bites in `.firebase-export` predate `imageStatus` and carry no `city`,
  * so neither the admin editor nor the public page would accept them. This
  * script marks each Bite that has a photo as uploaded, gives it a city, and
- * writes `landingPages/<slug>` as published, with the same snapshot shape
+ * writes `landingPages/<city>` as published, with the same snapshot shape
  * `saveLandingPage` writes. It talks to the Firestore emulator only: the
  * `Bearer owner` token it sends is the emulator's admin bypass and means
  * nothing to a real project.
@@ -18,7 +18,8 @@
  *
  *   node apps/bite-tribe-firebase/scripts/seed-city-page.mjs
  *
- * Options: `--city berlin`, `--city-name Berlin`, `--slug comfort-food`.
+ * Options: `--city berlin` (the page's id and URL, `/eat/<city>`) and
+ * `--city-name Berlin`.
  * `FIRESTORE_EMULATOR_HOST` (default `127.0.0.1:8080`) and `--project`
  * (default `bite-tribe`) select the emulator.
  */
@@ -35,14 +36,11 @@ const args = Object.fromEntries(
 const project = args.project ?? 'bite-tribe';
 const city = args.city ?? 'berlin';
 const cityName = args['city-name'] ?? 'Berlin';
-const slug = args.slug ?? 'comfort-food';
 const host = process.env.FIRESTORE_EMULATOR_HOST ?? '127.0.0.1:8080';
 
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-if (!SLUG.test(city) || !SLUG.test(slug)) {
-  console.error(
-    '--city and --slug take lowercase letters, digits and hyphens.',
-  );
+const CITY = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+if (!CITY.test(city)) {
+  console.error('--city takes lowercase letters, digits and hyphens.');
   process.exit(1);
 }
 
@@ -123,11 +121,10 @@ for (const doc of withPhoto) {
 
 const now = { timestampValue: new Date().toISOString() };
 
-await request(`${base}/landingPages/${slug}`, {
+await request(`${base}/landingPages/${city}`, {
   method: 'PATCH',
   body: JSON.stringify({
     fields: {
-      slug: str(slug),
       city: str(city),
       cityName: str(cityName),
       countryCode: str('DE'),
@@ -155,11 +152,11 @@ await request(`${base}/landingPages/${slug}`, {
 
 const functions = `http://127.0.0.1:5001/${project}/us-central1/renderCityPage`;
 
-console.log(`Published landingPages/${slug} with ${items.length} Bites:`);
+console.log(`Published landingPages/${city} with ${items.length} Bites:`);
 for (const item of items) {
   console.log(`  - ${item.mapValue.fields.name.stringValue}`);
 }
 console.log('');
-console.log(`Page:     ${functions}/eat/${city}/${slug}`);
+console.log(`Page:     ${functions}/eat/${city}`);
 console.log(`Sitemap:  ${functions}/eat/sitemap.xml`);
 console.log('Editor:   http://localhost:4302/landing-pages (admin@test.com)');

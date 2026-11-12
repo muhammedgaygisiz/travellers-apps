@@ -585,9 +585,9 @@ Those Bites predate `imageStatus` and have no `city`, so neither the admin
 editor nor the public city page would take them. `npx nx run
 bite-tribe-firebase:seed-city-page`, run against the running emulators, marks
 the Bites with a photo as uploaded, gives them a city, and publishes
-`landingPages/comfort-food`. It prints the page, sitemap and editor URLs; the
+`landingPages/berlin`. It prints the page, sitemap and editor URLs; the
 page is served at
-`http://127.0.0.1:5001/bite-tribe/us-central1/renderCityPage/eat/berlin/comfort-food`.
+`http://127.0.0.1:5001/bite-tribe/us-central1/renderCityPage/eat/berlin`.
 It writes nothing back to the export, so it runs again after each emulator
 start. See [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages).
 

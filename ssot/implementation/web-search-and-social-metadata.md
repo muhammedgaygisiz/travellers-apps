@@ -283,8 +283,14 @@ function without the rewrite is reachable only at its Cloud Functions URL.
 
 ## City Landing Pages
 
-**`https://bitetribe.app/eat/<city>/<slug>` is a public, server-rendered list of
-three to five Bites in one city, curated in the admin app.** Added 12 November
+**`https://bitetribe.app/eat/<city>`, for example `/eat/berlin`, is a public,
+server-rendered list of three to five Bites in one city, curated in the admin
+app.** One page per city: the city is the page's id and its whole URL. A longer
+`/eat/<city>/<slug>` with several lists per city was built first and dropped on
+12 November 2026 for the shorter URL; a second list per city could come back
+under it later without breaking `/eat/<city>`. A bare `/<city>` was rejected:
+Hosting routes by fixed pattern, so it would need either a deploy per city or a
+catch-all that sends every app route through the function first. Added 12 November
 2026 by epic [#1487]: the page in [#1489], the editor in [#1490], the structured
 data and sitemap in [#1491], the links into the app in [#1492].
 
@@ -299,33 +305,33 @@ the security rules and App Check are not in the request path, and neither was
 loosened for it. The `i18n` block on the hosting target does not interfere with
 the rewrite; that was checked against the emulator with `Accept-Language: de`.
 
-| Request                                                          | Answer                                       | `Cache-Control`                                                    |
-| ---------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
-| `/eat/<city>/<slug>`, `status: published`                        | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400` |
-| `/eat/<city>/<slug>`, `status: withdrawn`                        | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                  |
-| `status: draft`, an unknown slug, or the wrong city for the slug | `404`                                        | `public, max-age=60, s-maxage=60`                                  |
-| `/eat/sitemap.xml`                                               | `200`, the published set                     | as a published page                                                |
+| Request                                                      | Answer                                       | `Cache-Control`                                                    |
+| ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------ |
+| `/eat/<city>`, `status: published`                           | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400` |
+| `/eat/<city>`, `status: withdrawn`                           | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                  |
+| `status: draft`, an unknown city, or any other shape of path | `404`                                        | `public, max-age=60, s-maxage=60`                                  |
+| `/eat/sitemap.xml`                                           | `200`, the published set                     | as a published page                                                |
 
 The short cache on `404` and `410` is so a page published moments after a
-crawler asked for its slug is not hidden for an hour. A page is answered under
-its own city only, so one document cannot be indexed under two URLs.
+crawler asked for its URL is not hidden for an hour. A path that is not
+`/eat/` followed by one segment in the editor's city shape answers `404`
+without reading Firestore.
 
 ### The Document
 
-`landingPages/<slug>`, written only by the operator callables
+`landingPages/<city>`, written only by the operator callables
 (`saveLandingPage`, `setLandingPageStatus`); there is no client rule for the
 collection.
 
-| Field                                   | Meaning                                                                     |
-| --------------------------------------- | --------------------------------------------------------------------------- |
-| `slug`                                  | The document id and the last URL segment. Fixed once saved                  |
-| `city`                                  | The URL segment, `[a-z0-9-]`; `cityName` is how a reader sees it            |
-| `countryCode`, `locale`                 | ISO country and the language of the page's prose, which sets `<html lang>`  |
-| `status`                                | `draft`, `published` or `withdrawn`                                         |
-| `title`, `metaDescription`, `intro`     | The operator's text. All three are required to publish                      |
-| `items`                                 | The snapshot: three to five Bites, in order                                 |
-| `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it |
-| `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                    |
+| Field                                   | Meaning                                                                                                |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `city`                                  | The document id and the URL segment, `[a-z0-9-]`. Fixed once saved; `cityName` is how a reader sees it |
+| `countryCode`, `locale`                 | ISO country and the language of the page's prose, which sets `<html lang>`                             |
+| `status`                                | `draft`, `published` or `withdrawn`                                                                    |
+| `title`, `metaDescription`, `intro`     | The operator's text. All three are required to publish                                                 |
+| `items`                                 | The snapshot: three to five Bites, in order                                                            |
+| `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it                            |
+| `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                                               |
 
 **An entry is a Bite, shown as its photo, its name and where it is** -
 `biteId`, `name`, `imageUrl` (the Bite photo), `place` and `locality` (the
@@ -345,18 +351,23 @@ held to the same bar.
 - Its own title, meta description, canonical on `bitetribe.app`, Open Graph
   and Twitter tags. The image is the first Bite's photo, an absolute Storage
   URL.
+- The app's logo beside the wordmark in the header, loaded from
+  `/assets/icons/logo.svg` of the web build.
 - One JSON-LD block: an `ItemList` of the Bites in order. Each entry is the
   `Restaurant` the Bite was eaten at, with a city-level `PostalAddress` (a Bite
   carries no street), holding the dish as a `MenuItem` on its `Menu`. The JSON
   escapes every `<`, so no text can close the `<script>` element. It is the
   only script on the page.
-- One primary call to action, "Open BiteTribe", to `/?city_page=<slug>`; and
-  each Bite links to `/bite/<id>?city_page=<slug>`. A member lands on the Home
+- One primary call to action, "Open BiteTribe", to `/?city_page=<city>`; and
+  each Bite links to `/bite/<id>?city_page=<city>`. A member lands on the Home
   feed or the Bite; a signed-out visitor is sent to `/start` by `authGuard`,
-  which remembers a Bite and opens it after sign-in. On a wide screen the App
-  Store and Google Play QR codes from [#1453] sit beside the button, served
-  from the same `/assets/store/` files; a phone gets the button as a bar pinned
-  to the bottom.
+  which remembers a Bite and opens it after sign-in. The App Store and
+  Google Play badges from [#1453] link to the store listings, served from the
+  same `/assets/store/` files the start page uses; Apple's white badge replaces
+  the black one in dark mode. On a wide screen each badge sits under its QR
+  code beside the button; a phone gets the button and the two badges as a bar
+  pinned to the bottom, without the codes, since a phone cannot scan its own
+  screen.
 - **No analytics, cookie or storage.** The visit is attributed at the
   destination instead: the consumer app logs `city_page_arrived` from the
   `city_page` parameter before the first navigation. See

@@ -121,13 +121,13 @@ export class LandingPagesComponent {
     () => this.current()?.status,
   );
 
-  /** The slug is the document id, so it is fixed once the page exists. */
-  readonly slugLocked = computed(() => !!this.current());
+  /** The city is the page's id and URL, so it is fixed once the page exists. */
+  readonly cityLocked = computed(() => !!this.current());
 
   readonly publicUrl = computed(() => {
     const draft = this.draft();
 
-    return draft.city && draft.slug ? landingPageUrl(draft) : undefined;
+    return draft.city ? landingPageUrl(draft) : undefined;
   });
 
   readonly chosenIds = computed(

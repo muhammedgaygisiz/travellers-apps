@@ -20,6 +20,7 @@ import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { POSITION_SOURCE_COLORS } from '../model/position-source';
+import type { Geopoint, GooglePlace, PositionSource } from 'model';
 
 import {
   getMediaLocationPermissionState,
@@ -642,6 +643,145 @@ describe('BitePage', () => {
         expect(emittedPhotoPosition()).toBeNull();
         expect(photoCandidate()?.disabled).toBe(true);
         expect(component.positionSource()).toBeUndefined();
+      });
+    });
+
+    /**
+     * The order a user can just as well take: the position is set first, from
+     * any source but the photo, and the photo is added afterwards. A photo
+     * without a location must leave that position and its source exactly as
+     * they were - it only has nothing to offer as a photo candidate.
+     *
+     * The GPS case is guarded twice: were the pick to clear the source, the
+     * device fix that keeps arriving would put `gps` and its position back. A
+     * regression in the pick handler therefore shows in the other three
+     * sources first.
+     */
+    describe('a position the user set before adding a photo', () => {
+      const devicePosition = { latitude: 46.948, longitude: 7.447 };
+      const restaurantPosition = { latitude: 0.001, longitude: 0.001 };
+      const googlePosition = { latitude: 0.002, longitude: 0.002 };
+      const manualPosition = { latitude: 0.003, longitude: 0.003 };
+
+      const setBy: Record<
+        Exclude<PositionSource, 'photo'>,
+        { position: Geopoint; set: () => void }
+      > = {
+        gps: {
+          position: devicePosition,
+          set: (): void => {
+            componentRef.setInput('position', devicePosition);
+            component.onPositionFromNavigator();
+          },
+        },
+        restaurant: {
+          position: restaurantPosition,
+          set: (): void => {
+            componentRef.setInput('nearbyRestaurants', [
+              { name: 'Near Bistro', position: restaurantPosition },
+            ]);
+            component.onRestaurantSelected('Near Bistro');
+          },
+        },
+        google: {
+          position: googlePosition,
+          set: (): void =>
+            component.onGooglePlaceSelected({
+              placeId: 'place-1',
+              name: 'Google Bistro',
+              address: 'Main Street 1',
+              position: googlePosition,
+            } as GooglePlace),
+        },
+        manual: {
+          position: manualPosition,
+          set: (): void => {
+            component.manualPosition.set(manualPosition);
+            component.draftSource.set('manual');
+            component.confirmPositionSource({
+              dismiss: jest.fn(),
+            } as unknown as IonModal);
+          },
+        },
+      };
+
+      describe.each(['camera', 'gallery', 'web'] as const)(
+        'then a %s photo without a location',
+        (pickedFrom) => {
+          it.each(Object.keys(setBy) as (keyof typeof setBy)[])(
+            'keeps the %s position and its source',
+            async (source) => {
+              componentRef.setInput('isNew', true);
+              fillValidForm();
+              setBy[source].set();
+
+              expect(component.positionSource()).toBe(source);
+
+              await component.onImagePickedFrom(pickedFrom);
+              // The source reaches the form through an effect, as it does in
+              // the running app on its next change detection.
+              componentRef.changeDetectorRef.detectChanges();
+
+              expect(component.positionSource()).toBe(source);
+              expect(photoCandidate()?.disabled).toBe(true);
+
+              const emitSpy = jest.spyOn(component.submitBite, 'emit');
+              component.saveBite();
+
+              expect(emitSpy).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  position: setBy[source].position,
+                  positionSource: source,
+                  photoPosition: null,
+                }),
+              );
+            },
+          );
+        },
+      );
+
+      it('keeps it when the Bite is edited and gets a photo without a location', async () => {
+        componentRef.setInput('isNew', false);
+        componentRef.setInput('storedPhotoPosition', photoPosition);
+        fillValidForm();
+        setBy.restaurant.set();
+
+        await component.onImagePickedFrom('camera');
+
+        expect(component.positionSource()).toBe('restaurant');
+        expect(component.biteFormGroup.controls['position'].value).toEqual(
+          restaurantPosition,
+        );
+        expect(emittedPhotoPosition()).toBeNull();
+      });
+
+      /**
+       * Pinned as it stands, not introduced by #1290: a photo that does carry
+       * a location takes the position over, whatever was set before. The
+       * modal still offers the earlier source to switch back to.
+       */
+      it('is taken over by a photo that has a location', async () => {
+        componentRef.setInput('isNew', true);
+        fillValidForm();
+        setBy.restaurant.set();
+
+        component.onPositionFromImage(photoPosition);
+        await component.onImagePickedFrom('camera');
+
+        expect(component.positionSource()).toBe('photo');
+        expect(component.biteFormGroup.controls['position'].value).toEqual(
+          photoPosition,
+        );
+        expect(
+          component
+            .positionCandidates()
+            .find((candidate) => candidate.source === 'restaurant'),
+        ).toEqual(
+          expect.objectContaining({
+            position: restaurantPosition,
+            disabled: false,
+          }),
+        );
       });
     });
 

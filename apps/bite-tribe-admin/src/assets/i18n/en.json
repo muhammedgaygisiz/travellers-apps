@@ -19,6 +19,8 @@
   "admin-start-title": "BiteTribe Admin",
   "admin-dashboard-title": "Operations",
   "admin-dashboard-message": "BiteTribe-internal tools.",
+  "admin-dashboard-primary": "Day to day",
+  "admin-dashboard-secondary": "Migrations and backfills",
   "admin-start-tagline": "Internal operations tool",
   "admin-dashboard-signed-in-as": "Signed in as",
   "login": "Login",

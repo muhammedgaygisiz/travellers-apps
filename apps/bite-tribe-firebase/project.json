@@ -11,6 +11,12 @@
         "command": "firebase emulators:start --only auth,firestore,storage,functions,pubsub --import .firebase-export"
       }
     },
+    "seed-city-page": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node apps/bite-tribe-firebase/scripts/seed-city-page.mjs"
+      }
+    },
     "firebase-record": {
       "executor": "nx:run-commands",
       "options": {

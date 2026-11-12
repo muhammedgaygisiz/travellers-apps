@@ -570,6 +570,27 @@ physical device.
 
 **The emulator does not write roles back.** `firebase-serve` runs without `--export-on-exit`, so a claim granted against the running emulator through the Identity Toolkit REST API lasts only for that session. A durable fixture has to be added to the export file itself.
 
+### Seeded Bite Photos And A City Page
+
+The export's three Bites carry real food photos in `storage_export`. **Each
+photo URL in Firestore carries its own download token, and the Storage
+emulator serves an object only for a token in that object's
+`downloadTokens`.** The metadata originally listed only
+`local-emulator-download-token`, so every seeded Bite photo answered `403` and
+rendered blank in every app. Since [#1493] each object lists the token its URL
+carries as well. A regenerated export has to keep the two in step, or the
+photos go blank again with nothing in the console but a failed image load.
+
+Those Bites predate `imageStatus` and have no `city`, so neither the admin
+editor nor the public city page would take them. `npx nx run
+bite-tribe-firebase:seed-city-page`, run against the running emulators, marks
+the Bites with a photo as uploaded, gives them a city, and publishes
+`landingPages/comfort-food`. It prints the page, sitemap and editor URLs; the
+page is served at
+`http://127.0.0.1:5001/bite-tribe/us-central1/renderCityPage/eat/berlin/comfort-food`.
+It writes nothing back to the export, so it runs again after each emulator
+start. See [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages).
+
 ## Environments
 
 BiteTribe runs against three backends: the local emulators (dev), the
@@ -629,3 +650,4 @@ libs/bite-tribe/api
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894
 [#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902
 [#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
+[#1493]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1493

@@ -40,7 +40,7 @@ What ships today:
 1. An operator is granted `admin` through `grant-role.mjs`, run with service-account credentials.
 2. They sign into the admin app with a normal BiteTribe account.
 3. Sign-in verifies the `admin` role before it succeeds; an account without it gets the generic login failure. `roleGuard('admin')` backs that up on the routes for a restored session or a revoked role.
-4. They land on the dashboard, a list of the operator surfaces the tool offers.
+4. They land on the dashboard: the operator surfaces in two cards, the day-to-day work (account management, the report queues, Bite search, City pages, the restaurant surfaces) and, beside it, the migrations and backfills, which are run once and so are kept out of the daily list.
 5. **User management** lists every BiteTribe account with the roles it holds, and grants or revokes them. It reads `listUsersWithRoles` and writes `setUserRoles`, both admin-only.
 
 Only the roles, the subscription tier and the account's access are editable. The identity fields are read-only rather than offering a change nothing can save.

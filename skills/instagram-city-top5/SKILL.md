@@ -1,6 +1,6 @@
 ---
 name: instagram-city-top5
-description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, and publishes on Instagram web after approval. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
+description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, publishes on Instagram web after approval, and then publishes the city's landing page at bitetribe.app/eat/<city> with the same five Bites. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
 argument-hint: <city>
 ---
 
@@ -29,6 +29,7 @@ Then derive everything else from it, without asking:
 | Caption            | The template in step 5, with the city, the country, its flag and local hashtags.                       |
 | Location           | "<City>, <Country>" on Instagram (step 6).                                                             |
 | Restaurant tags    | Each restaurant's own Instagram account, where one can be confirmed (step 3).                          |
+| City page          | `https://bitetribe.app/eat/<city>`, with the post's five Bites (step 7).                               |
 
 Before step 1, check two things:
 
@@ -49,7 +50,7 @@ Leela is in a round frame because only reference crops of her exist (`ssot/asset
 
 ## Workflow
 
-Steps 2 and 5 are **gates**. Stop and wait for the user's answer.
+Steps 2 and 5, and the preview in step 7, are **gates**. Stop and wait for the user's answer.
 
 ### 1. Find the dishes
 
@@ -105,6 +106,7 @@ List the five with restaurant and author, plus two or three local alternatives, 
   5. Save both from the page with the blob-link snippet above (`main img`, the last one wider than 400px), and copy them into the working folder as `photos/leela-<city>.png` and `photos/leela-<city>-phone.png`. Set `leela.coverImage` and `leela.outroImage` to them (step 4).
 
   Name the costume at the gate in step 2, so the user can steer it.
+
 - **Restaurant accounts.** Instagram allows one location per post, and that stays the city. The restaurants are named instead: tagged on their own slide, and listed in the caption. A tag notifies the account, so **tag only an account you have confirmed as the restaurant's own**, in one of these ways:
   - the restaurant's website or Google Maps listing links to it;
   - its bio or posts give the same name and the same street or city as the Bite's place.
@@ -241,7 +243,48 @@ out;
 
 Every handle has to show up somewhere in the output. If one is missing, open **Edit** again and look at that slide. When one handle covers several slides (three Al Zaytouna dishes in Vienna), the output cannot tell those slides apart. Key each `li` by its image file name instead, and check that every one of those slides carries the handle.
 
+### 7. Publish the city page
+
+Every post gets a page at `https://bitetribe.app/eat/<city>` with the same five Bites (user's call, 12 November 2026, when the first fourteen were published from the existing posts). The page is owned by [Implementation - Web Search And Social Metadata](../../ssot/implementation/web-search-and-social-metadata.md#city-landing-pages); this step is how an agent fills one in.
+
+Use the admin app in the user's Chrome at `https://bite-tribe-admin.web.app/landing-pages`, signed in with an account holding the `admin` role. If it is not signed in, ask the user to sign in; never type a password. The production build has no `window.ng`, so read state from the DOM (`data-testid="admin-landing-*"`), not from the component.
+
+1. **New page**, then the fields:
+
+   | Field             | Value                                                                                                                                                    |
+   | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | City in the URL   | The English city name, lowercase ASCII, hyphens between words: `cologne`, `chiang-mai`, `malta` for a whole-country post. **Fixed once saved**.          |
+   | Other names       | Names readers also type, each redirecting to the page: the local name (`koeln`, `triest`) or a spelling without the hyphen (`chiangmai`). Often none.    |
+   | City name         | As a reader sees it: `Cologne`, `Chiang Mai`.                                                                                                            |
+   | Country, language | The ISO country code; `en`, the language the page is written in.                                                                                         |
+   | Title             | `Top 5 dishes in <City>`.                                                                                                                                |
+   | Meta description  | `Five dishes to eat in <City>, from real Bites: <the five dishes, short, joined with commas and "and">.`                                                 |
+   | Intro             | One line for the place, then `Every one is a real Bite, photographed and rated by someone who ate it.` **No Leela**: she is on the slides, not the page. |
+
+   Intro lines so far: "Five dishes to eat in Granada, the city of free tapas, from meatballs to oxtail croquettes." and "Five dishes to eat in Split and on Hvar, from pašticada to grilled squid."
+
+2. **Add the five Bites in the post's order.** The search box takes a dish name or tag, never a place, so search for the dish and add the result whose **dish and restaurant** both match the post. Read each result's label (`dish | place`) before clicking **Add**:
+   - **A restaurant keyword can match a dish name.** Filtering on "Koko" picked _kokoreç | zeynep kamil kokoreç recep usta_ instead of _Kokoreç | Koko Cologne_. Compare the place part of the label, not the whole label.
+   - **The same dish can exist twice at one place.** Pöç tandır at Tarihi Kayseri Kelle Tava is there once rated five stars and once unrated; the HESO in Solothurn has two identical Berliners. Take the one the post used (the config's `stars`), and if the two cannot be told apart, show the user both thumbnails and ask.
+   - **Search with the Bite's own spelling.** `yaglama` missed the Mülhem yağlama that `yağlama` found, and `veterník` found nothing because the Bite is spelled `veternik`. If the expected Bite is missing, try the other spelling and a distinctive second word.
+   - **The result list keeps the previous search for about a second.** Wait for the button's spinner to go, or for the list to change, before reading it.
+   - A restaurant's name in the app can differ from the post's (`Mühlem` / `Mülhem`, `the goulash` for a market stall). Match on the dish and the photo when the name does not line up.
+
+   Five Bites in the post's order, then **Save**. The page is a draft and is not public.
+
+3. **Gate: Preview.** Open **Preview**, scroll the user to it, and wait for approval of the text and the five Bites.
+
+4. **Publish.** The status turns to Published and **Withdraw** appears.
+
+5. **Check it live**, with a query string so no cached copy answers:
+   ```bash
+   curl -s "https://bitetribe.app/eat/<city>?v=$RANDOM" | grep -oE "<title>[^<]*</title>|<h2>[^<]*</h2>"
+   curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" "https://bitetribe.app/eat/<alias>?v=$RANDOM"
+   curl -s "https://bitetribe.app/eat/sitemap.xml?v=$RANDOM" | grep -c "<loc>"
+   ```
+   The page answers with its title and five `<h2>` dish names, every alias answers `301` to the page, and the sitemap count has gone up by one. The sitemap is cached for five minutes, so a request without the query string may lag that long.
+
 ## After Publishing
 
-- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, and anything skipped (for example alt text, or a tag that could not be set).
+- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, the city page's URL and aliases, and anything skipped (for example alt text, or a tag that could not be set).
 - If the post changed the format, update `## The City Top 5 Posts` in `ssot/implementation/social-media-channels.md`, and this skill too.

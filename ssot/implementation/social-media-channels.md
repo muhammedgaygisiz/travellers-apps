@@ -1359,6 +1359,12 @@ derives the rest from it, and its renderer is
 [`skills/instagram-city-top5/scripts/render.mjs`](../../skills/instagram-city-top5/scripts/render.mjs).
 Filed as [#1886].
 
+**Every post also has a city page** at `https://bitetribe.app/eat/<city>`
+with the same five Bites, as the skill's last step. The first fourteen were
+published on 12 November 2026 from the existing posts; Vienna has none, its
+dishes are not local. The page itself is owned by
+[Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md#city-landing-pages).
+
 ### The Slides
 
 `1080x1440` (3:4), uploaded with the crop set to **Original**:

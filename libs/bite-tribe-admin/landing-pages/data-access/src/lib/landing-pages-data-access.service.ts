@@ -24,7 +24,7 @@ export interface LandingPageItem {
 
 /** What the editor owns and sends to `saveLandingPage`. */
 export interface LandingPageDraft {
-  slug: string;
+  /** The page's id and its URL: one page per city, `/eat/<city>`. */
   city: string;
   cityName: string;
   countryCode: string;
@@ -45,10 +45,8 @@ export interface LandingPage extends LandingPageDraft {
 }
 
 /** The public URL of a page, on the canonical host. */
-export const landingPageUrl = (
-  page: Pick<LandingPage, 'city' | 'slug'>,
-): string =>
-  `https://bitetribe.app/eat/${encodeURIComponent(page.city)}/${encodeURIComponent(page.slug)}`;
+export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
+  `https://bitetribe.app/eat/${encodeURIComponent(page.city)}`;
 
 /**
  * The four operator callables behind city landing pages (epic #1487).
@@ -88,13 +86,13 @@ export class LandingPagesDataAccessService {
   }
 
   async setStatus(
-    slug: string,
+    city: string,
     status: Exclude<LandingPageStatus, 'draft'>,
   ): Promise<LandingPage> {
     const { data } = await FirebaseFunctions.callByName<
-      { slug: string; status: string },
+      { city: string; status: string },
       LandingPage
-    >({ name: 'setLandingPageStatus', data: { slug, status } });
+    >({ name: 'setLandingPageStatus', data: { city, status } });
 
     return data;
   }

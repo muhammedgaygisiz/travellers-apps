@@ -17,7 +17,6 @@ const searchBite = (n: number): SearchBite => ({
 });
 
 const stored: LandingPage = {
-  slug: 'best-sushi',
   city: 'berlin',
   cityName: 'Berlin',
   countryCode: 'DE',
@@ -47,9 +46,9 @@ describe(LandingPagesService.name, () => {
         .fn()
         .mockImplementation(async (draft) => ({ ...stored, ...draft })),
       preview: jest.fn().mockResolvedValue('<!doctype html>'),
-      setStatus: jest.fn().mockImplementation(async (slug, status) => ({
+      setStatus: jest.fn().mockImplementation(async (city, status) => ({
         ...stored,
-        slug,
+        city,
         status,
       })),
     };
@@ -77,7 +76,6 @@ describe(LandingPagesService.name, () => {
     service.open(service.pages()[0]);
 
     expect(service.draft()).toEqual({
-      slug: 'best-sushi',
       city: 'berlin',
       cityName: 'Berlin',
       countryCode: 'DE',
@@ -126,10 +124,7 @@ describe(LandingPagesService.name, () => {
     expect(dataAccess['save']).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'New title' }),
     );
-    expect(dataAccess['setStatus']).toHaveBeenCalledWith(
-      'best-sushi',
-      'published',
-    );
+    expect(dataAccess['setStatus']).toHaveBeenCalledWith('berlin', 'published');
     expect(service.current()?.status).toBe('published');
   });
 
@@ -138,10 +133,7 @@ describe(LandingPagesService.name, () => {
 
     await service.withdraw();
 
-    expect(dataAccess['setStatus']).toHaveBeenCalledWith(
-      'best-sushi',
-      'withdrawn',
-    );
+    expect(dataAccess['setStatus']).toHaveBeenCalledWith('berlin', 'withdrawn');
   });
 
   it('shows the preview without saving', async () => {

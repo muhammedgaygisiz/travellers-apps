@@ -15,7 +15,6 @@ addNecessaryIcons();
 const BITE_IMAGE = 'assets/demo/bite-demo.png';
 
 const draft: LandingPageDraft = {
-  slug: 'best-sushi',
   city: 'berlin',
   cityName: 'Berlin',
   countryCode: 'DE',
@@ -45,16 +44,17 @@ const pages: LandingPage[] = [
   },
   {
     ...draft,
-    slug: 'late-night-ramen',
-    title: 'Late-night ramen in Berlin',
+    city: 'munich',
+    cityName: 'Munich',
+    title: 'Late-night ramen in Munich',
     status: 'draft',
     biteIds: [],
     items: [],
   },
   {
     ...draft,
-    slug: 'brunch',
     city: 'hamburg',
+    cityName: 'Hamburg',
     title: 'Brunch in Hamburg',
     status: 'withdrawn',
     items: [],
@@ -84,7 +84,7 @@ export default {
     loadFailed: false,
     editing: false,
     current: undefined,
-    draft: { ...draft, slug: '', city: '', title: '', biteIds: [] },
+    draft: { ...draft, city: '', cityName: '', title: '', biteIds: [] },
     entries: [],
     results: [],
     searching: false,
@@ -133,8 +133,9 @@ export const Full: Story = {
     current: pages[1],
     draft: {
       ...draft,
-      slug: 'late-night-ramen',
-      title: 'Late-night ramen in Berlin',
+      city: 'munich',
+      cityName: 'Munich',
+      title: 'Late-night ramen in Munich',
       biteIds: [],
     },
     entries: [

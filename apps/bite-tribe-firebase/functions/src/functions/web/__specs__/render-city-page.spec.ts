@@ -76,7 +76,6 @@ const item = (
 });
 
 const page = {
-  slug: 'best-sushi',
   city: 'berlin',
   cityName: 'Berlin',
   countryCode: 'DE',
@@ -103,9 +102,9 @@ describe('renderCityPage', () => {
   it('renders a published page as a complete document', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 
-    const { status, body, headers } = await respond('/eat/berlin/best-sushi');
+    const { status, body, headers } = await respond('/eat/berlin');
 
-    expect(mockDoc).toHaveBeenCalledWith('best-sushi');
+    expect(mockDoc).toHaveBeenCalledWith('berlin');
     expect(status).toBe(200);
     expect(body).toMatch(/^<!doctype html>/);
     expect(body).toContain('<title>The best sushi in Berlin</title>');
@@ -124,13 +123,23 @@ describe('renderCityPage', () => {
     expect(headers['Cache-Control']).toBe(PUBLISHED_CACHE_CONTROL);
   });
 
+  it('carries the BiteTribe logo in its header', async () => {
+    mockGet.mockResolvedValue(snapshot(page));
+
+    const { body } = await respond('/eat/berlin');
+
+    expect(body).toContain(
+      '<img src="https://bitetribe.app/assets/icons/logo.svg" alt="" width="28" height="36" />BiteTribe',
+    );
+  });
+
   it('declares its canonical on bitetribe.app', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 
-    const { body } = await respond('/eat/berlin/best-sushi');
+    const { body } = await respond('/eat/berlin');
 
     expect(body).toContain(
-      '<link rel="canonical" href="https://bitetribe.app/eat/berlin/best-sushi" />',
+      '<link rel="canonical" href="https://bitetribe.app/eat/berlin" />',
     );
     expect(body).not.toContain('bite-tribe.web.app');
   });
@@ -138,7 +147,7 @@ describe('renderCityPage', () => {
   it('does not redirect and carries no executable script', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 
-    const { body } = await respond('/eat/berlin/best-sushi');
+    const { body } = await respond('/eat/berlin');
 
     expect(body).not.toContain('http-equiv="refresh"');
     // The one script element is the JSON-LD block, which never runs.
@@ -158,7 +167,7 @@ describe('renderCityPage', () => {
       }),
     );
 
-    const { body } = await respond('/eat/berlin/best-sushi');
+    const { body } = await respond('/eat/berlin');
 
     expect(body).not.toContain('<script>');
     expect(body).not.toMatch(/<\/script>[^\n]*<\/script>/);
@@ -170,9 +179,8 @@ describe('renderCityPage', () => {
   });
 
   it.each([
-    ['an unknown slug', undefined, '/eat/berlin/best-sushi'],
-    ['a draft', { ...page, status: 'draft' }, '/eat/berlin/best-sushi'],
-    ['the wrong city', page, '/eat/hamburg/best-sushi'],
+    ['an unknown city', undefined, '/eat/berlin'],
+    ['a draft', { ...page, status: 'draft' }, '/eat/berlin'],
   ])('answers %s with 404', async (_case, data, path) => {
     mockGet.mockResolvedValue(snapshot(data));
 
@@ -182,7 +190,14 @@ describe('renderCityPage', () => {
     expect(headers['Cache-Control']).toBe(MISSING_CACHE_CONTROL);
   });
 
-  it.each(['/eat', '/eat/berlin', '/eat/berlin/best-sushi/extra', '/s/x/y'])(
+  it.each([
+    '/eat',
+    '/eat/berlin/best-sushi',
+    '/eat/Berlin',
+    '/eat/ber.lin',
+    '/eat/berlin%2Fpages',
+    '/s/x/y',
+  ])(
     'answers the malformed path %s with 404 without reading Firestore',
     async (path) => {
       const { status } = await respond(path);
@@ -195,7 +210,7 @@ describe('renderCityPage', () => {
   it('answers a withdrawn page with 410', async () => {
     mockGet.mockResolvedValue(snapshot({ ...page, status: 'withdrawn' }));
 
-    const { status, body } = await respond('/eat/berlin/best-sushi');
+    const { status, body } = await respond('/eat/berlin');
 
     expect(status).toBe(410);
     expect(body).toBe('Gone');
@@ -205,13 +220,13 @@ describe('renderCityPage', () => {
     it('declares an ItemList of restaurants carrying each dish, in order', async () => {
       mockGet.mockResolvedValue(snapshot(page));
 
-      const data = jsonLd((await respond('/eat/berlin/best-sushi')).body);
+      const data = jsonLd((await respond('/eat/berlin')).body);
 
       expect(data).toMatchObject({
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         name: 'The best sushi in Berlin',
-        url: 'https://bitetribe.app/eat/berlin/best-sushi',
+        url: 'https://bitetribe.app/eat/berlin',
         numberOfItems: 3,
       });
       expect(data.itemListElement).toHaveLength(3);
@@ -242,7 +257,7 @@ describe('renderCityPage', () => {
     it('carries an absolute image in Open Graph and Twitter', async () => {
       mockGet.mockResolvedValue(snapshot(page));
 
-      const { body } = await respond('/eat/berlin/best-sushi');
+      const { body } = await respond('/eat/berlin');
 
       expect(body).toContain(
         '<meta property="og:image" content="https://example.test/1.jpg" />',
@@ -265,11 +280,11 @@ describe('renderCityPage', () => {
     it('lists the published pages with their publication date', async () => {
       mockQueryGet.mockResolvedValue({
         docs: [
-          doc('best-sushi', {
+          doc('berlin', {
             ...page,
             publishedAt: new Timestamp(Date.UTC(2026, 10, 12)),
           }),
-          doc('brunch', { ...page, city: 'hamburg' }),
+          doc('hamburg', { ...page }),
         ],
       });
 
@@ -280,11 +295,9 @@ describe('renderCityPage', () => {
       expect(status).toBe(200);
       expect(headers['Content-Type']).toBe('application/xml; charset=utf-8');
       expect(body).toContain(
-        '<loc>https://bitetribe.app/eat/berlin/best-sushi</loc>\n    <lastmod>2026-11-12</lastmod>',
+        '<loc>https://bitetribe.app/eat/berlin</loc>\n    <lastmod>2026-11-12</lastmod>',
       );
-      expect(body).toContain(
-        '<loc>https://bitetribe.app/eat/hamburg/brunch</loc>',
-      );
+      expect(body).toContain('<loc>https://bitetribe.app/eat/hamburg</loc>');
       expect(body.match(/<url>/g)).toHaveLength(2);
     });
 

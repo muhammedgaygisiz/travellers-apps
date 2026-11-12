@@ -16,6 +16,10 @@ import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
 import { BITE_COLLECTION } from '../../utils/constants';
 import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
 import { updateBiteWithImagePathFromFirestorage } from '../utils/update-bite-with-image-path-from-firestorage';
+import {
+  loadBitePhotoPosition,
+  saveBitePhotoPosition,
+} from '../utils/bite-photo-position';
 
 jest.mock('../utils/load-bites-by-location', () => ({
   loadBitesByLocation: jest.fn(),
@@ -60,13 +64,19 @@ jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest.fn(),
 }));
 
+jest.mock('../utils/bite-photo-position', () => ({
+  saveBitePhotoPosition: jest.fn(),
+  loadBitePhotoPosition: jest.fn(),
+}));
+
 jest.mock('../utils/update-bite-with-image-path-from-firestorage', () => ({
   updateBiteWithImagePathFromFirestorage: jest.fn(),
 }));
 
 const mockedUser = { uid: '123' };
+let signedInUser: { uid: string } | null = mockedUser;
 const MockedAuthService = {
-  getUser: (): any => mockedUser,
+  getUser: (): any => signedInUser,
   isLoggedIn$: of(false),
 };
 
@@ -86,6 +96,77 @@ describe(BiteApiService.name, () => {
     });
 
     service = TestBed.inject(BiteApiService);
+  });
+
+  /** The author-only photo position (GitHub issue #1290). */
+  describe('the photo position', () => {
+    const position = { latitude: 36.74, longitude: -5.16 };
+
+    beforeEach(() => {
+      signedInUser = mockedUser;
+      jest.mocked(saveBitePhotoPosition).mockReset();
+      jest.mocked(loadBitePhotoPosition).mockReset();
+      MockedErrorHandler.handleError.mockClear();
+    });
+
+    it("is written under the signed-in account's uid", async () => {
+      await service.saveBitePhotoPosition('bite-1', position);
+
+      expect(saveBitePhotoPosition).toHaveBeenCalledWith(
+        'bite-1',
+        mockedUser.uid,
+        position,
+      );
+    });
+
+    it('is not written without a signed-in account', async () => {
+      signedInUser = null;
+
+      await service.saveBitePhotoPosition('bite-1', position);
+
+      expect(saveBitePhotoPosition).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed write instead of throwing', async () => {
+      const error = new Error('permission-denied');
+      jest.mocked(saveBitePhotoPosition).mockRejectedValue(error);
+
+      await expect(
+        service.saveBitePhotoPosition('bite-1', null),
+      ).resolves.toBeUndefined();
+      expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
+    });
+
+    it("is read under the signed-in account's uid", async () => {
+      jest.mocked(loadBitePhotoPosition).mockResolvedValue(position);
+
+      await expect(service.loadBitePhotoPosition('bite-1')).resolves.toEqual(
+        position,
+      );
+      expect(loadBitePhotoPosition).toHaveBeenCalledWith(
+        'bite-1',
+        mockedUser.uid,
+      );
+    });
+
+    it('is not read without a signed-in account', async () => {
+      signedInUser = null;
+
+      await expect(
+        service.loadBitePhotoPosition('bite-1'),
+      ).resolves.toBeUndefined();
+      expect(loadBitePhotoPosition).not.toHaveBeenCalled();
+    });
+
+    it('answers nothing for a failed read, and reports it', async () => {
+      const error = new Error('unavailable');
+      jest.mocked(loadBitePhotoPosition).mockRejectedValue(error);
+
+      await expect(
+        service.loadBitePhotoPosition('bite-1'),
+      ).resolves.toBeUndefined();
+      expect(MockedErrorHandler.handleError).toHaveBeenCalledWith(error);
+    });
   });
 
   it('should create', () => {

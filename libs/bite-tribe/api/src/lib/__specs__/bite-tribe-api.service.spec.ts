@@ -90,6 +90,8 @@ class BiteApiMock {
   removeSelfFromBiteTags = jest.fn();
   findLocalImage = jest.fn();
   uploadImageFromLocalFile = jest.fn();
+  saveBitePhotoPosition = jest.fn();
+  loadBitePhotoPosition = jest.fn();
 }
 
 class SettingsApiMock {
@@ -186,6 +188,35 @@ describe(BiteTribeApiService.name, () => {
           reported: true,
         });
         expect(spy).toHaveBeenCalledWith('bite-id', 'spam');
+      },
+    ));
+  });
+
+  describe('the photo position', () => {
+    const position = { latitude: 36.74, longitude: -5.16 };
+
+    it('is saved through BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        await service.saveBitePhotoPosition('bite-id', position);
+
+        expect(biteApiService.saveBitePhotoPosition).toHaveBeenCalledWith(
+          'bite-id',
+          position,
+        );
+      },
+    ));
+
+    it('is loaded through BiteApiService', inject(
+      [BiteTribeApiService, BiteApiService],
+      async (service: BiteTribeApiService, biteApiService: BiteApiService) => {
+        jest
+          .mocked(biteApiService.loadBitePhotoPosition)
+          .mockResolvedValue(position);
+
+        await expect(service.loadBitePhotoPosition('bite-id')).resolves.toEqual(
+          position,
+        );
       },
     ));
   });

@@ -53,6 +53,7 @@ describe(EditBiteContainer.name, () => {
             tagSuggestionsForEditingBite: signal([]),
             taggableUsers: signal([]),
             taggedUsers: signal([]),
+            storedPhotoPosition: signal(undefined),
             googlePlaces: signal([]),
             googlePlacesLoading: signal(false),
             submitEditedBite: jest.fn(),

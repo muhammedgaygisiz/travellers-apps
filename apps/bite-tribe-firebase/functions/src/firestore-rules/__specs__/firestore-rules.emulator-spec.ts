@@ -2882,6 +2882,94 @@ describe('bites', () => {
       deleteDoc(doc(asConsumer(), 'bites', 'consumer-bite', 'likes', STRANGER)),
     );
   });
+
+  /**
+   * The photo's position, kept for the author alone (GitHub issue #1290). The
+   * Bite is readable by every member, so this is the one place under it where
+   * a deny on read is the whole point.
+   */
+  describe("the author's private document", () => {
+    const authorPrivate = (
+      db: Firestore,
+      biteId: string,
+      authorId: string,
+    ): DocumentReference<DocumentData> =>
+      doc(db, 'bites', biteId, 'authorPrivate', authorId);
+
+    const photoPosition = { latitude: 36.74, longitude: -5.16 };
+
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(
+          authorPrivate(context.firestore(), 'consumer-bite', CONSUMER),
+          { userId: CONSUMER, photoPosition },
+        );
+      });
+    });
+
+    it('lets the author write and read it back', async () => {
+      await assertSucceeds(
+        setDoc(authorPrivate(asConsumer(), 'consumer-bite', CONSUMER), {
+          userId: CONSUMER,
+          photoPosition: { latitude: 47.0, longitude: 7.4 },
+        }),
+      );
+      await assertSucceeds(
+        getDoc(authorPrivate(asConsumer(), 'consumer-bite', CONSUMER)),
+      );
+      await assertSucceeds(
+        deleteDoc(authorPrivate(asConsumer(), 'consumer-bite', CONSUMER)),
+      );
+    });
+
+    it('refuses every other member reading it', async () => {
+      await assertFails(
+        getDoc(authorPrivate(asStranger(), 'consumer-bite', CONSUMER)),
+      );
+      await assertFails(
+        getDocs(
+          query(
+            collectionGroup(asStranger(), 'authorPrivate'),
+            where('userId', '==', CONSUMER),
+          ),
+        ),
+      );
+    });
+
+    it('refuses deleting the author document of somebody else', async () => {
+      await assertFails(
+        deleteDoc(authorPrivate(asStranger(), 'consumer-bite', CONSUMER)),
+      );
+    });
+
+    it('refuses a document under a Bite the writer does not own', async () => {
+      await assertFails(
+        setDoc(authorPrivate(asStranger(), 'consumer-bite', STRANGER), {
+          userId: STRANGER,
+          photoPosition,
+        }),
+      );
+    });
+
+    it('refuses a document naming another account', async () => {
+      await assertFails(
+        setDoc(authorPrivate(asConsumer(), 'consumer-bite', CONSUMER), {
+          userId: STRANGER,
+          photoPosition,
+        }),
+      );
+    });
+
+    it('refuses fields beyond the photo position', async () => {
+      await assertFails(
+        setDoc(authorPrivate(asConsumer(), 'consumer-bite', CONSUMER), {
+          userId: CONSUMER,
+          photoPosition,
+          devicePosition: { latitude: 47.0, longitude: 7.4 },
+        }),
+      );
+    });
+  });
 });
 
 describe('reviews', () => {

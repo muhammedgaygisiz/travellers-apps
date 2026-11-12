@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { CelebrationService } from 'celebration';
 import type { Bite, Geopoint } from 'model';
-import type { BiteFormValue } from '../components/page/bite.page';
+import type { BiteSubmission } from '../components/page/bite.page';
 import { biteSourceOf, withDraftProvenance } from './bite-provenance';
 import { withAddressInvalidatedIfMoved } from './bite-address';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
@@ -41,6 +41,7 @@ export class BiteService {
   tagSuggestionsForEditingBite = this.dataAccess.tagSuggestionsForEditingBite;
   taggableUsers = this.dataAccess.taggableUsers;
   taggedUsers = this.dataAccess.taggedUsers;
+  storedPhotoPosition = this.dataAccess.storedPhotoPosition;
   googlePlaces = this.dataAccess.googlePlaces;
   googlePlacesLoading = this.dataAccess.googlePlacesLoading;
   nearbyGooglePlaces = this.dataAccess.nearbyGooglePlaces;
@@ -93,7 +94,7 @@ export class BiteService {
     return !!b && a.latitude === b.latitude && a.longitude === b.longitude;
   }
 
-  async submitNewBite(newBite: BiteFormValue): Promise<void> {
+  async submitNewBite(newBite: BiteSubmission): Promise<void> {
     await this.createBite(newBite, (first) => {
       void this.navController.navigateBack(['home']);
 
@@ -106,7 +107,7 @@ export class BiteService {
    * the same place can be posted right away. A first Bite celebrates over the
    * form.
    */
-  async submitNewBiteAndAddAnother(newBite: BiteFormValue): Promise<void> {
+  async submitNewBiteAndAddAnother(newBite: BiteSubmission): Promise<void> {
     await this.createBite(newBite, (first) => this.confirmCreated(first));
   }
 
@@ -127,7 +128,7 @@ export class BiteService {
   }
 
   private async createBite(
-    newBite: BiteFormValue,
+    newBite: BiteSubmission,
     onCreated: (first: boolean) => void,
   ): Promise<void> {
     const loading = await this.loadingController.create({
@@ -137,7 +138,9 @@ export class BiteService {
     });
     await loading.present();
 
-    const { id, ...biteData } = newBite;
+    // The photo position is taken off here and stored apart: anything left on
+    // the document is readable by every member (GitHub issue #1290).
+    const { id, photoPosition, ...biteData } = newBite;
     void id;
 
     // Read before the write: `submitNewBite` clears the draft as its first act,
@@ -153,7 +156,7 @@ export class BiteService {
     const first = (await this.dataAccess.hasOwnBites()) === false;
 
     try {
-      await this.dataAccess.submitNewBite(document);
+      await this.dataAccess.submitNewBite(document, photoPosition ?? undefined);
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated, {
         source: biteSourceOf(document),
@@ -165,13 +168,15 @@ export class BiteService {
     }
   }
 
-  submitEditedBite(editedBite: BiteFormValue): void {
+  submitEditedBite(submission: BiteSubmission): void {
+    // Taken off for the reason `createBite` gives (GitHub issue #1290).
+    const { photoPosition, ...editedBite } = submission;
     const bite = withAddressInvalidatedIfMoved(
       editedBite as unknown as Bite,
       this.biteValue(),
     );
 
-    void this.dataAccess.submitEditedBite(bite);
+    void this.dataAccess.submitEditedBite(bite, photoPosition);
     this.location.back();
   }
 

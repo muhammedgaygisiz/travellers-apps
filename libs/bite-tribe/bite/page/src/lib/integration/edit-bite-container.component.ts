@@ -21,6 +21,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
       [taggableUsers]="service.taggableUsers()"
       [taggedUsers]="service.taggedUsers()"
+      [storedPhotoPosition]="service.storedPhotoPosition()"
       [googlePlaces]="service.googlePlaces()"
       [googlePlacesLoading]="service.googlePlacesLoading()"
       (submitBite)="service.submitEditedBite($event)"

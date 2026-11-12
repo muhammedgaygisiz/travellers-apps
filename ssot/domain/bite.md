@@ -249,6 +249,7 @@ Current product expectation:
   - Review Bite.
   - Save a listable Bite to a bucket list. A Bite whose photo has not arrived is refused, with the reason.
   - Discover Bites through feed, map, search, restaurant, profile, bucket list, and BiteTrail flows.
+  - Read and write the photo position kept for its own Bite at `/bites/{biteId}/authorPrivate/{uid}` ([#1290]). It is the one document under a Bite no other member can read, because it holds the position the author may have chosen not to publish; it is deleted with the Bite and with the account.
   - Report somebody else's Bite to the operators, once per Bite, through `reportBite` ([#1608]). The report is a `/biteReports/{biteId}_{reporterUid}` document only an operator can read; it changes nothing on the Bite, and it is deleted with the Bite.
 - Admin
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
@@ -300,6 +301,7 @@ Firestore:
 ```text
 /bites/{biteId}
 /bites/{biteId}/likes/{userId}
+/bites/{biteId}/authorPrivate/{userId}
 /reviews/{reviewId}
 /bucketlists/{bucketlistId}
 ```
@@ -417,3 +419,4 @@ images/bites/{biteId}/{filename}
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916
 [#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920
+[#1290]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1290

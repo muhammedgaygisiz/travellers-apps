@@ -21,6 +21,7 @@ const emptyDraft = (): LandingPageDraft => ({
   metaDescription: '',
   intro: '',
   biteIds: [],
+  aliases: [],
 });
 
 const entryFromSearch = (bite: SearchBite): LandingPageEntry => ({
@@ -118,6 +119,7 @@ export class LandingPagesService {
       title: page.title,
       metaDescription: page.metaDescription,
       intro: page.intro,
+      aliases: page.aliases ?? [],
     });
     this.entries.set(
       page.items.map((item) => ({
@@ -132,10 +134,23 @@ export class LandingPagesService {
   }
 
   updateField(
-    field: keyof Omit<LandingPageDraft, 'biteIds'>,
+    field: Exclude<keyof LandingPageDraft, 'biteIds' | 'aliases'>,
     value: string,
   ): void {
     this.fields.update((fields) => ({ ...fields, [field]: value }));
+  }
+
+  /**
+   * Reads the aliases field: names separated by commas or spaces, lower-cased.
+   * The callable checks their shape and that no other page claims them.
+   */
+  updateAliases(text: string): void {
+    const aliases = text
+      .split(/[\s,]+/)
+      .map((alias) => alias.trim().toLowerCase())
+      .filter(Boolean);
+
+    this.fields.update((fields) => ({ ...fields, aliases }));
   }
 
   async search(term: string): Promise<void> {

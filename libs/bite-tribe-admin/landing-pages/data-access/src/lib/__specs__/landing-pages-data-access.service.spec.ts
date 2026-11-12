@@ -20,6 +20,7 @@ const draft: LandingPageDraft = {
   metaDescription: 'Five dishes.',
   intro: 'Why these.',
   biteIds: ['b1', 'b2', 'b3'],
+  aliases: [],
 };
 
 describe(LandingPagesDataAccessService.name, () => {

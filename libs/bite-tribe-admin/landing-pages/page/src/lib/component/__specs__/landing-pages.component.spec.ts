@@ -37,6 +37,7 @@ const draft: LandingPageDraft = {
   metaDescription: 'Five dishes.',
   intro: 'Why these.',
   biteIds: ['b1'],
+  aliases: [],
 };
 
 const published: LandingPage = {
@@ -208,6 +209,23 @@ describe(LandingPagesComponent.name, () => {
       expect(
         element('admin-landing-preview-frame')?.getAttribute('sandbox'),
       ).toBe('');
+    });
+  });
+
+  describe('aliases', () => {
+    it('lists the alias URLs that redirect to the page', () => {
+      setInputs({ editing: true, draft: { ...draft, aliases: ['bln'] } });
+
+      expect(component.aliasUrls()).toEqual(['https://bitetribe.app/eat/bln']);
+      expect(element('admin-landing-alias-urls')?.textContent).toContain(
+        'https://bitetribe.app/eat/bln',
+      );
+    });
+
+    it('shows no alias line for a page without aliases', () => {
+      setInputs({ editing: true });
+
+      expect(element('admin-landing-alias-urls')).toBeNull();
     });
   });
 

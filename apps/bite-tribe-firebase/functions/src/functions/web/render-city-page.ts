@@ -109,7 +109,23 @@ export const renderCityPage = onRequest(async (req, res) => {
     }
 
     const snap = await db.collection('landingPages').doc(city).get();
-    const page = snap.exists ? (snap.data() as LandingPage) : undefined;
+    let page = snap.exists ? (snap.data() as LandingPage) : undefined;
+    // The page's own city when the request named one of its aliases instead
+    // (issue #1974): `/eat/koeln` for the page at `/eat/cologne`.
+    let canonicalCity: string | undefined;
+
+    if (!page) {
+      const aliased = await db
+        .collection('landingPages')
+        .where('aliases', 'array-contains', city)
+        .get();
+      const match = aliased.docs[0];
+
+      if (match) {
+        page = match.data() as LandingPage;
+        canonicalCity = match.id;
+      }
+    }
 
     if (!page) {
       notFound(res);
@@ -124,6 +140,16 @@ export const renderCityPage = onRequest(async (req, res) => {
 
     if (page.status !== 'published') {
       notFound(res);
+      return;
+    }
+
+    // An alias never serves the page a second time: two URLs with one
+    // content would split its ranking. It answers as the page would - 404 for
+    // a draft, 410 once withdrawn - and otherwise sends the reader on, for
+    // good, to the one URL search engines should index.
+    if (canonicalCity) {
+      res.set('Cache-Control', PUBLISHED_CACHE_CONTROL);
+      res.redirect(301, landingPageUrl({ city: canonicalCity }));
       return;
     }
 

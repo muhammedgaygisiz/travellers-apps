@@ -41,7 +41,10 @@ import {
 } from 'bite-tribe-admin/landing-pages-data-access';
 import { LandingPageEntry } from './landing-page-entry';
 
-export type LandingPageField = keyof Omit<LandingPageDraft, 'biteIds'>;
+export type LandingPageField = Exclude<
+  keyof LandingPageDraft,
+  'biteIds' | 'aliases'
+>;
 
 /**
  * The operator's city landing page editor (epic #1487, issue #1490).
@@ -102,6 +105,7 @@ export class LandingPagesComponent {
   readonly newPage = output<void>();
   readonly openPage = output<LandingPage>();
   readonly fieldChange = output<{ field: LandingPageField; value: string }>();
+  readonly aliasesChange = output<string>();
   readonly searchSubmit = output<string>();
   readonly addBite = output<SearchBite>();
   readonly removeBite = output<string>();
@@ -129,6 +133,11 @@ export class LandingPagesComponent {
 
     return draft.city ? landingPageUrl(draft) : undefined;
   });
+
+  /** The alias URLs, each of which redirects to {@link publicUrl}. */
+  readonly aliasUrls = computed(() =>
+    this.draft().aliases.map((alias) => landingPageUrl({ city: alias })),
+  );
 
   readonly chosenIds = computed(
     () => new Set(this.entries().map((entry) => entry.biteId)),

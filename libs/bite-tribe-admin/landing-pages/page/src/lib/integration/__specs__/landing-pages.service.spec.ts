@@ -25,6 +25,7 @@ const stored: LandingPage = {
   metaDescription: 'Five dishes.',
   intro: 'Why these.',
   biteIds: ['b1', 'b2', 'b3'],
+  aliases: ['bln'],
   status: 'draft',
   items: [1, 2, 3].map((n) => ({
     biteId: `b${n}`,
@@ -84,8 +85,20 @@ describe(LandingPagesService.name, () => {
       metaDescription: 'Five dishes.',
       intro: 'Why these.',
       biteIds: ['b1', 'b2', 'b3'],
+      aliases: ['bln'],
     });
     expect(service.publishable()).toBe(true);
+  });
+
+  it('reads aliases separated by commas or spaces, lower-cased', async () => {
+    service.open(stored);
+    service.updateAliases(' Koeln, KOLN  cologne-city ,');
+
+    await service.save();
+
+    expect(dataAccess['save']).toHaveBeenCalledWith(
+      expect.objectContaining({ aliases: ['koeln', 'koln', 'cologne-city'] }),
+    );
   });
 
   it('saves the Bites in the order they were arranged', async () => {

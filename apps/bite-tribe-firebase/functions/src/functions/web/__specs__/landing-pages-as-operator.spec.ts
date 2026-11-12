@@ -226,6 +226,75 @@ describe('landing pages as operator', () => {
     });
   });
 
+  describe('aliases', () => {
+    it('saves the aliases a page answers under', async () => {
+      await call(
+        saveLandingPageHandler,
+        input({ aliases: ['koeln', 'koeln'] }),
+      );
+
+      expect(db.read('landingPages/berlin')?.['aliases']).toEqual(['koeln']);
+      expect(operatorLogs()).toEqual([
+        expect.objectContaining({
+          details: expect.objectContaining({ aliases: ['koeln'] }),
+        }),
+      ]);
+    });
+
+    it("refuses the page's own city as an alias", async () => {
+      await expect(
+        call(saveLandingPageHandler, input({ aliases: ['berlin'] })),
+      ).rejects.toMatchObject({ code: 'invalid-argument' });
+    });
+
+    it("refuses an alias that is another page's city", async () => {
+      db.seed('landingPages/munich', { city: 'munich', aliases: [] });
+
+      await expect(
+        call(saveLandingPageHandler, input({ aliases: ['munich'] })),
+      ).rejects.toMatchObject({
+        code: 'already-exists',
+        message: expect.stringContaining('munich'),
+      });
+    });
+
+    it("refuses an alias that is another page's alias", async () => {
+      db.seed('landingPages/munich', { city: 'munich', aliases: ['muenchen'] });
+
+      await expect(
+        call(saveLandingPageHandler, input({ aliases: ['muenchen'] })),
+      ).rejects.toMatchObject({
+        code: 'already-exists',
+        message: expect.stringContaining('/eat/munich'),
+      });
+    });
+
+    it('refuses a new page whose city another page claims as an alias', async () => {
+      db.seed('landingPages/cologne', { city: 'cologne', aliases: ['berlin'] });
+
+      await expect(call(saveLandingPageHandler, input())).rejects.toMatchObject(
+        { code: 'already-exists' },
+      );
+      expect(db.exists('landingPages/berlin')).toBe(false);
+    });
+
+    it('keeps its own aliases when the page is saved again', async () => {
+      await call(saveLandingPageHandler, input({ aliases: ['bln'] }));
+      await call(saveLandingPageHandler, input({ aliases: ['bln'] }));
+
+      expect(db.read('landingPages/berlin')?.['aliases']).toEqual(['bln']);
+    });
+
+    it('refuses more than five aliases', async () => {
+      await expect(
+        call(
+          saveLandingPageHandler,
+          input({ aliases: ['a', 'b', 'c', 'd', 'e', 'f'] }),
+        ),
+      ).rejects.toMatchObject({ code: 'invalid-argument' });
+    });
+  });
+
   describe('setLandingPageStatus', () => {
     it('publishes a page with three to five Bites', async () => {
       await call(saveLandingPageHandler, input());

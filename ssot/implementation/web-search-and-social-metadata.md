@@ -309,8 +309,12 @@ the rewrite; that was checked against the emulator with `Accept-Language: de`.
 | ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------ |
 | `/eat/<city>`, `status: published`                           | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400` |
 | `/eat/<city>`, `status: withdrawn`                           | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                  |
+| `/eat/<alias>` of a published page                           | `301` to `/eat/<city>`                       | as a published page                                                |
 | `status: draft`, an unknown city, or any other shape of path | `404`                                        | `public, max-age=60, s-maxage=60`                                  |
 | `/eat/sitemap.xml`                                           | `200`, the published set                     | as a published page                                                |
+
+An alias of a draft or withdrawn page answers `404` or `410` exactly as the
+page's own URL would, so an alias never reveals an unpublished page.
 
 The short cache on `404` and `410` is so a page published moments after a
 crawler asked for its URL is not hidden for an hour. A path that is not
@@ -323,15 +327,16 @@ without reading Firestore.
 (`saveLandingPage`, `setLandingPageStatus`); there is no client rule for the
 collection.
 
-| Field                                   | Meaning                                                                                                |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `city`                                  | The document id and the URL segment, `[a-z0-9-]`. Fixed once saved; `cityName` is how a reader sees it |
-| `countryCode`, `locale`                 | ISO country and the language of the page's prose, which sets `<html lang>`                             |
-| `status`                                | `draft`, `published` or `withdrawn`                                                                    |
-| `title`, `metaDescription`, `intro`     | The operator's text. All three are required to publish                                                 |
-| `items`                                 | The snapshot: three to five Bites, in order                                                            |
-| `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it                            |
-| `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                                               |
+| Field                                   | Meaning                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `city`                                  | The document id and the URL segment, `[a-z0-9-]`. Fixed once saved; `cityName` is how a reader sees it       |
+| `countryCode`, `locale`                 | ISO country and the language of the page's prose, which sets `<html lang>`                                   |
+| `aliases`                               | Other names the page answers under, same shape as `city`, at most five. Each redirects with `301`; see below |
+| `status`                                | `draft`, `published` or `withdrawn`                                                                          |
+| `title`, `metaDescription`, `intro`     | The operator's text. All three are required to publish                                                       |
+| `items`                                 | The snapshot: three to five Bites, in order                                                                  |
+| `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it                                  |
+| `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                                                     |
 
 **An entry is a Bite, shown as its photo, its name and where it is** -
 `biteId`, `name`, `imageUrl` (the Bite photo), `place` and `locality` (the
@@ -345,6 +350,23 @@ that is missing or not listable is refused by id at save time rather than
 dropped. Publishing re-snapshots, so what goes live is the Bites as they are
 then; an edit to a page that is already live goes live with the save and is
 held to the same bar.
+
+### Aliases
+
+**A page can answer under more than one name, but only one URL serves it.**
+Added for [#1974], with Cologne as the first case: `/eat/cologne` is the page,
+and `/eat/koeln` answers `301` to it. Serving the same document at two URLs
+would be duplicate content, and a search engine would split the page's ranking
+between them and choose a canonical itself; a permanent redirect hands the
+second name's ranking to the first instead.
+
+`renderCityPage` looks for an alias only when no page has the requested city
+as its id, with an `array-contains` query on `aliases` (a single-field index).
+`saveLandingPage` refuses an alias that equals the page's own city, another
+page's city or another page's alias, and a new page whose city another page
+already claims as an alias, so every name leads to exactly one page. The
+published-set sitemap lists the canonical URL only. The city itself stays
+fixed once saved; an alias is how a second name is added.
 
 ### What The Page Carries
 
@@ -458,3 +480,4 @@ Once deployed:
 [#1490]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1490
 [#1491]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1491
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
+[#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974

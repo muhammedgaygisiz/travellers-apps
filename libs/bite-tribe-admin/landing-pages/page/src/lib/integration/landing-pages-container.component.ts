@@ -26,6 +26,7 @@ import { LandingPagesService } from './landing-pages.service';
     (newPage)="service.newPage()"
     (openPage)="service.open($event)"
     (fieldChange)="service.updateField($event.field, $event.value)"
+    (aliasesChange)="service.updateAliases($event)"
     (searchSubmit)="service.search($event)"
     (addBite)="service.addBite($event)"
     (removeBite)="service.removeBite($event)"

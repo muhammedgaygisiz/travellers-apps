@@ -1,4 +1,4 @@
-import { escapeHtml, renderHtml } from '../render-html';
+import { escapeHtml, renderShareStub } from '../render-html';
 
 // The Bite name from issue #1488: the first copy of each metacharacter was
 // consumed by the old escape, and the second copy survived into the document.
@@ -30,9 +30,9 @@ describe('escapeHtml', () => {
   });
 });
 
-describe('renderHtml', () => {
+describe('renderShareStub', () => {
   const render = (title: string, description = 'EUR 12 · ⭐️ 5'): string =>
-    renderHtml({
+    renderShareStub({
       title,
       description,
       imageUrl: 'https://example.com/bite.jpg',

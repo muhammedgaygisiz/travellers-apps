@@ -11,24 +11,52 @@ export const escapeHtml = (s: string): string => {
     .replace(/'/g, '&#039;');
 };
 
-export const renderHtml = (opts: {
+export interface SocialMeta {
   title: string;
   description: string;
   imageUrl: string | undefined;
   canonicalUrl: string;
-  redirectUrl: string;
-}): string => {
+}
+
+/**
+ * The `<head>` tags a crawler and a link unfurler read: title, canonical, Open
+ * Graph and Twitter. Shared by the share stub below and the city landing page
+ * (issue #1489), so the two cannot drift apart in how they declare themselves.
+ * Every value is escaped here; callers pass raw text.
+ */
+export const renderSocialMeta = (opts: SocialMeta): string => {
   const title = escapeHtml(opts.title);
   const description = escapeHtml(opts.description);
   const canonicalUrl = escapeHtml(opts.canonicalUrl);
-  const redirectUrl = escapeHtml(opts.redirectUrl);
 
   const imageMeta = opts.imageUrl
     ? `
-        <meta property="og:image" content="${escapeHtml(opts.imageUrl)}">
-        <meta name="twitter:image" content="${escapeHtml(opts.imageUrl)}">
-      `
+  <meta property="og:image" content="${escapeHtml(opts.imageUrl)}" />
+  <meta name="twitter:image" content="${escapeHtml(opts.imageUrl)}" />`
     : '';
+
+  return `<title>${title}</title>
+  <link rel="canonical" href="${canonicalUrl}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:url" content="${canonicalUrl}" />${imageMeta}
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />`;
+};
+
+/**
+ * The unfurl stub behind `/s/bite/<id>`: just enough `<head>` for a link
+ * preview, then an immediate redirect into the app. A waypoint rather than a
+ * destination, which is why the city landing page has its own template.
+ */
+export const renderShareStub = (
+  opts: SocialMeta & { redirectUrl: string },
+): string => {
+  const redirectUrl = escapeHtml(opts.redirectUrl);
 
   // Crawlers: read OG tags in <head>
   // Humans: redirect immediately (and also show a link)
@@ -38,18 +66,7 @@ export const renderHtml = (opts: {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>${title}</title>
-  <link rel="canonical" href="${canonicalUrl}" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="${title}" />
-  <meta property="og:description" content="${description}" />
-  <meta property="og:url" content="${canonicalUrl}" />
-  ${imageMeta}
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${title}" />
-  <meta name="twitter:description" content="${description}" />
+  ${renderSocialMeta(opts)}
 
   <meta http-equiv="refresh" content="0;url=${redirectUrl}" />
 </head>

@@ -1,0 +1,104 @@
+import { LandingPage, LandingPageItem } from '../model/landing-page';
+import { BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
+import { escapeHtml, renderSocialMeta } from './render-html';
+
+/**
+ * The full document for a city landing page (issue #1489). Unlike the share
+ * stub it is the destination: no `meta refresh`, no script, and everything a
+ * crawler needs is in the one response.
+ *
+ * Plain HTML with inline CSS on purpose. The page is read far more often by
+ * crawlers and link unfurlers than by people, and the consumer app's bundle is
+ * the wrong payload for a document whose job is to be parsed.
+ */
+
+const STYLE = `
+  :root { color-scheme: light dark; --fg:#1d1d1b; --muted:#6b6a65; --line:#e4e2da; --card:#f6f5f0; --bg:#fff; }
+  @media (prefers-color-scheme: dark) { :root { --fg:#f1efe8; --muted:#a9a79f; --line:#3a3a37; --card:#262624; --bg:#1a1a18; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--fg); background:var(--bg); }
+  a { color:inherit; }
+  header, main, footer { max-width:1080px; margin:0 auto; padding:0 16px; }
+  header { display:flex; align-items:center; justify-content:space-between; height:56px; border-bottom:1px solid var(--line); }
+  .brand { font-weight:600; text-decoration:none; }
+  .eyebrow { color:var(--muted); font-size:14px; margin:24px 0 4px; }
+  h1 { font-size:28px; line-height:1.25; margin:0 0 12px; }
+  .intro { color:var(--muted); max-width:680px; margin:0 0 24px; white-space:pre-line; }
+  ol { list-style:none; padding:0; margin:0 0 32px; display:grid; gap:24px; }
+  li img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; background:var(--card); display:block; }
+  h2 { font-size:18px; margin:10px 0 0; }
+  .loc { color:var(--muted); font-size:14px; margin:2px 0 0; }
+  footer { border-top:1px solid var(--line); padding-top:16px; padding-bottom:32px; color:var(--muted); font-size:14px; }
+  footer a { margin-right:16px; }
+  @media (min-width:720px) { h1 { font-size:36px; } ol { grid-template-columns:repeat(3,1fr); gap:24px; } }
+`;
+
+/** `/eat/<city>/<slug>` on the canonical host, never `bite-tribe.web.app`. */
+export const landingPageUrl = (page: Pick<LandingPage, 'city' | 'slug'>) =>
+  `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}/${encodeURIComponent(page.slug)}`;
+
+const renderItem = (item: LandingPageItem, index: number): string => {
+  const name = escapeHtml(item.name);
+  const location = [item.place, item.locality].filter(Boolean).join(' · ');
+
+  return `
+      <li>
+        <img src="${escapeHtml(item.imageUrl)}" alt="${name}" loading="${index === 0 ? 'eager' : 'lazy'}" width="800" height="800" />
+        <h2>${name}</h2>
+        <p class="loc">${escapeHtml(location)}</p>
+      </li>`;
+};
+
+const formatMonth = (page: LandingPage): string | undefined => {
+  const at = page.updatedAt ?? page.publishedAt;
+  if (!at) {
+    return undefined;
+  }
+  try {
+    return at
+      .toDate()
+      .toLocaleDateString(page.locale, { month: 'long', year: 'numeric' });
+  } catch {
+    return undefined;
+  }
+};
+
+export const renderLandingPage = (page: LandingPage): string => {
+  const month = formatMonth(page);
+  const eyebrow = [page.cityName, month].filter(Boolean).join(' · ');
+
+  return `<!doctype html>
+<html lang="${escapeHtml(page.locale || 'en')}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="${escapeHtml(page.metaDescription)}" />
+  <meta property="og:site_name" content="BiteTribe" />
+
+  ${renderSocialMeta({
+    title: page.title,
+    description: page.metaDescription,
+    imageUrl: page.items[0]?.imageUrl,
+    canonicalUrl: landingPageUrl(page),
+  })}
+
+  <style>${STYLE}</style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="${BITE_TRIBE_ORIGIN}/">BiteTribe</a>
+  </header>
+  <main>
+    <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+    <h1>${escapeHtml(page.title)}</h1>
+    <p class="intro">${escapeHtml(page.intro)}</p>
+    <ol>${page.items.map(renderItem).join('')}
+    </ol>
+  </main>
+  <footer>
+    <a href="${BITE_TRIBE_ORIGIN}/support">Support</a>
+    <a href="${BITE_TRIBE_ORIGIN}/privacy">Privacy</a>
+  </footer>
+</body>
+</html>`;
+};

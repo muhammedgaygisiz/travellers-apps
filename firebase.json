@@ -40,6 +40,7 @@
       },
       "rewrites": [
         { "source": "/s/**", "function": "handleSharedLinkToBite" },
+        { "source": "/eat/**", "function": "renderCityPage" },
         { "source": "/download", "function": "handleDownloadLink" },
         { "source": "/download/**", "function": "handleDownloadLink" },
         { "source": "/unsubscribe/**", "function": "handleEmailUnsubscribe" },

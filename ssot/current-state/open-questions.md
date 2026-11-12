@@ -127,12 +127,12 @@ Moderation questions raised by threading are recorded on [epic-1284](../records/
 
 ## Public Content Questions
 
-These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Each gates the first published page rather than the first commit, and two of them are not engineering questions.
+These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Each gated the first published page rather than the first commit. Three were settled when the pages were built on 12 November 2026; the Impressum is still open and still gates the first public page.
 
-- May a member's Bite photo appear on a public marketing page? In-app display to signed-in members is a different use, and the terms and the privacy policy have to permit the public one. The epic's proposal is that the first pages use restaurant-supplied and operator-supplied imagery only. Google Places photos are not implicated: `get-place-details` keeps `photos` out of its field mask.
+- May a member's Bite photo appear on a public marketing page? **Decided on 12 November 2026, on [#1487]: yes.** An entry on a page is a Bite, shown as its photo, its name and where it is, so the Bite photo is the page's image. This replaces the epic's proposal of restaurant-supplied and operator-supplied imagery only. What the terms and the privacy policy say about it is not settled by the decision; the terms do not exist yet ([#1772]). Google Places photos are not implicated: `get-place-details` keeps `photos` out of its field mask.
 - Does an editorial page published under the company name need an Impressum? The public surface today is support, privacy and account deletion, none of which is editorial. Answer before a page is public, not after.
-- What is the content bar for publishing a page? One production restaurant has a menu. A curated list whose entries have no dishes behind them is the thin-page pattern that costs a domain more than it earns, so the epic proposes a stated minimum of real Bites with photos per entry, and one city in the first release.
-- Does the URL space keep `/eat/<city>/<slug>`? Cheap to change before the first page is indexed and expensive after.
+- What is the content bar for publishing a page? **Settled by the entry decision:** an entry is itself a Bite with its photo, and a page needs three to five of them plus a meta description and an intro before `setLandingPageStatus` will publish it. A Bite whose photo never arrived cannot be chosen. One city in the first release is the operator's call rather than a rule the editor enforces.
+- Does the URL space keep `/eat/<city>/<slug>`? **Settled: yes, as built.** Changing it after the first page is indexed is expensive. A withdrawn page answers `410` rather than `404`, as the epic proposed.
 
 ## Share As Image Questions
 

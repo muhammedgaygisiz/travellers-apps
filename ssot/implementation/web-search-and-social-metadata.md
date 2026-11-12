@@ -4,7 +4,8 @@
 
 This page owns what search engines and link unfurlers read when they reach the
 BiteTribe web app: the canonical host, the document metadata, the document
-title, `robots.txt`, `sitemap.xml`, and the Open Graph image.
+title, `robots.txt`, both sitemaps, the Open Graph image, and the public city
+landing pages.
 
 [Implementation - Store Listing Assets](store-listing-assets.md) owns the approved copy. This page owns
 where that copy is served on the web, so the stores and the site cannot drift
@@ -151,7 +152,7 @@ Both live in `libs/bite-tribe/shell` and are registered in `app.config.ts`.
 navigation. Only Googlebot, which does render JavaScript, ever sees the narrowed
 value.
 
-It exists because the sitemap lists four pages while the static tag claims all of
+It exists because the static sitemap lists four pages while the static tag claims all of
 them are the site root. Without it, `/support` and `/privacy` would be submitted
 for indexing and simultaneously declare themselves duplicates.
 
@@ -184,18 +185,35 @@ Both live in `apps/bite-tribe/public`, which the `public` asset entry in
 `apps/bite-tribe/project.json` copies to the site root. The folder was created by
 [#1454]; the build already referenced it.
 
-`sitemap.xml` lists four URLs: the root, `/support`, `/privacy` and
-`/account-deletion`. That is every route that renders without a session. The app
-is a single-page app behind a login, so nothing else has anything to show a
-crawler.
+There are two sitemaps, and each owns its own URLs:
+
+| Sitemap                                 | Owns                                                                 | Written by                                           |
+| --------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| `https://bitetribe.app/sitemap.xml`     | The four Angular routes that render without a session                | Hand, as the static file in `apps/bite-tribe/public` |
+| `https://bitetribe.app/eat/sitemap.xml` | Every published city landing page, with `lastmod` from `publishedAt` | `renderCityPage`, from the published set             |
+
+The static `sitemap.xml` lists four URLs: the root, `/support`, `/privacy` and
+`/account-deletion`. Those are the Angular routes that render without a
+session; the app is a single-page app behind a login, so no other route has
+anything to show a crawler. The city landing pages are not Angular routes and
+never appear in it - a growing, operator-published set cannot live in a static
+file - so they have the second sitemap, described under
+[City Landing Pages](#city-landing-pages).
 
 `robots.txt` allows everything except the authenticated surfaces, which render a
 redirect to `/start` for a signed-out crawler and would otherwise be indexed as
-thin duplicates of the start page. `/s/bite/<id>` is deliberately allowed: it is
-the shared-link function, and it serves its own title, description and image.
+thin duplicates of the start page. Two prefixes are deliberately allowed, each
+because it is server-rendered by a function and serves its own title,
+description and image: `/s/bite/<id>`, the shared-link function, and `/eat/`,
+the city landing pages. The file says so in a comment, so neither is added to
+the disallow list by symmetry with the app routes. It carries two `Sitemap:`
+lines, one per sitemap above.
 
-**A new public route needs three edits: the sitemap, `robots.txt`, and
-`SELF_CANONICAL_PATHS` in `canonical-url.ts`.**
+**A new public Angular route needs three edits: the static sitemap,
+`robots.txt`, and `SELF_CANONICAL_PATHS` in `canonical-url.ts`.** A new
+function-served route needs none of the third: Angular never bootstraps on it,
+so the function writes its own canonical, and it reaches a sitemap the way the
+city pages do rather than through the static file.
 
 ## The Download Link
 
@@ -263,6 +281,99 @@ The two halves ship from different CI jobs and neither waits for the other.
 once **both** have run: the rewrite without the function is a `404`, and the
 function without the rewrite is reachable only at its Cloud Functions URL.
 
+## City Landing Pages
+
+**`https://bitetribe.app/eat/<city>/<slug>` is a public, server-rendered list of
+three to five Bites in one city, curated in the admin app.** Added 12 November
+2026 by epic [#1487]: the page in [#1489], the editor in [#1490], the structured
+data and sitemap in [#1491], the links into the app in [#1492].
+
+### Rendered By A Function
+
+`renderCityPage` in
+`apps/bite-tribe-firebase/functions/src/functions/web/render-city-page.ts`,
+reached through the `/eat/**` rewrite on the `bite-tribe` hosting target, next
+to `/s/**`. It reads one `landingPages` document with the Admin SDK and returns
+a complete HTML document, so the browser never opens a Firestore connection:
+the security rules and App Check are not in the request path, and neither was
+loosened for it. The `i18n` block on the hosting target does not interfere with
+the rewrite; that was checked against the emulator with `Accept-Language: de`.
+
+| Request                                                          | Answer                                       | `Cache-Control`                                                    |
+| ---------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| `/eat/<city>/<slug>`, `status: published`                        | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400` |
+| `/eat/<city>/<slug>`, `status: withdrawn`                        | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                  |
+| `status: draft`, an unknown slug, or the wrong city for the slug | `404`                                        | `public, max-age=60, s-maxage=60`                                  |
+| `/eat/sitemap.xml`                                               | `200`, the published set                     | as a published page                                                |
+
+The short cache on `404` and `410` is so a page published moments after a
+crawler asked for its slug is not hidden for an hour. A page is answered under
+its own city only, so one document cannot be indexed under two URLs.
+
+### The Document
+
+`landingPages/<slug>`, written only by the operator callables
+(`saveLandingPage`, `setLandingPageStatus`); there is no client rule for the
+collection.
+
+| Field                                   | Meaning                                                                     |
+| --------------------------------------- | --------------------------------------------------------------------------- |
+| `slug`                                  | The document id and the last URL segment. Fixed once saved                  |
+| `city`                                  | The URL segment, `[a-z0-9-]`; `cityName` is how a reader sees it            |
+| `countryCode`, `locale`                 | ISO country and the language of the page's prose, which sets `<html lang>`  |
+| `status`                                | `draft`, `published` or `withdrawn`                                         |
+| `title`, `metaDescription`, `intro`     | The operator's text. All three are required to publish                      |
+| `items`                                 | The snapshot: three to five Bites, in order                                 |
+| `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it |
+| `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                    |
+
+**An entry is a Bite, shown as its photo, its name and where it is** -
+`biteId`, `name`, `imageUrl` (the Bite photo), `place` and `locality` (the
+Bite's city). Decided on [#1487] on 12 November 2026, in place of the
+restaurant-and-sentence entries the epic first proposed.
+
+**`items` is a snapshot, not a join.** Saving and publishing copy each Bite
+into it; the page renders the copy. A Bite renamed, delisted or deleted after
+publishing does not change or break a page that is already indexed. A Bite
+that is missing or not listable is refused by id at save time rather than
+dropped. Publishing re-snapshots, so what goes live is the Bites as they are
+then; an edit to a page that is already live goes live with the save and is
+held to the same bar.
+
+### What The Page Carries
+
+- Its own title, meta description, canonical on `bitetribe.app`, Open Graph
+  and Twitter tags. The image is the first Bite's photo, an absolute Storage
+  URL.
+- One JSON-LD block: an `ItemList` of the Bites in order. Each entry is the
+  `Restaurant` the Bite was eaten at, with a city-level `PostalAddress` (a Bite
+  carries no street), holding the dish as a `MenuItem` on its `Menu`. The JSON
+  escapes every `<`, so no text can close the `<script>` element. It is the
+  only script on the page.
+- One primary call to action, "Open BiteTribe", to `/?city_page=<slug>`; and
+  each Bite links to `/bite/<id>?city_page=<slug>`. A member lands on the Home
+  feed or the Bite; a signed-out visitor is sent to `/start` by `authGuard`,
+  which remembers a Bite and opens it after sign-in. On a wide screen the App
+  Store and Google Play QR codes from [#1453] sit beside the button, served
+  from the same `/assets/store/` files; a phone gets the button as a bar pinned
+  to the bottom.
+- **No analytics, cookie or storage.** The visit is attributed at the
+  destination instead: the consumer app logs `city_page_arrived` from the
+  `city_page` parameter before the first navigation. See
+  [Implementation - Analytics Events](analytics-events.md).
+
+Every text field is escaped with `escapeHtml`, which replaces every occurrence
+since [#1488]. The share stub and the page share `renderSocialMeta` for their
+head tags; only the share stub redirects.
+
+### Not Yet
+
+- A phone with the app installed opens these links in the browser: the
+  associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/` or `/bite/*`.
+- Pages are written in one language. `hreflang` arrives with the second.
+- Whether an editorial page needs an Impressum is open; see
+  [Current State - Open Questions](../current-state/open-questions.md).
+
 ## The Open Graph Image
 
 `apps/bite-tribe/src/assets/social/og-image.jpg`, `1200x630`, about 138 KB.
@@ -285,10 +396,11 @@ same image is 1 MB against 138 KB.
 
 ## Deliberately Not Done
 
-- **Per-route Open Graph tags.** Unfurlers do not run the app, so a shared link
-  to any in-app route unfurls with the site card. The one route that unfurls with
-  its own content is `/s/bite/<id>`, which is server-rendered by
-  `handleSharedLinkToBite` and already carries its own tags.
+- **Per-route Open Graph tags in the Angular app.** Unfurlers do not run the
+  app, so a shared link to any in-app route unfurls with the site card. Two
+  function-served routes unfurl with their own content and carry their own
+  tags: `/s/bite/<id>`, rendered by `handleSharedLinkToBite`, and every city
+  landing page under `/eat/`, rendered by `renderCityPage`.
 - **Moving the `bite-tribe.web.app` references.** Done on 19 September 2026 by
   [#345]; see the canonical host section. The host itself stays registered.
 - **`manifest.webmanifest`.** It still calls the app `bite-tribe` and carries no
@@ -306,6 +418,9 @@ Once deployed:
   `https://bitetribe.app/` without errors.
 - `https://bitetribe.app/robots.txt` and `https://bitetribe.app/sitemap.xml`
   should resolve on all three hosts.
+- After the first city page is published, Google's Rich Results test should
+  parse it without errors, and `https://bitetribe.app/eat/sitemap.xml` should be
+  submitted in Search Console as a second sitemap.
 - The Google snippet only changes after a recrawl. Submit the sitemap in Search
   Console rather than waiting.
 
@@ -314,6 +429,7 @@ Once deployed:
 - [Implementation - Store Listing Assets](store-listing-assets.md)
 - [Implementation - Social Media Channels](social-media-channels.md)
 - [Implementation - Localization](localization.md)
+- [Implementation - Analytics Events](analytics-events.md)
 - [Architecture - Overview](../architecture/overview.md)
 - [Current State - Release State](../current-state/release-state.md)
 
@@ -325,3 +441,9 @@ Once deployed:
 [#1455]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1455
 [#1628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1628
 [#1651]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1651
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+[#1488]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1488
+[#1489]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1489
+[#1490]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1490
+[#1491]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1491
+[#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492

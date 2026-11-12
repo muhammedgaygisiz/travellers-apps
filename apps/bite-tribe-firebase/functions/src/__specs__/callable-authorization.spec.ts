@@ -279,6 +279,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // public.
   handleDownloadLink: 'public',
 
+  // A published city landing page (issue #1489). Public because its readers
+  // are search engines and people without an account, which is the point of
+  // it. It reads one `landingPages` document with the Admin SDK, serves it
+  // only when `published`, and writes nothing.
+  renderCityPage: 'public',
+
   // The unsubscribe link in the new-user follow-up mail (issue #1707). Public
   // because the reader of a mail is not necessarily signed in anywhere. The
   // bearer is a random token issued with that one mail, never a uid, it can do

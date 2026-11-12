@@ -2,6 +2,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import {
   MISSING_CACHE_CONTROL,
   PUBLISHED_CACHE_CONTROL,
+  SITEMAP_CACHE_CONTROL,
   renderCityPage,
 } from '../render-city-page';
 
@@ -317,6 +318,10 @@ describe('renderCityPage', () => {
       expect(mockGet).not.toHaveBeenCalled();
       expect(status).toBe(200);
       expect(headers['Content-Type']).toBe('application/xml; charset=utf-8');
+      // Minutes, not the pages' hour plus a day of stale-while-revalidate:
+      // the CDN must not keep an old published set (issue #1980).
+      expect(headers['Cache-Control']).toBe(SITEMAP_CACHE_CONTROL);
+      expect(SITEMAP_CACHE_CONTROL).toBe('public, max-age=300, s-maxage=300');
       expect(body).toContain(
         '<loc>https://bitetribe.app/eat/berlin</loc>\n    <lastmod>2026-11-12</lastmod>',
       );

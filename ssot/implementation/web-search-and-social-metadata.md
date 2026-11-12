@@ -305,13 +305,13 @@ the security rules and App Check are not in the request path, and neither was
 loosened for it. The `i18n` block on the hosting target does not interfere with
 the rewrite; that was checked against the emulator with `Accept-Language: de`.
 
-| Request                                                      | Answer                                       | `Cache-Control`                                                    |
-| ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------ |
-| `/eat/<city>`, `status: published`                           | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400` |
-| `/eat/<city>`, `status: withdrawn`                           | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                  |
-| `/eat/<alias>` of a published page                           | `301` to `/eat/<city>`                       | as a published page                                                |
-| `status: draft`, an unknown city, or any other shape of path | `404`                                        | `public, max-age=60, s-maxage=60`                                  |
-| `/eat/sitemap.xml`                                           | `200`, the published set                     | as a published page                                                |
+| Request                                                      | Answer                                       | `Cache-Control`                                                                                    |
+| ------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/eat/<city>`, `status: published`                           | `200`, the page                              | `public, max-age=300, s-maxage=3600, stale-while-revalidate=86400`                                 |
+| `/eat/<city>`, `status: withdrawn`                           | `410 Gone`, so a search engine drops the URL | `public, max-age=60, s-maxage=60`                                                                  |
+| `/eat/<alias>` of a published page                           | `301` to `/eat/<city>`                       | as a published page                                                                                |
+| `status: draft`, an unknown city, or any other shape of path | `404`                                        | `public, max-age=60, s-maxage=60`                                                                  |
+| `/eat/sitemap.xml`                                           | `200`, the published set                     | `public, max-age=300, s-maxage=300`: minutes, so a new page reaches the sitemap promptly ([#1980]) |
 
 An alias of a draft or withdrawn page answers `404` or `410` exactly as the
 page's own URL would, so an alias never reveals an unpublished page.
@@ -481,3 +481,4 @@ Once deployed:
 [#1491]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1491
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
+[#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980

@@ -26,7 +26,9 @@ export const PUBLISHED_CACHE_CONTROL =
  */
 export const MISSING_CACHE_CONTROL = 'public, max-age=60, s-maxage=60';
 
-const notFound = (res: Parameters<Parameters<typeof onRequest>[0]>[1]) => {
+const notFound = (
+  res: Parameters<Parameters<typeof onRequest>[0]>[1],
+): void => {
   res.set('Cache-Control', MISSING_CACHE_CONTROL);
   res.status(404).send('Not Found');
 };

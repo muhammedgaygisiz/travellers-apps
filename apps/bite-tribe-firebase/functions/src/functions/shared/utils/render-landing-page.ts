@@ -34,7 +34,9 @@ const STYLE = `
 `;
 
 /** `/eat/<city>/<slug>` on the canonical host, never `bite-tribe.web.app`. */
-export const landingPageUrl = (page: Pick<LandingPage, 'city' | 'slug'>) =>
+export const landingPageUrl = (
+  page: Pick<LandingPage, 'city' | 'slug'>,
+): string =>
   `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}/${encodeURIComponent(page.slug)}`;
 
 const renderItem = (item: LandingPageItem, index: number): string => {

@@ -50,7 +50,10 @@ const snapshot = (data?: Record<string, unknown>): unknown => ({
   data: () => data,
 });
 
-const item = (n: number, extra: Record<string, unknown> = {}) => ({
+const item = (
+  n: number,
+  extra: Record<string, unknown> = {},
+): Record<string, unknown> => ({
   biteId: `bite-${n}`,
   name: `Dish ${n}`,
   imageUrl: `https://example.test/${n}.jpg`,

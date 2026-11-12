@@ -16,6 +16,7 @@ import {
 } from './service-worker';
 import { provideDocumentLanguage } from './document-language';
 import { provideCanonicalUrl } from './canonical-url';
+import { provideCityPageAttribution } from './city-page-attribution';
 import { provideDocumentTitle } from './document-title';
 import { providePressFeedback } from './press-feedback';
 import { AuthService } from 'ta-firestore';
@@ -85,6 +86,9 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // so the pages the sitemap lists do not also declare themselves duplicates
     // of the site root (issue #1454).
     provideCanonicalUrl(),
+    // Records a visit that arrived from a city landing page before the auth
+    // redirect drops the query string it came with (issue #1492).
+    provideCityPageAttribution(),
     // Keeps the product name in the document title once routing replaces the
     // one `index.html` ships (issue #1454).
     provideDocumentTitle(),

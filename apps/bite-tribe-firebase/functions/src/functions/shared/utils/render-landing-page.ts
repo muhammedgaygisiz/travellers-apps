@@ -190,6 +190,58 @@ export const renderJsonLd = (data: object): string =>
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 
+/**
+ * Structured data for the page (issue #1491): an `ItemList` of the Bites in
+ * order. Each entry is the `Restaurant` the Bite was eaten at, carrying the
+ * dish as a `MenuItem` on its menu, so the list stays a type search engines
+ * understand while saying what the page is actually about - the dish.
+ *
+ * The address is city-level only: a Bite carries a city, not a street, and a
+ * guessed street is worse than none.
+ */
+export const landingPageJsonLd = (page: LandingPage): object => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: page.title,
+  description: page.metaDescription,
+  url: landingPageUrl(page),
+  numberOfItems: page.items.length,
+  itemListElement: page.items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    item: {
+      '@type': 'Restaurant',
+      name: item.place,
+      image: item.imageUrl,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: item.locality || page.cityName,
+        addressCountry: page.countryCode,
+      },
+      hasMenu: {
+        '@type': 'Menu',
+        hasMenuItem: {
+          '@type': 'MenuItem',
+          name: item.name,
+          image: item.imageUrl,
+        },
+      },
+    },
+  })),
+});
+
+/**
+ * JSON inside a `<script>` element is not HTML-escaped by the parser, so the
+ * only way out of it is a literal `</script`. Escaping every `<` (and the two
+ * line separators JavaScript treats as newlines) closes that door whatever an
+ * operator or a Bite name contains.
+ */
+export const renderJsonLd = (data: object): string =>
+  JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
 const formatMonth = (page: LandingPage): string | undefined => {
   const at = page.updatedAt ?? page.publishedAt;
   if (!at) {

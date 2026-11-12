@@ -1,7 +1,7 @@
 import { onRequest } from 'firebase-functions/https';
 import { Bite } from '../shared/model/bite';
 import { getFirestore } from 'firebase-admin/firestore';
-import { renderHtml } from '../shared/utils/render-html';
+import { renderShareStub } from '../shared/utils/render-html';
 import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
 import { isListableBite } from '../shared/utils/bite-listability';
 
@@ -62,7 +62,7 @@ export const handleSharedLinkToBite = onRequest(async (req, res) => {
     const redirectUrl = `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}`;
 
     res.status(200).send(
-      renderHtml({
+      renderShareStub({
         title,
         description,
         imageUrl,

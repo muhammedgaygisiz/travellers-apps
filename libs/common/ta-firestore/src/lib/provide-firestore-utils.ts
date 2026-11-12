@@ -38,8 +38,11 @@ import { filter, firstValueFrom } from 'rxjs';
 import {
   AppCheckReadiness,
   FirebaseAppCheckRuntimeMode,
+  AppCheckRecoveryTrigger,
   initializeFirebaseAppCheck,
+  onFirebaseAppCheckTokenChanged,
   refreshFirebaseAppCheckReadiness,
+  reportFirebaseAppCheckRecovered,
 } from './initialize-firebase-app-check';
 import {
   AppCheckReadinessService,
@@ -176,7 +179,7 @@ export const provideFirestoreUtils = (
 export type AppCheckStartupGate = {
   readiness: Pick<
     AppCheckReadinessService,
-    'markReady' | 'markBlocked' | 'registerRetryHandler'
+    'isBlocked' | 'markReady' | 'registerRetryHandler' | 'startRecovery'
   >;
   startNavigation: () => void | Promise<void>;
 };
@@ -265,10 +268,22 @@ export const createFirebaseStartupInitializer =
     const readiness: AppCheckReadiness =
       await createFirebaseAppCheckInitializer(app, runtimeContext, analytics)();
 
+    // After the provider is registered, because the web plugin subscribes to
+    // nothing before that. Kept for the life of the page: a token the SDK
+    // fetches by itself ends a block whenever it arrives, at startup or after
+    // a mid-session loss, without waiting for the next re-check (issue #1465).
+    void onFirebaseAppCheckTokenChanged(() =>
+      liftBlock(runtimeContext, analytics, authService, gate, startup, {
+        trigger: 'token_listener',
+      }),
+    );
+
     if (!readiness.ready) {
-      // Enforced mode with no usable App Check token: hold auth and navigation,
-      // show the retry gate, and only resume when a retry proves readiness.
-      gate.readiness.markBlocked();
+      // Enforced mode with no usable App Check token: hold auth and
+      // navigation and wait for one. Not awaited, so the initializer returns
+      // and the shell can render its loading screen while the bounded
+      // recovery runs; nobody is asked to tap anything (issue #1465).
+      void gate.readiness.startRecovery();
       return;
     }
 
@@ -283,15 +298,49 @@ const retryStartup = async (
   startup: { resumed: boolean },
   context?: AppCheckRetryContext,
 ): Promise<void> => {
+  const trigger = context?.requireToken ? 'recovery' : 'retry';
   const refreshed = await refreshFirebaseAppCheckReadiness({
     analytics,
     runtimeMode: getAppCheckRuntimeMode(runtimeContext),
-    trigger: context?.requireToken ? 'recovery' : 'retry',
+    trigger,
+    attempt: context?.attempt,
   });
 
   if (refreshed.ready) {
-    await resumeStartup(authService, gate, startup);
+    await liftBlock(runtimeContext, analytics, authService, gate, startup, {
+      trigger,
+      attempt: context?.attempt,
+    });
   }
+};
+
+/**
+ * Ends a block, once, however it ended.
+ *
+ * A re-check and the token listener can both find the token within the same
+ * moment. Whichever arrives first lifts the gate and reports the recovery;
+ * the other finds the app no longer blocked and does nothing, so a recovery is
+ * counted once and a token refresh on a healthy page is not counted at all.
+ */
+const liftBlock = async (
+  runtimeContext: FirebaseAppCheckRuntimeContext | undefined,
+  analytics: Analytics | null | undefined,
+  authService: Pick<AuthService, 'initialize'>,
+  gate: AppCheckStartupGate,
+  startup: { resumed: boolean },
+  recovery: { trigger: AppCheckRecoveryTrigger; attempt?: number },
+): Promise<void> => {
+  if (!gate.readiness.isBlocked()) {
+    return;
+  }
+
+  void reportFirebaseAppCheckRecovered({
+    analytics,
+    runtimeMode: getAppCheckRuntimeMode(runtimeContext),
+    ...recovery,
+  });
+
+  await resumeStartup(authService, gate, startup);
 };
 
 /**

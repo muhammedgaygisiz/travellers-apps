@@ -53,7 +53,9 @@ const BLOCKED: appCheckUtils.AppCheckReadiness = {
 
 jest.mock('../initialize-firebase-app-check', () => ({
   initializeFirebaseAppCheck: jest.fn(),
+  onFirebaseAppCheckTokenChanged: jest.fn(),
   refreshFirebaseAppCheckReadiness: jest.fn(),
+  reportFirebaseAppCheckRecovered: jest.fn(),
 }));
 
 jest.mock('../provide-firestore-simulator', () => ({
@@ -76,6 +78,12 @@ describe(provideFirestoreUtils.name, () => {
     jest
       .mocked(appCheckUtils.initializeFirebaseAppCheck)
       .mockResolvedValue(READY);
+    jest
+      .mocked(appCheckUtils.onFirebaseAppCheckTokenChanged)
+      .mockResolvedValue(() => undefined);
+    jest
+      .mocked(appCheckUtils.reportFirebaseAppCheckRecovered)
+      .mockResolvedValue(undefined);
     jest
       .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
       .mockResolvedValue(READY);
@@ -151,21 +159,42 @@ describe(provideFirestoreUtils.name, () => {
     });
   });
 
+  /**
+   * A gate that keeps the one piece of state the initializer reads back:
+   * whether the shell is blocked. Starting a recovery blocks it and marking it
+   * ready lifts it, as the real service does.
+   */
   const createGate = (): {
     readiness: {
+      isBlocked: jest.Mock;
       markReady: jest.Mock;
-      markBlocked: jest.Mock;
       registerRetryHandler: jest.Mock;
+      startRecovery: jest.Mock;
     };
     startNavigation: jest.Mock;
-  } => ({
-    readiness: {
-      markReady: jest.fn(),
-      markBlocked: jest.fn(),
-      registerRetryHandler: jest.fn(),
-    },
-    startNavigation: jest.fn(),
-  });
+    state: { blocked: boolean };
+  } => {
+    const state = { blocked: false };
+
+    return {
+      readiness: {
+        isBlocked: jest.fn(() => state.blocked),
+        markReady: jest.fn(() => {
+          state.blocked = false;
+        }),
+        registerRetryHandler: jest.fn(),
+        startRecovery: jest.fn(async () => {
+          state.blocked = true;
+        }),
+      },
+      startNavigation: jest.fn(),
+      state,
+    };
+  };
+
+  /** The callback the initializer handed to the token listener. */
+  const tokenListener = (): (() => void) =>
+    jest.mocked(appCheckUtils.onFirebaseAppCheckTokenChanged).mock.calls[0][0];
 
   it('should initialize App Check, then auth, then start navigation when ready', async () => {
     const calls: string[] = [];
@@ -200,10 +229,12 @@ describe(provideFirestoreUtils.name, () => {
     // (issue #1835).
     expect(calls).toEqual(['app-check', 'firestore', 'auth', 'nav']);
     expect(gate.readiness.markReady).toHaveBeenCalled();
-    expect(gate.readiness.markBlocked).not.toHaveBeenCalled();
+    expect(gate.readiness.startRecovery).not.toHaveBeenCalled();
   });
 
-  it('should block and skip auth/navigation when App Check is not ready', async () => {
+  // Issue #1465: a blocked start waits for its token by itself. It used to
+  // mark itself blocked once and sit behind a button.
+  it('should start the recovery and hold auth/navigation when App Check is not ready', async () => {
     jest
       .mocked(appCheckUtils.initializeFirebaseAppCheck)
       .mockResolvedValueOnce(BLOCKED);
@@ -220,7 +251,7 @@ describe(provideFirestoreUtils.name, () => {
 
     await initializer();
 
-    expect(gate.readiness.markBlocked).toHaveBeenCalled();
+    expect(gate.readiness.startRecovery).toHaveBeenCalledTimes(1);
     expect(gate.readiness.registerRetryHandler).toHaveBeenCalledWith(
       expect.any(Function),
     );
@@ -256,6 +287,128 @@ describe(provideFirestoreUtils.name, () => {
     expect(gate.readiness.markReady).toHaveBeenCalled();
     expect(authService.initialize).toHaveBeenCalled();
     expect(gate.startNavigation).toHaveBeenCalled();
+  });
+
+  // Issue #1465: the recovery has to be countable, or a client that got
+  // through and one that gave up look the same.
+  it('should report a recovery with the attempt that ended the block', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    jest
+      .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
+      .mockResolvedValueOnce(READY);
+    const gate = createGate();
+
+    await createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      { initialize: jest.fn() },
+      gate,
+    )();
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as (context: {
+      requireToken: boolean;
+      attempt?: number;
+    }) => Promise<void>;
+    await retryHandler({ requireToken: false, attempt: 2 });
+
+    expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: 'retry', attempt: 2 }),
+    );
+    expect(appCheckUtils.reportFirebaseAppCheckRecovered).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: 'retry', attempt: 2 }),
+    );
+  });
+
+  // Issue #1465: auto-refresh is on, so the SDK can hand over a token before
+  // the next re-check asks for one. That token starts the app.
+  it('should resume startup when the SDK delivers a token on its own', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    await createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    )();
+
+    tokenListener()();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(
+      appCheckUtils.refreshFirebaseAppCheckReadiness,
+    ).not.toHaveBeenCalled();
+    expect(appCheckUtils.reportFirebaseAppCheckRecovered).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: 'token_listener' }),
+    );
+    expect(gate.readiness.markReady).toHaveBeenCalledTimes(1);
+    expect(authService.initialize).toHaveBeenCalledTimes(1);
+    expect(gate.startNavigation).toHaveBeenCalledTimes(1);
+  });
+
+  // Every token refresh on a healthy page reaches the listener too.
+  it('should ignore a token that arrives while nothing is blocked', async () => {
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    await createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    )();
+
+    tokenListener()();
+    await Promise.resolve();
+
+    expect(
+      appCheckUtils.reportFirebaseAppCheckRecovered,
+    ).not.toHaveBeenCalled();
+    expect(gate.readiness.markReady).toHaveBeenCalledTimes(1);
+    expect(authService.initialize).toHaveBeenCalledTimes(1);
+  });
+
+  // A re-check and the listener can find the same token in the same moment.
+  it('should count a recovery once when a re-check and the listener both find the token', async () => {
+    jest
+      .mocked(appCheckUtils.initializeFirebaseAppCheck)
+      .mockResolvedValueOnce(BLOCKED);
+    jest
+      .mocked(appCheckUtils.refreshFirebaseAppCheckReadiness)
+      .mockResolvedValueOnce(READY);
+    const authService = { initialize: jest.fn() };
+    const gate = createGate();
+
+    await createFirebaseStartupInitializer(
+      firebaseApp,
+      { production: true },
+      null,
+      authService,
+      gate,
+    )();
+
+    const retryHandler = gate.readiness.registerRetryHandler.mock
+      .calls[0][0] as (context: { requireToken: boolean }) => Promise<void>;
+    await retryHandler({ requireToken: false });
+    tokenListener()();
+    await Promise.resolve();
+
+    expect(appCheckUtils.reportFirebaseAppCheckRecovered).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(authService.initialize).toHaveBeenCalledTimes(1);
+    expect(gate.startNavigation).toHaveBeenCalledTimes(1);
   });
 
   // Issue #1621: the handler used to be registered only on the failure branch,
@@ -297,6 +450,8 @@ describe(provideFirestoreUtils.name, () => {
 
     const retryHandler = gate.readiness.registerRetryHandler.mock
       .calls[0][0] as (context: { requireToken: boolean }) => Promise<void>;
+    // What `reportTokenLost` does to the real service before it re-checks.
+    gate.state.blocked = true;
     await retryHandler({ requireToken: true });
 
     expect(appCheckUtils.refreshFirebaseAppCheckReadiness).toHaveBeenCalledWith(

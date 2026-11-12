@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "追加のセキュリティ確認が必要です",
-  "app-check-blocked-message": "BiteTribeのセキュリティ確認でこのデバイスを確認できませんでした。接続を確認して、もう一度お試しください。",
+  "app-check-blocked-title": "アプリを読み込めませんでした",
+  "app-check-blocked-message": "接続を確認して、もう一度お試しください。",
   "app-check-retry": "もう一度試す",
   "create-bite": "Biteを作成",
   "create-bite-in-progress": "Biteの作成画面を開いています...",

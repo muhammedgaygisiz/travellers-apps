@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "Vérification de sécurité supplémentaire requise",
-  "app-check-blocked-message": "BiteTribe n'a pas pu vérifier cet appareil avec son contrôle de sécurité. Vérifiez votre connexion et réessayez pour continuer.",
+  "app-check-blocked-title": "Impossible de charger l'application",
+  "app-check-blocked-message": "Vérifiez votre connexion et réessayez.",
   "app-check-retry": "Réessayer",
   "create-bite": "Créer Bite",
   "create-bite-in-progress": "Ouverture de Créer Bite...",

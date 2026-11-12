@@ -171,6 +171,7 @@
   | `app_check_token_preflight`       | base, `succeeded`, `trigger`, `reason?`     | A token was actually requested                 |
   | `app_check_enforced_blocked`      | base, `platform`, `provider`, `reason`      | Enforced mode could not prove readiness        |
   | `app_check_throttled`             | base, `platform`, `trigger`                 | The SDK is refusing to ask for a token at all  |
+  | `app_check_recovered`             | base, `platform`, `trigger`, `attempt?`     | A blocked client got a token after all         |
 
   The base parameters on every one of them are `runtime_mode`, `device_class`,
   `has_site_key` and `has_debug_token`.
@@ -203,6 +204,29 @@
   without it the SDK answers a re-check out of the cache the failed call came
   from, which is the defect Charter Run 11 worked around by deleting the App
   Check token cache by hand.
+
+- ### Why the recovered event exists, and what a blocked event counts
+
+  Since issue [#1465] a blocked client re-checks by itself, four times over
+  about a minute, behind a loading screen. Two things follow for these events.
+
+  **`app_check_enforced_blocked` counts blocked episodes, not attempts.** It
+  fires once when a cold start cannot prove readiness, once on the first failed
+  re-check of a mid-session loss - which has no startup event to announce it -
+  and once for each tap on the retry that fails. The automatic re-checks in
+  between emit only `app_check_token_preflight`. Before this rule every failed
+  re-check emitted it, which was harmless while a person had to tap for each
+  one and would have multiplied the count by five once the app did the tapping.
+  Counts from before and after the release that carries this are therefore not
+  the same measure for clients that retried.
+
+  **`app_check_recovered` is the other half of a recovery rate.** A client that
+  never got through and one that did used to emit the same events.
+  `trigger` says what ended the block: `retry` (a cold-start re-check),
+  `recovery` (a mid-session one), or `token_listener` - the SDK's own refresh
+  delivering a token before a re-check asked. `attempt` is the number of the
+  automatic re-check that succeeded, and is absent for the listener and for a
+  tap.
 
 - ### Why the throttle event exists
 
@@ -897,6 +921,7 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1114]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1114
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
+[#1465]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1465
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
 [#1708]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1708
 [#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723

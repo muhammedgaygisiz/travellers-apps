@@ -18,10 +18,10 @@ import { AppCheckGateComponent } from '../app-check-gate.component';
 import { AppCheckReadinessService } from '../../app-check-readiness.service';
 
 const TRANSLATIONS: Translation = {
-  'app-check-blocked-title': 'Extra security check needed',
-  'app-check-blocked-message':
-    'BiteTribe could not verify this device with its security check. Check your connection and try again to continue.',
+  'app-check-blocked-title': "Couldn't load the app",
+  'app-check-blocked-message': 'Check your connection and try again.',
   'app-check-retry': 'Try again',
+  loading: 'Loading',
 };
 
 @Injectable()
@@ -31,10 +31,26 @@ class StoryTranslocoLoader implements TranslocoLoader {
   }
 }
 
-class RetryingReadinessService {
-  readonly isRetrying = signal(true).asReadonly();
+/** The wait is running: the bounded recovery, or a re-check after a tap. */
+class WaitingReadinessService {
+  readonly status = signal('blocked').asReadonly();
+  readonly isRetrying = signal(false).asReadonly();
   retry = (): Promise<void> => Promise.resolve();
 }
+
+/** The wait ended without a token. */
+class UnavailableReadinessService {
+  readonly status = signal('unavailable').asReadonly();
+  readonly isRetrying = signal(false).asReadonly();
+  retry = (): Promise<void> => Promise.resolve();
+}
+
+const withReadiness = (
+  useClass: typeof WaitingReadinessService | typeof UnavailableReadinessService,
+): ReturnType<typeof moduleMetadata> =>
+  moduleMetadata({
+    providers: [{ provide: AppCheckReadinessService, useClass }],
+  });
 
 const SAFE_AREA_TOP = '35px';
 const SAFE_AREA_BOTTOM = '24px';
@@ -85,21 +101,20 @@ export default {
 
 type Story = StoryObj<AppCheckGateComponent>;
 
-/** Default state: waiting for the user to retry the App Check verification. */
-export const Idle: Story = {};
+/**
+ * What a blocked start looks like for as long as the app is still trying: the
+ * logo and a spinner, with no copy and nothing to tap (issue #1465).
+ */
+export const Loading: Story = {
+  decorators: [withReadiness(WaitingReadinessService)],
+};
 
-/** Retry in progress: the button is disabled and shows a spinner. */
-export const Retrying: Story = {
-  decorators: [
-    moduleMetadata({
-      providers: [
-        {
-          provide: AppCheckReadinessService,
-          useClass: RetryingReadinessService,
-        },
-      ],
-    }),
-  ],
+/**
+ * The end of the wait: a message any failed load would use, and a retry. It
+ * does not mention the security check.
+ */
+export const Unavailable: Story = {
+  decorators: [withReadiness(UnavailableReadinessService)],
 };
 
 /**
@@ -109,6 +124,7 @@ export const Retrying: Story = {
  */
 export const WithSystemBarInsets: Story = {
   decorators: [
+    withReadiness(UnavailableReadinessService),
     componentWrapperDecorator(
       (story) => `
         <div style="

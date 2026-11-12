@@ -405,9 +405,32 @@ Three rules hold that together (issue [#1621]):
   failed.** Every path but the cold-start preflight passes `forceRefresh`.
 - **The wait is bounded and ends in a defined state.** Recovery re-checks on a
   backoff of roughly a minute and then leaves the app in `ready` or
-  `unavailable`; `unavailable` keeps the gate up with its retry tappable. The
-  Firebase SDK's own `isTokenAutoRefreshEnabled` refresh is working the same
-  problem in parallel, and the recovery stops as soon as it wins.
+  `unavailable`. The Firebase SDK's own `isTokenAutoRefreshEnabled` refresh is
+  working the same problem in parallel, and the recovery stops as soon as it
+  wins.
+
+**Nobody is asked to do anything while that wait runs** (issue [#1465]). A cold
+start that cannot prove readiness walks the same backoff as a mid-session loss,
+by itself, and the gate is a loading screen for the length of it: the logo and
+a spinner, no copy, no control. Until then a blocked start sat behind a _Try
+again_ button and stayed there until somebody tapped it, next to a client that
+could usually have fetched the token on its next request.
+
+- **The forced re-checks are the mechanism, and the token listener is the
+  shortcut.** The plugin's `tokenChanged` event lifts the gate the moment the
+  SDK holds a token, on all three platforms. It cannot be relied on alone: the
+  web SDK's first retry after a failed token request is 30 seconds away, and
+  after a 403 it does not retry at all.
+- **`unavailable` is the only state with words in it.** When the wait ends
+  without a token the gate says the app could not load and offers a retry, in
+  the copy any failed load would use. It does not name the security check -
+  there is nothing a person can do about attestation, and checking the
+  connection and trying again is the whole of what they can do either way. A
+  tap shows the loading screen again while its re-check runs.
+- **A block is counted once and a recovery is counted at all.**
+  `app_check_enforced_blocked` fires once per blocked episode rather than once
+  per re-check, and `app_check_recovered` fires when a block ends, so the two
+  divide into a recovery rate. See [Implementation - Analytics Events](../implementation/analytics-events.md).
 
 **One failure is outside that bound.** After a 403 from the exchange the SDK
 applies a one-day backoff it holds in memory for the life of the page instance,
@@ -623,6 +646,7 @@ libs/bite-tribe/api
 [#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621
 [#1369]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1369
+[#1465]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1465
 [#933]: https://github.com/muhammedgaygisiz/travellers-apps/issues/933
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073

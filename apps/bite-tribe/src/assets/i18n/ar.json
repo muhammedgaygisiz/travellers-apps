@@ -1,6 +1,6 @@
 {
-  "app-check-blocked-title": "مطلوب فحص أمني إضافي",
-  "app-check-blocked-message": "تعذّر على BiteTribe التحقق من هذا الجهاز عبر فحص الأمان. يُرجى التحقق من الاتصال وإعادة المحاولة للمتابعة.",
+  "app-check-blocked-title": "تعذّر تحميل التطبيق",
+  "app-check-blocked-message": "يُرجى التحقق من الاتصال وإعادة المحاولة.",
   "app-check-retry": "إعادة المحاولة",
   "create-bite": "Bite إنشاء",
   "create-bite-in-progress": "جارٍ فتح إنشاء Bite...",

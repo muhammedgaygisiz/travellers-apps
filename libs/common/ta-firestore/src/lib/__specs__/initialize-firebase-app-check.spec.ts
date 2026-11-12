@@ -13,7 +13,9 @@ import {
   initializeFirebaseAppCheck,
   isAppCheckRefusal,
   isFirebaseAppCheckEnforced,
+  onFirebaseAppCheckTokenChanged,
   refreshFirebaseAppCheckReadiness,
+  reportFirebaseAppCheckRecovered,
   resetFirebaseAppCheckInitializationForTesting,
 } from '../initialize-firebase-app-check';
 import { Analytics, logEvent } from 'firebase/analytics';
@@ -32,6 +34,7 @@ jest.mock('@capacitor-firebase/app-check', () => ({
       expireTimeMillis: 123,
     }),
     setTokenAutoRefreshEnabled: jest.fn().mockResolvedValue(undefined),
+    addListener: jest.fn(),
   },
 }));
 jest.mock('@capacitor-firebase/analytics', () => ({
@@ -863,6 +866,62 @@ describe(initializeFirebaseAppCheck.name, () => {
       expect(readiness.reason).toBe('token_request_failed');
     });
 
+    // Issue #1465: the re-checks run by themselves now, four to a wait, and
+    // `app_check_enforced_blocked` counts clients rather than attempts.
+    describe('reporting a failed re-check as blocked', () => {
+      const failRecheck = async (options: {
+        trigger: 'recovery' | 'retry';
+        attempt?: number;
+      }): Promise<void> => {
+        process.env['NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED'] = 'true';
+        jest
+          .spyOn(FirebaseAppCheck, 'getToken')
+          .mockRejectedValueOnce(new Error('still no token'));
+
+        await refreshFirebaseAppCheckReadiness({
+          analytics,
+          runtimeMode: 'production',
+          ...options,
+        });
+      };
+
+      const blockedEvents = (): unknown[] =>
+        jest
+          .mocked(logEvent)
+          .mock.calls.filter(
+            ([, eventName]) => eventName === 'app_check_enforced_blocked',
+          );
+
+      it('should stay quiet on an automatic cold-start attempt, which startup already reported', async () => {
+        await failRecheck({ trigger: 'retry', attempt: 1 });
+
+        expect(blockedEvents()).toHaveLength(0);
+        expect(logEvent).toHaveBeenCalledWith(
+          analytics,
+          'app_check_token_preflight',
+          expect.objectContaining({ succeeded: false, trigger: 'retry' }),
+        );
+      });
+
+      it('should announce a mid-session loss on its first attempt', async () => {
+        await failRecheck({ trigger: 'recovery', attempt: 1 });
+
+        expect(blockedEvents()).toHaveLength(1);
+      });
+
+      it('should stay quiet on the later attempts of a mid-session recovery', async () => {
+        await failRecheck({ trigger: 'recovery', attempt: 2 });
+
+        expect(blockedEvents()).toHaveLength(0);
+      });
+
+      it('should report a tapped retry that failed', async () => {
+        await failRecheck({ trigger: 'retry' });
+
+        expect(blockedEvents()).toHaveLength(1);
+      });
+    });
+
     it('should not ask for a token in dev mode', async () => {
       process.env['NX_APP_BITE_TRIBE_IS_DEV'] = 'true';
 
@@ -904,6 +963,87 @@ describe(initializeFirebaseAppCheck.name, () => {
         'app_check_throttled',
         expect.objectContaining({ platform: 'web', trigger: 'recovery' }),
       );
+    });
+  });
+
+  describe(reportFirebaseAppCheckRecovered.name, () => {
+    it('should emit the recovery with what ended the block', async () => {
+      await reportFirebaseAppCheckRecovered({
+        analytics,
+        runtimeMode: 'production',
+        trigger: 'retry',
+        attempt: 3,
+      });
+
+      expect(logEvent).toHaveBeenCalledWith(
+        analytics,
+        'app_check_recovered',
+        expect.objectContaining({
+          attempt: 3,
+          platform: 'web',
+          trigger: 'retry',
+        }),
+      );
+    });
+  });
+
+  describe(onFirebaseAppCheckTokenChanged.name, () => {
+    type TokenChanged = (event: { token: string }) => void;
+
+    const subscribe = async (
+      listener: () => void,
+    ): Promise<{ emit: TokenChanged; stop: () => void; remove: jest.Mock }> => {
+      const remove = jest.fn().mockResolvedValue(undefined);
+      jest
+        .mocked(FirebaseAppCheck.addListener)
+        .mockResolvedValueOnce({ remove } as never);
+
+      const stop = await onFirebaseAppCheckTokenChanged(listener);
+      const emit = jest.mocked(FirebaseAppCheck.addListener).mock
+        .calls[0][1] as unknown as TokenChanged;
+
+      return { emit, stop, remove };
+    };
+
+    it('should call back when the SDK holds a new token', async () => {
+      const listener = jest.fn();
+      const { emit } = await subscribe(listener);
+
+      emit({ token: 'fresh-token' });
+
+      expect(FirebaseAppCheck.addListener).toHaveBeenCalledWith(
+        'tokenChanged',
+        expect.any(Function),
+      );
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call back for an empty token', async () => {
+      const listener = jest.fn();
+      const { emit } = await subscribe(listener);
+
+      emit({ token: '' });
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('should stop listening through the returned function', async () => {
+      const { stop, remove } = await subscribe(jest.fn());
+
+      stop();
+
+      expect(remove).toHaveBeenCalledTimes(1);
+    });
+
+    // The listener is a shortcut. Losing it must not take startup with it.
+    it('should survive a plugin that cannot subscribe', async () => {
+      jest
+        .mocked(FirebaseAppCheck.addListener)
+        .mockRejectedValueOnce(new Error('not implemented'));
+
+      const stop = await onFirebaseAppCheckTokenChanged(jest.fn());
+
+      expect(() => stop()).not.toThrow();
     });
   });
 

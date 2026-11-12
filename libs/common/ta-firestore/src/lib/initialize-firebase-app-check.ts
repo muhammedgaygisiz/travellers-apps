@@ -113,6 +113,11 @@ export type FirebaseAppCheckRecheckOptions =
      * default) or the mid-session path (`recovery`).
      */
     trigger?: 'recovery' | 'retry';
+    /**
+     * Which automatic re-check this is, counted from 1. Absent when a person
+     * tapped the gate's button.
+     */
+    attempt?: number;
   };
 
 /**
@@ -136,6 +141,11 @@ export type FirebaseAppCheckRecheckOptions =
  * refused for a missing or invalid token, so on that path the flag has already
  * been proven wrong and short-circuiting to `ready: true` would report a page
  * healthy that cannot reach Firebase (issue #1621).
+ *
+ * **A failed re-check does not always say `app_check_enforced_blocked`.** That
+ * event counts blocked clients, and since issue #1465 the re-checks run on
+ * their own, four to a wait. See {@link announcesBlock} for which of them
+ * speak.
  */
 export const refreshFirebaseAppCheckReadiness = async (
   telemetryOptions?: FirebaseAppCheckRecheckOptions,
@@ -159,7 +169,7 @@ export const refreshFirebaseAppCheckReadiness = async (
   const telemetry = await createTelemetry(telemetryOptions);
   const preflight = await preflightAppCheckToken(telemetry, trigger);
 
-  if (!preflight.ok) {
+  if (!preflight.ok && announcesBlock(trigger, telemetryOptions?.attempt)) {
     telemetry.emit('app_check_enforced_blocked', {
       platform,
       reason: preflight.reason ?? 'token_unavailable',
@@ -177,6 +187,85 @@ export const refreshFirebaseAppCheckReadiness = async (
       ? undefined
       : (preflight.reason ?? 'token_unavailable'),
   };
+};
+
+/**
+ * Whether a failed re-check is the one that reports its client as blocked.
+ *
+ * One blocked episode, one event, or the count stops meaning clients. A cold
+ * start has reported itself by the time a re-check runs, so its automatic
+ * attempts stay quiet. A mid-session loss has no such report, so its first
+ * attempt is the announcement and the rest stay quiet. A tap on the button has
+ * no attempt number and always speaks, as it did before the re-checks ran by
+ * themselves. Every attempt still emits `app_check_token_preflight`.
+ */
+const announcesBlock = (
+  trigger: 'recovery' | 'retry',
+  attempt: number | undefined,
+): boolean =>
+  attempt === undefined || (trigger === 'recovery' && attempt === 1);
+
+/**
+ * What ended a block: one of the two re-check triggers, or the SDK handing
+ * over a token on its own before a re-check asked for one.
+ */
+export type AppCheckRecoveryTrigger = 'recovery' | 'retry' | 'token_listener';
+
+export type FirebaseAppCheckRecoveredOptions =
+  FirebaseAppCheckTelemetryOptions & {
+    trigger: AppCheckRecoveryTrigger;
+    attempt?: number;
+  };
+
+/**
+ * Reports that a blocked client got through after all.
+ *
+ * `app_check_enforced_blocked` alone cannot say how a block ended: a client
+ * that recovered and one that gave up emitted the same events. With this next
+ * to it the recovery rate is a division (issue #1465).
+ */
+export const reportFirebaseAppCheckRecovered = async (
+  options: FirebaseAppCheckRecoveredOptions,
+): Promise<void> => {
+  const telemetry = await createTelemetry(options);
+
+  telemetry.emit('app_check_recovered', {
+    attempt: options.attempt,
+    platform: getAppCheckPlatform(),
+    trigger: options.trigger,
+  });
+};
+
+/**
+ * Calls back whenever the App Check SDK holds a new token, and answers with
+ * the function that stops it.
+ *
+ * Auto-refresh is on for every provider registered here, so a client that had
+ * no token at startup can be handed one without anybody asking again. The
+ * plugin forwards that on all three platforms: `onTokenChanged` on the web,
+ * the native SDK's own listener on iOS and Android.
+ *
+ * Best-effort by construction. The web plugin registers nothing when no
+ * provider was initialized, and a failure to subscribe only costs the
+ * shortcut: the bounded re-checks do not depend on it.
+ */
+export const onFirebaseAppCheckTokenChanged = async (
+  listener: () => void,
+): Promise<() => void> => {
+  try {
+    const handle = await FirebaseAppCheck.addListener(
+      'tokenChanged',
+      ({ token }) => {
+        if (token) {
+          listener();
+        }
+      },
+    );
+
+    return () => void handle.remove();
+  } catch {
+    return () => undefined;
+  }
 };
 
 /**
@@ -586,6 +675,7 @@ const getAppCheckPlatform = (): AppCheckPlatform => {
 type AppCheckTelemetryEvent =
   | 'app_check_enforced_blocked'
   | 'app_check_initialization_failed'
+  | 'app_check_recovered'
   | 'app_check_skipped'
   | 'app_check_startup_completed'
   | 'app_check_startup_started'
@@ -593,6 +683,7 @@ type AppCheckTelemetryEvent =
   | 'app_check_token_preflight';
 
 type AppCheckTelemetryParams = {
+  attempt?: number;
   device_class: AppCheckDeviceClass;
   duration_ms?: number;
   has_debug_token?: boolean;
@@ -603,7 +694,7 @@ type AppCheckTelemetryParams = {
   runtime_mode: FirebaseAppCheckRuntimeMode;
   succeeded?: boolean;
   transitional_policy?: typeof TRANSITIONAL_POLICY;
-  trigger?: AppCheckPreflightTrigger;
+  trigger?: AppCheckPreflightTrigger | AppCheckRecoveryTrigger;
   enforced_policy?: typeof ENFORCED_POLICY;
 };
 

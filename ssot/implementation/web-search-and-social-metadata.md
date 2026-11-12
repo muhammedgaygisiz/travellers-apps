@@ -541,19 +541,13 @@ two tools have nothing to report.
 
 - **Bing Webmaster Tools.** It can import a verified Search Console property.
   Optional in [#1982] and left for a later day.
-- **Social profiles.** Search Console has no setting that attaches an
-  Instagram account to a property; the Associations page offers Google
-  Analytics only. Google learns a site's profiles from `Organization`
-  structured data with `sameAs`, which the start page does not carry.
-
-## Related Pages
-
-- [Implementation - Store Listing Assets](store-listing-assets.md)
-- [Implementation - Social Media Channels](social-media-channels.md)
-- [Implementation - Localization](localization.md)
-- [Implementation - Analytics Events](analytics-events.md)
-- [Architecture - Overview](../architecture/overview.md)
-- [Current State - Release State](../current-state/release-state.md)
+- **Social channels.** Search Console can hold a social account as a property
+  of its own: the property selector's `Add property` offers Instagram, TikTok,
+  X and YouTube next to `Add a website`. Adding one links the account to the
+  Google Account through the platform's own consent screen, so it is done by
+  the account's owner, signed in to both. `@bitetribeapp` on Instagram was not
+  yet added when this was written. It is not on the Associations page, which
+  offers Google Analytics only.
 
 [#345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/345
 [#628]: https://github.com/muhammedgaygisiz/travellers-apps/issues/628

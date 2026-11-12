@@ -101,7 +101,7 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'store', displayName: 'Store listing' },
   // The city landing page a visit came from (issue #1492). `destination` is
   // not registered: it has two values and reads fine as an event filter.
-  { parameterName: 'page_slug', displayName: 'City page' },
+  { parameterName: 'city_page', displayName: 'City page' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

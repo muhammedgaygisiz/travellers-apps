@@ -9,7 +9,7 @@ import {
 import { escapeHtml } from '../shared/utils/render-html';
 
 /**
- * Serves a published city landing page at `/eat/<city>/<slug>` (epic #1487,
+ * Serves a published city landing page at `/eat/<city>` (epic #1487,
  * issue #1489).
  *
  * Rendered here with the Admin SDK rather than by a public Angular route: the
@@ -25,10 +25,13 @@ export const PUBLISHED_CACHE_CONTROL =
   'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400';
 
 /**
- * Short, so a page published moments after a crawler hit its slug is not
+ * Short, so a page published moments after a crawler hit its URL is not
  * hidden behind a cached 404 for an hour.
  */
 export const MISSING_CACHE_CONTROL = 'public, max-age=60, s-maxage=60';
+
+/** The city segment the admin editor accepts: lowercase letters, digits, hyphens. */
+const CITY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const notFound = (
   res: Parameters<Parameters<typeof onRequest>[0]>[1],
@@ -81,11 +84,8 @@ export const renderCityPage = onRequest(async (req, res) => {
         .where('status', '==', 'published')
         .get();
       const pages = published.docs
-        .map((doc) => ({ ...(doc.data() as LandingPage), slug: doc.id }))
-        .sort(
-          (a, b) =>
-            a.city.localeCompare(b.city) || a.slug.localeCompare(b.slug),
-        );
+        .map((doc) => ({ ...(doc.data() as LandingPage), city: doc.id }))
+        .sort((a, b) => a.city.localeCompare(b.city));
 
       res.set('Cache-Control', PUBLISHED_CACHE_CONTROL);
       res.set('Content-Type', 'application/xml; charset=utf-8');
@@ -93,26 +93,25 @@ export const renderCityPage = onRequest(async (req, res) => {
       return;
     }
 
-    // Otherwise expected: /eat/<city>/<slug>, nothing more.
-    if (parts.length !== 3 || parts[0] !== 'eat') {
+    // Otherwise expected: /eat/<city>, nothing more. One page per city, so
+    // the city is both the path and the document id.
+    if (parts.length !== 2 || parts[0] !== 'eat') {
       notFound(res);
       return;
     }
 
-    const [, city, slug] = parts.map((part) => decodeURIComponent(part));
-    // A slug with a slash would address a subcollection; anything else is a
-    // valid document id or simply misses.
-    if (!slug || slug.includes('/')) {
+    const city = decodeURIComponent(parts[1]);
+    // Only the shape the editor writes. Anything else - a slash that would
+    // address a subcollection, a dot, an upper-case letter - is not a page.
+    if (!CITY_PATTERN.test(city)) {
       notFound(res);
       return;
     }
 
-    const snap = await db.collection('landingPages').doc(slug).get();
+    const snap = await db.collection('landingPages').doc(city).get();
     const page = snap.exists ? (snap.data() as LandingPage) : undefined;
 
-    // A page is reachable under its own city only, so one document cannot be
-    // indexed under several URLs.
-    if (!page || page.city !== city) {
+    if (!page) {
       notFound(res);
       return;
     }
@@ -130,7 +129,7 @@ export const renderCityPage = onRequest(async (req, res) => {
 
     res.set('Cache-Control', PUBLISHED_CACHE_CONTROL);
     res.set('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send(renderLandingPage({ ...page, slug }));
+    res.status(200).send(renderLandingPage({ ...page, city }));
   } catch (error) {
     logger.error('renderCityPage failed', error);
     res.status(500).send('Internal Server Error');

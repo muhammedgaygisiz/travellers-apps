@@ -13,7 +13,6 @@ import {
 import { LandingPageEntry } from '../component/landing-page-entry';
 
 const emptyDraft = (): LandingPageDraft => ({
-  slug: '',
   city: '',
   cityName: '',
   countryCode: '',
@@ -112,7 +111,6 @@ export class LandingPagesService {
   open(page: LandingPage): void {
     this.current.set(page);
     this.fields.set({
-      slug: page.slug,
       city: page.city,
       cityName: page.cityName,
       countryCode: page.countryCode,
@@ -219,22 +217,22 @@ export class LandingPagesService {
         const saved = await this.dataAccess.save(this.draft());
         return saved.status === 'published'
           ? saved
-          : this.dataAccess.setStatus(saved.slug, 'published');
+          : this.dataAccess.setStatus(saved.city, 'published');
       },
     );
   }
 
   async withdraw(): Promise<void> {
-    const slug = this.current()?.slug;
+    const city = this.current()?.city;
 
-    if (!slug) {
+    if (!city) {
       return;
     }
 
     await this.run(
       'admin-landing-withdrawn',
       'admin-landing-withdraw-failed',
-      () => this.dataAccess.setStatus(slug, 'withdrawn'),
+      () => this.dataAccess.setStatus(city, 'withdrawn'),
     );
   }
 
@@ -254,7 +252,7 @@ export class LandingPagesService {
       this.current.set(page);
       this.pages.update((pages) => [
         page,
-        ...pages.filter((other) => other.slug !== page.slug),
+        ...pages.filter((other) => other.city !== page.city),
       ]);
       await this.toast(successKey, 'success');
 

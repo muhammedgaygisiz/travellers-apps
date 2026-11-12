@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide) all follow this recipe. The format and its history are owned by
 [Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -274,7 +274,7 @@ Use the admin app in the user's Chrome at `https://bite-tribe-admin.web.app/land
 
 3. **Gate: Preview.** Open **Preview**, scroll the user to it, and wait for approval of the text and the five Bites.
 
-4. **Publish.** The status turns to Published and **Withdraw** appears.
+4. **Publish.** The status turns to Published and **Withdraw** appears. The list's status badge can still read Draft for a while; trust the editor, where the button now reads **Update live page**.
 
 5. **Check it live**, with a query string so no cached copy answers:
    ```bash

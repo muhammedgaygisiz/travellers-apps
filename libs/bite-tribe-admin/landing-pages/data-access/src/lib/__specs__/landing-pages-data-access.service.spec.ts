@@ -42,6 +42,12 @@ describe(LandingPagesDataAccessService.name, () => {
     });
   });
 
+  it('lists nothing when the callable returns no data', async () => {
+    callByNameMock.mockResolvedValue({ data: null });
+
+    await expect(service.list()).resolves.toEqual([]);
+  });
+
   it('saves through saveLandingPage', async () => {
     callByNameMock.mockResolvedValue({ data: { ...draft, status: 'draft' } });
 

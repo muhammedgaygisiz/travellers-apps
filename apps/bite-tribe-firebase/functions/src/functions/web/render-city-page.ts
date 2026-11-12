@@ -26,6 +26,9 @@ export const PUBLISHED_CACHE_CONTROL =
  */
 export const MISSING_CACHE_CONTROL = 'public, max-age=60, s-maxage=60';
 
+/** The city segment the admin editor accepts: lowercase letters, digits, hyphens. */
+const CITY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 const notFound = (
   res: Parameters<Parameters<typeof onRequest>[0]>[1],
 ): void => {
@@ -35,27 +38,26 @@ const notFound = (
 
 export const renderCityPage = onRequest(async (req, res) => {
   try {
-    // Expected: /eat/<city>/<slug>, nothing more.
+    // Expected: /eat/<city>, nothing more. One page per city, so the city
+    // is both the path and the document id.
     const parts = req.path.split('/').filter(Boolean);
-    if (parts.length !== 3 || parts[0] !== 'eat') {
+    if (parts.length !== 2 || parts[0] !== 'eat') {
       notFound(res);
       return;
     }
 
-    const [, city, slug] = parts.map((part) => decodeURIComponent(part));
-    // A slug with a slash would address a subcollection; anything else is a
-    // valid document id or simply misses.
-    if (!slug || slug.includes('/')) {
+    const city = decodeURIComponent(parts[1]);
+    // Only the shape the editor writes. Anything else - a slash that would
+    // address a subcollection, a dot, an upper-case letter - is not a page.
+    if (!CITY_PATTERN.test(city)) {
       notFound(res);
       return;
     }
 
-    const snap = await db.collection('landingPages').doc(slug).get();
+    const snap = await db.collection('landingPages').doc(city).get();
     const page = snap.exists ? (snap.data() as LandingPage) : undefined;
 
-    // A page is reachable under its own city only, so one document cannot be
-    // indexed under several URLs.
-    if (!page || page.city !== city) {
+    if (!page) {
       notFound(res);
       return;
     }
@@ -73,7 +75,7 @@ export const renderCityPage = onRequest(async (req, res) => {
 
     res.set('Cache-Control', PUBLISHED_CACHE_CONTROL);
     res.set('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send(renderLandingPage({ ...page, slug }));
+    res.status(200).send(renderLandingPage({ ...page, city }));
   } catch (error) {
     logger.error('renderCityPage failed', error);
     res.status(500).send('Internal Server Error');

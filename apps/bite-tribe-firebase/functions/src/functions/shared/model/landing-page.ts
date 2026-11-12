@@ -1,8 +1,9 @@
 import { Timestamp } from 'firebase-admin/firestore';
 
 /**
- * A city landing page, stored at `landingPages/<slug>` and served at
- * `https://bitetribe.app/eat/<city>/<slug>` (epic #1487, issue #1489).
+ * A city landing page, stored at `landingPages/<city>` and served at
+ * `https://bitetribe.app/eat/<city>` (epic #1487, issue #1489). One page per
+ * city: the city is the document id and the whole path.
  *
  * - `draft`: never served, answers 404.
  * - `published`: served.
@@ -32,8 +33,7 @@ export interface LandingPageItem {
 }
 
 export interface LandingPage {
-  slug: string;
-  /** The URL segment, lowercase ASCII, e.g. `berlin`. */
+  /** The document id and the URL segment, lowercase ASCII, e.g. `berlin`. */
   city: string;
   /** The city as a reader sees it, e.g. `Berlin`. */
   cityName: string;

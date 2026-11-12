@@ -20,7 +20,8 @@ const STYLE = `
   a { color:inherit; }
   header, main, footer { max-width:1080px; margin:0 auto; padding:0 16px; }
   header { display:flex; align-items:center; justify-content:space-between; height:56px; border-bottom:1px solid var(--line); }
-  .brand { font-weight:600; text-decoration:none; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:18px; text-decoration:none; }
+  .brand img { height:36px; width:auto; display:block; }
   .eyebrow { color:var(--muted); font-size:14px; margin:24px 0 4px; }
   h1 { font-size:28px; line-height:1.25; margin:0 0 12px; }
   .intro { color:var(--muted); max-width:680px; margin:0 0 24px; white-space:pre-line; }
@@ -34,11 +35,16 @@ const STYLE = `
   @media (min-width:720px) { h1 { font-size:36px; } ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; } }
 `;
 
-/** `/eat/<city>/<slug>` on the canonical host, never `bite-tribe.web.app`. */
-export const landingPageUrl = (
-  page: Pick<LandingPage, 'city' | 'slug'>,
-): string =>
-  `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}/${encodeURIComponent(page.slug)}`;
+/**
+ * The app's own logo, served by the web build, so the page carries the same
+ * mark as every other BiteTribe surface. Empty `alt`: the wordmark beside it
+ * already names the link.
+ */
+const LOGO_URL = `${BITE_TRIBE_ORIGIN}/assets/icons/logo.svg`;
+
+/** `/eat/<city>` on the canonical host, never `bite-tribe.web.app`. */
+export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
+  `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}`;
 
 const renderItem = (item: LandingPageItem, index: number): string => {
   const name = escapeHtml(item.name);
@@ -89,7 +95,7 @@ export const renderLandingPage = (page: LandingPage): string => {
 </head>
 <body>
   <header>
-    <a class="brand" href="${BITE_TRIBE_ORIGIN}/">BiteTribe</a>
+    <a class="brand" href="${BITE_TRIBE_ORIGIN}/"><img src="${LOGO_URL}" alt="" width="28" height="36" />BiteTribe</a>
   </header>
   <main>
     <p class="eyebrow">${escapeHtml(eyebrow)}</p>

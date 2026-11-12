@@ -375,6 +375,12 @@ fixed once saved; an alias is how a second name is added.
   URL.
 - The app's logo beside the wordmark in the header, loaded from
   `/assets/icons/logo.svg` of the web build.
+- A link to [@bitetribeapp](https://www.instagram.com/bitetribeapp/) at the
+  right of the header, with Instagram's own glyph from Meta's brand resources,
+  unaltered ([#1978]): black on a light page, white on a dark one, from
+  `/assets/social/instagram-glyph-*.svg` of the web build. No embed, script or
+  tracking; nothing is loaded from an Instagram host. The gradient glyph was
+  not used, because Meta ships it as a 10 MB SVG.
 - One JSON-LD block: an `ItemList` of the Bites in order. Each entry is the
   `Restaurant` the Bite was eaten at, with a city-level `PostalAddress` (a Bite
   carries no street), holding the dish as a `MenuItem` on its `Menu`. The JSON
@@ -482,3 +488,4 @@ Once deployed:
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
+[#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978

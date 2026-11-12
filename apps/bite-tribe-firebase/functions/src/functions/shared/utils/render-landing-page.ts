@@ -23,6 +23,9 @@ const STYLE = `
   header { display:flex; align-items:center; justify-content:space-between; height:56px; border-bottom:1px solid var(--line); }
   .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:18px; text-decoration:none; }
   .brand img { height:36px; width:auto; display:block; }
+  .ig { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--muted); text-decoration:none; }
+  .ig img { width:24px; height:24px; display:block; }
+  .ig:hover span { text-decoration:underline; }
   .eyebrow { color:var(--muted); font-size:14px; margin:24px 0 4px; }
   h1 { font-size:28px; line-height:1.25; margin:0 0 12px; }
   .intro { color:var(--muted); max-width:680px; margin:0 0 24px; white-space:pre-line; }
@@ -85,6 +88,25 @@ const LOGO_URL = `${BITE_TRIBE_ORIGIN}/assets/icons/logo.svg`;
  * one, whose PNG already carries its clear space - hence its taller box.
  */
 const STORE_ASSETS = `${BITE_TRIBE_ORIGIN}/assets/store`;
+
+/** The account every city page mirrors a "Top 5 dishes" post from. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/bitetribeapp/';
+
+/**
+ * A link to the account, with Instagram's own glyph from Meta's brand
+ * resources, unaltered (issue #1978). Black on a light page and white on a
+ * dark one, the two monochrome variants the guidelines allow; the gradient
+ * glyph ships as a 10 MB SVG and is no header icon. Served from the web build
+ * like the logo and the store badges, so the page still loads nothing from
+ * an Instagram host, and carries no embed, script or tracking.
+ */
+const INSTAGRAM_LINK = `<a class="ig" href="${INSTAGRAM_URL}" rel="noopener" aria-label="BiteTribe on Instagram">
+      <picture>
+        <source srcset="${BITE_TRIBE_ORIGIN}/assets/social/instagram-glyph-white.svg" media="(prefers-color-scheme: dark)" />
+        <img src="${BITE_TRIBE_ORIGIN}/assets/social/instagram-glyph-black.svg" alt="" width="24" height="24" />
+      </picture>
+      <span>@bitetribeapp</span>
+    </a>`;
 
 /** `/eat/<city>` on the canonical host, never `bite-tribe.web.app`. */
 export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
@@ -230,6 +252,7 @@ export const renderLandingPage = (page: LandingPage): string => {
 <body>
   <header>
     <a class="brand" href="${BITE_TRIBE_ORIGIN}/"><img src="${LOGO_URL}" alt="" width="28" height="36" />BiteTribe</a>
+    ${INSTAGRAM_LINK}
   </header>
   <main>
     <p class="eyebrow">${escapeHtml(eyebrow)}</p>

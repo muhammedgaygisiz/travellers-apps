@@ -85,7 +85,7 @@ Not implemented. The surfaces this will touch are:
 ## Related GitHub Scope
 
 - Issue [#1124] is the epic, BiteTribe Pro subscriptions, and stage 2 of the monetization
-  umbrella [#1121]. Open
+  umbrella [#1121].
 - Issue [#1122] is the entitlement foundation and Pro feature gating this depends on, stage 0
   of the same umbrella. Open,
   with its own ordered children - issue [#1126] specifies the entitlement model and the

@@ -88,7 +88,7 @@ Added in issue [#1074], all optional so existing documents stay valid:
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after [#1077] reduced it. A missing value means `unclaimed`.
 - `Restaurant.claimedAt` and `claimedAtTimestamp` - when the restaurant became held: set by the first assignment and deleted by the last revoke (`RD-UR-10`).
 
-`RestaurantClaim`, once at `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
+`RestaurantClaim`, once a model in `libs/bite-tribe-common/model`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
 
 There is no `claimedByUserId` on `Restaurant`. It would duplicate the owner set, and who assigned each owner, when and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 

@@ -64,7 +64,7 @@ retires. The surfaces this will touch are:
 ## Related GitHub Scope
 
 - Issue [#1519] - moves BiteTrail creation from the business app into the consumer app
-- Issue [#1615] - decides whether a BiteTrail creator is a role of its own or a persona. Open
+- Issue [#1615] - decides whether a BiteTrail creator is a role of its own or a persona.
 
 ## Related Domains
 

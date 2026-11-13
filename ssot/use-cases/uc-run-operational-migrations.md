@@ -237,7 +237,7 @@ reaches a device is the new version announcement, whose store considerations bel
 - Issue [#1473], part of [#1471], split the migrations page by what each migration does and
   gave the dashboard one entry per migration instead of one shared page - new version
   notification, review timestamps backfill, Bite address backfill, restaurant clustering,
-  image migration, geohash migration. Closed.
+  image migration, geohash migration.
 - Issue [#1472] requires the `admin` role on every operator callable, migrations included, so
   moving the UI did not secure them on its own; the classification of every endpoint is now a
   test. Done.
@@ -248,20 +248,20 @@ reaches a device is the new version announcement, whose store considerations bel
   run once after deploying from the review-timestamps backfill surface. Closed - see
   [issue-1283](../records/issue-1283.md).
 - Issue [#1099] added the stable menu-item ids `backfillMenuItemIds` fills in for menus written
-  before it, delivered by pull request [#1593]. Closed.
+  before it, delivered by pull request [#1593].
 - Issue [#1717] added `backfillBiteImageStatusCallable`, which has to run before the rule that
-  lists only Bites with an uploaded photo goes live. Open.
+  lists only Bites with an uploaded photo goes live.
 - Issue [#1893] added `rebuildBiteCountriesCallable`, the first fill and repair of the
-  About page's country list. Open.
+  About page's country list.
 - Issue [#1752], part of epic [#1614], added `migrateRestaurantOwnerIdsCallable`, which moves
-  restaurant ownership into the `ownerUserIds` set. Open.
-- Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005]. Closed.
+  restaurant ownership into the `ownerUserIds` set.
+- Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005].
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
-  delivered by pull request [#948]. Closed.
+  delivered by pull request [#948].
 - Issue [#447] added the geohash migration (`addGeohashToBite`), delivered by pull request
-  [#453]. Closed.
+  [#453].
 - Pull request [#432] built the image-migration tooling (`migrateBiteImage`); it carries no
-  linked issue of its own. Closed.
+  linked issue of its own.
 
 ## Related Domains
 

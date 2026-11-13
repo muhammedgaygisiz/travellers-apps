@@ -1,5 +1,7 @@
 # Current State - Nx And Dependency Migration Roadmap
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 This page defines the staged migration path for Nx, Angular, Node.js, test tooling, visual regression tooling, and closely coupled workspace dependencies.

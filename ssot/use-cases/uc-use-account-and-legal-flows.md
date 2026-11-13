@@ -126,7 +126,7 @@ Relevant, and exercised more directly than on any other page.
 
 ## Related GitHub Scope
 
-- Issue [#1537] added removing the restaurant-staff association (`/restaurantStaff/{uid}`) from the account deletion cascade. Closed.
+- Issue [#1537] added removing the restaurant-staff association (`/restaurantStaff/{uid}`) from the account deletion cascade.
 - Issue [#1609] added removing both sides of every user block to the cascade.
 - Issues [#1568], [#1569] and [#1570] track three decisions the Deletion Contract has not yet made: what happens to a deleted account's restaurant-ownership fields, to a BiteTrail it owns, and to its `/accountDeletions/{uid}` job record. All open.
 

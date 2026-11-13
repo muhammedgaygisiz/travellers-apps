@@ -1,5 +1,7 @@
 # Current State - Release Candidate Test Charter
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 This charter defines the platform test pass that has to be executed before the release candidate is cut. It exists so that "Android, iOS and web tested" on the readiness checklist in [Current State - Release State](release-state.md) means a recorded run against a named build, on named devices, with a named result, instead of an informal click-through.

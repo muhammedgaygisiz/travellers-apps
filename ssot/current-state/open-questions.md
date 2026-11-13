@@ -1,5 +1,7 @@
 # Current State - Open Questions
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Open questions capture decisions that should become clear before or shortly after launch.

@@ -80,7 +80,7 @@ owner is the signed-in user.
   BiteTrail access and marketplace listing. Closed as completed. Its "assigned users" half
   describes the organisation mechanism [issue-1371](../records/issue-1371.md) removed and no longer exists
 - Issue [#1519] moves creating a BiteTrail into the consumer app and removes this surface, under `RD-UR-4`
-- Issue [#1615] decides whether a BiteTrail curator is a role or a persona. Open
+- Issue [#1615] decides whether a BiteTrail curator is a role or a persona.
 
 ## Related Domains
 

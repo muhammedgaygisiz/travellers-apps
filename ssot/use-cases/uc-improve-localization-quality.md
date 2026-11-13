@@ -65,9 +65,9 @@ back to English in a dialog the reviewer sees. And the listing locale set is bou
 - Issue [#1264] - the verification mail ignored the account language. Closed as completed, and
   the fourth Flow bullet describes the state after it
 - Issue [#1612] - the five components that already use Transloco and carry one stray literal
-  each. Open
+  each.
 - Issue [#1613] - the four consumer components that import no Transloco at all, whose every
-  visible string and announced attribute is English in all fourteen locales. Open
+  visible string and announced attribute is English in all fourteen locales.
 
 ## Related Domains
 

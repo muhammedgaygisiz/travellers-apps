@@ -180,18 +180,18 @@ each under App Functionality.
 
 ## Related GitHub Scope
 
-- Issues [#1229] and [#1168] made the photo survive being offline and losing connectivity mid-upload: a photo picked offline now enters the `pending`/`uploaded`/`failed` states instead of being silently dropped, and the client writes `failed` itself once an upload stalls. Closed.
-- Issue [#1717] made the upload state decide who is shown the Bite: only `uploaded` is listed to other people, and the poster of a failed one is told so. Open.
-- Issue [#1233] scoped a prefilled creation draft (from a menu item or a repost) to its own session, and fixed the undefined-vs-empty photo path that lost a menu-derived Bite when it had none. Closed.
-- Issue [#1287] is the Entry Feedback Contract on the Create Bite button - the spinner and header progress bar covering `freshSessionGuard` and the lazy page chunk. Closed.
-- Issues [#1266], [#1306] and [#1289] redesigned the position-source picker: the single text row with an edit action replacing four always-visible buttons, the modal map following the selected candidate (`focusedGeopointId`), and the modal's disabled rows and marker-tap selection. Closed.
-- Issue [#1269] added the dual-origin distance labels and Bite-position ordering for the `Posting later` edge case. Closed.
-- Issue [#1394] moved the Android gallery onto the system Photo Picker, dropping its own permission prompt. Closed.
-- Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule). Closed.
-- Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what made the author-only photo position of [#1290] possible. Closed.
-- Issue [#1783] shows the total Bite count as a badge next to the My Bites title, sharing the profile header's count rule. Open.
-- Issue [#1796] celebrates the user's first Bite in place of the ordinary creation toast, part of epic [#1741]. Open.
-- Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with). Open.
+- Issues [#1229] and [#1168] made the photo survive being offline and losing connectivity mid-upload: a photo picked offline now enters the `pending`/`uploaded`/`failed` states instead of being silently dropped, and the client writes `failed` itself once an upload stalls.
+- Issue [#1717] made the upload state decide who is shown the Bite: only `uploaded` is listed to other people, and the poster of a failed one is told so.
+- Issue [#1233] scoped a prefilled creation draft (from a menu item or a repost) to its own session, and fixed the undefined-vs-empty photo path that lost a menu-derived Bite when it had none.
+- Issue [#1287] is the Entry Feedback Contract on the Create Bite button - the spinner and header progress bar covering `freshSessionGuard` and the lazy page chunk.
+- Issues [#1266], [#1306] and [#1289] redesigned the position-source picker: the single text row with an edit action replacing four always-visible buttons, the modal map following the selected candidate (`focusedGeopointId`), and the modal's disabled rows and marker-tap selection.
+- Issue [#1269] added the dual-origin distance labels and Bite-position ordering for the `Posting later` edge case.
+- Issue [#1394] moved the Android gallery onto the system Photo Picker, dropping its own permission prompt.
+- Issue [#1409] moved the `ACCESS_MEDIA_LOCATION` grant to the onboarding photos step (the Media Permission Rule).
+- Issue [#1078] replaced the permissive `/{document=**}` Firestore wildcard with default-deny and per-collection matches, which is what made the author-only photo position of [#1290] possible.
+- Issue [#1783] shows the total Bite count as a badge next to the My Bites title, sharing the profile header's count rule.
+- Issue [#1796] celebrates the user's first Bite in place of the ordinary creation toast, part of epic [#1741].
+- Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#1290] stores the photo's position at `bites/{biteId}/authorPrivate/{uid}`, readable by the author alone, so `Aus Bild` is offered again when the Bite is edited. Classified `[Secondary]`.
 
 ## Related Domains

@@ -300,13 +300,13 @@ Relevant.
 
 ## Related GitHub Scope
 
-- Issue [#1244] is the Notification Navigation Contract above - a tap reliably opens its own surface, cold start or not. Closed.
-- Issue [#1366] is the Notification Collapse Contract above - a collapse key stops notifications piling up in the OS drawer. Closed.
-- Issue [#1200] is the Localization Contract above - notification copy follows the recipient's saved language. Closed.
-- Issue [#1194] is the Release Announcement Contract above - an operator-fired, per-platform new-version notification. Closed.
-- Issue [#1212] is the Country Badge Contract above - a profile's first Bite in a new country becomes an engagement signal. Closed.
+- Issue [#1244] is the Notification Navigation Contract above - a tap reliably opens its own surface, cold start or not.
+- Issue [#1366] is the Notification Collapse Contract above - a collapse key stops notifications piling up in the OS drawer.
+- Issue [#1200] is the Localization Contract above - notification copy follows the recipient's saved language.
+- Issue [#1194] is the Release Announcement Contract above - an operator-fired, per-platform new-version notification.
+- Issue [#1212] is the Country Badge Contract above - a profile's first Bite in a new country becomes an engagement signal.
 - Issue [#1283] is the Review Thread Contract above - a reply fans out to every thread participant, not just the Bite creator. Closed. Shared with [UC - Inspect Bite Details](uc-inspect-bite-details.md), which owns the thread UI this fan-out targets.
-- Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915]. Open.
+- Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915].
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains

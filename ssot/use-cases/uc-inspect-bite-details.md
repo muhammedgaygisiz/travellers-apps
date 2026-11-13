@@ -299,16 +299,16 @@ data types this page renders are declared in [Implementation - Store Declaration
 
 ## Related GitHub Scope
 
-- Issue [#1272] is the Relative Time Contract above - localized, single-unit, honest ages for the Bite and its reviews. Closed.
-- Issue [#1246] is the Shared Link Entry Contract above - a cold shared-link visitor always lands on the Bite, signed in or not. Closed.
-- Issue [#1232] is the Unresolvable Bite Contract above - one settled answer (shown, gone, or failed) for every way this page's read can end. Closed.
-- Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language. Closed.
-- Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads. Closed.
-- Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker. Closed.
-- Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card. Closed.
+- Issue [#1272] is the Relative Time Contract above - localized, single-unit, honest ages for the Bite and its reviews.
+- Issue [#1246] is the Shared Link Entry Contract above - a cold shared-link visitor always lands on the Bite, signed in or not.
+- Issue [#1232] is the Unresolvable Bite Contract above - one settled answer (shown, gone, or failed) for every way this page's read can end.
+- Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language.
+- Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads.
+- Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
+- Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
-- Issue [#1918] is the `Ate with` row, part of epic [#1915]. Open.
-- Issue [#1920] is `Remove me` on that row - the user-generated-content control that lets a user leave somebody else's Bite. Open.
+- Issue [#1918] is the `Ate with` row, part of epic [#1915].
+- Issue [#1920] is `Remove me` on that row - the user-generated-content control that lets a user leave somebody else's Bite.
 
 ## Related Domains
 

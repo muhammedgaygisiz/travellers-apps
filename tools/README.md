@@ -10,26 +10,26 @@ content is generated, change the generator.
 
 ## Writes into `ssot/`
 
-| Script                        | `npm run`                 | Writes                                        | Does                                                               |
-| ----------------------------- | ------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
-| `generate-full-changelog.mjs` | `generate-full-changelog` | `ssot/releases/`                              | Rebuilds `changelog.md` and one `build-*.md` per tag from git tags |
-| `write-build-provenance.mjs`  | `release:provenance`      | `ssot/current-state/`, `ssot/implementation/` | Records what a native build was made from                          |
-| `generate-launch-post.mjs`    | `generate-launch-post`    | `ssot/assets/social/`                         | Composes the Instagram launch post from the brand artwork          |
+| Script                        | `npm run`                 | Writes                | Does                                                               |
+| ----------------------------- | ------------------------- | --------------------- | ------------------------------------------------------------------ |
+| `generate-full-changelog.mjs` | `generate-full-changelog` | `ssot/releases/`      | Rebuilds `changelog.md` and one `build-*.md` per tag from git tags |
+| `generate-launch-post.mjs`    | `generate-launch-post`    | `ssot/assets/social/` | Composes the Instagram launch post from the brand artwork          |
 
 ## Release and build
 
-| Script                                              | `npm run`                                       | Does                                                                    |
-| --------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
-| `increment-build-number.mjs`                        | `increment-build-number`                        | Moves the native build number                                           |
-| `increment-build-number-and-generate-changelog.mjs` | `increment-build-number-and-generate-changelog` | Both of the above in the order the release workflow needs               |
-| `sync-native-version.mjs`                           | `sync-native-version`                           | Pushes the `package.json` marketing version into the native projects    |
-| `native-version.mjs`                                | —                                               | Library: the marketing version lives in `package.json` and nowhere else |
-| `generate-changelog.mjs`                            | `generate-changelog`                            | Changelog for one build                                                 |
-| `changelog-sections.mjs`                            | —                                               | Library: cuts two ranges out of a build's changelog section             |
-| `release-notes.mjs`                                 | `release:notes`                                 | Prints the changelog range used for store build notes                   |
-| `build-android-release.mjs`                         | `release:android`                               | Builds the Android release artifact under a JDK Gradle accepts          |
-| `assert-release-bundle.mjs`                         | `release:verify-bundle`                         | Asserts a production web bundle is fit to be wrapped natively           |
-| `set-native-release-secrets.sh`                     | —                                               | Sets the GitHub Actions secrets `native-release.yml` needs              |
+| Script                                              | `npm run`                                       | Does                                                                             |
+| --------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| `increment-build-number.mjs`                        | `increment-build-number`                        | Moves the native build number                                                    |
+| `increment-build-number-and-generate-changelog.mjs` | `increment-build-number-and-generate-changelog` | Both of the above in the order the release workflow needs                        |
+| `write-build-provenance.mjs`                        | `release:provenance`                            | Writes `dist/build-provenance.json`, recording what a native build was made from |
+| `sync-native-version.mjs`                           | `sync-native-version`                           | Pushes the `package.json` marketing version into the native projects             |
+| `native-version.mjs`                                | —                                               | Library: the marketing version lives in `package.json` and nowhere else          |
+| `generate-changelog.mjs`                            | `generate-changelog`                            | Changelog for one build                                                          |
+| `changelog-sections.mjs`                            | —                                               | Library: cuts two ranges out of a build's changelog section                      |
+| `release-notes.mjs`                                 | `release:notes`                                 | Prints the changelog range used for store build notes                            |
+| `build-android-release.mjs`                         | `release:android`                               | Builds the Android release artifact under a JDK Gradle accepts                   |
+| `assert-release-bundle.mjs`                         | `release:verify-bundle`                         | Asserts a production web bundle is fit to be wrapped natively                    |
+| `set-native-release-secrets.sh`                     | —                                               | Sets the GitHub Actions secrets `native-release.yml` needs                       |
 
 ## Checks
 
@@ -52,14 +52,29 @@ own [README](analytics/README.md).
 
 ## What `check:ssot` enforces
 
-| Rule       | Fails when                                                                                                                                               |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LINK`     | A relative link points at a file that does not exist                                                                                                     |
-| `WIKILINK` | A Logseq `[[wikilink]]` appears outside code                                                                                                             |
-| `ISSUEREF` | An issue number is written so that it does not link (`\#1234`, or a bare `#1234`)                                                                        |
-| `REFDEF`   | A `[#1234]` reference has no definition in its own file                                                                                                  |
-| `LOGSEQ`   | A `key:: value` property, or a page that opens as an outline bullet rather than a heading                                                                |
-| `UF-*`     | A use-case page breaks [Use Case Format](../ssot/overview/use-case-format.md) — level, required sections, section order, classification, related domains |
+A failure makes the command exit non-zero. A warning is listed with the failures but
+never changes the exit code; in CI it reaches the job summary and the pull request's SSOT
+comment, which then says it does not block the merge.
+
+| Rule         | Result                                   | Checks                                                                                                                                                                                                                                                                                                                                                      |
+| ------------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LINK`       | failure                                  | A relative link points at a file that does not exist                                                                                                                                                                                                                                                                                                        |
+| `WIKILINK`   | failure                                  | A Logseq `[[wikilink]]` appears outside code                                                                                                                                                                                                                                                                                                                |
+| `ISSUEREF`   | failure                                  | An issue number is written so that it does not link (`\#1234`, or a bare `#1234`)                                                                                                                                                                                                                                                                           |
+| `REFDEF`     | failure                                  | A `[#1234]` reference has no definition in its own file                                                                                                                                                                                                                                                                                                     |
+| `LOGSEQ`     | failure                                  | A `key:: value` property, a page that opens as an outline bullet rather than a heading, or a heading written as an outline bullet (`- ## …`) anywhere in a file outside code                                                                                                                                                                                |
+| `PATH`       | failure                                  | A path in backticks starting `apps/`, `libs/` or `tools/`, outside fenced code, names nothing in the working tree. `...` stands for any subpath; `*`, `**`, `<name>` and `{a,b}` match as a reader expects. Paths `git check-ignore` matches are exempt, and so are pages under `records/`, `releases/` and `test-runs/`, which describe the tree as it was |
+| `ISSUESTATE` | failure                                  | A line in a use case's `Related GitHub Scope` ends in `Open` or `Closed`, with or without a full stop. The state of an issue lives on GitHub                                                                                                                                                                                                                |
+| `VERIFIED`   | failure if missing, warning if > 30 days | A page under `ssot/current-state/` carries no `**Last verified:** YYYY-MM-DD` line as the first line below its `#` heading, or carries one older than 30 days                                                                                                                                                                                               |
+| `UF-*`       | failure                                  | A use-case page breaks [Use Case Format](../ssot/overview/use-case-format.md) — level, required sections, section order, classification, related domains                                                                                                                                                                                                    |
+
+`PATH` reads the working tree through `git ls-files`, tracked and untracked, so it agrees
+with CI on a case-insensitive file system and needs a git checkout to run.
+
+Age is a warning rather than a failure because a blocking age check would fail unrelated
+pull requests on the day a page turns 31 days old. Update the date only after reading the
+page against the current state; a date bumped without reading is the drift this rule
+exists to surface.
 
 Scripts that are libraries rather than entry points carry no `npm run` name and are
 imported by their neighbours.

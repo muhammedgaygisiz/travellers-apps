@@ -98,7 +98,7 @@ onboarding ([UC - Guide New Users After Registration](uc-guide-new-users-after-r
 
 ## Related GitHub Scope
 
-- Issue [#1328] is the account-scoping fix - the gallery moved from a flat, unscoped directory to the uid-scoped one this page now reads. Closed.
+- Issue [#1328] is the account-scoping fix - the gallery moved from a flat, unscoped directory to the uid-scoped one this page now reads.
 
 ## Related Domains
 

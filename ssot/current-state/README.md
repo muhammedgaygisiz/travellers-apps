@@ -1,6 +1,10 @@
 # Current State
 
+**Last verified:** 2026-11-13
+
 What is true right now. These pages date faster than any others here.
+
+Every page carries `**Last verified:** YYYY-MM-DD` as the first line below its title. Change the date only after reading the whole page against the current state, and correct what is no longer true in the same change. `npm run check:ssot` fails a page without the line and warns once it is more than 30 days old; see [tools/README.md](../../tools/README.md).
 
 Part of the [SSOT index](../README.md).
 

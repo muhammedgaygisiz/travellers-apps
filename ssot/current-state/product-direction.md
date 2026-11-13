@@ -1,5 +1,7 @@
 # Current State - Product Direction
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Product Direction names the fronts the product grows along, and groups the
@@ -7,8 +9,9 @@ Product Direction names the fronts the product grows along, and groups the
 
 It sits between [Mission](../product/mission.md) and [Current State - Roadmap](roadmap.md). Mission says what
 BiteTribe does and where it stops. This page says which parts of the product get
-better next and why each front matters. The Roadmap owns sequencing, dates, and
-launch status; nothing here carries a date.
+better next and why each front matters. The Roadmap owns the phases, and
+[Current State - Release State](release-state.md) the dates and launch status;
+nothing here carries a date.
 
 ## Why It Exists
 
@@ -43,13 +46,18 @@ No epic owns this front yet.
 ## Restaurant And Menu Completeness
 
 - [UC - Contact A Restaurant And Plan A Visit](../use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)
-- [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) — [epic-1069](../records/epic-1069.md)
+- [UC - Dismiss Restaurant Candidate](../use-cases/uc-dismiss-restaurant-candidate.md) — [epic-1495][#1495]
+- [UC - Resolve Candidate Against An Existing Restaurant](../use-cases/uc-resolve-candidate-against-an-existing-restaurant.md) — [epic-1630][#1630]
 
 Restaurant and menu data should carry someone from discovery to a clear next
 action: trying a dish, planning a visit, or creating a bite from a menu item.
+Restaurant candidates found in Bites are how that data grows, so a candidate
+that is wrong or already known has to leave the queue as cleanly as a real one
+enters it.
 
 ## The BiteTrail Ecosystem
 
+- [UC - Create A BiteTrail](../use-cases/uc-create-a-bitetrail.md)
 - [UC - Price A BiteTrail For Sale](../use-cases/uc-price-a-bitetrail-for-sale.md)
 - [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md)
 
@@ -58,41 +66,40 @@ eventually earn from local knowledge. See [Bite Trail](../domain/bite-trail.md) 
 
 No epic owns this front yet.
 
-## Table Service In The Restaurant
-
-- [UC - Configure Restaurant Floor Plans And Tables](../use-cases/uc-configure-restaurant-floor-plans-and-tables.md) — [epic-1070][#1070]
-- [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md) — [epic-1071][#1071]
-- [UC - Order At The Table Through A QR Code](../use-cases/uc-order-at-the-table-through-a-qr-code.md) — [epic-1072][#1072]
-
-The in-restaurant half of [epic-735][#735]. It reaches the mission when an order
-becomes a bite, which is [epic-1073][#1073]. Until then it is business tooling, and
-[Mission](../product/mission.md) treats it as supporting work rather than the centre of the product.
-
 ## Monetization
 
 - [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md) — [epic-1124][#1124]
 - [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md) — [epic-1123][#1123]
 - [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md) — [epic-1125][#1125]
+- [UC - Earn From A Paid BiteTrail](../use-cases/uc-earn-from-a-paid-bitetrail.md) — [epic-1125][#1125]
 
-[Monetization](../product/monetization.md) owns the free and paid boundary and the revenue share. All three
+[Monetization](../product/monetization.md) owns the free and paid boundary and the revenue share. All four
 sit behind the entitlement foundation in [epic-1122][#1122], under umbrella
 [epic-1121][#1121].
 
 ## Trust And Data Quality
 
-- [UC - Harden Platform And Backend Trust](../use-cases/uc-harden-platform-and-backend-trust.md)
-- [UC - Strengthen Location Currency And Data Quality Guidance](../use-cases/uc-strengthen-location-currency-and-data-quality-guidance.md)
 - [UC - Improve Localization Quality](../use-cases/uc-improve-localization-quality.md) — [epic-738][#738]
 
 Data quality work is product work. Bad location, currency, or language context
 weakens trust in every bite it touches.
 
+## Growth And Marketing
+
+- [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md) — [epic-1723][#1723]
+
+BiteTribe grows when people who have never opened it meet it where they already
+are: in a search engine, on Instagram, in a friend's shared Bite. This front holds
+the work whose purpose is marketing and more users rather than a better app for
+existing ones. The city landing pages of [epic-1487][#1487] belong here too and
+are already supported, which is why they are not listed.
+
 ## Current Limitations
 
 - The one-line rationale under each front is written here and nowhere else. It is
   the part of this page most likely to drift from the use-case pages it summarizes.
-- Search, menu completeness, and BiteTrail gamification have no owning epic, so
-  those fronts cannot be traced to issues yet.
+- Universal search, contacting a restaurant, and the BiteTrail ecosystem have no
+  owning epic, so those use cases cannot be traced to issues yet.
 - This page covers unbuilt work only. Use cases under "Supported today" in
   [SSOT](../README.md) are not grouped here.
 
@@ -111,14 +118,13 @@ weakens trust in every bite it touches.
 - Epics section in [SSOT](../README.md)
 - [Mission](../product/mission.md)
 
-[#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#738]: https://github.com/muhammedgaygisiz/travellers-apps/issues/738
-[#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
-[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
-[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
-[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
 [#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+[#1495]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1495
+[#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630
+[#1723]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1723

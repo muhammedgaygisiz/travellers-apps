@@ -76,14 +76,13 @@ Location** under App Functionality is already declared in
   entry point `Flow` opens with. Closed as completed.
 - Issue [#812] asked for the swipe that checks a Bite off in a Bucket List. Closed as
   completed, delivered by pull request [#1162].
-- Issue [#1016] added the first-visit coach marks, the bucket-list swipe among them. Closed
-  as completed.
+- Issue [#1016] added the first-visit coach marks, the bucket-list swipe among them.
 - Pull request [#766] added the `tried out` flow with its bucketlist-scoped metadata, and
   pull request [#757] the one-time BiteTrail rating flow reached from My Bucket Lists.
   Neither names an issue, so the rating flow has no issue behind it in the repository.
 - Issue [#1717] hides a Bite whose photo never arrived from everybody but its poster, bucket
   lists included, and refuses to add one. The list overview's badge still counts the stored
-  `biteIds`. Open.
+  `biteIds`.
 - Issue [#1800] celebrates the tick that completes a Bucket List, part of epic [#1741].
 
 ## Related Domains

@@ -163,7 +163,7 @@ This stops being true the moment a business or admin client is submitted to a st
 
 ## Related GitHub Scope
 
-- Issue [#1069] - Restaurant ownership, claiming and authorization, with seven child issues
+- Epic [#1069] - Restaurant ownership, claiming and authorization, with seven child issues
 - Issue [#1075] - the three roles as verified identity; `admin` and `business` came from [#1469] and [#1472], and [#1075] itself added `staff`, generalised `requireAdmin` into `requireRole`, and made `business` and `staff` mutually exclusive; done
 - Issue [#1076] - self-service restaurant claiming, closed as not planned
 - Issue [#1077] - assign and revoke restaurant ownership, and remove the claim model; done

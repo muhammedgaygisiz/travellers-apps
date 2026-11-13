@@ -135,9 +135,9 @@ Built since, and owned elsewhere:
 
 ## Related GitHub Scope
 
-- Issue [#735] - Restaurant Interaction Platform umbrella
-- Issue [#1070] - Restaurant floor plan and table configuration, with eleven child issues
-- Issue [#1069] - Restaurant ownership, claiming and authorization, prerequisite, delivered
+- Epic [#735] - Restaurant Interaction Platform umbrella
+- Epic [#1070] - Restaurant floor plan and table configuration, with eleven child issues
+- Epic [#1069] - Restaurant ownership, claiming and authorization, prerequisite, delivered
 - Issue [#1080] - the shared model and the coordinate system, delivered
 - Issue [#1081] - persistence, rules and optimistic concurrency, delivered
 - Issue [#1082] - the editor canvas, rooms and the grid: creating, renaming, resizing and deleting rooms, with pan, zoom and a scale reference, delivered

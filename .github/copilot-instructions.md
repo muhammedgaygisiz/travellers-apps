@@ -9,14 +9,8 @@ The source of truth is not Copilot-specific. Follow `AGENTS.md` and the SSOT pag
 
 ## Required Start
 
-1. Read `AGENTS.md`.
-2. Read `ssot/README.md`.
-3. Read `ssot/overview/agent-operating-contract.md`.
-4. Use `ssot/overview/traceability-map.md` to connect the request to product, domain, use case,
-   epic, architecture, implementation, testing, and release context.
-5. Follow `ssot/overview/spec-to-code-workflow.md` for implementation work.
-6. Follow `ssot/overview/feature-delivery-workflow.md` for normal issue-to-merge work.
-7. Follow `ssot/overview/release-workflow.md` for Sunday release work.
+Read `AGENTS.md` first. It names what every task reads and what each kind of task reads in
+addition.
 
 ## Task-Scoped Guidance
 

@@ -10,10 +10,11 @@ content is generated, change the generator.
 
 ## Writes into `ssot/`
 
-| Script                        | `npm run`                 | Writes                | Does                                                               |
-| ----------------------------- | ------------------------- | --------------------- | ------------------------------------------------------------------ |
-| `generate-full-changelog.mjs` | `generate-full-changelog` | `ssot/releases/`      | Rebuilds `changelog.md` and one `build-*.md` per tag from git tags |
-| `generate-launch-post.mjs`    | `generate-launch-post`    | `ssot/assets/social/` | Composes the Instagram launch post from the brand artwork          |
+| Script                          | `npm run`                 | Writes                              | Does                                                                                                                                                                                                                                                                              |
+| ------------------------------- | ------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generate-full-changelog.mjs`   | `generate-full-changelog` | `ssot/releases/`                    | Rebuilds `changelog.md` and one `build-*.md` per tag from git tags                                                                                                                                                                                                                |
+| `generate-launch-post.mjs`      | `generate-launch-post`    | `ssot/assets/social/`               | Composes the Instagram launch post from the brand artwork                                                                                                                                                                                                                         |
+| `generate-traceability-map.mjs` | `generate:traceability`   | `ssot/overview/traceability-map.md` | Rewrites `Domain To Use Cases` and `Use Cases To Epics` from each use case's `Related Domains` and `Related GitHub Scope`. It owns only the block between `<!-- generated:traceability:start -->` and `<!-- generated:traceability:end -->`; the rest of the page is hand-written |
 
 ## Release and build
 
@@ -66,6 +67,9 @@ comment, which then says it does not block the merge.
 | `PATH`       | failure                                  | A path in backticks starting `apps/`, `libs/` or `tools/`, outside fenced code, names nothing in the working tree. `...` stands for any subpath; `*`, `**`, `<name>` and `{a,b}` match as a reader expects. Paths `git check-ignore` matches are exempt, and so are pages under `records/`, `releases/` and `test-runs/`, which describe the tree as it was |
 | `ISSUESTATE` | failure                                  | A line in a use case's `Related GitHub Scope` ends in `Open` or `Closed`, with or without a full stop. The state of an issue lives on GitHub                                                                                                                                                                                                                |
 | `VERIFIED`   | failure if missing, warning if > 30 days | A page under `ssot/current-state/` carries no `**Last verified:** YYYY-MM-DD` line as the first line below its `#` heading, or carries one older than 30 days                                                                                                                                                                                               |
+| `GENERATED`  | failure                                  | The generated block of `ssot/overview/traceability-map.md` is not what `npm run generate:traceability` writes now: a use case's `Related Domains` or `Related GitHub Scope` changed without regenerating, or the block was edited by hand                                                                                                                   |
+| `ENTRY`      | warning                                  | `AGENTS.md` and the documents it lists under `## Always Read` exceed 3,500 words together. Fails instead if the section is missing or names a file that does not exist                                                                                                                                                                                      |
+| `MAPSIZE`    | warning                                  | `ssot/overview/traceability-map.md` exceeds 3,000 words                                                                                                                                                                                                                                                                                                     |
 | `UF-*`       | failure                                  | A use-case page breaks [Use Case Format](../ssot/overview/use-case-format.md) — level, required sections, section order, classification, related domains                                                                                                                                                                                                    |
 
 `PATH` reads the working tree through `git ls-files`, tracked and untracked, so it agrees
@@ -75,6 +79,15 @@ Age is a warning rather than a failure because a blocking age check would fail u
 pull requests on the day a page turns 31 days old. Update the date only after reading the
 page against the current state; a date bumped without reading is the drift this rule
 exists to surface.
+
+`ENTRY` and `MAPSIZE` count words as `wc -w` does. Every agent reads `AGENTS.md` and its
+always-read documents before it reads its task, so each word there is paid on every task;
+every feature and fix task reads the traceability map, whose generated block grows with each
+use case. The budgets, 3,500 and 3,000 words, were set when the two stood at 2,864 and 2,050, and
+leave room for ordinary growth. Going past one is a decision someone takes in
+a pull request, by shortening what is read or by raising the budget here with the reason; it is
+not something that should happen by accretion. They warn rather than fail so that the decision
+stays possible.
 
 Scripts that are libraries rather than entry points carry no `npm run` name and are
 imported by their neighbours.

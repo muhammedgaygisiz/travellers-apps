@@ -81,8 +81,8 @@ Not implemented. There is no ad dependency in the workspace. The surfaces this w
 
 ## Related GitHub Scope
 
-- Issue [#1123] is the epic, AdMob advertising for free users, and stage 1 of the
-  monetization umbrella [#1121].
+- Epic [#1123] is the epic, AdMob advertising for free users, and stage 1 of the
+  monetization umbrella epic [#1121].
 - Issue [#542] is the native in-feed placement and carries the ordinal `04` within that epic.
 - Issue [#989], the GDPR consent mode and PII/retention review, is open and should produce one
   consent experience with this page rather than two

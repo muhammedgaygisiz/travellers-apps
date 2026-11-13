@@ -59,7 +59,7 @@ BiteTrail's completion rather than a generic Bucket List's. What exists to build
 
 ## Related GitHub Scope
 
-- Issue [#770]
+- Epic [#770]
 
 ## Related Domains
 

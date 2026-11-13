@@ -118,10 +118,10 @@ all be reviewed for the first time.
 
 - Issue [#1079] scoped this app to the Restaurants assigned to the caller and guarded the edit
   routes. Closed as completed; the assignment itself is [UC - Own And Claim Restaurants](uc-own-and-claim-restaurants.md).
-- Issue [#734], the restaurant and menu epic, covered opening hours, social links,
+- Epic [#734], the restaurant and menu epic, covered opening hours, social links,
   verified/unverified restaurant handling, menu cleanup, and admin restaurant workflows.
   Closed as completed - delivered, not planned.
-- Issue [#778], the candidate epic, and issue [#942] covered verifying restaurant candidates
+- Epic [#778], the candidate epic, and issue [#942] covered verifying restaurant candidates
   discovered from repeated Bite evidence into real Restaurants. Both closed as completed. That
   flow is Operator work in the Admin App; see [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 - Issue [#1003] seeded the initial Menu of a verified candidate from its Bites. Closed as
@@ -131,7 +131,7 @@ all be reviewed for the first time.
 - Issue [#370] put the published menu code on `restaurant/:restaurantId`, and with it the
   copyable address and the print sheet. Closed as completed, delivering issue [#371].
 - Issue [#1830] added the facilities field group and its first facility, the gender-neutral
-  restroom, which the consumer restaurant page shows. Part of [#1823].
+  restroom, which the consumer restaurant page shows. Part of epic [#1823].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.

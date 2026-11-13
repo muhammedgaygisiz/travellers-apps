@@ -100,12 +100,12 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 
 ## Related GitHub Scope
 
-- Issue [#734], the `User wants to see a menu of a restaurant` epic, covered richer restaurant
+- Epic [#734], the `User wants to see a menu of a restaurant` epic, covered richer restaurant
   menu and restaurant page behaviour. Closed as completed - it is delivered, not planned.
 - Issue [#1381] owns the state contract above. Closed as completed.
 - Issue [#1696] made the Menu label readable in light mode, where it had been drawn in fixed white on a transparent button, moved the menu button above the tags, and replaced the Bites button on both pages with the rating count as a link.
 
-- Issue [#1830] added the facility line to the restaurant page. Part of [#1823].
+- Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
 
 ## Related Domains
 

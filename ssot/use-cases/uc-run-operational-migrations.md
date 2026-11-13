@@ -232,7 +232,7 @@ reaches a device is the new version announcement, whose store considerations bel
 
 ## Related GitHub Scope
 
-- Issue [#1471] is the epic that grew the admin app into the BiteTribe operations tool,
+- Epic [#1471] is the epic that grew the admin app into the BiteTribe operations tool,
   migrations included. Closed, with every issue under it complete.
 - Issue [#1473], part of [#1471], split the migrations page by what each migration does and
   gave the dashboard one entry per migration instead of one shared page - new version

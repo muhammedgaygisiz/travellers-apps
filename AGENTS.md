@@ -8,15 +8,28 @@ Agents should use the SSOT before making changes so product intent, domain langu
 
 This contract is model-agnostic. Codex, Claude, GPT, local IDE agents, and future assistants should all follow the same SSOT workflow.
 
-## Start Here
+## Always Read
 
-1. Read `ssot/README.md`.
-2. Read `ssot/overview/agent-operating-contract.md`.
-3. Use `ssot/overview/traceability-map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
-4. Follow `ssot/overview/feature-delivery-workflow.md` for normal issue-to-merge work.
-5. Follow `ssot/overview/release-workflow.md` for Sunday release work.
-6. Use `ssot/overview/spec-to-code-workflow.md` for implementation details.
-7. Use tool-specific guidance, such as the skills in `skills/` or `CLAUDE.md`, only as an adapter to this shared workflow.
+Every task reads these two before anything else:
+
+- `ssot/README.md`
+- `ssot/overview/agent-operating-contract.md`
+
+## Read By Task
+
+Then read what the task needs, and no more:
+
+| Task                               | Reads in addition                                                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Feature, fix, behavioural refactor | `ssot/overview/traceability-map.md`, `ssot/overview/feature-delivery-workflow.md`, `ssot/overview/spec-to-code-workflow.md` |
+| Release                            | `ssot/overview/release-workflow.md`                                                                                         |
+| Dependency or framework migration  | `ssot/current-state/nx-and-dependency-migration-roadmap.md`                                                                 |
+| CI and build                       | `ssot/implementation/ci-pipeline.md`                                                                                        |
+| SSOT page or issue writing         | `ssot/overview/use-case-format.md` or `ssot/overview/github-issue-format.md`, as the page requires                          |
+| Anything else                      | Nothing by default; `ssot/overview/traceability-map.md` when the task needs the page that owns a fact                       |
+
+`CLAUDE.md`, `.github/copilot-instructions.md` and the skills in `skills/` point here and
+add only what their tool needs. They are adapters to this workflow, not a second one.
 
 ## Core Rules
 

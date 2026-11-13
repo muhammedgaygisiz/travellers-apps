@@ -33,7 +33,6 @@
     "release:notes": "node tools/release-notes.mjs",
     "check:ssot": "node tools/check-ssot.mjs",
     "generate:traceability": "node tools/generate-traceability-map.mjs",
-    "generate-full-changelog": "node tools/generate-full-changelog.mjs",
     "generate-store-qr-codes": "node tools/generate-store-qr-codes.mjs",
     "generate-launch-post": "node tools/generate-launch-post.mjs",
     "increment-build-number-and-generate-changelog": "node tools/increment-build-number-and-generate-changelog.mjs",

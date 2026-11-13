@@ -80,7 +80,7 @@ Status and Related GitHub Scope already name, not to this one:
   umbrella epic [#1121].
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
   actor.
-- [issue-1371](../records/issue-1371.md) removed the `organisationId` field and the assigned-users flow this page used
+- [issue-1371](../history/records/issue-1371.md) removed the `organisationId` field and the assigned-users flow this page used
   to describe
 
 ## Related Domains

@@ -7,7 +7,7 @@ documents each event, how it is emitted in code, the launch dashboard to build
 in the GA4/Firebase console, and how to verify events in DebugView.
 
 The launch-critical core was defined by issue 910 (part of [epic-907][#907],
-Phase 2 / Week 3), and the onboarding funnel by [epic-850](../records/epic-850.md). Issue 1098
+Phase 2 / Week 3), and the onboarding funnel by [epic-850](../history/records/epic-850.md). Issue 1098
 added the first events the **business** app owns - the table operations of
 [epic-1071][#1071] - which is where the per-event surface rule below comes from.
 
@@ -92,7 +92,7 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 | Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
 | Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
 
-The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
+The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../history/records/epic-850.md),
 issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
 fires once per step in order (`identity`, `visibility`, `currency`, `language`,
 `location`, `notifications`, `finish`); `onboarding_assistant_completed` fires
@@ -760,7 +760,7 @@ can check metrics without opening the console:
   If logcat answers that app measurement is disabled by
   `setAnalyticsCollectionEnabled(false)`, the device is carrying a disable a
   dev build wrote into `com.google.android.gms.measurement.prefs`. Only a
-  build that includes the [issue-1387](../records/issue-1387.md) fix re-enables it; clearing app data
+  build that includes the [issue-1387](../history/records/issue-1387.md) fix re-enables it; clearing app data
   may not, because auto-backup can restore the preference.
 - iOS: add launch argument `-FIRDebugEnabled`.
 - Web: analytics debug is visible via the `google-analytics`/`g/collect`

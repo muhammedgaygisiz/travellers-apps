@@ -158,7 +158,7 @@ in a window; these two count **people**, followed from the day they arrived.
   and the digest prints a `By source` table under the platform one. A campaign
   tag (`utm_source`, or the Play install referrer's) wins over GA4's
   first-touch source; the tag convention is in
-  [Social Media Channels](../implementation/social-media-channels.md#campaign-tags-on-every-link).
+  [Social Media Channels](../marketing/social-media-channels.md#campaign-tags-on-every-link).
   Web rows also count `store_handoffs`, the arrivals who followed a store link,
   because they install under a new identity and would otherwise read as lost.
   App Store campaign installs are not in the export at all: Apple reports them

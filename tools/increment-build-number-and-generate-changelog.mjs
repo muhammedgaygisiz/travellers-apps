@@ -39,7 +39,7 @@ commitNativeVersionSyncIfNeeded(version);
 // a tag-triggered CI run produced 97 artifacts under a tag named 96.
 const releaseCommit = git(['rev-parse', 'HEAD']).stdout;
 
-run('npm', ['run', 'generate-changelog']);
+run('npm', ['run', 'generate-changelog', '--', '--tag', tagName]);
 run('npm', ['run', 'increment-build-number']);
 
 ensureNativeVersionMatches(version);

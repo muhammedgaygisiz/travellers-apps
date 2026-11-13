@@ -21,7 +21,6 @@ Release and build workflow describes the implementation-facing scripts that supp
 | `npm run release:provenance`                            | Write `dist/build-provenance.json` naming the version, build number, and source commit        |
 | `npm run generate-changelog`                            | Generate incremental changelog output                                                         |
 | `npm run release:notes`                                 | Print the changelog range for store build notes (`-- --full` for the GitHub release body)     |
-| `npm run generate-full-changelog`                       | Regenerate `ssot/releases/` from the git tags                                                 |
 | `npm run increment-build-number-and-generate-changelog` | Generate changelog, increment build number, commit, tag, push, and publish the GitHub release |
 | `npm run cap:sync:ios`                                  | Capacitor sync into the iOS wrapper with a UTF-8 locale pinned                                |
 | `npm run cap:run:ios`                                   | Run Capacitor iOS                                                                             |
@@ -615,7 +614,7 @@ build written correctly and run with `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED=true`
 can still return a cached bundle carrying the gate off.
 
 Run 11 of the release-candidate pass hit exactly that, and only the bundle check
-caught it. See [Test Run 11 - Android Build 96](../test-runs/11-android-build-96.md) and
+caught it. See [Test Run 11 - Android Build 96](../history/test-runs/11-android-build-96.md) and
 [#1428].
 
 Every production build therefore passes `--skip-nx-cache`, in CI and by hand.

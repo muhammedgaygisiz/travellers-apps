@@ -14,7 +14,7 @@ Done. Finish the launch-blocking backend work: Firebase App Check monitoring, fi
 
 ## Phase 2 - Product Intelligence
 
-Done. Make the release measurable and ready to ship: the analytics event taxonomy and its dashboard ([Implementation - Analytics Events](../implementation/analytics-events.md)), the platform test pass on Android, iOS and web, the store assets, and the onboarding assistant ([epic-850](../records/epic-850.md)).
+Done. Make the release measurable and ready to ship: the analytics event taxonomy and its dashboard ([Implementation - Analytics Events](../implementation/analytics-events.md)), the platform test pass on Android, iOS and web, the store assets, and the onboarding assistant ([epic-850](../history/records/epic-850.md)).
 
 The Nx and dependency migration ran alongside it without becoming a launch prerequisite; its own state is in [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md).
 

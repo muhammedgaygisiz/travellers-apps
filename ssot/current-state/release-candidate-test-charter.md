@@ -100,16 +100,16 @@ Install the named Google Play Open Testing artifact on a physical device, then e
 1. Registration, the blocking onboarding assistant, and continuation to the home page.
 2. Login, logout, and session restore after a cold start.
 3. Create a Bite with a photo, including the upload failure state and both retry paths.
-4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [issue-1262](../records/issue-1262.md).
+4. Location permission grant and denial, Bite currency prefill from the Bite position, and manual currency override. The account default currency suggested during onboarding is a separate check with a separate source: it is derived from the device region through the device time zone, never from the interface language, so a device whose Region and language variant disagree must still suggest the currency of the Region. See [issue-1262](../history/records/issue-1262.md).
 5. Map view, marker selection, the Bite drawer, and camera stability while live updates arrive.
 6. Search for Bites, restaurants and cities.
 7. Bucket list add, swipe to tick, and undo.
 8. Notification permission, and delivery of a ranking-change notification. Issue 971 landed these but device delivery is still unverified.
-9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [issue-1190](../records/issue-1190.md).
+9. Deep links into Bite details. Profiles are not shareable and have no deep link; that is the intended product scope, not a missing feature. See [issue-1190](../history/records/issue-1190.md).
 10. Privacy policy and account deletion end to end.
 11. Restaurant menus and local gallery support, which have no Playwright coverage at all.
-12. App Check in enforced mode: a working session, then the loading screen when the token is refused, ending either in the app once a token arrives or, after about a minute, in the could-not-load message with its retry (issue 1465 replaced the retry gate that Runs 10 and 11 saw here). Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [issue-1245](../records/issue-1245.md).
-13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [issue-1265](../records/issue-1265.md) shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
+12. App Check in enforced mode: a working session, then the loading screen when the token is refused, ending either in the app once a token arrives or, after about a minute, in the could-not-load message with its retry (issue 1465 replaced the retry gate that Runs 10 and 11 saw here). Google Maps Platform is read separately: Places API (New) at 0% verified is the expected reading and must not be enforced, so the evidence to record is that restaurant, city, and Bite place search still work while the Firebase APIs are enforced. See [issue-1245](../history/records/issue-1245.md).
+13. Trigger the verification-mail **resend** and read the delivered `From` header and subject in the received mail, not the code that built them. Expect `BiteTribe <noreply@bitetribe.app>` and the catalog subject in the account's language; the one-word spelling landed on 2026-08-21 and only reaches a recipient once the Workspace `Send mail as` display name is updated to match, so a delivered `Bite Tribe` here means that console step is still outstanding. This is a required check rather than an optional one because Gmail rewrites `From` server-side when the delegated mailbox's `Send mail as` list does not carry the address, which happens after the function has already produced a correct header: [issue-1265](../history/records/issue-1265.md) shipped twice and changed nothing a recipient saw, and no unit test can catch it. Read the resend mail specifically - the registration mail comes from Firebase Auth's own mailer and exercises a different sender path. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## iOS
 
@@ -172,18 +172,18 @@ Add one entry per platform per execution, newest first. Keep previous entries
 when re-running after fixes. Each record holds the build identity, the device,
 the result summary, the findings filed, and what was left unexecuted.
 
-- 29 Aug 2026 — [Test Run 11 - Android Build 96](../test-runs/11-android-build-96.md)
-- 29 Aug 2026 — [Test Run 10 - Android Build 96](../test-runs/10-android-build-96.md)
-- 27 Aug 2026 — [Test Run 09 - Android Build 95](../test-runs/09-android-build-95.md)
-- 17 Aug 2026 — [Test Run 08 - Web Build 95](../test-runs/08-web-build-95.md)
-- 15 Aug 2026 — [Test Run 07 - Web Build 95](../test-runs/07-web-build-95.md)
-- 15 Aug 2026 — [Test Run 07 - iOS Build 94](../test-runs/07-ios-build-94.md)
-- 10 Aug 2026 — [Test Run 06 - iOS Build 93](../test-runs/06-ios-build-93.md)
-- 8 Aug 2026 — [Test Run 05 - iOS Build 92](../test-runs/05-ios-build-92.md)
-- 6 Aug 2026 — [Test Run 04 - iOS Build 91](../test-runs/04-ios-build-91.md)
-- 4 Aug 2026 — [Test Run 03 - iOS Build 90](../test-runs/03-ios-build-90.md)
-- 3 Aug 2026 — [Test Run 02 - iOS Build 89](../test-runs/02-ios-build-89.md)
-- 28 July 2026 — [Test Run 01 - iOS Build 87](../test-runs/01-ios-build-87.md)
+- 29 Aug 2026 — [Test Run 11 - Android Build 96](../history/test-runs/11-android-build-96.md)
+- 29 Aug 2026 — [Test Run 10 - Android Build 96](../history/test-runs/10-android-build-96.md)
+- 27 Aug 2026 — [Test Run 09 - Android Build 95](../history/test-runs/09-android-build-95.md)
+- 17 Aug 2026 — [Test Run 08 - Web Build 95](../history/test-runs/08-web-build-95.md)
+- 15 Aug 2026 — [Test Run 07 - Web Build 95](../history/test-runs/07-web-build-95.md)
+- 15 Aug 2026 — [Test Run 07 - iOS Build 94](../history/test-runs/07-ios-build-94.md)
+- 10 Aug 2026 — [Test Run 06 - iOS Build 93](../history/test-runs/06-ios-build-93.md)
+- 8 Aug 2026 — [Test Run 05 - iOS Build 92](../history/test-runs/05-ios-build-92.md)
+- 6 Aug 2026 — [Test Run 04 - iOS Build 91](../history/test-runs/04-ios-build-91.md)
+- 4 Aug 2026 — [Test Run 03 - iOS Build 90](../history/test-runs/03-ios-build-90.md)
+- 3 Aug 2026 — [Test Run 02 - iOS Build 89](../history/test-runs/02-ios-build-89.md)
+- 28 July 2026 — [Test Run 01 - iOS Build 87](../history/test-runs/01-ios-build-87.md)
 
 Runs 01 and 02 carried no run number in the source; those two numbers are
 assigned for ordering only and each page says so.

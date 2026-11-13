@@ -118,7 +118,7 @@ So a change that makes a fact untrue carries the sweep with it:
 - **Do not rewrite a recorded decision.** `RD-*` entries in [Recorded Decisions](../decisions/recorded-decisions.md) say
   what was decided and when. A by-hand clause inside one is marked as true when
   the decision was taken; the decision itself stands.
-- **Leave [records/](../records/README.md), [releases/](../releases/README.md) and [test-runs/](../test-runs/README.md) alone.** They are accounts of what was
+- **Leave [history/](../history/README.md) and the root [CHANGELOG.md](../../CHANGELOG.md) alone.** They are accounts of what was
   true at the time. Correcting them would destroy the record rather than the
   staleness.
 - **Do not over-correct.** Check which neighbouring steps are still manual
@@ -165,7 +165,7 @@ an issue.
 
 The SSOT does not mirror GitHub. When the current state of an issue is needed, ask GitHub
 for it (`gh issue view <number>`) rather than reading a copy. Reports written before this
-rule was stated are kept in [records/](../records/README.md) and are not extended.
+rule was stated are kept in [records/](../history/records/README.md) and are not extended.
 
 ## Related Pages
 

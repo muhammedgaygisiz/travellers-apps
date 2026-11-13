@@ -41,7 +41,7 @@ const MAP_BUDGET_WORDS = 3000;
 // Words as `wc -w` counts them.
 const words = (text) => text.split(/\s+/).filter(Boolean).length;
 // Pages that describe the tree as it was, so their quoted paths may no longer resolve.
-const HISTORICAL = ['records', 'releases', 'test-runs'];
+const HISTORICAL = 'history';
 
 function walk(dir) {
   const out = [];
@@ -158,8 +158,8 @@ for (const file of files) {
   }
 
   const page = relative(SSOT, file).split(sep);
-  if (!HISTORICAL.includes(page[0])) {
-    for (const m of stripFences(text).matchAll(/`((?:apps|libs|tools)\/[^`\n]*)`/g)) {
+  if (page[0] !== HISTORICAL) {
+    for (const m of stripFences(text).matchAll(/`((?:apps|libs|tools|ssot)\/[^`\n]*)`/g)) {
       if (!resolves(m[1])) unresolved.push({ file, path: m[1] });
     }
   }

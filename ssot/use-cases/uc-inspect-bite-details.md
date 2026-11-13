@@ -5,7 +5,7 @@
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
 directions actions, the header photo's upload state, reporting the Bite, and the six contracts below all ship.
-Editing, deleting and reporting a review are not on this page at all — [epic-1284](../records/epic-1284.md) owns
+Editing, deleting and reporting a review are not on this page at all — [epic-1284](../history/records/epic-1284.md) owns
 them.
 
 ## Goal
@@ -43,7 +43,7 @@ nothing, and how a review and its thread are attributed.
   `handleSharedLinkToBite` preview endpoint, and the native `/s/bite/*` deep-link
   registration in the iOS Associated Domains file and the Android App Links
   intent filter exist for Bites alone. Profiles, bucket lists, restaurants, and
-  BiteTrails have no share action and no deep link. See [issue-1190](../records/issue-1190.md).
+  BiteTrails have no share action and no deep link. See [issue-1190](../history/records/issue-1190.md).
 - User can open directions to the Bite's place through the platform navigation experience.
 - A Bite made from a dish somebody ordered says so, and the line opens that restaurant's menu (issue [#1113]). It leads to the **menu** rather than to the dish: `restaurant/:restaurantId/menu` resolves which menu that is, and a dish that has since been deleted would otherwise be a dead address. Nothing on this page is resolved off the menu, which is what makes a rename or a deletion harmless - the dish's name was copied onto the Bite when it was created and is the heading at the top of this page (`RD-TS-53`). A Bite carrying no menu link renders no line, under the `Absent Field Contract` below.
 - User can save the Bite to an existing bucket list or create a new list for it.
@@ -216,7 +216,7 @@ turns the review compartment from a flat list into a thread list. Implemented by
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
 - Editing, deleting and reporting a review or reply are not part of this
-  contract. [epic-1284](../records/epic-1284.md) owns them.
+  contract. [epic-1284](../history/records/epic-1284.md) owns them.
 
 ## Review Attribution Contract
 
@@ -261,13 +261,13 @@ review threads. Attribution is release-critical rather than polish — [#1308] w
 as a release blocker because reviews published the name the identity provider holds.
 
 Not on this page: editing, deleting and reporting a review or reply, owned by
-[epic-1284](../records/epic-1284.md).
+[epic-1284](../history/records/epic-1284.md).
 
 ## App Store Review Area
 
 Relevant on two counts. The `/s/bite/*` deep link is registered in the iOS Associated
 Domains entitlement and an Android App Links intent filter, so it is part of the shipped
-build's configuration — see [issue-1190](../records/issue-1190.md). And review attribution is a privacy matter
+build's configuration — see [issue-1190](../history/records/issue-1190.md). And review attribution is a privacy matter
 rather than a cosmetic one: [#1308] published the name the identity provider holds. The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
@@ -326,8 +326,8 @@ data types this page renders are declared in [Implementation - Store Declaration
   entry that lands on a highlighted thread
 - [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md) — the share menu and the image
   share the share button leads to
-- [epic-1284](../records/epic-1284.md)
-- [issue-1190](../records/issue-1190.md)
+- [epic-1284](../history/records/epic-1284.md)
+- [issue-1190](../history/records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 
 [#1166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1166

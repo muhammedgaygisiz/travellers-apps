@@ -19,14 +19,15 @@ Every task reads these two before anything else:
 
 Then read what the task needs, and no more:
 
-| Task                               | Reads in addition                                                                                                           |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Feature, fix, behavioural refactor | `ssot/overview/traceability-map.md`, `ssot/overview/feature-delivery-workflow.md`, `ssot/overview/spec-to-code-workflow.md` |
-| Release                            | `ssot/overview/release-workflow.md`                                                                                         |
-| Dependency or framework migration  | `ssot/current-state/nx-and-dependency-migration-roadmap.md`                                                                 |
-| CI and build                       | `ssot/implementation/ci-pipeline.md`                                                                                        |
-| SSOT page or issue writing         | `ssot/overview/use-case-format.md` or `ssot/overview/github-issue-format.md`, as the page requires                          |
-| Anything else                      | Nothing by default; `ssot/overview/traceability-map.md` when the task needs the page that owns a fact                       |
+| Task                                              | Reads in addition                                                                                                           |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Feature, fix, behavioural refactor                | `ssot/overview/traceability-map.md`, `ssot/overview/feature-delivery-workflow.md`, `ssot/overview/spec-to-code-workflow.md` |
+| Release                                           | `ssot/overview/release-workflow.md`                                                                                         |
+| Dependency or framework migration                 | `ssot/current-state/nx-and-dependency-migration-roadmap.md`                                                                 |
+| CI and build                                      | `ssot/implementation/ci-pipeline.md`                                                                                        |
+| SSOT page or issue writing                        | `ssot/overview/use-case-format.md` or `ssot/overview/github-issue-format.md`, as the page requires                          |
+| What happened in a past release, test run or epic | `ssot/history/`; never as the source for a current fact                                                                     |
+| Anything else                                     | Nothing by default; `ssot/overview/traceability-map.md` when the task needs the page that owns a fact                       |
 
 `CLAUDE.md`, `.github/copilot-instructions.md` and the skills in `skills/` point here and
 add only what their tool needs. They are adapters to this workflow, not a second one.

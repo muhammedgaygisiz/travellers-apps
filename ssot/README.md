@@ -8,20 +8,19 @@ Start with [Agent Operating Contract](overview/agent-operating-contract.md) for 
 repository. A feature, fix or behavioural refactor then uses [Traceability Map](overview/traceability-map.md)
 to find the pages it touches; `AGENTS.md` routes every other kind of task.
 
-| Folder                                      | Holds                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [overview/](overview/README.md)             | How work is done here: contracts, workflows, page formats                            |
-| [product/](product/README.md)               | Vision, mission, principles, glossary, personas, roles, monetization                 |
-| [domain/](domain/README.md)                 | The domain model, one page per aggregate                                             |
-| [use-cases/](use-cases/README.md)           | Behaviour, one page per use case, per [Use Case Format](overview/use-case-format.md) |
-| [architecture/](architecture/README.md)     | Structural constraints                                                               |
-| [implementation/](implementation/README.md) | How the constraints are realised in code and CI                                      |
-| [current-state/](current-state/README.md)   | What is true right now: roadmap, known issues, release state                         |
-| [decisions/](decisions/README.md)           | ADRs and the `RD-*` decision register                                                |
-| [records/](records/README.md)               | Closing records for work already done. History, not specification                    |
-| [test-runs/](test-runs/README.md)           | Release-candidate execution records                                                  |
-| [releases/](releases/README.md)             | Changelog and per-build pages                                                        |
-| [operations/](operations/README.md)         | Running the product day to day                                                       |
+| Folder                                      | Holds                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [overview/](overview/README.md)             | How work is done here: contracts, workflows, page formats                                           |
+| [product/](product/README.md)               | Vision, mission, principles, glossary, personas, roles, monetization                                |
+| [domain/](domain/README.md)                 | The domain model, one page per aggregate                                                            |
+| [use-cases/](use-cases/README.md)           | Behaviour, one page per use case, per [Use Case Format](overview/use-case-format.md)                |
+| [architecture/](architecture/README.md)     | Structural constraints                                                                              |
+| [implementation/](implementation/README.md) | How the constraints are realised in code and CI                                                     |
+| [current-state/](current-state/README.md)   | What is true right now: roadmap, known issues, release state                                        |
+| [decisions/](decisions/README.md)           | ADRs and the `RD-*` decision register                                                               |
+| [history/](history/README.md)               | What happened: closing records and release-candidate test runs. Never the source for a current fact |
+| [marketing/](marketing/README.md)           | Social media channels, posts and brand artwork                                                      |
+| [operations/](operations/README.md)         | Running the product day to day                                                                      |
 
 ## Overview
 
@@ -125,7 +124,7 @@ gh issue list -R muhammedgaygisiz/travellers-apps --search 'is:open epic: in:tit
 
 Their priority is the `Priority` field on the `Bite Tribe` project board, not a label; see
 [GitHub Project Board And Issue Handling](overview/github-project-board-and-issue-handling.md).
-Closing records for epics that produced one are in [records/](records/README.md).
+Closing records for epics that produced one are in [history/records/](history/records/README.md).
 
 ## Architecture
 
@@ -161,10 +160,8 @@ Closing records for epics that produced one are in [records/](records/README.md)
 - [Implementation - Store Release Steps](implementation/store-release-steps.md)
 - [Implementation - Store Listing Assets](implementation/store-listing-assets.md)
 - [Implementation - Store Listing Translations](implementation/store-listing-translations.md)
-- [Implementation - Brand Characters](implementation/brand-characters.md)
 - [Implementation - Store Declarations](implementation/store-declarations.md)
 - [Implementation - Web Search And Social Metadata](implementation/web-search-and-social-metadata.md)
-- [Implementation - Social Media Channels](implementation/social-media-channels.md)
 - [Implementation - CI Pipeline](implementation/ci-pipeline.md)
 
 ## Decisions
@@ -173,6 +170,11 @@ Closing records for epics that produced one are in [records/](records/README.md)
 - [ADR-0002 Firebase Backend](decisions/adr-0002-firebase-backend.md)
 - [ADR-0003 Nx Monorepo](decisions/adr-0003-nx-monorepo.md)
 - [ADR-0004 Table Payment Model](decisions/adr-0004-table-payment-model.md)
+
+## Marketing
+
+- [Marketing - Brand Characters](marketing/brand-characters.md)
+- [Marketing - Social Media Channels](marketing/social-media-channels.md)
 
 ## Operations
 
@@ -191,7 +193,9 @@ Closing records for epics that produced one are in [records/](records/README.md)
 
 ## Releases
 
-- [Changelog](releases/changelog.md)
+The release history is the root [CHANGELOG.md](../CHANGELOG.md), one section per build, written by
+every release; the git tags `build-<version>-<build-number>` are its source. See
+[Release Workflow](overview/release-workflow.md).
 
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#738]: https://github.com/muhammedgaygisiz/travellers-apps/issues/738

@@ -390,7 +390,7 @@ installation list and re-reads the permission. Returning from the system
 settings page to a Settings page that is still mounted does not re-read it — the
 same limitation iOS has, and not addressed by [#1386].
 
-See [issue-1386](../records/issue-1386.md) for what reading a revoked Android permission as "not decided
+See [issue-1386](../history/records/issue-1386.md) for what reading a revoked Android permission as "not decided
 yet" cost.
 
 ### Device Metadata Source Rule
@@ -724,7 +724,7 @@ Stories pasteboard on iOS or send a targeted intent on Android.
 | Instagram Post  | Saved add-only with `PHPhotoLibrary`, then `instagram://library?LocalIdentifier=<id>`                                           | `ACTION_SEND` to `com.instagram.android`                                                                         |
 
 - **The App ID is wrapper configuration.** Meta's public App ID - registered in
-  issue [#1729], recorded in [Implementation - Social Media Channels](../implementation/social-media-channels.md) - is `MetaAppID` in the iOS
+  issue [#1729], recorded in [Marketing - Social Media Channels](../marketing/social-media-channels.md) - is `MetaAppID` in the iOS
   `Info.plist` and the `meta_app_id` string resource on Android. The web layer
   never handles it. The App Secret and the client token are never in the
   repository, and no Meta SDK is installed (`UC-SBS` `R-28`).

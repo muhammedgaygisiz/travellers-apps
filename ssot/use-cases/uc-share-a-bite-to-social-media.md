@@ -280,7 +280,7 @@ Relevant, on both stores. The entries landed with [#1732] and [#1730]; [Implemen
   policy and no terms of use, and the deletion that leaves a Bite's photo behind with no account
   to license it
 - [Architecture - Storage](../architecture/storage.md) - where the CORS policy and its apply command are written
-- [Implementation - Social Media Channels](../implementation/social-media-channels.md) - the `@bitetribeapp` handle the cards may carry
+- [Marketing - Social Media Channels](../marketing/social-media-channels.md) - the `@bitetribeapp` handle the cards may carry
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 - [Implementation - Localization](../implementation/localization.md)
 - [Implementation - Analytics Events](../implementation/analytics-events.md)

@@ -16,3 +16,4 @@ Part of the [SSOT index](../README.md).
 - [Test Run 09 - Android Build 95](09-android-build-95.md)
 - [Test Run 10 - Android Build 96](10-android-build-96.md)
 - [Test Run 11 - Android Build 96](11-android-build-96.md)
+- [Test Run 12 - iOS Simulator, Press And Release Epic](12-ios-simulator-press-release.md)

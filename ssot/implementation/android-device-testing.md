@@ -43,6 +43,30 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 [Implementation - Store Release Steps](store-release-steps.md) needs no export. The debug `:run` path
 used here has no such resolver, so the export is required.
 
+#### Without Android Studio
+
+A Mac with no Android Studio can build the debug APK from Homebrew alone.
+Accepting the SDK licences is part of the install, so it needs the owner's
+consent:
+
+```bash
+brew install --cask android-commandlinetools
+brew install openjdk@21
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+sdkmanager --sdk_root=$ANDROID_HOME --licenses
+sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+cd apps/bite-tribe-android && npx cap sync android
+cd android && ./gradlew :app:assembleDebug -Porg.gradle.java.installations.paths=$JAVA_HOME
+```
+
+`cap sync android` comes first because it generates
+`capacitor-cordova-android-plugins`, which Gradle cannot configure without.
+`org.gradle.java.installations.paths` hands Gradle the toolchain directly: an
+installed JDK 20 or 22 does not satisfy the plugins' `languageVersion=21`.
+Verified on 22 October 2026 for issue [#1767]; it built `app-debug.apk` with
+`BiteHapticsPlugin` in it.
+
 ### The env file
 
 `apps/bite-tribe/.env` carries the Firebase configuration. A production build
@@ -198,3 +222,4 @@ https://localhost/ are blocked`. The Firebase web API key's HTTP-referrer
 
 [#933]: https://github.com/muhammedgaygisiz/travellers-apps/issues/933
 [#1038]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1038
+[#1767]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1767

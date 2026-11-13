@@ -216,10 +216,8 @@ a one-off step. It is the filter, not traffic, and it does not recur.
 - [Current State - Nx And Dependency Migration Roadmap](nx-and-dependency-migration-roadmap.md)
 
 [#370]: https://github.com/muhammedgaygisiz/travellers-apps/issues/370
-[#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
 [#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
-[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
 [#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1098]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1098

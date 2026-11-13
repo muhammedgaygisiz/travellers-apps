@@ -196,16 +196,3 @@ Closing records for epics that produced one are in [history/records/](history/re
 The release history is the root [CHANGELOG.md](../CHANGELOG.md), one section per build, written by
 every release; the git tags `build-<version>-<build-number>` are its source. See
 [Release Workflow](overview/release-workflow.md).
-
-[#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
-[#738]: https://github.com/muhammedgaygisiz/travellers-apps/issues/738
-[#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
-[#1070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1070
-[#1071]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1071
-[#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
-[#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
-[#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
-[#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
-[#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
-[#1124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1124
-[#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125

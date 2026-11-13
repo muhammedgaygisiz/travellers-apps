@@ -272,6 +272,4 @@ Rules:
 [#1874]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1874
 [#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
 [#1894]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1894
-[#1752]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1752
-[#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753
 [#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754

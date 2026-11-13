@@ -156,6 +156,7 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#542]: https://github.com/muhammedgaygisiz/travellers-apps/issues/542
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#967]: https://github.com/muhammedgaygisiz/travellers-apps/issues/967
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#989]: https://github.com/muhammedgaygisiz/travellers-apps/issues/989
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
@@ -163,7 +164,6 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1076]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1076
-[#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
 [#1100]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1100
 [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
@@ -179,6 +179,7 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1245]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1245
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629

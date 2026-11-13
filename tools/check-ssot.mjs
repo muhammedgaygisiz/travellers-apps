@@ -143,9 +143,9 @@ for (const file of files) {
   }
 
   const defined = new Set([...text.matchAll(/^\[#(\d+)]: /gm)].map((m) => m[1]));
-  for (const m of text.matchAll(/]\[#(\d+)]|(?<!:)\[#(\d+)](?!:)/g)) {
+  for (const m of text.matchAll(/]\[#(\d+)]|(?<!:)(?<!^)\[#(\d+)]|^\[#(\d+)](?!:)/gm)) {
     if (inCode(spans, m.index)) continue;
-    const n = m[1] ?? m[2];
+    const n = m[1] ?? m[2] ?? m[3];
     if (!defined.has(n)) fail(file, 'REFDEF', `[#${n}] used with no definition in this file`);
   }
 

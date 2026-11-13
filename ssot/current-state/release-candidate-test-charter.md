@@ -203,11 +203,10 @@ assigned for ordering only and each page says so.
 - [Implementation - Testing](../implementation/testing.md)
 - [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
 - [epic-907][#907]
-- [Issue [#1181] - signed Android and iOS CI builds](https://github.com/muhammedgaygisiz/travellers-apps/issues/1181)
+- [Issue #1181][#1181] - signed Android and iOS CI builds
 
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#912]: https://github.com/muhammedgaygisiz/travellers-apps/issues/912
-[#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
 [#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1179]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1179

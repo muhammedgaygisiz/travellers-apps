@@ -55,7 +55,7 @@ Neither is a question to answer before the behaviour is scoped.
 
 ## Related GitHub Scope
 
-- Issue [#1617] is the epic and owns all three actions: reaching a restaurant, planning a visit
+- Epic [#1617] is the epic and owns all three actions: reaching a restaurant, planning a visit
   and reserving a table. Open, with no child issues yet - each action is a product decision
   before it is work, and the epic carries those decisions
 - Issue [#735], the Restaurant Interaction Platform epic, is cited as the boundary rather than

@@ -74,10 +74,10 @@ Status and Related GitHub Scope already name, not to this one:
 
 ## Related GitHub Scope
 
-- Issue [#266] is the packaging epic. Closed as completed; it delivered the surfaces named in
+- Epic [#266] is the packaging epic. Closed as completed; it delivered the surfaces named in
   Status, which other pages now own
-- Issue [#1125] owns what makes a paid BiteTrail sellable, and is stage 3 of the monetization
-  umbrella [#1121].
+- Epic [#1125] owns what makes a paid BiteTrail sellable, and is stage 3 of the monetization
+  umbrella epic [#1121].
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
   actor.
 - [issue-1371](../records/issue-1371.md) removed the `organisationId` field and the assigned-users flow this page used

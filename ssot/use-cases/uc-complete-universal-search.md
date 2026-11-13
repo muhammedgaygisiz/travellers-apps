@@ -41,7 +41,7 @@ a signed-in account.
 
 ## Related GitHub Scope
 
-- Part of [#790], _epic: user wants to search in the app_ - the open epic this page belongs to,
+- Part of epic [#790], _epic: user wants to search in the app_ - the open epic this page belongs to,
   and the only issue named here that is not closed.
 - Issue [#843] is **not** this page's. It is the closed epic that delivered the search which
   ships today, described by [UC - Search In BiteTribe](uc-search-in-bitetribe.md).

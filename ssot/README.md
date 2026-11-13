@@ -5,7 +5,8 @@ architecture, implementation rules, release state and decisions. Where a documen
 elsewhere disagrees with a page here on a fact, the page here wins.
 
 Start with [Agent Operating Contract](overview/agent-operating-contract.md) for how to work in this
-repository, and [Traceability Map](overview/traceability-map.md) to find the pages a change touches.
+repository. A feature, fix or behavioural refactor then uses [Traceability Map](overview/traceability-map.md)
+to find the pages it touches; `AGENTS.md` routes every other kind of task.
 
 | Folder                                      | Holds                                                                                |
 | ------------------------------------------- | ------------------------------------------------------------------------------------ |

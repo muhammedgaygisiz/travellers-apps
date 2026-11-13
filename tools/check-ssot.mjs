@@ -6,8 +6,9 @@
  * below are the ones a reader cannot see being broken: a link that resolves to
  * nothing, a leftover Logseq wikilink, an issue number that does not link, a quoted
  * code path that resolves to nothing, issue state copied out of GitHub, a
- * current-state page nobody has verified, and the use-case format rules in
- * ssot/overview/use-case-format.md.
+ * current-state page nobody has verified, a generated block edited by hand or not
+ * regenerated, the use-case format rules in ssot/overview/use-case-format.md, and the
+ * word budgets of what every agent reads before its task.
  *
  * Exits non-zero when any rule fails, listing every failure. Warnings are listed
  * too but never change the exit code.
@@ -15,6 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
+import { MAP, regenerate } from './generate-traceability-map.mjs';
 
 const SSOT = resolve('ssot');
 // `Claude outputs` is where the Claude desktop app drops files; it is git-ignored.
@@ -29,6 +31,15 @@ const warn = (file, rule, message) =>
 // A current-state page last verified longer ago than this is reported, not failed:
 // a blocking age check would fail unrelated pull requests the day a page turns stale.
 const VERIFIED_MAX_AGE_DAYS = 30;
+// What an agent reads before its task: AGENTS.md and the documents it names under
+// `## Always Read`. Past this, growth is a decision taken in a pull request, not
+// something that happens by accretion; a warning, so that the decision stays possible.
+const ENTRY_BUDGET_WORDS = 3500;
+// The traceability map is read by every feature and fix task. It is generated in part,
+// so it grows with every use case; past this, look at what it carries before it grows on.
+const MAP_BUDGET_WORDS = 3000;
+// Words as `wc -w` counts them.
+const words = (text) => text.split(/\s+/).filter(Boolean).length;
 // Pages that describe the tree as it was, so their quoted paths may no longer resolve.
 const HISTORICAL = ['records', 'releases', 'test-runs'];
 
@@ -252,6 +263,68 @@ for (const file of readdirSync(join(SSOT, 'use-cases'))
     if (/\b(?:Open|Closed)\.?\s*$/.test(line)) {
       fail(file, 'ISSUESTATE', `issue state copied into Related GitHub Scope: ${line.trim().slice(-60)}`);
     }
+  }
+}
+
+// ---- generated blocks (tools/README.md, Writes into ssot/) ----
+try {
+  const current = readFileSync(MAP, 'utf8');
+  if (regenerate(current) !== current) {
+    fail(
+      MAP,
+      'GENERATED',
+      'the generated block is not what `npm run generate:traceability` writes now; change the use case, not the block, and regenerate',
+    );
+  }
+  const size = words(current);
+  if (size > MAP_BUDGET_WORDS) {
+    warn(
+      MAP,
+      'MAPSIZE',
+      `${size} words, over the budget of ${MAP_BUDGET_WORDS} - see tools/README.md`,
+    );
+  }
+} catch (error) {
+  fail(MAP, 'GENERATED', error.message);
+}
+
+// ---- the always-read entry (AGENTS.md, `## Always Read`) ----
+{
+  const agents = readFileSync('AGENTS.md', 'utf8');
+  const always =
+    /^## Always Read\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(
+      stripFences(agents),
+    )?.[1] ?? '';
+  const named = [...always.matchAll(/^\s*(?:-|\d+\.) .*?`([^`]+\.md)`/gm)].map(
+    (m) => m[1],
+  );
+  if (!named.length)
+    fail(
+      'AGENTS.md',
+      'ENTRY',
+      'no `## Always Read` section listing documents in backticks',
+    );
+  let total = words(agents);
+  const counts = [`AGENTS.md ${total}`];
+  for (const path of named) {
+    if (!exists(path)) {
+      fail(
+        'AGENTS.md',
+        'ENTRY',
+        `always-read document does not exist: ${path}`,
+      );
+      continue;
+    }
+    const n = words(readFileSync(path, 'utf8'));
+    total += n;
+    counts.push(`${path} ${n}`);
+  }
+  if (total > ENTRY_BUDGET_WORDS) {
+    warn(
+      'AGENTS.md',
+      'ENTRY',
+      `always-read documents total ${total} words, over the budget of ${ENTRY_BUDGET_WORDS} (${counts.join(', ')}) - see tools/README.md`,
+    );
   }
 }
 

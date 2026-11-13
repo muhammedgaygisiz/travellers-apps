@@ -71,8 +71,8 @@ touch are:
 
 ## Related GitHub Scope
 
-- Issue [#1125] is the epic, paid BiteTrails and creator revenue share, and stage 3 of the
-  monetization umbrella [#1121].
+- Epic [#1125] is the epic, paid BiteTrails and creator revenue share, and stage 3 of the
+  monetization umbrella epic [#1121].
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona, which is this page's
   actor.
 - Payout-side identity verification has no issue of its own; it sits inside [#1125]

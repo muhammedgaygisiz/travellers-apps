@@ -129,7 +129,7 @@ that surface is [UC - Order At The Table Through A QR Code](uc-order-at-the-tabl
 
 ## Related GitHub Scope
 
-- Issue [#1071] - Staff table management and live table state, with eight child issues
+- Epic [#1071] - Staff table management and live table state, with eight child issues
 - Issue [#1098] - Analytics on table operations. `table_visit_moved` is deferred to the issue that gives a visit somewhere to move to
 
 ## Related Domains

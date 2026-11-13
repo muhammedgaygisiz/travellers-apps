@@ -32,7 +32,7 @@ Before editing code or SSOT content, an agent must:
 2. Fetch current GitHub issue or PR text when one is referenced.
 3. Check local state with `git status --short --branch`.
 4. Read [SSOT](../README.md).
-5. Use [Traceability Map](traceability-map.md) to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context.
+5. For a feature, fix or behavioural refactor, use [Traceability Map](traceability-map.md) to identify the relevant product, domain, use-case, epic, architecture, implementation, testing, and release context. Other tasks read what `AGENTS.md` routes them to.
 6. Read the owning code surface before editing.
 7. When the change writes or revises a `UC - *` page, read [Use Case Format](use-case-format.md) and [Actogram Format](actogram-format.md) first.
 

@@ -284,7 +284,7 @@ permission surface, so the purpose strings are read here before any other screen
 
 ## Related GitHub Scope
 
-- Issue [#850] (epic, supersedes closed [#841])
+- Epic [#850] (supersedes closed [#841])
 - Issues [#1011], [#1012], [#1013], [#1014], [#1015], [#1023], [#1016], [#1017]
 - Issue [#1271] (home city collected in the location step), with [#1270] for the
   profile display of the same field

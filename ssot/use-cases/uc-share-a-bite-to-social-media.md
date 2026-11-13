@@ -239,7 +239,7 @@ Relevant, on both stores. The entries landed with [#1732] and [#1730]; [Implemen
 
 ## Related GitHub Scope
 
-- Part of [#1723], the epic: share a Bite as an image to Instagram and Facebook.
+- Part of epic [#1723]: share a Bite as an image to Instagram and Facebook.
 - [#1724] writes this page.
 - [#1725] lets a Bite photo be drawn into a canvas and exported - `R-15` to `R-19`. Must land
   before [#1726].

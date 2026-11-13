@@ -162,7 +162,7 @@ page is where the queue the reports arrive in lives.
 - Issue [#1829] - a user reports a profile, and the reported-profiles queue an operator works it from, part of epic [#1823]
 - Issue [#1490] - curate and publish a city landing page, part of epic [#1487]
 - Issue [#1974] - let a city page answer under alias names with a redirect, part of epic [#1487]
-- Issue [#1069] - stage 0 of [#735], restaurant ownership, claiming and authorization
+- Epic [#1069] - stage 0 of epic [#735], restaurant ownership, claiming and authorization
 - Issue [#1075] - business roles as verified identity
 - Issue [#1077] - assign and revoke restaurant ownership, and the admin-app surface for it; done
 - Issue [#1078] - ownership-scoped Firestore rules

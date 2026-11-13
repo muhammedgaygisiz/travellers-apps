@@ -411,7 +411,7 @@ change, and each was a real gap rather than a precaution:
   the Firebase functions, the e2e suites, the native wrappers, `chart` and `cv`.
 - **Files outside any project are declared as inputs.** Nx counts a
   `{workspaceRoot}/…` target input as touching that project. `build-storybook`
-  declares the brand characters under `ssot/assets/characters`, which a story
+  declares the brand characters under `ssot/marketing/assets/characters`, which a story
   renders, and `libs/bite-tribe-common/styles`, which the build reaches through
   `stylePreprocessorOptions` and no project owns. It also declares `world-atlas`
   as an external dependency, because the build copies its files without any

@@ -1,5 +1,7 @@
 # Current State - Open Questions
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Open questions capture decisions that should become clear before or shortly after launch.
@@ -12,8 +14,8 @@ Open questions capture decisions that should become clear before or shortly afte
 - How should vacation usage and posting later be represented in the product?
 - How much restaurant and menu context is needed for launch without drifting away from the dish-first product decision?
 - Can a maintainer put their own tags on a restaurant? Nothing of the kind exists: there is no tag field on `Restaurant` and nothing in the business app writes one. The tags both restaurant pages already render are derived from Bites and belong to [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md); a maintainer-set tag would be the restaurant describing itself rather than its diners describing it. It was the last idea left on the use case that carried "restaurant profile completeness", and it is recorded here because that page was deleted rather than because the idea was dropped. If it is wanted it needs an owning use case and a field; if not, nothing in the SSOT should describe it.
-- What are the brand characters called, and what does a surface use one for? The seven committed in [issue 1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) carry the design export's filenames, which mix a historical term with national ones, and nothing in the product references them. Both halves are open: the vocabulary, and whether a character becomes an avatar, a BiteTrail marker, an empty state, or stays brand material. See [Implementation - Brand Characters](../implementation/brand-characters.md).
-- Where does Leela appear? She is named as BiteTribe's main character and her reference artwork is cut from the street food comic, but only the comic uses her. Open: whether she stays a campaign character on social, or becomes the face of onboarding, empty states or the store screenshots - and the clean redraw that any of those needs. See [Implementation - Brand Characters](../implementation/brand-characters.md#leela).
+- What are the brand characters called, and what does a surface use one for? The seven committed in [issue 1482](https://github.com/muhammedgaygisiz/travellers-apps/issues/1482) carry the design export's filenames, which mix a historical term with national ones, and nothing in the product references them. Both halves are open: the vocabulary, and whether a character becomes an avatar, a BiteTrail marker, an empty state, or stays brand material. See [Marketing - Brand Characters](../marketing/brand-characters.md).
+- Where does Leela appear? She is named as BiteTribe's main character and her reference artwork is cut from the street food comic, but only the comic uses her. Open: whether she stays a campaign character on social, or becomes the face of onboarding, empty states or the store screenshots - and the clean redraw that any of those needs. See [Marketing - Brand Characters](../marketing/brand-characters.md#leela).
 - Which palette is the brand's, the logo's or the new characters'? The shipped `logo.svg` outlines a `#F0B967` cookie in `#55422A`; the seven characters use `#402810` over `#F8B850`. They read as one family at thumbnail size and as two drafts side by side, which the `Brand/Characters` Storybook page shows. Re-cutting the logo changes a mark that is already in both stores, so this is a decision rather than a cleanup.
 
 ## Glossary And Naming Questions
@@ -105,7 +107,7 @@ These belong to issue [#1283] and do not block its implementation. Each has a wo
 - When replying to a reply, should the `@name` mention be stored as part of the review text, or only prefilled in the composer so the author can delete it before sending?
 - Does a Bite document need a reply or thread count for the feed card, or is the count only ever derived on the details page?
 
-Moderation questions raised by threading are recorded on [epic-1284](../records/epic-1284.md), not here.
+Moderation questions raised by threading are recorded on [epic-1284](../history/records/epic-1284.md), not here.
 
 ## Analytics Questions
 
@@ -127,10 +129,10 @@ Moderation questions raised by threading are recorded on [epic-1284](../records/
 
 ## Public Content Questions
 
-These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Each gated the first published page rather than the first commit. Three were settled when the pages were built on 12 November 2026; the Impressum is still open and still gates the first public page.
+These belong to [epic-1487](../history/records/epic-1487.md), the city landing pages. Each was meant to gate the first published page rather than the first commit. Three were settled when the pages were built on 12 November 2026. The Impressum was not: the pages went live without one, and it stays open.
 
 - May a member's Bite photo appear on a public marketing page? **Decided on 12 November 2026, on [#1487]: yes.** An entry on a page is a Bite, shown as its photo, its name and where it is, so the Bite photo is the page's image. This replaces the epic's proposal of restaurant-supplied and operator-supplied imagery only. What the terms and the privacy policy say about it is not settled by the decision; the terms do not exist yet ([#1772]). Google Places photos are not implicated: `get-place-details` keeps `photos` out of its field mask.
-- Does an editorial page published under the company name need an Impressum? The public surface today is support, privacy and account deletion, none of which is editorial. Answer before a page is public, not after.
+- Does an editorial page published under the company name need an Impressum? **Still open, in [#1979]; the gate was waived.** The city landing pages went live on 12 November 2026 without one - fifteen cities in `bitetribe.app/eat/sitemap.xml` - because the maintainer waived the gate rather than answering the question first. The pages are editorial, unlike support, privacy and account deletion, which were the whole public surface before them.
 - What is the content bar for publishing a page? **Settled by the entry decision:** an entry is itself a Bite with its photo, and a page needs three to five of them plus a meta description and an intro before `setLandingPageStatus` will publish it. A Bite whose photo never arrived cannot be chosen. One city in the first release is the operator's call rather than a rule the editor enforces.
 - Does the URL space keep `/eat/<city>/<slug>`? **Settled on 12 November 2026: `/eat/<city>`,** one page per city, shorter than the proposal and still under the one rewrite. A bare `/<city>` was rejected because Hosting cannot route it without a deploy per city or a catch-all over every app route. Changing it after the first page is indexed is expensive. A withdrawn page answers `410` rather than `404`, as the epic proposed.
 
@@ -138,7 +140,7 @@ These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Ea
 
 These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and Facebook. The rules that are settled are on [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md); these are not, and each gates the child named next to it.
 
-- How many templates ship at launch, who designs them, and do they use the brand characters in [Implementation - Brand Characters](../implementation/brand-characters.md)? **Settled on 23 October 2026 for [#1731]:** two layouts, Classic and Wide, both data on the one shared renderer. Colours are chosen separately from the layout - five background gradients and five text colours - and a text colour is offered only where it is legible on the background. No brand characters on the image; a design needing new drawing structure would be a decision of its own.
+- How many templates ship at launch, who designs them, and do they use the brand characters in [Marketing - Brand Characters](../marketing/brand-characters.md)? **Settled on 23 October 2026 for [#1731]:** two layouts, Classic and Wide, both data on the one shared renderer. Colours are chosen separately from the layout - five background gradients and five text colours - and a text colour is offered only where it is legible on the background. No brand characters on the image; a design needing new drawing structure would be a decision of its own.
 - Does the QR code carry the full `/s/bite/<biteId>` link or a short one? **Settled for now by [#1726]: the full link.** With a production Bite id, a UUID, it encodes as a version 6 code of 41 modules, which the 240 px the template gives it draws at about five pixels a module; a code decoded from an exported image on 23 October 2026. A short link would only be worth it for a template that draws the code much smaller. `UC-SBS` `R-23` holds either way: the code carries the Bite's address and nothing user-controlled.
 - **Who writes the terms of use, and what do they license?** BiteTribe has a privacy policy and no terms, so no creator has licensed anyone to put their photo on another platform. `UC-SBS` `R-30` states what the licence must cover for somebody else's Bite to be shared as an image; it needs a Swiss or EU IP lawyer's confirmation before it is published. Issue [#1772] owns the work. Every existing account has to accept the terms actively before its Bites can be shared by others - an unannounced change of terms does not grant a licence. Gates the image share of somebody else's Bite, not of one's own.
 - Should a creator be able to refuse image sharing of their Bites altogether, beyond choosing whether they are named (`UC-SBS` `R-31`)? Accepting the terms would otherwise be the only gate.
@@ -154,6 +156,7 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#542]: https://github.com/muhammedgaygisiz/travellers-apps/issues/542
 [#735]: https://github.com/muhammedgaygisiz/travellers-apps/issues/735
 [#967]: https://github.com/muhammedgaygisiz/travellers-apps/issues/967
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#989]: https://github.com/muhammedgaygisiz/travellers-apps/issues/989
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
@@ -161,7 +164,6 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
 [#1073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1073
 [#1076]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1076
-[#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
 [#1100]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1100
 [#1101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1101
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
@@ -177,6 +179,7 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1245]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1245
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629
@@ -189,3 +192,4 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1731]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1731
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
+[#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979

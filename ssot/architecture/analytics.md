@@ -30,7 +30,7 @@ Two consequences. A disabled **native** collection flag silences the app's own
 events on a device, not only the auto-collected ones. And an event sent through
 the JS SDK from a native platform lands on a different measurement path than
 every other event the same device produces, which is what `exception` did until
-[issue-1387](../records/issue-1387.md).
+[issue-1387](../history/records/issue-1387.md).
 
 ## Collection Flag Rule
 
@@ -49,7 +49,7 @@ window flag that nothing persists and would eagerly initialize web analytics for
 apps that never asked for it.
 
 The general rule: a dev-only branch may not leave persistent native state that
-no production path asserts back. See [issue-1387](../records/issue-1387.md) for what one unbalanced
+no production path asserts back. See [issue-1387](../history/records/issue-1387.md) for what one unbalanced
 call cost.
 
 ## Common Events

@@ -77,13 +77,16 @@ jobs:
         run: npm run nx -- affected -t lint
 
       # Structural checks for the SSOT: dead relative links, leftover Logseq syntax,
-      # issue numbers that do not link, and the use-case format rules.
-      # See ssot/overview/use-case-format.md.
+      # issue numbers that do not link, quoted code paths that resolve to nothing,
+      # issue state copied out of GitHub, unverified current-state pages, a generated
+      # traceability block that is stale or hand-edited, the use-case format rules, and
+      # the word budgets of what every agent reads first. See tools/README.md.
       #
       # BLOCKING: a violation fails the job and therefore the pipeline. The report still
       # goes to the job summary and, on a pull request, to a comment - which GitHub turns
       # into an email through normal notification settings - because the reporting step
-      # runs with `if: always()`.
+      # runs with `if: always()`. A warning (a current-state page past its verification
+      # age, or a word budget exceeded) does not fail the step, but is reported the same way.
       - name: Check SSOT
         id: ssot
         run: npm run check:ssot --silent > ssot-report.txt 2>&1
@@ -100,12 +103,18 @@ jobs:
               ? readFileSync('ssot-report.txt', 'utf8').trim()
               : '(no report produced)';
             const failed = outcome === 'failure';
-            const heading = failed ? '### SSOT check found problems' : '### SSOT check passed';
+            const warned = !failed && /\bwarning\(s\)/.test(report.split('\n')[0]);
+            const heading = failed
+              ? '### SSOT check found problems'
+              : warned
+                ? '### SSOT check passed with warnings'
+                : '### SSOT check passed';
 
             await core.summary.addRaw(`${heading}\n\n\`\`\`\n${report}\n\`\`\`\n`).write();
 
             if (context.eventName !== 'pull_request') {
               if (failed) core.error(`SSOT check found problems:\n${report}`);
+              if (warned) core.warning(`SSOT check passed with warnings:\n${report}`);
               return;
             }
 
@@ -119,7 +128,7 @@ jobs:
             });
             const existing = comments.find((comment) => comment.body.includes(marker));
 
-            if (!failed) {
+            if (!failed && !warned) {
               if (existing) {
                 await github.rest.issues.updateComment({
                   owner,
@@ -136,7 +145,9 @@ jobs:
               marker,
               heading,
               '',
-              'This blocks the merge. Fix it in this pull request.',
+              failed
+                ? 'This blocks the merge. Fix it in this pull request.'
+                : 'This does not block the merge. Re-verify the pages named below, in this pull request or the next.',
               '',
               '```',
               report,

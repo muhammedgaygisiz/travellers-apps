@@ -88,13 +88,13 @@ Added in issue [#1074], all optional so existing documents stay valid:
 - `Restaurant.claimStatus` - `unclaimed`, `claimed`, `revoked` after [#1077] reduced it. A missing value means `unclaimed`.
 - `Restaurant.claimedAt` and `claimedAtTimestamp` - when the restaurant became held: set by the first assignment and deleted by the last revoke (`RD-UR-10`).
 
-`RestaurantClaim`, once at `libs/bite-tribe-common/model/src/lib/restaurant-claim.ts`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
+`RestaurantClaim`, once a model in `libs/bite-tribe-common/model`, was **removed by [#1077] rather than filled in**. It was added for the self-service flow, never had an importer, and direct assignment produces no claim document, so it went with its barrel export. `claimStatus` reduced with it \- `pending` and `disputed` existed only because of a review queue, so `unclaimed`, `claimed` and `revoked` are what assignment can produce.
 
 There is no `claimedByUserId` on `Restaurant`. It would duplicate the owner set, and who assigned each owner, when and why is in the operator log rather than on the document: both callables require a reason and log through `logOperatorAction`, the shape every operator action shares. See [Implementation - Firebase Functions](../implementation/firebase-functions.md).
 
 ## Key Behaviours
 
-- Ownership is held by a normal user carrying the `business` role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [issue-1371](../records/issue-1371.md).
+- Ownership is held by a normal user carrying the `business` role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [issue-1371](../history/records/issue-1371.md).
 - Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client. See [Architecture - Auth](../architecture/auth.md).
 - **`admin`, `business` and `staff` are independent roles, not a hierarchy.** A staff account holds `staff` and **not** `business`, which is why `roleGuard` accepts a set of roles: the business-app routes are gated on `roleGuard('business', 'staff')`, and a single-role gate would sign a staff account out at the door. Holding `business` and `staff` together is contradictory \- one operates a restaurant, the other is the narrowed set \- and `setUserRoles` refuses it.
 - **Which restaurants an account is assigned to is a Firestore document, never a custom claim.** An assignment change then takes effect immediately rather than after up to an hour, there is no 1000-byte claim payload to grow into, and [#1078]'s rules read the same field \- a claim copy would be a second version of one fact that can silently disagree with it.
@@ -163,7 +163,7 @@ This stops being true the moment a business or admin client is submitted to a st
 
 ## Related GitHub Scope
 
-- Issue [#1069] - Restaurant ownership, claiming and authorization, with seven child issues
+- Epic [#1069] - Restaurant ownership, claiming and authorization, with seven child issues
 - Issue [#1075] - the three roles as verified identity; `admin` and `business` came from [#1469] and [#1472], and [#1075] itself added `staff`, generalised `requireAdmin` into `requireRole`, and made `business` and `staff` mutually exclusive; done
 - Issue [#1076] - self-service restaurant claiming, closed as not planned
 - Issue [#1077] - assign and revoke restaurant ownership, and remove the claim model; done
@@ -190,7 +190,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - [Architecture - Firebase](../architecture/firebase.md) - the Firestore security rules as a whole
 - [Implementation - Firebase Functions](../implementation/firebase-functions.md) - `logOperatorAction` and the operator callables
 - [#1076] - self-service claiming, closed as not planned
-- [issue-1371](../records/issue-1371.md) - removed the organisation fields this was first specified against
+- [issue-1371](../history/records/issue-1371.md) - removed the organisation fields this was first specified against
 
 [#130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/130
 [#288]: https://github.com/muhammedgaygisiz/travellers-apps/issues/288

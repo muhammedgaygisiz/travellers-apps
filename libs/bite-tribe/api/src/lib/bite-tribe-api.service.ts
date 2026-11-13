@@ -281,6 +281,17 @@ export class BiteTribeApiService {
     return this.biteApiService.saveNewBite(biteWithoutImage);
   }
 
+  saveBitePhotoPosition(
+    biteId: string,
+    photoPosition: Geopoint | null,
+  ): Promise<void> {
+    return this.biteApiService.saveBitePhotoPosition(biteId, photoPosition);
+  }
+
+  loadBitePhotoPosition(biteId: string): Promise<Geopoint | undefined> {
+    return this.biteApiService.loadBitePhotoPosition(biteId);
+  }
+
   uploadImage(
     bite: Bite,
     callbackFn: (p: CreateAndUploadImageCallbackParams) => void,

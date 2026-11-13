@@ -67,9 +67,9 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 ## Related GitHub Scope
 
 - Part of [epic-1122][#1122], which specifies loading a position other than the current one and any radius beyond 15 km as a Pro capability. Not built.
-- Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against. Closed.
-- Issue [#1331] separated the empty-feed and empty-search-result copy. Closed.
-- Issue [#1717] lists only Bites with an uploaded photo to anybody but their poster. Open.
+- Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against.
+- Issue [#1331] separated the empty-feed and empty-search-result copy.
+- Issue [#1717] lists only Bites with an uploaded photo to anybody but their poster.
 
 ## Related Domains
 

@@ -93,6 +93,24 @@ export class BiteDataAccessService {
   /** True once the Bite read failed, so the page can say so. */
   biteLoadFailed = resourceFailed(this.bite);
 
+  /**
+   * The position read from the edited Bite's photo when it was posted, which
+   * only its author can read (GitHub issue #1290). The photo itself was
+   * re-encoded without its EXIF, so this is the only way to offer it again.
+   */
+  private readonly photoPositionResource = resource({
+    params: () => ({
+      biteId: this.storeService.biteIdFromUrl(),
+      uid: this.storeService.user()?.uid,
+    }),
+    loader: ({ params }) =>
+      params.biteId && params.uid
+        ? this.api.loadBitePhotoPosition(params.biteId)
+        : Promise.resolve(undefined),
+  });
+
+  storedPhotoPosition = resourceValue(this.photoPositionResource);
+
   currency = toSignal(this.storeService.currencyFromSettings$);
   favCurrencies = toSignal(this.storeService.favCurrenciesFromSettings$);
   position = toSignal(this.storeService.position$);
@@ -283,7 +301,12 @@ export class BiteDataAccessService {
     }
   }
 
-  async submitNewBite(bite: Bite): Promise<void> {
+  /**
+   * @param photoPosition The position read from the photo, stored apart from
+   *   the Bite where only its author can read it (GitHub issue #1290). Never
+   *   part of `bite`, which every member can read.
+   */
+  async submitNewBite(bite: Bite, photoPosition?: Geopoint): Promise<void> {
     this.storeService.saveNewBite();
 
     const { image, ...biteDocWithoutImage } = bite;
@@ -296,6 +319,10 @@ export class BiteDataAccessService {
     const savedBite = await this.api.saveNewBite(biteDocToSave);
     const newBite = { ...savedBite, image };
     this.storeService.createdNewBite(newBite);
+
+    if (photoPosition) {
+      void this.api.saveBitePhotoPosition(newBite.id, photoPosition);
+    }
 
     if (image) {
       // Fire-and-forget: the Cloud Function setBiteImagePathOnUpload
@@ -451,8 +478,20 @@ export class BiteDataAccessService {
     this.uploadProgress.set(null);
   }
 
-  async submitEditedBite(bite: Bite): Promise<void> {
+  /**
+   * @param photoPosition `undefined` leaves the stored photo position alone,
+   *   because the photo did not change. `null` removes it, because the new
+   *   photo has none. See GitHub issue #1290.
+   */
+  async submitEditedBite(
+    bite: Bite,
+    photoPosition?: Geopoint | null,
+  ): Promise<void> {
     this.storeService.saveEditedBite(bite);
+
+    if (photoPosition !== undefined && bite.id) {
+      void this.api.saveBitePhotoPosition(bite.id, photoPosition);
+    }
   }
 
   setEditingBite(bite: Partial<Bite>): void {

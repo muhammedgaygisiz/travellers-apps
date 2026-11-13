@@ -140,7 +140,7 @@ would set at runtime is invisible to the clients this metadata exists for.
 [issue #1455][#1455],
 because [#1454] had no account to name. The handle and the constraint that it
 must not ship before the X account is registered both live in
-[Implementation - Social Media Channels](social-media-channels.md).
+[Marketing - Social Media Channels](../marketing/social-media-channels.md).
 
 ## The Two Runtime Exceptions
 
@@ -410,7 +410,7 @@ head tags; only the share stub redirects.
 - A phone with the app installed opens these links in the browser: the
   associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/` or `/bite/*`.
 - Pages are written in one language. `hreflang` arrives with the second.
-- Whether an editorial page needs an Impressum is open; see
+- Whether an editorial page needs an Impressum is open in [#1979]; see
   [Current State - Open Questions](../current-state/open-questions.md).
 
 ## The Open Graph Image
@@ -599,4 +599,5 @@ so both properties have the same two owners.
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
+[#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982

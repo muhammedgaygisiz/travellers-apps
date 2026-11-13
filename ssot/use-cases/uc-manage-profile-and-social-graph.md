@@ -60,7 +60,7 @@ report one account files against another.
 - Profile identity is used in search and Bite trust context.
 - Profile Bites are always listed newest first. The profile is a timeline of what
   a user cooked or ate, so it ignores the distance sorting and the my-bites
-  filters. See [issue-1118](../records/issue-1118.md).
+  filters. See [issue-1118](../history/records/issue-1118.md).
 - While a profile loads, the page shows a skeleton in the shape of the loaded
   profile instead of the field fallbacks. Placeholder values such as the FREE
   badge must never be shown for a profile that has not arrived yet, because the
@@ -416,7 +416,7 @@ A new photo chosen on `Edit Profile` uploads in the background, the way a Bite p
   someone outside the app.
 - Sharing is a Bite capability. Making profiles shareable would be a new product
   decision with its own privacy handling, not a completion of existing work. See
-  [issue-1190](../records/issue-1190.md) and [UC - Inspect Bite Details](uc-inspect-bite-details.md).
+  [issue-1190](../history/records/issue-1190.md) and [UC - Inspect Bite Details](uc-inspect-bite-details.md).
 
 ## MVP Classification
 
@@ -494,10 +494,10 @@ It changes no declaration: the data collected and its purpose are the same.
 
 ## Related GitHub Scope
 
-- Issue [#1166] is the profile-loading skeleton fix - no placeholder facts (e.g. the FREE badge) render before a profile arrives. Closed.
-- Issue [#1188] made the public/private visibility choice readable directly off the profile. Closed.
-- Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu. Closed.
-- Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
+- Issue [#1166] is the profile-loading skeleton fix - no placeholder facts (e.g. the FREE badge) render before a profile arrives.
+- Issue [#1188] made the public/private visibility choice readable directly off the profile.
+- Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu.
+- Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above.
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
 - Issue [#1829] is the Profile Report Contract above, part of epic [#1823].
@@ -522,8 +522,8 @@ It changes no declaration: the data collected and its purpose are the same.
 - [UC - Inspect Bite Details](uc-inspect-bite-details.md) — the same two-names confusion on a surface that publishes
 - [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) — where the photo and location permissions
   are collected
-- [issue-1118](../records/issue-1118.md)
-- [issue-1190](../records/issue-1190.md)
+- [issue-1118](../history/records/issue-1118.md)
+- [issue-1190](../history/records/issue-1190.md)
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
 - [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) — the Operator's block, which this is not
 - [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md) — where a block goes when either account is deleted

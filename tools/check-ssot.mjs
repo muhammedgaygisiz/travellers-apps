@@ -4,13 +4,19 @@
  *
  * The SSOT is plain markdown that has to stay navigable from GitHub, so the rules
  * below are the ones a reader cannot see being broken: a link that resolves to
- * nothing, a leftover Logseq wikilink, an issue number that does not link, and the
- * use-case format rules in ssot/overview/use-case-format.md.
+ * nothing, a leftover Logseq wikilink, an issue number that does not link, a quoted
+ * code path that resolves to nothing, issue state copied out of GitHub, a
+ * current-state page nobody has verified, a generated block edited by hand or not
+ * regenerated, the use-case format rules in ssot/overview/use-case-format.md, and the
+ * word budgets of what every agent reads before its task.
  *
- * Exits non-zero on the first failing category, listing every failure.
+ * Exits non-zero when any rule fails, listing every failure. Warnings are listed
+ * too but never change the exit code.
  */
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
+import { MAP, regenerate } from './generate-traceability-map.mjs';
 
 const SSOT = resolve('ssot');
 // `Claude outputs` is where the Claude desktop app drops files; it is git-ignored.
@@ -18,6 +24,24 @@ const SKIP = new Set(['assets', 'Claude outputs']);
 const failures = [];
 const fail = (file, rule, message) =>
   failures.push({ file: relative('.', file), rule, message });
+const warnings = [];
+const warn = (file, rule, message) =>
+  warnings.push({ file: relative('.', file), rule, message });
+
+// A current-state page last verified longer ago than this is reported, not failed:
+// a blocking age check would fail unrelated pull requests the day a page turns stale.
+const VERIFIED_MAX_AGE_DAYS = 30;
+// What an agent reads before its task: AGENTS.md and the documents it names under
+// `## Always Read`. Past this, growth is a decision taken in a pull request, not
+// something that happens by accretion; a warning, so that the decision stays possible.
+const ENTRY_BUDGET_WORDS = 3500;
+// The traceability map is read by every feature and fix task. It is generated in part,
+// so it grows with every use case; past this, look at what it carries before it grows on.
+const MAP_BUDGET_WORDS = 3000;
+// Words as `wc -w` counts them.
+const words = (text) => text.split(/\s+/).filter(Boolean).length;
+// Pages that describe the tree as it was, so their quoted paths may no longer resolve.
+const HISTORICAL = 'history';
 
 function walk(dir) {
   const out = [];
@@ -43,6 +67,53 @@ function codeSpans(text) {
   return spans;
 }
 const inCode = (spans, i) => spans.some(([a, b]) => i >= a && i < b);
+const stripFences = (text) => text.replace(/^(```|~~~)[\s\S]*?^\1[^\n]*$/gm, '');
+
+// ---- the working tree, as git sees it: tracked and untracked, ignored files left out ----
+const git = (args, input) =>
+  execFileSync('git', args, { encoding: 'utf8', input, stdio: ['pipe', 'pipe', 'ignore'] });
+const tree = new Set();
+for (const path of git(['ls-files', '-z', '--cached', '--others', '--exclude-standard']).split('\0')) {
+  if (!path) continue;
+  const parts = path.split('/');
+  for (let i = 1; i <= parts.length; i++) tree.add(parts.slice(0, i).join('/'));
+}
+const treeList = [...tree];
+const escape = (s) => s.replace(/[.+^$()|[\]\\]/g, '\\$&');
+/**
+ * Whether a quoted path names something in the tree. `...` stands for any subpath;
+ * the notation the SSOT already uses for families of files - `*`, `**`, `<lang>` and
+ * `{page,data-access}` - matches the way a reader would expect it to.
+ */
+function resolves(quoted) {
+  const path = quoted.replace(/\/+$/, '');
+  if (!/\.\.\.|[*<{]/.test(path)) return tree.has(path);
+  const pattern = path
+    .split(/(\/\.\.\.\/|\*\*|\*|<[^>/]+>|\{[^}/]+})/)
+    .map((part) => {
+      if (part === '/.../') return '/(?:[^/]+/)*';
+      if (part === '**') return '.*';
+      if (part === '*') return '[^/]*';
+      if (part.startsWith('<')) return '[^/]+';
+      if (part.startsWith('{')) return `(?:${part.slice(1, -1).split(',').map(escape).join('|')})`;
+      return escape(part);
+    })
+    .join('');
+  const re = new RegExp(`^${pattern}$`);
+  return treeList.some((p) => re.test(p));
+}
+function ignored(paths) {
+  if (!paths.length) return new Set();
+  try {
+    return new Set(git(['check-ignore', '--no-index', '--stdin'], paths.join('\n')).split('\n'));
+  } catch (error) {
+    // exit status 1 means none of the paths is ignored
+    if (error.status === 1) return new Set();
+    throw error;
+  }
+}
+const unresolved = [];
+const today = new Date(new Date().toISOString().slice(0, 10));
 
 const files = walk(SSOT);
 const exists = (p) => {
@@ -72,14 +143,47 @@ for (const file of files) {
   }
 
   const defined = new Set([...text.matchAll(/^\[#(\d+)]: /gm)].map((m) => m[1]));
-  for (const m of text.matchAll(/]\[#(\d+)]|(?<!:)\[#(\d+)](?!:)/g)) {
+  for (const m of text.matchAll(/]\[#(\d+)]|(?<!:)(?<!^)\[#(\d+)]|^\[#(\d+)](?!:)/gm)) {
     if (inCode(spans, m.index)) continue;
-    const n = m[1] ?? m[2];
+    const n = m[1] ?? m[2] ?? m[3];
     if (!defined.has(n)) fail(file, 'REFDEF', `[#${n}] used with no definition in this file`);
   }
 
   if (/^\s*[a-z-]+:: /m.test(text)) fail(file, 'LOGSEQ', 'Logseq property (`key:: value`)');
   if (/^- \S/.test(text)) fail(file, 'LOGSEQ', 'file opens as an outline bullet, not a heading');
+  for (const m of text.matchAll(/^[ \t]*- (#{1,6}) /gm)) {
+    if (inCode(spans, m.index)) continue;
+    const line = text.slice(0, m.index).split('\n').length;
+    fail(file, 'LOGSEQ', `line ${line}: heading written as an outline bullet (\`- ${m[1]}\`)`);
+  }
+
+  const page = relative(SSOT, file).split(sep);
+  if (page[0] !== HISTORICAL) {
+    for (const m of stripFences(text).matchAll(/`((?:apps|libs|tools|ssot)\/[^`\n]*)`/g)) {
+      if (!resolves(m[1])) unresolved.push({ file, path: m[1] });
+    }
+  }
+
+  if (page[0] === 'current-state') {
+    const lines = text.split('\n');
+    const h1 = lines.findIndex((l) => /^# /.test(l));
+    const next = lines.slice(h1 + 1).find((l) => l.trim()) ?? '';
+    const m = /^\*\*Last verified:\*\* (\d{4}-\d{2}-\d{2})\s*$/.exec(next);
+    if (h1 < 0 || !m) {
+      fail(file, 'VERIFIED', 'no `**Last verified:** YYYY-MM-DD` line below the `#` heading');
+    } else {
+      const age = Math.floor((today - new Date(m[1])) / 86_400_000);
+      if (Number.isNaN(age)) fail(file, 'VERIFIED', `not a date: ${m[1]}`);
+      else if (age > VERIFIED_MAX_AGE_DAYS) {
+        warn(file, 'VERIFIED', `last verified ${m[1]}, ${age} days ago - read it against the current state`);
+      }
+    }
+  }
+}
+
+const ignoredPaths = ignored([...new Set(unresolved.map((u) => u.path))]);
+for (const { file, path } of unresolved) {
+  if (!ignoredPaths.has(path)) fail(file, 'PATH', `resolves to nothing: ${path}`);
 }
 
 // ---- use-case format (ssot/overview/use-case-format.md) ----
@@ -153,18 +257,104 @@ for (const file of readdirSync(join(SSOT, 'use-cases'))
   const alien = rd.filter((d) => !domains.has(d.text)).map((d) => d.text);
   if (alien.length) fail(file, 'UF-4', `not a domain page: ${alien.join(', ')}`);
   if (level === 'L3' && nextUp.has(title)) fail(file, 'UF-2', "under 'Next to implement' but declared L3");
+
+  // the state of an issue lives on GitHub; a copy here is wrong the day the issue changes
+  for (const line of (section(bare, 'Related GitHub Scope') ?? '').split('\n')) {
+    if (/\b(?:Open|Closed)\.?\s*$/.test(line)) {
+      fail(file, 'ISSUESTATE', `issue state copied into Related GitHub Scope: ${line.trim().slice(-60)}`);
+    }
+  }
 }
 
-const byRule = new Map();
-for (const f of failures) byRule.set(f.rule, [...(byRule.get(f.rule) ?? []), f]);
+// ---- generated blocks (tools/README.md, Writes into ssot/) ----
+try {
+  const current = readFileSync(MAP, 'utf8');
+  if (regenerate(current) !== current) {
+    fail(
+      MAP,
+      'GENERATED',
+      'the generated block is not what `npm run generate:traceability` writes now; change the use case, not the block, and regenerate',
+    );
+  }
+  const size = words(current);
+  if (size > MAP_BUDGET_WORDS) {
+    warn(
+      MAP,
+      'MAPSIZE',
+      `${size} words, over the budget of ${MAP_BUDGET_WORDS} - see tools/README.md`,
+    );
+  }
+} catch (error) {
+  fail(MAP, 'GENERATED', error.message);
+}
+
+// ---- the always-read entry (AGENTS.md, `## Always Read`) ----
+{
+  const agents = readFileSync('AGENTS.md', 'utf8');
+  const always =
+    /^## Always Read\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(
+      stripFences(agents),
+    )?.[1] ?? '';
+  const named = [...always.matchAll(/^\s*(?:-|\d+\.) .*?`([^`]+\.md)`/gm)].map(
+    (m) => m[1],
+  );
+  if (!named.length)
+    fail(
+      'AGENTS.md',
+      'ENTRY',
+      'no `## Always Read` section listing documents in backticks',
+    );
+  let total = words(agents);
+  const counts = [`AGENTS.md ${total}`];
+  for (const path of named) {
+    if (!exists(path)) {
+      fail(
+        'AGENTS.md',
+        'ENTRY',
+        `always-read document does not exist: ${path}`,
+      );
+      continue;
+    }
+    const n = words(readFileSync(path, 'utf8'));
+    total += n;
+    counts.push(`${path} ${n}`);
+  }
+  if (total > ENTRY_BUDGET_WORDS) {
+    warn(
+      'AGENTS.md',
+      'ENTRY',
+      `always-read documents total ${total} words, over the budget of ${ENTRY_BUDGET_WORDS} (${counts.join(', ')}) - see tools/README.md`,
+    );
+  }
+}
+
+const byRule = (list) => {
+  const map = new Map();
+  for (const f of list) map.set(f.rule, [...(map.get(f.rule) ?? []), f]);
+  return [...map].sort();
+};
+const print = (log, groups) => {
+  for (const [rule, list] of groups) {
+    log(`${rule} (${list.length})`);
+    for (const f of list) log(`  ${f.file}: ${f.message}`);
+    log('');
+  }
+};
+
+const warned = warnings.length ? `, ${warnings.length} warning(s)` : ', no warnings';
 if (!failures.length) {
-  console.log(`check-ssot: ${files.length} pages, no failures.`);
+  console.log(`check-ssot: ${files.length} pages, no failures${warned}.`);
+  if (warnings.length) {
+    console.log('\nWarnings (these do not fail the check):\n');
+    print(console.log, byRule(warnings));
+  }
   process.exit(0);
 }
-console.error(`check-ssot: ${failures.length} failure(s) across ${byRule.size} rule(s).\n`);
-for (const [rule, list] of [...byRule].sort()) {
-  console.error(`${rule} (${list.length})`);
-  for (const f of list) console.error(`  ${f.file}${sep === '\\' ? '' : ''}: ${f.message}`);
-  console.error('');
+const failed = byRule(failures);
+console.error(`check-ssot: ${failures.length} failure(s) across ${failed.length} rule(s)${warned}.\n`);
+print(console.error, failed);
+if (warnings.length) {
+  console.error('Warnings (these do not fail the check):\n');
+  print(console.error, byRule(warnings));
 }
 process.exit(1);

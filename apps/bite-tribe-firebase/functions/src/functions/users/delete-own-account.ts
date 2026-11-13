@@ -43,6 +43,7 @@ const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
 const BUCKETLISTS_COLLECTION = 'bucketlists';
 const LIKES_COLLECTION = 'likes';
+const AUTHOR_PRIVATE_COLLECTION = 'authorPrivate';
 const RATINGS_COLLECTION = 'ratings';
 const REVIEWS_COLLECTION = 'reviews';
 const SELLS_COLLECTION = 'sells';
@@ -155,6 +156,26 @@ export const deleteLikesByUser = (
   applyToQuery(
     db,
     db.collectionGroup(LIKES_COLLECTION).where('userId', '==', uid),
+    (batch, ref) => batch.delete(ref),
+  );
+
+/**
+ * Deletes what the account kept privately about its own Bites (GitHub issue
+ * #1290): the position read from each photo, stored even where the account
+ * chose another source.
+ *
+ * The Bite itself survives the account with its author cleared, so this cannot
+ * ride on the Bite-delete trigger. Left behind, it would keep the photo's
+ * location under a uid that no longer resolves. Like {@link deleteLikesByUser},
+ * the collection-group filter needs its exemption in `firestore.indexes.json`.
+ */
+export const deleteBiteAuthorPrivateByUser = (
+  db: Firestore,
+  uid: string,
+): Promise<number> =>
+  applyToQuery(
+    db,
+    db.collectionGroup(AUTHOR_PRIVATE_COLLECTION).where('userId', '==', uid),
     (batch, ref) => batch.delete(ref),
   );
 
@@ -509,6 +530,10 @@ export const deleteAccountForUser = async (
     const anonymizedBites = await anonymizeBitesByUser(db, uid);
     const removedBiteTags = await removeTaggedUserFromBites(db, uid);
     const deletedLikes = await deleteLikesByUser(db, uid);
+    const deletedBitePhotoPositions = await deleteBiteAuthorPrivateByUser(
+      db,
+      uid,
+    );
     const deletedReviews = await deleteReviewsByUser(db, uid);
     const deletedBucketlists = await deleteBucketlistsByUser(db, uid);
     const deletedRatings = await deleteBiteTrailRatingsByUser(db, uid);
@@ -538,6 +563,7 @@ export const deleteAccountForUser = async (
         anonymizedBites,
         removedBiteTags,
         deletedLikes,
+        deletedBitePhotoPositions,
         deletedReviews,
         deletedBucketlists,
         deletedRatings,
@@ -557,6 +583,7 @@ export const deleteAccountForUser = async (
       anonymizedBites,
       removedBiteTags,
       deletedLikes,
+      deletedBitePhotoPositions,
       deletedReviews,
       deletedBucketlists,
       deletedRatings,

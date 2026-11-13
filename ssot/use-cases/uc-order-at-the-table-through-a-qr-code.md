@@ -934,7 +934,7 @@ guest's phone is retrying.
 
 ## Related GitHub Scope
 
-- Issue [#1072] - QR table menu and table ordering, with ten child issues
+- Epic [#1072] - QR table menu and table ordering, with ten child issues
 - Issue [#1099] - stable menu item identifiers, availability and price snapshots, the model this use case hangs its order lines from
 - Issue [#1100] - resolve and validate a table QR token, the backend every later child calls before it does anything
 - Issue [#1101] - guest table session start and join, which gave the printed address a screen and the guest an identity to hold a session with
@@ -947,7 +947,7 @@ guest's phone is retrying.
 - Issue [#1598] - orderable menu extras, split out of [#1103] because `Category.extrasBlock` had no ids, no renderer and no editor. It settled where an extra lives first (`RD-TS-35`: on the category, applying to every dish in it) and then gave extras ids, an editor in the business app, a printed block on both reading surfaces, a tick box per orderable dish, a per-line snapshot, and the two refusals that answer an extra withdrawn or repriced mid-meal (`RD-TS-36`)
 - Issue [#1107] - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since [#1101]
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
-- Issue [#1073] - Visit summary, bill delivery and Bite creation from orders, with six child issues
+- Epic [#1073] - Visit summary, bill delivery and Bite creation from orders, with six child issues
 - Issue [#1110] - the party's bill and the settlement record, which gave the guest the one read `RD-TS-12` had deferred and the restaurant a place to write down that it was paid. The bill is a callable rather than a widened rule, so a guest's phone still cannot list the visit
 - Issue [#1112] - the Bite made from an ordered dish, which is what the whole stage was for: the order supplies the restaurant, the dish, the price, the currency and the position, and the guest supplies a photo, a rating and a comment
 - Issue [#1111] - the visit summary, which gave the meal somewhere to live after the table was cleared: one document per guest under their own account, written by a trigger rather than by the close, optionally mailed once, and a confirmation on a close nobody was paid for

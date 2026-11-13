@@ -11,6 +11,16 @@ const buildNumber = readBuildNumber(process.cwd());
 const buildTag = `build-${buildNumber}`;
 const today = new Date().toISOString().slice(0, 10);
 const currentRev = git(['rev-parse', '--short=8', 'HEAD']);
+// The tag the release is about to create, passed by
+// increment-build-number-and-generate-changelog as `--tag <name>`. It is written
+// below the heading, which stays `## build-<n> (<date>)` because this script and
+// changelog-sections.mjs parse it. Run on its own, the script writes no tag line.
+const tagIndex = process.argv.indexOf('--tag');
+const tagName = tagIndex === -1 ? undefined : process.argv[tagIndex + 1];
+
+if (tagIndex !== -1 && !tagName) {
+  throw new Error('--tag needs a tag name, e.g. --tag build-1.1.2-101.');
+}
 
 const typeHeadings = new Map([
   ['feat', 'Features'],
@@ -37,7 +47,14 @@ const startRev =
   existingStartRev ??
   findLatestPreviousBuildRev(changelog, Number(buildNumber));
 const commits = getCommits(startRev).map(parseCommit).filter(Boolean);
-const section = renderSection(buildTag, today, startRev, currentRev, commits);
+const section = renderSection(
+  buildTag,
+  tagName,
+  today,
+  startRev,
+  currentRev,
+  commits,
+);
 const nextChangelog = upsertBuildSection(changelog, buildTag, section);
 
 writeFileSync(changelogPath, nextChangelog);
@@ -56,19 +73,23 @@ function getBuildSection(content, tag) {
 }
 
 function findLatestPreviousBuildRev(content, currentBuildNumber) {
-  const gitBuilds = new Set(getGitBuildTags());
+  const gitBuilds = getGitBuildTags();
   const changelogBuilds = getChangelogBuilds(content);
   const candidates = [
     ...changelogBuilds.map(({ build, endRev }) => ({
       build,
-      rev: gitBuilds.has(build) ? `build-${build}` : endRev,
+      rev: gitBuilds.get(build) ?? endRev,
     })),
-    ...[...gitBuilds].map((build) => ({ build, rev: `build-${build}` })),
+    ...[...gitBuilds].map(([build, tag]) => ({ build, rev: tag })),
   ]
     .filter(({ build, rev }) => build < currentBuildNumber && rev)
     .sort((left, right) => right.build - left.build);
 
-  return candidates[0]?.rev;
+  const rev = candidates[0]?.rev;
+
+  // Written as the commit, as before: a tag name and an end revision name the
+  // same commit, and the section should not change with the form it was found in.
+  return rev && git(['rev-parse', '--short=8', `${rev}^{commit}`]);
 }
 
 function getChangelogBuilds(content) {
@@ -82,12 +103,21 @@ function getChangelogBuilds(content) {
   }));
 }
 
+/** build number -> tag name, for both `build-<n>` and `build-<version>-<n>` tags */
 function getGitBuildTags() {
-  return git(['tag', '--merged', 'HEAD', '--list', 'build-*'])
-    .split('\n')
-    .map((tag) => tag.trim().match(/^build-(\d+)$/)?.[1])
-    .filter(Boolean)
-    .map(Number);
+  const tags = new Map();
+  const listed = git(['tag', '--merged', 'HEAD', '--list', 'build-*']);
+
+  for (const line of listed.split('\n')) {
+    const tag = line.trim();
+    const build = tag.match(/^build-(?:\d+\.\d+\.\d+-)?(\d+)$/)?.[1];
+
+    if (build) {
+      tags.set(Number(build), tag);
+    }
+  }
+
+  return tags;
 }
 
 function getCommits(startRev) {
@@ -124,8 +154,13 @@ function parseCommit({ hash, subject, body }) {
   };
 }
 
-function renderSection(tag, date, startRev, endRev, parsedCommits) {
+function renderSection(tag, tagName, date, startRev, endRev, parsedCommits) {
   const lines = [`## ${tag} (${date})`];
+
+  // The tag's commit is not written: it is `git rev-list -n1 <tag>`.
+  if (tagName) {
+    lines.push('', `Tag: \`${tagName}\``, '');
+  }
 
   if (startRev) {
     lines.push(`<!-- changelog-start-rev: ${startRev} -->`);

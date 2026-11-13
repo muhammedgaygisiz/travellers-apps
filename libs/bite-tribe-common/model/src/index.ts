@@ -1,4 +1,5 @@
 export type * from './lib/bite';
+export type * from './lib/bite-author-private';
 export type * from './lib/review';
 export type * from './lib/review-thread';
 export type * from './lib/restaurant';

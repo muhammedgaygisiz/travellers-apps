@@ -1,19 +1,20 @@
 # Implementation - Analytics Events
 
-- ## Purpose
+## Purpose
 
-  This page is the source of truth for the product analytics taxonomy. It
-  documents each event, how it is emitted in code, the launch dashboard to build
-  in the GA4/Firebase console, and how to verify events in DebugView.
+This page is the source of truth for the product analytics taxonomy. It
+documents each event, how it is emitted in code, the launch dashboard to build
+in the GA4/Firebase console, and how to verify events in DebugView.
 
-  The launch-critical core was defined by issue 910 (part of [epic-907][#907],
-  Phase 2 / Week 3), and the onboarding funnel by [epic-850](../records/epic-850.md). Issue 1098
-  added the first events the **business** app owns - the table operations of
-  [epic-1071][#1071] - which is where the per-event surface rule below comes from.
+The launch-critical core was defined by issue 910 (part of [epic-907][#907],
+Phase 2 / Week 3), and the onboarding funnel by [epic-850](../history/records/epic-850.md). Issue 1098
+added the first events the **business** app owns - the table operations of
+[epic-1071][#1071] - which is where the per-event surface rule below comes from.
 
-  See [Architecture - Analytics](../architecture/analytics.md) for how this fits the wider analytics surface.
+See [Architecture - Analytics](../architecture/analytics.md) for how this fits the wider analytics surface.
 
-- ## How Events Are Emitted
+## How Events Are Emitted
+
 - Events and their typed parameters live in
   `libs/common/ta-firestore/src/lib/analytics/analytics-events.ts`.
 - They are sent through `AnalyticsService`
@@ -37,504 +38,505 @@
   containers) that owns the behavior, never from presentational components.
 - Event names follow the GA4 `snake_case` convention; parameter values are
   primitives only.
-- ## Event Reference
 
-  | Category     | Event                                 | Params                                                                                                     | Trigger                                                                                             | Owner                                                                                                       |
-  | ------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-  | Activation   | `sign_up`                             | `method: string` (`'password'`)                                                                            | Registration succeeds                                                                               | `libs/common/ui/auth/.../registration/registration.service.ts`                                              |
-  | Activation   | `password_reset_requested`            | –                                                                                                          | Forgot-password form submitted                                                                      | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
-  | Activation   | `password_reset_request_failed`       | `code: string`                                                                                             | Firebase rejects a forgot-password request                                                          | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
-  | Activation   | `email_verification_prompt_shown`     | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Eligible unverified user enters a prompt surface                                                    | Home, settings, and profile integration services                                                            |
-  | Activation   | `email_verification_resend_tapped`    | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | User taps resend verification email                                                                 | Home, settings, and profile integration services                                                            |
-  | Activation   | `email_verification_resend_succeeded` | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Backend resend callable succeeds                                                                    | Home, settings, and profile integration services                                                            |
-  | Activation   | `email_verification_resend_failed`    | `surface: 'home' \| 'settings' \| 'profile_edit'`, `reason: string`                                        | Backend resend callable fails or rate-limits                                                        | Home, settings, and profile integration services                                                            |
-  | Activation   | `email_verification_synced`           | `verified: boolean`, `source: 'app_start' \| 'app_resume' \| 'profile_edit'`                               | App syncs Firebase Auth email verification metadata                                                 | `libs/bite-tribe/store/src/lib/app/effects.ts`                                                              |
-  | Account      | `account_deletion_started`            | –                                                                                                          | User confirms the destructive delete-account alert                                                  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
-  | Account      | `account_deletion_completed`          | –                                                                                                          | Backend cascade succeeds and the user is signed out                                                 | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
-  | Account      | `account_deletion_failed`             | `reason: 'reauth_required' \| 'reauth_failed' \| 'account_changed' \| 'unknown'`                           | Deletion needs a fresh sign-in, targets an account other than the confirmed one, or fails outright  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
-  | Creation     | `bite_created`                        | `source: 'visit' \| 'menu' \| 'manual'`                                                                    | New Bite persisted                                                                                  | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
-  | Creation     | `bucketlist_created`                  | –                                                                                                          | Bucket list created                                                                                 | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`                                    |
-  | Creation     | `bucketlist_rated`                    | `rating: number`                                                                                           | BiteTrail rating submitted                                                                          | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts`                                |
-  | Discovery    | `search_performed`                    | –                                                                                                          | Query first reaches the min length (once per search session)                                        | `libs/bite-tribe/search/page/.../integration/search.service.ts`                                             |
-  | Discovery    | `restaurant_viewed`                   | `verified: boolean`                                                                                        | Restaurant / place page entered                                                                     | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`                                 |
-  | Discovery    | `bite_viewed`                         | –                                                                                                          | Bite details page entered                                                                           | `libs/bite-tribe/details/page/.../integration/details.container.ts`                                         |
-  | Onboarding   | `onboarding_assistant_started`        | –                                                                                                          | Assistant loads for the first time in a session                                                     | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
-  | Onboarding   | `onboarding_step_completed`           | `step: OnboardingStepId`                                                                                   | A step is persisted and marked complete on advance                                                  | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
-  | Onboarding   | `onboarding_assistant_completed`      | –                                                                                                          | Completion flag is written on the finish step                                                       | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
-  | Onboarding   | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                                                | A coach mark is dismissed for the first time                                                        | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`                                            |
-  | Social       | `follow_suggestions_shown`            | `surface: 'onboarding' \| 'following' \| 'home'`, `count: number`                                          | A suggestions list first renders with somebody in it, once per visit to the surface                 | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
-  | Social       | `follow_suggestion_followed`          | `surface`, `position: number` (one-based), `reason: 'nearby' \| 'curated' \| 'active'`                     | A follow from a suggestion is written                                                               | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
-  | Social       | `user_followed`                       | `source: 'suggestion' \| 'profile'`                                                                        | Any follow: written from a suggestion, or tapped on a profile                                       | Follow-suggestions service; `libs/bite-tribe/profile/page/.../profile.service.ts`                           |
-  | Table ops    | `table_seated`                        | `TableOperation`, `from_status: TableStatus`, `guests?: number`                                            | A transition into `occupied` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_freed`                         | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `available` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_reserved`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `reserved` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_cleaning_started`              | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `cleaning` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_disabled`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `disabled` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_visit_opened`                  | `TableOperation`, `visit_id: string`                                                                       | The transition opened a visit the table did not already carry                                       | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table ops    | `table_visit_closed`                  | `TableOperation`, `visit_id: string`, `outcome: 'closed' \| 'abandoned'`                                   | The transition ended the visit at that table                                                        | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
-  | Table funnel | `table_code_scanned`                  | `TableGuestParams` (ids absent on a refusal), `outcome: 'confirm' \| 'menu_only' \| 'refused' \| 'failed'` | A scanned code resolves, is refused, or cannot be reached                                           | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
-  | Table funnel | `table_session_started`               | `TableGuestParams`, `status: 'pending' \| 'active'`                                                        | The backend opened a session for the confirmed table                                                | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
-  | Table funnel | `table_order_submitted`               | `TableGuestParams`, `line_count: number`                                                                   | An order reached the kitchen, replays excluded                                                      | `libs/bite-tribe/table-order/data-access/.../table-order.service.ts`                                        |
-  | Table funnel | `table_bite_prompt_shown`             | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | A visit summary reached a guest with the Bite offer on it                                           | `.../table-order/data-access/.../visit-summary.service.ts`, `.../visits/page/.../visit-detail.container.ts` |
-  | Table funnel | `table_bite_started`                  | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | The guest opened the Bite form from that offer                                                      | `.../menu/page/.../order/table-order.component.ts`, `.../visits/page/.../visit-detail.container.ts`         |
-  | Share funnel | `share_menu_opened`                   | `bite_id: string`                                                                                          | The share menu reaches the screen on the viewer's own Bite                                          | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_target_chosen`                 | `bite_id`, `target: ShareTarget`                                                                           | A menu entry is picked; a dismissed menu emits nothing                                              | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_composer_opened`               | `bite_id`, `target`, `format: 'story' \| 'post'`                                                           | The image composer reaches the screen                                                               | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_template_chosen`               | `ShareImageParams`                                                                                         | The user switches the layout; the default one is not counted                                        | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share' \| 'open_app'`                                              | Saved, taken from the share sheet, or the target app opened with it - not that it was posted        | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | Share funnel | `share_handoff_failed`                | `ShareImageParams`, `action`, `reason: 'cancelled' \| 'permission_denied' \| 'unavailable' \| 'failed'`    | The image did not leave; `cancelled` is the user closing the share sheet                            | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
-  | World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                  | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
-  | World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                            | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
-  | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                   | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
-  | Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                       | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
-  | Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
-  | Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
+## Event Reference
 
-  The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../records/epic-850.md),
-  issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
-  fires once per step in order (`identity`, `visibility`, `currency`, `language`,
-  `location`, `notifications`, `finish`); `onboarding_assistant_completed` fires
-  once, after the `finish` step's completion write succeeds. `coach_mark_dismissed`
-  carries the dismissed `CoachMarkSurface` id and fires only on the first dismissal
-  per user, so re-entering a surface whose mark was already seen emits nothing.
+| Category     | Event                                 | Params                                                                                                     | Trigger                                                                                             | Owner                                                                                                       |
+| ------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Activation   | `sign_up`                             | `method: string` (`'password'`)                                                                            | Registration succeeds                                                                               | `libs/common/ui/auth/.../registration/registration.service.ts`                                              |
+| Activation   | `password_reset_requested`            | –                                                                                                          | Forgot-password form submitted                                                                      | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
+| Activation   | `password_reset_request_failed`       | `code: string`                                                                                             | Firebase rejects a forgot-password request                                                          | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
+| Activation   | `email_verification_prompt_shown`     | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Eligible unverified user enters a prompt surface                                                    | Home, settings, and profile integration services                                                            |
+| Activation   | `email_verification_resend_tapped`    | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | User taps resend verification email                                                                 | Home, settings, and profile integration services                                                            |
+| Activation   | `email_verification_resend_succeeded` | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Backend resend callable succeeds                                                                    | Home, settings, and profile integration services                                                            |
+| Activation   | `email_verification_resend_failed`    | `surface: 'home' \| 'settings' \| 'profile_edit'`, `reason: string`                                        | Backend resend callable fails or rate-limits                                                        | Home, settings, and profile integration services                                                            |
+| Activation   | `email_verification_synced`           | `verified: boolean`, `source: 'app_start' \| 'app_resume' \| 'profile_edit'`                               | App syncs Firebase Auth email verification metadata                                                 | `libs/bite-tribe/store/src/lib/app/effects.ts`                                                              |
+| Account      | `account_deletion_started`            | –                                                                                                          | User confirms the destructive delete-account alert                                                  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+| Account      | `account_deletion_completed`          | –                                                                                                          | Backend cascade succeeds and the user is signed out                                                 | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+| Account      | `account_deletion_failed`             | `reason: 'reauth_required' \| 'reauth_failed' \| 'account_changed' \| 'unknown'`                           | Deletion needs a fresh sign-in, targets an account other than the confirmed one, or fails outright  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
+| Creation     | `bite_created`                        | `source: 'visit' \| 'menu' \| 'manual'`                                                                    | New Bite persisted                                                                                  | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
+| Creation     | `bucketlist_created`                  | –                                                                                                          | Bucket list created                                                                                 | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`                                    |
+| Creation     | `bucketlist_rated`                    | `rating: number`                                                                                           | BiteTrail rating submitted                                                                          | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts`                                |
+| Discovery    | `search_performed`                    | –                                                                                                          | Query first reaches the min length (once per search session)                                        | `libs/bite-tribe/search/page/.../integration/search.service.ts`                                             |
+| Discovery    | `restaurant_viewed`                   | `verified: boolean`                                                                                        | Restaurant / place page entered                                                                     | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`                                 |
+| Discovery    | `bite_viewed`                         | –                                                                                                          | Bite details page entered                                                                           | `libs/bite-tribe/details/page/.../integration/details.container.ts`                                         |
+| Onboarding   | `onboarding_assistant_started`        | –                                                                                                          | Assistant loads for the first time in a session                                                     | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+| Onboarding   | `onboarding_step_completed`           | `step: OnboardingStepId`                                                                                   | A step is persisted and marked complete on advance                                                  | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+| Onboarding   | `onboarding_assistant_completed`      | –                                                                                                          | Completion flag is written on the finish step                                                       | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
+| Onboarding   | `coach_mark_dismissed`                | `surface: CoachMarkSurface`                                                                                | A coach mark is dismissed for the first time                                                        | `libs/bite-tribe/coach-mark/src/lib/coach-mark-state.service.ts`                                            |
+| Social       | `follow_suggestions_shown`            | `surface: 'onboarding' \| 'following' \| 'home'`, `count: number`                                          | A suggestions list first renders with somebody in it, once per visit to the surface                 | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
+| Social       | `follow_suggestion_followed`          | `surface`, `position: number` (one-based), `reason: 'nearby' \| 'curated' \| 'active'`                     | A follow from a suggestion is written                                                               | `libs/bite-tribe/follow-suggestions/data-access/.../follow-suggestions.service.ts`                          |
+| Social       | `user_followed`                       | `source: 'suggestion' \| 'profile'`                                                                        | Any follow: written from a suggestion, or tapped on a profile                                       | Follow-suggestions service; `libs/bite-tribe/profile/page/.../profile.service.ts`                           |
+| Table ops    | `table_seated`                        | `TableOperation`, `from_status: TableStatus`, `guests?: number`                                            | A transition into `occupied` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_freed`                         | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `available` is confirmed                                                          | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_reserved`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `reserved` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_cleaning_started`              | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `cleaning` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_disabled`                      | `TableOperation`, `from_status: TableStatus`                                                               | A transition into `disabled` is confirmed                                                           | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_visit_opened`                  | `TableOperation`, `visit_id: string`                                                                       | The transition opened a visit the table did not already carry                                       | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table ops    | `table_visit_closed`                  | `TableOperation`, `visit_id: string`, `outcome: 'closed' \| 'abandoned'`                                   | The transition ended the visit at that table                                                        | `libs/bite-tribe-business/table-management/page/.../table-plan.service.ts`                                  |
+| Table funnel | `table_code_scanned`                  | `TableGuestParams` (ids absent on a refusal), `outcome: 'confirm' \| 'menu_only' \| 'refused' \| 'failed'` | A scanned code resolves, is refused, or cannot be reached                                           | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
+| Table funnel | `table_session_started`               | `TableGuestParams`, `status: 'pending' \| 'active'`                                                        | The backend opened a session for the confirmed table                                                | `libs/bite-tribe/table-session/data-access/.../table-session.service.ts`                                    |
+| Table funnel | `table_order_submitted`               | `TableGuestParams`, `line_count: number`                                                                   | An order reached the kitchen, replays excluded                                                      | `libs/bite-tribe/table-order/data-access/.../table-order.service.ts`                                        |
+| Table funnel | `table_bite_prompt_shown`             | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | A visit summary reached a guest with the Bite offer on it                                           | `.../table-order/data-access/.../visit-summary.service.ts`, `.../visits/page/.../visit-detail.container.ts` |
+| Table funnel | `table_bite_started`                  | `restaurant_id`, `has_account`, `visit_id: string`, `surface: 'table' \| 'visit_detail'`                   | The guest opened the Bite form from that offer                                                      | `.../menu/page/.../order/table-order.component.ts`, `.../visits/page/.../visit-detail.container.ts`         |
+| Share funnel | `share_menu_opened`                   | `bite_id: string`                                                                                          | The share menu reaches the screen on the viewer's own Bite                                          | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| Share funnel | `share_target_chosen`                 | `bite_id`, `target: ShareTarget`                                                                           | A menu entry is picked; a dismissed menu emits nothing                                              | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| Share funnel | `share_composer_opened`               | `bite_id`, `target`, `format: 'story' \| 'post'`                                                           | The image composer reaches the screen                                                               | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| Share funnel | `share_template_chosen`               | `ShareImageParams`                                                                                         | The user switches the layout; the default one is not counted                                        | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| Share funnel | `share_handoff_succeeded`             | `ShareImageParams`, `action: 'save' \| 'share' \| 'open_app'`                                              | Saved, taken from the share sheet, or the target app opened with it - not that it was posted        | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| Share funnel | `share_handoff_failed`                | `ShareImageParams`, `action`, `reason: 'cancelled' \| 'permission_denied' \| 'unavailable' \| 'failed'`    | The image did not leave; `cancelled` is the user closing the share sheet                            | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
+| World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                  | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+| World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                            | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+| World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                   | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
+| Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                       | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
+| Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
+| Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
 
-  The social events belong to issue [#1708]. None of them names the person
-  followed: `position` and `reason` are what the ranking needs, and a uid would be
-  personal data in a product event. `user_followed` is the first follow event the
-  app has had, so followers can be told apart from everybody else when reading
-  retention. From a profile it is counted on the tap, because that follow is
-  optimistic and its write reports no outcome; from a suggestion it is counted once
-  the write succeeds.
+The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../history/records/epic-850.md),
+issue [#1017]), not to the launch taxonomy of issue 910. `onboarding_step_completed`
+fires once per step in order (`identity`, `visibility`, `currency`, `language`,
+`location`, `notifications`, `finish`); `onboarding_assistant_completed` fires
+once, after the `finish` step's completion write succeeds. `coach_mark_dismissed`
+carries the dismissed `CoachMarkSurface` id and fires only on the first dismissal
+per user, so re-entering a surface whose mark was already seen emits nothing.
 
-  The share-funnel events belong to issue [#1733] and are described under
-  [The Share-As-Image Funnel](#the-share-as-image-funnel) below.
+The social events belong to issue [#1708]. None of them names the person
+followed: `position` and `reason` are what the ranking needs, and a uid would be
+personal data in a product event. `user_followed` is the first follow event the
+app has had, so followers can be told apart from everybody else when reading
+retention. From a profile it is counted on the tap, because that follow is
+optimistic and its write reports no outcome; from a suggestion it is counted once
+the write succeeds.
 
-  The world-globe events belong to issue [#1787], the visited-countries globe in
-  [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
-  They answer whether people open the globe, on whose profile, and whether they
-  do anything with it. `country_code` is an ISO alpha-2 code from the profile's
-  flags, which everybody who can open the profile already sees; no event names
-  the profile. `world_globe_zoom` is counted once per visit, because a pinch fires
-  continuously and the question is whether people zoom, not how much. Four
-  parameters were added to `provision-ga4.mjs`: `own_profile`, `country_code`,
-  `has_bites` and `control`. The tap's `source` reuses the already registered,
-  shared `source` dimension (also the Bite source of `bite_created`), so a
-  breakdown by it needs an event filter. GA4 does not backfill, so every event collected
-  before the `--apply` reports `(not set)` for them.
+The share-funnel events belong to issue [#1733] and are described under
+[The Share-As-Image Funnel](#the-share-as-image-funnel) below.
 
-  `celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
-  It answers whether the moments fire as rarely as the epic intends. `moment` is
-  one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow` and
-  `bite-trail-completed`, and was added to `provision-ga4.mjs`. It is logged
-  even when reduced motion skips the confetti, because the toast still marks the
-  moment.
+The world-globe events belong to issue [#1787], the visited-countries globe in
+[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md).
+They answer whether people open the globe, on whose profile, and whether they
+do anything with it. `country_code` is an ISO alpha-2 code from the profile's
+flags, which everybody who can open the profile already sees; no event names
+the profile. `world_globe_zoom` is counted once per visit, because a pinch fires
+continuously and the question is whether people zoom, not how much. Four
+parameters were added to `provision-ga4.mjs`: `own_profile`, `country_code`,
+`has_bites` and `control`. The tap's `source` reuses the already registered,
+shared `source` dimension (also the Bite source of `bite_created`), so a
+breakdown by it needs an event filter. GA4 does not backfill, so every event collected
+before the `--apply` reports `(not set)` for them.
 
-  `store_link_clicked` belongs to issue [#1759]. A web visitor who follows a
-  store link installs the app under a new identity, so without it the web reads
-  as a dead end even when it handed people to a store. The activation funnel
-  counts it per web arrival as `store_handoffs` (`STORE_HANDOFF` in
-  `tools/analytics/cohorts.config.mjs`), beside the steps rather than as one of
-  them, because it is an exit from the web funnel and not a stage of it. A
-  scanned QR code is not counted: the phone that scans it opens the store
-  directly. `store` was added to `provision-ga4.mjs`; `surface` reuses the
-  already registered, shared `surface` dimension, so a breakdown by it needs an
-  event filter.
+`celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
+It answers whether the moments fire as rarely as the epic intends. `moment` is
+one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow` and
+`bite-trail-completed`, and was added to `provision-ga4.mjs`. It is logged
+even when reduced motion skips the confetti, because the toast still marks the
+moment.
 
-  `city_page_arrived` belongs to issue [#1492] (epic [#1487]). The public city
-  landing pages at `/eat/<city>` carry no analytics, cookie or storage,
-  so attribution is recorded at the destination instead: every link into the
-  app carries `?city_page=<city>`, and an app initializer logs the event before
-  the first navigation, because `authGuard` sends a signed-out visitor to
-  `/start` and the query string does not survive the redirect. `destination`
-  is `start` for the page's call to action (the site root) and `bite` for an
-  entry (`/bite/<id>`). Only a city in the editor's own shape on one of those
-  two paths is recorded. `city_page` was added to `provision-ga4.mjs`;
-  `destination` reads fine as an event filter and is not registered.
+`store_link_clicked` belongs to issue [#1759]. A web visitor who follows a
+store link installs the app under a new identity, so without it the web reads
+as a dead end even when it handed people to a store. The activation funnel
+counts it per web arrival as `store_handoffs` (`STORE_HANDOFF` in
+`tools/analytics/cohorts.config.mjs`), beside the steps rather than as one of
+them, because it is an exit from the web funnel and not a stage of it. A
+scanned QR code is not counted: the phone that scans it opens the store
+directly. `store` was added to `provision-ga4.mjs`; `surface` reuses the
+already registered, shared `surface` dimension, so a breakdown by it needs an
+event filter.
 
-- ## App Check Telemetry
+`city_page_arrived` belongs to issue [#1492] (epic [#1487]). The public city
+landing pages at `/eat/<city>` carry no analytics, cookie or storage,
+so attribution is recorded at the destination instead: every link into the
+app carries `?city_page=<city>`, and an app initializer logs the event before
+the first navigation, because `authGuard` sends a signed-out visitor to
+`/start` and the query string does not survive the redirect. `destination`
+is `start` for the page's call to action (the site root) and `bite` for an
+entry (`/bite/<id>`). Only a city in the editor's own shape on one of those
+two paths is recorded. `city_page` was added to `provision-ga4.mjs`;
+`destination` reads fine as an event filter and is not registered.
 
-  The seven `app_check_*` events are **not** part of the product taxonomy above.
-  They are emitted directly by
-  `libs/common/ta-firestore/src/lib/initialize-firebase-app-check.ts`, not
-  through `AnalyticsService`, because they have to fire during the app
-  initializer - before the injector the service lives in is usable - and
-  because they belong to platform readiness rather than to product behavior.
-  They are listed here so nobody reads them in GA4 without knowing what they
-  can and cannot answer.
+## App Check Telemetry
 
-  | Event                             | Params                                      | Trigger                                        |
-  | --------------------------------- | ------------------------------------------- | ---------------------------------------------- |
-  | `app_check_startup_started`       | base                                        | The initializer begins                         |
-  | `app_check_startup_completed`     | base, `duration_ms`, `platform`, `provider` | A provider was registered                      |
-  | `app_check_initialization_failed` | base, `platform`, `provider`, `reason`      | Provider registration threw                    |
-  | `app_check_skipped`               | base, `platform`, `reason`                  | Dev mode, unsupported platform, or no site key |
-  | `app_check_token_preflight`       | base, `succeeded`, `trigger`, `reason?`     | A token was actually requested                 |
-  | `app_check_enforced_blocked`      | base, `platform`, `provider`, `reason`      | Enforced mode could not prove readiness        |
-  | `app_check_throttled`             | base, `platform`, `trigger`                 | The SDK is refusing to ask for a token at all  |
-  | `app_check_recovered`             | base, `platform`, `trigger`, `attempt?`     | A blocked client got a token after all         |
+The seven `app_check_*` events are **not** part of the product taxonomy above.
+They are emitted directly by
+`libs/common/ta-firestore/src/lib/initialize-firebase-app-check.ts`, not
+through `AnalyticsService`, because they have to fire during the app
+initializer - before the injector the service lives in is usable - and
+because they belong to platform readiness rather than to product behavior.
+They are listed here so nobody reads them in GA4 without knowing what they
+can and cannot answer.
 
-  The base parameters on every one of them are `runtime_mode`, `device_class`,
-  `has_site_key` and `has_debug_token`.
+| Event                             | Params                                      | Trigger                                        |
+| --------------------------------- | ------------------------------------------- | ---------------------------------------------- |
+| `app_check_startup_started`       | base                                        | The initializer begins                         |
+| `app_check_startup_completed`     | base, `duration_ms`, `platform`, `provider` | A provider was registered                      |
+| `app_check_initialization_failed` | base, `platform`, `provider`, `reason`      | Provider registration threw                    |
+| `app_check_skipped`               | base, `platform`, `reason`                  | Dev mode, unsupported platform, or no site key |
+| `app_check_token_preflight`       | base, `succeeded`, `trigger`, `reason?`     | A token was actually requested                 |
+| `app_check_enforced_blocked`      | base, `platform`, `provider`, `reason`      | Enforced mode could not prove readiness        |
+| `app_check_throttled`             | base, `platform`, `trigger`                 | The SDK is refusing to ask for a token at all  |
+| `app_check_recovered`             | base, `platform`, `trigger`, `attempt?`     | A blocked client got a token after all         |
 
-- ### Why the preflight event exists
+The base parameters on every one of them are `runtime_mode`, `device_class`,
+`has_site_key` and `has_debug_token`.
 
-  **Registering a provider is not evidence that attestation works.** The native
-  bridge registers a `CustomProvider`, which never fetches a token, so before
-  issue [#1221] a client that could not attest at all still reported
-  `app_check_startup_completed` and nothing disagreed. The token round-trip only
-  ran when enforcement was already on, which meant the only way to find out
-  whether enforcement would work was to switch it on in production.
+### Why the preflight event exists
 
-  `app_check_token_preflight` now fires whenever a provider was registered,
-  enforced or not, and carries `succeeded`. It is the readiness signal to read
-  before enabling enforcement.
+**Registering a provider is not evidence that attestation works.** The native
+bridge registers a `CustomProvider`, which never fetches a token, so before
+issue [#1221] a client that could not attest at all still reported
+`app_check_startup_completed` and nothing disagreed. The token round-trip only
+ran when enforcement was already on, which meant the only way to find out
+whether enforcement would work was to switch it on in production.
 
-  **Enforced mode awaits it; non-enforced mode does not.** With enforcement off
-  the token changes nothing about startup, so awaiting a round-trip inside the
-  app initializer would delay initial navigation for every user to buy a metric.
-  The request is issued and reported when it settles. `trigger` separates the
-  startup attempt from a `retry` through the enforced-mode gate, and both from a
-  `recovery` - the mid-session path issue [#1621] added, where a page that
-  started with a token lost it afterwards. The three say different things about
-  a client: a `retry` means the app never started, a `recovery` means it ran and
-  then stopped being able to reach Firebase.
+`app_check_token_preflight` now fires whenever a provider was registered,
+enforced or not, and carries `succeeded`. It is the readiness signal to read
+before enabling enforcement.
 
-  **`startup` is the only trigger that accepts a cached token.** The other two
-  run after a token request has just failed, so they ask with `forceRefresh` -
-  without it the SDK answers a re-check out of the cache the failed call came
-  from, which is the defect Charter Run 11 worked around by deleting the App
-  Check token cache by hand.
+**Enforced mode awaits it; non-enforced mode does not.** With enforcement off
+the token changes nothing about startup, so awaiting a round-trip inside the
+app initializer would delay initial navigation for every user to buy a metric.
+The request is issued and reported when it settles. `trigger` separates the
+startup attempt from a `retry` through the enforced-mode gate, and both from a
+`recovery` - the mid-session path issue [#1621] added, where a page that
+started with a token lost it afterwards. The three say different things about
+a client: a `retry` means the app never started, a `recovery` means it ran and
+then stopped being able to reach Firebase.
 
-- ### Why the recovered event exists, and what a blocked event counts
+**`startup` is the only trigger that accepts a cached token.** The other two
+run after a token request has just failed, so they ask with `forceRefresh` -
+without it the SDK answers a re-check out of the cache the failed call came
+from, which is the defect Charter Run 11 worked around by deleting the App
+Check token cache by hand.
 
-  Since issue [#1465] a blocked client re-checks by itself, four times over
-  about a minute, behind a loading screen. Two things follow for these events.
+### Why the recovered event exists, and what a blocked event counts
 
-  **`app_check_enforced_blocked` counts blocked episodes, not attempts.** It
-  fires once when a cold start cannot prove readiness, once on the first failed
-  re-check of a mid-session loss - which has no startup event to announce it -
-  and once for each tap on the retry that fails. The automatic re-checks in
-  between emit only `app_check_token_preflight`. Before this rule every failed
-  re-check emitted it, which was harmless while a person had to tap for each
-  one and would have multiplied the count by five once the app did the tapping.
-  Counts from before and after the release that carries this are therefore not
-  the same measure for clients that retried.
+Since issue [#1465] a blocked client re-checks by itself, four times over
+about a minute, behind a loading screen. Two things follow for these events.
 
-  **`app_check_recovered` is the other half of a recovery rate.** A client that
-  never got through and one that did used to emit the same events.
-  `trigger` says what ended the block: `retry` (a cold-start re-check),
-  `recovery` (a mid-session one), or `token_listener` - the SDK's own refresh
-  delivering a token before a re-check asked. `attempt` is the number of the
-  automatic re-check that succeeded, and is absent for the listener and for a
-  tap.
+**`app_check_enforced_blocked` counts blocked episodes, not attempts.** It
+fires once when a cold start cannot prove readiness, once on the first failed
+re-check of a mid-session loss - which has no startup event to announce it -
+and once for each tap on the retry that fails. The automatic re-checks in
+between emit only `app_check_token_preflight`. Before this rule every failed
+re-check emitted it, which was harmless while a person had to tap for each
+one and would have multiplied the count by five once the app did the tapping.
+Counts from before and after the release that carries this are therefore not
+the same measure for clients that retried.
 
-- ### Why the throttle event exists
+**`app_check_recovered` is the other half of a recovery rate.** A client that
+never got through and one that did used to emit the same events.
+`trigger` says what ended the block: `retry` (a cold-start re-check),
+`recovery` (a mid-session one), or `token_listener` - the SDK's own refresh
+delivering a token before a re-check asked. `attempt` is the number of the
+automatic re-check that succeeded, and is absent for the listener and for a
+tap.
 
-  A 403 from the App Check exchange puts the SDK into its own one-day backoff -
-  `appCheck/initial-throttle` - held in memory for the life of the page
-  instance. From that moment the client answers every token request out of that
-  state without a network call, so **nothing it does afterwards reaches
-  Firebase**, and nothing on the server side can see it: a client that never
-  sends a request is invisible in App Check monitoring, which goes on reporting
-  100% verified.
+### Why the throttle event exists
 
-  It was therefore observable only as a console line on a page nobody was
-  watching - the state issue [#1621] was reported from had produced hundreds of
-  them over five hours. `app_check_throttled` fires when a token request is
-  refused by that backoff rather than by the network, which is the one failure
-  in this file that no wait inside the session can end: only a document reload
-  clears it. It carries the `trigger` that met it, so a page that started in the
-  state and a page that fell into it mid-session are told apart.
+A 403 from the App Check exchange puts the SDK into its own one-day backoff -
+`appCheck/initial-throttle` - held in memory for the life of the page
+instance. From that moment the client answers every token request out of that
+state without a network call, so **nothing it does afterwards reaches
+Firebase**, and nothing on the server side can see it: a client that never
+sends a request is invisible in App Check monitoring, which goes on reporting
+100% verified.
 
-- ### Why `device_class` exists
+It was therefore observable only as a console line on a page nobody was
+watching - the state issue [#1621] was reported from had produced hundreds of
+them over five hours. `app_check_throttled` fires when a token request is
+refused by that backoff rather than by the network, which is the one failure
+in this file that no wait inside the session can end: only a document reload
+clears it. It carries the `trigger` that met it, so a page that started in the
+state and a page that fell into it mid-session are told apart.
 
-  Firebase's own App Check metrics are per-service and carry **no client
-  attribution**, so production numbers are the only readiness signal there is.
-  A simulator or emulator cannot attest, so its traffic is unverified by
-  construction - and a production build on a simulator was previously
-  indistinguishable from a physical device here, since both carry
-  `runtime_mode: production` and `platform: ios`. Test traffic polluting the
-  metric could therefore not be identified, let alone subtracted.
+### Why `device_class` exists
 
-  `device_class` is `virtual`, `physical`, or `unknown`, read from
-  `@capacitor/device`'s `isVirtual`. **A web client is `unknown`, not
-  `physical`.** The plugin answers `isVirtual: false` in a browser, which would
-  read as a claim about hardware rather than as the absence of one, so only
-  native platforms are asked. The lookup is best-effort and falls back to
-  `unknown`; attribution is never worth failing startup for.
+Firebase's own App Check metrics are per-service and carry **no client
+attribution**, so production numbers are the only readiness signal there is.
+A simulator or emulator cannot attest, so its traffic is unverified by
+construction - and a production build on a simulator was previously
+indistinguishable from a physical device here, since both carry
+`runtime_mode: production` and `platform: ios`. Test traffic polluting the
+metric could therefore not be identified, let alone subtracted.
 
-  Note the remaining blind spot: `runtime_mode: dev_simulator` suppresses
-  telemetry entirely, so a dev build reports nothing at all. That is intended -
-  a dev build talks to the emulators, which do not enforce App Check.
+`device_class` is `virtual`, `physical`, or `unknown`, read from
+`@capacitor/device`'s `isVirtual`. **A web client is `unknown`, not
+`physical`.** The plugin answers `isVirtual: false` in a browser, which would
+read as a claim about hardware rather than as the absence of one, so only
+native platforms are asked. The lookup is best-effort and falls back to
+`unknown`; attribution is never worth failing startup for.
 
-- ## Table Operations
+Note the remaining blind spot: `runtime_mode: dev_simulator` suppresses
+telemetry entirely, so a dev build reports nothing at all. That is intended -
+a dev build talks to the emulators, which do not enforce App Check.
 
-  The seven `table_*` events belong to the staff table management of
-  [epic-1071][#1071] (issue 1098) and are emitted by the **business** app alone. They
-  are not launch signals and are deliberately absent from the launch dashboard
-  below; the measures they exist for are the BigQuery query named under Derived
-  Measures.
+## Table Operations
 
-  `TableOperation` in the table above is the three parameters every one of them
-  carries: `restaurant_id`, `table_id` and `table_count`. All three are on every
-  event rather than on the one event that needs each, so no measure depends on
-  joining two event names, and `table_count` — the restaurant's tables across
-  all its rooms — is the denominator of both rates issue 1098 asks for.
+The seven `table_*` events belong to the staff table management of
+[epic-1071][#1071] (issue 1098) and are emitted by the **business** app alone. They
+are not launch signals and are deliberately absent from the launch dashboard
+below; the measures they exist for are the BigQuery query named under Derived
+Measures.
 
-- ### What is measured, and what is not
+`TableOperation` in the table above is the three parameters every one of them
+carries: `restaurant_id`, `table_id` and `table_count`. All three are on every
+event rather than on the one event that needs each, so no measure depends on
+joining two event names, and `table_count` — the restaurant's tables across
+all its rooms — is the denominator of both rates issue 1098 asks for.
 
-  **Only confirmed transitions.** The events are emitted from the two places a
-  transition is confirmed — the callable answering, and a queued transition
-  landing on reconnect — and from neither of the places one is merely asked for.
-  A refused transition did not happen; a transition made offline has happened
-  by the time it is counted, so going offline changes an event's timing and not
-  the total. A `replayed` answer is the backend saying it already applied that
-  exact intent (issue 1096), so it is counted once.
+### What is measured, and what is not
 
-  **Five names keyed on the target, `from_status` as a parameter.** Freeing an
-  occupied table and putting a blocked one back into service are the same
-  transition into `available` and are not the same sentence, so they are one
-  event with two readings rather than two event names. The map lives in
-  `OPERATION_EVENTS` in `table-plan.service.ts`.
+**Only confirmed transitions.** The events are emitted from the two places a
+transition is confirmed — the callable answering, and a queued transition
+landing on reconnect — and from neither of the places one is merely asked for.
+A refused transition did not happen; a transition made offline has happened
+by the time it is counted, so going offline changes an event's timing and not
+the total. A `replayed` answer is the backend saying it already applied that
+exact intent (issue 1096), so it is counted once.
 
-  **`ordering` and `awaitingPayment` carry no event.** They are in the
-  transition matrix and the action sheet offers them (issue 1094), but the
-  events that reach them are the QR ordering of issue 1072. The transitions
-  still happen and are still in the audit trail; they are not measured until
-  the stage that owns them says what it wants measured.
+**Five names keyed on the target, `from_status` as a parameter.** Freeing an
+occupied table and putting a blocked one back into service are the same
+transition into `available` and are not the same sentence, so they are one
+event with two readings rather than two event names. The map lives in
+`OPERATION_EVENTS` in `table-plan.service.ts`.
 
-  **A seating produces two events, on purpose.** Seating a table _is_ opening a
-  visit, so `table_seated` and `table_visit_opened` describe one commit. They
-  are kept apart because they measure different objects: a place in the room,
-  and a party that will carry orders (issue 1072) and a bill (issue 1073) and
-  can outlive the table it started at. **Any count of seatings therefore reads
-  one of the two names and never their sum.**
+**`ordering` and `awaitingPayment` carry no event.** They are in the
+transition matrix and the action sheet offers them (issue 1094), but the
+events that reach them are the QR ordering of issue 1072. The transitions
+still happen and are still in the audit trail; they are not measured until
+the stage that owns them says what it wants measured.
 
-  **A carried visit is not a new one.** `TableState.visitId` is the only pointer
-  at an open visit, so the pointer the table held going in is compared against
-  the one the callable answers with. A visit carried between the party statuses
-  keeps its id and raises nothing. On the offline-replay path the pointer is
-  read when the transition lands rather than when it was made, because the
-  queue entry records the status the device was showing and not the visit behind
-  it; if the listener has already delivered that same transition the event is
-  missed, and it can never be invented — a carried visit keeps its id and so
-  never looks new.
+**A seating produces two events, on purpose.** Seating a table _is_ opening a
+visit, so `table_seated` and `table_visit_opened` describe one commit. They
+are kept apart because they measure different objects: a place in the room,
+and a party that will carry orders (issue 1072) and a bill (issue 1073) and
+can outlive the table it started at. **Any count of seatings therefore reads
+one of the two names and never their sum.**
 
-  **`table_visit_moved` does not exist.** Issue 1098 names it, and
-  `moveTableVisit` has existed since issue 1095, but no surface calls it —
-  [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md) records the same gap. An event constant
-  nothing emits would be a row in this table that DebugView can never show, so
-  the event lands with the move surface rather than ahead of it.
+**A carried visit is not a new one.** `TableState.visitId` is the only pointer
+at an open visit, so the pointer the table held going in is compared against
+the one the callable answers with. A visit carried between the party statuses
+keeps its id and raises nothing. On the offline-replay path the pointer is
+read when the transition lands rather than when it was made, because the
+queue entry records the status the device was showing and not the visit behind
+it; if the listener has already delivered that same transition the event is
+missed, and it can never be invented — a carried visit keeps its id and so
+never looks new.
 
-- ## The Order-To-Bite Funnel
+**`table_visit_moved` does not exist.** Issue 1098 names it, and
+`moveTableVisit` has existed since issue 1095, but no surface calls it —
+[UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md) records the same gap. An event constant
+nothing emits would be a row in this table that DebugView can never show, so
+the event lands with the move surface rather than ahead of it.
 
-  Stage 4 of [epic-1073][#1073] exists to answer one question - does the table
-  platform actually feed the core product - and issue [#1114] is that question
-  as a number. Seven steps, from a code being scanned to a Bite being published
-  about what was eaten.
+## The Order-To-Bite Funnel
 
-  **The guest app emitted nothing before this.** Stage 3 shipped the entire
-  scan, browse and order journey with no analytics at all; the seven `table_*`
-  events above are the business app's and describe how staff work the room. So
-  this issue is mostly instrumentation, and only then a funnel.
+Stage 4 of [epic-1073][#1073] exists to answer one question - does the table
+platform actually feed the core product - and issue [#1114] is that question
+as a number. Seven steps, from a code being scanned to a Bite being published
+about what was eaten.
 
-- ### The Steps
+**The guest app emitted nothing before this.** Stage 3 shipped the entire
+scan, browse and order journey with no analytics at all; the seven `table_*`
+events above are the business app's and describe how staff work the room. So
+this issue is mostly instrumentation, and only then a funnel.
 
-  | #   | Step               | Event                                 | App          | One row is            |
-  | --- | ------------------ | ------------------------------------- | ------------ | --------------------- |
-  | 1   | Table code scanned | `table_code_scanned`                  | consumer     | an event              |
-  | 2   | Session started    | `table_session_started`               | consumer     | an event              |
-  | 3   | Order submitted    | `table_order_submitted`               | consumer     | an event              |
-  | 4   | Visit closed       | `table_visit_closed`                  | **business** | a distinct `visit_id` |
-  | 5   | Bite offered       | `table_bite_prompt_shown`             | consumer     | a distinct `visit_id` |
-  | 6   | Bite draft started | `table_bite_started`                  | consumer     | an event              |
-  | 7   | Bite published     | `bite_created` where `source = visit` | consumer     | an event              |
+### The Steps
 
-  The list lives as data in `tools/analytics/funnel.config.mjs`, and
-  `analytics-events.spec.ts` fails if a step names an event this taxonomy does
-  not have or if the query stops counting one.
+| #   | Step               | Event                                 | App          | One row is            |
+| --- | ------------------ | ------------------------------------- | ------------ | --------------------- |
+| 1   | Table code scanned | `table_code_scanned`                  | consumer     | an event              |
+| 2   | Session started    | `table_session_started`               | consumer     | an event              |
+| 3   | Order submitted    | `table_order_submitted`               | consumer     | an event              |
+| 4   | Visit closed       | `table_visit_closed`                  | **business** | a distinct `visit_id` |
+| 5   | Bite offered       | `table_bite_prompt_shown`             | consumer     | a distinct `visit_id` |
+| 6   | Bite draft started | `table_bite_started`                  | consumer     | an event              |
+| 7   | Bite published     | `bite_created` where `source = visit` | consumer     | an event              |
 
-- ### What Was Reused Rather Than Added
+The list lives as data in `tools/analytics/funnel.config.mjs`, and
+`analytics-events.spec.ts` fails if a step names an event this taxonomy does
+not have or if the query stops counting one.
 
-  **`table_visit_closed`**, which the business app already emits. The moment a
-  visit ends is one moment whichever app is watching it, and a second event for
-  it would have to be kept in step with the first forever. It is also what makes
-  `visit_id` the join for the bottom half of the funnel: staff close the visit,
-  the guest's phone offers the Bite, and only the id ties the two sides
-  together.
+### What Was Reused Rather Than Added
 
-  **`bite_created`**, which gained a `source` parameter rather than a
-  `table_bite_published` beside it. A published Bite is a published Bite, and
-  the launch dashboard's count of them must not change because the funnel
-  wanted to read one. `source` is derived from the document rather than passed
-  down from the screen that opened the form - a draft whose link was dropped,
-  because the guest picked a different restaurant, is honestly `manual` no
-  matter which button started it.
+**`table_visit_closed`**, which the business app already emits. The moment a
+visit ends is one moment whichever app is watching it, and a second event for
+it would have to be kept in step with the first forever. It is also what makes
+`visit_id` the join for the bottom half of the funnel: staff close the visit,
+the guest's phone offers the Bite, and only the id ties the two sides
+together.
 
-- ### What Each Step Counts, And What It Does Not
+**`bite_created`**, which gained a `source` parameter rather than a
+`table_bite_published` beside it. A published Bite is a published Bite, and
+the launch dashboard's count of them must not change because the funnel
+wanted to read one. `source` is derived from the document rather than passed
+down from the screen that opened the form - a draft whose link was dropped,
+because the guest picked a different restaurant, is honestly `manual` no
+matter which button started it.
 
-  **A scan is counted however it ended.** A sticker on a table that has been
-  taken out of service is a guest the platform lost, and it looks identical to
-  no scan at all if only the resolved ones are counted. `outcome` separates
-  them. A refusal names **no restaurant**, because a token that resolves to
-  nothing resolves to nothing - so both ids are absent on a `refused` or
-  `failed` scan rather than sent empty, the same answer `guests` gives when a
-  host recorded no party size, and `scans_resolved` is the figure a
-  per-restaurant reading should use.
+### What Each Step Counts, And What It Does Not
 
-  **A replayed order is not counted twice.** The backend answering `replayed`
-  means it had already applied that exact intent (`RD-TS-9`), so a guest whose
-  phone lost the answer and retried is one dinner. Same rule as the staff
-  transitions of issue 1096.
+**A scan is counted however it ended.** A sticker on a table that has been
+taken out of service is a guest the platform lost, and it looks identical to
+no scan at all if only the resolved ones are counted. `outcome` separates
+them. A refusal names **no restaurant**, because a token that resolves to
+nothing resolves to nothing - so both ids are absent on a `refused` or
+`failed` scan rather than sent empty, the same answer `guests` gives when a
+host recorded no party size, and `scans_resolved` is the figure a
+per-restaurant reading should use.
 
-  **A prompt is counted once per visit per screen.** The table screen offers
-  another look while the trigger is still writing the summary (`RD-TS-49`), so
-  a guest who taps twice saw one offer. `surface` separates the summary at the
-  table from the same meal opened in _My visits_ days later, which is how long
-  the gap between eating and writing actually is.
+**A replayed order is not counted twice.** The backend answering `replayed`
+means it had already applied that exact intent (`RD-TS-9`), so a guest whose
+phone lost the answer and retried is one dinner. Same rule as the staff
+transitions of issue 1096.
 
-  **Nothing is counted from a template.** A component cannot say "shown" once,
-  because it re-renders; every one of these is emitted from the integration
-  layer that owns the behaviour, which is the rule the rest of this page states.
+**A prompt is counted once per visit per screen.** The table screen offers
+another look while the trigger is still writing the summary (`RD-TS-49`), so
+a guest who taps twice saw one offer. `surface` separates the summary at the
+table from the same meal opened in _My visits_ days later, which is how long
+the gap between eating and writing actually is.
 
-- ### The Account Segmentation
+**Nothing is counted from a template.** A component cannot say "shown" once,
+because it re-renders; every one of these is emitted from the integration
+layer that owns the behaviour, which is the rule the rest of this page states.
 
-  `has_account` is on every guest-side step and says exactly one thing:
-  **whether a registered member was signed in at that moment**. Not whether
-  somebody is signed in at all - a table guest holds an anonymous account from
-  the scan onwards (`RD-TS-4`), so that would be true of everybody and mean
-  nothing. It is read through `AuthService.getMember()`, which answers `null`
-  for the anonymous account, and it carries no uid and nothing that could
-  become one.
+### The Account Segmentation
 
-  That is what makes "account creation triggered by the Bite prompt is
-  attributable" answerable: a `table_bite_prompt_shown` with `has_account:
+`has_account` is on every guest-side step and says exactly one thing:
+**whether a registered member was signed in at that moment**. Not whether
+somebody is signed in at all - a table guest holds an anonymous account from
+the scan onwards (`RD-TS-4`), so that would be true of everybody and mean
+nothing. It is read through `AuthService.getMember()`, which answers `null`
+for the anonymous account, and it carries no uid and nothing that could
+become one.
+
+That is what makes "account creation triggered by the Bite prompt is
+attributable" answerable: a `table_bite_prompt_shown` with `has_account:
 false` followed by a `sign_up` in the same session is the offer working. The
-  funnel query reports the population - `prompts_without_account` - and the
-  join to `sign_up` is a GA4 exploration rather than a column, because the two
-  events share a session and not a parameter.
+funnel query reports the population - `prompts_without_account` - and the
+join to `sign_up` is a GA4 exploration rather than a column, because the two
+events share a session and not a parameter.
 
-- ### Where It Is Measured
+### Where It Is Measured
 
-  `tools/analytics/queries/order-to-bite-funnel.sql`, run with
-  `npm run analytics:query -- order-to-bite-funnel [--days=n]`. Over the
-  BigQuery export rather than the Data API, for the reason
-  `table-operations.sql` is: two steps are a distinct count of `visit_id`, the
-  Data API has no distinct-count metric, and the ids are deliberately
-  unregistered as custom dimensions.
+`tools/analytics/queries/order-to-bite-funnel.sql`, run with
+`npm run analytics:query -- order-to-bite-funnel [--days=n]`. Over the
+BigQuery export rather than the Data API, for the reason
+`table-operations.sql` is: two steps are a distinct count of `visit_id`, the
+Data API has no distinct-count metric, and the ids are deliberately
+unregistered as custom dimensions.
 
-  **The launch dashboard is untouched.** `dashboard.config.mjs` still carries no
-  `table_*` tile, and the funnel is its own configuration beside it - the
-  sentence that file already carried stays true, because whether the table
-  platform feeds the core product is a different question from whether the
-  launch is healthy.
+**The launch dashboard is untouched.** `dashboard.config.mjs` still carries no
+`table_*` tile, and the funnel is its own configuration beside it - the
+sentence that file already carried stays true, because whether the table
+platform feeds the core product is a different question from whether the
+launch is healthy.
 
-  Four parameters were added to `provision-ga4.mjs`: `has_account`, `status`,
-  `surface` and `source`. Two of those are **shared parameter names** - GA4
-  registers a dimension per parameter name across every event that sends one -
-  so `outcome` now also carries how a scan resolved, and `surface` is already
-  sent by the email-verification prompts and the coach marks. Nothing breaks,
-  because every reading picks an event first; but a breakdown by `surface` with
-  no event filter mixes three unrelated vocabularies. And GA4 does not backfill,
-  so every event collected before the `--apply` reports `(not set)` forever.
+Four parameters were added to `provision-ga4.mjs`: `has_account`, `status`,
+`surface` and `source`. Two of those are **shared parameter names** - GA4
+registers a dimension per parameter name across every event that sends one -
+so `outcome` now also carries how a scan resolved, and `surface` is already
+sent by the email-verification prompts and the coach marks. Nothing breaks,
+because every reading picks an event first; but a breakdown by `surface` with
+no event filter mixes three unrelated vocabularies. And GA4 does not backfill,
+so every event collected before the `--apply` reports `(not set)` forever.
 
-- ### No personal guest data
+### No personal guest data
 
-  The rule of issue 1098, and what it does and does not exclude.
+The rule of issue 1098, and what it does and does not exclude.
 
-  `restaurant_id`, `table_id` and `visit_id` are opaque business identifiers:
-  the first two are the restaurant's own, and a visit id names a party without
-  naming anyone in it. `guests` is a party size, which identifies nobody and
-  cannot be joined back to a person — covers per service is the measure it
-  exists for. What is excluded is anything that could re-identify a guest: a
-  name, a contact detail, an account id. None of it reaches this layer, because
-  the staff view never asks for it.
+`restaurant_id`, `table_id` and `visit_id` are opaque business identifiers:
+the first two are the restaurant's own, and a visit id names a party without
+naming anyone in it. `guests` is a party size, which identifies nobody and
+cannot be joined back to a person — covers per service is the measure it
+exists for. What is excluded is anything that could re-identify a guest: a
+name, a contact detail, an account id. None of it reaches this layer, because
+the staff view never asks for it.
 
-  The staff member's own uid is also absent. `AuthService.setupAnalyticsAndCrashlytics`
-  still skips `setUserId` in the business app, so a table event carries no
-  actor. Who moved a disputed table is the audit trail's job
-  (`tableStateTransitions`, issue 1092), which is the record a dispute is
-  actually read from; analytics answers how a room is worked, not by whom.
+The staff member's own uid is also absent. `AuthService.setupAnalyticsAndCrashlytics`
+still skips `setUserId` in the business app, so a table event carries no
+actor. Who moved a disputed table is the audit trail's job
+(`tableStateTransitions`, issue 1092), which is the record a dispute is
+actually read from; analytics answers how a room is worked, not by whom.
 
-  **The same rule on the guest side** (issue [#1114]), where the events are
-  emitted from a phone the guest is holding and the temptation is larger. The
-  funnel carries `restaurant_id`, `table_id`, `visit_id`, a `line_count` and a
-  boolean. It carries **no dish names**: what somebody ordered is the
-  restaurant's business and would be a food preference attached to a session,
-  and the funnel counts orders rather than reading them. It carries no uid -
-  not the anonymous one the scan mints, and not the member's - and no address,
-  even on the step that follows the summary mail (`RD-TS-46`: the address is
-  handed to the backend, used, and stored nowhere, this layer included).
+**The same rule on the guest side** (issue [#1114]), where the events are
+emitted from a phone the guest is holding and the temptation is larger. The
+funnel carries `restaurant_id`, `table_id`, `visit_id`, a `line_count` and a
+boolean. It carries **no dish names**: what somebody ordered is the
+restaurant's business and would be a food preference attached to a session,
+and the funnel counts orders rather than reading them. It carries no uid -
+not the anonymous one the scan mints, and not the member's - and no address,
+even on the step that follows the summary mail (`RD-TS-46`: the address is
+handed to the backend, used, and stored nowhere, this layer included).
 
-  `has_account` is the one thing said about the person, and it is one bit:
-  whether BiteTribe already had them. It cannot be joined back to anybody.
+`has_account` is the one thing said about the person, and it is one bit:
+whether BiteTribe already had them. It cannot be joined back to anybody.
 
-- ### Derived Measures
+### Derived Measures
 
-  All three measures issue 1098 asks for are ratios over an event parameter,
-  and two of them need a distinct count of one. The GA4 Data API has neither a
-  distinct-count metric nor any sight of a parameter that has not been
-  registered as a custom dimension, so they are computed against the
-  **BigQuery export**, which carries every parameter of every event regardless:
+All three measures issue 1098 asks for are ratios over an event parameter,
+and two of them need a distinct count of one. The GA4 Data API has neither a
+distinct-count metric nor any sight of a parameter that has not been
+registered as a custom dimension, so they are computed against the
+**BigQuery export**, which carries every parameter of every event regardless:
 
-  `tools/analytics/queries/table-operations.sql`, run with
-  `npm run analytics:query -- table-operations [--days=n]`.
+`tools/analytics/queries/table-operations.sql`, run with
+`npm run analytics:query -- table-operations [--days=n]`.
 
-  | Measure                    | Column                  | Formula                                                                |
-  | -------------------------- | ----------------------- | ---------------------------------------------------------------------- |
-  | Table turnover per service | `turnover_per_table`    | `table_seated` count / `table_count`                                   |
-  | Share of tables ever used  | `tables_used_pct`       | distinct `table_id` / `table_count`                                    |
-  | Average occupancy duration | `avg_occupancy_minutes` | mean `table_visit_closed` − `table_visit_opened`, joined on `visit_id` |
+| Measure                    | Column                  | Formula                                                                |
+| -------------------------- | ----------------------- | ---------------------------------------------------------------------- |
+| Table turnover per service | `turnover_per_table`    | `table_seated` count / `table_count`                                   |
+| Share of tables ever used  | `tables_used_pct`       | distinct `table_id` / `table_count`                                    |
+| Average occupancy duration | `avg_occupancy_minutes` | mean `table_visit_closed` − `table_visit_opened`, joined on `visit_id` |
 
-  A service is one calendar day. A restaurant serving past midnight splits
-  across two rows; the visit crossing the boundary is counted on the day it
-  opened, and a visit still open at the end of the window appears in
-  `visits_unclosed` rather than dragging the average down.
+A service is one calendar day. A restaurant serving past midnight splits
+across two rows; the visit crossing the boundary is counted on the day it
+opened, and a visit still open at the end of the window appears in
+`visits_unclosed` rather than dragging the average down.
 
-- ### One property, two apps
+### One property, two apps
 
-  Both apps report to one GA4 property through one measurement id
-  (`NX_APP_BITE_TRIBE_MEASSUREMENT_ID` is read by all three shells). Until
-  issue 1098 the business app initialized no analytics at all — nothing
-  provided `provideFirestoreAnalytics`, and `AnalyticsService` returned before
-  ever touching the plugin — so it sent neither product nor auto-collected
-  events. The first `table_*` event initializes the web SDK there, and from
-  that moment the auto-collected `session_start`, `page_view` and
-  `user_engagement` of every staff shift reach the property the launch
-  dashboard reads.
+Both apps report to one GA4 property through one measurement id
+(`NX_APP_BITE_TRIBE_MEASSUREMENT_ID` is read by all three shells). Until
+issue 1098 the business app initialized no analytics at all — nothing
+provided `provideFirestoreAnalytics`, and `AnalyticsService` returned before
+ever touching the plugin — so it sent neither product nor auto-collected
+events. The first `table_*` event initializes the web SDK there, and from
+that moment the auto-collected `session_start`, `page_view` and
+`user_engagement` of every staff shift reach the property the launch
+dashboard reads.
 
-  Those cannot be told apart by event name, so the surface is **said** rather
-  than inferred: both apps set the user property `app_surface`
-  (`consumer` / `business`) once, before their first event. It is user-scoped
-  because what the launch tiles have to exclude is the _user_ —
-  `activeUsers` counts people, not events — and it is set from both apps now
-  even though nothing filters on it yet, because GA4 does not backfill and a
-  filter added later over traffic that never carried the property would
-  exclude nothing.
+Those cannot be told apart by event name, so the surface is **said** rather
+than inferred: both apps set the user property `app_surface`
+(`consumer` / `business`) once, before their first event. It is user-scoped
+because what the launch tiles have to exclude is the _user_ —
+`activeUsers` counts people, not events — and it is set from both apps now
+even though nothing filters on it yet, because GA4 does not backfill and a
+filter added later over traffic that never carried the property would
+exclude nothing.
 
-  The `Active users` and `Crash-free users` tiles below are the only two that
-  count _people_ rather than events, and therefore the only two that had to say
-  whose. Issue 1584 scoped them, and issue 1586 corrected how: the filter is
-  `NOT app_surface IN (business)` rather than `app_surface = consumer`.
+The `Active users` and `Crash-free users` tiles below are the only two that
+count _people_ rather than events, and therefore the only two that had to say
+whose. Issue 1584 scoped them, and issue 1586 corrected how: the filter is
+`NOT app_surface IN (business)` rather than `app_surface = consumer`.
 
-  That distinction is the whole of it. GA4 does not backfill a custom
-  dimension, so every session collected before `app_surface` was registered
-  carries no value at all - and so does every session from an app release that
-  predates the property being set. `= consumer` excludes all of it: `Active
+That distinction is the whole of it. GA4 does not backfill a custom
+dimension, so every session collected before `app_surface` was registered
+carries no value at all - and so does every session from an app release that
+predates the property being set. `= consumer` excludes all of it: `Active
 users` read **0** and `Crash-free users` **n/a** within a minute of the
-  dimension being registered on 12 September 2026. The exclusion form keeps
-  unlabelled traffic, which is the right answer, because unlabelled traffic
-  _is_ consumer traffic - the business app sent nothing at all until issue 1098.
+dimension being registered on 12 September 2026. The exclusion form keeps
+unlabelled traffic, which is the right answer, because unlabelled traffic
+_is_ consumer traffic - the business app sent nothing at all until issue 1098.
 
-  One artefact to know when reading the numbers: `activeUsers` is an
-  approximate distinct count and filtering changes the aggregation path, so a
-  filtered figure differs slightly from an unfiltered one - 70 against 66 over
-  the same window on the day it landed. The step is the filter, not traffic.
+One artefact to know when reading the numbers: `activeUsers` is an
+approximate distinct count and filtering changes the aggregation path, so a
+filtered figure differs slightly from an unfiltered one - 70 against 66 over
+the same window on the day it landed. The step is the filter, not traffic.
 
-- ### Auto-collected (no code)
+### Auto-collected (no code)
 
-  Retention and launch monitoring rely on events GA4 collects automatically plus
-  the existing exception handler:
+Retention and launch monitoring rely on events GA4 collects automatically plus
+the existing exception handler:
 
 - `first_open`, `first_visit`, `session_start`, `screen_view` — GA4 automatic
   collection.
@@ -546,163 +548,163 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   other. The activation funnel of [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) counts both as one step, which is
   what made the web's conversion visible at all.
 
-- ## The Share-As-Image Funnel
+## The Share-As-Image Funnel
 
-  [Epic-1723][#1723] lets a user turn one of their own Bites into an image for
-  an Instagram or Facebook Story or Post, and issue [#1733] is how often that
-  happens and where the ones who start stop. Five steps and a failure beside the
-  last one, all emitted by the consumer app from the details page's integration
-  service. [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md)
-  states the contract as `R-24` and `R-29`.
+[Epic-1723][#1723] lets a user turn one of their own Bites into an image for
+an Instagram or Facebook Story or Post, and issue [#1733] is how often that
+happens and where the ones who start stop. Five steps and a failure beside the
+last one, all emitted by the consumer app from the details page's integration
+service. [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md)
+states the contract as `R-24` and `R-29`.
 
-  | #   | Step              | Event                     | Optional |
-  | --- | ----------------- | ------------------------- | -------- |
-  | 1   | Share menu opened | `share_menu_opened`       | no       |
-  | 2   | Entry picked      | `share_target_chosen`     | no       |
-  | 3   | Composer opened   | `share_composer_opened`   | no       |
-  | 4   | Layout picked     | `share_template_chosen`   | yes      |
-  | 5   | Image handed off  | `share_handoff_succeeded` | no       |
-  | –   | Hand-off failed   | `share_handoff_failed`    | –        |
+| #   | Step              | Event                     | Optional |
+| --- | ----------------- | ------------------------- | -------- |
+| 1   | Share menu opened | `share_menu_opened`       | no       |
+| 2   | Entry picked      | `share_target_chosen`     | no       |
+| 3   | Composer opened   | `share_composer_opened`   | no       |
+| 4   | Layout picked     | `share_template_chosen`   | yes      |
+| 5   | Image handed off  | `share_handoff_succeeded` | no       |
+| –   | Hand-off failed   | `share_handoff_failed`    | –        |
 
-  The list lives as data in `tools/analytics/share-image-funnel.config.mjs`,
-  beside `funnel.config.mjs` rather than in it, and `analytics-events.spec.ts`
-  keeps it, its query, the taxonomy and the unions the parameters copy in step.
+The list lives as data in `tools/analytics/share-image-funnel.config.mjs`,
+beside `funnel.config.mjs` rather than in it, and `analytics-events.spec.ts`
+keeps it, its query, the taxonomy and the unions the parameters copy in step.
 
-- ### What Each Parameter Is
+### What Each Parameter Is
 
-  `ShareImageParams` is `bite_id`, `target`, `format`, `template` and, on a
-  celebrated Bite, `celebration`, and each step carries as much of it as is
-  known by then.
+`ShareImageParams` is `bite_id`, `target`, `format`, `template` and, on a
+celebrated Bite, `celebration`, and each step carries as much of it as is
+known by then.
 
-  - `bite_id` - the Bite being shared. The share link carries the same id.
-  - `target` - the menu entry that started the share: `instagram_story`,
-    `instagram_post`, `facebook_story`, or in a browser `save` and
-    `share_image`, or `more` for the link share. `ANALYTICS_TARGET` in
-    `details.service.ts` maps the menu's entries onto these.
-  - `format` - `story` (9:16) or `post` (4:5), decided by the entry.
-  - `template` - the layout, `classic` or `wide`. On the hand-off it is the
-    layout that went out, picked or not.
-  - `celebration` - `first_bite` or `first_country`, while the image carries
-    its celebration line (`UC-SBS` `R-34`, issue [#1837]); absent when the Bite
-    was no first or the line was switched off. It names the moment, never the
-    country.
-  - `action` - on the hand-off only: `save` or `share`. An Instagram Story can
-    be saved rather than shared, so `target` and `action` are both needed.
-  - `reason` - on a failure only: `cancelled`, `permission_denied`,
-    `unavailable` (a browser that cannot share files) or `failed`.
+- `bite_id` - the Bite being shared. The share link carries the same id.
+- `target` - the menu entry that started the share: `instagram_story`,
+  `instagram_post`, `facebook_story`, or in a browser `save` and
+  `share_image`, or `more` for the link share. `ANALYTICS_TARGET` in
+  `details.service.ts` maps the menu's entries onto these.
+- `format` - `story` (9:16) or `post` (4:5), decided by the entry.
+- `template` - the layout, `classic` or `wide`. On the hand-off it is the
+  layout that went out, picked or not.
+- `celebration` - `first_bite` or `first_country`, while the image carries
+  its celebration line (`UC-SBS` `R-34`, issue [#1837]); absent when the Bite
+  was no first or the line was switched off. It names the moment, never the
+  country.
+- `action` - on the hand-off only: `save` or `share`. An Instagram Story can
+  be saved rather than shared, so `target` and `action` are both needed.
+- `reason` - on a failure only: `cancelled`, `permission_denied`,
+  `unavailable` (a browser that cannot share files) or `failed`.
 
-- ### What Each Step Counts, And What It Does Not
+### What Each Step Counts, And What It Does Not
 
-  **No free text, ever (`R-24`).** The image shows a dish name, a place and
-  possibly the sharer's display name. None of them is a parameter, and the
-  details service spec fails if any of them reaches one.
+**No free text, ever (`R-24`).** The image shows a dish name, a place and
+possibly the sharer's display name. None of them is a parameter, and the
+details service spec fails if any of them reaches one.
 
-  **A dismissed menu is a drop-off, not an event.** `share_menu_opened` with no
-  `share_target_chosen` after it is the user closing the menu.
+**A dismissed menu is a drop-off, not an event.** `share_menu_opened` with no
+`share_target_chosen` after it is the user closing the menu.
 
-  **`more` leaves the funnel at step 2.** The link share has no composer, and is
-  the shared-link entry's to measure, as are visits that come back through the
-  QR code.
+**`more` leaves the funnel at step 2.** The link share has no composer, and is
+the shared-link entry's to measure, as are visits that come back through the
+QR code.
 
-  **The default layout is not a choice.** `share_template_chosen` is one event
-  per switch, so a composer can emit none or several; a tap on the layout
-  already showing emits nothing. The hand-off names the layout either way, which
-  is the figure to read for which layout people share.
+**The default layout is not a choice.** `share_template_chosen` is one event
+per switch, so a composer can emit none or several; a tap on the layout
+already showing emits nothing. The hand-off names the layout either way, which
+is the figure to read for which layout people share.
 
-  **"Succeeded" is the hand-off, not the post.** Instagram and Facebook do not
-  tell the app that hands them an image whether the user published it. Saved,
-  taken by an app from the share sheet, or handed straight to Instagram or
-  Facebook (`action: open_app`, issue [#1730]) is the last thing BiteTribe can
-  see (`UC-SBS` `G4`). A closed share sheet is `share_handoff_failed` with
-  `reason: cancelled` - counted, because it is a drop-off, and apart from the
-  faults, because it is not one.
+**"Succeeded" is the hand-off, not the post.** Instagram and Facebook do not
+tell the app that hands them an image whether the user published it. Saved,
+taken by an app from the share sheet, or handed straight to Instagram or
+Facebook (`action: open_app`, issue [#1730]) is the last thing BiteTribe can
+see (`UC-SBS` `G4`). A closed share sheet is `share_handoff_failed` with
+`reason: cancelled` - counted, because it is a drop-off, and apart from the
+faults, because it is not one.
 
-  **A failed direct hand-off is two events.** When the app will not take the
-  image, the composer falls back to the share sheet: `share_handoff_failed`
-  with `action: open_app` and its reason, then whatever the share sheet
-  reports with `action: share`. A fallback that worked still counts one
-  failure, which is the figure that shows the direct route breaking.
+**A failed direct hand-off is two events.** When the app will not take the
+image, the composer falls back to the share sheet: `share_handoff_failed`
+with `action: open_app` and its reason, then whatever the share sheet
+reports with `action: share`. A fallback that worked still counts one
+failure, which is the figure that shows the direct route breaking.
 
-- ### Where It Is Measured
+### Where It Is Measured
 
-  `tools/analytics/queries/share-image-funnel.sql`, run with
-  `npm run analytics:query -- share-image-funnel [--days=n]`. Over the BigQuery
-  export, because `bites_shared` is a distinct count of `bite_id` and the id is
-  deliberately not a custom dimension.
+`tools/analytics/queries/share-image-funnel.sql`, run with
+`npm run analytics:query -- share-image-funnel [--days=n]`. Over the BigQuery
+export, because `bites_shared` is a distinct count of `bite_id` and the id is
+deliberately not a custom dimension.
 
-  **The launch dashboard is untouched**, for the reason it holds no `table_*`
-  tile: whether sharing as an image brings enough reach to be worth its upkeep
-  is a question about one feature, not about the health of the launch.
+**The launch dashboard is untouched**, for the reason it holds no `table_*`
+tile: whether sharing as an image brings enough reach to be worth its upkeep
+is a question about one feature, not about the health of the launch.
 
-  Five parameters were added to `provision-ga4.mjs`: `target`, `format`,
-  `template`, `action` and `reason`. `reason` is a **shared parameter name** -
-  the email-verification resend, the account deletion, the follow suggestions
-  and the App Check telemetry already send one - so a breakdown by it needs an
-  event filter, like `surface`. GA4 does not backfill, so every event collected
-  before the `--apply` reports `(not set)` for them.
+Five parameters were added to `provision-ga4.mjs`: `target`, `format`,
+`template`, `action` and `reason`. `reason` is a **shared parameter name** -
+the email-verification resend, the account deletion, the follow suggestions
+and the App Check telemetry already send one - so a breakdown by it needs an
+event filter, like `surface`. GA4 does not backfill, so every event collected
+before the `--apply` reports `(not set)` for them.
 
-- ## Launch Dashboard Spec
+## Launch Dashboard Spec
 
-  Build a daily-monitoring dashboard in the Firebase console (Analytics
-  dashboard) or Looker Studio with these tiles. This is executed by the product
-  owner against the logged-in console; the taxonomy above drives it.
+Build a daily-monitoring dashboard in the Firebase console (Analytics
+dashboard) or Looker Studio with these tiles. This is executed by the product
+owner against the logged-in console; the taxonomy above drives it.
 
-  | Metric                      | Category          | Source                              |
-  | --------------------------- | ----------------- | ----------------------------------- |
-  | New activated users         | Activation        | `sign_up` count                     |
-  | Bites created               | Creation          | `bite_created` count                |
-  | Bucket lists created        | Creation          | `bucketlist_created` count          |
-  | Ratings submitted           | Creation          | `bucketlist_rated` count            |
-  | Searches                    | Discovery         | `search_performed` count            |
-  | Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed` |
-  | D1 / D7 retention           | Retention         | `queries/retention-cohorts.sql`     |
-  | Active users                | Retention         | GA4 `activeUsers`                   |
-  | Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
-  | Unhandled errors            | Launch monitoring | `exception` count                   |
-  | Top unhandled errors        | Launch monitoring | `exception` by `description`        |
-  | App Check throttle          | Launch monitoring | `app_check_throttled`, people only  |
-  | App Check throttle crawlers | Launch monitoring | `app_check_throttled`, crawlers     |
-  | Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
+| Metric                      | Category          | Source                              |
+| --------------------------- | ----------------- | ----------------------------------- |
+| New activated users         | Activation        | `sign_up` count                     |
+| Bites created               | Creation          | `bite_created` count                |
+| Bucket lists created        | Creation          | `bucketlist_created` count          |
+| Ratings submitted           | Creation          | `bucketlist_rated` count            |
+| Searches                    | Discovery         | `search_performed` count            |
+| Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed` |
+| D1 / D7 retention           | Retention         | `queries/retention-cohorts.sql`     |
+| Active users                | Retention         | GA4 `activeUsers`                   |
+| Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
+| Unhandled errors            | Launch monitoring | `exception` count                   |
+| Top unhandled errors        | Launch monitoring | `exception` by `description`        |
+| App Check throttle          | Launch monitoring | `app_check_throttled`, people only  |
+| App Check throttle crawlers | Launch monitoring | `app_check_throttled`, crawlers     |
+| Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
 
-  Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+Keep the dashboard scoped to launch signals; resist adding vanity metrics.
 
-  The App Check throttle is two rows since [issue 1709](https://github.com/muhammedgaygisiz/travellers-apps/issues/1709). Meta's
-  link-preview crawlers open every link posted to Instagram or Facebook, fail
-  reCAPTCHA, and land in the throttle. Counted together with people, they made
-  App Check look like it was locking people out. The alert stays on the people
-  row. A crawler is web traffic from a data-centre town; the towns, and why
-  the rule is the town rather than the App Check block, are in
-  `tools/analytics/crawlers.config.mjs`.
+The App Check throttle is two rows since [issue 1709](https://github.com/muhammedgaygisiz/travellers-apps/issues/1709). Meta's
+link-preview crawlers open every link posted to Instagram or Facebook, fail
+reCAPTCHA, and land in the throttle. Counted together with people, they made
+App Check look like it was locking people out. The alert stays on the people
+row. A crawler is web traffic from a data-centre town; the towns, and why
+the rule is the town rather than the App Check block, are in
+`tools/analytics/crawlers.config.mjs`.
 
-  Two of these are not tiles and cannot become ones. D1/D7 retention and the
-  activation funnel are populations followed over time rather than totals for a
-  window, so [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) gave them checked-in SQL over the BigQuery export
-  and their own sections in the daily digest. They are listed here because the
-  launch dashboard is where a reader looks for them, not because
-  `dashboard.config.mjs` holds them.
+Two of these are not tiles and cannot become ones. D1/D7 retention and the
+activation funnel are populations followed over time rather than totals for a
+window, so [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) gave them checked-in SQL over the BigQuery export
+and their own sections in the daily digest. They are listed here because the
+launch dashboard is where a reader looks for them, not because
+`dashboard.config.mjs` holds them.
 
-  Every metric is a **total for the window**, not a per-day rate. Until 31
-  August 2026 six of them were titled "/ day" and one "Daily active users",
-  while the queries divided by nothing: `eventCount` sums the window, and GA4's
-  `activeUsers` counts distinct users inside it, which on this property was 15
-  for one day against 40 for seven. The wrong reading reached three SSOT pages
-  as "5 Bites per day" before it was caught, so the titles now name what is
-  measured and the digest states the basis under its header.
+Every metric is a **total for the window**, not a per-day rate. Until 31
+August 2026 six of them were titled "/ day" and one "Daily active users",
+while the queries divided by nothing: `eventCount` sums the window, and GA4's
+`activeUsers` counts distinct users inside it, which on this property was 15
+for one day against 40 for seven. The wrong reading reached three SSOT pages
+as "5 Bites per day" before it was caught, so the titles now name what is
+measured and the digest states the basis under its header.
 
-  The two stability rows are deliberately separate. `app_exception` is logged by
-  Crashlytics when a native process crashes, so a user counted there had the
-  same event the Crashlytics console reports, which makes it the honest basis
-  for a crash-free rate. `exception` is logged by
-  `FirebaseErrorHandlerService` for every unhandled Angular error on all three
-  platforms; those are usually survivable, so folding them into the crash-free
-  rate would understate it against the console. Stack traces and non-fatal
-  `recordException` reports exist only in Crashlytics and stay a console
-  pointer.
+The two stability rows are deliberately separate. `app_exception` is logged by
+Crashlytics when a native process crashes, so a user counted there had the
+same event the Crashlytics console reports, which makes it the honest basis
+for a crash-free rate. `exception` is logged by
+`FirebaseErrorHandlerService` for every unhandled Angular error on all three
+platforms; those are usually survivable, so folding them into the crash-free
+rate would understate it against the console. Stack traces and non-fatal
+`recordException` reports exist only in Crashlytics and stay a console
+pointer.
 
-- ## Agent-Operable Metrics
+## Agent-Operable Metrics
 
-  The dashboard spec above is also **dashboard-as-code** so agents (and humans)
-  can check metrics without opening the console:
+The dashboard spec above is also **dashboard-as-code** so agents (and humans)
+can check metrics without opening the console:
 
 - `tools/analytics/dashboard.config.mjs` — the launch tiles as data, derived
   from this page. Single source of truth for the report CLI. It carries no
@@ -748,94 +750,96 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
   `npm run analytics:provision -- --apply`, and GA4 does not backfill, so every
   event collected before that reports `(not set)` for them forever.
 
-- ## DebugView Verification Steps
-  1. Build and run the app on a device/emulator (or web) signed into the Firebase
-     project.
-  2. Enable debug mode:
-  - Android: `adb shell setprop debug.firebase.analytics.app <package-name>`.
-    If logcat answers that app measurement is disabled by
-    `setAnalyticsCollectionEnabled(false)`, the device is carrying a disable a
-    dev build wrote into `com.google.android.gms.measurement.prefs`. Only a
-    build that includes the [issue-1387](../records/issue-1387.md) fix re-enables it; clearing app data
-    may not, because auto-backup can restore the preference.
-  - iOS: add launch argument `-FIRDebugEnabled`.
-  - Web: analytics debug is visible via the `google-analytics`/`g/collect`
-    network calls; use the GA4 DebugView with the debug extension if needed. 3. Open Firebase console → Analytics → DebugView and select the debug device. 4. Exercise each flow and confirm the matching event appears with expected
-    parameters:
-  - Register a new account → `sign_up`.
-  - Create a Bite → `bite_created`.
-  - Create a bucket list → `bucketlist_created`; rate a BiteTrail →
-    `bucketlist_rated`.
-  - Type a search query (≥ 2 chars) → `search_performed`.
-  - Open a restaurant/place → `restaurant_viewed`; open a Bite → `bite_viewed`.
-  - Enter the onboarding assistant → `onboarding_assistant_started`; advance
-    each step → `onboarding_step_completed` with the matching `step`; finish →
-    `onboarding_assistant_completed`.
-  - Dismiss a coach mark → `coach_mark_dismissed` with the matching `surface`. 5. Disable debug mode when done (Android: set the prop to `.none`).
+## DebugView Verification Steps
 
-- ### Verified in production, 12 September 2026
+1. Build and run the app on a device/emulator (or web) signed into the Firebase
+   project.
+2. Enable debug mode:
 
-  All seven events confirmed against the deployed business app with a signed-in
-  staff account, on restaurant `2k3pjK8y279XFlMrS1ke`.
+- Android: `adb shell setprop debug.firebase.analytics.app <package-name>`.
+  If logcat answers that app measurement is disabled by
+  `setAnalyticsCollectionEnabled(false)`, the device is carrying a disable a
+  dev build wrote into `com.google.android.gms.measurement.prefs`. Only a
+  build that includes the [issue-1387](../history/records/issue-1387.md) fix re-enables it; clearing app data
+  may not, because auto-backup can restore the preference.
+- iOS: add launch argument `-FIRDebugEnabled`.
+- Web: analytics debug is visible via the `google-analytics`/`g/collect`
+  network calls; use the GA4 DebugView with the debug extension if needed. 3. Open Firebase console → Analytics → DebugView and select the debug device. 4. Exercise each flow and confirm the matching event appears with expected
+  parameters:
+- Register a new account → `sign_up`.
+- Create a Bite → `bite_created`.
+- Create a bucket list → `bucketlist_created`; rate a BiteTrail →
+  `bucketlist_rated`.
+- Type a search query (≥ 2 chars) → `search_performed`.
+- Open a restaurant/place → `restaurant_viewed`; open a Bite → `bite_viewed`.
+- Enter the onboarding assistant → `onboarding_assistant_started`; advance
+  each step → `onboarding_step_completed` with the matching `step`; finish →
+  `onboarding_assistant_completed`.
+- Dismiss a coach mark → `coach_mark_dismissed` with the matching `surface`. 5. Disable debug mode when done (Android: set the prop to `.none`).
 
-  Read from the `g/collect` request payloads in the browser's network panel
-  rather than from DebugView. That is the better instrument here and not a
-  shortcut: the payload carries **every** parameter whether or not it is
-  registered as a GA4 custom dimension, which is the only way to see
-  `restaurant_id`, `table_id`, `visit_id`, `table_count` and `guests` at all -
-  they are deliberately unregistered, so no GA4 report will ever show them.
-  DebugView would have shown the event names and a subset of the parameters.
+### Verified in production, 12 September 2026
 
-  | Event                    | Confirmed parameters                                                |
-  | ------------------------ | ------------------------------------------------------------------- |
-  | `table_seated`           | `from_status=available`, `guests=4`                                 |
-  | `table_freed`            | `from_status=cleaning`, and `from_status=disabled` on the re-enable |
-  | `table_reserved`         | `from_status=available`                                             |
-  | `table_cleaning_started` | `from_status=occupied`                                              |
-  | `table_disabled`         | `from_status=available`                                             |
-  | `table_visit_opened`     | `visit_id`                                                          |
-  | `table_visit_closed`     | `visit_id`, `outcome=closed`                                        |
+All seven events confirmed against the deployed business app with a signed-in
+staff account, on restaurant `2k3pjK8y279XFlMrS1ke`.
 
-  Every event carried `restaurant_id`, `table_id` and `table_count`.
+Read from the `g/collect` request payloads in the browser's network panel
+rather than from DebugView. That is the better instrument here and not a
+shortcut: the payload carries **every** parameter whether or not it is
+registered as a GA4 custom dimension, which is the only way to see
+`restaurant_id`, `table_id`, `visit_id`, `table_count` and `guests` at all -
+they are deliberately unregistered, so no GA4 report will ever show them.
+DebugView would have shown the event names and a subset of the parameters.
 
-  Four things the run established beyond the parameter table.
+| Event                    | Confirmed parameters                                                |
+| ------------------------ | ------------------------------------------------------------------- |
+| `table_seated`           | `from_status=available`, `guests=4`                                 |
+| `table_freed`            | `from_status=cleaning`, and `from_status=disabled` on the re-enable |
+| `table_reserved`         | `from_status=available`                                             |
+| `table_cleaning_started` | `from_status=occupied`                                              |
+| `table_disabled`         | `from_status=available`                                             |
+| `table_visit_opened`     | `visit_id`                                                          |
+| `table_visit_closed`     | `visit_id`, `outcome=closed`                                        |
 
-  **The visit ids chain.** Across two full cycles, each `table_visit_closed`
-  named the visit its preceding `table_visit_opened` had opened, and the next
-  seating opened a different one. No visit was opened or closed twice. That is
-  the `visitBefore` comparison holding in production, which is the one piece of
-  this taxonomy a unit test can only approximate.
+Every event carried `restaurant_id`, `table_id` and `table_count`.
 
-  **`guests` is absent rather than zero.** The first seating was made without a
-  party size and carried no `guests` parameter at all, which is the documented
-  behaviour rather than a miss.
+Four things the run established beyond the parameter table.
 
-  **`from_status` earns its place.** `table_disabled` then `table_freed` with
-  `from_status=disabled` is a table taken out of service and put back, and it is
-  one event pair rather than two invented event names.
+**The visit ids chain.** Across two full cycles, each `table_visit_closed`
+named the visit its preceding `table_visit_opened` had opened, and the next
+seating opened a different one. No visit was opened or closed twice. That is
+the `visitBefore` comparison holding in production, which is the one piece of
+this taxonomy a unit test can only approximate.
 
-  **The measurement id is present.** Each request carried
-  `tid=G-R05N7EW09S`, which is what issue 1588 fixed - the bundle deployed before
-  it had no `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` in its env object at all.
+**`guests` is absent rather than zero.** The first seating was made without a
+party size and carried no `guests` parameter at all, which is the documented
+behaviour rather than a miss.
 
-  One note for a future run: a newly registered GA4 custom dimension is not
-  queryable through the Data API for up to 24 hours, and the realtime report
-  rejects `customEvent:` dimensions outright. So the API can confirm that an
-  event **arrived** within a minute or two, and cannot confirm its parameters at
-  all on the day it was registered. Use the request payload for parameters, the
-  realtime report for arrival, and `analytics:query -- table-operations` from the
-  next day for the measures.
+**`from_status` earns its place.** `table_disabled` then `table_freed` with
+`from_status=disabled` is a table taken out of service and put back, and it is
+one event pair rather than two invented event names.
 
-- ### DebugView, the order-to-Bite funnel
+**The measurement id is present.** Each request carried
+`tid=G-R05N7EW09S`, which is what issue 1588 fixed - the bundle deployed before
+it had no `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` in its env object at all.
 
-  The guest surfaces are the consumer app, so the ordinary DebugView steps
-  above apply - but the flow needs a restaurant with table ordering switched on
-  and a printed table token, which is the same setup the manual test of issue
-  [#1103] uses. Read the `g/collect` payloads rather than DebugView for the
-  parameters: `restaurant_id`, `table_id` and `visit_id` are deliberately
-  unregistered, so no GA4 report will ever show them.
+One note for a future run: a newly registered GA4 custom dimension is not
+queryable through the Data API for up to 24 hours, and the realtime report
+rejects `customEvent:` dimensions outright. So the API can confirm that an
+event **arrived** within a minute or two, and cannot confirm its parameters at
+all on the day it was registered. Use the request payload for parameters, the
+realtime report for arrival, and `analytics:query -- table-operations` from the
+next day for the measures.
 
-  In one pass, on one table:
+### DebugView, the order-to-Bite funnel
+
+The guest surfaces are the consumer app, so the ordinary DebugView steps
+above apply - but the flow needs a restaurant with table ordering switched on
+and a printed table token, which is the same setup the manual test of issue
+[#1103] uses. Read the `g/collect` payloads rather than DebugView for the
+parameters: `restaurant_id`, `table_id` and `visit_id` are deliberately
+unregistered, so no GA4 report will ever show them.
+
+In one pass, on one table:
 
 - Scan a valid code → `table_code_scanned` with `outcome: confirm` and both ids.
 - Scan a code for a table that is out of service → `table_code_scanned` with
@@ -856,12 +860,12 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 - Write a Bite by hand from the home screen → `bite_created` with
   `source: manual`.
 
-- ### DebugView, the share-as-image funnel
+### DebugView, the share-as-image funnel
 
-  On a device or emulator signed in as the creator of a Bite, on that Bite's
-  details page. On Android the Capacitor bridge logs each `logEvent` call with
-  its parameters to logcat (`pluginId: FirebaseAnalytics`), which shows the
-  whole payload even on a dev build.
+On a device or emulator signed in as the creator of a Bite, on that Bite's
+details page. On Android the Capacitor bridge logs each `logEvent` call with
+its parameters to logcat (`pluginId: FirebaseAnalytics`), which shows the
+whole payload even on a dev build.
 
 - Tap share → `share_menu_opened` with `bite_id`. Dismiss it → nothing more.
 - Pick **Instagram Post** → `share_target_chosen` (`target: instagram_post`),
@@ -880,17 +884,17 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 - Check that no parameter of any of these carries the dish name, the place or
   a display name.
 
-- ### DebugView, business app (table operations)
+### DebugView, business app (table operations)
 
-  The business app is web-only and its table events need a **non-dev** build to
-  reach DebugView at all: the dev branch of `provide-firestore-utils.ts` calls
-  `FirebaseAnalytics.setEnabled({ enabled: false })`, whose web implementation
-  disables collection for that page load. Serve a production configuration
-  (`NX_APP_BITE_TRIBE_IS_DEV` unset) against the real project, sign in as a
-  staff account, and open `restaurant/:restaurantId/tables`.
+The business app is web-only and its table events need a **non-dev** build to
+reach DebugView at all: the dev branch of `provide-firestore-utils.ts` calls
+`FirebaseAnalytics.setEnabled({ enabled: false })`, whose web implementation
+disables collection for that page load. Serve a production configuration
+(`NX_APP_BITE_TRIBE_IS_DEV` unset) against the real project, sign in as a
+staff account, and open `restaurant/:restaurantId/tables`.
 
-  Then, on one table, and confirming each event carries `restaurant_id`,
-  `table_id` and `table_count`:
+Then, on one table, and confirming each event carries `restaurant_id`,
+`table_id` and `table_count`:
 
 - Seat a party with a count → `table_seated` (`from_status: available`,
   `guests`) **and** `table_visit_opened` with a `visit_id`.
@@ -908,7 +912,8 @@ users` read **0** and `Crash-free users` **n/a** within a minute of the
 - Confirm the session carries the `app_surface: business` user property, and
   that a consumer session carries `app_surface: consumer`.
 
-- ## Related Pages
+## Related Pages
+
 - [Architecture - Analytics](../architecture/analytics.md)
 - [epic-907][#907]
 - [Current State - Roadmap](../current-state/roadmap.md)

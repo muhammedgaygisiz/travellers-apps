@@ -1,5 +1,7 @@
 # Current State - Release State
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Release state summarizes where BiteTribe stands on the path to launch.
@@ -14,9 +16,9 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 ## Current Release Stage
 
-BiteTribe is in Phase 3 (Public Launch) as of 16 September 2026, and **the app is live on both stores**: Google Play since the production promotion of 31 August 2026, and the App Store since 15 September 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
+BiteTribe is past Phase 3 (Public Launch) and in Phase 4 (Learn), and **the app is live on both stores**: Google Play since the production promotion of 31 August 2026, and the App Store since 15 September 2026. Four builds have been released since the release candidate - 1.0.1 (97) and 1.0.2 (98) on 20 September, 1.1.1 (99) on 30 October and 1.1.2 (100) on 8 November 2026 - each tagged `build-<version>-<build>`. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
 
-The soft launch is executed ([issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)); the public launch campaign ([issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)) has not started, and nothing has been published on any channel. All launch-blocking **code** work was complete before the release candidate: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and was switched on for the release candidate. What remained after that was proof and paperwork, and both stores have now cleared it.
+The soft launch is executed ([issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)); the public launch campaign ([issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)) opened with the Instagram launch post of 16 September 2026, whose reach is recorded below. All launch-blocking **code** work was complete before the release candidate: Phase 1's backend work, the onboarding assistant ([epic-850](../history/records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and was switched on for the release candidate. What remained after that was proof and paperwork, and both stores have now cleared it.
 
 Where the three release-candidate gates stand. All three closed by 30 August 2026, and **the release candidate is cut**: build 1.0.1 (96) is distributed on both tracks and installed on hardware from each. The gate history is kept below rather than collapsed, because two of these were open for a month and the reasons are worth keeping:
 
@@ -30,7 +32,7 @@ Where the three release-candidate gates stand. All three closed by 30 August 202
 
   What is filled: Play's default listing is live with name, both descriptions, icon, a current-palette feature graphic and five phone screenshots, and all ten of Play's app-content declarations are complete. App Store Connect has name, subtitle, age rating, description, promotional text, keywords, category, pricing, content rights and a published App Privacy entry, and TestFlight is in good shape with both tester groups and a filled beta description.
 
-  What is not: Play has no tablet screenshots of either size and an empty website and phone number; App Store Connect has no app previews and no marketing URL, the latter pending [Implementation - Social Media Channels](../implementation/social-media-channels.md). Three items listed here as gaps closed on 30 and 31 August 2026: the support URL is set to `https://bite-tribe.web.app/support`, build 96 is attached, and five screenshots were accepted as sufficient because Apple requires one - the 13-inch iPad set that App Store Connect does enforce was captured and uploaded on 31 August. Apple's privacy nutrition labels **are** done - published 21 August 2026 - and so is the age rating, corrected from 18+ to **13+** on 30 August 2026 after three declarations were found asserting features the codebase does not have. Two of the four account-level blockers also closed: the Program License Agreement is `Active`, and the new social-media age-rating questions are answered. **Digital Services Act trader status was declared non-trader on 30 August 2026** and shows `Active` across the 27 EU territories, so no account-level blocker remains. Note the correction: Apple's removal threat is for leaving the status _undeclared_, not for declaring non-trader - a non-trader app stays in the EU, and EU consumers are simply told that consumer-protection rights do not apply to contracts with the developer. The status stops being accurate at [#1123], the first monetized release, which [#1433] gates. See [Implementation - Store Listing Assets](../implementation/store-listing-assets.md) for the per-slot state and [Implementation - Store Release Steps](../implementation/store-release-steps.md) for the console procedure.
+  What is not: Play has no tablet screenshots of either size and an empty website and phone number; App Store Connect has no app previews and no marketing URL, the latter pending [Marketing - Social Media Channels](../marketing/social-media-channels.md). Three items listed here as gaps closed on 30 and 31 August 2026: the support URL is set to `https://bite-tribe.web.app/support`, build 96 is attached, and five screenshots were accepted as sufficient because Apple requires one - the 13-inch iPad set that App Store Connect does enforce was captured and uploaded on 31 August. Apple's privacy nutrition labels **are** done - published 21 August 2026 - and so is the age rating, corrected from 18+ to **13+** on 30 August 2026 after three declarations were found asserting features the codebase does not have. Two of the four account-level blockers also closed: the Program License Agreement is `Active`, and the new social-media age-rating questions are answered. **Digital Services Act trader status was declared non-trader on 30 August 2026** and shows `Active` across the 27 EU territories, so no account-level blocker remains. Note the correction: Apple's removal threat is for leaving the status _undeclared_, not for declaring non-trader - a non-trader app stays in the EU, and EU consumers are simply told that consumer-protection rights do not apply to contracts with the developer. The status stops being accurate at [#1123], the first monetized release, which [#1433] gates. See [Implementation - Store Listing Assets](../implementation/store-listing-assets.md) for the per-slot state and [Implementation - Store Release Steps](../implementation/store-release-steps.md) for the console procedure.
 
 - **[Issue 1177](https://github.com/muhammedgaygisiz/travellers-apps/issues/1177) is settled, its last acceptance criterion closed by decision on 29 August 2026.** Every decision in it is made and recorded: issue 952 deferred, issue 978 closed, Angular 22 out of scope - a decision the upgrade in `d7e45edd` has since overtaken - the Nx gates met, the debug token rotated, and both rules gaps accepted. Its one open acceptance criterion is App Check enforcement verified against real traffic on all three platforms, which is charter check 12. **Android now satisfies it in full**: Run 10 executed both halves for the first time, and Run 11 reached the refused-token gate a second time by deleting only the App Check token cache while leaving the debug secret registered, which is the repeatable way to exercise it on a device. Web and iOS were **accepted as gaps on 29 August 2026** rather than executed: the enforced build is delivered on both, and no attestation failure has surfaced in the field. The criterion is closed by that decision rather than by a run, and the refused-token retry gate remains unproven outside Android.
 
@@ -43,8 +45,8 @@ Revised on 19 August 2026. The original targets are kept alongside the new ones,
 | Launch-blocking backend work completed | 17 July 2026             | Met, late                 | Done. All launch-blocking code has landed                                    |
 | Release Candidate ready                | 31 July 2026             | Met, 30 August 2026       | Done. Build 1.0.1 (96), cut and distributed on both tracks                   |
 | Soft launch                            | Week of 3 August 2026    | Week of 7 September 2026  | Done, late. Play 31 August 2026, App Store 15 September 2026                 |
-| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Not started. Waited on the App Store review, which cleared 15 September 2026 |
-| Learning phase                         | August to September 2026 | September to October 2026 | Follows public launch                                                        |
+| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Done. Instagram launch post on 16 September 2026, after the App Store review |
+| Learning phase                         | August to September 2026 | September to October 2026 | Under way since 16 September 2026                                            |
 
 The revised dates are derived rather than chosen, and the derivation is what to argue with if they look wrong:
 
@@ -180,7 +182,6 @@ using the width. Only the logged-out start page is a centred narrow column, and
 an early reading of that one screen produced a "stretched phone column" finding
 that the rest of the app does not support. Whether BiteTribe should claim iPad
 at all remains open as
-[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#1451]; what
 is settled is that the claim is not currently embarrassing.
 
@@ -319,7 +320,7 @@ The daily digest ([#991]) over the same period:
 [#1759] made the two comparable: the digest's activation funnel now splits
 arrivals by acquisition source, and counts the web arrivals handed to a store
 (`store_link_clicked`) next to web sign-ups. The tagged bio links that feed it are
-in [Social Media Channels](../implementation/social-media-channels.md#campaign-tags-on-every-link).
+in [Social Media Channels](../marketing/social-media-channels.md#campaign-tags-on-every-link).
 
 ## Launch Rule
 
@@ -338,6 +339,7 @@ Before public launch, the release should be stable enough to learn from real use
 [#965]: https://github.com/muhammedgaygisiz/travellers-apps/issues/965
 [#981]: https://github.com/muhammedgaygisiz/travellers-apps/issues/981
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#988]: https://github.com/muhammedgaygisiz/travellers-apps/issues/988
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123

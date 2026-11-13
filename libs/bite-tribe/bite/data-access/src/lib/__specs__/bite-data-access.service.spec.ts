@@ -56,6 +56,8 @@ describe(BiteDataAccessService.name, () => {
     searchNearbyPlaces: jest.Mock;
     getCurrencyByPosition: jest.Mock;
     hasBitesByUser: jest.Mock;
+    saveBitePhotoPosition: jest.Mock;
+    loadBitePhotoPosition: jest.Mock;
   };
   let store: {
     saveNewBite: jest.Mock;
@@ -97,6 +99,8 @@ describe(BiteDataAccessService.name, () => {
       searchNearbyPlaces: jest.fn().mockResolvedValue([]),
       getCurrencyByPosition: jest.fn().mockResolvedValue(undefined),
       hasBitesByUser: jest.fn().mockResolvedValue(false),
+      saveBitePhotoPosition: jest.fn().mockResolvedValue(undefined),
+      loadBitePhotoPosition: jest.fn().mockResolvedValue(undefined),
     };
     store = {
       saveNewBite: jest.fn(),
@@ -673,6 +677,56 @@ describe(BiteDataAccessService.name, () => {
         expect.not.objectContaining({ imageStatus: expect.anything() }),
       );
       expect(api.uploadImage).not.toHaveBeenCalled();
+    });
+  });
+
+  /** Stored apart from the Bite, for its author alone (GitHub issue #1290). */
+  describe('the photo position', () => {
+    const photoPosition = { latitude: 36.74, longitude: -5.16 };
+
+    it('is stored under the saved Bite, and never on it', async () => {
+      await service.submitNewBite(biteWithImage(), photoPosition);
+
+      expect(api.saveBitePhotoPosition).toHaveBeenCalledWith(
+        SAVED_BITE_ID,
+        photoPosition,
+      );
+      expect(api.saveNewBite).toHaveBeenCalledWith(
+        expect.not.objectContaining({ photoPosition: expect.anything() }),
+      );
+    });
+
+    it('writes nothing for a new Bite whose photo had none', async () => {
+      await service.submitNewBite(biteWithImage());
+
+      expect(api.saveBitePhotoPosition).not.toHaveBeenCalled();
+    });
+
+    it('is rewritten with an edit that changed the photo', async () => {
+      await service.submitEditedBite(
+        { ...biteWithImage(), id: 'bite-1' },
+        null,
+      );
+
+      expect(api.saveBitePhotoPosition).toHaveBeenCalledWith('bite-1', null);
+    });
+
+    it('is left alone by an edit that kept the photo', async () => {
+      await service.submitEditedBite({ ...biteWithImage(), id: 'bite-1' });
+
+      expect(api.saveBitePhotoPosition).not.toHaveBeenCalled();
+    });
+
+    it('is loaded for the Bite being edited', async () => {
+      api.loadBitePhotoPosition.mockResolvedValue(photoPosition);
+      biteIdFromUrl.set('bite-1');
+
+      TestBed.tick();
+      await jest.advanceTimersByTimeAsync(0);
+      TestBed.tick();
+
+      expect(api.loadBitePhotoPosition).toHaveBeenCalledWith('bite-1');
+      expect(service.storedPhotoPosition()).toEqual(photoPosition);
     });
   });
 

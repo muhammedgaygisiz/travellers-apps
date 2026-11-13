@@ -63,7 +63,7 @@ through store in-app purchase, and the locking that must come with it belong to
 
 ## Related GitHub Scope
 
-- Issue [#266], the `Organisation/Food Vlogger wants to offer packages of bites (BiteTrails)`
+- Epic [#266], the `Organisation/Food Vlogger wants to offer packages of bites (BiteTrails)`
   epic, describes the marketplace MVP for creator or food-vlogger BiteTrail packages and was
   the Eid campaign's vehicle. Closed as completed.
 - The three surfaces themselves have no issue behind them: pull request [#662] set the Market

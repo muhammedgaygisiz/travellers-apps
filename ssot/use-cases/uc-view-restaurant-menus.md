@@ -172,7 +172,7 @@ no privacy label entry changes. Table ordering shares this page's library and be
 
 ## Related GitHub Scope
 
-- Issue [#734], the `User wants to see a menu of a restaurant` epic, covered menu
+- Epic [#734], the `User wants to see a menu of a restaurant` epic, covered menu
   functionality and the actions around menu items. Closed as completed.
 - Issue [#735] is the `Restaurant Interaction Platform` epic - floor plan, tables, QR
   ordering and Bites from orders - and is open. It reaches menu items only through table

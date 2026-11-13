@@ -11,15 +11,7 @@ All paths in this skill are relative to the repository root. Resolve it with `gi
 
 ## Start Here
 
-This skill is an adapter to the shared, model-agnostic contract. It does not define a separate product or implementation truth. Follow these first:
-
-1. Read `AGENTS.md`.
-2. Read `ssot/README.md`.
-3. Read `ssot/overview/agent-operating-contract.md`.
-4. Use `ssot/overview/traceability-map.md` to connect the request to product, domain, use case, epic, architecture, implementation, testing, and release context.
-5. Follow `ssot/overview/spec-to-code-workflow.md` for implementation work.
-6. Follow `ssot/overview/feature-delivery-workflow.md` for issue-to-merge work.
-7. Follow `ssot/overview/release-workflow.md` for Sunday release work.
+This skill is an adapter to the shared, model-agnostic contract. It does not define a separate product or implementation truth. Read `AGENTS.md` first: it names what every task reads and what each kind of task reads in addition.
 
 The sections below are operational notes for this repository. When they seem to conflict with the SSOT, the SSOT wins.
 

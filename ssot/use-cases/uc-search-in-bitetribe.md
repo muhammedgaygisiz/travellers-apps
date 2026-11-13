@@ -66,8 +66,8 @@ location permission that decides which Bites are loaded in the first place belon
 
 ## Related GitHub Scope
 
-- Part of [#790], the open search epic.
-- Issue [#843] - the closed epic that delivered the search this page describes.
+- Part of epic [#790], the open search epic.
+- Epic [#843] - the closed epic that delivered the search this page describes.
 - Issue [#903] adds a list/map switch for location-aware search results.
 - Issue [#973] adds city search, delivered by pull request [#974].
 - Issue [#722] adds country search.

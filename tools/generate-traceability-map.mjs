@@ -8,7 +8,7 @@
  * - Domain To Use Cases, from each use case's `Related Domains`.
  * - Use Cases To Epics, from each use case's `Related GitHub Scope`. An epic is an
  *   issue reference written `epic-NNNN`, preceded by the word `epic`, or linking to
- *   `ssot/records/epic-*.md`. Individual issues are not listed.
+ *   `ssot/history/records/epic-*.md`. Individual issues are not listed.
  *
  * Only the text between the two markers is rewritten; every line outside them is left
  * as it is. check-ssot (rule GENERATED) fails when the block differs from what this

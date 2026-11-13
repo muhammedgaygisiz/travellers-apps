@@ -2,24 +2,24 @@
 /**
  * Composes the Instagram launch post from the brand artwork. Run: npm run generate-launch-post
  *
- * Writes ssot/assets/social/launch-post.png, 1080x1350. The logo stands in front, the
+ * Writes ssot/marketing/assets/social/launch-post.png, 1080x1350. The logo stands in front, the
  * seven brand characters stand behind it as a pyramid, and the wordmark and tagline sit
  * below. Every pixel comes from committed artwork, so nothing is redrawn:
  *
- * - the characters are the SVGs in ssot/assets/characters/ and the logo is logo.svg
+ * - the characters are the SVGs in ssot/marketing/assets/characters/ and the logo is logo.svg
  * - the wordmark and tagline are cut from the Play feature graphic, which carries them
  *   as outlined paths, so no font is needed
  *
- * See ssot/implementation/social-media-channels.md, section "The Launch Post".
+ * See ssot/marketing/social-media-channels.md, section "The Launch Post".
  */
 import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
 
-const OUT = 'ssot/assets/social/launch-post.png';
+const OUT = 'ssot/marketing/assets/social/launch-post.png';
 const W = 1080;
 const H = 1350;
 const BG = '#1a1c22';
-const CHARACTERS = 'ssot/assets/characters/';
+const CHARACTERS = 'ssot/marketing/assets/characters/';
 const FEATURE_GRAPHIC =
   'ssot/assets/store-listing/feature-graphic/feature-graphic.svg';
 

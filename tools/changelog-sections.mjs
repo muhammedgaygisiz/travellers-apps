@@ -31,9 +31,11 @@ export function extractNotes(section, { includeChores = true } = {}) {
 
   if (headingStart === -1) {
     // A build with no conventional commits renders a bare bullet instead of
-    // headings. Fall back to the body so the release is still described.
+    // headings. Fall back to the body so the release is still described, without
+    // the `Tag:` line and the comments that sit between the heading and it.
     return section
       .replace(/^## [^\n]*\n/, '')
+      .replace(/^Tag: `[^`\n]*`\n/m, '')
       .replace(/^<!--[^\n]*-->\n/gm, '')
       .trim();
   }

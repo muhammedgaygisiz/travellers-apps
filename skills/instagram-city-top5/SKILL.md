@@ -7,7 +7,7 @@ argument-hint: <city>
 # Instagram City Top 5
 
 The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide) all follow this recipe. The format and its history are owned by
-[Implementation - Social Media Channels](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
+[Marketing - Social Media Channels](../../ssot/marketing/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
 
@@ -33,7 +33,7 @@ Then derive everything else from it, without asking:
 
 Before step 1, check two things:
 
-- **Has the city been posted already?** The list is in [The City Top 5 Posts](../../ssot/implementation/social-media-channels.md#the-city-top-5-posts), but it has fallen behind before: Solothurn, Istanbul and Budapest were missing from it. So also scroll the profile grid at `instagram.com/bitetribeapp/` and search the tiles' image alt text for the city. If the city has been posted, say so and ask whether to do it again. If the list is missing a post, add it.
+- **Has the city been posted already?** The list is in [The City Top 5 Posts](../../ssot/marketing/social-media-channels.md#the-city-top-5-posts), but it has fallen behind before: Solothurn, Istanbul and Budapest were missing from it. So also scroll the profile grid at `instagram.com/bitetribeapp/` and search the tiles' image alt text for the city. If the city has been posted, say so and ask whether to do it again. If the list is missing a post, add it.
 - **Are there enough Bites?** If the country search finds fewer than five Bites in or near the city, stop and report what it found, rather than filling the post with Bites from elsewhere in the country.
 
 ## The Post
@@ -46,7 +46,7 @@ Seven slides, 1080x1440 (3:4):
 | 1-5   | One Bite card each on `#1a1c22`, drawn with the web card's own styles, logo + wordmark below.                                                  |
 | 6     | Leela asking people to follow @bitetribeapp and try the app, with the handle and "Available on iOS and Android".                               |
 
-Leela is in a round frame because only reference crops of her exist (`ssot/assets/characters/leela/`), each with the comic's café painted behind her. Do not stretch them past their 480x560 size. On the cover and the closing slide she wears an outfit for the place, generated for each post (step 3).
+Leela is in a round frame because only reference crops of her exist (`ssot/marketing/assets/characters/leela/`), each with the comic's café painted behind her. Do not stretch them past their 480x560 size. On the cover and the closing slide she wears an outfit for the place, generated for each post (step 3).
 
 ## Workflow
 
@@ -99,7 +99,7 @@ List the five with restaurant and author, plus two or three local alternatives, 
 - **Reactions.** Search cards are `readonly` and hide them. Click each card's `ion-card`, and read the emoji and count from the detail page text, under the price and place. Use `history.back()` to return to the results.
 - **Cover photo.** Use a free Unsplash photo (`https://unsplash.com/s/photos/<city>?license=free`), portrait if possible, with calm sky or street at the top for the title. Download it with `curl -sL -o <id>.jpg "https://unsplash.com/photos/<id>/download?force=true&w=2000"`. Skip Unsplash+ results.
 - **A Leela dressed for the place.** Every cover and closing slide gets a Leela themed for the city (user's call, 11 November 2026; Cologne was the first, in a Rote Funken Karneval uniform). Ask ChatGPT for her, in the same Chrome at `https://chatgpt.com/`, signed in as the user. If it is not signed in, ask the user to sign in; never type a password.
-  1. Attach `ssot/assets/characters/leela/leela-vienna-first-bite.png` and `leela-vienna-reference-sheet.png` with the file-upload tool on the "Attach photos" `input[type=file]`. Do not click it.
+  1. Attach `ssot/marketing/assets/characters/leela/leela-vienna-first-bite.png` and `leela-vienna-reference-sheet.png` with the file-upload tool on the "Attach photos" `input[type=file]`. Do not click it.
   2. Ask for the same character, face, hair, art style and colours, in a costume or outfit typical of the place (a Karneval uniform, a dirndl, a local football shirt, a festival look). Ask for her waving or holding a local dish, with a big smile, head and shoulders, face in the upper half so it survives a round crop, a simple warm blurred background, and no text or speech bubbles.
   3. Look at the result before using it. It has to read as Leela in the cover's style. Ask again with a correction if it does not.
   4. In the same conversation, attach `leela-vienna-shows-her-phone.png` and ask for the same costumed Leela in that pose, showing her phone towards the viewer, for the closing slide.
@@ -287,4 +287,4 @@ Use the admin app in the user's Chrome at `https://bite-tribe-admin.web.app/land
 ## After Publishing
 
 - Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, the city page's URL and aliases, and anything skipped (for example alt text, or a tag that could not be set).
-- If the post changed the format, update `## The City Top 5 Posts` in `ssot/implementation/social-media-channels.md`, and this skill too.
+- If the post changed the format, update `## The City Top 5 Posts` in `ssot/marketing/social-media-channels.md`, and this skill too.

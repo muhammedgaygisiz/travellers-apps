@@ -13,9 +13,9 @@ import { DEFAULT_VIEWPORT } from 'storybook/viewport';
  * the logo carries the earlier `#55422A` outline over a `#F0B967` cookie, the
  * seven new characters a darker `#402810` over a more saturated `#F8B850`.
  *
- * The SVGs are served from `ssot/assets/characters` through a `staticDirs`
+ * The SVGs are served from `ssot/marketing/assets/characters` through a `staticDirs`
  * entry in `.storybook/main.ts`, and the logo from the app assets it already
- * ships in. See [[Implementation - Brand Characters]] for where the set lives
+ * ships in. See [[Marketing - Brand Characters]] for where the set lives
  * and how it was produced.
  */
 interface Character {

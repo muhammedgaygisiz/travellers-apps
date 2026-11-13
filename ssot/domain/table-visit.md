@@ -494,7 +494,6 @@ staff keep an unconditional `list` over the whole table.
 [#1106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1106
 [#1107]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1107
 [#1108]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1108
-[#1109]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1109
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1110]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1110
 [#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111

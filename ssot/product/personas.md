@@ -176,7 +176,7 @@ A person who has just registered and does not yet understand how to participate 
 
 **Next opportunities**
 
-- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [epic-850](../records/epic-850.md).
+- Onboarding assistant for username, motivation, public profile, default currency, favorite currencies, and first actions. See [epic-850](../history/records/epic-850.md).
 
 ## Privacy-conscious participant
 

@@ -6,7 +6,7 @@
 Partly in place, and the rest is tracked elsewhere. App Check is enforced on every callable -
 41 go through the `onAppCheck` wrapper, and the other two (`getCurrencyByPosition`,
 `backfillBiteAddress`) call `onCall` directly but set `enforceAppCheck` themselves - and the
-control in front of Google Places is written down rather than implied ([issue-1245](../records/issue-1245.md)). `storage.rules`
+control in front of Google Places is written down rather than implied ([issue-1245](../history/records/issue-1245.md)). `storage.rules`
 is scoped by owner ([#1350]). Still open: App Check replay protection on sensitive callables ([#952]). CI
 now deploys `firestore.rules`, `storage.rules` and `firestore.indexes.json` from `develop` and
 waits for indexes to be READY before functions deploy, closing [#1567].
@@ -29,7 +29,7 @@ each is trusted for; which account may read or write a given document is
 
 - App Check, callable backend boundaries, user creation, leaderboard aggregation, search callables, and location queries are production-ready.
 - Trust and safety improvements support user-facing discovery reliability.
-- A third-party API that App Check cannot reach is protected by the callable in front of it, and the substitute control is documented instead of being implied. Google Places is the worked example: server-side only, App Check enforced and authenticated at the callable, key restricted by API, and monitoring read as expected rather than as an open gap. See [issue-1245](../records/issue-1245.md).
+- A third-party API that App Check cannot reach is protected by the callable in front of it, and the substitute control is documented instead of being implied. Google Places is the worked example: server-side only, App Check enforced and authenticated at the callable, key restricted by API, and monitoring read as expected rather than as an open gap. See [issue-1245](../history/records/issue-1245.md).
 
 ## MVP Classification
 
@@ -53,7 +53,7 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
   which sets `enforceAppCheck` everywhere except the Functions emulator.
 - 41 callable modules import it; the other two, `getCurrencyByPosition` and
   `backfillBiteAddress`, call `onCall` directly but set `enforceAppCheck` themselves.
-- [issue-1245](../records/issue-1245.md) for the Google Places control and the App Check monitoring reading behind it.
+- [issue-1245](../history/records/issue-1245.md) for the Google Places control and the App Check monitoring reading behind it.
 
 ## Related GitHub Scope
 
@@ -83,7 +83,7 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 - [Architecture - Firebase](../architecture/firebase.md) - the Firestore and Storage rulesets, and the Google Maps
   Platform trust boundary
 - [Current State - Known Issues](../current-state/known-issues.md) - where the open platform risks are carried
-- [issue-1245](../records/issue-1245.md)
+- [issue-1245](../history/records/issue-1245.md)
 
 [#952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/952
 [#1621]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1621

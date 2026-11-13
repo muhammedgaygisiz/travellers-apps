@@ -94,7 +94,7 @@ There is no `claimedByUserId` on `Restaurant`. It would duplicate the owner set,
 
 ## Key Behaviours
 
-- Ownership is held by a normal user carrying the `business` role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [issue-1371](../records/issue-1371.md).
+- Ownership is held by a normal user carrying the `business` role. There is no organisation entity: the `isOrganisation` and `organisationId` fields this was once going to build on never had a writer and were removed in [issue-1371](../history/records/issue-1371.md).
 - Roles are Firebase Auth custom claims set only by the backend, so they cannot be forged from the client. See [Architecture - Auth](../architecture/auth.md).
 - **`admin`, `business` and `staff` are independent roles, not a hierarchy.** A staff account holds `staff` and **not** `business`, which is why `roleGuard` accepts a set of roles: the business-app routes are gated on `roleGuard('business', 'staff')`, and a single-role gate would sign a staff account out at the door. Holding `business` and `staff` together is contradictory \- one operates a restaurant, the other is the narrowed set \- and `setUserRoles` refuses it.
 - **Which restaurants an account is assigned to is a Firestore document, never a custom claim.** An assignment change then takes effect immediately rather than after up to an hour, there is no 1000-byte claim payload to grow into, and [#1078]'s rules read the same field \- a claim copy would be a second version of one fact that can silently disagree with it.
@@ -190,7 +190,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - [Architecture - Firebase](../architecture/firebase.md) - the Firestore security rules as a whole
 - [Implementation - Firebase Functions](../implementation/firebase-functions.md) - `logOperatorAction` and the operator callables
 - [#1076] - self-service claiming, closed as not planned
-- [issue-1371](../records/issue-1371.md) - removed the organisation fields this was first specified against
+- [issue-1371](../history/records/issue-1371.md) - removed the organisation fields this was first specified against
 
 [#130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/130
 [#288]: https://github.com/muhammedgaygisiz/travellers-apps/issues/288

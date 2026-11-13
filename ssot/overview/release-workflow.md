@@ -237,6 +237,16 @@ A hand-built release loses what the workflow provides: the artifacts correspond
 to a machine rather than a commit, and nothing writes `build-provenance.json`.
 Record the source commit by hand if this path is used.
 
+## Release History
+
+The release history is the root `CHANGELOG.md`, and the git tags
+`build-<version>-<build-number>` are its source. Every release adds one section,
+headed `## build-<build-number> (<date>)`; nothing else in the repository keeps a
+second copy. From build 101 on, the line below that heading names the tag, for
+example ``Tag: `build-1.1.2-101` ``. The tag points at the commit before the one that
+writes the changelog, so the section does not name a commit; `git rev-list -n1 <tag>`
+resolves it. Earlier sections carry no `Tag:` line, and `git tag` lists their tags.
+
 ## Release Output
 
 Each release should produce:
@@ -245,7 +255,8 @@ Each release should produce:
   with the current release build number
 - `build-provenance.json` attached to the GitHub release, naming the source
   commit
-- generated changelog section for the released build
+- generated changelog section for the released build, carrying a `Tag:` line with
+  the tag the release creates
 - store build notes of at most 230 characters, used for both TestFlight and Play
   Console
 - synced native app state

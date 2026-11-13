@@ -138,7 +138,7 @@ listings.
 
 - [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md)
 - [Implementation - Analytics Events](../implementation/analytics-events.md)
-- [Implementation - Social Media Channels](../implementation/social-media-channels.md)
+- [Marketing - Social Media Channels](../marketing/social-media-channels.md)
 - [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)
 - [UC - Inspect Bite Details](uc-inspect-bite-details.md)
 - [User Roles](../product/user-roles.md)

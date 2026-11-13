@@ -140,7 +140,7 @@ would set at runtime is invisible to the clients this metadata exists for.
 [issue #1455][#1455],
 because [#1454] had no account to name. The handle and the constraint that it
 must not ship before the X account is registered both live in
-[Implementation - Social Media Channels](social-media-channels.md).
+[Marketing - Social Media Channels](../marketing/social-media-channels.md).
 
 ## The Two Runtime Exceptions
 
@@ -466,7 +466,7 @@ Once deployed:
 ## Related Pages
 
 - [Implementation - Store Listing Assets](store-listing-assets.md)
-- [Implementation - Social Media Channels](social-media-channels.md)
+- [Marketing - Social Media Channels](../marketing/social-media-channels.md)
 - [Implementation - Localization](localization.md)
 - [Implementation - Analytics Events](analytics-events.md)
 - [Architecture - Overview](../architecture/overview.md)

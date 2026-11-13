@@ -369,7 +369,6 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1609]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1609
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
-[#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
 [#1565]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1565

@@ -13,7 +13,7 @@ This page governs **GitHub issues**, and only issues.
 - **Epics are excluded.** An `epic-*` page keeps its own shape.
 - **Use cases are excluded.** A `UC - *` page has its own format, defined in [Use Case Format](use-case-format.md), with its flow notation in [Actogram Format](actogram-format.md).
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
-- **The SSOT does not mirror issues.** There is no `issue-*` page to keep in step with an issue body; for the current state of an issue, ask GitHub. What the SSOT keeps is the closing report, as a comment on the issue (see `Closing Report`) and, where the work produced a durable rule, on the page that owns it. Reports written before that rule was stated are in [records/](../records/README.md).
+- **The SSOT does not mirror issues.** There is no `issue-*` page to keep in step with an issue body; for the current state of an issue, ask GitHub. What the SSOT keeps is the closing report, as a comment on the issue (see `Closing Report`) and, where the work produced a durable rule, on the page that owns it. Reports written before that rule was stated are in [records/](../history/records/README.md).
 
 ## Language And Form
 

@@ -115,7 +115,7 @@ name being written down as text:
 - The GitHub project board is literally named `Bite Tribe`. Documentation that
   names it is describing an external identifier, not the product. Renaming the
   board is a separate operational decision.
-- [issue-1265](../records/issue-1265.md) and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) record
+- [issue-1265](../history/records/issue-1265.md) and [Current State - Release Candidate Test Charter](../current-state/release-candidate-test-charter.md) record
   dated console state and observed mail headers. Rewriting a past observation
   would make it assert something that was never true.
 - Historical changelog entries under `build-*` quote past commit subjects.
@@ -124,13 +124,13 @@ The rule reaches the social accounts too, and there it does a second job.
 `@bitetribe` on Instagram is an unrelated food business that writes itself
 **Bite Tribe**, with a space, so following our own spelling is also what tells
 the two apart. The handle is `bitetribeapp` and the display name is
-`BiteTribe`; see [Implementation - Social Media Channels](social-media-channels.md).
+`BiteTribe`; see [Marketing - Social Media Channels](../marketing/social-media-channels.md).
 
 ### Console Follow-Up The Rename Owes
 
 The rename moved two values that live outside this repository, and both must be
 changed before the next functions deploy or the registration and resend mails
-present two identities again — the exact defect [issue-1265](../records/issue-1265.md) closed:
+present two identities again — the exact defect [issue-1265](../history/records/issue-1265.md) closed:
 
 1. The Firebase Auth `Email address verification` template subject, to
    `Verify your BiteTribe email address`.
@@ -677,20 +677,20 @@ App Review sign-in and contact fields were filled — they had been entirely emp
 which for a login-gated app is the most common rejection there is. See
 [Current State - Release State](../current-state/release-state.md) for the submission narrative.
 
-| Slot                                    | State                                                                                                                             |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Name, subtitle                          | set                                                                                                                               |
-| Age rating                              | set, 13+ - was 18+                                                                                                                |
-| Screenshots, iPhone                     | 5 of 10, 6.9", current                                                                                                            |
-| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026                                                                                   |
-| App previews                            | none                                                                                                                              |
-| Description, promotional text, keywords | set                                                                                                                               |
-| Support URL, marketing URL, copyright   | support URL and copyright **set**, marketing URL blank pending [Implementation - Social Media Channels](social-media-channels.md) |
-| Primary category                        | Food & Drink                                                                                                                      |
-| App Privacy                             | published                                                                                                                         |
-| Pricing, availability                   | free, all 175 regions                                                                                                             |
-| Content Rights                          | declared                                                                                                                          |
-| Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                                                  |
+| Slot                                    | State                                                                                                                                     |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Name, subtitle                          | set                                                                                                                                       |
+| Age rating                              | set, 13+ - was 18+                                                                                                                        |
+| Screenshots, iPhone                     | 5 of 10, 6.9", current                                                                                                                    |
+| Screenshots, iPad                       | 5 of 10, 13", captured and uploaded 31 Aug 2026                                                                                           |
+| App previews                            | none                                                                                                                                      |
+| Description, promotional text, keywords | set                                                                                                                                       |
+| Support URL, marketing URL, copyright   | support URL and copyright **set**, marketing URL blank pending [Marketing - Social Media Channels](../marketing/social-media-channels.md) |
+| Primary category                        | Food & Drink                                                                                                                              |
+| App Privacy                             | published                                                                                                                                 |
+| Pricing, availability                   | free, all 175 regions                                                                                                                     |
+| Content Rights                          | declared                                                                                                                                  |
+| Build                                   | 96 (1.0.1), attached 31 Aug 2026                                                                                                          |
 
 TestFlight is in good shape: internal and external groups exist, and the beta
 description, feedback email and reviewer sign-in are all filled. It carried build
@@ -883,7 +883,7 @@ These are account-level and gate submission regardless of listing completeness:
 - [Implementation - Store Release Steps](store-release-steps.md)
 - [Implementation - Store Listing Translations](store-listing-translations.md)
 - [Implementation - Web Search And Social Metadata](web-search-and-social-metadata.md)
-- [Implementation - Social Media Channels](social-media-channels.md)
+- [Marketing - Social Media Channels](../marketing/social-media-channels.md)
 - [Implementation - Localization](localization.md)
 - [Implementation - Release And Build Workflow](release-and-build-workflow.md)
 - [Current State - Release State](../current-state/release-state.md)

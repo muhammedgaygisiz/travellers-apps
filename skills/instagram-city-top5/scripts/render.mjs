@@ -42,7 +42,7 @@ const escape = (s) =>
 
 const logo = dataUri(join(root, 'apps/bite-tribe/src/assets/icons/logo.svg'));
 const leela = (file) =>
-  dataUri(join(root, 'ssot/assets/characters/leela', file));
+  dataUri(join(root, 'ssot/marketing/assets/characters/leela', file));
 
 const leelaCover =
   config.leela?.cover ??

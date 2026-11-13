@@ -410,7 +410,7 @@ head tags; only the share stub redirects.
 - A phone with the app installed opens these links in the browser: the
   associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/` or `/bite/*`.
 - Pages are written in one language. `hreflang` arrives with the second.
-- Whether an editorial page needs an Impressum is open; see
+- Whether an editorial page needs an Impressum is open in [#1979]; see
   [Current State - Open Questions](../current-state/open-questions.md).
 
 ## The Open Graph Image
@@ -489,3 +489,4 @@ Once deployed:
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
+[#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979

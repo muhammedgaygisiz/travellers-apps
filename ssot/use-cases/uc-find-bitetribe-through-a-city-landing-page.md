@@ -4,7 +4,8 @@
 
 **Level:** L1
 
-Supported. Epic [#1487] shipped on 12 November 2026: a published page answers at
+Supported, and live: epic [#1487]'s pages were published on 12 November 2026, fifteen
+cities in `bitetribe.app/eat/sitemap.xml`. A published page answers at
 `bitetribe.app/eat/<city>` with three to five Bites from that city, structured data
 for search engines, a published-set sitemap, and links into the app that the app
 attributes to the page. What is not built is the hand-off to an installed app: a phone
@@ -62,7 +63,7 @@ into the app. It does not own the page's content, which an Operator curates in
 - **Intended, not built:** on a phone with BiteTribe installed, the links open the app at
   the Bite, or at a page of its own for the city, instead of the browser. Today they open
   the browser, because the app claims only `/s/bite/*`, `/t/*` and `/m/*` as its links. No
-  issue owns this yet.
+  issue owns this yet; it is `[Secondary]`, see `MVP Classification`.
 - The reader can instead go to either store through its badge, or scan its QR code on a
   wide screen, or open the BiteTribe Instagram account from the header ([#1978]).
 - The page itself sets no cookie, stores nothing and runs no analytics script; the
@@ -76,7 +77,8 @@ into the app. It does not own the page's content, which an Operator curates in
 - **A second language.** A page is written in one language, which sets `<html lang>`.
   Pages in further languages, and the `hreflang` links between them, are likely but not
   planned.
-- **Impressum.** Whether an editorial page needs one is open; see
+- **Impressum.** Whether an editorial page needs one is open in [#1979]. The pages went
+  live on 12 November 2026 without one, because the maintainer waived the gate; see
   [Current State - Open Questions](../current-state/open-questions.md).
 - **A domain page for the city landing page.** The `landingPages` document has its own
   lifecycle (draft, published, withdrawn) and aliases, and is treated as an implementation
@@ -92,9 +94,11 @@ the app's own authorization, unchanged.
 
 ## MVP Classification
 
-**[MVP]** - the whole page; epic [#1487] is `P0`. The hand-off to an installed app (the
-`Intended, not built` bullet in `Flow`) is unimplemented and has no issue yet, which
-`UF-15` requires of an `[MVP]` step.
+**[MVP]** - the page itself: what a visitor and a crawler get at `/eat/<city>`, and the
+links into the app and the stores; epic [#1487] is `P0`.
+**[Secondary]** - the hand-off to an installed app (the `Intended, not built` bullet in
+`Flow`). It makes the step into the app smoother, but the page reaches new people
+without it.
 
 ## App Store Review Area
 
@@ -147,4 +151,5 @@ listings.
 [#1493]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1493
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
+[#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980

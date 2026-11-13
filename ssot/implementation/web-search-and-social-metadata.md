@@ -532,9 +532,12 @@ please check again in a day or so`, as on 12 November, so the indexed and
 
 ### A New City Page
 
-Publishing a page adds it to `/eat/sitemap.xml` within minutes ([#1980]), and
-Google finds it from there. Requesting indexing through URL Inspection only
-moves it up the queue. The quota is per property and per day, and a repeated
+Publishing a page adds it to `/eat/sitemap.xml` within minutes ([#1980]), but
+Google reads the sitemap on its own schedule: on 14 November 2026 two pages
+had been in it for up to two days and Search Console still showed the count
+from 12 November. So the `instagram-city-top5` skill ends by submitting the
+city sitemap again and requesting indexing for the new page through URL
+Inspection ([#2005]). The quota is per property and per day, and a repeated
 request for the same URL spends quota without changing its position.
 
 ### Hosts That Must Not Be Indexed
@@ -610,3 +613,4 @@ so both properties have the same two owners.
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982
+[#2005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2005

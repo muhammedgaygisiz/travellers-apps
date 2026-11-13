@@ -77,7 +77,7 @@ Not implemented. Today a BiteTrail has `price` and `currency`, and saving one as
 ## Related GitHub Scope
 
 - Issue [#1125] is the epic, paid BiteTrails and creator revenue share, and stage 3 of the
-  monetization umbrella [#1121]. Open
+  monetization umbrella [#1121].
 - Issue [#1122] is the entitlement foundation, stage 0, and issue [#1124] the Pro subscription
   rails this purchase reuses, stage 2. Both open
 - Issue [#266], the packaging epic, is closed as completed; what is left of packaging is

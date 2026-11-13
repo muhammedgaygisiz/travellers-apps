@@ -54,7 +54,7 @@ permission, and changes no store declaration.
 ## Related GitHub Scope
 
 - Pull request [#1210] introduced this mechanism (`seed initial menu from bites when verifying a candidate`); it names no issue.
-- Issue [#1099] added the stable per-item id (`InitialMenuItem.id`) an order line references, delivered by pull request [#1593]. Closed.
+- Issue [#1099] added the stable per-item id (`InitialMenuItem.id`) an order line references, delivered by pull request [#1593].
 
 ## Related Domains
 

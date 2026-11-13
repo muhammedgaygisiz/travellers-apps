@@ -380,9 +380,10 @@ carrying exactly the switch the user came for — and falls back to
 app supports. It resolves whether a page opened, so a caller can keep guiding
 the user instead of appearing to do nothing.
 
-`libs/common/push-notifications/src/lib/app-settings.ts` is the web-side proxy.
-Location has the same Android gap and is the obvious second caller; the proxy
-moves out of `push-notifications` when it gets one.
+`libs/common/app-settings/src/lib/app-settings.ts` is the web-side proxy. It
+started in `push-notifications` and moved into a library of its own when media
+location, which has the same Android gap for `ACCESS_MEDIA_LOCATION`, became its
+second caller.
 
 Recovery is recognised on re-entering the Settings page, which reloads the
 installation list and re-reads the permission. Returning from the system

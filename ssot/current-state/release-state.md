@@ -1,5 +1,7 @@
 # Current State - Release State
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Release state summarizes where BiteTribe stands on the path to launch.
@@ -14,9 +16,9 @@ Target public launch period: 3 August 2026 to 16 August 2026.
 
 ## Current Release Stage
 
-BiteTribe is in Phase 3 (Public Launch) as of 16 September 2026, and **the app is live on both stores**: Google Play since the production promotion of 31 August 2026, and the App Store since 15 September 2026. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
+BiteTribe is past Phase 3 (Public Launch) and in Phase 4 (Learn), and **the app is live on both stores**: Google Play since the production promotion of 31 August 2026, and the App Store since 15 September 2026. Four builds have been released since the release candidate - 1.0.1 (97) and 1.0.2 (98) on 20 September, 1.1.1 (99) on 30 October and 1.1.2 (100) on 8 November 2026 - each tagged `build-<version>-<build>`. The original Phase 3 window of 3 to 16 August 2026 passed without a release candidate and is recorded below as missed rather than quietly rewritten.
 
-The soft launch is executed ([issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)); the public launch campaign ([issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)) has not started, and nothing has been published on any channel. All launch-blocking **code** work was complete before the release candidate: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and was switched on for the release candidate. What remained after that was proof and paperwork, and both stores have now cleared it.
+The soft launch is executed ([issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)); the public launch campaign ([issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913)) opened with the Instagram launch post of 16 September 2026, whose reach is recorded below. All launch-blocking **code** work was complete before the release candidate: Phase 1's backend work, the onboarding assistant ([epic-850](../records/epic-850.md)), and the enforced-mode App Check startup gate from issue 933, which landed and was switched on for the release candidate. What remained after that was proof and paperwork, and both stores have now cleared it.
 
 Where the three release-candidate gates stand. All three closed by 30 August 2026, and **the release candidate is cut**: build 1.0.1 (96) is distributed on both tracks and installed on hardware from each. The gate history is kept below rather than collapsed, because two of these were open for a month and the reasons are worth keeping:
 
@@ -43,8 +45,8 @@ Revised on 19 August 2026. The original targets are kept alongside the new ones,
 | Launch-blocking backend work completed | 17 July 2026             | Met, late                 | Done. All launch-blocking code has landed                                    |
 | Release Candidate ready                | 31 July 2026             | Met, 30 August 2026       | Done. Build 1.0.1 (96), cut and distributed on both tracks                   |
 | Soft launch                            | Week of 3 August 2026    | Week of 7 September 2026  | Done, late. Play 31 August 2026, App Store 15 September 2026                 |
-| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Not started. Waited on the App Store review, which cleared 15 September 2026 |
-| Learning phase                         | August to September 2026 | September to October 2026 | Follows public launch                                                        |
+| Public launch                          | Week of 10 August 2026   | Week of 14 September 2026 | Done. Instagram launch post on 16 September 2026, after the App Store review |
+| Learning phase                         | August to September 2026 | September to October 2026 | Under way since 16 September 2026                                            |
 
 The revised dates are derived rather than chosen, and the derivation is what to argue with if they look wrong:
 
@@ -180,7 +182,6 @@ using the width. Only the logged-out start page is a centred narrow column, and
 an early reading of that one screen produced a "stretched phone column" finding
 that the rest of the app does not support. Whether BiteTribe should claim iPad
 at all remains open as
-[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#1451]; what
 is settled is that the claim is not currently embarrassing.
 
@@ -338,6 +339,7 @@ Before public launch, the release should be stable enough to learn from real use
 [#965]: https://github.com/muhammedgaygisiz/travellers-apps/issues/965
 [#981]: https://github.com/muhammedgaygisiz/travellers-apps/issues/981
 [#986]: https://github.com/muhammedgaygisiz/travellers-apps/issues/986
+[#987]: https://github.com/muhammedgaygisiz/travellers-apps/issues/987
 [#988]: https://github.com/muhammedgaygisiz/travellers-apps/issues/988
 [#991]: https://github.com/muhammedgaygisiz/travellers-apps/issues/991
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123

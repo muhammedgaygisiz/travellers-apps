@@ -1,5 +1,7 @@
 # Current State - E2E Coverage
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 This page tracks Playwright end-to-end coverage across BiteTribe use cases so

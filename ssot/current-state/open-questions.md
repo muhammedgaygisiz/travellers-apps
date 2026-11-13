@@ -1,5 +1,7 @@
 # Current State - Open Questions
 
+**Last verified:** 2026-11-13
+
 ## Purpose
 
 Open questions capture decisions that should become clear before or shortly after launch.
@@ -127,10 +129,10 @@ Moderation questions raised by threading are recorded on [epic-1284](../records/
 
 ## Public Content Questions
 
-These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Each gated the first published page rather than the first commit. Three were settled when the pages were built on 12 November 2026; the Impressum is still open and still gates the first public page.
+These belong to [epic-1487](../records/epic-1487.md), the city landing pages. Each was meant to gate the first published page rather than the first commit. Three were settled when the pages were built on 12 November 2026. The Impressum was not: the pages went live without one, and it stays open.
 
 - May a member's Bite photo appear on a public marketing page? **Decided on 12 November 2026, on [#1487]: yes.** An entry on a page is a Bite, shown as its photo, its name and where it is, so the Bite photo is the page's image. This replaces the epic's proposal of restaurant-supplied and operator-supplied imagery only. What the terms and the privacy policy say about it is not settled by the decision; the terms do not exist yet ([#1772]). Google Places photos are not implicated: `get-place-details` keeps `photos` out of its field mask.
-- Does an editorial page published under the company name need an Impressum? The public surface today is support, privacy and account deletion, none of which is editorial. Answer before a page is public, not after.
+- Does an editorial page published under the company name need an Impressum? **Still open, in [#1979]; the gate was waived.** The city landing pages went live on 12 November 2026 without one - fifteen cities in `bitetribe.app/eat/sitemap.xml` - because the maintainer waived the gate rather than answering the question first. The pages are editorial, unlike support, privacy and account deletion, which were the whole public surface before them.
 - What is the content bar for publishing a page? **Settled by the entry decision:** an entry is itself a Bite with its photo, and a page needs three to five of them plus a meta description and an intro before `setLandingPageStatus` will publish it. A Bite whose photo never arrived cannot be chosen. One city in the first release is the operator's call rather than a rule the editor enforces.
 - Does the URL space keep `/eat/<city>/<slug>`? **Settled on 12 November 2026: `/eat/<city>`,** one page per city, shorter than the proposal and still under the one rewrite. A bare `/<city>` was rejected because Hosting cannot route it without a deploy per city or a catch-all over every app route. Changing it after the first page is indexed is expensive. A withdrawn page answers `410` rather than `404`, as the epic proposed.
 
@@ -189,3 +191,4 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1731]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1731
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
+[#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979

@@ -35,6 +35,7 @@ Part of the [SSOT index](../README.md).
 - [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md)
 - [UC - Generate Initial Menu From Bite Evidence](uc-generate-initial-menu-from-bite-evidence.md)
 - [UC - Manage A Bite's Restaurant Assignment](uc-manage-a-bites-restaurant-assignment.md)
+- [UC - Find BiteTribe Through A City Landing Page](uc-find-bitetribe-through-a-city-landing-page.md)
 
 ## Next to implement
 

@@ -59,7 +59,7 @@ App Check attests the app binary to Firebase and is invisible to a reviewer.
 
 - Issue [#1350] - `storage.rules` scoped by owner, per path.
 - Issue [#1567] - CI now deploys the committed rules and indexes from `develop`. Closed as completed.
-- Issue [#952] - App Check replay protection on sensitive callables, classified `[Secondary]`. Open.
+- Issue [#952] - App Check replay protection on sensitive callables, classified `[Secondary]`.
 - Issue [#1621] - App Check readiness is re-evaluated while the app runs, so a
   client that loses its token after startup recovers on a bounded backoff
   instead of being unable to sign anybody in until the page is reloaded. The

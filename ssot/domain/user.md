@@ -1,20 +1,21 @@
 # User
 
-- ## Purpose
+## Purpose
 
-  A User represents a person or creator participating in BiteTribe.
+A User represents a person or creator participating in BiteTribe.
 
-  Users are the trust layer around Bites. They create Bites, follow each other, save food experiences, rate BiteTrails, and provide the social context that helps other people decide what to eat.
+Users are the trust layer around Bites. They create Bites, follow each other, save food experiences, rate BiteTrails, and provide the social context that helps other people decide what to eat.
 
-- ## Why It Exists
+## Why It Exists
 
-  The goal of a User is to answer:
+The goal of a User is to answer:
 
-  > Who shared this food experience, and can I trust their context?
+> Who shared this food experience, and can I trust their context?
 
-  A Bite without creator context is weaker because BiteTribe depends on human food experiences, not anonymous listings.
+A Bite without creator context is weaker because BiteTribe depends on human food experiences, not anonymous listings.
 
-- ## Business Rules
+## Business Rules
+
 - A User can create many Bites.
 - A User can have a public or private profile.
 - A public profile is visible to other BiteTribe users inside the app. It is not
@@ -40,18 +41,20 @@
 - A User can rate a BiteTrail once.
 - Public profile quality affects trust in Bites and BiteTrails.
 - Email/password users should verify their email address; linked Google or Apple provider accounts are treated as trusted for this lifecycle.
-- ## Required Data
 
-  Current profile model fields:
+## Required Data
 
-  | Field        | Current name in code | Description                                    |
-  | ------------ | -------------------- | ---------------------------------------------- |
-  | User id      | `userId`             | Auth/user identifier and profile document id.  |
-  | Display name | `displayName`        | Public display identity.                       |
-  | Email        | `email`              | Account email, also used in search.            |
-  | Photo        | `photoUrl`           | Profile image URL or uploaded image reference. |
+Current profile model fields:
 
-- ## Optional Data
+| Field        | Current name in code | Description                                    |
+| ------------ | -------------------- | ---------------------------------------------- |
+| User id      | `userId`             | Auth/user identifier and profile document id.  |
+| Display name | `displayName`        | Public display identity.                       |
+| Email        | `email`              | Account email, also used in search.            |
+| Photo        | `photoUrl`           | Profile image URL or uploaded image reference. |
+
+## Optional Data
+
 - `fullName`
 - `pronouns` - free text, at most 40 characters, absent rather than empty. What it is
   and who sees it is in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1826]).
@@ -81,42 +84,43 @@
 - `onboardingCompletedAt`
 - `onboardingCompletedAtTimestamp`
 - `onboardingVersion`
-- ## Relationships
 
-  ```text
-  User
-  |-- Bites (creator)
-  |-- Bucket Lists
-  |-- Likes
-  |-- Reviews
-  |-- Followers
-  |-- Following
-  |-- Blocked accounts
-  |-- BiteTrails (owner or curator)
-  |-- BiteTrail ratings
-  ```
+## Relationships
 
-- ## Lifecycle
+```text
+User
+|-- Bites (creator)
+|-- Bucket Lists
+|-- Likes
+|-- Reviews
+|-- Followers
+|-- Following
+|-- Blocked accounts
+|-- BiteTrails (owner or curator)
+|-- BiteTrail ratings
+```
 
-  ```text
-  Authenticated
-  |
-  Profile created
-  |
-  Public/private profile chosen
-  |
-  Profile maintained
-  |
-  Creates or discovers Bites
-  |
-  Follows, likes, reviews, saves, or curates
-  |
-  Last seen and contribution signals updated
-  |
-  Account deleted (profile removed, Bites survive without an author)
-  ```
+## Lifecycle
 
-  Current implementation notes:
+```text
+Authenticated
+|
+Profile created
+|
+Public/private profile chosen
+|
+Profile maintained
+|
+Creates or discovers Bites
+|
+Follows, likes, reviews, saves, or curates
+|
+Last seen and contribution signals updated
+|
+Account deleted (profile removed, Bites survive without an author)
+```
+
+Current implementation notes:
 
 - A public user document is stored in `/users/{userId}`.
 - `saveUser` initializes profile data from the authenticated user.
@@ -135,7 +139,9 @@
 - A User can delete their own account from the app. `deleteOwnAccount` removes the public user document, its follow and push-token subcollections, the mirrored follow edge on other users, both sides of every block it placed or received, the display-name claim, settings, reviews, likes, the photo positions kept privately under its own Bites ([#1290]), bucket lists, BiteTrail ratings and profile images, then deletes the Firebase Auth account last. Bites are kept with `userId` removed so the shared content graph survives, and a Bite without a `userId` renders like a private user's Bite. The full per-category contract is in [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md); the reasoning is in [issue-1182](../records/issue-1182.md).
 - Bite count and country-code aggregates support leaderboard rank, profile contribution display, and profile badges.
 - There is no organisation or restaurant profile type. `isOrganisation` and `isRestaurant` were declared on `PublicUser` but never written by any client, callable, or migration - only by hand onto a few seeded emulator documents - so no account could ever become one from inside the app. `isOrganisation` nevertheless changed the profile page (Bite Trails instead of Bites, no subscription badge, no follow or edit action, no visibility status) and drove the business dashboard's Organisations list, and `isRestaurant` was read by nothing at all. Both are removed, along with the `organisationId` field the business app queried without ever declaring it. Business capability is planned as an additional role on a normal user instead. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and [issue-1371](../records/issue-1371.md).
-- ## Permissions
+
+## Permissions
+
 - Guest
   - Guest behavior is not the main authenticated app flow today.
 - Registered user
@@ -147,9 +153,10 @@
   - Create bucket lists and save BiteTrails.
 - Admin
   - Moderation and user administration are future or operational capabilities, not clearly modeled in the current User domain code.
-- ## Use Cases
 
-  Supported today:
+## Use Cases
+
+Supported today:
 
 - Create public/private user profile.
 - Edit profile.
@@ -174,92 +181,100 @@
 - Better privacy guidance.
 - Restaurant ownership through an additional role on a normal user.
 - Creator credibility and badges.
-- ## Related Epics
+
+## Related Epics
+
 - Onboarding assistant
 - Search
 - Marketplace
 - BiteTrail gamification
 - BiteTrail packages
 - [epic-1122][#1122] entitlement foundation and Pro gating
-- ## Technical Implementation
 
-  Firestore:
+## Technical Implementation
 
-  ```text
-  /users/{userId}
-  /users/{userId}/followers/{followerUserId}
-  /users/{userId}/following/{followedUserId}
-  /users/{userId}/blocked/{blockedUserId}
-  /users/{userId}/blockedBy/{blockerUserId}
-  /userReports/{reportedUserId}_{reporterUserId}
-  /displayNames/{normalizedDisplayName}
-  /biteTrails/{biteTrailId}/ratings/{userId}
-  ```
+Firestore:
 
-  Frontend and shared model:
+```text
+/users/{userId}
+/users/{userId}/followers/{followerUserId}
+/users/{userId}/following/{followedUserId}
+/users/{userId}/blocked/{blockedUserId}
+/users/{userId}/blockedBy/{blockerUserId}
+/userReports/{reportedUserId}_{reporterUserId}
+/displayNames/{normalizedDisplayName}
+/biteTrails/{biteTrailId}/ratings/{userId}
+```
 
-  ```text
-  libs/bite-tribe-common/model/src/lib/public-user.ts
-  libs/bite-tribe-common/model/src/lib/user.ts
-  libs/bite-tribe/api/src/lib/profile-api.service.ts
-  libs/bite-tribe/profile/page
-  libs/bite-tribe/followers/page
-  libs/bite-tribe/follow-suggestions/data-access
-  libs/bite-tribe/follow-suggestions/ui
-  libs/bite-tribe/store/src/lib/app
-  ```
+Frontend and shared model:
 
-  Cloud Functions:
+```text
+libs/bite-tribe-common/model/src/lib/public-user.ts
+libs/bite-tribe-common/model/src/lib/user.ts
+libs/bite-tribe/api/src/lib/profile-api.service.ts
+libs/bite-tribe/profile/page
+libs/bite-tribe/followers/page
+libs/bite-tribe/follow-suggestions/data-access
+libs/bite-tribe/follow-suggestions/ui
+libs/bite-tribe/store/src/lib/app
+```
 
-  ```text
-  createUserOnAuthCreate
-  deleteOwnAccount
-  blockUser
-  unblockUser
-  reportUser
-  listUserReports
-  dismissUserReports
-  claimDisplayName
-  checkDisplayNameAvailability
-  countUsers
-  syncDisplayNameCopiesOnUserUpdate
-  updateLastSeen
-  updateUserMetadata
-  syncEmailVerificationStatus
-  resendEmailVerification
-  sendEmailVerificationReminders
-  sendNewUserFollowUps
-  sendNewUserWeekFollowUps
-  sendNewUserMonthFollowUps
-  handleEmailUnsubscribe
-  searchUsers
-  suggestPeopleToFollow
-  loadLeaderboard
-  incrementBiteCountOnBiteCreate
-  resyncBiteCounts
-  sendDailyLeaderboardNotification
-  notifyUserOnNewFollower
-  ```
+Cloud Functions:
 
-  Storage:
+```text
+createUserOnAuthCreate
+deleteOwnAccount
+blockUser
+unblockUser
+reportUser
+listUserReports
+dismissUserReports
+claimDisplayName
+checkDisplayNameAvailability
+countUsers
+syncDisplayNameCopiesOnUserUpdate
+updateLastSeen
+updateUserMetadata
+syncEmailVerificationStatus
+resendEmailVerification
+sendEmailVerificationReminders
+sendNewUserFollowUps
+sendNewUserWeekFollowUps
+sendNewUserMonthFollowUps
+handleEmailUnsubscribe
+searchUsers
+suggestPeopleToFollow
+loadLeaderboard
+incrementBiteCountOnBiteCreate
+resyncBiteCounts
+sendDailyLeaderboardNotification
+notifyUserOnNewFollower
+```
 
-  ```text
-  images/users/{userId}/{filename}
-  ```
+Storage:
 
-- ## Current Limitations
+```text
+images/users/{userId}/{filename}
+```
+
+## Current Limitations
+
 - There is no profile type. Every User is an individual profile; business capability is planned as an additional role on a normal user rather than a separate kind of profile. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md).
 - Public/private visibility needs clearer user-facing guidance.
 - Admin moderation is not clearly modeled.
 - Profile trust and creator credibility are mostly implicit.
 - Onboarding after registration is not complete.
-- ## Future Ideas
+
+## Future Ideas
+
 - Guided onboarding for username, public profile, currency, and first actions.
 - Creator profile completeness score.
 - Creator badges.
 - Clearer public/private profile controls.
 - Better trust signals for search and Bite ranking.
-- ## Sources Used
+
+## Sources Used
+
 - [Mission](../product/mission.md)
 - [Principles](../product/principles.md)
 - [Glossary](../product/glossary.md)

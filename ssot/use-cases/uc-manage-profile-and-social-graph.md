@@ -494,10 +494,10 @@ It changes no declaration: the data collected and its purpose are the same.
 
 ## Related GitHub Scope
 
-- Issue [#1166] is the profile-loading skeleton fix - no placeholder facts (e.g. the FREE badge) render before a profile arrives. Closed.
-- Issue [#1188] made the public/private visibility choice readable directly off the profile. Closed.
-- Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu. Closed.
-- Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above. Closed.
+- Issue [#1166] is the profile-loading skeleton fix - no placeholder facts (e.g. the FREE badge) render before a profile arrives.
+- Issue [#1188] made the public/private visibility choice readable directly off the profile.
+- Issue [#1260] moved account identity ("who am I signed in as") from the profile page into the app menu.
+- Issue [#1270], together with onboarding's [#1271], is the Profile Identity Contract above.
 - Issue [#1708] is `Follow Suggestions` above, motivated by the analytics check on [#914] and sharing its pick list with the follow-up mail of [#1707].
 - Issue [#1609] is the User Block Contract above.
 - Issue [#1829] is the Profile Report Contract above, part of epic [#1823].

@@ -61,7 +61,7 @@ Neither is a question to answer before the behaviour is scoped.
 - Issue [#735], the Restaurant Interaction Platform epic, is cited as the boundary rather than
   as an owner. None of its five stage epics - [#1069], [#1070], [#1071], [#1072], [#1073] - covers
   any of this, and reservations are in its out-of-scope list by name, which is why [#1617]
-  exists. Open
+  exists.
 
 ## Related Domains
 

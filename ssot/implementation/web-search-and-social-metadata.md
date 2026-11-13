@@ -510,6 +510,26 @@ loses its verified owners and, with them, access to its data.
 currently not indexed`, which is the expected state before the first crawl
   and not an error.
 
+### What Was Done On 14 November 2026
+
+- **`/eat/sitemap.xml` now lists sixteen city pages.** Adelaide and Zurich
+  were published after 12 November. The Sitemaps page still showed 14
+  discovered pages, last read on 12 November, so the sitemap was submitted
+  again. Google read it at once: 16 discovered pages, last read 14 November,
+  status `Success`.
+- **Indexing was requested for the remaining six city pages**: Mostar and
+  Solothurn first, then Split, Trieste, Zurich and Adelaide. Every request
+  went through and none was refused for quota. With these, indexing has been
+  requested once for each of the sixteen pages in the sitemap.
+- **Before the request**, Trieste read `Discovered - currently not indexed`
+  with `/eat/sitemap.xml` as its referring sitemap. Split, Zurich and
+  Adelaide read `URL is unknown to Google` with no referring sitemap, since
+  they were inspected before Google read the sitemap again.
+- **The Pages report still had nothing to read.** It showed `Processing data,
+please check again in a day or so`, as on 12 November, so the indexed and
+  not indexed counts and the `Page with redirect` entries for the three
+  aliases are not known yet.
+
 ### A New City Page
 
 Publishing a page adds it to `/eat/sitemap.xml` within minutes ([#1980]), and
@@ -556,6 +576,9 @@ so both properties have the same two owners.
 
 ### Not Done
 
+- **The Pages report.** Read it again once it has data: the indexed count,
+  every reason a page is not indexed, and whether the three aliases show
+  under `Page with redirect`.
 - **Bing Webmaster Tools.** It can import a verified Search Console property.
   Optional in [#1982] and left for a later day.
 

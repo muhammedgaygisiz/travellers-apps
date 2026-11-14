@@ -134,6 +134,33 @@
           </ion-button>
         }
 
+        <!-- Weekly top-3 badges (#2031): held for the week after they were
+        won, and a way into the standings they were won in. -->
+        @if (weeklyBadges().length) {
+          <div class="weekly-badges" data-testid="profile-weekly-badges">
+            @for (badge of weeklyBadges(); track badge.board) {
+              <ion-button
+                class="weekly-badge"
+                [class.weekly-badge--gold]="badge.place === 1"
+                [class.weekly-badge--silver]="badge.place === 2"
+                [class.weekly-badge--bronze]="badge.place === 3"
+                fill="outline"
+                size="small"
+                [attr.data-testid]="'profile-weekly-badge-' + badge.board"
+                (click)="weeklyBadgeClick.emit(badge.board)"
+              >
+                <ion-icon slot="start" name="trophy-outline" />
+                {{
+                  (badge.board === 'thisWeek'
+                    ? 'weekly-badge-most-bites'
+                    : 'weekly-badge-most-liked'
+                  ) | transloco: { place: badge.place }
+                }}
+              </ion-button>
+            }
+          </div>
+        }
+
         <div class="bites-section">
           <h2>{{ 'bites' | transloco }}</h2>
 

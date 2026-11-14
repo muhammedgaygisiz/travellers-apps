@@ -765,6 +765,60 @@ describe('ProfileComponent', () => {
     });
   });
 
+  describe('the weekly top-3 badges (issue #2031)', () => {
+    const badges = (): HTMLElement[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.weekly-badge',
+        ),
+      );
+
+    it('shows one button per list, This week first, coloured by place', () => {
+      compRef.setInput('user', {
+        public: true,
+        userId: 'u1',
+        weeklyBadges: [
+          { board: 'mostLiked', place: 3, week: '2026-11-09' },
+          { board: 'thisWeek', place: 1, week: '2026-11-09' },
+        ],
+      });
+      fixture.detectChanges();
+
+      expect(badges().map((b) => b.dataset['testid'])).toEqual([
+        'profile-weekly-badge-thisWeek',
+        'profile-weekly-badge-mostLiked',
+      ]);
+      expect(badges()[0].classList).toContain('weekly-badge--gold');
+      expect(badges()[1].classList).toContain('weekly-badge--bronze');
+    });
+
+    it('opens the list a badge was won on', () => {
+      const opened: string[] = [];
+      component.weeklyBadgeClick.subscribe((board) => opened.push(board));
+      compRef.setInput('user', {
+        public: true,
+        userId: 'u1',
+        weeklyBadges: [{ board: 'mostLiked', place: 2, week: '2026-11-09' }],
+      });
+      fixture.detectChanges();
+
+      badges()[0].click();
+
+      expect(opened).toEqual(['mostLiked']);
+    });
+
+    it('shows no badge row without a badge', () => {
+      compRef.setInput('user', { public: true, userId: 'u1' });
+      fixture.detectChanges();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="profile-weekly-badges"]',
+        ),
+      ).toBeNull();
+    });
+  });
+
   describe('the show on globe button', () => {
     const button = (): HTMLElement | null =>
       (fixture.nativeElement as HTMLElement).querySelector(

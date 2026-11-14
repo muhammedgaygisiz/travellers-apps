@@ -375,6 +375,8 @@ export interface AnalyticsEventParamMap {
       | 'onboarding-finished'
       | 'first-follow'
       | 'bite-trail-completed'
+      | 'weekly-award-bites'
+      | 'weekly-award-liked'
       | 'bite-milestone'
       | 'leaderboard-top-ten'
       | 'leaderboard-overtake';

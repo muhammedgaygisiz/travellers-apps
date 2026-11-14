@@ -98,6 +98,11 @@ export const buildCollapseKey = (
 
       return type;
 
+    case 'WEEKLY_AWARD':
+      // A week's result replaces the previous one. Its surface is the
+      // leaderboard, so opening it clears the push (issue #2031).
+      return buildKey(type, 'LEADERBOARD_RANK_CHANGE');
+
     case 'WEEKLY_BITE_SUMMARY':
     case 'NEW_VERSION_AVAILABLE':
       // A fixed page, sent on a schedule. Yesterday's standing is superseded by

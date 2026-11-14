@@ -45,6 +45,10 @@ export const zh: NotificationMessages = {
     '你的 Bite {{dish}} 在最受喜爱榜上升至第 {{rank}} 名！🎉',
   'leaderboard.mostLikedDropped':
     '你的 Bite {{dish}} 在最受喜爱榜下降至第 {{rank}} 名。',
+  'weeklyAward.title': '🏆 本周结果',
+  'weeklyAward.bodyMostBites': '恭喜，你本周在排行榜上排名第 {{place}}！',
+  'weeklyAward.bodyMostLiked':
+    '恭喜，你的 Bite 本周在最受喜爱榜上排名第 {{place}}！',
   'countryBadge.title': '🎉 新的国家徽章！',
   'countryBadge.body': '恭喜！你刚刚解锁了{{country}}的徽章',
   'countryBadge.followerTitle': '🌍 新的国家徽章',

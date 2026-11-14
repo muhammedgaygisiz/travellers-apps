@@ -23,6 +23,7 @@ const BOARDS_FROM_LINK: readonly LeaderboardBoard[] = [
       [board]="service.board()"
       [ranking]="service.ranking.value()"
       [isLoading]="service.ranking.isLoading()"
+      [currentUserId]="service.currentUserId()"
       (boardChange)="service.selectBoard($event)"
       (userClick)="service.userClicked($event)"
       (biteClick)="service.biteClicked($event)"

@@ -50,6 +50,11 @@ export const th: NotificationMessages = {
     'Bite {{dish}} ของคุณขึ้นไปอยู่อันดับ {{rank}} ในรายการที่ถูกใจมากที่สุด! 🎉',
   'leaderboard.mostLikedDropped':
     'Bite {{dish}} ของคุณตกไปอยู่อันดับ {{rank}} ในรายการที่ถูกใจมากที่สุด',
+  'weeklyAward.title': '🏆 ผลประจำสัปดาห์',
+  'weeklyAward.bodyMostBites':
+    'ยินดีด้วย คุณจบสัปดาห์นี้ที่อันดับ {{place}} ในกระดานอันดับ!',
+  'weeklyAward.bodyMostLiked':
+    'ยินดีด้วย Bite ของคุณจบสัปดาห์นี้ที่อันดับ {{place}} ในรายการที่ถูกใจมากที่สุด!',
   'countryBadge.title': '🎉 เหรียญตราประเทศใหม่!',
   'countryBadge.body': 'ยินดีด้วย! คุณปลดล็อกเหรียญตรา {{country}} แล้ว',
   'countryBadge.followerTitle': '🌍 เหรียญตราประเทศใหม่',

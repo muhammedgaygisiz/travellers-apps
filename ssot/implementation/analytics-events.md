@@ -128,14 +128,15 @@ before the `--apply` reports `(not set)` for them.
 `celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
 It answers whether the moments fire as rarely as the epic intends. `moment` is
 one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow`,
-`bite-trail-completed`, and since issue [#2013] of epic [#2012]
-`bite-milestone`, `leaderboard-top-ten` and `leaderboard-overtake`; it was
-added to `provision-ga4.mjs`. A `bite-milestone` also carries the `count` it
-reached and a leaderboard moment the `rank`; neither is a registered
-dimension, because they are read from the BigQuery export. It is logged even
-when reduced motion skips the confetti, because the toast still marks the
-moment, and never for a moment the settling window suppressed, because nothing
-was shown.
+`bite-trail-completed`, since issue [#2031] `weekly-award-bites` and
+`weekly-award-liked` (a weekly top-3 finish, celebrated once per won week), and
+since issue [#2013] of epic [#2012] `bite-milestone`, `leaderboard-top-ten` and
+`leaderboard-overtake`; it was added to `provision-ga4.mjs`. A
+`bite-milestone` also carries the `count` it reached and a leaderboard moment
+the `rank`; neither is a registered dimension, because they are read from the
+BigQuery export. It is logged even when reduced motion skips the confetti,
+because the toast still marks the moment, and never for a moment the settling
+window suppressed, because nothing was shown.
 
 `store_link_clicked` belongs to issue [#1759]. A web visitor who follows a
 store link installs the app under a new identity, so without it the web reads
@@ -955,3 +956,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
+[#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

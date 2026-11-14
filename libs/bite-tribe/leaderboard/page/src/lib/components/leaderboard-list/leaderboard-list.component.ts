@@ -81,6 +81,8 @@ export class LeaderboardListComponent {
   board = input<LeaderboardBoard>('thisWeek');
   ranking = input<LeaderboardRanking | undefined>(undefined);
   isLoading = input(false);
+  /** The signed-in user, whose own place is highlighted (#2032). */
+  currentUserId = input<string | undefined>(undefined);
   /** The moment the countdown is measured from; fixed in stories. */
   now = input<number>(Date.now());
 
@@ -191,6 +193,47 @@ export class LeaderboardListComponent {
 
     return format.formatRange(ranking.start, ranking.end - 1);
   });
+
+  /**
+   * Whether open podium places invite the user to take them: only on the
+   * running weeks, the boards a user can still get onto (#2032).
+   */
+  invitesToPodium = computed(
+    () => this.board() === 'thisWeek' || this.board() === 'mostLiked',
+  );
+
+  /**
+   * The empty text is for a board nobody can join any more, or that has no
+   * podium to show: last week and all time. A running week shows its podium
+   * with every place open instead.
+   */
+  showsEmptyText = computed(() => this.isEmpty() && !this.invitesToPodium());
+
+  /**
+   * The three podium places in screen order - #2 left, #1 middle, #3 right -
+   * each with its entry, if there is one.
+   */
+  podiumSlots = computed(() => {
+    const users = this.ranksBites() ? [] : this.rankedUsers();
+    const bites = this.ranksBites() ? this.rankedBites() : [];
+
+    return [2, 1, 3].map((place) => ({
+      place,
+      user: users[place - 1] as LeaderboardUser | undefined,
+      bite: bites[place - 1] as MostLikedBite | undefined,
+    }));
+  });
+
+  /** Whether a running week still has a podium place free. */
+  hasOpenPlace = computed(
+    () =>
+      this.invitesToPodium() &&
+      (this.ranksBites() ? this.rankedBites() : this.rankedUsers()).length < 3,
+  );
+
+  /** The places below the podium, 4 to 10. */
+  listedUsers = computed(() => this.rankedUsers().slice(3));
+  listedBites = computed(() => this.rankedBites().slice(3));
 
   emptyKey = computed(() => {
     switch (this.board()) {

@@ -672,18 +672,35 @@ describe('CelebrationService', () => {
       });
     });
 
+    it('keeps a window a second first Bite raises in suppressed', async () => {
+      reducedMotion = true;
+
+      await service.celebrate('first-bite');
+      await service.celebrate('first-bite');
+      const later = service.celebrate('first-country', { country: 'Japan' });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      await later;
+
+      expect(present).toHaveBeenCalledTimes(2);
+      expect(logEvent).not.toHaveBeenCalledWith(
+        AnalyticsEvent.CelebrationShown,
+        expect.objectContaining({ moment: 'first-country' }),
+      );
+    });
+
     it('plays a direct moment at once while a window is open', async () => {
       reducedMotion = true;
 
       const held = service.celebrate('bite-milestone', { count: 5 });
       await service.celebrate('first-follow', { displayName: 'Leela' });
+      await service.celebrate('weekly-award-bites', { place: 1 });
 
-      expect(present).toHaveBeenCalledTimes(1);
+      expect(present).toHaveBeenCalledTimes(2);
 
       await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
       await held;
 
-      expect(present).toHaveBeenCalledTimes(2);
+      expect(present).toHaveBeenCalledTimes(3);
     });
 
     it('logs the count of a milestone and the rank of a leaderboard moment', async () => {

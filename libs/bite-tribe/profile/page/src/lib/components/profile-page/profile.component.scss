@@ -71,6 +71,35 @@ $GOLD: #ffd700;
     margin: 0.75rem 0 0;
   }
 
+  .weekly-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  // Gold, silver and bronze carry icon, border and text alike (#2031).
+  .weekly-badge {
+    // Flush with Show on globe above, which also drops Ionic's margin.
+    margin: 0;
+
+    --border-color: var(--weekly-badge-color);
+    --color: var(--weekly-badge-color);
+
+    &--gold {
+      --weekly-badge-color: #c98a0b;
+    }
+
+    &--silver {
+      --weekly-badge-color: #8a8f98;
+    }
+
+    &--bronze {
+      --weekly-badge-color: #b0602f;
+    }
+  }
+
   .profile-about {
     color: gray;
     font-style: italic;

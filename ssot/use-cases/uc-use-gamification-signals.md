@@ -37,6 +37,24 @@ computed from; what a notification about one of them says, and to whom, belongs 
   still running. A deleted Bite, one whose photo is not uploaded, and one whose creator is
   private or gone are left out. There is no all-time most-liked ranking. See GitHub issue
   [#2028].
+- The Monday reset hands the final top 3 of **This week** and of **Most liked** a badge,
+  `weeklyBadges` on the user document (backend-owned, so a client cannot award itself one).
+  It is held for one week and moves to the next week's top 3; nothing is kept. A Most liked
+  creator with several top-3 Bites gets one badge for the best place, a user on both lists gets
+  both, and places 4 to 10 and All time get nothing. The profile shows each badge as an outline
+  button under **Show on globe** - a trophy coloured gold, silver or bronze and "#1 Most Bites
+  last week" - that opens the leaderboard on **Last week** of that list. Each winner gets one
+  push at the reset naming the better place, and the app plays the celebration once per won
+  week on each device, the first time it opens after the reset. See GitHub issue [#2031].
+- Every tab shows its top 3 on a podium: #1 in the middle and highest with a trophy, #2 left,
+  #3 right, each ringed gold, silver or bronze, with the avatar, name and Bite count (or on
+  **Most liked** the Bite's photo, dish, creator and like count). The steps are an image,
+  `assets/leaderboard/podium.webp`, in the brand characters' style; each place is placed over
+  its step. Places 4 to 10 follow as the list, and the signed-in user's own entry is
+  highlighted. On a running week (**This week**, **Most liked**) an empty place is drawn open
+  with "Your spot?" and an invitation to post or like; an empty running week shows that open
+  podium instead of the empty text. **Last week** and **All time** show only the places that
+  exist. See GitHub issue [#2032].
 - Backend functions maintain Bite counts. The weekly board is built from the Bites whose
   `createdAtTimestamp` falls in the week, so it needs no per-user weekly counter and a deleted
   Bite drops out of its week by itself. A tie is decided by who reached the count first.
@@ -94,6 +112,7 @@ them is collected in onboarding.
 - `sendDailyLeaderboardNotification`
 - `resetWeeklyLeaderboard`, `rebuildWeeklyLeaderboard`, `freezeLastWeek`
 - `recordLike`, `removeLike`, `rebuildMostLiked`, `freezeMostLikedLastWeek`
+- `awardWeeklyBadges`, `celebrateWeeklyAward$`, profile weekly badges
 - Profile country badges
 - `notifyOnNewCountryBadge`
 - `celebrateFirstCountry$` in the bite-tribe store's `AppEffect`
@@ -118,6 +137,10 @@ them is collected in onboarding.
   `/meta/leaderboardMostLikedDaily` the daily notification baseline. `loadLeaderboard` takes
   `mostLiked` and `mostLikedLastWeek`. The board query needs the `weeklyBiteLikes` (`week`,
   `likes` descending) composite index.
+- Issue [#2031] added the weekly top-3 badges: `users/{uid}.weeklyBadges` and
+  `/meta/weeklyAwards` (the awarded week and its holders, so the next reset takes the badges
+  back and a retried reset awards nothing twice), the `WEEKLY_AWARD` push and the
+  `weekly-award-bites` and `weekly-award-liked` celebrations.
 - Issue [#954] added the ranking notifications, delivered by pull request [#971].
 - Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in
@@ -162,5 +185,7 @@ them is collected in onboarding.
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
+[#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
+[#2032]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2032
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013

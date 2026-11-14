@@ -1142,6 +1142,7 @@ service cloud.firestore {
         'subscriptionTier',
         'normalizedDisplayName',
         'countryCodes',
+        'weeklyBadges',
         'lastSeen',
         'lastSeenTimestamp',
         'appVersion',

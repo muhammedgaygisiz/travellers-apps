@@ -202,9 +202,10 @@ climbed.
 
 **Every celebration goes through `CelebrationService` in
 `libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
-one of eight `CelebrationMoment`s - `first-bite`, `first-country`,
-`onboarding-finished`, `first-follow`, `bite-trail-completed`, and from issue
-[#2013] `bite-milestone`, `leaderboard-top-ten`, `leaderboard-overtake` - and
+one of ten `CelebrationMoment`s - `first-bite`, `first-country`,
+`onboarding-finished`, `first-follow`, `bite-trail-completed`, from issue
+[#2031] `weekly-award-bites` and `weekly-award-liked`, and from issue [#2013]
+`bite-milestone`, `leaderboard-top-ten`, `leaderboard-overtake` - and
 owns everything else:
 
 | Decision  | Value                                                                                                        |
@@ -250,8 +251,9 @@ Details worth knowing before changing it:
   so every held moment in it is suppressed. A suppressed moment presents no
   toast, draws no burst, plays no sound and logs no `celebration_shown`. A held
   moment raised after the window closed opens a new one and plays on its own.
-  The other three moments are direct reactions to a tap and play at once,
-  window or not. The 3 s is a starting point, tuned on the reference devices
+  The other moments play at once, window or not: three are direct reactions
+  to a tap, and the two weekly awards come from the login snapshot, not from a
+  Bite. The 3 s is a starting point, tuned on the reference devices
   in the epic's acceptance story; a held moment therefore plays about 3 s after
   its snapshot.
 - **The grand burst, for thousands only** ([#2013]). A `bite-milestone` whose
@@ -273,7 +275,7 @@ Details worth knowing before changing it:
   sound is not motion. The in-app haptics switch reaches the toast's haptic as
   it reaches every other one, and does not touch the confetti; the `Sounds`
   switch silences the sound and nothing else.
-- **One sound for every moment.** All eight moments play the same
+- **One sound for every moment.** All ten moments play the same
   `celebration` sound; there is no sound per moment.
 - **Never rejects.** A failure of the library, of the burst or of the sound is
   swallowed, the posture `ToastService.present()` holds.
@@ -406,3 +408,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2039]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2039
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
+[#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppActions } from './actions';
 import {
   catchError,
+  concatMap,
   EMPTY,
   exhaustMap,
   filter,
@@ -41,6 +42,8 @@ import { ToastService } from 'toast';
 import { CelebrationService } from 'celebration';
 import { TranslocoService } from '@jsverse/transloco';
 import { newCountryCodes } from './utils/new-country-codes';
+import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
+import type { WeeklyBadge } from 'model';
 
 @Injectable()
 export class AppEffect {
@@ -146,6 +149,30 @@ export class AppEffect {
               this.transloco.getActiveLang(),
             ),
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Celebrates a weekly top-3 finish the first time the app opens after the
+   * Monday reset awarded it (issue #2031). The badge is on the login
+   * snapshot of the user's own document, so no listener is added for it; the
+   * push already told the user at the reset.
+   */
+  celebrateWeeklyAward$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AppActions.setPublicProfile),
+        concatMap(({ profile }) => from(weeklyAwardToCelebrate(profile))),
+        filter((badge): badge is WeeklyBadge => !!badge),
+        tap((badge) => {
+          void this.celebration.celebrate(
+            badge.board === 'thisWeek'
+              ? 'weekly-award-bites'
+              : 'weekly-award-liked',
+            { place: badge.place },
+          );
         }),
       ),
     { dispatch: false },

@@ -7,8 +7,9 @@ import { ToastService } from 'toast';
 /**
  * The moments bite-tribe celebrates. Epic #1741 brought the firsts and the
  * completion, each reached once in the normal course of use; epic #2012 added a
- * few round Bite counts and progress in the leaderboard's top ten. Nothing else
- * is celebrated, so a routine post stays a routine post.
+ * few round Bite counts and progress in the leaderboard's top ten, and issue
+ * #2031 a weekly top-3 finish. Nothing else is celebrated, so a routine post
+ * stays a routine post.
  */
 export type CelebrationMoment =
   | 'first-bite'
@@ -16,6 +17,8 @@ export type CelebrationMoment =
   | 'onboarding-finished'
   | 'first-follow'
   | 'bite-trail-completed'
+  | 'weekly-award-bites'
+  | 'weekly-award-liked'
   | 'bite-milestone'
   | 'leaderboard-top-ten'
   | 'leaderboard-overtake';
@@ -30,6 +33,8 @@ export const CELEBRATION_MESSAGE_KEYS: Record<CelebrationMoment, string> = {
   'onboarding-finished': 'onboarding-finished',
   'first-follow': 'first-follow',
   'bite-trail-completed': 'bite-trail-completed',
+  'weekly-award-bites': 'weekly-award-bites-earned',
+  'weekly-award-liked': 'weekly-award-liked-earned',
   'bite-milestone': 'bite-milestone',
   'leaderboard-top-ten': 'leaderboard-top-ten',
   'leaderboard-overtake': 'leaderboard-overtake',
@@ -225,9 +230,10 @@ interface HeldCelebration {
 
 /** The settling window currently open. */
 interface SettlingWindow {
-  /** A `first-bite` played in it, so no held moment does. */
-  firstBite: boolean;
-  /** The highest held moment raised in it so far. */
+  /**
+   * The highest held moment raised in it so far. A window without one was
+   * taken by a `first-bite`, so no held moment plays in it.
+   */
   best?: HeldCelebration;
 }
 
@@ -311,11 +317,10 @@ export class CelebrationService {
    */
   private claimWindow(): void {
     if (!this.settling) {
-      this.openWindow({ firstBite: true });
+      this.openWindow({});
       return;
     }
 
-    this.settling.firstBite = true;
     this.settling.best?.done();
     this.settling.best = undefined;
   }
@@ -323,18 +328,18 @@ export class CelebrationService {
   /** Keeps `held` if it is the highest moment of its window so far. */
   private hold(held: HeldCelebration): void {
     if (!this.settling) {
-      this.openWindow({ firstBite: false, best: held });
+      this.openWindow({ best: held });
       return;
     }
 
-    const { best, firstBite } = this.settling;
+    const { best } = this.settling;
 
-    if (firstBite || (best && rank(best.moment) < rank(held.moment))) {
+    if (!best || rank(best.moment) < rank(held.moment)) {
       held.done();
       return;
     }
 
-    best?.done();
+    best.done();
     this.settling.best = held;
   }
 

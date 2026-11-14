@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "あなたのBite？",
   "leaderboard-invite-this-week": "Biteを投稿して今週のランキングを上がろう",
   "leaderboard-invite-most-liked": "お気に入りのBiteにいいねして表彰台に乗せよう",
+  "leaderboard-countries": "国別",
   "weekly-badge-most-bites": "#{{ place }} 先週のBite数",
   "weekly-badge-most-liked": "#{{ place }} 先週のいいね数",
   "weekly-award-bites-earned": "先週のランキングで{{ place }}位になりました！🏆",

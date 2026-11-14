@@ -2,6 +2,7 @@ import { computed, inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import {
+  CountryBoard,
   LeaderboardBoard,
   LeaderboardDataAccessService,
   LeaderboardUser,
@@ -20,6 +21,24 @@ export class LeaderboardService {
 
   readonly board = this.dataAccess.board.asReadonly();
   readonly ranking = this.dataAccess.ranking;
+  readonly countryBoard = this.dataAccess.countryBoard.asReadonly();
+  readonly countryRanking = this.dataAccess.countryRanking;
+
+  /** Opens the country ranking (issue #2043). */
+  openCountries(): void {
+    this.navController.navigateForward([PATH.LEADERBOARD_COUNTRIES]);
+  }
+
+  selectCountryBoard(board: CountryBoard): void {
+    this.dataAccess.countryBoard.set(board);
+  }
+
+  /** Opens the country's Bites in the country search. */
+  countryClicked(countryCode: string): void {
+    this.navController.navigateForward([PATH.SEARCH], {
+      queryParams: { country: countryCode },
+    });
+  }
 
   reload(): void {
     this.ranking.reload();

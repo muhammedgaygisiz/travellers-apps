@@ -1,6 +1,18 @@
 @use 'globals';
+@use '../podium';
 
 :host {
+  .leaderboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+
+    h1 {
+      margin: 0;
+    }
+  }
+
   .leaderboard-tabs {
     margin-bottom: 0.75rem;
   }
@@ -122,147 +134,7 @@
     flex-shrink: 0;
   }
 
-  // The podium (#2032). The steps are the image; each place is positioned
-  // over its own step, from the step tops measured in the artwork:
-  // #1 at 51.4 %, #2 at 62.6 % and #3 at 69.4 % of its height.
-  .podium {
-    position: relative;
-    width: 100%;
-    max-width: 26rem;
-    aspect-ratio: 3 / 2;
-    margin: 0.75rem auto 0;
-  }
-
-  .podium__image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .podium__place {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 30%;
-    transform: translateX(-50%);
-
-    --podium-ring: var(--ion-color-medium);
-    --podium-avatar: 2.75rem;
-
-    &--1 {
-      bottom: 48.6%;
-      left: 48.5%;
-
-      --podium-ring: #e8a317;
-      --podium-avatar: 3.5rem;
-    }
-
-    &--2 {
-      bottom: 37.4%;
-      left: 18%;
-
-      --podium-ring: #a3a8b0;
-    }
-
-    &--3 {
-      bottom: 30.6%;
-      left: 80.5%;
-
-      --podium-ring: #c26b36;
-    }
-  }
-
-  .podium__crown {
-    color: #e8a317;
-    font-size: 1.125rem;
-  }
-
-  .podium__entry {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-
-    &:disabled {
-      opacity: 1;
-    }
-
-    &--own .podium__name {
-      color: var(--ion-color-primary);
-    }
-  }
-
-  .podium__avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--podium-avatar);
-    height: var(--podium-avatar);
-    overflow: hidden;
-    border: 3px solid var(--podium-ring);
-    border-radius: 50%;
-    background: var(--ion-background-color, #fff);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    ion-icon {
-      width: 100%;
-      height: 100%;
-      color: var(--ion-color-medium);
-    }
-
-    &--bite {
-      border-radius: 0.75rem;
-
-      ion-icon {
-        width: 50%;
-        height: 50%;
-      }
-    }
-
-    &--open {
-      border-style: dashed;
-      border-color: var(--ion-color-medium);
-    }
-  }
-
-  .podium__name,
-  .podium__count {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .podium__name {
-    margin-top: 0.25rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
-
-  .podium__count {
-    color: var(--ion-color-medium);
-    font-size: 0.75rem;
-  }
-
-  .podium__invite {
-    margin: 0.25rem 0 0.75rem;
-    color: var(--ion-color-medium);
-    font-size: 0.8125rem;
-    text-align: center;
-  }
+  @include podium.styles;
 
   // The signed-in user's own row (#2032).
   .leaderboard-item--own {

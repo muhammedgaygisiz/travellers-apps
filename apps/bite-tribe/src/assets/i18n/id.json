@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "Bite-mu?",
   "leaderboard-invite-this-week": "Unggah Bite untuk naik di papan minggu ini",
   "leaderboard-invite-most-liked": "Sukai Bite favoritmu untuk menaruhnya di podium",
+  "leaderboard-countries": "Negara",
   "weekly-badge-most-bites": "#{{ place }} Bite terbanyak minggu lalu",
   "weekly-badge-most-liked": "#{{ place }} Bite paling disukai minggu lalu",
   "weekly-award-bites-earned": "Kamu menutup minggu lalu di #{{ place }} papan peringkat! 🏆",

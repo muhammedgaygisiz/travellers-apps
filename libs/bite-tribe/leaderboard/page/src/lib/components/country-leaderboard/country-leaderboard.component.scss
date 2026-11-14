@@ -1,0 +1,64 @@
+@use '../podium';
+
+:host {
+  .week-switch {
+    max-width: 18rem;
+    margin: 0.5rem auto;
+
+    ion-segment-button {
+      min-height: 32px;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    margin: 0 0 0.5rem;
+
+    color: var(--ion-color-medium);
+    font-size: 0.8125rem;
+  }
+
+  .spinner-container,
+  .empty-container {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+
+    color: var(--ion-color-medium);
+    text-align: center;
+  }
+
+  @include podium.styles;
+
+  // A flag fills the round place, cropped to its middle (#2043).
+  .podium__avatar--flag {
+    font-size: calc(var(--podium-avatar) * 1.4);
+
+    .fi {
+      line-height: 1;
+    }
+  }
+
+  .rank-badge {
+    min-width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+  }
+
+  .row-flag {
+    margin-inline-end: 0.75rem;
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .entry-count {
+    white-space: nowrap;
+  }
+}

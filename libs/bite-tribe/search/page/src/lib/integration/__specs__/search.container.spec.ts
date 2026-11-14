@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
 import { signal } from '@angular/core';
 import type { SearchCategory, SearchResult } from 'model';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { SearchContainer } from '../search.container';
 import { SearchService } from '../search.service';
 
@@ -41,6 +42,10 @@ const MockSearchService = {
   resultClicked: jest.fn(),
 };
 
+const route = {
+  snapshot: { queryParamMap: convertToParamMap({}) },
+};
+
 describe(SearchContainer.name, () => {
   let component: SearchContainer;
   let fixture: ComponentFixture<SearchContainer>;
@@ -51,12 +56,14 @@ describe(SearchContainer.name, () => {
     hasSearched.set(false);
     selectedCategory.set('user');
     selectedCountryCode.set('');
+    route.snapshot.queryParamMap = convertToParamMap({});
 
     TestBed.configureTestingModule({
       providers: [
         provideIonicAngular(getIonicConfig()),
         { provide: TranslocoService, useValue: MockTranslocoService },
         { provide: SearchService, useValue: MockSearchService },
+        { provide: ActivatedRoute, useValue: route },
       ],
     }).compileComponents();
 
@@ -64,6 +71,21 @@ describe(SearchContainer.name, () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     jest.clearAllMocks();
+  });
+
+  it('should open a country search from a ?country= link (#2043)', () => {
+    route.snapshot.queryParamMap = convertToParamMap({ country: 'ba' });
+
+    component.ionViewWillEnter();
+
+    expect(MockSearchService.selectCategory).toHaveBeenCalledWith('country');
+    expect(MockSearchService.selectCountry).toHaveBeenCalledWith('BA');
+  });
+
+  it('should leave the search as it is without a link', () => {
+    component.ionViewWillEnter();
+
+    expect(MockSearchService.selectCountry).not.toHaveBeenCalled();
   });
 
   it('should create', () => {

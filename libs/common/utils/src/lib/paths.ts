@@ -73,6 +73,7 @@ export const PATH = {
   SEARCH: 'search',
   GALLERY: 'gallery',
   LEADERBOARD: 'leaderboard',
+  LEADERBOARD_COUNTRIES: 'leaderboard-countries',
   WEEKLY_BITES: 'weekly-bites',
 };
 

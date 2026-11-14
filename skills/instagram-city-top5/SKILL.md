@@ -1,6 +1,6 @@
 ---
 name: instagram-city-top5
-description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, publishes on Instagram web after approval, then publishes the city's landing page at bitetribe.app/eat/<city> with the same five Bites, and submits that page to Google in Search Console. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
+description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, publishes on Instagram web after approval and posts the same slides to the BiteTribe Facebook Page from Business Suite, then publishes the city's landing page at bitetribe.app/eat/<city> with the same five Bites, and submits that page to Google in Search Console. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
 argument-hint: <city>
 ---
 
@@ -29,6 +29,7 @@ Then derive everything else from it, without asking:
 | Caption            | The template in step 5, with the city, the country, its flag and local hashtags.                       |
 | Location           | "<City>, <Country>" on Instagram (step 6).                                                             |
 | Restaurant tags    | Each restaurant's own Instagram account, where one can be confirmed (step 3).                          |
+| Facebook Page      | The same slides and caption, without the handles, on the BiteTribe Page via Business Suite (step 6).   |
 | City page          | `https://bitetribe.app/eat/<city>`, with the post's five Bites (step 7).                               |
 | Search Console     | The city sitemap submitted again, and indexing requested for the new page (step 8).                    |
 
@@ -207,7 +208,7 @@ In the same Chrome, signed in as @bitetribeapp:
 
    A tag label then sits on the photo. Tag nothing on the cover or the closing slide. Each slide has a delete icon at its top left, which removes the slide from the post - never click it.
 
-6. Leave "Share to Facebook" off; no Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
+6. Leave "Share to Facebook" off: on Instagram web it shares to the owner's personal Facebook profile, never to the BiteTribe Page (see **Post it to the Facebook Page** below). No Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
 7. **Follow every tagged account** from @bitetribeapp. Open each profile and click **Follow**, or **Follow Back**, if the header shows it. If it shows **Following** already, leave it. Check that the button reads **Following** afterwards. If it still reads **Follow**, reload the profile before clicking again: on Šug the button had not updated yet, and the follow had already gone through.
 
    ```js
@@ -243,6 +244,26 @@ out;
 ```
 
 Every handle has to show up somewhere in the output. If one is missing, open **Edit** again and look at that slide. When one handle covers several slides (three Al Zaytouna dishes in Vienna), the output cannot tell those slides apart. Key each `li` by its image file name instead, and check that every one of those slides carries the handle.
+
+**Post it to the Facebook Page.** Every city post also goes to the BiteTribe Facebook Page (user's call, 14 November 2026, [#2007](https://github.com/muhammedgaygisiz/travellers-apps/issues/2007)). Instagram's "Share to Facebook" cannot do it: its only target is the owner's personal profile, with the audience "Only me", although Business Suite lists the Page as the asset connected to @bitetribeapp. So post the same slides to the Page from Meta Business Suite, after the Instagram post is up. It needs no gate of its own: the user approved the slides and the caption in step 5.
+
+1. Open `https://business.facebook.com/latest/composer?business_id=1059515020497260` in the same Chrome.
+2. **Check the destination.** **Post to** starts as "BiteTribe and bitetribeapp". Open it and untick **bitetribeapp**, so that only the Facebook Page **BiteTribe** stays ticked. Posting to Instagram from here would put the carousel up a second time.
+3. **Add photo/video** opens a native file picker the agent cannot see. Before clicking it, keep the input in the page instead, then upload all the slides in order to the file input that `find` returns:
+
+   ```js
+   // Run before clicking "Add photo/video": the input lands in the page and no picker opens
+   const orig = HTMLInputElement.prototype.click;
+   HTMLInputElement.prototype.click = function () {
+     if (this.type !== 'file') return orig.call(this);
+     this.style.display = 'block';
+     if (!this.isConnected) document.body.appendChild(this);
+   };
+   ```
+
+4. **Caption:** the Instagram caption, with two changes. Drop each `(@handle)`, because Instagram handles mean nothing on Facebook, and end the app line with "get it at bitetribe.app" in place of "link in bio". Typing it line by line works, but pasting is faster: focus `[role=combobox][aria-label^="Write"]` and dispatch a `paste` `ClipboardEvent` whose `DataTransfer` holds the text.
+5. **Before Publish, check:** the caption reads back exactly as written (the editor shows each blank line as two, so collapse runs of newlines before comparing). The hashtag autocomplete can finish the last hashtag for you: Granada went to `#andaluciaorienta`, and with that suggestion pending, **Publish** did nothing. **Post to** reads "BiteTribe" alone, the media list shows every slide (one `1080 x 1440` row each), and the four switches (ad post, date and time, Facebook story, Boost) are off. **Publish**, then wait for the "Try sharing your photos in a new way" dialog, which means the post went up, and dismiss it with **Maybe later**.
+6. Open `facebook.com/bitetribeapp` and check that the post is at the top of the Page's posts.
 
 ### 7. Publish the city page
 
@@ -304,5 +325,5 @@ Use Search Console in the user's Chrome, on the `bitetribe.app` **domain propert
 
 ## After Publishing
 
-- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, the city page's URL and aliases, the sitemap's discovered count and whether indexing was requested, and anything skipped (for example alt text, or a tag that could not be set).
+- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, whether the Facebook Page post went up, the city page's URL and aliases, the sitemap's discovered count and whether indexing was requested, and anything skipped (for example alt text, or a tag that could not be set).
 - If the post changed the format, update `## The City Top 5 Posts` in `ssot/marketing/social-media-channels.md`, and this skill too.

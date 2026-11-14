@@ -52,6 +52,7 @@ rest of the product reads.
 - The selector measures its rows from whichever position actually answers the question in front of the user. While the Bite sits where the user is standing, every row carries the single unlabelled distance it always did. Once the Bite's position is more than half a kilometre from the device — the charter's `Posting later` edge case — each row names both origins instead, `0.2 km from the Bite` above `1538.8 km from you`, and the list is ordered by the distance from the Bite. A distance measured from the device cannot discriminate between candidates that are all ~1539 km away, and ordering by it puts a candidate that happens to lie towards the device ahead of the one next door. Rows are measured from the two positions rather than from a precomputed value, so the same numbers hold for local restaurants, Google search results, and nearby Google suggestions, which had three different origins between them. The half-kilometre threshold sits above GPS and EXIF noise and below the spread of a plausible candidate list, so posting on the spot never degrades into two near-identical numbers. See GitHub issue [#1269].
 - When a Bite position is available, the app prefills the currency from that location; the user's preferred currency remains the fallback. A prefilled draft that names its own currency - a copied Bite, a menu item, an order line - keeps it, because its price was recorded in that currency: replacing only the currency turned a EUR 15 copy into CHF 15 when the Bite stood in Switzerland. See GitHub issue [#2018].
 - User can still manually correct the currency before saving.
+- The price field names the currency by its code (`BAM`, `CHF`, `EUR`), never by its full name, so the input keeps a width that can be tapped on a phone; screen readers still hear the full localized name, and the currency selector lists it. The selector opens scrolled to the currency already selected. See GitHub issue [#2035].
 - The app warns when the entered price looks suspiciously high.
 - The app stores the Bite and uploads the image.
 - Connectivity is not a precondition for the photo. A Bite always needs one, the
@@ -197,6 +198,7 @@ each under App Functionality.
 - Issue [#1846] plays the `celebration` sound with every celebration, the first Bite's included, part of epic [#1742].
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#2018] added `Copy Bite` on another member's Bite, the copied-price date, and the automatic Bucket List tick on posting a copy.
+- Issue [#2035] made the price field show the currency code, after the Bosnia-Herzegovina convertible mark left the input 0px wide on a phone, and opens the shared currency selector on the selected currency.
 - Issue [#1290] stores the photo's position at `bites/{biteId}/authorPrivate/{uid}`, readable by the author alone, so `Aus Bild` is offered again when the Bite is edited. Classified `[Secondary]`.
 
 ## Related Domains
@@ -236,3 +238,4 @@ each under App Functionality.
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1917]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1917
 [#2018]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2018
+[#2035]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2035

@@ -13,11 +13,17 @@
         slot="end"
         class="ion-display-flex ion-align-items-center"
         [class.is-loading]="currencyLoading()"
+        [attr.aria-label]="currencyLoading() ? null : selectedCurrencyName()"
       >
+        <!-- The code, not the name: a long name such as the Bosnia-Herzegovina
+        convertible mark left the input no width to tap into (#2035). The
+        selector still lists the full name. -->
         @if (currencyLoading()) {
           <ion-skeleton-text [animated]="true" class="currency-skeleton" />
         } @else {
-          {{ selectedCurrencyName() }}
+          <span data-testid="bite-price-currency">{{
+            selectedCurrencyCode()
+          }}</span>
           <ion-icon name="chevron-expand-outline" />
         }
       </ion-text>

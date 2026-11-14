@@ -257,8 +257,8 @@ export class CreateBitePage {
     await expect(this.tagChips.filter({ hasText: tag })).toBeVisible();
   }
 
-  async expectCurrency(currencyName: string): Promise<void> {
-    await expect(this.currency).toContainText(currencyName);
+  async expectCurrency(currencyCode: string): Promise<void> {
+    await expect(this.currency).toContainText(currencyCode);
   }
 
   async chooseCurrency(currencyCode: string): Promise<void> {

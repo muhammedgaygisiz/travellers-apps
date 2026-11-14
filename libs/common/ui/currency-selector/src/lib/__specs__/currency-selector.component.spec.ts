@@ -1,4 +1,6 @@
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { IonContent } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from '../currency-selector.component';
 import { addNecessaryIcons } from 'utils';
 import { TranslocoService } from '@jsverse/transloco';
@@ -233,6 +235,67 @@ describe('CurrencySelectorComponent', () => {
 
     component.cancel();
     expect(cancelled).toBeTruthy();
+  });
+
+  describe('opening on the selected currency (#2035)', () => {
+    /** Stubs the list's scroller so the scroll can be read in jsdom. */
+    const stubScroller = (
+      target: ComponentFixture<unknown>,
+    ): jest.SpyInstance => {
+      const content = target.debugElement
+        .query((el) => el.injector.get(IonContent, null) !== null)
+        .injector.get(IonContent);
+      const scrollElement = document.createElement('div');
+
+      jest.spyOn(content, 'getScrollElement').mockResolvedValue(scrollElement);
+
+      return jest.spyOn(content, 'scrollToPoint').mockResolvedValue();
+    };
+
+    it('should scroll the list to the selected currency', async () => {
+      fixture.componentRef.setInput('selectedCurrency', 'CHF');
+      fixture.detectChanges();
+      const scrollToPoint = stubScroller(fixture);
+
+      await component.scrollToSelected();
+
+      expect(scrollToPoint).toHaveBeenCalledWith(0, expect.any(Number), 0);
+    });
+
+    it('should not scroll in favorites mode, which has no single selection', async () => {
+      fixture.componentRef.setInput('mode', 'favorites');
+      fixture.detectChanges();
+      const scrollToPoint = stubScroller(fixture);
+
+      await component.scrollToSelected();
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+    });
+
+    it('should wait for its modal to finish presenting before scrolling', async () => {
+      @Component({
+        template: `<ion-modal
+          ><currency-selector selectedCurrency="CHF"
+        /></ion-modal>`,
+        imports: [CurrencySelectorComponent],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      })
+      class ModalHostComponent {}
+
+      const host = TestBed.createComponent(ModalHostComponent);
+      host.detectChanges();
+      const scrollToPoint = stubScroller(host);
+      await host.whenStable();
+
+      expect(scrollToPoint).not.toHaveBeenCalled();
+
+      host.nativeElement
+        .querySelector('ion-modal')
+        .dispatchEvent(new CustomEvent('ionModalDidPresent'));
+      await host.whenStable();
+
+      expect(scrollToPoint).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('searchbarInput', () => {

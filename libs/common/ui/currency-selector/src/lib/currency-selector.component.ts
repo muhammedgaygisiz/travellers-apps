@@ -1,11 +1,14 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -75,6 +78,9 @@ export class CurrencySelectorComponent {
 
   currencies = currencyCodes;
   rawSearchTerm = signal('');
+
+  private readonly content = viewChild(IonContent);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
@@ -139,6 +145,61 @@ export class CurrencySelectorComponent {
       })
       .map(({ currency }) => currency);
   });
+
+  constructor() {
+    afterNextRender(() => {
+      // Every caller opens the picker in an `ion-modal`, which renders it
+      // before it is presented and laid out: a scroll then has no height to
+      // work with and is lost. So inside a modal it waits for the modal to
+      // finish presenting; on its own (Storybook) it scrolls right away.
+      const modal = this.host.nativeElement.closest('ion-modal');
+
+      if (modal) {
+        modal.addEventListener(
+          'ionModalDidPresent',
+          () => void this.scrollToSelected(),
+          { once: true },
+        );
+
+        return;
+      }
+
+      void this.scrollToSelected();
+    });
+  }
+
+  /**
+   * Opening the picker shows the currency already chosen. The list holds
+   * every currency, so without this the user lands at the top and has to
+   * scroll to see what is selected (#2035). Favorites mode has no single
+   * selection, so it opens at the top as before.
+   */
+  async scrollToSelected(): Promise<void> {
+    const content = this.content();
+    const code = this.selectedCurrency();
+
+    if (this.isFavoritesMode() || !content || !code) {
+      return;
+    }
+
+    const row = this.host.nativeElement.querySelector<HTMLElement>(
+      `[data-testid="currency-option-${code}"]`,
+    );
+
+    if (!row) {
+      return;
+    }
+
+    const scrollElement = await content.getScrollElement();
+    const rowTop =
+      row.getBoundingClientRect().top -
+      scrollElement.getBoundingClientRect().top +
+      scrollElement.scrollTop;
+    const centred =
+      rowTop - (scrollElement.clientHeight - row.offsetHeight) / 2;
+
+    await content.scrollToPoint(0, Math.max(0, centred), 0);
+  }
 
   getCurrencyName(currency: (typeof currencyCodes)[number]): string {
     return getLocalizedCurrencyName(

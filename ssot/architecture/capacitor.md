@@ -23,6 +23,7 @@ apps/bite-tribe-android
 - Geolocation and maps.
 - Native image handling and compression support.
 - Haptic feedback.
+- Interface sounds.
 
 ## Dependency Rule
 
@@ -668,6 +669,70 @@ dependency, and that plays the platform's own haptic primitive:
   either platform, and the setting above stays on the device and is never
   collected.
 
+## Sound Rule
+
+Sounds play through one service, `SoundsService` in `libs/common/sounds`, and
+only as one of two named intents (epic [#1742], issue [#1843]). Each intent calls
+the method of the same name on `BiteSounds`, a local Capacitor plugin in the
+bite-tribe native wrappers built like `BiteHaptics`, which plays one of the two
+files bundled by issue [#1842] through the platform's own UI-sound path. Where
+the files come from and how loud they are is owned by
+[Implementation - Store Listing Assets](../implementation/store-listing-assets.md#bundled-audio).
+
+| Intent        | iOS file          | Android resource        | Reserved for        |
+| ------------- | ----------------- | ----------------------- | ------------------- |
+| `posted`      | `posted.caf`      | `raw/sound_posted`      | A Bite being posted |
+| `celebration` | `celebration.caf` | `raw/sound_celebration` | A celebrated first  |
+
+- **Not through the web layer.** Web Audio in the Android WebView plays on the
+  media stream at media volume, which epic [#1742] rules out, so the service
+  plays nothing off a native build and no call site plays audio from the web.
+- **iOS: System Sound Services.** `BiteSoundsPlugin.swift`, next to
+  `BiteHapticsPlugin.swift` and registered in `capacitorDidLoad()` of
+  `BridgeViewController.swift`, creates one `SystemSoundID` per file with
+  `AudioServicesCreateSystemSoundID` when it loads and plays it with
+  `AudioServicesPlaySystemSound`. A system sound mixes with other audio, never
+  takes the audio session and does not play while the ring/silent switch is on
+  silent, so the plugin does not touch `AVAudioSession` at all. That is the
+  behaviour of the `ambient` category without changing the app-wide session.
+- **Android: the system stream.** `BiteSoundsPlugin.java`, next to
+  `BiteHapticsPlugin.java` and registered in `MainActivity` before
+  `super.onCreate`, loads both files into one `SoundPool` when it loads, with
+  `AudioAttributes` `USAGE_ASSISTANCE_SONIFICATION` and
+  `CONTENT_TYPE_SONIFICATION`, so they play on the system stream at system
+  volume. It never requests audio focus, so the user's music keeps playing at
+  its own volume.
+- **Silent mode means silent.** On Android a sound plays only when
+  `AudioManager.getRingerMode()` is `RINGER_MODE_NORMAL` and the interruption
+  filter is `INTERRUPTION_FILTER_ALL`, so vibrate, silent and Do Not Disturb all
+  mean no sound. On iOS the ring/silent switch does the same through System
+  Sound Services.
+- **No volume of its own.** Neither plugin sets a level beyond full scale of
+  the system stream; the system volume and the files' own level are the only
+  levels.
+- **Switchable per device.** `SoundsService` reads one `Preferences` key,
+  `sounds-enabled`, once at start-up and caches it in an `enabled` signal, with
+  `setEnabled()`, exactly as `haptics-enabled` works above. Only `'false'`
+  turns sounds off, so a fresh install has them on and the phone's silent mode
+  is what keeps them quiet at the table. While it is off, no intent reaches the
+  plugin. The settings row is issue [#1844].
+- **Never stacked.** A play that starts within `SOUND_LENGTH_MS` (300 ms, the
+  longest a bundled file may be) of the last one that reached the plugin is
+  dropped, so two moments landing together sound once. A play the setting or a
+  native failure stopped does not hold the window.
+- **No fallback, never rejects.** There is no `@capacitor/*` fallback: when
+  `Capacitor.isPluginAvailable('BiteSounds')` is false the intent resolves
+  silently, which is the safe default for sound. Any native failure is
+  swallowed, and a file that cannot be loaded leaves its intent silent.
+- **No passthrough.** The service exposes no `play(file)`, and no call site
+  imports `BiteSounds` directly, so one intent keeps one meaning everywhere.
+  The call sites are issues [#1845] and [#1846].
+- **A native change ships with a store build**, as for haptics.
+- **No permission, no store declaration.** Playing bundled UI sounds needs no
+  microphone or audio permission, no `UIBackgroundModes` audio entry, no
+  manifest entry and no privacy nutrition label entry, and the setting stays on
+  the device.
+
 ## Keyboard Resize Rule
 
 `@capacitor/keyboard` runs with its defaults: no `Keyboard` block in either
@@ -787,6 +852,9 @@ libs/common/ui/star-rating
 apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteHapticsPlugin.java
 apps/bite-tribe-ios/ios/App/App/BiteHapticsPlugin.swift
 apps/bite-tribe-ios/ios/App/App/BridgeViewController.swift
+libs/common/sounds
+apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/BiteSoundsPlugin.java
+apps/bite-tribe-ios/ios/App/App/BiteSoundsPlugin.swift
 libs/common/social-share
 apps/bite-tribe-android/android/app/src/main/java/com/bitetribe/app/SocialSharePlugin.java
 apps/bite-tribe-ios/ios/App/App/SocialSharePlugin.swift
@@ -830,6 +898,7 @@ libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
 [#1729]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1729
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
+[#1742]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1742
 [#1743]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1743
 [#1744]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1744
 [#1745]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1745
@@ -839,5 +908,10 @@ libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
 [#1749]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1749
 [#1765]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1765
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835
+[#1842]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1842
+[#1843]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1843
+[#1844]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1844
+[#1845]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1845
+[#1846]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1846
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
 [#1883]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1883

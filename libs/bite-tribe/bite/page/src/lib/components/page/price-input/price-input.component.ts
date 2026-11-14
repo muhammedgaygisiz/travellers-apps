@@ -58,6 +58,9 @@ export class PriceInputComponent implements OnInit {
 
   private readonly currencyCode = signal<string>('EUR');
 
+  /** What the field shows: always short, so the input keeps its width. */
+  readonly selectedCurrencyCode = this.currencyCode.asReadonly();
+
   private readonly activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });

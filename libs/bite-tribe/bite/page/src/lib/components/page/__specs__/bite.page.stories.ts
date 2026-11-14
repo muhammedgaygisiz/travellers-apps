@@ -76,6 +76,21 @@ export const CurrencyLoading: Story = {
 };
 
 /**
+ * The currency with the longest name the price field is likely to meet: the
+ * Bosnia-Herzegovina convertible mark. The field names the currency by its
+ * code, so the input keeps its width on a phone (issue #2035).
+ */
+export const LongCurrencyName: Story = {
+  args: {
+    position: {
+      latitude: 46.9422564444011,
+      longitude: 7.457160053942448,
+    },
+    currency: 'BAM',
+  },
+};
+
+/**
  * A draft copied from another member's Bite that is older than 30 days: the
  * price comes along, dated, so the poster checks it (issue #2018). The fixed
  * date is far enough back to stay old on every run.

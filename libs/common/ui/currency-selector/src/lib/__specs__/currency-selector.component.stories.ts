@@ -40,7 +40,11 @@ export default {
 
 type Story = StoryObj<CurrencySelectorComponent>;
 
-/** Picking the one currency prices are shown in. */
+/**
+ * Picking the one currency prices are shown in. The picker scrolls to the
+ * selected currency when it opens; this story is captured from the top so it
+ * keeps showing the search bar and the instruction.
+ */
 export const Default: Story = {
   args: {
     mode: 'preferred',
@@ -48,6 +52,7 @@ export const Default: Story = {
     favoriteCurrencies: [],
     leftButtonLangCode: 'cancel',
   },
+  parameters: { lokiSettle: { resetScroll: true } },
 };
 
 /** Same single pick, with favorites sorted to the top and marked as such. */
@@ -56,6 +61,18 @@ export const WithFavorites: Story = {
     ...Default.args,
     selectedCurrency: 'EUR',
     favoriteCurrencies: ['USD', 'CHF', 'THB'],
+  },
+  parameters: { lokiSettle: { resetScroll: true } },
+};
+
+/**
+ * The picker opened with a currency far down the list selected: it opens
+ * scrolled so the selected row is in view (#2035).
+ */
+export const OpensOnSelected: Story = {
+  args: {
+    ...Default.args,
+    selectedCurrency: 'CHF',
   },
 };
 

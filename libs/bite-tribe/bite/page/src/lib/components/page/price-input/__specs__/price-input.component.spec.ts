@@ -70,6 +70,34 @@ describe('PriceInputComponent', () => {
     });
   });
 
+  describe('currency in the field', () => {
+    it('should show the currency code, not its name, so a long name cannot crowd out the input', () => {
+      createComponent();
+
+      host.form.controls['currency'].patchValue('BAM');
+      hostFixture.detectChanges();
+
+      const shown = hostFixture.debugElement.query(
+        By.css('[data-testid="bite-price-currency"]'),
+      ).nativeElement as HTMLElement;
+
+      expect(shown.textContent?.trim()).toBe('BAM');
+    });
+
+    it('should keep the full currency name as the accessible name', () => {
+      createComponent();
+
+      host.form.controls['currency'].patchValue('USD');
+      hostFixture.detectChanges();
+
+      const trigger = hostFixture.debugElement.query(
+        By.css('#currency-selector-trigger-bite'),
+      ).nativeElement as HTMLElement;
+
+      expect(trigger.getAttribute('aria-label')).toBe('US Dollar');
+    });
+  });
+
   describe('selectedCurrencyName', () => {
     it('should return the localized selected currency name', () => {
       MockTranslocoService.getActiveLang.mockReturnValue('de');

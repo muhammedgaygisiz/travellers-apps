@@ -366,7 +366,7 @@ test.describe('Create and maintain personal bites', () => {
     // coordinates the lookup was last called with are what separate the two:
     // both positions sit in the Eurozone, so the resolved currency cannot.
     await expect.poll(() => currencyLookups.at(-1)).toEqual(PHOTO_POSITION);
-    await biteForm.expectCurrency('Euro');
+    await biteForm.expectCurrency('EUR');
 
     await biteForm.fillName(name);
     // The custom entry carries no position of its own, so the photo stays the

@@ -119,10 +119,10 @@ test.describe('Bite location, currency, and data quality', () => {
     await mockPositionCurrency(page, 'USD');
 
     const createBite = await prepareCreateBite(page);
-    await createBite.expectCurrency('US Dollar');
+    await createBite.expectCurrency('USD');
 
     await createBite.chooseCurrency('CHF');
-    await createBite.expectCurrency('Swiss Franc');
+    await createBite.expectCurrency('CHF');
 
     const runId = Date.now();
     const biteName = `Currency Override Bite ${runId}`;
@@ -145,7 +145,7 @@ test.describe('Bite location, currency, and data quality', () => {
     await mockPositionCurrency(page, null);
 
     const createBite = await prepareCreateBite(page);
-    await createBite.expectCurrency('Euro');
+    await createBite.expectCurrency('EUR');
 
     const runId = Date.now();
     await createBite.uploadImage(IMAGE_FIXTURE);

@@ -70,6 +70,7 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 - Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against.
 - Issue [#1331] separated the empty-feed and empty-search-result copy.
 - Issue [#1717] lists only Bites with an uploaded photo to anybody but their poster.
+- Issue [#2022] draws the map dark in dark mode, from the same OpenStreetMap tiles so every restaurant, café and bar icon stays on it.
 
 ## Related Domains
 
@@ -90,3 +91,4 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 [#1331]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1331
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
 [#1791]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1791
+[#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022

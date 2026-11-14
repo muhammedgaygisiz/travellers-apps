@@ -22,6 +22,21 @@ Use these adaptive tokens:
 
 `--ion-color-card-background` resolves through `--ion-color-tertiary-shade`, so it flips with the theme (`#d4d4d4` light, `#191e26` dark). Prefer it over hand-rolled surface colors.
 
+### Maps
+
+The Leaflet map in `libs/bite-tribe-common/map` takes its dark colours from its own
+stylesheet, `map.component.scss`, not from the Ionic tokens, because Leaflet draws
+its panes and controls outside the component's view. In dark mode it recolours the
+**same** OpenStreetMap tiles with a CSS `filter` on `.leaflet-tile-pane` rather than
+loading a dark tile set: the dark sets (CARTO Dark Matter, Stadia Alidade Smooth Dark,
+Esri Dark Gray) leave out the restaurant, café and bar icons, and those icons are what
+the map is for. Only the tile pane is filtered, so markers, the GPS dot and popups keep
+their colours; the container background, the zoom and attribution controls and the
+small cluster bubble take dark values through `--map-*` custom properties. The switch
+is `:host-context(.dark)` plus the `prefers-color-scheme` media query under
+`html:not(.light)`, so a settings change recolours an open map without reloading tiles.
+See GitHub issue [#2022].
+
 ## Tokens That Do Not Work Here
 
 - **`--ion-color-light` is not a surface.** It is a fixed light value (`#f4f5f8`) that does **not** flip in dark mode. Using it as a background leaves theme-adaptive white text unreadable on it.
@@ -333,3 +348,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1801]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1801
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
+[#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022

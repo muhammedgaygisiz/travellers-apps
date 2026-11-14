@@ -144,7 +144,11 @@ const DARK = '--ion-background-color: #1a1c22; --ion-text-color: #ffffff';
 componentWrapperDecorator((story) => `<div style="${DARK}">${story}</div>`);
 ```
 
-The floor-plan canvas is baselined this way (issue [#1089]). The same decorator
+The floor-plan canvas is baselined this way (issue [#1089]). The Leaflet map
+cannot be: its dark tiles come from a CSS `filter`, not a variable, so its dark
+stories wrap it in `<div class="dark">` instead, which its stylesheet matches
+through `:host-context(.dark)` (issue [#2022]). Those stories are Loki-skipped
+with the rest of the map's. The same decorator
 shape gives a `filter: grayscale(1)` story, which is how a plan that must not
 carry meaning in a colour alone is asserted rather than promised - and it is
 the state the plan is printed in.
@@ -256,3 +260,4 @@ gitignored, then remove the entry afterwards.
 [#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
 [#1411]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1411
 [#1547]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1547
+[#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022

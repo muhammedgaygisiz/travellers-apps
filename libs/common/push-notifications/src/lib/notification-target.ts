@@ -89,6 +89,18 @@ export const toNotificationTarget = (
           }
         : { commands: [PATH.LEADERBOARD] };
 
+    case 'WEEKLY_AWARD': {
+      // The week's result opens the frozen standings it was won in (#2031).
+      const board = data['board'];
+
+      return board === 'lastWeek' || board === 'mostLikedLastWeek'
+        ? {
+            commands: [PATH.LEADERBOARD],
+            extras: { queryParams: { board } },
+          }
+        : { commands: [PATH.LEADERBOARD] };
+    }
+
     case 'NEW_COUNTRY_BADGE':
       // The badge lives on the profile of whoever earned it. The same payload
       // reaches the achiever and their followers, so the achiever is sent to

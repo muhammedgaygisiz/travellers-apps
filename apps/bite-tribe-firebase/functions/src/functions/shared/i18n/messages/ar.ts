@@ -49,6 +49,11 @@ export const ar: NotificationMessages = {
     'صعدت Bite {{dish}} الخاصة بك إلى المركز {{rank}} في قائمة الأكثر إعجابًا! 🎉',
   'leaderboard.mostLikedDropped':
     'نزلت Bite {{dish}} الخاصة بك إلى المركز {{rank}} في قائمة الأكثر إعجابًا.',
+  'weeklyAward.title': '🏆 نتائج الأسبوع',
+  'weeklyAward.bodyMostBites':
+    'تهانينا، أنهيت الأسبوع في المركز {{place}} على لوحة المتصدرين!',
+  'weeklyAward.bodyMostLiked':
+    'تهانينا، أنهت Bite الخاصة بك الأسبوع في المركز {{place}} في قائمة الأكثر إعجابًا!',
   'countryBadge.title': '🎉 شارة دولة جديدة!',
   'countryBadge.body': 'تهانينا! لقد فتحت شارة {{country}}',
   'countryBadge.followerTitle': '🌍 شارة دولة جديدة',

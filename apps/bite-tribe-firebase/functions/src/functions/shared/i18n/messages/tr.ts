@@ -50,6 +50,11 @@ export const tr: NotificationMessages = {
     "{{dish}} Bite'ın en çok beğenilenlerde #{{rank}} sırasına yükseldi! 🎉",
   'leaderboard.mostLikedDropped':
     "{{dish}} Bite'ın en çok beğenilenlerde #{{rank}} sırasına düştü.",
+  'weeklyAward.title': '🏆 Haftanın sonuçları',
+  'weeklyAward.bodyMostBites':
+    'Tebrikler, haftayı sıralamada #{{place}} olarak bitirdin!',
+  'weeklyAward.bodyMostLiked':
+    "Tebrikler, Bite'ın haftayı en çok beğenilenlerde #{{place}} olarak bitirdi!",
   'countryBadge.title': '🎉 Yeni ülke rozeti!',
   'countryBadge.body': 'Tebrikler! {{country}} rozetinin kilidini açtın',
   'countryBadge.followerTitle': '🌍 Yeni ülke rozeti',

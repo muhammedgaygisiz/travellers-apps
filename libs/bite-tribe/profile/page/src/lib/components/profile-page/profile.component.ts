@@ -30,6 +30,8 @@ import {
   PublicUser,
   USER_REPORT_REASONS,
   UserReportReason,
+  WeeklyBadge,
+  WeeklyBadgeBoard,
 } from 'model';
 
 import { BiteComponent } from 'bite-tribe-common/bite';
@@ -198,6 +200,8 @@ export class ProfileComponent {
   readonly followingClick = output<string>();
   /** The profile's user id, to open its countries on a globe (#1787). */
   readonly worldClick = output<string>();
+  /** A weekly badge was tapped: the board it was won on (issue #2031). */
+  readonly weeklyBadgeClick = output<WeeklyBadgeBoard>();
   readonly retryImageUpload = output<Bite>();
 
   isOpen = signal(false);
@@ -244,6 +248,23 @@ export class ProfileComponent {
   followingCount = computed(() => {
     return this.profileMetadata()?.following;
   });
+
+  /**
+   * The weekly top-3 badges shown under the globe button (issue #2031), the
+   * This week one first. A badge is held for the week after it was won, so
+   * the copy says "last week".
+   */
+  weeklyBadges = computed((): WeeklyBadge[] =>
+    this.showsProfileContent()
+      ? [...(this.user()?.weeklyBadges ?? [])]
+          .filter((badge) => badge.place >= 1 && badge.place <= 3)
+          .sort(
+            (a, b) =>
+              (a.board === 'thisWeek' ? -1 : 0) -
+              (b.board === 'thisWeek' ? -1 : 0),
+          )
+      : [],
+  );
 
   /** Whether the flag row shows anything, and so the globe has something. */
   hasCountries = computed(() =>

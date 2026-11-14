@@ -30,6 +30,12 @@ export interface PublicUser {
   followingCount?: number;
   subscriptionTier?: number;
   countryCodes?: string[];
+  /**
+   * The weekly top-3 badges the user holds (issue #2031): at most one per
+   * weekly list, written by the Monday reset and held until the next one.
+   * Backend-owned, like `countryCodes`.
+   */
+  weeklyBadges?: WeeklyBadge[];
 
   createdAt?: string;
   createdAtTimestamp?: number;
@@ -54,4 +60,14 @@ export interface PublicUser {
 
   /** The coach mark surfaces this account has dismissed (issue #1851). */
   coachMarksSeen?: string[];
+}
+
+/** A weekly list a badge is won on (issue #2031). */
+export type WeeklyBadgeBoard = 'thisWeek' | 'mostLiked';
+
+/** A place from 1 to 3 on one weekly list, and the week it was won in. */
+export interface WeeklyBadge {
+  board: WeeklyBadgeBoard;
+  place: number;
+  week: string;
 }

@@ -52,6 +52,11 @@ export const id: NotificationMessages = {
     'Bite {{dish}} kamu naik ke #{{rank}} di daftar paling disukai! 🎉',
   'leaderboard.mostLikedDropped':
     'Bite {{dish}} kamu turun ke #{{rank}} di daftar paling disukai.',
+  'weeklyAward.title': '🏆 Hasil minggu ini',
+  'weeklyAward.bodyMostBites':
+    'Selamat, kamu menutup minggu ini di #{{place}} papan peringkat!',
+  'weeklyAward.bodyMostLiked':
+    'Selamat, Bite kamu menutup minggu ini di #{{place}} daftar paling disukai!',
   'countryBadge.title': '🎉 Lencana negara baru!',
   'countryBadge.body': 'Selamat! Kamu membuka lencana {{country}}',
   'countryBadge.followerTitle': '🌍 Lencana negara baru',

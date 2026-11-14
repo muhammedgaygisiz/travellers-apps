@@ -372,7 +372,9 @@ export interface AnalyticsEventParamMap {
       | 'first-country'
       | 'onboarding-finished'
       | 'first-follow'
-      | 'bite-trail-completed';
+      | 'bite-trail-completed'
+      | 'weekly-award-bites'
+      | 'weekly-award-liked';
   };
   /**
    * A web visitor followed a store badge or QR link (GitHub issue #1759).

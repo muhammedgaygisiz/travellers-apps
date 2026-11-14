@@ -26,6 +26,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (followersClick)="service.gotoFollowers($event)"
       (followingClick)="service.gotoFollowing($event)"
       (worldClick)="service.gotoWorld($event)"
+      (weeklyBadgeClick)="service.gotoWeeklyStandings($event)"
     />
   `,
   imports: [ProfileComponent],

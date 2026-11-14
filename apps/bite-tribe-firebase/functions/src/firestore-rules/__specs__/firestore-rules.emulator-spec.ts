@@ -3111,6 +3111,14 @@ describe('users', () => {
     );
   });
 
+  it('refuses awarding itself a weekly top-3 badge (issue #2031)', async () => {
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+        weeklyBadges: [{ board: 'thisWeek', place: 1, week: '2026-11-09' }],
+      }),
+    );
+  });
+
   /**
    * The profile write paths send whole objects back. A backend-owned field
    * carried at the value it already has is not a change, and must not be

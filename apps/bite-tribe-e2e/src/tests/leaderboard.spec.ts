@@ -312,4 +312,69 @@ test.describe('Use gamification signals', () => {
       await deleteFirestoreDocument(page, `bites/${biteId}`);
     }
   });
+
+  test('shows a weekly top-3 badge on the profile that opens last week’s standings', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const winner: RankedUser = {
+      id: `badge-winner-${runId}`,
+      displayName: `Badge Winner ${runId}`,
+      city: 'Bern',
+      // Above every count other specs seed: the Bite triggers rebuild the
+      // all-time board from the user documents, so a seeded board does not
+      // stay as seeded in the shared emulator.
+      biteCount: 5000,
+    };
+
+    await seedRankedUser(page, winner);
+    // The Monday reset writes the badge; seeded here because the scheduled
+    // job does not run in the emulator. Its logic is on the unit tests.
+    await seedFirestoreDocument(page, `users/${winner.id}`, {
+      userId: { stringValue: winner.id },
+      displayName: { stringValue: winner.displayName },
+      email: { stringValue: `${winner.id}@example.test` },
+      photoUrl: { stringValue: '' },
+      city: { stringValue: winner.city },
+      public: { booleanValue: true },
+      biteCount: { integerValue: String(winner.biteCount) },
+      subscriptionTier: { integerValue: '0' },
+      weeklyBadges: {
+        arrayValue: {
+          values: [
+            {
+              mapValue: {
+                fields: {
+                  board: { stringValue: 'thisWeek' },
+                  place: { integerValue: '1' },
+                  week: { stringValue: '2026-11-09' },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+    await seedLeaderboard(page, [winner]);
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    const leaderboard = new LeaderboardPage(page);
+    await leaderboard.open();
+    await dismissCoachMarks(page);
+    await leaderboard.showAllTime();
+    await leaderboard.rowFor(winner.displayName).click();
+    await page.waitForURL(`**/profile/${winner.id}`);
+
+    const badge = page.getByTestId('profile-weekly-badge-thisWeek');
+    await expect(badge).toContainText('#1 Most Bites last week');
+
+    await badge.click();
+    await page.waitForURL('**/leaderboard?board=lastWeek');
+    await expect(leaderboard.finalStandings).toContainText('Final standings');
+  });
 });

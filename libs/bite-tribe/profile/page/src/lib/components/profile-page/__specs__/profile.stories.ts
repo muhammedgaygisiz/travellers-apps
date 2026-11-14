@@ -75,6 +75,26 @@ export const Default: Story = {
   },
 };
 
+/**
+ * A weekly top-3 finisher (issue #2031): one badge per list under the globe
+ * button, gold and bronze, each opening the standings it was won in.
+ */
+export const WithWeeklyBadges: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      countryCodes: ['CH', 'BA', 'TR'],
+      weeklyBadges: [
+        { board: 'thisWeek', place: 1, week: '2026-11-09' },
+        { board: 'mostLiked', place: 3, week: '2026-11-09' },
+      ],
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 /** Somebody else's public profile with pronouns after the name (#1826). */
 export const WithPronouns: Story = {
   args: {

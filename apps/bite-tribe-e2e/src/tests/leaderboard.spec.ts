@@ -373,4 +373,83 @@ test.describe('Use gamification signals', () => {
     await page.waitForURL('**/leaderboard?board=lastWeek');
     await expect(leaderboard.finalStandings).toContainText('Final standings');
   });
+
+  test('ranks countries by this week’s Bites on their own page and opens a country', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+
+    const runId = Date.now();
+    const biteIds = [0, 1, 2].map((i) => `country-bite-${i}-${runId}`);
+
+    const countryBite = (biteId: string): Record<string, unknown> => ({
+      userId: { stringValue: `country-author-${runId}` },
+      name: { stringValue: `Ćevapi ${biteId}` },
+      place: { stringValue: `Sarajevo Kitchen ${runId}` },
+      price: { stringValue: '6.00' },
+      currency: { stringValue: 'BAM' },
+      imageStatus: { stringValue: 'uploaded' },
+      createdAt: { stringValue: new Date().toISOString() },
+      createdAtTimestamp: { integerValue: String(Date.now()) },
+    });
+
+    for (const biteId of biteIds) {
+      await seedFirestoreDocument(page, `bites/${biteId}`, countryBite(biteId));
+    }
+
+    // The emulator has no geocoding key, so the address trigger fails on a
+    // new Bite and clears its country. Once it has run, the country is
+    // written back; a write that leaves the position alone does not run it
+    // again.
+    for (const biteId of biteIds) {
+      await expect
+        .poll(
+          async () =>
+            (await getFirestoreDocument(page, `bites/${biteId}`))?.[
+              'addressStatus'
+            ],
+          { timeout: 30_000 },
+        )
+        .toBe('failed');
+      await seedFirestoreDocument(page, `bites/${biteId}`, {
+        ...countryBite(biteId),
+        addressStatus: { stringValue: 'failed' },
+        countryCode: { stringValue: 'BA' },
+      });
+    }
+
+    // The ranking is cached for a few minutes; start this read fresh.
+    await deleteFirestoreDocument(page, 'meta/leaderboardCountries');
+
+    try {
+      await loginAsTestUser(page);
+      await completeOnboardingIfNeeded(page);
+      await dismissCoachMarks(page);
+
+      const leaderboard = new LeaderboardPage(page);
+      await leaderboard.open();
+      await dismissCoachMarks(page);
+
+      await page.getByTestId('leaderboard-countries').click();
+      await page.waitForURL('**/leaderboard-countries');
+
+      const bosnia = page
+        .getByTestId('country-entry')
+        .filter({ hasText: 'Bosnia' });
+      await expect(bosnia.locator('.entry-count')).toHaveText('3 Bites');
+      await expect(page.getByTestId('country-week-ends')).toContainText(
+        'Week ends in',
+      );
+
+      await bosnia.click();
+      await page.waitForURL('**/search?country=BA');
+      await expect(page.getByTestId('search-country-field')).toContainText(
+        'Bosnia',
+      );
+    } finally {
+      for (const biteId of biteIds) {
+        await deleteFirestoreDocument(page, `bites/${biteId}`);
+      }
+    }
+  });
 });

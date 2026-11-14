@@ -11,6 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   IonAvatar,
   IonBadge,
+  IonButton,
   IonContent,
   IonIcon,
   IonItem,
@@ -60,6 +61,7 @@ const LAST_WEEK_BOARDS: readonly LeaderboardBoard[] = [
     PageComponent,
     IonAvatar,
     IonBadge,
+    IonButton,
     IonContent,
     IonIcon,
     IonItem,
@@ -89,6 +91,8 @@ export class LeaderboardListComponent {
   boardChange = output<LeaderboardBoard>();
   userClick = output<LeaderboardUser>();
   biteClick = output<MostLikedBite>();
+  /** The globe button: open the country ranking (#2043). */
+  countriesClick = output<void>();
 
   imageErroredUserIds = signal<Set<string>>(new Set());
 

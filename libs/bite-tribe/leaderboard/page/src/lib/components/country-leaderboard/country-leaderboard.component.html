@@ -1,0 +1,139 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+  [loading]="isLoading()"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <h1 class="ion-margin-bottom">
+      {{ 'leaderboard-countries' | transloco }}
+    </h1>
+
+    <ion-segment
+      [value]="tab()"
+      data-testid="country-leaderboard-tabs"
+      (ionChange)="selectTab($any($event.detail.value))"
+    >
+      <ion-segment-button value="week" data-testid="country-tab-week">
+        {{ 'leaderboard-tab-this-week' | transloco }}
+      </ion-segment-button>
+      <ion-segment-button value="allTime" data-testid="country-tab-all-time">
+        {{ 'leaderboard-tab-all-time' | transloco }}
+      </ion-segment-button>
+    </ion-segment>
+
+    @if (tab() === 'week') {
+      <ion-segment
+        class="week-switch"
+        [value]="board()"
+        (ionChange)="selectWeek($any($event.detail.value))"
+      >
+        <ion-segment-button value="countries" data-testid="country-week-this">
+          {{ 'leaderboard-tab-this-week' | transloco }}
+        </ion-segment-button>
+        <ion-segment-button
+          value="countriesLastWeek"
+          data-testid="country-week-last"
+        >
+          {{ 'leaderboard-last-week' | transloco }}
+        </ion-segment-button>
+      </ion-segment>
+
+      @if (weekEndsIn(); as endsIn) {
+        <p class="meta" data-testid="country-week-ends">
+          <ion-icon name="time-outline" aria-hidden="true" />
+          {{ 'leaderboard-week-ends' | transloco: { relative: endsIn } }}
+        </p>
+      }
+      @if (lastWeekDates(); as dates) {
+        <p class="meta" data-testid="country-final-standings">
+          {{ 'leaderboard-final-standings' | transloco: { dates } }}
+        </p>
+      }
+    }
+
+    @if (isLoading()) {
+      <div class="spinner-container">
+        <ion-spinner color="primary" />
+      </div>
+    } @else if (!entries().length) {
+      <div class="empty-container">
+        <ion-label data-testid="country-leaderboard-empty">{{
+          emptyKey() | transloco
+        }}</ion-label>
+      </div>
+    } @else {
+      <div class="podium" data-testid="country-podium">
+        <img
+          class="podium__image"
+          src="assets/leaderboard/podium.webp"
+          alt=""
+          aria-hidden="true"
+        />
+        @for (slot of podiumSlots(); track slot.place) {
+          <div
+            class="podium__place"
+            [class]="'podium__place podium__place--' + slot.place"
+          >
+            @if (slot.entry; as country) {
+              @if (slot.place === 1) {
+                <ion-icon
+                  name="trophy"
+                  class="podium__crown"
+                  aria-hidden="true"
+                />
+              }
+              <button
+                type="button"
+                class="podium__entry"
+                data-testid="country-entry"
+                [attr.data-rank]="country.rank"
+                (click)="countryClick.emit(country.countryCode)"
+              >
+                <span class="podium__avatar podium__avatar--flag">
+                  <span [class]="country.flagClass" aria-hidden="true"></span>
+                </span>
+                <span class="podium__name entry-name">{{ country.name }}</span>
+                <span class="podium__count entry-count">{{
+                  'leaderboard-bite-count'
+                    | transloco: { count: country.biteCount }
+                }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <ion-list>
+        @for (country of listed(); track country.countryCode) {
+          <ion-item
+            class="ion-margin-vertical country-item"
+            data-testid="country-entry"
+            [attr.data-rank]="country.rank"
+            button
+            [detail]="true"
+            (click)="countryClick.emit(country.countryCode)"
+          >
+            <ion-badge slot="start" color="primary" class="rank-badge">
+              {{ country.rank }}
+            </ion-badge>
+            <span slot="start" class="row-flag" aria-hidden="true">
+              <span [class]="country.flagClass"></span>
+            </span>
+            <ion-label>
+              <h2 class="entry-name">{{ country.name }}</h2>
+            </ion-label>
+            <ion-badge slot="end" color="secondary" class="entry-count">
+              {{
+                'leaderboard-bite-count'
+                  | transloco: { count: country.biteCount }
+              }}
+            </ion-badge>
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </ion-content>
+</ta-page>

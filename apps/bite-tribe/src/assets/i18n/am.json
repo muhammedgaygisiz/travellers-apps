@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "የእርስዎ Bite?",
   "leaderboard-invite-this-week": "የዚህ ሳምንት ደረጃ ላይ ለመውጣት Bite ያጋሩ",
   "leaderboard-invite-most-liked": "የሚወዷቸውን Bites ይውደዱ እና መድረኩ ላይ ያውጧቸው",
+  "leaderboard-countries": "አገሮች",
   "weekly-badge-most-bites": "#{{ place }} ባለፈው ሳምንት ብዙ Bites",
   "weekly-badge-most-liked": "#{{ place }} ባለፈው ሳምንት በብዛት የተወደደ Bite",
   "weekly-award-bites-earned": "ያለፈውን ሳምንት በደረጃ ሰንጠረዡ #{{ place }} ሆነው አጠናቀቁ! 🏆",

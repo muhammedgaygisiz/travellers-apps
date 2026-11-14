@@ -69,6 +69,15 @@ const APP_ROUTES: Routes = [
     title: 'Leaderboard',
   },
   {
+    path: PATH.LEADERBOARD_COUNTRIES,
+    loadComponent: () =>
+      import('bite-tribe/leaderboard').then(
+        (m) => m.CountryLeaderboardContainer,
+      ),
+    canActivate: [authGuard],
+    title: 'Country leaderboard',
+  },
+  {
     path: PATH.WEEKLY_BITES,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.WeeklyBitesContainer),

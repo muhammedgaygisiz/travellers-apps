@@ -27,6 +27,7 @@ const BOARDS_FROM_LINK: readonly LeaderboardBoard[] = [
       (boardChange)="service.selectBoard($event)"
       (userClick)="service.userClicked($event)"
       (biteClick)="service.biteClicked($event)"
+      (countriesClick)="service.openCountries()"
     />
 
     <bt-coach-mark

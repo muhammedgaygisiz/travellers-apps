@@ -15,6 +15,7 @@ import {
   buildWeeklyAwardBody,
   WeeklyBadge,
 } from '../shared/utils/weekly-awards';
+import { freezeCountriesLastWeek } from '../shared/utils/country-leaderboard';
 import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 
 const db = getFirestore();
@@ -66,6 +67,9 @@ export const resetWeeklyLeaderboard = onSchedule(
     const thisWeek = await rebuildWeeklyLeaderboard(db);
     const mostLikedLastWeek = await freezeMostLikedLastWeek(db);
     await rebuildMostLiked(db);
+    // The country ranking (issue #2043) freezes with the other boards; the
+    // running week is computed on read, so it needs no restart.
+    await freezeCountriesLastWeek(db);
 
     const winners = await awardWeeklyBadges(
       db,

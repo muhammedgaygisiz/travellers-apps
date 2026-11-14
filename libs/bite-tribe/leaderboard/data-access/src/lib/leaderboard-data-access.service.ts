@@ -17,6 +17,27 @@ export type LeaderboardUser = Pick<
 export type LeaderboardBoard =
   'thisWeek' | 'lastWeek' | 'allTime' | 'mostLiked' | 'mostLikedLastWeek';
 
+/**
+ * The country rankings (issue #2043): the running week, last week frozen at
+ * the reset, and all time.
+ */
+export type CountryBoard =
+  'countries' | 'countriesLastWeek' | 'countriesAllTime';
+
+/** One country on a country ranking. */
+export interface RankedCountry {
+  countryCode: string;
+  biteCount: number;
+}
+
+/** One country ranking as `loadLeaderboard` returns it. */
+export interface CountryRanking {
+  board: CountryBoard;
+  countries: RankedCountry[];
+  start?: number;
+  end?: number;
+}
+
 /** One Bite on a Most liked board. */
 export interface MostLikedBite {
   biteId: string;
@@ -72,6 +93,31 @@ export class LeaderboardDataAccessService {
       return emptyRanking(board);
     }
   }
+
+  readonly countryBoard = signal<CountryBoard>('countries');
+
+  /** Loads a country ranking; a failure reads as an empty one. */
+  async loadCountries(board: CountryBoard): Promise<CountryRanking> {
+    try {
+      const result = await FirebaseFunctions.callByName<
+        { board: CountryBoard },
+        CountryRanking
+      >({
+        name: 'loadLeaderboard',
+        data: { board },
+      });
+
+      return result.data?.countries ? result.data : { board, countries: [] };
+    } catch {
+      return { board, countries: [] };
+    }
+  }
+
+  countryRanking = resource({
+    params: () => ({ board: this.countryBoard() }),
+    loader: ({ params }) => this.loadCountries(params.board),
+    defaultValue: { board: 'countries', countries: [] } as CountryRanking,
+  });
 
   ranking = resource({
     params: () => ({ board: this.board() }),

@@ -629,6 +629,56 @@ both publish localized badge artwork, and adopting it would mean 22 files and a
 locale-to-asset map rather than three files and none; that trade has not been
 made.
 
+## Bundled Audio
+
+bite-tribe bundles exactly two interface sounds in its native wrappers, chosen
+for [Epic #1742][#1742] by [Issue #1842][#1842]: `posted`, for a Bite being
+posted, and `celebration`, for a celebrated first. A store app can only ship
+audio it has the right to redistribute, so this section is where that right is
+recorded. Both sounds are **CC0 1.0** (public domain): no attribution is
+required, and nothing conditions bundling them in a free or paid store app.
+Anything under CC-BY, CC-BY-NC or a "free for personal use" licence is rejected.
+
+| Sound         | Source                                                                                          | Author  | Licence | Downloaded  |
+| ------------- | ----------------------------------------------------------------------------------------------- | ------- | ------- | ----------- |
+| `posted`      | [Chomp on Chip.wav](https://freesound.org/people/bbrocer/sounds/382660/), freesound #382660     | bbrocer | CC0 1.0 | 14 Nov 2026 |
+| `celebration` | [UI Toast Notification](https://freesound.org/people/Qvantor/sounds/878254/), freesound #878254 | Qvantor | CC0 1.0 | 14 Nov 2026 |
+
+The maintainer picked both by ear from three rounds of CC0 candidates. Kenney's
+Interface Sounds pack was the first round, and its taps and two-note chimes
+were turned down in favour of a bite for `posted` and a soft notification for
+`celebration`. Fanfares were tried as well and rejected as too loud.
+
+### What Was Done To Them
+
+Both downloads are freesound's high-quality Ogg previews, not the uploaded
+originals, because an original needs a signed-in freesound account. The masters
+are therefore decoded from a lossy file. A later re-master that needs the
+uncompressed audio should start from the original upload on the source page,
+which carries the same licence.
+
+| Sound         | Edit                                                                                                                 | Length | Peak     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- | ------ | -------- |
+| `posted`      | The loudest single bite of the 6.5 s recording, 5.845 s to 6.080 s, mixed to mono, a 30 ms fade-out, peak-normalised | 235 ms | -13 dBFS |
+| `celebration` | Resampled from 48 kHz to 44.1 kHz, mixed to mono, trimmed to its audible length, a 30 ms fade-out, peak-normalised   | 272 ms | -16 dBFS |
+
+Both stay within the issue's limits of 300 ms and -12 dBFS. `celebration` sits
+3 dB below `posted` so a celebrated first is never louder than an ordinary post.
+Neither native player sets a volume, so these files are where the loudness
+lives; the level is accepted on the reference devices by [Issue #1847][#1847],
+and a change there is a re-master here.
+
+| File                                                                                             | Format                                                                    |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `ssot/assets/bundled-audio/posted.wav`, `celebration.wav`                                        | The edited masters, 16-bit PCM, mono, 44.1 kHz                            |
+| `apps/bite-tribe-ios/ios/App/App/Sounds/posted.caf`, `celebration.caf`                           | 16-bit linear PCM `.caf`, mono, 44.1 kHz, in the `App` target's resources |
+| `apps/bite-tribe-android/android/app/src/main/res/raw/sound_posted.ogg`, `sound_celebration.ogg` | Ogg Vorbis, mono, 44.1 kHz, `oggenc -q 5`                                 |
+
+Re-encode from the masters, never from a shipped file: `afconvert -f caff -d
+LEI16@44100 -c 1` for iOS, which ships with macOS, and `oggenc -q 5` for
+Android, which needs `brew install vorbis-tools`. Playing them is
+[Issue #1843][#1843]; this section only owns where they come from.
+
 ## Current State
 
 First inventoried on 21 August 2026 and kept current since. The rows below carry
@@ -903,4 +953,8 @@ These are account-level and gate submission regardless of listing completeness:
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1706]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1706
+[#1742]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1742
+[#1842]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1842
+[#1843]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1843
+[#1847]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1847
 [#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006

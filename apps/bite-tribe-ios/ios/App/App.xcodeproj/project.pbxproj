@@ -22,6 +22,8 @@
 		8D8EB8252DD8F0950057EE1A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8D8EB8242DD8F0950057EE1A /* GoogleService-Info.plist */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
 		BE7E00000000000000000002 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BE7E00000000000000000001 /* InfoPlist.strings */; };
+		5D0D00000000000000000001 /* posted.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5D0D00000000000000000002 /* posted.caf */; };
+		5D0D00000000000000000003 /* celebration.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5D0D00000000000000000004 /* celebration.caf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +60,8 @@
 		BE7E0000000000000000010B /* ko */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BE7E0000000000000000010C /* ja */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BE7E0000000000000000010D /* zh-Hans */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		5D0D00000000000000000002 /* posted.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = posted.caf; sourceTree = "<group>"; };
+		5D0D00000000000000000004 /* celebration.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = celebration.caf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,9 +120,19 @@
 				BE7E00000000000000000001 /* InfoPlist.strings */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				5D0D00000000000000000005 /* Sounds */,
 				8D8EB8242DD8F0950057EE1A /* GoogleService-Info.plist */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		5D0D00000000000000000005 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				5D0D00000000000000000002 /* posted.caf */,
+				5D0D00000000000000000004 /* celebration.caf */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		8A953AE34BBF3DAF287294CD /* Pods */ = {
@@ -209,6 +223,8 @@
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				BE7E00000000000000000002 /* InfoPlist.strings in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
+				5D0D00000000000000000001 /* posted.caf in Resources */,
+				5D0D00000000000000000003 /* celebration.caf in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,

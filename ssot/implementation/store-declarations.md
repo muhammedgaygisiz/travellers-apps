@@ -32,17 +32,17 @@ questionnaire was corrected and saved on 30 August 2026. This paragraph read
 below it recorded the labels as published - a contradiction inside one page, and
 the reason a reader trusting the summary would have re-done finished work.
 
-| Declaration      | Value                                                                                     |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| Privacy policy   | `https://bite-tribe.web.app/privacy`                                                      |
-| Account deletion | `https://bite-tribe.web.app/account-deletion`                                             |
-| Content rating   | 12+ / Teen                                                                                |
-| Target age group | 18 and over - now the outlier, see below                                                  |
-| Ads              | none in this build                                                                        |
-| Data shared      | none                                                                                      |
-| Data collected   | name, email, user IDs, precise location, photos, crash logs, app interactions, device IDs |
-| Account creation | username and password, and OAuth                                                          |
-| Security         | encrypted in transit                                                                      |
+| Declaration      | Value                                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Privacy policy   | `https://bite-tribe.web.app/privacy`                                                                             |
+| Account deletion | `https://bite-tribe.web.app/account-deletion`                                                                    |
+| Content rating   | 12+ / Teen                                                                                                       |
+| Target age group | 18 and over - now the outlier, see below                                                                         |
+| Ads              | none in this build                                                                                               |
+| Data shared      | none                                                                                                             |
+| Data collected   | name, email, user IDs, other info (pronouns), precise location, photos, crash logs, app interactions, device IDs |
+| Account creation | username and password, and OAuth                                                                                 |
+| Security         | encrypted in transit                                                                                             |
 
 The Apple nutrition labels are answered from this same list, so the two stores
 describe one set of data flows. Revisit both when the AdMob epic
@@ -100,19 +100,21 @@ console.
 
 Completed and **published** on 21 August 2026. Nine data types, every one
 **linked to the user's identity** and **none used for tracking**, with the Play
-equivalent alongside:
+equivalent alongside. Pronouns get a row of their own only because Play splits
+them out; on Apple they are the same `Other User Content` type:
 
-| Apple category | Type                | Purpose                      | Play equivalent     |
-| -------------- | ------------------- | ---------------------------- | ------------------- |
-| Contact Info   | Name                | App Functionality            | Name                |
-| Contact Info   | Email Address       | App Functionality            | Email address       |
-| Location       | Precise Location    | App Functionality            | Precise location    |
-| User Content   | Photos or Videos    | App Functionality            | Photos              |
-| User Content   | Other User Content  | App Functionality            | –                   |
-| Identifiers    | User ID             | Analytics, App Functionality | User IDs            |
-| Identifiers    | Device ID           | App Functionality            | Device or other IDs |
-| Usage Data     | Product Interaction | Analytics                    | App interactions    |
-| Diagnostics    | Crash Data          | Analytics                    | Crash logs          |
+| Apple category | Type                          | Purpose                      | Play equivalent     |
+| -------------- | ----------------------------- | ---------------------------- | ------------------- |
+| Contact Info   | Name                          | App Functionality            | Name                |
+| Contact Info   | Email Address                 | App Functionality            | Email address       |
+| Location       | Precise Location              | App Functionality            | Precise location    |
+| User Content   | Photos or Videos              | App Functionality            | Photos              |
+| User Content   | Other User Content            | App Functionality            | –                   |
+| User Content   | Other User Content (pronouns) | App Functionality            | Other info          |
+| Identifiers    | User ID                       | Analytics, App Functionality | User IDs            |
+| Identifiers    | Device ID                     | App Functionality            | Device or other IDs |
+| Usage Data     | Product Interaction           | Analytics                    | App interactions    |
+| Diagnostics    | Crash Data                    | Analytics                    | Crash logs          |
 
 Three answers that needed evidence rather than assumption:
 
@@ -137,12 +139,20 @@ that heading. The divergence is a taxonomy difference, not an inconsistency.
 
 Pronouns, an optional free-text profile field since [#1826], need no new Apple
 type: they are text the user writes and publishes on their own profile, used for
-app functionality only, which is `Other User Content`. Play has no such catch-all,
-and its `Personal info - Other info` type names gender identity among its
-examples, so the Play Data safety form should declare `Other info` (collected,
-optional, App functionality, not shared) before the build that ships the field.
-That is a console step, not done yet, and tracked as [#1864]. The privacy policy lists pronouns
-among the account data it collects.
+app functionality only, which is `Other User Content`, so the nutrition label is
+unchanged. Play has no such catch-all, and its `Personal info - Other info` type
+names gender identity among its examples, so the Play Data safety form declares
+pronouns as `Other info` - the second `Other User Content` row above. Saved and
+sent for Google's review on 14 November 2026 ([#1864]):
+
+- **Collected:** yes. **Shared:** no; the value never leaves BiteTribe's own
+  Firebase project.
+- **Processed ephemerally:** no; it is stored on `/users/{uid}`.
+- **Required or optional:** optional, shown as optional on the listing.
+- **Purpose:** App functionality only. Not Analytics, since no event carries the
+  value, and not Personalization or Advertising.
+
+The privacy policy lists pronouns among the account data it collects.
 
 `Purchases` is left undeclared on both stores: paid BiteTrails are
 [epic-1125][#1125] and are not in the shipped build.

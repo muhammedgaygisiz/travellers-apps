@@ -125,10 +125,31 @@
     white-space: nowrap;
   }
 
+  // A long name, such as "Bosnia & Herzegovina", wraps onto a second line
+  // before it is cut, and name and count sit on a soft pill in the page
+  // colour, so the text never stands on the busy confetti of the artwork.
+  .podium__entry:not(.podium__entry--open) .podium__name,
+  .podium__entry:not(.podium__entry--open) .podium__count {
+    padding: 0 0.375rem;
+    background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.85);
+  }
+
   .podium__name {
+    display: -webkit-box;
     margin-top: 0.25rem;
+    border-radius: 0.375rem 0.375rem 0 0;
     font-size: 0.8125rem;
     font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .podium__count {
+    border-radius: 0 0 0.375rem 0.375rem;
   }
 
   .podium__count {

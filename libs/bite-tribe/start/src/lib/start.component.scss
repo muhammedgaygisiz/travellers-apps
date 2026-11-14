@@ -105,6 +105,20 @@ $two-columns-min-width: 768px;
           font-size: 1.5rem;
           font-weight: bold;
         }
+
+        // At the far end of the row, away from the sign-up button.
+        .instagram {
+          display: flex;
+          margin-left: auto;
+          padding: 8px;
+        }
+
+        .instagram-glyph {
+          width: 24px;
+          height: 24px;
+          background: url('/assets/social/instagram-glyph-black.svg') center /
+            contain no-repeat;
+        }
       }
 
       .headline {
@@ -198,5 +212,20 @@ $two-columns-min-width: 768px;
         }
       }
     }
+  }
+}
+
+/* Instagram's two monochrome glyphs, unaltered: black on a light page, white on
+ * a dark one, switched on the same pair of conditions as the theme in
+ * `apps/bite-tribe/src/theme/variables.scss`. `:host-context()` because a
+ * written `html.dark` selector is emitted with the component attribute and
+ * matches nothing; see `bt-store-links` for the same rule. */
+:host-context(html.dark) .landing .brand .instagram-glyph {
+  background-image: url('/assets/social/instagram-glyph-white.svg');
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not(.light)) .landing .brand .instagram-glyph {
+    background-image: url('/assets/social/instagram-glyph-white.svg');
   }
 }

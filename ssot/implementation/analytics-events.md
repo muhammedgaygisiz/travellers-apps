@@ -90,6 +90,7 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                   | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
 | Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                       | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
 | Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
+| Acquisition  | `instagram_link_clicked`              | `surface: 'start'`                                                                                         | The Instagram link in the web start page's brand row is followed; the native start page has no link | `libs/bite-tribe/start/src/lib/start.component.ts`                                                          |
 | Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
 
 The onboarding funnel events belong to the onboarding assistant epic ([epic-850](../history/records/epic-850.md),
@@ -141,6 +142,12 @@ scanned QR code is not counted: the phone that scans it opens the store
 directly. `store` was added to `provision-ga4.mjs`; `surface` reuses the
 already registered, shared `surface` dimension, so a breakdown by it needs an
 event filter.
+
+`instagram_link_clicked` belongs to issue [#2006]. The web start page links to
+the BiteTribe Instagram account, as the city landing pages do since [#1978];
+the event says whether anyone leaves the start page for it rather than signing
+up. The city pages log nothing, by their no-analytics rule. `surface` reuses the
+shared `surface` dimension, so nothing was added to `provision-ga4.mjs`.
 
 `city_page_arrived` belongs to issue [#1492] (epic [#1487]). The public city
 landing pages at `/eat/<city>` carry no analytics, cookie or storage,
@@ -939,3 +946,5 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#1759]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1759
 [#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
+[#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
+[#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006

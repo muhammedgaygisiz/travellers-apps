@@ -18,11 +18,15 @@ import { Capacitor } from '@capacitor/core';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { StoreLinksComponent } from 'bite-tribe/store-links';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { STORE_SERVICE } from 'utils';
 
 export type StartPlatform = 'web' | 'ios' | 'android';
 
 export type SignInProvider = 'google' | 'apple';
+
+/** The BiteTribe account the city landing pages link to as well (#1978). */
+export const INSTAGRAM_URL = 'https://www.instagram.com/bitetribeapp/';
 
 /**
  * The page a signed-out visitor lands on.
@@ -38,6 +42,11 @@ export type SignInProvider = 'google' | 'apple';
  * Both layouts offer Google and Apple sign-in directly (issue #1714), through
  * the same store calls as the login page. One tap signs in an existing account
  * or creates a new one, so the buttons need no log-in and sign-up variants.
+ *
+ * The web layout links to the BiteTribe Instagram account from the brand row
+ * (issue #2006), as the city landing pages do from their header. The native
+ * layout does not: someone who just installed the app is about to sign up,
+ * and a link out of it at that moment would only compete with that.
  */
 @Component({
   selector: 'start',
@@ -57,6 +66,9 @@ export type SignInProvider = 'google' | 'apple';
 })
 export class StartComponent {
   private readonly store = inject(STORE_SERVICE, { optional: true });
+  private readonly analytics = inject(AnalyticsService);
+
+  protected readonly instagramUrl = INSTAGRAM_URL;
 
   /**
    * The platform the page renders for. Read from Capacitor, and an input only
@@ -95,6 +107,12 @@ export class StartComponent {
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Start',
+    });
+  }
+
+  protected followedInstagram(): void {
+    this.analytics.logEvent(AnalyticsEvent.InstagramLinkClicked, {
+      surface: 'start',
     });
   }
 

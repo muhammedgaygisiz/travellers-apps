@@ -7,6 +7,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { CelebrationService } from 'celebration';
+import { SoundsService } from 'sounds';
 
 const Mock = {
   navigateBack: jest.fn(),
@@ -49,6 +50,10 @@ const CelebrationMock = {
   celebrate: jest.fn().mockResolvedValue(undefined),
 };
 
+const SoundsMock = {
+  posted: jest.fn().mockResolvedValue(undefined),
+};
+
 describe('BiteService', () => {
   let service: BiteService;
 
@@ -65,6 +70,7 @@ describe('BiteService', () => {
         { provide: TranslocoService, useValue: TranslocoMock },
         { provide: AnalyticsService, useValue: AnalyticsMock },
         { provide: CelebrationService, useValue: CelebrationMock },
+        { provide: SoundsService, useValue: SoundsMock },
       ],
     }).compileComponents();
 
@@ -255,6 +261,62 @@ describe('BiteService', () => {
 
       expect(CelebrationMock.celebrate).not.toHaveBeenCalled();
       expect(ToastMock.present).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the posted sound', () => {
+    const newBite = { id: '', name: 'Test Bite' };
+
+    it.each([
+      ['submitNewBite', 'submitNewBite'],
+      ['submitNewBiteAndAddAnother', 'submitNewBiteAndAddAnother'],
+    ] as const)(
+      'plays once with the toast for a later Bite through %s',
+      async (_, submit) => {
+        await service[submit](newBite);
+
+        expect(SoundsMock.posted).toHaveBeenCalledTimes(1);
+        expect(ToastMock.present).toHaveBeenCalledWith({
+          messageKey: 'bite-created-successfully',
+          outcome: 'success',
+        });
+      },
+    );
+
+    it.each([
+      ['submitNewBite', 'submitNewBite'],
+      ['submitNewBiteAndAddAnother', 'submitNewBiteAndAddAnother'],
+    ] as const)(
+      'stays silent for a first Bite through %s, which celebrates instead',
+      async (_, submit) => {
+        Mock.hasOwnBites.mockResolvedValue(false);
+
+        await service[submit](newBite);
+
+        expect(SoundsMock.posted).not.toHaveBeenCalled();
+      },
+    );
+
+    it('stays silent when the create fails', async () => {
+      Mock.submitNewBite.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(service.submitNewBite(newBite)).rejects.toThrow('offline');
+
+      expect(SoundsMock.posted).not.toHaveBeenCalled();
+    });
+
+    it('does not wait for the sound', async () => {
+      SoundsMock.posted.mockReturnValueOnce(new Promise<void>(() => undefined));
+
+      await service.submitNewBite(newBite);
+
+      expect(ToastMock.present).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays silent when a Bite is edited', () => {
+      service.submitEditedBite({ id: '123', name: 'Edited' } as never);
+
+      expect(SoundsMock.posted).not.toHaveBeenCalled();
     });
   });
 

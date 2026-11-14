@@ -9,6 +9,7 @@ import { withAddressInvalidatedIfMoved } from './bite-address';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { SoundsService } from 'sounds';
 import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +22,7 @@ export class BiteService {
   private readonly toast = inject(ToastService);
   private readonly analytics = inject(AnalyticsService);
   private readonly celebration = inject(CelebrationService);
+  private readonly sounds = inject(SoundsService);
 
   image = signal<string>('');
 
@@ -113,7 +115,9 @@ export class BiteService {
 
   /**
    * The user's first Bite is celebrated in place of the ordinary toast (issue
-   * #1796); every later one gets the ordinary toast.
+   * #1796); every later one gets the ordinary toast and the `posted` sound
+   * (issue #1845). The celebration plays its own sound, so a first Bite does
+   * not play `posted` as well.
    */
   private confirmCreated(first: boolean): void {
     if (first) {
@@ -125,6 +129,7 @@ export class BiteService {
       messageKey: 'bite-created-successfully',
       outcome: 'success',
     });
+    void this.sounds.posted();
   }
 
   private async createBite(

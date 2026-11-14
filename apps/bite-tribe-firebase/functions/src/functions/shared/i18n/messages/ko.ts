@@ -40,6 +40,14 @@ export const ko: NotificationMessages = {
   'leaderboard.droppedOut': '순위표 상위 {{limit}}위 밖으로 밀려났어요',
   'leaderboard.climbed': '순위표에서 {{rank}}위로 올라갔어요! 🎉',
   'leaderboard.dropped': '순위표에서 {{rank}}위로 내려갔어요',
+  'leaderboard.mostLikedEnteredTop':
+    '회원님의 Bite {{dish}}이(가) 좋아요 상위 {{limit}}위에 {{rank}}위로 진입했어요! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    '회원님의 Bite {{dish}}이(가) 좋아요 상위 {{limit}}위에서 밀려났어요.',
+  'leaderboard.mostLikedClimbed':
+    '회원님의 Bite {{dish}}이(가) 좋아요 순위 {{rank}}위로 올랐어요! 🎉',
+  'leaderboard.mostLikedDropped':
+    '회원님의 Bite {{dish}}이(가) 좋아요 순위 {{rank}}위로 내려갔어요.',
   'countryBadge.title': '🎉 새 국가 배지!',
   'countryBadge.body': '축하해요! 새 배지를 받았어요: {{country}}',
   'countryBadge.followerTitle': '🌍 새 국가 배지',

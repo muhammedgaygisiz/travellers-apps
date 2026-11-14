@@ -39,6 +39,14 @@ export const am: NotificationMessages = {
   'leaderboard.droppedOut': 'ከመሪዎች ሰሌዳ ምርጥ {{limit}} ውጪ ሆነዋል።',
   'leaderboard.climbed': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወጥተዋል! 🎉',
   'leaderboard.dropped': 'በመሪዎች ሰሌዳ ላይ ወደ {{rank}}ኛ ደረጃ ወርደዋል።',
+  'leaderboard.mostLikedEnteredTop':
+    'የእርስዎ Bite {{dish}} በብዛት በተወደዱት ምርጥ {{limit}} ውስጥ በ#{{rank}} ገብቷል! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'የእርስዎ Bite {{dish}} በብዛት ከተወደዱት ምርጥ {{limit}} ወጥቷል።',
+  'leaderboard.mostLikedClimbed':
+    'የእርስዎ Bite {{dish}} በብዛት በተወደዱት ዝርዝር ወደ #{{rank}} ከፍ ብሏል! 🎉',
+  'leaderboard.mostLikedDropped':
+    'የእርስዎ Bite {{dish}} በብዛት በተወደዱት ዝርዝር ወደ #{{rank}} ወርዷል።',
   'countryBadge.title': '🎉 አዲስ የአገር ባጅ!',
   'countryBadge.body': 'እንኳን ደስ አለዎት! የ{{country}} ባጅ ከፍተዋል',
   'countryBadge.followerTitle': '🌍 አዲስ የአገር ባጅ',

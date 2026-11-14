@@ -43,6 +43,14 @@ export const en: NotificationMessages = {
     'You dropped out of the top {{limit}} on the leaderboard.',
   'leaderboard.climbed': 'You climbed up to #{{rank}} on the leaderboard! 🎉',
   'leaderboard.dropped': 'You dropped to #{{rank}} on the leaderboard.',
+  'leaderboard.mostLikedEnteredTop':
+    'Your Bite {{dish}} entered the top {{limit}} most liked at #{{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Your Bite {{dish}} dropped out of the top {{limit}} most liked.',
+  'leaderboard.mostLikedClimbed':
+    'Your Bite {{dish}} climbed to #{{rank}} on the most liked list! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Your Bite {{dish}} dropped to #{{rank}} on the most liked list.',
   'countryBadge.title': '🎉 New country badge!',
   'countryBadge.body': 'Congrats! You just unlocked the badge for {{country}}',
   'countryBadge.followerTitle': '🌍 New country badge',

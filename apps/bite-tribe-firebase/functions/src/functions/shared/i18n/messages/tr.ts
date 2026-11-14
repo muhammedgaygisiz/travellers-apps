@@ -42,6 +42,14 @@ export const tr: NotificationMessages = {
   'leaderboard.droppedOut': 'Lider tablosunda ilk {{limit}} dışına düştün.',
   'leaderboard.climbed': 'Lider tablosunda {{rank}}. sıraya yükseldin! 🎉',
   'leaderboard.dropped': 'Lider tablosunda {{rank}}. sıraya düştün.',
+  'leaderboard.mostLikedEnteredTop':
+    "{{dish}} Bite'ın en çok beğenilenler ilk {{limit}} listesine #{{rank}} sırasından girdi! 🎉",
+  'leaderboard.mostLikedDroppedOut':
+    "{{dish}} Bite'ın en çok beğenilenler ilk {{limit}} listesinden çıktı.",
+  'leaderboard.mostLikedClimbed':
+    "{{dish}} Bite'ın en çok beğenilenlerde #{{rank}} sırasına yükseldi! 🎉",
+  'leaderboard.mostLikedDropped':
+    "{{dish}} Bite'ın en çok beğenilenlerde #{{rank}} sırasına düştü.",
   'countryBadge.title': '🎉 Yeni ülke rozeti!',
   'countryBadge.body': 'Tebrikler! {{country}} rozetinin kilidini açtın',
   'countryBadge.followerTitle': '🌍 Yeni ülke rozeti',

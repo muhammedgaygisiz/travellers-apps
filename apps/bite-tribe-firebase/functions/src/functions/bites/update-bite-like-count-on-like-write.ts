@@ -9,6 +9,11 @@ import {
   onDocumentDeleted,
   onDocumentUpdated,
 } from 'firebase-functions/firestore';
+import {
+  rebuildMostLiked,
+  recordLike,
+  removeLike,
+} from '../shared/utils/weekly-most-liked';
 
 type LikeType = 'thumbup' | 'drooling' | 'mindblown';
 
@@ -22,6 +27,35 @@ const LIKE_TYPES: LikeType[] = ['thumbup', 'drooling', 'mindblown'];
 const BITE_COLLECTION = 'bites';
 
 const db = getFirestore();
+
+/**
+ * Keeps the weekly Most liked board in step with a like that arrived or was
+ * removed (issue #2028). A failure is logged and does not fail the trigger:
+ * the all-time counts on the Bite are the trigger's first job, and the board
+ * is rebuilt again by the next counted like or a read of a stale week.
+ */
+const syncWeeklyLikes = async (
+  change: 'add' | 'remove',
+  biteId: string,
+  likerUid: string,
+): Promise<void> => {
+  try {
+    const changed =
+      change === 'add'
+        ? await recordLike(db, biteId, likerUid)
+        : await removeLike(db, biteId, likerUid);
+
+    if (changed) {
+      await rebuildMostLiked(db);
+    }
+  } catch (error) {
+    logger.warn('failed to update the weekly most-liked board', {
+      biteId,
+      change,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
 
 const isLikeType = (value: unknown): value is LikeType =>
   LIKE_TYPES.includes(value as LikeType);
@@ -118,6 +152,7 @@ export const incrementBiteLikeCountOnLikeCreate = onDocumentCreated(
     }
 
     await syncOrApplyLikeCountDelta(event.params.biteId, { [likeType]: 1 });
+    await syncWeeklyLikes('add', event.params.biteId, event.params.likeId);
   },
 );
 
@@ -138,6 +173,7 @@ export const decrementBiteLikeCountOnLikeDelete = onDocumentDeleted(
     }
 
     await syncOrApplyLikeCountDelta(event.params.biteId, { [likeType]: -1 });
+    await syncWeeklyLikes('remove', event.params.biteId, event.params.likeId);
   },
 );
 

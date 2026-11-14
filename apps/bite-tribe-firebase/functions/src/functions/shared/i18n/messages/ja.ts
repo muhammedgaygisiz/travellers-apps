@@ -45,6 +45,14 @@ export const ja: NotificationMessages = {
   'leaderboard.droppedOut': 'ランキングのトップ{{limit}}から外れました。',
   'leaderboard.climbed': 'ランキングで{{rank}}位に上がりました！🎉',
   'leaderboard.dropped': 'ランキングで{{rank}}位に下がりました。',
+  'leaderboard.mostLikedEnteredTop':
+    'あなたのBite「{{dish}}」がいいね数トップ{{limit}}に{{rank}}位で入りました！🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'あなたのBite「{{dish}}」がいいね数トップ{{limit}}から外れました。',
+  'leaderboard.mostLikedClimbed':
+    'あなたのBite「{{dish}}」がいいね数ランキングで{{rank}}位に上がりました！🎉',
+  'leaderboard.mostLikedDropped':
+    'あなたのBite「{{dish}}」がいいね数ランキングで{{rank}}位に下がりました。',
   'countryBadge.title': '🎉 新しい国のバッジ！',
   'countryBadge.body':
     'おめでとうございます！{{country}}のバッジを獲得しました',

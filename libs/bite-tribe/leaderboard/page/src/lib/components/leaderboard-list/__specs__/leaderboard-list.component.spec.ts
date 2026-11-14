@@ -198,4 +198,95 @@ describe(LeaderboardListComponent.name, () => {
       expect(component.tab()).toBe('allTime');
     });
   });
+
+  describe('Most liked board (#2028)', () => {
+    const bites = [
+      {
+        biteId: 'b-1',
+        name: 'Mantı',
+        imageUrl: 'https://img/1',
+        userId: 'ana',
+        displayName: 'Ana',
+        likeCount: 9,
+      },
+      {
+        biteId: 'b-2',
+        name: 'Burek',
+        imageUrl: '',
+        userId: 'ana',
+        displayName: 'Ana',
+        likeCount: 4,
+      },
+    ];
+
+    it('opens the Most liked tab on this week, with its own week switch', () => {
+      const emitted: string[] = [];
+      component.boardChange.subscribe((board) => emitted.push(board));
+
+      component.selectTab('mostLiked');
+      componentRef.setInput('board', 'mostLiked');
+
+      expect(emitted).toEqual(['mostLiked']);
+      expect(component.tab()).toBe('mostLiked');
+      expect(component.weekBoards()).toEqual({
+        current: 'mostLiked',
+        last: 'mostLikedLastWeek',
+      });
+    });
+
+    it('ranks Bites, one creator in several places, and opens a Bite', () => {
+      componentRef.setInput('board', 'mostLiked');
+      componentRef.setInput('ranking', {
+        board: 'mostLiked',
+        users: [],
+        bites,
+      });
+      fixture.detectChanges();
+
+      const rows = fixture.nativeElement.querySelectorAll('.leaderboard-bite');
+      expect(rows).toHaveLength(2);
+      expect(component.ranksBites()).toBe(true);
+      expect(component.isEmpty()).toBe(false);
+
+      const opened: string[] = [];
+      component.biteClick.subscribe((bite) => opened.push(bite.biteId));
+      (rows[1] as HTMLElement).click();
+
+      expect(opened).toEqual(['b-2']);
+    });
+
+    it('counts down on this week and dates last week, like the users board', () => {
+      componentRef.setInput('board', 'mostLiked');
+      componentRef.setInput('ranking', {
+        board: 'mostLiked',
+        users: [],
+        bites,
+        start: Date.UTC(2026, 10, 9),
+        end: Date.UTC(2026, 10, 16),
+      });
+      componentRef.setInput('now', Date.UTC(2026, 10, 15, 19));
+      expect(component.weekEndsIn()).toBe('in 5 hours');
+
+      componentRef.setInput('board', 'mostLikedLastWeek');
+      componentRef.setInput('ranking', {
+        board: 'mostLikedLastWeek',
+        users: [],
+        bites,
+        start: Date.UTC(2026, 10, 9),
+        end: Date.UTC(2026, 10, 16),
+      });
+      expect(component.weekEndsIn()).toBe('');
+      expect(component.lastWeekDates()).toMatch(/November 9\s*–\s*15/);
+      expect(component.emptyKey()).toBe(
+        'leaderboard-empty-most-liked-last-week',
+      );
+    });
+
+    it('falls back to a placeholder when a Bite photo fails', () => {
+      component.onBiteImageError('b-1');
+
+      expect(component.hasBiteImage(bites[0])).toBe(false);
+      expect(component.hasBiteImage(bites[1])).toBe(false);
+    });
+  });
 });

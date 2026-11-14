@@ -88,6 +88,16 @@ export const buildCollapseKey = (
       return buildKey(type, data['userId'], data['countryCode']);
 
     case 'LEADERBOARD_RANK_CHANGE':
+      // A Bite's move on the Most liked board (issue #2028) is its own
+      // notification, so a creator with two Bites on the board keeps both.
+      // The surface segment stays the type, so opening the leaderboard still
+      // clears it.
+      if (data['board'] === 'mostLiked') {
+        return buildKey(type, type, data['biteId']);
+      }
+
+      return type;
+
     case 'WEEKLY_BITE_SUMMARY':
     case 'NEW_VERSION_AVAILABLE':
       // A fixed page, sent on a schedule. Yesterday's standing is superseded by

@@ -37,6 +37,14 @@ export const zh: NotificationMessages = {
   'leaderboard.droppedOut': '你跌出了排行榜前{{limit}}名。',
   'leaderboard.climbed': '你在排行榜上升到了第{{rank}}名！🎉',
   'leaderboard.dropped': '你在排行榜上降到了第{{rank}}名。',
+  'leaderboard.mostLikedEnteredTop':
+    '你的 Bite {{dish}} 以第 {{rank}} 名进入最受喜爱前 {{limit}} 名！🎉',
+  'leaderboard.mostLikedDroppedOut':
+    '你的 Bite {{dish}} 跌出了最受喜爱前 {{limit}} 名。',
+  'leaderboard.mostLikedClimbed':
+    '你的 Bite {{dish}} 在最受喜爱榜上升至第 {{rank}} 名！🎉',
+  'leaderboard.mostLikedDropped':
+    '你的 Bite {{dish}} 在最受喜爱榜下降至第 {{rank}} 名。',
   'countryBadge.title': '🎉 新的国家徽章！',
   'countryBadge.body': '恭喜！你刚刚解锁了{{country}}的徽章',
   'countryBadge.followerTitle': '🌍 新的国家徽章',

@@ -41,6 +41,14 @@ export const ar: NotificationMessages = {
   'leaderboard.droppedOut': 'لقد خرجت من أفضل {{limit}} على لوحة المتصدرين.',
   'leaderboard.climbed': 'لقد صعدت إلى المركز {{rank}} على لوحة المتصدرين! 🎉',
   'leaderboard.dropped': 'لقد نزلت إلى المركز {{rank}} على لوحة المتصدرين.',
+  'leaderboard.mostLikedEnteredTop':
+    'دخلت Bite {{dish}} الخاصة بك أفضل {{limit}} الأكثر إعجابًا في المركز {{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'خرجت Bite {{dish}} الخاصة بك من أفضل {{limit}} الأكثر إعجابًا.',
+  'leaderboard.mostLikedClimbed':
+    'صعدت Bite {{dish}} الخاصة بك إلى المركز {{rank}} في قائمة الأكثر إعجابًا! 🎉',
+  'leaderboard.mostLikedDropped':
+    'نزلت Bite {{dish}} الخاصة بك إلى المركز {{rank}} في قائمة الأكثر إعجابًا.',
   'countryBadge.title': '🎉 شارة دولة جديدة!',
   'countryBadge.body': 'تهانينا! لقد فتحت شارة {{country}}',
   'countryBadge.followerTitle': '🌍 شارة دولة جديدة',

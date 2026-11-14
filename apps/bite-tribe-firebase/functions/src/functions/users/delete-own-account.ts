@@ -27,6 +27,11 @@ import {
   rebuildWeeklyLeaderboard,
 } from '../shared/utils/weekly-leaderboard';
 import {
+  LEADERBOARD_MOST_LIKED_LAST_WEEK_DOC,
+  pruneMostLiked,
+  rebuildMostLiked,
+} from '../shared/utils/weekly-most-liked';
+import {
   DISPLAY_NAMES_COLLECTION,
   USERS_COLLECTION,
   normalizeDisplayName,
@@ -510,6 +515,11 @@ export const refreshLeaderboardsAfterDeletion = async (
   await pruneSnapshot(db, LEADERBOARD_LAST_WEEK_DOC, uid);
   await rebuildLeaderboard(db);
   await rebuildWeeklyLeaderboard(db);
+  // The Most liked boards name each Bite's creator (issue #2028). Last week's
+  // is frozen, so pruned; the running one is rebuilt, which skips Bites whose
+  // author no longer exists.
+  await pruneMostLiked(db, LEADERBOARD_MOST_LIKED_LAST_WEEK_DOC, uid);
+  await rebuildMostLiked(db);
 };
 
 /**

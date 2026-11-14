@@ -46,6 +46,14 @@ export const fr: NotificationMessages = {
     'Tu ne fais plus partie du top {{limit}} du classement.',
   'leaderboard.climbed': 'Te voilà à la place n°{{rank}} du classement ! 🎉',
   'leaderboard.dropped': 'Tu passes à la place n°{{rank}} du classement.',
+  'leaderboard.mostLikedEnteredTop':
+    'Ton Bite {{dish}} est entré dans le top {{limit}} des plus aimés à la place #{{rank}} ! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Ton Bite {{dish}} est sorti du top {{limit}} des plus aimés.',
+  'leaderboard.mostLikedClimbed':
+    'Ton Bite {{dish}} est monté à la place #{{rank}} des plus aimés ! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Ton Bite {{dish}} est descendu à la place #{{rank}} des plus aimés.',
   'countryBadge.title': '🎉 Nouveau badge pays !',
   'countryBadge.body':
     'Bravo ! Tu viens de débloquer le badge pour {{country}}',

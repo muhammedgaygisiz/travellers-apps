@@ -30,6 +30,18 @@ export class LeaderboardPage {
     await this.root.getByTestId('leaderboard-tab-all-time').click();
   }
 
+  /** Bites ranked by this week's likes (issue #2028). */
+  async showMostLiked(): Promise<void> {
+    await this.root.getByTestId('leaderboard-tab-most-liked').click();
+  }
+
+  /** The Bite row holding this dish name on the Most liked board. */
+  biteRowFor(dishName: string): Locator {
+    return this.root.locator('ion-item.leaderboard-bite').filter({
+      has: this.page.locator('ion-label h2', { hasText: dishName }),
+    });
+  }
+
   /** Last week's frozen final standings, under the week tab. */
   async showLastWeek(): Promise<void> {
     await this.root.getByTestId('leaderboard-week-last').click();

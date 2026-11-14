@@ -46,6 +46,14 @@ export const es: NotificationMessages = {
     '¡Has subido al puesto n.º {{rank}} de la clasificación! 🎉',
   'leaderboard.dropped':
     'Has bajado al puesto n.º {{rank}} de la clasificación.',
+  'leaderboard.mostLikedEnteredTop':
+    '¡Tu Bite {{dish}} entró en el top {{limit}} de los más gustados en el puesto #{{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Tu Bite {{dish}} salió del top {{limit}} de los más gustados.',
+  'leaderboard.mostLikedClimbed':
+    '¡Tu Bite {{dish}} subió al puesto #{{rank}} de los más gustados! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Tu Bite {{dish}} bajó al puesto #{{rank}} de los más gustados.',
   'countryBadge.title': '🎉 ¡Nueva insignia de país!',
   'countryBadge.body':
     '¡Enhorabuena! Has desbloqueado la insignia de {{country}}',

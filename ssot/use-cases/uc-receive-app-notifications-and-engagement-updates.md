@@ -29,7 +29,7 @@ clear, and which installations they are delivered to.
 - Backend functions react to new Bites, likes, reviews, followers, and weekly activity.
 - Backend functions can notify users about meaningful leaderboard ranking changes.
 - Notifications or shared-link behavior keep users connected to activity.
-- Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard, or the weekly bites page.
+- Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard (on the **Most liked** tab when the notification is about a Bite's move there, [#2028]), or the weekly bites page.
 - Notifications about the same thing replace one another instead of stacking, and
   the ones about a surface are cleared once the user opens it.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
@@ -334,3 +334,4 @@ Relevant.
 [#1366]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1366
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1919]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1919
+[#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028

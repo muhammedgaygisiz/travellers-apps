@@ -43,6 +43,14 @@ export const pt: NotificationMessages = {
   'leaderboard.droppedOut': 'Saíste do top {{limit}} da classificação.',
   'leaderboard.climbed': 'Subiste para a posição {{rank}} da classificação! 🎉',
   'leaderboard.dropped': 'Desceste para a posição {{rank}} da classificação.',
+  'leaderboard.mostLikedEnteredTop':
+    'Seu Bite {{dish}} entrou no top {{limit}} dos mais curtidos em #{{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Seu Bite {{dish}} saiu do top {{limit}} dos mais curtidos.',
+  'leaderboard.mostLikedClimbed':
+    'Seu Bite {{dish}} subiu para #{{rank}} entre os mais curtidos! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Seu Bite {{dish}} caiu para #{{rank}} entre os mais curtidos.',
   'countryBadge.title': '🎉 Novo emblema de país!',
   'countryBadge.body': 'Parabéns! Desbloqueaste o emblema de {{country}}',
   'countryBadge.followerTitle': '🌍 Novo emblema de país',

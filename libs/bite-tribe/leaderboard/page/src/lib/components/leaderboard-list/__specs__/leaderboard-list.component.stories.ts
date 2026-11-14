@@ -108,3 +108,61 @@ export const AllTime: Story = {
     },
   },
 };
+
+const likedBites = [
+  {
+    biteId: 'manti',
+    name: 'Mantı',
+    imageUrl: '',
+    userId: 'ali',
+    displayName: 'Ali K.',
+    likeCount: 44,
+  },
+  {
+    biteId: 'cevapi',
+    name: 'Ćevapi',
+    imageUrl: '',
+    userId: 'lena',
+    displayName: 'Lena M.',
+    likeCount: 31,
+  },
+  {
+    biteId: 'burek',
+    name: 'Burek',
+    imageUrl: '',
+    userId: 'ali',
+    displayName: 'Ali K.',
+    likeCount: 27,
+  },
+];
+
+/**
+ * Bites ranked by the likes they received this week (issue #2028). One
+ * creator can hold several places.
+ */
+export const MostLiked: Story = {
+  args: {
+    board: 'mostLiked',
+    ranking: {
+      board: 'mostLiked',
+      users: [],
+      bites: likedBites,
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};
+
+/** Last week's most-liked Bites, frozen at the reset and dated. */
+export const MostLikedLastWeek: Story = {
+  args: {
+    board: 'mostLikedLastWeek',
+    ranking: {
+      board: 'mostLikedLastWeek',
+      users: [],
+      bites: likedBites,
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};

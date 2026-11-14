@@ -19,6 +19,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonSpinner,
+  IonThumbnail,
 } from '@ionic/angular/standalone';
 import { PageComponent } from 'common/ui/page';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -26,13 +27,31 @@ import {
   LeaderboardBoard,
   LeaderboardRanking,
   LeaderboardUser,
+  MostLikedBite,
 } from 'bite-tribe/leaderboard-data-access';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-/** The two top-level tabs; the week tab holds both weekly boards. */
-export type LeaderboardTab = 'week' | 'allTime';
+/**
+ * The top-level tabs. `week` and `mostLiked` each hold a running and a last
+ * week's board, chosen with the week switch.
+ */
+export type LeaderboardTab = 'week' | 'mostLiked' | 'allTime';
+
+/** The running and the last week's board of each weekly tab. */
+const WEEK_BOARDS: Record<
+  Exclude<LeaderboardTab, 'allTime'>,
+  { current: LeaderboardBoard; last: LeaderboardBoard }
+> = {
+  week: { current: 'thisWeek', last: 'lastWeek' },
+  mostLiked: { current: 'mostLiked', last: 'mostLikedLastWeek' },
+};
+
+const LAST_WEEK_BOARDS: readonly LeaderboardBoard[] = [
+  'lastWeek',
+  'mostLikedLastWeek',
+];
 
 @Component({
   selector: 'leaderboard-list',
@@ -49,6 +68,7 @@ export type LeaderboardTab = 'week' | 'allTime';
     IonSegment,
     IonSegmentButton,
     IonSpinner,
+    IonThumbnail,
     TranslocoPipe,
   ],
   templateUrl: './leaderboard-list.component.html',
@@ -66,6 +86,7 @@ export class LeaderboardListComponent {
 
   boardChange = output<LeaderboardBoard>();
   userClick = output<LeaderboardUser>();
+  biteClick = output<MostLikedBite>();
 
   imageErroredUserIds = signal<Set<string>>(new Set());
 
@@ -73,8 +94,27 @@ export class LeaderboardListComponent {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
 
-  tab = computed<LeaderboardTab>(() =>
-    this.board() === 'allTime' ? 'allTime' : 'week',
+  tab = computed<LeaderboardTab>(() => {
+    const board = this.board();
+
+    if (board === 'allTime') {
+      return 'allTime';
+    }
+
+    return board === 'mostLiked' || board === 'mostLikedLastWeek'
+      ? 'mostLiked'
+      : 'week';
+  });
+
+  /** The week switch's two values for the tab on screen. */
+  weekBoards = computed(() => {
+    const tab = this.tab();
+
+    return tab === 'allTime' ? undefined : WEEK_BOARDS[tab];
+  });
+
+  private readonly isLastWeek = computed(() =>
+    LAST_WEEK_BOARDS.includes(this.board()),
   );
 
   /**
@@ -87,6 +127,18 @@ export class LeaderboardListComponent {
 
     return ranking?.board === this.board() ? ranking : undefined;
   });
+
+  /** The ranked Bites of a Most liked board, in the order stored. */
+  rankedBites = computed(() => this.shownRanking()?.bites ?? []);
+
+  /** Whether the board on screen ranks Bites rather than users. */
+  ranksBites = computed(() => this.tab() === 'mostLiked');
+
+  isEmpty = computed(() =>
+    this.ranksBites()
+      ? this.rankedBites().length === 0
+      : this.rankedUsers().length === 0,
+  );
 
   rankedUsers = computed(() =>
     [...(this.shownRanking()?.users ?? [])].sort(
@@ -101,7 +153,7 @@ export class LeaderboardListComponent {
   weekEndsIn = computed(() => {
     const end = this.shownRanking()?.end;
 
-    if (this.board() !== 'thisWeek' || !end) {
+    if (this.tab() === 'allTime' || this.isLastWeek() || !end) {
       return '';
     }
 
@@ -121,7 +173,7 @@ export class LeaderboardListComponent {
   lastWeekDates = computed(() => {
     const ranking = this.shownRanking();
 
-    if (this.board() !== 'lastWeek' || !ranking?.start || !ranking.end) {
+    if (!this.isLastWeek() || !ranking?.start || !ranking.end) {
       return '';
     }
 
@@ -146,17 +198,34 @@ export class LeaderboardListComponent {
         return 'leaderboard-empty-this-week';
       case 'lastWeek':
         return 'leaderboard-empty-last-week';
+      case 'mostLiked':
+        return 'leaderboard-empty-most-liked';
+      case 'mostLikedLastWeek':
+        return 'leaderboard-empty-most-liked-last-week';
       default:
         return 'no-leaderboard-users-yet';
     }
   });
 
   selectTab(tab: LeaderboardTab): void {
-    this.boardChange.emit(tab === 'allTime' ? 'allTime' : 'thisWeek');
+    this.boardChange.emit(
+      tab === 'allTime' ? 'allTime' : WEEK_BOARDS[tab].current,
+    );
   }
 
   selectWeek(board: LeaderboardBoard): void {
     this.boardChange.emit(board);
+  }
+
+  /** Bite photos that failed to load, by Bite id. */
+  imageErroredBiteIds = signal<Set<string>>(new Set());
+
+  onBiteImageError(biteId: string): void {
+    this.imageErroredBiteIds.update((set) => new Set([...set, biteId]));
+  }
+
+  hasBiteImage(bite: MostLikedBite): boolean {
+    return !!bite.imageUrl && !this.imageErroredBiteIds().has(bite.biteId);
   }
 
   onImageError(userId: string): void {

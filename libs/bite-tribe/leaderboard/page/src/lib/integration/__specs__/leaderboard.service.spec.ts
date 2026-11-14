@@ -45,6 +45,22 @@ describe(LeaderboardService.name, () => {
     expect(service.ranking.reload).toHaveBeenCalledTimes(1);
   });
 
+  it('should open a Bite from the Most liked board', () => {
+    service.biteClicked({
+      biteId: 'bite-1',
+      name: 'Mantı',
+      imageUrl: '',
+      userId: 'ana',
+      displayName: 'Ana',
+      likeCount: 3,
+    });
+
+    expect(navController.navigateForward).toHaveBeenCalledWith([
+      'bite',
+      'bite-1',
+    ]);
+  });
+
   it('should switch the board the ranking is loaded for', () => {
     service.selectBoard('lastWeek');
 

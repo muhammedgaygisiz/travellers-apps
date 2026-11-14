@@ -11,6 +11,16 @@ import {
   META_COLLECTION,
 } from '../shared/utils/leaderboard';
 import { readWeeklyLeaderboard } from '../shared/utils/weekly-leaderboard';
+import {
+  BiteRankChange,
+  buildMostLikedNotificationBody,
+  computeBiteRankChanges,
+  MostLikedBite,
+  readMostLiked,
+} from '../shared/utils/weekly-most-liked';
+
+/** The Most liked board as of the last daily run (issue #2028). */
+const MOST_LIKED_DAILY_DOC = 'leaderboardMostLikedDaily';
 
 const db = getFirestore();
 
@@ -71,13 +81,95 @@ const notifyUser = async (change: LeaderboardRankChange): Promise<void> => {
 };
 
 /**
+ * Tells a creator one of their Bites moved on the Most liked board. The
+ * payload names the board and the Bite: the tap opens the Most liked tab, and
+ * the Bite keeps one Bite's move from replacing another's in the drawer.
+ */
+const notifyBiteOwner = async (change: BiteRankChange): Promise<void> => {
+  await sendLocalizedNotification({
+    uids: [change.userId],
+    data: {
+      type: 'LEADERBOARD_RANK_CHANGE',
+      userId: `${change.userId}`,
+      board: 'mostLiked',
+      biteId: change.biteId,
+    },
+    buildMessage: (translate) => ({
+      title: translate('leaderboard.title'),
+      body: buildMostLikedNotificationBody(change, translate),
+    }),
+  });
+};
+
+/** The users' weekly board: one notification per user who moved. */
+const notifyUserBoard = async (): Promise<number> => {
+  const { week, users: currentUsers } = await readWeeklyLeaderboard(db);
+  const baselineUsers = await readBaseline(week);
+
+  if (baselineUsers === null) {
+    logger.info(
+      '--- No baseline for this week yet; seeding today as baseline and skipping notifications',
+      { week },
+    );
+    await storeBaseline(week, currentUsers);
+    return 0;
+  }
+
+  const changes = computeRankChanges(baselineUsers, currentUsers);
+
+  logger.info('--- Leaderboard rank changes since yesterday:', changes);
+
+  for (const change of changes) {
+    await notifyUser(change);
+  }
+
+  // Commit today's ranking as tomorrow's baseline only after notifications
+  // have been dispatched, so a mid-run failure retries against the same
+  // baseline instead of silently swallowing the changes.
+  await storeBaseline(week, currentUsers);
+
+  return changes.length;
+};
+
+/**
+ * The Most liked board: one notification per Bite that moved, to its creator.
+ * Its baseline follows the same week rule as the users' board.
+ */
+const notifyMostLikedBoard = async (): Promise<number> => {
+  const { week, bites } = await readMostLiked(db);
+  const ref = db.collection(META_COLLECTION).doc(MOST_LIKED_DAILY_DOC);
+  const baseline = (await ref.get()).data();
+  const store = (): Promise<unknown> =>
+    ref.set({ week, bites, computedAt: FieldValue.serverTimestamp() });
+
+  if (baseline?.['week'] !== week || !Array.isArray(baseline['bites'])) {
+    await store();
+    return 0;
+  }
+
+  const changes = computeBiteRankChanges(
+    baseline['bites'] as MostLikedBite[],
+    bites,
+  );
+
+  for (const change of changes) {
+    await notifyBiteOwner(change);
+  }
+
+  await store();
+
+  return changes.length;
+};
+
+/**
  * Scheduled Cloud Function that runs every day at 09:00 Europe/Zurich.
  *
- * It compares the running week's leaderboard against the ranking captured on
- * the previous run and sends each user whose rank changed since yesterday a
- * single push notification. The very first run, and the first run of every
- * week, only seeds the baseline: there is nothing in the same week to compare
- * against, and the reset itself is not news to anyone (issue #2027).
+ * It compares the running week's boards against the rankings captured on the
+ * previous run and notifies each user whose rank changed since yesterday, and
+ * each creator whose Bite moved on the Most liked board (issue #2028). The very
+ * first run, and the first run of every week, only seeds the baseline: there
+ * is nothing in the same week to compare against, and the reset itself is not
+ * news to anyone (issue #2027).
  */
 export const sendDailyLeaderboardNotification = onSchedule(
   {
@@ -87,33 +179,12 @@ export const sendDailyLeaderboardNotification = onSchedule(
   async (): Promise<void> => {
     logger.info('--- Starting daily leaderboard notification');
 
-    const { week, users: currentUsers } = await readWeeklyLeaderboard(db);
-    const baselineUsers = await readBaseline(week);
-
-    if (baselineUsers === null) {
-      logger.info(
-        '--- No baseline for this week yet; seeding today as baseline and skipping notifications',
-        { week },
-      );
-      await storeBaseline(week, currentUsers);
-      return;
-    }
-
-    const changes = computeRankChanges(baselineUsers, currentUsers);
-
-    logger.info('--- Leaderboard rank changes since yesterday:', changes);
-
-    for (const change of changes) {
-      await notifyUser(change);
-    }
-
-    // Commit today's ranking as tomorrow's baseline only after notifications
-    // have been dispatched, so a mid-run failure retries against the same
-    // baseline instead of silently swallowing the changes.
-    await storeBaseline(week, currentUsers);
+    const notifiedUsers = await notifyUserBoard();
+    const notifiedBites = await notifyMostLikedBoard();
 
     logger.info('--- Daily leaderboard notification finished', {
-      notifiedUsers: changes.length,
+      notifiedUsers,
+      notifiedBites,
     });
   },
 );

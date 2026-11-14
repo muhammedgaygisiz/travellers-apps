@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { TestBed } from '@angular/core/testing';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 import confetti from 'canvas-confetti';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
@@ -20,8 +22,31 @@ jest.mock('ta-firestore', () => ({
   AnalyticsService: class {},
 }));
 jest.mock('toast', () => ({ ToastService: class {} }));
+// The real `SoundsService` runs against a stubbed `BiteSounds` plugin, so the
+// setting and the one-at-a-time window are its own, not a copy of them.
+jest.mock('@capacitor/core', () => ({
+  Capacitor: { isNativePlatform: jest.fn(), isPluginAvailable: jest.fn() },
+  registerPlugin: jest.fn(() => ({
+    posted: jest.fn(),
+    celebration: jest.fn(),
+  })),
+}));
+jest.mock('@capacitor/preferences', () => ({
+  Preferences: { get: jest.fn(), set: jest.fn() },
+}));
 
 const create = confetti.create as jest.Mock;
+
+// Read before any `clearAllMocks`, which would drop the recorded result.
+const biteSounds = (registerPlugin as jest.Mock).mock.results[0].value as {
+  posted: jest.Mock;
+  celebration: jest.Mock;
+};
+const getPreference = Preferences.get as jest.Mock;
+
+/** Lets the sound, which is fired and not awaited, reach the plugin. */
+const settle = (): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, 0));
 
 const THEME: Record<string, string> = {
   '--ion-color-primary': ' #4a90d9',
@@ -88,6 +113,12 @@ describe('CelebrationService', () => {
 
     present = jest.fn().mockResolvedValue(undefined);
     logEvent = jest.fn();
+
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (Capacitor.isPluginAvailable as jest.Mock).mockReturnValue(true);
+    getPreference.mockResolvedValue({ value: null });
+    biteSounds.posted.mockResolvedValue(undefined);
+    biteSounds.celebration.mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -172,14 +203,19 @@ describe('CelebrationService', () => {
     await celebrated;
   });
 
-  it('creates no canvas under reduced motion and still presents the toast', async () => {
+  it('creates no canvas under reduced motion and still presents the toast and plays the sound', async () => {
     reducedMotion = true;
 
     await service.celebrate('first-follow');
+    await settle();
 
     expect(create).not.toHaveBeenCalled();
     expect(canvases()).toHaveLength(0);
     expect(present).toHaveBeenCalledTimes(1);
+    expect(present).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'success' }),
+    );
+    expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
   });
 
   it('draws no second burst while one is running', async () => {
@@ -194,6 +230,64 @@ describe('CelebrationService', () => {
 
     endBurst();
     await first;
+  });
+
+  it('plays no second sound while the first is playing', async () => {
+    reducedMotion = true;
+
+    await service.celebrate('first-bite');
+    await service.celebrate('first-country', { country: 'Japan' });
+    await settle();
+
+    expect(present).toHaveBeenCalledTimes(2);
+    expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
+  });
+
+  it('plays confetti, toast and haptic but no sound with sounds switched off', async () => {
+    getPreference.mockResolvedValue({ value: 'false' });
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ToastService, useValue: { present } },
+        { provide: AnalyticsService, useValue: { logEvent } },
+      ],
+    });
+    service = TestBed.inject(CelebrationService);
+
+    const celebrated = service.celebrate('first-bite');
+    await settle();
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(present).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'success' }),
+    );
+
+    endBurst();
+    await celebrated;
+    await settle();
+
+    expect(biteSounds.celebration).not.toHaveBeenCalled();
+    expect(biteSounds.posted).not.toHaveBeenCalled();
+  });
+
+  it('does not wait for the sound to finish', async () => {
+    reducedMotion = true;
+    biteSounds.celebration.mockReturnValue(new Promise<void>(() => undefined));
+
+    await service.celebrate('first-bite');
+    await settle();
+
+    expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves when the sound fails', async () => {
+    reducedMotion = true;
+    biteSounds.celebration.mockRejectedValue(new Error('no sound pool'));
+
+    await expect(service.celebrate('first-bite')).resolves.toBeUndefined();
+    await settle();
+
+    expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
   });
 
   it('draws again once the earlier burst has ended', async () => {
@@ -212,11 +306,12 @@ describe('CelebrationService', () => {
   });
 
   it.each(Object.entries(CELEBRATION_MESSAGE_KEYS))(
-    'presents exactly one success toast for %s',
+    'presents exactly one success toast and one celebration sound for %s',
     async (moment, messageKey) => {
       reducedMotion = true;
 
       await service.celebrate(moment as CelebrationMoment, { user: 'leela' });
+      await settle();
 
       expect(present).toHaveBeenCalledTimes(1);
       expect(present).toHaveBeenCalledWith({
@@ -224,6 +319,8 @@ describe('CelebrationService', () => {
         params: { user: 'leela' },
         outcome: 'success',
       });
+      expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
+      expect(biteSounds.posted).not.toHaveBeenCalled();
     },
   );
 

@@ -166,3 +166,68 @@ export const MostLikedLastWeek: Story = {
     },
   },
 };
+
+/**
+ * Monday morning: one user has posted. The open places invite the rest onto
+ * the podium (issue #2032).
+ */
+export const ThisWeekOneEntry: Story = {
+  args: {
+    board: 'thisWeek',
+    now: MONDAY + 9 * 60 * 60 * 1000,
+    ranking: {
+      board: 'thisWeek',
+      users: weekUsers.slice(0, 1),
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};
+
+/** Two users this week: #3 is still open. */
+export const ThisWeekTwoEntries: Story = {
+  args: {
+    board: 'thisWeek',
+    ranking: {
+      board: 'thisWeek',
+      users: weekUsers.slice(0, 2),
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};
+
+/** Last week is frozen: only the places that were taken, no invitation. */
+export const LastWeekOneEntry: Story = {
+  args: {
+    board: 'lastWeek',
+    ranking: {
+      board: 'lastWeek',
+      users: weekUsers.slice(0, 1),
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};
+
+/** One liked Bite this week: two open Bite places on the podium. */
+export const MostLikedOneEntry: Story = {
+  args: {
+    board: 'mostLiked',
+    ranking: {
+      board: 'mostLiked',
+      users: [],
+      bites: likedBites.slice(0, 1),
+      start: MONDAY,
+      end: NEXT_MONDAY,
+    },
+  },
+};
+
+/** The signed-in user's own row is highlighted (issue #2032). */
+export const OwnRowHighlighted: Story = {
+  args: {
+    ...ThisWeek.args,
+    currentUserId: 'tom',
+  },
+};

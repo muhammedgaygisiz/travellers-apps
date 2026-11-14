@@ -243,14 +243,16 @@ describe(LeaderboardListComponent.name, () => {
       });
       fixture.detectChanges();
 
-      const rows = fixture.nativeElement.querySelectorAll('.leaderboard-bite');
-      expect(rows).toHaveLength(2);
       expect(component.ranksBites()).toBe(true);
       expect(component.isEmpty()).toBe(false);
 
       const opened: string[] = [];
       component.biteClick.subscribe((bite) => opened.push(bite.biteId));
-      (rows[1] as HTMLElement).click();
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="podium-place-2"] button',
+        ) as HTMLElement
+      ).click();
 
       expect(opened).toEqual(['b-2']);
     });
@@ -287,6 +289,107 @@ describe(LeaderboardListComponent.name, () => {
 
       expect(component.hasBiteImage(bites[0])).toBe(false);
       expect(component.hasBiteImage(bites[1])).toBe(false);
+    });
+  });
+
+  describe('podium (#2032)', () => {
+    const user = (userId: string, biteCount: number): LeaderboardUser => ({
+      userId,
+      displayName: userId,
+      photoUrl: '',
+      public: true,
+      biteCount,
+    });
+    const five = [
+      user('a', 9),
+      user('b', 7),
+      user('c', 5),
+      user('d', 3),
+      user('e', 1),
+    ];
+    const place = (n: number): HTMLElement =>
+      fixture.nativeElement.querySelector(`[data-testid="podium-place-${n}"]`);
+
+    it('puts #1 in the middle, #2 left and #3 right, and lists 4 on below', () => {
+      componentRef.setInput('ranking', { board: 'thisWeek', users: five });
+      fixture.detectChanges();
+
+      expect(component.podiumSlots().map((slot) => slot.place)).toEqual([
+        2, 1, 3,
+      ]);
+      expect(place(1).textContent).toContain('a');
+      expect(place(2).textContent).toContain('b');
+      expect(place(3).textContent).toContain('c');
+
+      const badges = Array.from(
+        fixture.nativeElement.querySelectorAll('ion-list .rank-badge'),
+      ).map((badge) => (badge as HTMLElement).textContent?.trim());
+      expect(badges).toEqual(['4', '5']);
+    });
+
+    it('opens a public user from the podium', () => {
+      const opened: string[] = [];
+      component.userClick.subscribe((u) => opened.push(u.userId));
+      componentRef.setInput('ranking', { board: 'thisWeek', users: five });
+      fixture.detectChanges();
+
+      (place(1).querySelector('button') as HTMLElement).click();
+
+      expect(opened).toEqual(['a']);
+    });
+
+    it('highlights the signed-in user, on the podium and in the list', () => {
+      componentRef.setInput('currentUserId', 'd');
+      componentRef.setInput('ranking', { board: 'thisWeek', users: five });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelectorAll('.leaderboard-item--own'),
+      ).toHaveLength(1);
+
+      componentRef.setInput('currentUserId', 'b');
+      fixture.detectChanges();
+      expect(place(2).querySelector('.podium__entry--own')).not.toBeNull();
+    });
+
+    it('invites onto the open places of a running week', () => {
+      componentRef.setInput('ranking', {
+        board: 'thisWeek',
+        users: [user('a', 1)],
+      });
+      fixture.detectChanges();
+
+      expect(place(2).querySelector('.podium__entry--open')).not.toBeNull();
+      expect(place(3).querySelector('.podium__entry--open')).not.toBeNull();
+      expect(component.hasOpenPlace()).toBe(true);
+    });
+
+    it('shows the open podium, not the empty text, on an empty running week', () => {
+      componentRef.setInput('ranking', { board: 'thisWeek', users: [] });
+      fixture.detectChanges();
+
+      expect(component.showsEmptyText()).toBe(false);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="leaderboard-podium"]',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('shows only the places that exist on last week, without an invitation', () => {
+      componentRef.setInput('board', 'lastWeek');
+      componentRef.setInput('ranking', {
+        board: 'lastWeek',
+        users: [user('a', 1)],
+      });
+      fixture.detectChanges();
+
+      expect(place(2).querySelector('.podium__entry--open')).toBeNull();
+      expect(component.hasOpenPlace()).toBe(false);
+
+      componentRef.setInput('ranking', { board: 'lastWeek', users: [] });
+      fixture.detectChanges();
+      expect(component.showsEmptyText()).toBe(true);
     });
   });
 });

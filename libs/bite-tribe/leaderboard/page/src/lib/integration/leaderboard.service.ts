@@ -1,5 +1,6 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { NavController } from '@ionic/angular/standalone';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import {
   LeaderboardBoard,
   LeaderboardDataAccessService,
@@ -12,6 +13,10 @@ import { PATH } from 'utils';
 export class LeaderboardService {
   private readonly navController = inject(NavController);
   private readonly dataAccess = inject(LeaderboardDataAccessService);
+  private readonly storeService = inject(BiteTribeStoreService);
+
+  /** The signed-in user, whose own place is highlighted (#2032). */
+  readonly currentUserId = computed(() => this.storeService.user()?.uid);
 
   readonly board = this.dataAccess.board.asReadonly();
   readonly ranking = this.dataAccess.ranking;

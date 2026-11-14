@@ -19,7 +19,9 @@ export class LeaderboardPage {
   constructor(page: Page) {
     this.page = page;
     this.root = page.locator('leaderboard-list');
-    this.rows = this.root.locator('ion-item.leaderboard-item');
+    // Places 1 to 3 stand on the podium and 4 on are list rows (#2032); both
+    // carry the same test hooks, so a journey does not care which it is.
+    this.rows = this.root.getByTestId('leaderboard-entry');
     this.emptyState = this.root.locator('.empty-container');
     this.weekEnds = this.root.getByTestId('leaderboard-week-ends');
     this.finalStandings = this.root.getByTestId('leaderboard-final-standings');
@@ -51,8 +53,8 @@ export class LeaderboardPage {
 
   /** The Bite row holding this dish name on the Most liked board. */
   biteRowFor(dishName: string): Locator {
-    return this.root.locator('ion-item.leaderboard-bite').filter({
-      has: this.page.locator('ion-label h2', { hasText: dishName }),
+    return this.rows.filter({
+      has: this.page.locator('.entry-name', { hasText: dishName }),
     });
   }
 
@@ -64,7 +66,7 @@ export class LeaderboardPage {
   /** The row holding this display name, wherever it ranks. */
   rowFor(displayName: string): Locator {
     return this.rows.filter({
-      has: this.page.locator('ion-label h2', { hasText: displayName }),
+      has: this.page.locator('.entry-name', { hasText: displayName }),
     });
   }
 
@@ -73,7 +75,14 @@ export class LeaderboardPage {
   }
 
   row(rank: number): Locator {
-    return this.rows.nth(rank - 1);
+    return this.root.locator(
+      `[data-testid="leaderboard-entry"][data-rank="${rank}"]`,
+    );
+  }
+
+  /** The rank an entry holds, wherever it is drawn. */
+  async rankOf(entry: Locator): Promise<number> {
+    return Number(await entry.getAttribute('data-rank'));
   }
 
   async expectRankedUser(
@@ -82,10 +91,12 @@ export class LeaderboardPage {
   ): Promise<void> {
     const row = this.row(rank);
 
-    await expect(row.locator('.rank-badge')).toHaveText(String(rank));
-    await expect(row.locator('ion-label h2')).toHaveText(user.displayName);
-    await expect(row.locator('ion-label p')).toHaveText(user.city);
-    await expect(row.locator('.bite-count')).toHaveText(
+    await expect(row.locator('.entry-name')).toHaveText(user.displayName);
+    // The podium names a place by where it stands, without a city line.
+    if (rank > 3) {
+      await expect(row.locator('.entry-city')).toHaveText(user.city);
+    }
+    await expect(row.locator('.entry-count')).toHaveText(
       `${user.biteCount} Bites`,
     );
   }

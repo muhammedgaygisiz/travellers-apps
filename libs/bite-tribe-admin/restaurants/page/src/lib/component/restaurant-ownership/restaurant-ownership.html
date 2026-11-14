@@ -31,9 +31,8 @@
               @for (restaurant of visibleRestaurants(); track restaurant.id) {
               <ion-item
                 [button]="true"
-                [color]="
-                      restaurant.id === selected()?.id ? 'light' : undefined
-                    "
+                [class.selected-row]="restaurant.id === selected()?.id"
+                [attr.aria-current]="restaurant.id === selected()?.id ? 'true' : null"
                 (click)="onSelect(restaurant)"
               >
                 <ion-label>

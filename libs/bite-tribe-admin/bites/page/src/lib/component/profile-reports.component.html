@@ -36,7 +36,10 @@
                 @for (user of reports(); track user.uid) {
                   <ion-item
                     [button]="true"
-                    [color]="user.uid === selected()?.uid ? 'light' : undefined"
+                    [class.selected-row]="user.uid === selected()?.uid"
+                    [attr.aria-current]="
+                      user.uid === selected()?.uid ? 'true' : null
+                    "
                     (click)="onSelect(user)"
                   >
                     <ion-label>

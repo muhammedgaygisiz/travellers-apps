@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /* The Bite report queue's 1:2 split: a list to scan and a profile to read. */
   .profile-reports {
     align-items: flex-start;

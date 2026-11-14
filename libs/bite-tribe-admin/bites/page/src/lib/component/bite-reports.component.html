@@ -36,8 +36,9 @@
                 @for (bite of reports(); track bite.biteId) {
                   <ion-item
                     [button]="true"
-                    [color]="
-                      bite.biteId === selected()?.biteId ? 'light' : undefined
+                    [class.selected-row]="bite.biteId === selected()?.biteId"
+                    [attr.aria-current]="
+                      bite.biteId === selected()?.biteId ? 'true' : null
                     "
                     (click)="onSelect(bite)"
                   >

@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /*
    * The 1:2 split the admin tool asks for.
    *

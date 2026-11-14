@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /* The same 1:2 split as the Bite search: a list to pick from, a page to edit. */
   .landing-pages {
     align-items: flex-start;

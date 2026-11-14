@@ -46,6 +46,15 @@ computed from; what a notification about one of them says, and to whom, belongs 
   last week" - that opens the leaderboard on **Last week** of that list. Each winner gets one
   push at the reset naming the better place, and the app plays the celebration once per won
   week on each device, the first time it opens after the reset. See GitHub issue [#2031].
+- Every tab shows its top 3 on a podium: #1 in the middle and highest with a trophy, #2 left,
+  #3 right, each ringed gold, silver or bronze, with the avatar, name and Bite count (or on
+  **Most liked** the Bite's photo, dish, creator and like count). The steps are an image,
+  `assets/leaderboard/podium.webp`, in the brand characters' style; each place is placed over
+  its step. Places 4 to 10 follow as the list, and the signed-in user's own entry is
+  highlighted. On a running week (**This week**, **Most liked**) an empty place is drawn open
+  with "Your spot?" and an invitation to post or like; an empty running week shows that open
+  podium instead of the empty text. **Last week** and **All time** show only the places that
+  exist. See GitHub issue [#2032].
 - Backend functions maintain Bite counts. The weekly board is built from the Bites whose
   `createdAtTimestamp` falls in the week, so it needs no per-user weekly counter and a deleted
   Bite drops out of its week by itself. A tie is decided by who reached the count first.
@@ -172,3 +181,4 @@ them is collected in onboarding.
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
+[#2032]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2032

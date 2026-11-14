@@ -5,6 +5,7 @@ import {
   LeaderboardBoard,
   LeaderboardDataAccessService,
 } from 'bite-tribe/leaderboard-data-access';
+import { BiteTribeStoreService } from 'bite-tribe/store';
 import { LeaderboardService } from '../leaderboard.service';
 
 class MockDataAccess {
@@ -14,6 +15,10 @@ class MockDataAccess {
     isLoading: jest.fn(() => false),
     reload: jest.fn(),
   };
+}
+
+class MockStoreService {
+  user = signal<{ uid: string } | undefined>({ uid: 'me' });
 }
 
 class MockNavController {
@@ -30,6 +35,7 @@ describe(LeaderboardService.name, () => {
         LeaderboardService,
         { provide: LeaderboardDataAccessService, useClass: MockDataAccess },
         { provide: NavController, useClass: MockNavController },
+        { provide: BiteTribeStoreService, useClass: MockStoreService },
       ],
     });
 
@@ -37,6 +43,10 @@ describe(LeaderboardService.name, () => {
     navController = TestBed.inject(
       NavController,
     ) as unknown as MockNavController;
+  });
+
+  it('should name the signed-in user, whose place is highlighted', () => {
+    expect(service.currentUserId()).toBe('me');
   });
 
   it('should reload the leaderboard resource', () => {

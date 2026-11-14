@@ -202,15 +202,11 @@ test.describe('Use gamification signals', () => {
       const leaderRow = leaderboard.rowFor(leader.displayName);
       const runnerRow = leaderboard.rowFor(runnerUp.displayName);
 
-      await expect(leaderRow.locator('.bite-count')).toHaveText('6 Bites');
-      await expect(runnerRow.locator('.bite-count')).toHaveText('5 Bites');
+      await expect(leaderRow.locator('.entry-count')).toHaveText('6 Bites');
+      await expect(runnerRow.locator('.entry-count')).toHaveText('5 Bites');
 
-      const leaderRank = Number(
-        await leaderRow.locator('.rank-badge').textContent(),
-      );
-      const runnerRank = Number(
-        await runnerRow.locator('.rank-badge').textContent(),
-      );
+      const leaderRank = await leaderboard.rankOf(leaderRow);
+      const runnerRank = await leaderboard.rankOf(runnerRow);
       expect(leaderRank).toBeLessThan(runnerRank);
 
       await leaderboard.showLastWeek();
@@ -296,10 +292,10 @@ test.describe('Use gamification signals', () => {
       await expect(leaderboard.weekEnds).toContainText('Week ends in');
 
       const row = leaderboard.biteRowFor(dish);
-      await expect(row.locator('.like-count')).toHaveText(
+      await expect(row.locator('.entry-count')).toHaveText(
         `${likers.length} likes`,
       );
-      await expect(row.locator('ion-label p')).toHaveText(
+      await expect(row.locator('.entry-by')).toHaveText(
         `by ${author.displayName}`,
       );
 

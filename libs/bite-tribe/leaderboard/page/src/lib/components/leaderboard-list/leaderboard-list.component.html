@@ -72,97 +72,227 @@
       <div class="spinner-container">
         <ion-spinner color="primary" />
       </div>
-    } @else if (isEmpty()) {
+    } @else if (showsEmptyText()) {
       <div class="empty-container">
         <ion-label data-testid="leaderboard-empty">{{
           emptyKey() | transloco
         }}</ion-label>
       </div>
-    } @else if (ranksBites()) {
-      <!-- Bites, not users: one creator may hold several places (#2028). -->
-      <ion-list data-testid="leaderboard-bites">
-        @for (bite of rankedBites(); track bite.biteId) {
-          <ion-item
-            class="ion-margin-vertical leaderboard-item leaderboard-bite"
-            button
-            [detail]="true"
-            (click)="biteClick.emit(bite)"
-          >
-            <ion-badge slot="start" color="primary" class="rank-badge">
-              {{ $index + 1 }}
-            </ion-badge>
-            <ion-thumbnail slot="start" class="bite-thumbnail">
-              @if (hasBiteImage(bite)) {
-                <img
-                  [src]="bite.imageUrl"
-                  [alt]="bite.name"
-                  (error)="onBiteImageError(bite.biteId)"
-                />
-              } @else {
-                <ion-icon name="image-outline" aria-hidden="true" />
-              }
-            </ion-thumbnail>
-            <ion-label>
-              <h2>{{ bite.name }}</h2>
-              <p>
-                {{ 'leaderboard-by' | transloco: { name: bite.displayName } }}
-              </p>
-            </ion-label>
-            <ion-badge slot="end" color="secondary" class="like-count">
-              {{
-                'leaderboard-like-count' | transloco: { count: bite.likeCount }
-              }}
-            </ion-badge>
-          </ion-item>
-        }
-      </ion-list>
     } @else {
-      <ion-list>
-        @for (user of rankedUsers(); track user.userId) {
-          @let publicUser = !!user.public;
-          <ion-item
-            class="ion-margin-vertical leaderboard-item"
-            [button]="publicUser"
-            [detail]="publicUser"
-            (click)="publicUser ? userClick.emit(user) : undefined"
+      <!-- The top 3 on a podium: #1 in the middle and highest, #2 left, #3
+      right (#2032). The steps are the image; each place stands on its own. -->
+      <div class="podium" data-testid="leaderboard-podium">
+        <img
+          class="podium__image"
+          src="assets/leaderboard/podium.webp"
+          alt=""
+          aria-hidden="true"
+        />
+        @for (slot of podiumSlots(); track slot.place) {
+          <div
+            class="podium__place"
+            [class]="'podium__place podium__place--' + slot.place"
+            [attr.data-testid]="'podium-place-' + slot.place"
           >
-            <ion-badge slot="start" color="primary" class="rank-badge">
-              {{ $index + 1 }}
-            </ion-badge>
-            <ion-avatar slot="start">
-              @if (publicUser && hasImage(user)) {
-                <img
-                  [src]="user.photoUrl"
-                  (error)="onImageError(user.userId)"
-                />
-              } @else {
-                <ion-icon name="person-circle-outline" class="profile-image" />
-              }
-            </ion-avatar>
-            <ion-label>
-              <h2>
-                {{ publicUser ? user.displayName : ('anonymous' | transloco) }}
-              </h2>
-              @if (publicUser && user.city) {
-                <p>{{ user.city }}</p>
-              }
-            </ion-label>
-            <ion-badge slot="end" color="secondary" class="bite-count">
-              {{
-                'leaderboard-bite-count' | transloco: { count: user.biteCount }
-              }}
-            </ion-badge>
-            @if (!publicUser) {
+            @if (slot.place === 1 && (slot.user || slot.bite)) {
               <ion-icon
-                slot="end"
-                name="chevron-forward-outline"
-                class="detail-placeholder"
+                name="trophy"
+                class="podium__crown"
                 aria-hidden="true"
               />
             }
-          </ion-item>
+            @if (slot.user; as user) {
+              @let publicUser = !!user.public;
+              <button
+                type="button"
+                class="podium__entry"
+                data-testid="leaderboard-entry"
+                [attr.data-rank]="slot.place"
+                [class.podium__entry--own]="user.userId === currentUserId()"
+                [disabled]="!publicUser"
+                (click)="userClick.emit(user)"
+              >
+                <span class="podium__avatar">
+                  @if (publicUser && hasImage(user)) {
+                    <img
+                      [src]="user.photoUrl"
+                      alt=""
+                      (error)="onImageError(user.userId)"
+                    />
+                  } @else {
+                    <ion-icon name="person-circle-outline" aria-hidden="true" />
+                  }
+                </span>
+                <span class="podium__name entry-name">{{
+                  publicUser ? user.displayName : ('anonymous' | transloco)
+                }}</span>
+                <span class="podium__count entry-count">{{
+                  'leaderboard-bite-count'
+                    | transloco: { count: user.biteCount }
+                }}</span>
+              </button>
+            } @else if (slot.bite; as bite) {
+              <button
+                type="button"
+                class="podium__entry"
+                data-testid="leaderboard-entry"
+                [attr.data-rank]="slot.place"
+                [class.podium__entry--own]="bite.userId === currentUserId()"
+                (click)="biteClick.emit(bite)"
+              >
+                <span class="podium__avatar podium__avatar--bite">
+                  @if (hasBiteImage(bite)) {
+                    <img
+                      [src]="bite.imageUrl"
+                      [alt]="bite.name"
+                      (error)="onBiteImageError(bite.biteId)"
+                    />
+                  } @else {
+                    <ion-icon name="image-outline" aria-hidden="true" />
+                  }
+                </span>
+                <span class="podium__name entry-name">{{ bite.name }}</span>
+                <span class="podium__count entry-by">{{
+                  'leaderboard-by' | transloco: { name: bite.displayName }
+                }}</span>
+                <span class="podium__count entry-count">{{
+                  'leaderboard-like-count'
+                    | transloco: { count: bite.likeCount }
+                }}</span>
+              </button>
+            } @else if (invitesToPodium()) {
+              <div class="podium__entry podium__entry--open">
+                <span class="podium__avatar podium__avatar--open"></span>
+                <span class="podium__name">{{
+                  (ranksBites()
+                    ? 'leaderboard-your-bite'
+                    : 'leaderboard-your-spot'
+                  ) | transloco
+                }}</span>
+              </div>
+            }
+          </div>
         }
-      </ion-list>
+      </div>
+
+      @if (hasOpenPlace()) {
+        <p class="podium__invite" data-testid="leaderboard-podium-invite">
+          {{
+            (ranksBites()
+              ? 'leaderboard-invite-most-liked'
+              : 'leaderboard-invite-this-week'
+            ) | transloco
+          }}
+        </p>
+      }
+
+      @if (ranksBites()) {
+        <!-- Bites, not users: one creator may hold several places (#2028). -->
+        <ion-list data-testid="leaderboard-bites">
+          @for (bite of listedBites(); track bite.biteId) {
+            <ion-item
+              class="ion-margin-vertical leaderboard-item leaderboard-bite"
+              data-testid="leaderboard-entry"
+              [attr.data-rank]="$index + 4"
+              [class.leaderboard-item--own]="bite.userId === currentUserId()"
+              button
+              [detail]="true"
+              (click)="biteClick.emit(bite)"
+            >
+              <ion-badge slot="start" color="primary" class="rank-badge">
+                {{ $index + 4 }}
+              </ion-badge>
+              <ion-thumbnail slot="start" class="bite-thumbnail">
+                @if (hasBiteImage(bite)) {
+                  <img
+                    [src]="bite.imageUrl"
+                    [alt]="bite.name"
+                    (error)="onBiteImageError(bite.biteId)"
+                  />
+                } @else {
+                  <ion-icon name="image-outline" aria-hidden="true" />
+                }
+              </ion-thumbnail>
+              <ion-label>
+                <h2 class="entry-name">{{ bite.name }}</h2>
+                <p class="entry-by">
+                  {{ 'leaderboard-by' | transloco: { name: bite.displayName } }}
+                </p>
+              </ion-label>
+              <ion-badge
+                slot="end"
+                color="secondary"
+                class="like-count entry-count"
+              >
+                {{
+                  'leaderboard-like-count'
+                    | transloco: { count: bite.likeCount }
+                }}
+              </ion-badge>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <ion-list>
+          @for (user of listedUsers(); track user.userId) {
+            @let publicUser = !!user.public;
+            <ion-item
+              class="ion-margin-vertical leaderboard-item"
+              data-testid="leaderboard-entry"
+              [attr.data-rank]="$index + 4"
+              [class.leaderboard-item--own]="user.userId === currentUserId()"
+              [button]="publicUser"
+              [detail]="publicUser"
+              (click)="publicUser ? userClick.emit(user) : undefined"
+            >
+              <ion-badge slot="start" color="primary" class="rank-badge">
+                {{ $index + 4 }}
+              </ion-badge>
+              <ion-avatar slot="start">
+                @if (publicUser && hasImage(user)) {
+                  <img
+                    [src]="user.photoUrl"
+                    (error)="onImageError(user.userId)"
+                  />
+                } @else {
+                  <ion-icon
+                    name="person-circle-outline"
+                    class="profile-image"
+                  />
+                }
+              </ion-avatar>
+              <ion-label>
+                <h2 class="entry-name">
+                  {{
+                    publicUser ? user.displayName : ('anonymous' | transloco)
+                  }}
+                </h2>
+                @if (publicUser && user.city) {
+                  <p class="entry-city">{{ user.city }}</p>
+                }
+              </ion-label>
+              <ion-badge
+                slot="end"
+                color="secondary"
+                class="bite-count entry-count"
+              >
+                {{
+                  'leaderboard-bite-count'
+                    | transloco: { count: user.biteCount }
+                }}
+              </ion-badge>
+              @if (!publicUser) {
+                <ion-icon
+                  slot="end"
+                  name="chevron-forward-outline"
+                  class="detail-placeholder"
+                  aria-hidden="true"
+                />
+              }
+            </ion-item>
+          }
+        </ion-list>
+      }
     }
   </ion-content>
 </ta-page>

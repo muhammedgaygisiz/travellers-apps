@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide, Zurich, Cusco) all follow this recipe. The format and its history are owned by
 [Marketing - Social Media Channels](../../ssot/marketing/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.
@@ -209,6 +209,9 @@ In the same Chrome, signed in as @bitetribeapp:
    A tag label then sits on the photo. Tag nothing on the cover or the closing slide. Each slide has a delete icon at its top left, which removes the slide from the post - never click it.
 
 6. Leave "Share to Facebook" off: on Instagram web it shares to the owner's personal Facebook profile, never to the BiteTribe Page (see **Post it to the Facebook Page** below). No Threads option appears for this account. Share, wait for "Your post has been shared", and close the tab you opened.
+
+   **To schedule instead** (Cusco, 14 November 2026, set for 22:00): turn on **Schedule content**, below the location. A date (today by default) and a time appear; set the time on the `Hours` and `Minutes` spinbuttons by clicking each and typing, then read both back from `[role=spinbutton]` `aria-valuenow`. **Share** turns into **Schedule**; wait for "Your post has been scheduled". Tags and follows work as for a shared post, but the tags can be read back only once the post is live, and the Facebook Page post is scheduled for the same time (step 5 there).
+
 7. **Follow every tagged account** from @bitetribeapp. Open each profile and click **Follow**, or **Follow Back**, if the header shows it. If it shows **Following** already, leave it. Check that the button reads **Following** afterwards. If it still reads **Follow**, reload the profile before clicking again: on Šug the button had not updated yet, and the follow had already gone through.
 
    ```js
@@ -262,7 +265,7 @@ Every handle has to show up somewhere in the output. If one is missing, open **E
    ```
 
 4. **Caption:** the Instagram caption, with two changes. Drop each `(@handle)`, because Instagram handles mean nothing on Facebook, and end the app line with "get it at bitetribe.app" in place of "link in bio". Typing it line by line works, but pasting is faster: focus `[role=combobox][aria-label^="Write"]` and dispatch a `paste` `ClipboardEvent` whose `DataTransfer` holds the text.
-5. **Before Publish, check:** the caption reads back exactly as written (the editor shows each blank line as two, so collapse runs of newlines before comparing). The hashtag autocomplete can finish the last hashtag for you: Granada went to `#andaluciaorienta`, and with that suggestion pending, **Publish** did nothing. **Post to** reads "BiteTribe" alone, the media list shows every slide (one `1080 x 1440` row each), and the four switches (ad post, date and time, Facebook story, Boost) are off. **Publish**, then wait for the "Try sharing your photos in a new way" dialog, which means the post went up, and dismiss it with **Maybe later**.
+5. **Before Publish, check:** the caption reads back exactly as written (the editor shows each blank line as two, so collapse runs of newlines before comparing). The hashtag autocomplete can finish the last hashtag for you: Granada went to `#andaluciaorienta`, and with that suggestion pending, **Publish** did nothing. **Post to** reads "BiteTribe" alone, the media list shows every slide (one `1080 x 1440` row each), and the four switches (ad post, date and time, Facebook story, Boost) are off. **Publish**, then wait for the "Try sharing your photos in a new way" dialog, which means the post went up, and dismiss it with **Maybe later**. If the Instagram post was scheduled, turn **Set date and time** on instead, set the same date and time (the time field opens on a default such as 22:33, so click the minutes and type them), and **Schedule**. It ends on "Your post is scheduled" with a boost offer: dismiss it with **Maybe later**, never **Boost**.
 6. Open `facebook.com/bitetribeapp` and check that the post is at the top of the Page's posts.
 
 ### 7. Publish the city page

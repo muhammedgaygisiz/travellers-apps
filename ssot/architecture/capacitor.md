@@ -730,7 +730,9 @@ the files come from and how loud they are is owned by
   swallowed, and a file that cannot be loaded leaves its intent silent.
 - **No passthrough.** The service exposes no `play(file)`, and no call site
   imports `BiteSounds` directly, so one intent keeps one meaning everywhere.
-  The call sites are issues [#1845] and [#1846].
+  `posted` is called from `confirmCreated` in `BiteService`
+  (`libs/bite-tribe/bite/page`), next to the `bite-created-successfully`
+  toast (issue [#1845]); `celebration` belongs to issue [#1846].
 - **A native change ships with a store build**, as for haptics.
 - **No permission, no store declaration.** Playing bundled UI sounds needs no
   microphone or audio permission, no `UIBackgroundModes` audio entry, no

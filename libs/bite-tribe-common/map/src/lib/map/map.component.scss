@@ -1,13 +1,108 @@
+// The map's colours. Light mode keeps Leaflet's own look; dark mode recolours
+// the same OpenStreetMap tiles on the device instead of loading a dark tile set,
+// because the dark sets drop the restaurant, cafe and bar icons the map exists to
+// show. Only the tile pane is filtered, so markers, the GPS dot and popups keep
+// their colours. See GitHub issue #2022.
+:host {
+  --map-tile-filter: none;
+  --map-background: #ddd;
+  --map-control-background: #fff;
+  --map-control-background-hover: #f4f4f4;
+  --map-control-color: #000;
+  --map-control-border: #ccc;
+  --map-attribution-background: rgba(255, 255, 255, 0.8);
+  --map-attribution-color: #333;
+  --map-attribution-link: #0078a8;
+  --map-control-disabled-background: #f4f4f4;
+  --map-control-disabled-color: #bbb;
+  --map-cluster-small: rgba(0, 0, 0, 0.6);
+}
+
+@mixin dark-map {
+  // Inverting turns the light land dark; turning the hue half way round brings
+  // the inverted colours back, so the orange food icons stay orange and water
+  // stays blue. The rest settles land close to the dark page background.
+  --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.95)
+    contrast(0.85) saturate(0.8);
+  --map-background: #1a1c22;
+  --map-control-background: #262a33;
+  --map-control-background-hover: #31363f;
+  --map-control-color: #fff;
+  --map-control-border: #3b414c;
+  --map-attribution-background: rgba(26, 28, 34, 0.8);
+  --map-attribution-color: #c9ccd1;
+  --map-attribution-link: #8fbcec;
+  --map-control-disabled-background: #262a33;
+  --map-control-disabled-color: #6b717c;
+  --map-cluster-small: rgba(255, 255, 255, 0.75);
+
+  // The small cluster is a dark bubble in light mode; on a dark map it turns
+  // light, so its count turns dark.
+  ::ng-deep .marker-cluster-small {
+    color: #000;
+  }
+}
+
+// Both theme switches, as in `apps/bite-tribe/src/theme/variables.scss`: the
+// explicit class, and the system setting while the user has chosen neither.
+// `.dark` rather than `html.dark`, so a story can darken one map by wrapping it
+// instead of switching the whole document.
+:host-context(.dark) {
+  @include dark-map;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not(.light)) {
+    @include dark-map;
+  }
+}
+
 .map-container {
   height: 300px;
   width: 100%;
   border-radius: var(--border-radius);
 }
 
-::ng-deep .marker-cluster-small {
-  background-color: rgba(0, 0, 0, 0.6);
+// Leaflet builds its panes and controls outside this component's view.
+:host ::ng-deep {
+  .leaflet-container {
+    background: var(--map-background);
+  }
 
-  & div {
-    background-color: rgba(0, 0, 0, 0.6);
+  .leaflet-tile-pane {
+    filter: var(--map-tile-filter);
+  }
+
+  .leaflet-bar a {
+    background-color: var(--map-control-background);
+    border-bottom-color: var(--map-control-border);
+    color: var(--map-control-color);
+  }
+
+  .leaflet-bar a:hover,
+  .leaflet-bar a:focus {
+    background-color: var(--map-control-background-hover);
+  }
+
+  .leaflet-bar a.leaflet-disabled {
+    background-color: var(--map-control-disabled-background);
+    color: var(--map-control-disabled-color);
+  }
+
+  .leaflet-control-attribution.leaflet-control {
+    background: var(--map-attribution-background);
+    color: var(--map-attribution-color);
+
+    a {
+      color: var(--map-attribution-link);
+    }
+  }
+
+  .marker-cluster-small {
+    background-color: var(--map-cluster-small);
+
+    & div {
+      background-color: var(--map-cluster-small);
+    }
   }
 }

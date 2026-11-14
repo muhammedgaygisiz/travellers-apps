@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/angular';
+import { componentWrapperDecorator, Meta, StoryObj } from '@storybook/angular';
 import { MapComponent } from '../map.component';
 import { MarkerColor } from '../model/marker-color.enum';
 
@@ -56,4 +56,46 @@ export const FocusedCandidate: Story = {
     ...Candidates.args,
     focusedGeopointId: 'restaurant',
   },
+};
+
+/**
+ * Wraps a map in the `dark` class the app puts on the document, so one story
+ * renders dark without switching the whole page (see Implementation -
+ * Storybook, "A Dark Story Cannot Switch The Document").
+ */
+const inDarkMode = componentWrapperDecorator(
+  (story) =>
+    `<div class="dark" style="background: #1a1c22; padding: 8px">${story}</div>`,
+);
+
+/**
+ * A street in Bern with restaurants, cafes and bars, close enough for the
+ * OpenStreetMap tiles to draw their icons and names.
+ */
+const restaurantStreet = [
+  { id: 'kramgasse', latitude: 46.94808, longitude: 7.45116 },
+];
+
+/** The light map at street level, to compare with {@link DarkRestaurantStreet}. */
+export const RestaurantStreet: Story = {
+  args: {
+    geopoints: restaurantStreet,
+    readonly: true,
+  },
+};
+
+/**
+ * The same street in dark mode: the same tiles, recoloured, so every
+ * restaurant, cafe and bar icon stays on the map. The marker keeps its red.
+ * See GitHub issue #2022.
+ */
+export const DarkRestaurantStreet: Story = {
+  args: RestaurantStreet.args,
+  decorators: [inDarkMode],
+};
+
+/** The source candidates in dark mode, each marker in its own colour. */
+export const DarkCandidates: Story = {
+  args: Candidates.args,
+  decorators: [inDarkMode],
 };

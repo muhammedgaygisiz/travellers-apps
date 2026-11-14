@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import {
+  CountryBoard,
   LeaderboardBoard,
   LeaderboardDataAccessService,
 } from 'bite-tribe/leaderboard-data-access';
@@ -10,6 +11,12 @@ import { LeaderboardService } from '../leaderboard.service';
 
 class MockDataAccess {
   board = signal<LeaderboardBoard>('thisWeek');
+  countryBoard = signal<CountryBoard>('countries');
+  countryRanking = {
+    value: jest.fn(() => ({ board: 'countries', countries: [] })),
+    isLoading: jest.fn(() => false),
+    reload: jest.fn(),
+  };
   ranking = {
     value: jest.fn(() => ({ board: 'thisWeek', users: [] })),
     isLoading: jest.fn(() => false),
@@ -69,6 +76,22 @@ describe(LeaderboardService.name, () => {
       'bite',
       'bite-1',
     ]);
+  });
+
+  it('should open the country ranking and a country’s Bites (#2043)', () => {
+    service.openCountries();
+    service.countryClicked('BA');
+    service.selectCountryBoard('countriesAllTime');
+
+    expect(navController.navigateForward).toHaveBeenNthCalledWith(1, [
+      'leaderboard-countries',
+    ]);
+    expect(navController.navigateForward).toHaveBeenNthCalledWith(
+      2,
+      ['search'],
+      { queryParams: { country: 'BA' } },
+    );
+    expect(service.countryBoard()).toBe('countriesAllTime');
   });
 
   it('should switch the board the ranking is loaded for', () => {

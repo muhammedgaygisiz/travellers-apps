@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "¿Tu Bite?",
   "leaderboard-invite-this-week": "Publica un Bite y sube en la clasificación de esta semana",
   "leaderboard-invite-most-liked": "Dale me gusta a los Bites que te encantan para subirlos al podio",
+  "leaderboard-countries": "Países",
   "weekly-badge-most-bites": "#{{ place }} Más Bites la semana pasada",
   "weekly-badge-most-liked": "#{{ place }} Bite más gustado la semana pasada",
   "weekly-award-bites-earned": "¡Terminaste la semana pasada en el puesto #{{ place }} de la clasificación! 🏆",

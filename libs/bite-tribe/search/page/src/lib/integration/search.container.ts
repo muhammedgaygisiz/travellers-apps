@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { SearchPage } from '../components/search-page/search.page';
 import { SearchService } from './search.service';
@@ -24,6 +25,18 @@ import { SearchService } from './search.service';
 })
 export class SearchContainer {
   readonly service = inject(SearchService);
+  private readonly route = inject(ActivatedRoute);
+
+  ionViewWillEnter(): void {
+    // The country leaderboard opens a country's Bites as `?country=BA`
+    // (issue #2043).
+    const country = this.route.snapshot.queryParamMap.get('country');
+
+    if (country) {
+      this.service.selectCategory('country');
+      this.service.selectCountry(country.toUpperCase());
+    }
+  }
 
   ionViewDidEnter(): void {
     void FirebaseAnalytics.setCurrentScreen({

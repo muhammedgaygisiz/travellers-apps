@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "Senin Bite'ın?",
   "leaderboard-invite-this-week": "Bu haftanın sıralamasında yükselmek için bir Bite paylaş",
   "leaderboard-invite-most-liked": "Sevdiğin Bite'ları beğenerek onları kürsüye çıkar",
+  "leaderboard-countries": "Ülkeler",
   "weekly-badge-most-bites": "#{{ place }} Geçen hafta en çok Bite",
   "weekly-badge-most-liked": "#{{ place }} Geçen hafta en çok beğenilen Bite",
   "weekly-award-bites-earned": "Geçen haftayı sıralamada #{{ place }} olarak bitirdin! 🏆",

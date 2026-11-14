@@ -17,6 +17,13 @@ import {
   MostLikedBoard,
   readMostLiked,
 } from '../shared/utils/weekly-most-liked';
+import {
+  CountryBoard,
+  freezeCountriesLastWeek,
+  RankedCountry,
+  readAllTimeCountries,
+  readWeekCountries,
+} from '../shared/utils/country-leaderboard';
 import { requireMember } from '../shared/roles';
 
 const db = getFirestore();
@@ -26,10 +33,18 @@ const db = getFirestore();
  * week, `lastWeek` the frozen final standings of the week before, and
  * `allTime` the ranking by every Bite a user created. `mostLiked` and
  * `mostLikedLastWeek` rank Bites by the likes they received in the running
- * and the previous week (issue #2028).
+ * and the previous week (issue #2028). The three `countries` boards rank
+ * countries by the Bites posted in them (issue #2043).
  */
 export type LeaderboardBoard =
-  'thisWeek' | 'lastWeek' | 'allTime' | 'mostLiked' | 'mostLikedLastWeek';
+  | 'thisWeek'
+  | 'lastWeek'
+  | 'allTime'
+  | 'mostLiked'
+  | 'mostLikedLastWeek'
+  | 'countries'
+  | 'countriesLastWeek'
+  | 'countriesAllTime';
 
 export interface LoadLeaderboardRequest {
   board?: LeaderboardBoard;
@@ -41,6 +56,8 @@ export interface LeaderboardResponse {
   users: LeaderboardUser[];
   /** The ranked Bites; only on the two Most liked boards. */
   bites?: MostLikedBite[];
+  /** The ranked countries; only on the three country boards (#2043). */
+  countries?: RankedCountry[];
   /** The week's bounds, epoch ms; absent on the all-time board. */
   start?: number;
   end?: number;
@@ -52,6 +69,9 @@ const BOARDS: readonly LeaderboardBoard[] = [
   'allTime',
   'mostLiked',
   'mostLikedLastWeek',
+  'countries',
+  'countriesLastWeek',
+  'countriesAllTime',
 ];
 
 const readAllTime = async (): Promise<LeaderboardUser[]> => {
@@ -91,6 +111,18 @@ const fromMostLiked = (
   end: week.end,
 });
 
+const fromCountries = (
+  board: LeaderboardBoard,
+  ranking: CountryBoard,
+): LeaderboardResponse => ({
+  board,
+  users: [],
+  countries: ranking.countries,
+  ...(ranking.start === undefined
+    ? {}
+    : { start: ranking.start, end: ranking.end }),
+});
+
 export const loadLeaderboard = onAppCheck<LoadLeaderboardRequest | undefined>(
   async (request) => {
     try {
@@ -119,6 +151,18 @@ export const loadLeaderboard = onAppCheck<LoadLeaderboardRequest | undefined>(
 
     if (requested === 'allTime') {
       return { board: requested, users: await readAllTime() };
+    }
+
+    if (requested === 'countries') {
+      return fromCountries(requested, await readWeekCountries(db));
+    }
+
+    if (requested === 'countriesLastWeek') {
+      return fromCountries(requested, await freezeCountriesLastWeek(db));
+    }
+
+    if (requested === 'countriesAllTime') {
+      return fromCountries(requested, await readAllTimeCountries(db));
     }
 
     if (requested === 'mostLiked') {

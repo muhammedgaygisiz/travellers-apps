@@ -55,6 +55,17 @@ computed from; what a notification about one of them says, and to whom, belongs 
   with "Your spot?" and an invitation to post or like; an empty running week shows that open
   podium instead of the empty text. **Last week** and **All time** show only the places that
   exist. See GitHub issue [#2032].
+- A globe button beside the leaderboard title opens the country ranking, a page of its own
+  rather than a fourth tab: countries ranked by the Bites posted in them, every listable Bite
+  counting for its country whoever posted it, since the page shows only countries and counts.
+  **This week** (with the **Last week** switch, frozen at the Monday reset) and **All time**,
+  the top 3 on the podium with their flags, the rest as the list; tapping a country opens its
+  Bites in the country search (`/search?country=BA`). A Bite counts once its country is
+  resolved and its photo uploaded. The running week and all time are computed on read and
+  cached in `/meta/leaderboardCountries` (5 minutes) and `/meta/leaderboardCountriesAllTime`
+  (an hour), the all-time one with `count()` aggregations per country listed in
+  `/meta/biteCountries`; last week is frozen in `/meta/leaderboardCountriesLastWeek`. No
+  badge, push or celebration goes with it. See GitHub issue [#2043].
 - Backend functions maintain Bite counts. The weekly board is built from the Bites whose
   `createdAtTimestamp` falls in the week, so it needs no per-user weekly counter and a deleted
   Bite drops out of its week by itself. A tie is decided by who reached the count first.
@@ -182,3 +193,4 @@ them is collected in onboarding.
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
 [#2032]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2032
+[#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043

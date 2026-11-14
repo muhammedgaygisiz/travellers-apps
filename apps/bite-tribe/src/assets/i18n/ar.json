@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "Bite الخاصة بك؟",
   "leaderboard-invite-this-week": "انشر Bite لتصعد في ترتيب هذا الأسبوع",
   "leaderboard-invite-most-liked": "أعجب بالـ Bites التي تحبها لتضعها على منصة التتويج",
+  "leaderboard-countries": "الدول",
   "weekly-badge-most-bites": "#{{ place }} أكثر Bites الأسبوع الماضي",
   "weekly-badge-most-liked": "#{{ place }} Bite الأكثر إعجابًا الأسبوع الماضي",
   "weekly-award-bites-earned": "أنهيت الأسبوع الماضي في المركز {{ place }} على لوحة المتصدرين! 🏆",

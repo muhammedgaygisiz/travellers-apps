@@ -7,7 +7,19 @@
   [loading]="isLoading()"
 >
   <ion-content class="ion-padding content-safe-padding-bottom">
-    <h1 class="ion-margin-bottom">{{ 'leaderboard' | transloco }}</h1>
+    <div class="leaderboard-header">
+      <h1>{{ 'leaderboard' | transloco }}</h1>
+      <!-- The country ranking is its own page (#2043). -->
+      <ion-button
+        fill="clear"
+        class="leaderboard-countries"
+        data-testid="leaderboard-countries"
+        [attr.aria-label]="'leaderboard-countries' | transloco"
+        (click)="countriesClick.emit()"
+      >
+        <ion-icon slot="icon-only" name="globe-outline" />
+      </ion-button>
+    </div>
 
     <!-- The week is the default: a ranking that resets every Monday 00:00 UTC
     is one a new user can climb (#2027). -->

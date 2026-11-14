@@ -347,6 +347,7 @@
   "leaderboard-your-bite": "당신의 Bite?",
   "leaderboard-invite-this-week": "Bite를 올리고 이번 주 순위표에서 올라가 보세요",
   "leaderboard-invite-most-liked": "좋아하는 Bite에 좋아요를 눌러 시상대에 올려 보세요",
+  "leaderboard-countries": "국가",
   "weekly-badge-most-bites": "#{{ place }} 지난주 최다 Bite",
   "weekly-badge-most-liked": "#{{ place }} 지난주 최다 좋아요 Bite",
   "weekly-award-bites-earned": "지난주 순위표 {{ place }}위로 마무리했어요! 🏆",

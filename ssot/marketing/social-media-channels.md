@@ -1568,6 +1568,38 @@ and shirt, after the surf club's schnitzel, and the cover photo is Glenelg's
 Moseley Square, where the gelato is from. Leela's cover line is "A meat pie
 with the koalas, then gelato on Glenelg beach".
 
+### On The Facebook Page
+
+**Every city post also goes to the BiteTribe Facebook Page** (product owner's
+call, 14 November 2026, [#2007]). Until then the posts were on Instagram only:
+the skill left Instagram's "Share to Facebook" off.
+
+**Instagram's share switch cannot reach the Page.** On 14 November 2026 the
+Instagram web composer offered one Facebook target, the owner's personal
+profile with the audience "Only me", and Accounts Center showed the same
+target for @bitetribeapp. Business Suite, meanwhile, lists the BiteTribe Page
+as the asset connected to @bitetribeapp, so there was nothing to relink. The
+Page gets its own post instead, from the Meta Business Suite composer with
+only the Page ticked under **Post to**. The composer ticks @bitetribeapp as
+well by default, and leaving it ticked would put the carousel on Instagram a
+second time. Accounts Center also shares @bitetribeapp's stories to the
+personal profile automatically; that was left as it is.
+
+**The Facebook caption is the Instagram one with two changes:** the
+`(@handle)` after each restaurant is dropped, since Instagram handles mean
+nothing on Facebook, and "link in bio" becomes "get it at bitetribe.app".
+Restaurants are not tagged on Facebook.
+
+**The backfill** (14 November 2026) posted all seventeen city posts so far,
+oldest first, from Solothurn to Zurich. The slides were downloaded from the
+published Instagram carousels, so they are exactly what went up there,
+including Solothurn's 720x960 and the six-slide format before Leela's closing
+slide. Solothurn's line about "a seasonal gem available right now" lost the
+"available right now", seven weeks on. The composer's hashtag autocomplete
+once completed the last hashtag on its own (Granada's `#andalucia` became
+`#andaluciaorienta`), and Publish did nothing until the caption was put back,
+so the skill reads every caption back before publishing.
+
 ## Wiring Back Into The Product
 
 ### twitter:site, Done
@@ -1676,3 +1708,4 @@ yet reflected.
 [#1942]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1942
 [#1944]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1944
 [#1948]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1948
+[#2007]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2007

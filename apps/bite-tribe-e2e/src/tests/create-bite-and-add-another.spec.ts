@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { BiteDetailsPage } from '../pages/bite-details.page';
 import { CreateBitePage } from '../pages/create-bite.page';
 import { MenuPage } from '../pages/menu.page';
 import { RestaurantPage } from '../pages/restaurant.page';
@@ -186,10 +187,12 @@ test.describe('Post and add another Bite', () => {
     const createBite = new CreateBitePage(page);
 
     await search.open();
-    await search.selectCategory('Restaurant');
+    await search.selectCategory('Bite');
     await search.search(fixture.restaurantName);
-    await search.expectResult(fixture.restaurantName);
-    await search.openResult(fixture.restaurantName);
+    await search.expectResult(fixture.biteName);
+    await search.openResult(fixture.biteName);
+    await page.waitForURL(new RegExp(`/bite/${fixture.biteId}$`));
+    await new BiteDetailsPage(page).openRestaurant(fixture.restaurantName);
     await page.waitForURL(
       new RegExp(`/bite/[^/]+/restaurant/${fixture.restaurantId}$`),
     );

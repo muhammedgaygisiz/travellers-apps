@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { dismissCoachMarks } from '../support/coach-marks';
 
 export class BiteDetailsPage {
   readonly page: Page;
@@ -154,6 +155,21 @@ export class BiteDetailsPage {
         .locator('star-rating[readonly]')
         .locator(`[aria-label="${options.rating} star"]`),
     ).toHaveAttribute('aria-checked', 'true');
+  }
+
+  /**
+   * Opens the restaurant page from the restaurant name under the Bite's title.
+   * Since GitHub issue #2026 this is how search reaches a restaurant: Bites
+   * search matches the restaurant name and lands on one of its Bites.
+   */
+  async openRestaurant(restaurant: string): Promise<void> {
+    // A first visit to a Bite page queues its coach mark, whose scrim would
+    // swallow the click.
+    await dismissCoachMarks(this.page);
+    await this.page
+      .locator('details-page:visible')
+      .getByRole('button', { name: restaurant, exact: true })
+      .click();
   }
 
   async openEdit(): Promise<void> {

@@ -6,34 +6,31 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
-const restaurantResults: SearchResult[] = [
+const biteResults: SearchResult[] = [
   {
-    category: 'restaurant',
+    category: 'bite',
     value: {
-      id: 'restaurant-1',
-      name: 'Tandoori House',
-      biteId: 'bite-1',
-      place: 'Bern, Switzerland',
+      id: 'bite-1',
+      name: 'Butter Chicken',
+      place: 'Tandoori House',
       position: { latitude: 46.948, longitude: 7.447 },
     },
   },
   {
-    category: 'restaurant',
+    category: 'bite',
     value: {
-      id: 'restaurant-2',
-      name: 'Ristorante Milano',
-      biteId: 'bite-2',
-      place: 'Zurich, Switzerland',
+      id: 'bite-2',
+      name: 'Risotto alla Milanese',
+      place: 'Ristorante Milano',
       position: { latitude: 47.3769, longitude: 8.5417 },
     },
   },
   {
-    category: 'restaurant',
+    category: 'bite',
     value: {
-      id: 'restaurant-3',
-      name: 'Le Petit Bistro',
-      biteId: 'bite-3',
-      place: 'Geneva, Switzerland',
+      id: 'bite-3',
+      name: 'Croque Monsieur',
+      place: 'Le Petit Bistro',
       position: { latitude: 46.2044, longitude: 6.1432 },
     },
   },
@@ -92,15 +89,15 @@ export const Default: Story = {};
 
 export const WithResults: Story = {
   args: {
-    selectedCategory: 'restaurant',
-    results: restaurantResults,
+    selectedCategory: 'bite',
+    results: biteResults,
     hasSearched: true,
   },
 };
 
 export const EmptyResults: Story = {
   args: {
-    selectedCategory: 'restaurant',
+    selectedCategory: 'bite',
     results: [],
     hasSearched: true,
   },

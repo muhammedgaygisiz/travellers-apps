@@ -1,5 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import { geohashForLocation } from 'geofire-common';
+import { BiteDetailsPage } from '../pages/bite-details.page';
 import { HomePage } from '../pages/home.page';
 import { RestaurantPage } from '../pages/restaurant.page';
 import { SearchPage } from '../pages/search.page';
@@ -64,14 +65,18 @@ async function seedRestaurantBite(
   });
 }
 
-async function loginAndOpenRestaurantSearch(page: Page): Promise<SearchPage> {
+/**
+ * Restaurants are reached through one of their Bites: Bites search matches the
+ * restaurant name, and the Bite links to its restaurant (GitHub issue #2026).
+ */
+async function loginAndOpenBiteSearch(page: Page): Promise<SearchPage> {
   await loginAsTestUser(page);
   await completeOnboardingIfNeeded(page);
   await dismissCoachMarks(page);
 
   const search = new SearchPage(page);
   await search.open();
-  await search.selectCategory('Restaurant');
+  await search.selectCategory('Bite');
   return search;
 }
 
@@ -173,10 +178,13 @@ test.describe('Browse Restaurants and Places', () => {
       }),
     ]);
 
-    const search = await loginAndOpenRestaurantSearch(page);
+    const search = await loginAndOpenBiteSearch(page);
     await search.search(restaurantName);
-    await search.expectResult(restaurantName);
-    await search.openResult(restaurantName);
+    await search.expectResult(firstBite.name);
+    await search.expectResult(secondBite.name);
+    await search.openResult(firstBite.name);
+    await page.waitForURL(new RegExp(`/bite/${firstBite.id}$`));
+    await new BiteDetailsPage(page).openRestaurant(restaurantName);
     await page.waitForURL(
       new RegExp(`/bite/[^/]+/restaurant/${restaurantId}$`),
     );
@@ -235,16 +243,15 @@ test.describe('Browse Restaurants and Places', () => {
       }),
     ]);
 
-    const search = await loginAndOpenRestaurantSearch(page);
+    const search = await loginAndOpenBiteSearch(page);
     await search.search(`No Such Place ${runId}`);
     await search.expectEmpty();
 
     await search.search(place);
-    await search.expectResult(place);
-    await expect(search.result(place)).toContainText(
-      'This restaurant is not verified on BiteTribe yet.',
-    );
-    await search.openResult(place);
+    await search.expectResult(firstBite.name);
+    await search.openResult(firstBite.name);
+    await page.waitForURL(new RegExp(`/bite/${firstBite.id}$`));
+    await new BiteDetailsPage(page).openRestaurant(place);
     await page.waitForURL(/\/bite\/[^/]+\/restaurant\/place\//);
 
     const restaurant = new RestaurantPage(page);

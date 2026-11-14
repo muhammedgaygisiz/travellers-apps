@@ -219,9 +219,9 @@ describe(SearchListComponent.name, () => {
     expect(component.getResultImage(result)).toBe('bite-image-path');
   });
 
-  it('should describe city results like bites with a location icon', () => {
+  it('should describe country results like bites with a location icon', () => {
     const result: SearchResult = {
-      category: 'city',
+      category: 'country',
       value: {
         id: 'bite-2',
         name: 'Margherita',
@@ -231,37 +231,18 @@ describe(SearchListComponent.name, () => {
       },
     };
 
-    expect(component.getResultId(result)).toBe('city-bite-2');
+    expect(component.getResultId(result)).toBe('country-bite-2');
     expect(component.getResultTitle(result)).toBe('Margherita');
     expect(component.getResultSubtitle(result)).toBe('Napoli - Classic pizza');
     expect(component.getResultFallbackIcon(result)).toBe('location-outline');
-    expect(component.isUnverifiedRestaurant(result)).toBe(false);
-  });
-
-  it('should identify unverified restaurant results', () => {
-    const result: SearchResult = {
-      category: 'restaurant',
-      value: {
-        id: 'place-1',
-        name: 'Yalkottu',
-        biteId: 'bite-1',
-        place: 'Yalkottu',
-      },
-    };
-
-    expect(component.getResultId(result)).toBe('restaurant-place-1');
-    expect(component.getResultTitle(result)).toBe('Yalkottu');
-    expect(component.getResultSubtitle(result)).toBe('Yalkottu');
-    expect(component.getResultFallbackIcon(result)).toBe('storefront-outline');
-    expect(component.isUnverifiedRestaurant(result)).toBe(true);
   });
 
   describe('at desktop widths', () => {
     let mediaListener: ((event: MediaQueryListEvent) => void) | undefined;
     let matches: boolean;
 
-    const cityResult: SearchResult = {
-      category: 'city',
+    const biteResult: SearchResult = {
+      category: 'bite',
       value: { id: 'bite-1', name: 'Pizza', place: 'Napoli' },
     };
 
@@ -293,7 +274,7 @@ describe(SearchListComponent.name, () => {
       createAtWidth(true);
       const emitted: SearchResult[] = [];
       component.resultClick.subscribe((result) => emitted.push(result));
-      componentRef.setInput('results', [cityResult]);
+      componentRef.setInput('results', [biteResult]);
       fixture.detectChanges();
 
       const cards = fixture.nativeElement.querySelectorAll('bt-bite');
@@ -301,7 +282,7 @@ describe(SearchListComponent.name, () => {
       expect(fixture.nativeElement.querySelector('ion-list')).toBeNull();
 
       cards[0].querySelector('ion-card').click();
-      expect(emitted).toEqual([cityResult]);
+      expect(emitted).toEqual([biteResult]);
     });
 
     it('should keep the list for results that are not Bites', () => {
@@ -317,7 +298,7 @@ describe(SearchListComponent.name, () => {
 
     it('should switch between list and cards when the width crosses the breakpoint', () => {
       createAtWidth(false);
-      componentRef.setInput('results', [cityResult]);
+      componentRef.setInput('results', [biteResult]);
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('bt-bite')).toBeNull();
 
@@ -328,10 +309,10 @@ describe(SearchListComponent.name, () => {
 
     it('should fill the card fields the search payload does not carry', () => {
       createAtWidth(true);
-      componentRef.setInput('results', [cityResult]);
+      componentRef.setInput('results', [biteResult]);
 
       expect(component.biteCards()[0].bite).toEqual({
-        ...cityResult.value,
+        ...biteResult.value,
         image: '',
         price: 0,
         position: { latitude: 0, longitude: 0 },

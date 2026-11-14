@@ -9,7 +9,7 @@ import { completeOnboardingIfNeeded } from '../support/onboarding';
 const IMAGE_FIXTURE = join(__dirname, '..', 'fixtures', 'bite.jpg');
 
 test.describe('Search', () => {
-  test('finds a created bite by bite and restaurant categories', async ({
+  test('finds a created bite by its name and by its restaurant', async ({
     page,
   }) => {
     await loginAsTestUser(page);
@@ -40,8 +40,8 @@ test.describe('Search', () => {
     await search.search(biteName);
     await search.expectResult(biteName);
 
-    await search.selectCategory('Restaurant');
+    // Bites search also reads the restaurant name (GitHub issue #2026).
     await search.search(restaurant);
-    await search.expectResult(restaurant);
+    await search.expectResult(biteName);
   });
 });

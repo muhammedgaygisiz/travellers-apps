@@ -18,6 +18,14 @@ interface SearchBitesRequest {
   searchText?: unknown;
 }
 
+/**
+ * The free-text fields a Bites search reads (GitHub issue #2026): the dish, the
+ * restaurant as written on the Bite, the reverse-geocoded city and the
+ * description. Tags are matched one by one beside them. Country text is left
+ * out on purpose - the country picker is its search.
+ */
+const SEARCHABLE_FIELDS = ['name', 'place', 'city', 'description'] as const;
+
 const matchesSearchText = (value: string, searchText: string): boolean =>
   foldSearchText(value).includes(searchText);
 
@@ -54,12 +62,13 @@ export const searchBites = onAppCheck<SearchBitesRequest>(async (request) => {
         return false;
       }
 
-      const name = getString(bite, 'name');
-      const tags = getStringArray(bite, 'tags');
-
       return (
-        matchesSearchText(name, searchText) ||
-        tags.some((tag) => matchesSearchText(tag, searchText))
+        SEARCHABLE_FIELDS.some((field) =>
+          matchesSearchText(getString(bite, field), searchText),
+        ) ||
+        getStringArray(bite, 'tags').some((tag) =>
+          matchesSearchText(tag, searchText),
+        )
       );
     })
     .slice(0, MAX_RESULTS)

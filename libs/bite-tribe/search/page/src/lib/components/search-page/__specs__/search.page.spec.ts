@@ -64,17 +64,15 @@ describe(SearchPage.name, () => {
     it('should emit the selected category', () => {
       const emitSpy = jest.spyOn(component.categoryChange, 'emit');
 
-      component.categoryValueChange('restaurant');
+      component.categoryValueChange('bite');
 
-      expect(emitSpy).toHaveBeenCalledWith('restaurant');
+      expect(emitSpy).toHaveBeenCalledWith('bite');
     });
 
     it('should expose translated category options for the chip radio group', () => {
       expect(component.categoryOptions()).toEqual([
         { label: 'search-category-user', value: 'user' },
         { label: 'search-category-bite', value: 'bite' },
-        { label: 'search-category-restaurant', value: 'restaurant' },
-        { label: 'search-category-city', value: 'city' },
         { label: 'search-category-country', value: 'country' },
       ]);
     });
@@ -96,7 +94,7 @@ describe(SearchPage.name, () => {
     });
 
     it('should keep the searchbar for the text-driven categories', () => {
-      componentRef.setInput('selectedCategory', 'city');
+      componentRef.setInput('selectedCategory', 'bite');
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('ion-searchbar')).toBeTruthy();
@@ -238,23 +236,6 @@ describe(SearchPage.name, () => {
       expect(component.mapPositions()[0]).not.toHaveProperty('rating');
     });
 
-    it('should not put a rating on restaurant markers', () => {
-      componentRef.setInput('selectedCategory', 'restaurant');
-      componentRef.setInput('results', [
-        {
-          category: 'restaurant',
-          value: {
-            id: 'restaurant-1',
-            name: 'Tandoori House',
-            biteId: 'bite-1',
-            position: { latitude: 46.948, longitude: 7.447 },
-          },
-        },
-      ]);
-
-      expect(component.mapPositions()[0]).not.toHaveProperty('rating');
-    });
-
     it('should run the page full width only while the map is showing', () => {
       componentRef.setInput('selectedCategory', 'bite');
       expect(component.isMapView()).toBe(false);
@@ -270,11 +251,11 @@ describe(SearchPage.name, () => {
 
     it('should emit the matching result when a map marker is selected', () => {
       const result = {
-        category: 'restaurant' as const,
+        category: 'bite' as const,
         value: {
-          id: 'restaurant-1',
-          name: 'Italian Restaurant Bern',
-          biteId: 'bite-1',
+          id: 'bite-1',
+          name: 'Margherita',
+          place: 'Italian Restaurant Bern',
           position: { latitude: 46.948, longitude: 7.447 },
         },
       };
@@ -282,7 +263,7 @@ describe(SearchPage.name, () => {
       componentRef.setInput('results', [result]);
 
       component.mapMarkerClick({
-        id: 'restaurant-restaurant-1',
+        id: 'bite-bite-1',
         latitude: 0,
         longitude: 0,
       });

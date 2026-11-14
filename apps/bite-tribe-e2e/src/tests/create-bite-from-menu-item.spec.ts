@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { BiteDetailsPage } from '../pages/bite-details.page';
 import { CreateBitePage } from '../pages/create-bite.page';
 import { MenuPage } from '../pages/menu.page';
 import { RestaurantPage } from '../pages/restaurant.page';
@@ -72,10 +73,12 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
 
     const openMenuFromHome = async (): Promise<void> => {
       await search.open();
-      await search.selectCategory('Restaurant');
+      await search.selectCategory('Bite');
       await search.search(restaurantName);
-      await search.expectResult(restaurantName);
-      await search.openResult(restaurantName);
+      await search.expectResult(fixture.biteName);
+      await search.openResult(fixture.biteName);
+      await page.waitForURL(new RegExp(`/bite/${fixture.biteId}$`));
+      await new BiteDetailsPage(page).openRestaurant(restaurantName);
       await page.waitForURL(
         new RegExp(`/bite/[^/]+/restaurant/${restaurantId}$`),
       );
@@ -100,7 +103,8 @@ test.describe('Create a Bite from a Restaurant menu item', () => {
         'menu-page',
         new RegExp(`/bite/[^/]+/restaurant/${restaurantId}$`),
       );
-      await backFrom('restaurant', '**/search');
+      await backFrom('restaurant', new RegExp(`/bite/${fixture.biteId}$`));
+      await backFrom('details-page', '**/search');
       await backFrom('search-page', '**/home');
     };
 

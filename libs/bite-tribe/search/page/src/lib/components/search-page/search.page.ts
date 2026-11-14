@@ -59,8 +59,6 @@ export class SearchPage {
   readonly categories: SearchCategoryOption[] = [
     { labelKey: 'search-category-user', value: 'user' },
     { labelKey: 'search-category-bite', value: 'bite' },
-    { labelKey: 'search-category-restaurant', value: 'restaurant' },
-    { labelKey: 'search-category-city', value: 'city' },
     { labelKey: 'search-category-country', value: 'country' },
   ];
 
@@ -132,10 +130,7 @@ export class SearchPage {
             id: this.getResultId(result),
             // Carries the rating into the marker, so a Bite found through
             // search looks like the same Bite on every other map in the app.
-            // Restaurants have no rating of their own and keep the plain pin.
-            ...(result.category !== 'restaurant' && result.value.rating
-              ? { rating: result.value.rating }
-              : {}),
+            ...(result.value.rating ? { rating: result.value.rating } : {}),
           }) as Geopoint,
       ),
   );

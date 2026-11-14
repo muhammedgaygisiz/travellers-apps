@@ -3,7 +3,11 @@ import { LeaderboardPage } from '../pages/leaderboard.page';
 import { ProfilePage } from '../pages/profile.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
-import { seedFirestoreDocument } from '../support/firestore';
+import {
+  deleteFirestoreDocument,
+  getFirestoreDocument,
+  seedFirestoreDocument,
+} from '../support/firestore';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 
 interface RankedUser {
@@ -88,6 +92,7 @@ test.describe('Use gamification signals', () => {
     const leaderboard = new LeaderboardPage(page);
     await leaderboard.open();
     await dismissCoachMarks(page);
+    await leaderboard.showAllTime();
 
     await expect(leaderboard.rows).toHaveCount(2);
     await leaderboard.expectRankedUser(1, leader);
@@ -115,7 +120,109 @@ test.describe('Use gamification signals', () => {
     const leaderboard = new LeaderboardPage(page);
     await leaderboard.open();
     await dismissCoachMarks(page);
+    await leaderboard.showAllTime();
 
     await leaderboard.expectEmpty();
+  });
+
+  test('ranks this week by the Bites created since Monday, and dates last week', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+
+    const runId = Date.now();
+    // Weekly counts the seeded Bites beat on their own, whatever the shared
+    // emulator already holds for this week from other specs.
+    const leader: RankedUser = {
+      id: `week-leader-${runId}`,
+      displayName: `Week Leader ${runId}`,
+      city: 'Sarajevo',
+      biteCount: 6,
+    };
+    const runnerUp: RankedUser = {
+      id: `week-runner-${runId}`,
+      displayName: `Week Runner ${runId}`,
+      city: 'Mostar',
+      biteCount: 5,
+    };
+    const biteIds: string[] = [];
+
+    await Promise.all([
+      seedRankedUser(page, { ...leader, biteCount: 1 }),
+      seedRankedUser(page, { ...runnerUp, biteCount: 900 }),
+    ]);
+
+    // Ranked by this week's Bites, not by the all-time count on the user
+    // document: the runner-up's 900 must not put them first.
+    for (const user of [leader, runnerUp]) {
+      for (let i = 0; i < user.biteCount; i++) {
+        const biteId = `${user.id}-bite-${i}`;
+        biteIds.push(biteId);
+        await seedFirestoreDocument(page, `bites/${biteId}`, {
+          userId: { stringValue: user.id },
+          name: { stringValue: `Weekly Bite ${i} ${runId}` },
+          place: { stringValue: `Weekly Kitchen ${runId}` },
+          price: { stringValue: '5.00' },
+          currency: { stringValue: 'BAM' },
+          createdAt: { stringValue: new Date().toISOString() },
+          createdAtTimestamp: { integerValue: String(Date.now()) },
+        });
+      }
+    }
+
+    // The board is rebuilt by the Bite create trigger, asynchronously.
+    await expect
+      .poll(
+        async () => {
+          const board = await getFirestoreDocument(
+            page,
+            'meta/leaderboardWeekly',
+          );
+          const users = (board?.['users'] ?? []) as { userId: string }[];
+
+          return [leader.id, runnerUp.id].every((id) =>
+            users.some((user) => user.userId === id),
+          );
+        },
+        { timeout: 60_000 },
+      )
+      .toBe(true);
+
+    try {
+      await loginAsTestUser(page);
+      await completeOnboardingIfNeeded(page);
+      await dismissCoachMarks(page);
+
+      const leaderboard = new LeaderboardPage(page);
+      await leaderboard.open();
+      await dismissCoachMarks(page);
+
+      await expect(leaderboard.weekEnds).toContainText('Week ends in');
+
+      const leaderRow = leaderboard.rowFor(leader.displayName);
+      const runnerRow = leaderboard.rowFor(runnerUp.displayName);
+
+      await expect(leaderRow.locator('.bite-count')).toHaveText('6 Bites');
+      await expect(runnerRow.locator('.bite-count')).toHaveText('5 Bites');
+
+      const leaderRank = Number(
+        await leaderRow.locator('.rank-badge').textContent(),
+      );
+      const runnerRank = Number(
+        await runnerRow.locator('.rank-badge').textContent(),
+      );
+      expect(leaderRank).toBeLessThan(runnerRank);
+
+      await leaderboard.showLastWeek();
+      await expect(leaderboard.finalStandings).toContainText('Final standings');
+      await expect(leaderboard.weekEnds).toHaveCount(0);
+      await expect(leaderboard.rowFor(leader.displayName)).toHaveCount(0);
+    } finally {
+      // The emulator keeps every write for the run; hand the Bites back so
+      // they do not sit in later specs' feeds.
+      for (const biteId of biteIds) {
+        await deleteFirestoreDocument(page, `bites/${biteId}`);
+      }
+    }
   });
 });

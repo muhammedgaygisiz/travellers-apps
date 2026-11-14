@@ -13,12 +13,33 @@ export class LeaderboardPage {
   readonly root: Locator;
   readonly rows: Locator;
   readonly emptyState: Locator;
+  readonly weekEnds: Locator;
+  readonly finalStandings: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.root = page.locator('leaderboard-list');
     this.rows = this.root.locator('ion-item.leaderboard-item');
     this.emptyState = this.root.locator('.empty-container');
+    this.weekEnds = this.root.getByTestId('leaderboard-week-ends');
+    this.finalStandings = this.root.getByTestId('leaderboard-final-standings');
+  }
+
+  /** The ranking by every Bite a user created; the week is the default. */
+  async showAllTime(): Promise<void> {
+    await this.root.getByTestId('leaderboard-tab-all-time').click();
+  }
+
+  /** Last week's frozen final standings, under the week tab. */
+  async showLastWeek(): Promise<void> {
+    await this.root.getByTestId('leaderboard-week-last').click();
+  }
+
+  /** The row holding this display name, wherever it ranks. */
+  rowFor(displayName: string): Locator {
+    return this.rows.filter({
+      has: this.page.locator('ion-label h2', { hasText: displayName }),
+    });
   }
 
   async open(): Promise<void> {
@@ -49,8 +70,8 @@ export class LeaderboardPage {
     await this.page.waitForURL(`**/profile/${userId}`);
   }
 
-  async expectEmpty(): Promise<void> {
-    await expect(this.emptyState).toContainText('No leaderboard users yet');
+  async expectEmpty(message = 'No leaderboard users yet'): Promise<void> {
+    await expect(this.emptyState).toContainText(message);
     await expect(this.rows).toHaveCount(0);
   }
 }

@@ -8,10 +8,19 @@ jest.mock('@capacitor-firebase/functions', () => ({
   },
 }));
 
+const users = [
+  {
+    userId: 'user-1',
+    displayName: 'Daniel Langone',
+    photoUrl: '',
+    public: true,
+    biteCount: 12,
+  },
+];
+
 describe(LeaderboardDataAccessService.name, () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({ data: [] });
   });
 
   const createService = (): LeaderboardDataAccessService => {
@@ -22,38 +31,56 @@ describe(LeaderboardDataAccessService.name, () => {
     return TestBed.inject(LeaderboardDataAccessService);
   };
 
-  it('should load leaderboard users from the Firebase function', async () => {
+  it('should ask the Firebase function for the named board', async () => {
     const service = createService();
-    const users = [
-      {
-        userId: 'user-1',
-        displayName: 'Daniel Langone',
-        photoUrl: '',
-        public: true,
-        biteCount: 12,
-      },
-    ];
+    const ranking = {
+      board: 'lastWeek',
+      users,
+      start: Date.UTC(2026, 10, 2),
+      end: Date.UTC(2026, 10, 9),
+    };
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockResolvedValue({ data: ranking });
+
+    const result = await service.loadRanking('lastWeek');
+
+    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+      name: 'loadLeaderboard',
+      data: { board: 'lastWeek' },
+    });
+    expect(result).toEqual(ranking);
+  });
+
+  it('should read a bare array from a function deployed before the weekly board as all time', async () => {
+    const service = createService();
     jest
       .mocked(FirebaseFunctions.callByName)
       .mockResolvedValue({ data: users });
 
-    const result = await service.usersLoader({} as never);
-
-    expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
-      name: 'loadLeaderboard',
-      data: undefined,
+    expect(await service.loadRanking('thisWeek')).toEqual({
+      board: 'allTime',
+      users,
     });
-    expect(result).toEqual(users);
   });
 
-  it('should return an empty list when the Firebase function fails', async () => {
+  it('should return an empty ranking when the Firebase function fails', async () => {
     const service = createService();
     jest
       .mocked(FirebaseFunctions.callByName)
       .mockRejectedValue(new Error('Function not found'));
 
-    const result = await service.usersLoader({} as never);
+    expect(await service.loadRanking('thisWeek')).toEqual({
+      board: 'thisWeek',
+      users: [],
+    });
+  });
 
-    expect(result).toEqual([]);
+  it('should start on this week', () => {
+    jest
+      .mocked(FirebaseFunctions.callByName)
+      .mockResolvedValue({ data: { board: 'thisWeek', users: [] } });
+
+    expect(createService().board()).toBe('thisWeek');
   });
 });

@@ -9,13 +9,68 @@
   <ion-content class="ion-padding content-safe-padding-bottom">
     <h1 class="ion-margin-bottom">{{ 'leaderboard' | transloco }}</h1>
 
+    <!-- The week is the default: a ranking that resets every Monday 00:00 UTC
+    is one a new user can climb (#2027). -->
+    <ion-segment
+      class="leaderboard-tabs"
+      [value]="tab()"
+      data-testid="leaderboard-tabs"
+      (ionChange)="selectTab($any($event.detail.value))"
+    >
+      <ion-segment-button value="week" data-testid="leaderboard-tab-week">
+        {{ 'leaderboard-tab-this-week' | transloco }}
+      </ion-segment-button>
+      <ion-segment-button
+        value="allTime"
+        data-testid="leaderboard-tab-all-time"
+      >
+        {{ 'leaderboard-tab-all-time' | transloco }}
+      </ion-segment-button>
+    </ion-segment>
+
+    @if (tab() === 'week') {
+      <ion-segment
+        class="leaderboard-week-switch"
+        [value]="board()"
+        data-testid="leaderboard-week-switch"
+        (ionChange)="selectWeek($any($event.detail.value))"
+      >
+        <ion-segment-button
+          value="thisWeek"
+          data-testid="leaderboard-week-this"
+        >
+          {{ 'leaderboard-tab-this-week' | transloco }}
+        </ion-segment-button>
+        <ion-segment-button
+          value="lastWeek"
+          data-testid="leaderboard-week-last"
+        >
+          {{ 'leaderboard-last-week' | transloco }}
+        </ion-segment-button>
+      </ion-segment>
+
+      @if (weekEndsIn(); as endsIn) {
+        <p class="leaderboard-meta" data-testid="leaderboard-week-ends">
+          <ion-icon name="time-outline" aria-hidden="true" />
+          {{ 'leaderboard-week-ends' | transloco: { relative: endsIn } }}
+        </p>
+      }
+      @if (lastWeekDates(); as dates) {
+        <p class="leaderboard-meta" data-testid="leaderboard-final-standings">
+          {{ 'leaderboard-final-standings' | transloco: { dates } }}
+        </p>
+      }
+    }
+
     @if (isLoading()) {
       <div class="spinner-container">
         <ion-spinner color="primary" />
       </div>
     } @else if (rankedUsers().length === 0) {
       <div class="empty-container">
-        <ion-label>{{ 'no-leaderboard-users-yet' | transloco }}</ion-label>
+        <ion-label data-testid="leaderboard-empty">{{
+          emptyKey() | transloco
+        }}</ion-label>
       </div>
     } @else {
       <ion-list>

@@ -8,6 +8,10 @@ import {
   META_COLLECTION,
   toLeaderboardEntry,
 } from '../shared/utils/leaderboard';
+import {
+  LEADERBOARD_LAST_WEEK_DOC,
+  LEADERBOARD_WEEKLY_DOC,
+} from '../shared/utils/weekly-leaderboard';
 import { USERS_COLLECTION } from './display-name-utils';
 
 const REVIEWS_COLLECTION = 'reviews';
@@ -111,7 +115,9 @@ const renameInCollection = async (
  * that copy it, and an old name left in any of them is visible to other
  * accounts:
  *
- * - `meta/leaderboard` and `meta/leaderboardDaily`, the persisted rankings.
+ * - `meta/leaderboard`, `meta/leaderboardDaily`, `meta/leaderboardWeekly` and
+ *   `meta/leaderboardLastWeek`, the persisted rankings (the last two since
+ *   issue #2027).
  * - `reviews.author`, denormalised at write time. The app resolves the name
  *   through `authorId` on read, but the stored field is readable by any member.
  * - `biteTrails.ownerName`, rendered as `@name` on every Bite Trail card.
@@ -127,32 +133,47 @@ export const syncDisplayNameCopies = async (
   uid: string,
   displayName: string,
 ): Promise<void> => {
-  const [leaderboard, leaderboardDaily, reviews, biteTrails] =
-    await Promise.all([
-      renameInLeaderboardSnapshot(db, LEADERBOARD_DOC, uid, displayName),
-      renameInLeaderboardSnapshot(db, LEADERBOARD_DAILY_DOC, uid, displayName),
-      renameInCollection(
-        db,
-        REVIEWS_COLLECTION,
-        'authorId',
-        'author',
-        uid,
-        displayName,
-      ),
-      renameInCollection(
-        db,
-        BITE_TRAILS_COLLECTION,
-        'ownerId',
-        'ownerName',
-        uid,
-        displayName,
-      ),
-    ]);
+  const [
+    leaderboard,
+    leaderboardDaily,
+    leaderboardWeekly,
+    leaderboardLastWeek,
+    reviews,
+    biteTrails,
+  ] = await Promise.all([
+    renameInLeaderboardSnapshot(db, LEADERBOARD_DOC, uid, displayName),
+    renameInLeaderboardSnapshot(db, LEADERBOARD_DAILY_DOC, uid, displayName),
+    renameInLeaderboardSnapshot(db, LEADERBOARD_WEEKLY_DOC, uid, displayName),
+    renameInLeaderboardSnapshot(
+      db,
+      LEADERBOARD_LAST_WEEK_DOC,
+      uid,
+      displayName,
+    ),
+    renameInCollection(
+      db,
+      REVIEWS_COLLECTION,
+      'authorId',
+      'author',
+      uid,
+      displayName,
+    ),
+    renameInCollection(
+      db,
+      BITE_TRAILS_COLLECTION,
+      'ownerId',
+      'ownerName',
+      uid,
+      displayName,
+    ),
+  ]);
 
   logger.info('syncDisplayNameCopies: copies rewritten', {
     uid,
     leaderboard,
     leaderboardDaily,
+    leaderboardWeekly,
+    leaderboardLastWeek,
     reviews,
     biteTrails,
   });

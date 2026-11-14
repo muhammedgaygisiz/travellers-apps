@@ -15,6 +15,8 @@ export type Bite = {
   countryCode?: string;
   formatted?: string;
   addressStatus?: 'pending' | 'resolved' | 'failed';
+  createdAt?: string;
+  createdAtTimestamp?: number;
   updatedAt?: string;
   updatedAtTimestamp?: number;
   currency?: string;

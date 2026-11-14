@@ -370,12 +370,14 @@ of harm rather than a stale label.
   through `authorId` per [UC - Inspect Bite Details](uc-inspect-bite-details.md). Push
   notifications read the sender's name from the profile when they are sent, so one sent
   after the change carries the new name.
-- **Copied, and rewritten on change.** Four places store a copy, and all of them are
+- **Copied, and rewritten on change.** Six places store a copy, and all of them are
   readable by every member. `syncDisplayNameCopiesOnUserUpdate` fires on an update to
   `/users/{uid}` whose `displayName` changed - whichever path wrote it - and rewrites them:
   - `meta/leaderboard`, the leaderboard, which is otherwise rebuilt only when a Bite is
     created or deleted. The new name shows without waiting for anybody to post.
   - `meta/leaderboardDaily`, the daily notification baseline.
+  - `meta/leaderboardWeekly` and `meta/leaderboardLastWeek`, the running week and last week's
+    frozen final standings ([#2027]).
   - `reviews.author`, the name written onto each review the person wrote.
   - `biteTrails.ownerName`, the `@name` on each of the person's Bite Trail cards.
 
@@ -554,3 +556,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1916]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1916
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
+[#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027

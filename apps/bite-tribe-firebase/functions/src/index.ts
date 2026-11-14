@@ -129,6 +129,7 @@ export { deleteOwnAccount } from './functions/users/delete-own-account';
 export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';
 export { sendDailyLeaderboardNotification } from './functions/leaderboard/send-daily-leaderboard-notification';
+export { resetWeeklyLeaderboard } from './functions/leaderboard/reset-weekly-leaderboard';
 export { resyncBiteCounts } from './functions/leaderboard/resync-bite-counts';
 export {
   decrementBiteCountOnBiteDelete,

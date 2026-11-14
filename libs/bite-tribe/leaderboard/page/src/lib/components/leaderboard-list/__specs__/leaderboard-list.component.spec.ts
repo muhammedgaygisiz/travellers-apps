@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  getActiveLang: jest.fn(() => 'en'),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
@@ -56,7 +57,7 @@ describe(LeaderboardListComponent.name, () => {
       },
     ];
 
-    componentRef.setInput('users', users);
+    componentRef.setInput('ranking', { board: 'thisWeek', users });
 
     expect(component.rankedUsers().map((user) => user.userId)).toEqual([
       'user-2',
@@ -82,13 +83,10 @@ describe(LeaderboardListComponent.name, () => {
       },
     ];
 
-    componentRef.setInput('users', users);
+    componentRef.setInput('ranking', { board: 'thisWeek', users });
     component.rankedUsers();
 
-    expect(component.users().map((user) => user.userId)).toEqual([
-      'user-1',
-      'user-2',
-    ]);
+    expect(users.map((user) => user.userId)).toEqual(['user-1', 'user-2']);
   });
 
   it('should run the header progress bar while the spinner shows', () => {
@@ -126,5 +124,78 @@ describe(LeaderboardListComponent.name, () => {
     component.onImageError(user.userId);
 
     expect(component.hasImage(user)).toBe(false);
+  });
+
+  describe('weekly board (#2027)', () => {
+    const MONDAY = Date.UTC(2026, 10, 9);
+    const NEXT_MONDAY = Date.UTC(2026, 10, 16);
+    const user: LeaderboardUser = {
+      userId: 'user-1',
+      displayName: 'A',
+      photoUrl: '',
+      public: true,
+      biteCount: 2,
+    };
+
+    it('should open on the week tab with this week selected', () => {
+      expect(component.tab()).toBe('week');
+      expect(component.board()).toBe('thisWeek');
+    });
+
+    it('should switch to all time and back to this week', () => {
+      const emitted: string[] = [];
+      component.boardChange.subscribe((board) => emitted.push(board));
+
+      component.selectTab('allTime');
+      component.selectTab('week');
+
+      expect(emitted).toEqual(['allTime', 'thisWeek']);
+    });
+
+    it('should not show the previous board while the next one loads', () => {
+      componentRef.setInput('board', 'lastWeek');
+      componentRef.setInput('ranking', { board: 'thisWeek', users: [user] });
+
+      expect(component.rankedUsers()).toEqual([]);
+    });
+
+    it('should count down to the reset in days, then hours', () => {
+      componentRef.setInput('ranking', {
+        board: 'thisWeek',
+        users: [user],
+        start: MONDAY,
+        end: NEXT_MONDAY,
+      });
+
+      componentRef.setInput('now', NEXT_MONDAY - 2.5 * 24 * 3600 * 1000);
+      expect(component.weekEndsIn()).toBe('in 2 days');
+
+      componentRef.setInput('now', NEXT_MONDAY - 5 * 3600 * 1000);
+      expect(component.weekEndsIn()).toBe('in 5 hours');
+    });
+
+    it('should date last week’s final standings', () => {
+      componentRef.setInput('board', 'lastWeek');
+      componentRef.setInput('ranking', {
+        board: 'lastWeek',
+        users: [user],
+        start: MONDAY,
+        end: NEXT_MONDAY,
+      });
+
+      expect(component.lastWeekDates()).toMatch(/November 9\s*–\s*15/);
+      expect(component.weekEndsIn()).toBe('');
+    });
+
+    it('should say why each board can be empty', () => {
+      expect(component.emptyKey()).toBe('leaderboard-empty-this-week');
+
+      componentRef.setInput('board', 'lastWeek');
+      expect(component.emptyKey()).toBe('leaderboard-empty-last-week');
+
+      componentRef.setInput('board', 'allTime');
+      expect(component.emptyKey()).toBe('no-leaderboard-users-yet');
+      expect(component.tab()).toBe('allTime');
+    });
   });
 });

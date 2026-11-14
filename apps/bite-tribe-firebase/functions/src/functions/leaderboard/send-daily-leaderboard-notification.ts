@@ -9,26 +9,30 @@ import {
   LeaderboardUser,
   LEADERBOARD_DAILY_DOC,
   META_COLLECTION,
-  readPersistedLeaderboard,
 } from '../shared/utils/leaderboard';
+import { readWeeklyLeaderboard } from '../shared/utils/weekly-leaderboard';
 
 const db = getFirestore();
 
 const ZURICH_TZ = 'Europe/Zurich';
 
 /**
- * Reads the daily baseline ranking. Returns `null` when
- * the document does not exist yet (used to detect the first daily run, where
- * there is no baseline to compare against), and an empty array when the
- * document exists but holds no ranking.
+ * Reads the daily baseline ranking. Returns `null` when there is nothing to
+ * compare against: the document does not exist yet (the first daily run), or
+ * it was taken in another week than `week`. A baseline from before the Monday
+ * reset would report every ranked user as having dropped out, so a new week
+ * starts from a fresh baseline instead (issue #2027). A baseline written
+ * before the board became weekly carries no week and counts as another week.
  */
-const readBaseline = async (): Promise<LeaderboardUser[] | null> => {
+const readBaseline = async (
+  week: string,
+): Promise<LeaderboardUser[] | null> => {
   const snap = await db
     .collection(META_COLLECTION)
     .doc(LEADERBOARD_DAILY_DOC)
     .get();
 
-  if (!snap.exists) {
+  if (!snap.exists || snap.data()?.['week'] !== week) {
     return null;
   }
 
@@ -41,8 +45,12 @@ const readBaseline = async (): Promise<LeaderboardUser[] | null> => {
  * Overwrites the daily baseline with the given ranking so tomorrow's run can
  * diff against today.
  */
-const storeBaseline = async (users: LeaderboardUser[]): Promise<void> => {
+const storeBaseline = async (
+  week: string,
+  users: LeaderboardUser[],
+): Promise<void> => {
   await db.collection(META_COLLECTION).doc(LEADERBOARD_DAILY_DOC).set({
+    week,
     users,
     computedAt: FieldValue.serverTimestamp(),
   });
@@ -65,10 +73,11 @@ const notifyUser = async (change: LeaderboardRankChange): Promise<void> => {
 /**
  * Scheduled Cloud Function that runs every day at 09:00 Europe/Zurich.
  *
- * It compares the live persisted leaderboard against the ranking captured on
+ * It compares the running week's leaderboard against the ranking captured on
  * the previous run and sends each user whose rank changed since yesterday a
- * single push notification. The very first run only seeds the baseline so users
- * are not notified about a ranking they were never told about before.
+ * single push notification. The very first run, and the first run of every
+ * week, only seeds the baseline: there is nothing in the same week to compare
+ * against, and the reset itself is not news to anyone (issue #2027).
  */
 export const sendDailyLeaderboardNotification = onSchedule(
   {
@@ -78,16 +87,15 @@ export const sendDailyLeaderboardNotification = onSchedule(
   async (): Promise<void> => {
     logger.info('--- Starting daily leaderboard notification');
 
-    // Read through the shared helper so a snapshot still caching retired
-    // fields is rebuilt first, and today's baseline is written without them.
-    const currentUsers = (await readPersistedLeaderboard(db)) ?? [];
-    const baselineUsers = await readBaseline();
+    const { week, users: currentUsers } = await readWeeklyLeaderboard(db);
+    const baselineUsers = await readBaseline(week);
 
     if (baselineUsers === null) {
       logger.info(
-        '--- No baseline yet; seeding today as baseline and skipping notifications',
+        '--- No baseline for this week yet; seeding today as baseline and skipping notifications',
+        { week },
       );
-      await storeBaseline(currentUsers);
+      await storeBaseline(week, currentUsers);
       return;
     }
 
@@ -102,7 +110,7 @@ export const sendDailyLeaderboardNotification = onSchedule(
     // Commit today's ranking as tomorrow's baseline only after notifications
     // have been dispatched, so a mid-run failure retries against the same
     // baseline instead of silently swallowing the changes.
-    await storeBaseline(currentUsers);
+    await storeBaseline(week, currentUsers);
 
     logger.info('--- Daily leaderboard notification finished', {
       notifiedUsers: changes.length,

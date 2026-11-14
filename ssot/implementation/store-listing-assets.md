@@ -676,7 +676,8 @@ and a change there is a re-master here.
 
 Re-encode from the masters, never from a shipped file: `afconvert -f caff -d
 LEI16@44100 -c 1` for iOS, which ships with macOS, and `oggenc -q 5` for
-Android, which needs `brew install vorbis-tools`. Playing them is
+Android, which needs `brew install vorbis-tools`. How they play is owned by the
+Sound Rule in [Architecture - Capacitor](../architecture/capacitor.md#sound-rule), added by
 [Issue #1843][#1843]; this section only owns where they come from.
 
 ## Current State

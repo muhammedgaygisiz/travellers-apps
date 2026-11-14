@@ -3,8 +3,8 @@
 ## Status
 
 **Level:** L1
-Supported today. The settings page carries theme, the device's haptic feedback switch on native
-builds, currency with a favourites shortlist, language, the location-permission state, and the
+Supported today. The settings page carries theme, the device's haptic feedback and sounds switches
+on native builds, currency with a favourites shortlist, language, the location-permission state, and the
 per-installation notification list [#1184] put in place of the old account-wide switch. Three fields on the `Settings` model are not controls
 here: `nearby`, which nothing in settings sets, `pushNotifications`, retired by [#1184], and
 `emailUpdates`, whose switch [#1879] removed until there is a newsletter.
@@ -33,6 +33,13 @@ belongs to [UC - Receive App Notifications And Engagement Updates](uc-receive-ap
   segmented controls and pull-to-refresh Ionic draws play their own haptics and follow the
   phone's setting instead, which the row's helper text says. How the switch reaches the haptics
   is owned by `Haptic Feedback Rule` in [Architecture - Capacitor](../architecture/capacitor.md) ([#1746]).
+- **Sounds** - whether this device plays the app's sounds, on by default, in the row directly
+  below haptic feedback. Like that row it is shown on native builds only and is a device setting
+  that applies at once, needs no save, survives a restart and never reaches the account. Turning
+  it off silences every sound the app plays; leaving it on still plays nothing while the phone is
+  on silent, which the row's helper text says. The two switches are independent: neither changes
+  the other. How the switch reaches the sounds is owned by `Sound Rule` in
+  [Architecture - Capacitor](../architecture/capacitor.md) ([#1844]).
 - **Currency** - the currency amounts are shown in, with a shortlist of favourite currencies
   so a user switching between a few does not scroll the whole list. Rates come from the
   exchange-rates API.
@@ -95,7 +102,7 @@ Language is what the app and every notification are rendered in, and the app shi
 them. Currency is what reported prices mean: a price read in the wrong one misinforms rather
 than inconveniences, and prices are the point of the product.
 
-**[Secondary]** - theme, the haptic feedback switch, the favourite-currency shortlist, and the
+**[Secondary]** - theme, the haptic feedback and sounds switches, the favourite-currency shortlist, and the
 location-permission row,
 which reports a state collected elsewhere rather than setting one.
 
@@ -120,6 +127,7 @@ and at the point of use, not here, and the data types behind them are declared i
 - Issue [#1023] is where the location permission this page reports is collected, during onboarding (part of the closed epic-850).
 - Issue [#1386] is the OS-permission-vs-delivery-flag distinction the current installation's row reflects. Closed as completed.
 - Issue [#1746] added the per-device haptic feedback switch, part of epic [#1740], which reversed epic [#1633]'s reliance on the OS setting alone.
+- Issue [#1844] added the per-device sounds switch beside it, part of epic [#1742], on top of the `SoundsService` setting issue [#1843] provides.
 - Issue [#1606] tracked two undecided items. Its email half is settled by issue [#1879] - hide the switch now, build it with the newsletter ([#329]); whether `Settings.nearby` becomes a control here is still open.
 
 ## Related Domains
@@ -134,8 +142,8 @@ and at the point of use, not here, and the data types behind them are declared i
 - [UC - Guide New Users After Registration](uc-guide-new-users-after-registration.md) - where the location permission is collected
 - [UC - Discover Bites](uc-discover-bites.md) - the Home feed whose optional nearby filter reads `Settings.nearby`
 - [Implementation - Store Declarations](../implementation/store-declarations.md)
-- [Architecture - Capacitor](../architecture/capacitor.md) - `Haptic Feedback Rule`, which owns how the haptic feedback switch
-  reaches the haptics
+- [Architecture - Capacitor](../architecture/capacitor.md) - `Haptic Feedback Rule` and `Sound Rule`, which own how the haptic
+  feedback and sounds switches reach the haptics and the sounds
 
 [#329]: https://github.com/muhammedgaygisiz/travellers-apps/issues/329
 [#1023]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1023
@@ -144,5 +152,8 @@ and at the point of use, not here, and the data types behind them are declared i
 [#1606]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1606
 [#1633]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1633
 [#1740]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1740
+[#1742]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1742
 [#1746]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1746
+[#1843]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1843
+[#1844]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1844
 [#1879]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1879

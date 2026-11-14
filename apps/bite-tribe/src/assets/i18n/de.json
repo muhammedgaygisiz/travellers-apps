@@ -192,6 +192,8 @@
   "theme": "Design",
   "haptic-feedback": "Haptisches Feedback",
   "haptic-feedback-helper": "Leichte Vibrationen, wenn du tippst. Schalter, Segmentauswahlen und Ziehen zum Aktualisieren folgen der Einstellung deines Handys.",
+  "sounds": "Töne",
+  "sounds-helper": "Ein paar leise Töne, wenn du einen Bite postest oder etwas zum ersten Mal schaffst. Sie folgen dem Lautlos-Modus deines Handys.",
   "turkish": "Türkçe",
   "english": "English",
   "follow": "Folgen",

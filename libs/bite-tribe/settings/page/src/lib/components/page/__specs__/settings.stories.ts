@@ -192,3 +192,26 @@ export const HapticFeedbackOff: Story = {
     hapticsEnabled: false,
   },
 };
+
+/**
+ * A native build, where the device's sounds can be switched off right below
+ * haptic feedback. The web plays no sounds, so every other story shows no such
+ * row (issue #1844).
+ */
+export const SoundsOn: Story = {
+  args: {
+    hapticsSupported: true,
+    soundsSupported: true,
+    soundsEnabled: true,
+  },
+};
+
+/** Switched off on this device, while haptic feedback stays on. */
+export const SoundsOff: Story = {
+  args: {
+    hapticsSupported: true,
+    hapticsEnabled: true,
+    soundsSupported: true,
+    soundsEnabled: false,
+  },
+};

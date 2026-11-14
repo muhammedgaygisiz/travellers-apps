@@ -9,6 +9,7 @@ import { Platform } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 import { HapticsService } from 'haptics';
+import { SoundsService } from 'sounds';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -37,6 +38,7 @@ export class SettingsDataAccessService {
   private readonly transloco = inject(TranslocoService);
   private readonly platform = inject(Platform);
   private readonly haptics = inject(HapticsService);
+  private readonly sounds = inject(SoundsService);
 
   user = toSignal(this.storeService.user$);
   settings = toSignal(this.storeService.settings$);
@@ -55,6 +57,22 @@ export class SettingsDataAccessService {
   /** Applies at once, and survives a restart. */
   setHapticsEnabled(enabled: boolean): Promise<void> {
     return this.haptics.setEnabled(enabled);
+  }
+
+  /**
+   * Whether this device plays the app's sounds. A device setting, not an
+   * account one: it is kept in device `Preferences` by `SoundsService` and
+   * never reaches the settings document (issue #1844). The phone's silent
+   * mode silences them as well, whatever this says.
+   */
+  soundsEnabled = this.sounds.enabled;
+
+  /** Sounds play only on a native build, so the web has nothing to switch. */
+  readonly soundsSupported = Capacitor.isNativePlatform();
+
+  /** Applies at once, and survives a restart. */
+  setSoundsEnabled(enabled: boolean): Promise<void> {
+    return this.sounds.setEnabled(enabled);
   }
 
   /**

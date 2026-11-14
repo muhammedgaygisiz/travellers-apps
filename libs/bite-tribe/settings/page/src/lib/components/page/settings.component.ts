@@ -109,6 +109,13 @@ export class PageSettings {
   hapticsSupported = input(false);
   /** This device's haptics setting, kept on the device rather than the account. */
   hapticsEnabled = input(true);
+  /**
+   * Whether this device can play sounds at all. Off the web build only, so
+   * the row is not offered where it would switch nothing.
+   */
+  soundsSupported = input(false);
+  /** This device's sounds setting, kept on the device rather than the account. */
+  soundsEnabled = input(true);
 
   submitSettings = output<Settings>();
   logout = output<void>();
@@ -131,6 +138,11 @@ export class PageSettings {
    * preferences form, which is saved to the account (issue #1746).
    */
   hapticsEnabledChange = output<boolean>();
+  /**
+   * The sounds switch was flipped. Like the haptics switch it applies at once
+   * and is not part of the saved preferences form (issue #1844).
+   */
+  soundsEnabledChange = output<boolean>();
 
   private readonly formBuilder = inject(FormBuilder);
 

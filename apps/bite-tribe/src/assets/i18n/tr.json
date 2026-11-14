@@ -192,6 +192,8 @@
   "theme": "Tema",
   "haptic-feedback": "Dokunsal geri bildirim",
   "haptic-feedback-helper": "Dokunduğunda hafif titreşimler. Anahtarlar, bölümlü seçiciler ve yenilemek için çekme, telefonunun kendi ayarını izler.",
+  "sounds": "Sesler",
+  "sounds-helper": "Bir Bite paylaştığında veya bir ilke ulaştığında birkaç sessiz ses. Telefonunun sessiz modunu izler.",
   "turkish": "Türkçe",
   "english": "English",
   "follow": "Takip et",

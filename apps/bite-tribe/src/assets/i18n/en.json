@@ -192,6 +192,8 @@
   "theme": "Theme",
   "haptic-feedback": "Haptic Feedback",
   "haptic-feedback-helper": "Gentle vibrations when you tap. Switches, segmented controls and pull-to-refresh follow your phone's own setting.",
+  "sounds": "Sounds",
+  "sounds-helper": "A few quiet sounds when you post a Bite or reach a first. They follow your phone's silent mode.",
   "turkish": "Türkçe",
   "english": "English",
   "portuguese": "Português",

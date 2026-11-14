@@ -715,7 +715,11 @@ the files come from and how loud they are is owned by
   `setEnabled()`, exactly as `haptics-enabled` works above. Only `'false'`
   turns sounds off, so a fresh install has them on and the phone's silent mode
   is what keeps them quiet at the table. While it is off, no intent reaches the
-  plugin. The settings row is issue [#1844].
+  plugin. The user flips it from the `Sounds` row in settings, directly below
+  `Haptic feedback` and shown on native builds only, through
+  `SettingsDataAccessService.setSoundsEnabled()` (issue [#1844]); what the
+  row offers is owned by
+  [UC - Configure Personal Settings](../use-cases/uc-configure-personal-settings.md).
 - **Never stacked.** A play that starts within `SOUND_LENGTH_MS` (300 ms, the
   longest a bundled file may be) of the last one that reached the plugin is
   dropped, so two moments landing together sound once. A play the setting or a

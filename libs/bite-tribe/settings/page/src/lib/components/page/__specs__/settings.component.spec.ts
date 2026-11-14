@@ -808,6 +808,90 @@ describe(PageSettings.name, () => {
     });
   });
 
+  describe('Sounds', () => {
+    const byTestId = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    const toggle = (): HTMLElement & { checked?: boolean } =>
+      byTestId('settings-sounds-toggle') as HTMLElement & {
+        checked?: boolean;
+      };
+
+    it('should not offer the row where sounds play nothing', () => {
+      // The web build plays no sounds, so a switch there would switch nothing.
+      expect(byTestId('settings-sounds')).toBeNull();
+    });
+
+    describe('given a native build', () => {
+      beforeEach(() => {
+        compRef.setInput('hapticsSupported', true);
+        compRef.setInput('soundsSupported', true);
+        fixture.detectChanges();
+      });
+
+      it('should place the row right below haptic feedback', () => {
+        expect(byTestId('settings-haptics')?.nextElementSibling).toBe(
+          byTestId('settings-sounds'),
+        );
+      });
+
+      it('should explain that the sounds follow the phone', () => {
+        const helper = byTestId('settings-sounds-helper');
+
+        expect(
+          helper?.closest('[data-testid="settings-sounds"]'),
+        ).not.toBeNull();
+      });
+
+      it('should be on for a device that never changed it', () => {
+        expect(toggle().checked).toBe(true);
+      });
+
+      it.each([true, false])(
+        'should show the device setting as %s',
+        (enabled) => {
+          compRef.setInput('soundsEnabled', enabled);
+          fixture.detectChanges();
+
+          expect(toggle().checked).toBe(enabled);
+        },
+      );
+
+      it('should leave haptics alone when sounds are switched off', () => {
+        const soundsSpy = jest.spyOn(component.soundsEnabledChange, 'emit');
+        const hapticsSpy = jest.spyOn(component.hapticsEnabledChange, 'emit');
+
+        toggle().dispatchEvent(
+          new CustomEvent('ionChange', { detail: { checked: false } }),
+        );
+
+        expect(soundsSpy).toHaveBeenCalledWith(false);
+        expect(hapticsSpy).not.toHaveBeenCalled();
+      });
+
+      it('should leave sounds alone when haptics are switched off', () => {
+        const soundsSpy = jest.spyOn(component.soundsEnabledChange, 'emit');
+
+        byTestId('settings-haptics-toggle')?.dispatchEvent(
+          new CustomEvent('ionChange', { detail: { checked: false } }),
+        );
+
+        expect(soundsSpy).not.toHaveBeenCalled();
+      });
+
+      it('should emit the new value at once, outside the saved form', () => {
+        toggle().dispatchEvent(
+          new CustomEvent('ionChange', { detail: { checked: false } }),
+        );
+
+        expect(component.settingsForm.pristine).toBe(true);
+        expect(Object.keys(component.settingsForm.controls)).not.toContain(
+          'sounds',
+        );
+      });
+    });
+  });
+
   describe('Section grouping', () => {
     const byTestId = (testId: string): HTMLElement | null =>
       fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);

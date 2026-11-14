@@ -1,5 +1,6 @@
 import { DOCUMENT, inject, Injectable } from '@angular/core';
 import confetti from 'canvas-confetti';
+import { SoundsService } from 'sounds';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
 
@@ -67,8 +68,9 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
  * The single way bite-tribe celebrates a moment.
  *
  * A celebration is one short confetti burst from the bottom of the screen, the
- * moment's own success toast, and the `success` haptic `ToastService` already
- * plays for it. The confetti plays no haptic of its own, so each moment is one
+ * moment's own success toast, the `success` haptic `ToastService` already
+ * plays for it, and the `celebration` sound from `SoundsService` (issue
+ * #1846). The confetti plays no haptic of its own, so each moment is one
  * action with one reaction. This is the only file that imports
  * `canvas-confetti`.
  *
@@ -78,33 +80,41 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
  * removed when the burst ends.
  *
  * **One at a time.** A celebration that starts while a burst is still running
- * presents its toast but draws no second burst.
+ * presents its toast but draws no second burst, and one that starts while the
+ * sound is still playing plays no second sound - `SoundsService` drops it.
  *
  * **Reduced motion.** Under `prefers-reduced-motion: reduce` no canvas is
- * created at all; the toast and haptic still mark the moment.
+ * created at all; the toast, haptic and sound still mark the moment, because a
+ * sound is not motion.
  *
  * **Never rejects.** The celebration decorates an action the caller has
- * already completed, so any failure of the confetti is swallowed - the same
- * posture `ToastService.present()` holds.
+ * already completed, so any failure of the confetti or the sound is swallowed
+ * - the same posture `ToastService.present()` holds.
  */
 @Injectable({ providedIn: 'root' })
 export class CelebrationService {
   private readonly document = inject(DOCUMENT);
   private readonly toast = inject(ToastService);
   private readonly analytics = inject(AnalyticsService);
+  private readonly sounds = inject(SoundsService);
 
   private bursting = false;
 
   /**
    * Celebrates `moment`. Resolves once the toast is presented and the burst,
-   * if one is drawn, has ended. `params` fill the moment's toast copy, such as
-   * the country of a first Bite there.
+   * if one is drawn, has ended. The sound is fired and not awaited, so it never
+   * holds the call up. `params` fill the moment's toast copy, such as the
+   * country of a first Bite there.
    */
   async celebrate(
     moment: CelebrationMoment,
     params?: Record<string, unknown>,
   ): Promise<void> {
     this.analytics.logEvent(AnalyticsEvent.CelebrationShown, { moment });
+
+    // `SoundsService` never rejects; the catch keeps a broken one from
+    // surfacing as an unhandled rejection all the same.
+    this.sounds.celebration().catch(() => undefined);
 
     await Promise.all([
       this.toast.present({

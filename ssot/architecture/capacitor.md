@@ -732,7 +732,10 @@ the files come from and how loud they are is owned by
   imports `BiteSounds` directly, so one intent keeps one meaning everywhere.
   `posted` is called from `confirmCreated` in `BiteService`
   (`libs/bite-tribe/bite/page`), next to the `bite-created-successfully`
-  toast (issue [#1845]); `celebration` belongs to issue [#1846].
+  toast (issue [#1845]); `celebration` is called from `celebrate()` in
+  `CelebrationService` (`libs/common/celebration`), so every celebrated moment
+  plays it with its toast (issue [#1846]). See the Celebration Rule in
+  [Implementation - Ionic Patterns](../implementation/ionic-patterns.md#celebration-rule).
 - **A native change ships with a store build**, as for haptics.
 - **No permission, no store declaration.** Playing bundled UI sounds needs no
   microphone or audio permission, no `UIBackgroundModes` audio entry, no

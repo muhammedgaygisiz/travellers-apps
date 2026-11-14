@@ -189,10 +189,12 @@ and pressed, in light and dark.
 ## Celebration Rule
 
 A few firsts in bite-tribe are celebrated (epic [#1741]): one short confetti
-burst from the bottom of the screen, the moment's own success toast, and the
-`success` haptic that toast already plays. The ceiling is that burst. There is
-no full-screen takeover, no modal, no mascot and no sound, and a routine action
-is never celebrated.
+burst from the bottom of the screen, the moment's own success toast, the
+`success` haptic that toast already plays, and the `celebration` sound (epic
+[#1742], issue [#1846]) through the Sound Rule in
+[Architecture - Capacitor](../architecture/capacitor.md#sound-rule). The ceiling is that burst. There is
+no full-screen takeover, no modal and no mascot, and a routine action is never
+celebrated.
 
 **Every celebration goes through `CelebrationService` in
 `libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
@@ -206,6 +208,7 @@ everything else:
 | Colours   | `--ion-color-primary`, `--bite-tribe-color` and `--ion-color-secondary`, read from the document at fire time |
 | Copy      | The moment's key in `CELEBRATION_MESSAGE_KEYS`, presented through `ToastService` with `outcome: 'success'`   |
 | Haptic    | The `success` the toast plays. The confetti plays none                                                       |
+| Sound     | `SoundsService.celebration()`, fired and not awaited, once per call. Silent mode and `Sounds` keep it quiet  |
 | Analytics | `celebration_shown` with the `moment`, once per call                                                         |
 
 Details worth knowing before changing it:
@@ -223,13 +226,18 @@ Details worth knowing before changing it:
   `#1c212b` on `#1a1c22`) and would draw invisible particles. The brand orange
   `--bite-tribe-color` takes its place.
 - **One at a time.** A celebration that starts while a burst is running still
-  presents its toast but draws no second burst.
+  presents its toast but draws no second burst, and one that starts while the
+  sound is still playing plays no second sound, because `SoundsService` drops a
+  play inside its `SOUND_LENGTH_MS` window.
 - **Reduced motion draws nothing.** Under `prefers-reduced-motion: reduce` no
-  canvas is created; the toast and haptic still mark the moment. The in-app
-  haptics switch reaches the toast's haptic as it reaches every other one, and
-  does not touch the confetti.
-- **Never rejects.** A failure of the library or of the burst is swallowed,
-  the posture `ToastService.present()` holds.
+  canvas is created; the toast, haptic and sound still mark the moment, since a
+  sound is not motion. The in-app haptics switch reaches the toast's haptic as
+  it reaches every other one, and does not touch the confetti; the `Sounds`
+  switch silences the sound and nothing else.
+- **One sound for every moment.** All five moments play the same
+  `celebration` sound; there is no sound per moment.
+- **Never rejects.** A failure of the library, of the burst or of the sound is
+  swallowed, the posture `ToastService.present()` holds.
 - **Detected at the moment it happens, with no "seen" store.** Nothing is
   written to `Preferences`, the account or Firestore to remember a moment, so
   a second phone never replays one. A deliberate redo - deleting the only Bite
@@ -344,6 +352,8 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1798]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1798
 [#1799]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1799
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
+[#1742]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1742
+[#1846]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1846
 [#1800]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1800
 [#1801]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1801
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835

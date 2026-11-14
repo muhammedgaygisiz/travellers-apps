@@ -1,6 +1,6 @@
 ---
 name: instagram-city-top5
-description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, publishes on Instagram web after approval, and then publishes the city's landing page at bitetribe.app/eat/<city> with the same five Bites. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
+description: Create the @bitetribeapp "<City> Top 5 dishes" Instagram carousel for one city. It asks for the city when none is given, picks five Bites through the web app's country search, renders seven slides with Leela on the cover and the closing slide, tags and follows each restaurant's confirmed Instagram account, publishes on Instagram web after approval, then publishes the city's landing page at bitetribe.app/eat/<city> with the same five Bites, and submits that page to Google in Search Console. Use when the user asks for a city post or a Top 5 post, or runs it with a city name, e.g. "/instagram-city-top5 Ljubljana".
 argument-hint: <city>
 ---
 
@@ -30,6 +30,7 @@ Then derive everything else from it, without asking:
 | Location           | "<City>, <Country>" on Instagram (step 6).                                                             |
 | Restaurant tags    | Each restaurant's own Instagram account, where one can be confirmed (step 3).                          |
 | City page          | `https://bitetribe.app/eat/<city>`, with the post's five Bites (step 7).                               |
+| Search Console     | The city sitemap submitted again, and indexing requested for the new page (step 8).                    |
 
 Before step 1, check two things:
 
@@ -284,7 +285,24 @@ Use the admin app in the user's Chrome at `https://bite-tribe-admin.web.app/land
    ```
    The page answers with its title and five `<h2>` dish names, every alias answers `301` to the page, and the sitemap count has gone up by one. The sitemap is cached for five minutes, so a request without the query string may lag that long.
 
+### 8. Tell Google about the page
+
+Publishing puts the page in `/eat/sitemap.xml`, but Google reads a sitemap on its own schedule. On 14 November 2026 Adelaide and Zurich had been in the sitemap for up to two days while Search Console still showed 14 pages, last read on 12 November; it showed 16 only after the sitemap was submitted again ([#2005](https://github.com/muhammedgaygisiz/travellers-apps/issues/2005)). The property is described in [Implementation - Web Search And Social Metadata](../../ssot/implementation/web-search-and-social-metadata.md#search-console).
+
+Use Search Console in the user's Chrome, on the `bitetribe.app` **domain property**, signed in as one of its two owners. If it is not signed in, ask the user to sign in; never type a password. The step needs no gate of its own: it only tells Google about the page the user approved and published in step 7. Change nothing else in the property.
+
+1. **Submit the sitemap again.** Open `https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Abitetribe.app`, enter `https://bitetribe.app/eat/sitemap.xml` under **Add a new sitemap** and **Submit**. The row for that sitemap should then read today's date under **Last read**, status **Success**, and a **Discovered pages** count equal to the live count from step 7's last command. `https://bitetribe.app/sitemap.xml` lists the app's four static pages and is left alone.
+
+2. **Request indexing for the new page.** Type the full `https://bitetribe.app/eat/<city>` into the search bar at the top (**Inspect any URL in "bitetribe.app"**) and press Return.
+   - **Open the inspection from the search bar.** A direct link to `/search-console/inspect?...` with the page as `id` answers `404`.
+   - **Read the inspected URL under the header before clicking.** If the typing did not take, the previous URL is still shown, and the request is spent on a page that already had one.
+   - **Request indexing**, then wait. Google runs a live test first, and the **Indexing requested** dialog takes about a minute to appear. Dismiss it.
+   - A page that reads **URL is on Google** needs no request.
+   - Aliases are not requested: they answer `301`, and Google follows them to the page.
+
+3. **If the dialog reads Quota Exceeded**, stop. The property allows about ten requests a day, a repeat for the same URL counts, and it resets the next day. The page is in the submitted sitemap either way, so report the request as skipped rather than retrying.
+
 ## After Publishing
 
-- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, the city page's URL and aliases, and anything skipped (for example alt text, or a tag that could not be set).
+- Report the result: the slide count, the caption, the location, the tags that were set, the accounts newly followed, the city page's URL and aliases, the sitemap's discovered count and whether indexing was requested, and anything skipped (for example alt text, or a tag that could not be set).
 - If the post changed the format, update `## The City Top 5 Posts` in `ssot/marketing/social-media-channels.md`, and this skill too.

@@ -446,8 +446,11 @@ same image is 1 MB against 138 KB.
   description. That is the PWA install name, not search metadata, and it is a
   separate defect against the spelling rule in
   [Implementation - Store Listing Assets](store-listing-assets.md).
-- **The business app.** `apps/bite-tribe-business/src/index.html` has the same
-  gap. It is not a public front door and was out of scope.
+- **Metadata for the business app.** `apps/bite-tribe-business/src/index.html`
+  carries no description, canonical or Open Graph tags, and should not: it is
+  a signed-in tool, not a public front door, and since [#1982] it is
+  `noindex, nofollow` like the admin app. See `Hosts That Must Not Be Indexed`
+  below.
 
 ## Verification
 
@@ -457,11 +460,130 @@ Once deployed:
   `https://bitetribe.app/` without errors.
 - `https://bitetribe.app/robots.txt` and `https://bitetribe.app/sitemap.xml`
   should resolve on all three hosts.
-- After the first city page is published, Google's Rich Results test should
-  parse it without errors, and `https://bitetribe.app/eat/sitemap.xml` should be
-  submitted in Search Console as a second sitemap.
-- The Google snippet only changes after a recrawl. Submit the sitemap in Search
+- After a city page is published, Google's Rich Results test should parse it
+  without errors, and the page should be submitted through URL Inspection in
+  Search Console; see below.
+- The Google snippet only changes after a recrawl. Request indexing in Search
   Console rather than waiting.
+
+## Search Console
+
+Set up on 12 November 2026 for [issue #1982][#1982].
+
+| Fact         | Value                                                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Property     | `bitetribe.app`, a **domain property** (`sc-domain:bitetribe.app`)                                                                   |
+| Covers       | Every host and protocol under the domain, so `www.bitetribe.app` too                                                                 |
+| Verification | Google's DNS `TXT` record (`google-site-verification=...`) on the `bitetribe.app` zone in Cloudflare                                 |
+| Owners       | `muhammed.gaygisiz@gmail.com` (created it) and `muhammed.gaygisiz@bitetribe.app`, both Owner                                         |
+| Sitemaps     | `https://bitetribe.app/sitemap.xml` (4 pages) and `https://bitetribe.app/eat/sitemap.xml` (the published city pages, 14 on that day) |
+| Analytics    | Associated with GA4 property `487035057` (`bite-tribe`), web data stream `Bite Tribe`                                                |
+| Emails       | All Search Console emails enabled for the creating owner; the setting is per Google account                                          |
+
+**The Cloudflare `TXT` record must not be deleted.** It is what verifies the
+property. Google rechecks it periodically, and a property whose record is gone
+loses its verified owners and, with them, access to its data.
+
+### What Was Checked On 12 November 2026
+
+- **Rich Results test, `https://bitetribe.app/eat/cologne`: 11 valid items, no
+  errors.** One `Carousels` item (the `ItemList`), five `Local businesses` and
+  five `Organization` (the `Restaurant` entries). Google accepts the
+  `Restaurant` with a `MenuItem` on its `Menu`, so the fallback [#1491] kept in
+  reserve is not needed. Each item carries non-critical issues only: optional
+  fields a Bite does not have, such as a street address, a phone number and a
+  price range.
+- **The three aliases redirect.** `/eat/koeln`, `/eat/chiangmai` and
+  `/eat/triest` answer `301` to `/eat/cologne`, `/eat/chiang-mai` and
+  `/eat/trieste`. Search Console should list them under `Page with redirect`,
+  never under a duplicate reason.
+- **Indexing was requested through URL Inspection for ten of the fourteen
+  city pages**: Bern, Bratislava, Budapest, Chiang Mai, Cologne, Granada,
+  Istanbul, Kayseri, London and Malta. The twelfth request of the day was
+  refused with `Quota Exceeded` (eleven went through, one of them a repeat for
+  Bern), so the property allows about ten a day. Mostar, Solothurn, Split and
+  Trieste are in the submitted sitemap and were left to be requested on a
+  later day.
+- **The Pages report had nothing to read yet.** A property created the same
+  day shows `Processing data, please check again in a day or so`. Every
+  inspected city page read `URL is unknown to Google` or `Discovered -
+currently not indexed`, which is the expected state before the first crawl
+  and not an error.
+
+### What Was Done On 14 November 2026
+
+- **`/eat/sitemap.xml` now lists sixteen city pages.** Adelaide and Zurich
+  were published after 12 November. The Sitemaps page still showed 14
+  discovered pages, last read on 12 November, so the sitemap was submitted
+  again. Google read it at once: 16 discovered pages, last read 14 November,
+  status `Success`.
+- **Indexing was requested for the remaining six city pages**: Mostar and
+  Solothurn first, then Split, Trieste, Zurich and Adelaide. Every request
+  went through and none was refused for quota. With these, indexing has been
+  requested once for each of the sixteen pages in the sitemap.
+- **Before the request**, Trieste read `Discovered - currently not indexed`
+  with `/eat/sitemap.xml` as its referring sitemap. Split, Zurich and
+  Adelaide read `URL is unknown to Google` with no referring sitemap, since
+  they were inspected before Google read the sitemap again.
+- **The Pages report still had nothing to read.** It showed `Processing data,
+please check again in a day or so`, as on 12 November, so the indexed and
+  not indexed counts and the `Page with redirect` entries for the three
+  aliases are not known yet.
+
+### A New City Page
+
+Publishing a page adds it to `/eat/sitemap.xml` within minutes ([#1980]), but
+Google reads the sitemap on its own schedule: on 14 November 2026 two pages
+had been in it for up to two days and Search Console still showed the count
+from 12 November. So the `instagram-city-top5` skill ends by submitting the
+city sitemap again and requesting indexing for the new page through URL
+Inspection ([#2005]). The quota is per property and per day, and a repeated
+request for the same URL spends quota without changing its position.
+
+### Hosts That Must Not Be Indexed
+
+| Host                          | State                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `bite-tribe-admin.web.app`    | `noindex, nofollow`, as a meta tag and an `X-Robots-Tag` header            |
+| `bite-tribe-business.web.app` | The same, since [#1982]; before it the host was indexable                  |
+| `bite-tribe.web.app`          | Indexable on purpose; every page declares its canonical on `bitetribe.app` |
+
+Both signals are set for the two tools: the meta tag in each app's
+`index.html`, and the header on `**` in the app's hosting target in
+`firebase.json`, which also covers responses that are not HTML. Neither app
+has a `robots.txt`, and must not get a `Disallow` one: a crawler that is
+blocked from fetching a page never sees its `noindex`, and can still list the
+bare URL.
+
+The `web.app` hosts are not part of the domain property and were not added as
+properties of their own. `bite-tribe.web.app` serves the consumer build with
+its canonical pointing at `bitetribe.app`, so its pages consolidate there; the
+two tools have nothing to report.
+
+### The Instagram Property
+
+**`@bitetribeapp` is a Search Console property of its own**, added on 12
+November 2026 under `muhammed.gaygisiz@bitetribe.app`. Search Console holds a
+social account as a property next to the website: the property selector's
+`Add property` offers Instagram, TikTok, X and YouTube beside `Add a website`.
+It is not on the Associations page, which offers Google Analytics only.
+
+Adding one links the account to the Google Account that is signed in, through
+the platform's own consent and sign-in, so it is done by the account's owner.
+
+**It has its own user list; the website property's owners do not carry
+over.** Only the Google Account that made the link sees the property until
+others are added under its `Settings` > `Users and permissions`.
+`muhammed.gaygisiz@gmail.com` was added there as a second Owner the same day,
+so both properties have the same two owners.
+
+### Not Done
+
+- **The Pages report.** Read it again once it has data: the indexed count,
+  every reason a page is not indexed, and whether the three aliases show
+  under `Page with redirect`.
+- **Bing Webmaster Tools.** It can import a verified Search Console property.
+  Optional in [#1982] and left for a later day.
 
 ## Related Pages
 
@@ -490,3 +612,5 @@ Once deployed:
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
+[#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982
+[#2005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2005

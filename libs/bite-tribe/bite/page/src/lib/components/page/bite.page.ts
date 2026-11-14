@@ -65,7 +65,8 @@ import {
   getRestaurantsNearBite,
   hasRestaurantNearBite,
 } from './utils/restaurants-near-bite';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { copiedPriceDate } from './utils/copied-price-date';
 import { PriceInputComponent } from './price-input/price-input.component';
 import {
   AteWithPickerComponent,
@@ -115,6 +116,11 @@ import {
 export class BitePage {
   private readonly platform = inject(Platform);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
+
+  private readonly activeLang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   bite = input<Bite>();
 
@@ -128,6 +134,24 @@ export class BitePage {
    * themselves the same thing again (issue #1365).
    */
   titleKey = computed(() => (this.isNew() ? 'create-bite' : 'edit-bite'));
+
+  /**
+   * The month and year of a copied price old enough to be worth checking, in
+   * the reader's language (GitHub issue #2018). Empty on an edit, on a Bite
+   * typed from scratch, and on a fresh copy.
+   */
+  copiedPriceMonth = computed(() => {
+    const date = this.isNew() ? copiedPriceDate(this.bite()) : undefined;
+
+    if (!date) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat(this.activeLang(), {
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+  });
 
   currency = input<string>();
 
@@ -273,10 +297,17 @@ export class BitePage {
     }
   });
 
+  /**
+   * The location's currency, or the user's preferred one, prefills the form -
+   * unless the draft already names one. A copied Bite, a menu item and an
+   * order line carry a price in their own currency, and replacing just the
+   * currency put that number under the wrong one: a EUR 15 copy posted as
+   * CHF 15 because the Bite stood in Switzerland (GitHub issue #2018).
+   */
   currencyInitFromInputEffect = effect(() => {
     const currency = this.currency();
 
-    if (currency) {
+    if (currency && !this.bite()?.currency) {
       this.biteFormGroup.controls['currency'].patchValue(currency);
     }
   });

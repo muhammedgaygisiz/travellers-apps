@@ -38,6 +38,7 @@ export class CreateBitePage {
   readonly ateWithSearch: Locator;
   readonly ateWithCandidates: Locator;
   readonly ateWithChips: Locator;
+  readonly copiedPriceHint: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -103,6 +104,8 @@ export class CreateBitePage {
     this.ateWithChips = page.locator(
       'bite bt-ate-with-picker .selected bt-chip',
     );
+    // The date under a copied price older than 30 days (issue #2018).
+    this.copiedPriceHint = page.getByTestId('copied-price-hint');
   }
 
   /**

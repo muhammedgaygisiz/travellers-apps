@@ -20,7 +20,7 @@ import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { POSITION_SOURCE_COLORS } from '../model/position-source';
-import type { Geopoint, GooglePlace, PositionSource } from 'model';
+import type { Bite, Geopoint, GooglePlace, PositionSource } from 'model';
 
 import {
   getMediaLocationPermissionState,
@@ -134,6 +134,44 @@ describe('BitePage', () => {
       componentRef.setInput('isNew', false);
 
       expect(component.titleKey()).toBe('edit-bite');
+    });
+  });
+
+  // Issue #2018: an old copied price is dated under the price input.
+  describe('copiedPriceMonth', () => {
+    const copy = (createdAt: string): Bite =>
+      ({
+        name: 'Hibiscus ice tea',
+        price: 4.5,
+        copiedFrom: { biteId: 'sams-bite', createdAt },
+      }) as Bite;
+
+    const hint = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="copied-price-hint"]');
+
+    it('names the month of a copied price older than 30 days', () => {
+      componentRef.setInput('isNew', true);
+      componentRef.setInput('bite', copy('2020-03-02T19:00:00.000Z'));
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.copiedPriceMonth()).toBe('March 2020');
+      expect(hint()).not.toBeNull();
+    });
+
+    it('stays empty for a fresh copy', () => {
+      componentRef.setInput('isNew', true);
+      componentRef.setInput('bite', copy(new Date().toISOString()));
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.copiedPriceMonth()).toBe('');
+      expect(hint()).toBeNull();
+    });
+
+    it('stays empty when editing', () => {
+      componentRef.setInput('isNew', false);
+      componentRef.setInput('bite', copy('2020-03-02T19:00:00.000Z'));
+
+      expect(component.copiedPriceMonth()).toBe('');
     });
   });
 
@@ -1072,6 +1110,36 @@ describe('BitePage', () => {
       expect(component.biteFormGroup.controls['currency'].value).toBe(
         testCurrency,
       );
+    });
+
+    // Issue #2018: a draft's price stays in the draft's own currency.
+    it("should keep the draft's currency over the location's", () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', {
+        name: 'PotatoThing',
+        price: 15,
+        currency: 'EUR',
+      } as Bite);
+      fixture.detectChanges();
+
+      // The location's currency resolves after the draft is in the form.
+      componentRef.setInput('currency', 'CHF');
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBe('EUR');
+    });
+
+    it("should use the location's currency for a draft without one", () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', { name: 'Margherita' } as Bite);
+      componentRef.setInput('currency', 'CHF');
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBe('CHF');
     });
 
     it('should set position when input is provided', () => {

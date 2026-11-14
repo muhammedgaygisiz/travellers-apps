@@ -55,6 +55,13 @@
         [favCurrencies]="favCurrencies()"
       />
 
+      @if (copiedPriceMonth()) {
+      <ion-note class="copied-price-hint" data-testid="copied-price-hint">
+        <ion-icon name="time-outline" aria-hidden="true" />
+        {{ 'copied-price-hint' | transloco: { month: copiedPriceMonth() } }}
+      </ion-note>
+      }
+
       <star-rating
         formControlName="rating"
         label="{{ 'rating-label' | transloco }}"

@@ -71,6 +71,15 @@ ion-modal {
     }
   }
 
+  // Sits under the price input it qualifies (issue #2018).
+  .copied-price-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.25rem 0;
+    font-size: 0.85rem;
+  }
+
   .position-source-hint {
     display: block;
     padding: 0.5rem 1rem 0;

@@ -58,6 +58,8 @@
   "choose-from-gallery": "الاختيار من المعرض",
   "edit": "تعديل",
   "edit-bite": "تعديل Bite",
+  "copy-bite": "نسخ Bite",
+  "copied-price-hint": "السعر من {{month}}، هل ما زال صحيحًا؟",
   "edit-profile": "تعديل الملف الشخصي",
   "profile-image": "صورة الملف الشخصي",
   "public-user": "مستخدم عام",

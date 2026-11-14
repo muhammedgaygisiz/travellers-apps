@@ -58,6 +58,8 @@
   "choose-from-gallery": "ギャラリーから選択",
   "edit": "編集",
   "edit-bite": "Biteを編集",
+  "copy-bite": "Biteをコピー",
+  "copied-price-hint": "{{month}}の価格です。今も合っていますか？",
   "edit-profile": "プロフィールを編集",
   "profile-image": "プロフィール画像",
   "public-user": "公開ユーザー",

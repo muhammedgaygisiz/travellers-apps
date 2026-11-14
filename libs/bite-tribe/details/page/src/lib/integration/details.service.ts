@@ -265,6 +265,12 @@ export class DetailsService {
       currency: originalBite.currency,
       restaurantId: originalBite.restaurantId,
       position: originalBite.position,
+      // Which Bite this is a copy of, so the form can date the price and the
+      // submit can tick it off in the poster's bucket lists (issue #2018).
+      copiedFrom: {
+        biteId: originalBite.id,
+        createdAt: originalBite.createdAt,
+      },
     } as Partial<Bite>;
     this.dataAccess.cacheBite(userAgnosticBiteInfo);
     this.navController.navigateForward(['new-bite']);

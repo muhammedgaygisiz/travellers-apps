@@ -1,6 +1,7 @@
 import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 import { BitePage } from '../bite.page';
+import type { Bite } from 'model';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
@@ -71,5 +72,33 @@ export const CurrencyLoading: Story = {
     },
     currency: 'EUR',
     currencyLoading: true,
+  },
+};
+
+/**
+ * A draft copied from another member's Bite that is older than 30 days: the
+ * price comes along, dated, so the poster checks it (issue #2018). The fixed
+ * date is far enough back to stay old on every run.
+ */
+export const CopiedWithOldPrice: Story = {
+  args: {
+    position: {
+      latitude: 46.9422564444011,
+      longitude: 7.457160053942448,
+    },
+    bite: {
+      name: 'Hibiscus ice tea',
+      place: 'Einstein au Jardin',
+      price: 4.5,
+      currency: 'CHF',
+      position: {
+        latitude: 46.9422564444011,
+        longitude: 7.457160053942448,
+      },
+      copiedFrom: {
+        biteId: 'sams-bite',
+        createdAt: '2020-03-02T19:00:00.000Z',
+      },
+    } as Bite,
   },
 };

@@ -23,6 +23,7 @@ Bucket Lists also bridge BiteTrails into a personal user journey.
 - A Bucket List can track tried-out Bites.
 - A tried-out Bite stays in the Bucket List. It is shown as done rather than removed, because the tried-out progress of the list depends on it.
 - Removing a Bite from a Bucket List also removes its tried-out status for that Bucket List.
+- Posting a Bite copied from a listed Bite marks the listed Bite as tried out in each of the user's Bucket Lists that holds it ([#2018]).
 - Deleting a Bucket List deletes the list, not the Bites.
 - Saving a BiteTrail as a Bucket List writes a sell record for that BiteTrail.
 - Creating a Bucket List from a Bite writes the list and that Bite's membership as one document, so the pair either both exist or neither does. The user is told it worked, or told it failed, only once that write has settled — never on the prompt closing. A list is not created before its Bite is loaded, since an unloaded Bite would leave an empty list behind. This is the contract GitHub issue [#1231] restored, where a first list created from a Bite's empty add dialog reported success and persisted nothing.
@@ -180,3 +181,4 @@ No dedicated Bucket List Cloud Function is currently modeled.
 
 [#1231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1231
 [#1329]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1329
+[#2018]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2018

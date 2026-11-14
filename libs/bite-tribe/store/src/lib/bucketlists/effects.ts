@@ -6,6 +6,7 @@ import {
   catchError,
   from,
   map,
+  mergeMap,
   Observable,
   of,
   switchMap,
@@ -235,12 +236,16 @@ export class BucketListEffect {
    * Saves a tried-out tick. The tick that completes a bucket list is
    * celebrated once it is saved (issue #1800); the tick shows no other
    * feedback, so the celebration's toast is the only one.
+   *
+   * Merged rather than switched: posting a copied Bite ticks it off in every
+   * list that holds it at once (issue #2018), and a switch would drop all but
+   * the last list's celebration.
    */
   setBiteTriedOutStatusEffect$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BucketlistActions.setBiteTriedOutStatus),
       withLatestFrom(this.store.select(bucketlists)),
-      switchMap(([{ bucketlistId, biteId, checked }, lists]) => {
+      mergeMap(([{ bucketlistId, biteId, checked }, lists]) => {
         const bucketlist = lists.find((list) => list.id === bucketlistId);
         const completes = completesBucketlist(bucketlist, biteId, checked);
 

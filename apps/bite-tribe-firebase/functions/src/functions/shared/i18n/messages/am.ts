@@ -47,6 +47,11 @@ export const am: NotificationMessages = {
     'የእርስዎ Bite {{dish}} በብዛት በተወደዱት ዝርዝር ወደ #{{rank}} ከፍ ብሏል! 🎉',
   'leaderboard.mostLikedDropped':
     'የእርስዎ Bite {{dish}} በብዛት በተወደዱት ዝርዝር ወደ #{{rank}} ወርዷል።',
+  'weeklyAward.title': '🏆 የሳምንቱ ውጤቶች',
+  'weeklyAward.bodyMostBites':
+    'እንኳን ደስ አለዎት፣ ሳምንቱን በደረጃ ሰንጠረዡ #{{place}} ሆነው አጠናቀቁ!',
+  'weeklyAward.bodyMostLiked':
+    'እንኳን ደስ አለዎት፣ የእርስዎ Bite ሳምንቱን በብዛት በተወደዱት #{{place}} ሆኖ አጠናቀቀ!',
   'countryBadge.title': '🎉 አዲስ የአገር ባጅ!',
   'countryBadge.body': 'እንኳን ደስ አለዎት! የ{{country}} ባጅ ከፍተዋል',
   'countryBadge.followerTitle': '🌍 አዲስ የአገር ባጅ',

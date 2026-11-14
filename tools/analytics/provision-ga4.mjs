@@ -94,7 +94,7 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'country_code', displayName: 'Country code' },
   { parameterName: 'has_bites', displayName: 'Country has Bites' },
   { parameterName: 'control', displayName: 'Zoom control' },
-  // The celebrations (issue #1795). `moment` is one of five fixed values.
+  // The celebrations (issues #1795, #2031). `moment` is one of seven fixed values.
   { parameterName: 'moment', displayName: 'Celebration moment' },
   // A web visitor handed to a store (issue #1759). `store` is the listing; the
   // page it was followed from rides on the shared `surface` registered above.

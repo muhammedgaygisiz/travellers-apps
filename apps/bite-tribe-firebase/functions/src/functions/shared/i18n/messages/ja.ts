@@ -53,6 +53,11 @@ export const ja: NotificationMessages = {
     'あなたのBite「{{dish}}」がいいね数ランキングで{{rank}}位に上がりました！🎉',
   'leaderboard.mostLikedDropped':
     'あなたのBite「{{dish}}」がいいね数ランキングで{{rank}}位に下がりました。',
+  'weeklyAward.title': '🏆 今週の結果',
+  'weeklyAward.bodyMostBites':
+    'おめでとうございます！今週のランキングで{{place}}位になりました！',
+  'weeklyAward.bodyMostLiked':
+    'おめでとうございます！あなたのBiteが今週のいいね数ランキングで{{place}}位になりました！',
   'countryBadge.title': '🎉 新しい国のバッジ！',
   'countryBadge.body':
     'おめでとうございます！{{country}}のバッジを獲得しました',

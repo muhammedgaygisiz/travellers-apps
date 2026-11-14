@@ -14,7 +14,9 @@ export type CelebrationMoment =
   | 'first-country'
   | 'onboarding-finished'
   | 'first-follow'
-  | 'bite-trail-completed';
+  | 'bite-trail-completed'
+  | 'weekly-award-bites'
+  | 'weekly-award-liked';
 
 /**
  * The toast each moment raises in place of its ordinary success toast. The
@@ -26,6 +28,8 @@ export const CELEBRATION_MESSAGE_KEYS: Record<CelebrationMoment, string> = {
   'onboarding-finished': 'onboarding-finished',
   'first-follow': 'first-follow',
   'bite-trail-completed': 'bite-trail-completed',
+  'weekly-award-bites': 'weekly-award-bites-earned',
+  'weekly-award-liked': 'weekly-award-liked-earned',
 };
 
 /**

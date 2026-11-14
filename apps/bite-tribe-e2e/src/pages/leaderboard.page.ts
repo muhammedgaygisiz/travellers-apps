@@ -25,14 +25,28 @@ export class LeaderboardPage {
     this.finalStandings = this.root.getByTestId('leaderboard-final-standings');
   }
 
+  /**
+   * Taps a segment button until it is the selected one. A tap that lands
+   * before the segment has hydrated changes nothing, and the next step would
+   * then read the previous board.
+   */
+  private async select(button: Locator): Promise<void> {
+    await expect(async () => {
+      await button.click();
+      await expect(button).toHaveClass(/segment-button-checked/, {
+        timeout: 1_000,
+      });
+    }).toPass({ timeout: 15_000 });
+  }
+
   /** The ranking by every Bite a user created; the week is the default. */
   async showAllTime(): Promise<void> {
-    await this.root.getByTestId('leaderboard-tab-all-time').click();
+    await this.select(this.root.getByTestId('leaderboard-tab-all-time'));
   }
 
   /** Bites ranked by this week's likes (issue #2028). */
   async showMostLiked(): Promise<void> {
-    await this.root.getByTestId('leaderboard-tab-most-liked').click();
+    await this.select(this.root.getByTestId('leaderboard-tab-most-liked'));
   }
 
   /** The Bite row holding this dish name on the Most liked board. */
@@ -44,7 +58,7 @@ export class LeaderboardPage {
 
   /** Last week's frozen final standings, under the week tab. */
   async showLastWeek(): Promise<void> {
-    await this.root.getByTestId('leaderboard-week-last').click();
+    await this.select(this.root.getByTestId('leaderboard-week-last'));
   }
 
   /** The row holding this display name, wherever it ranks. */

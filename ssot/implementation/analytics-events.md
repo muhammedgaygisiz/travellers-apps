@@ -127,8 +127,10 @@ before the `--apply` reports `(not set)` for them.
 
 `celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
 It answers whether the moments fire as rarely as the epic intends. `moment` is
-one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow` and
-`bite-trail-completed`, and was added to `provision-ga4.mjs`. It is logged
+one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow`,
+`bite-trail-completed`, and since issue [#2031] `weekly-award-bites` and
+`weekly-award-liked` (a weekly top-3 finish, celebrated once per won week), and
+was added to `provision-ga4.mjs`. It is logged
 even when reduced motion skips the confetti, because the toast still marks the
 moment.
 
@@ -948,3 +950,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006
+[#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

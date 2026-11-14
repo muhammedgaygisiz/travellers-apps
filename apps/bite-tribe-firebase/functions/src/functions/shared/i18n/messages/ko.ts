@@ -48,6 +48,11 @@ export const ko: NotificationMessages = {
     '회원님의 Bite {{dish}}이(가) 좋아요 순위 {{rank}}위로 올랐어요! 🎉',
   'leaderboard.mostLikedDropped':
     '회원님의 Bite {{dish}}이(가) 좋아요 순위 {{rank}}위로 내려갔어요.',
+  'weeklyAward.title': '🏆 이번 주 결과',
+  'weeklyAward.bodyMostBites':
+    '축하해요, 이번 주 순위표에서 {{place}}위로 마무리했어요!',
+  'weeklyAward.bodyMostLiked':
+    '축하해요, 회원님의 Bite가 이번 주 좋아요 순위 {{place}}위로 마무리했어요!',
   'countryBadge.title': '🎉 새 국가 배지!',
   'countryBadge.body': '축하해요! 새 배지를 받았어요: {{country}}',
   'countryBadge.followerTitle': '🌍 새 국가 배지',

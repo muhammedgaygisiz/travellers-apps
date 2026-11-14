@@ -77,6 +77,18 @@ describe(toNotificationTarget.name, () => {
     ).toEqual({ commands: ['leaderboard'] });
   });
 
+  it('opens the frozen standings a weekly award was won in', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'WEEKLY_AWARD', board: 'mostLikedLastWeek' },
+        RECIPIENT,
+      ),
+    ).toEqual({
+      commands: ['leaderboard'],
+      extras: { queryParams: { board: 'mostLikedLastWeek' } },
+    });
+  });
+
   it('opens the Most liked tab for a Bite that moved on it', () => {
     expect(
       toNotificationTarget(

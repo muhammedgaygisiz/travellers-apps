@@ -4,7 +4,13 @@ import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { LocalImagePickerService } from 'bite-tribe-common/bite';
 import { NavController } from '@ionic/angular/standalone';
 import type { PageMenuTarget } from 'common/ui/page';
-import type { Bite, LikeClick, PublicUser, UserReportReason } from 'model';
+import type {
+  Bite,
+  LikeClick,
+  PublicUser,
+  UserReportReason,
+  WeeklyBadgeBoard,
+} from 'model';
 import {
   PATH,
   getDisplayNameFailureReason,
@@ -260,6 +266,18 @@ export class ProfileService {
   }
 
   /** Opens the profile's countries on a globe (GitHub issue #1787). */
+  /**
+   * Opens the frozen standings a weekly badge was won in (issue #2031): the
+   * badge is about last week, so the leaderboard opens on Last week.
+   */
+  gotoWeeklyStandings(board: WeeklyBadgeBoard): void {
+    this.navController.navigateForward([PATH.LEADERBOARD], {
+      queryParams: {
+        board: board === 'thisWeek' ? 'lastWeek' : 'mostLikedLastWeek',
+      },
+    });
+  }
+
   gotoWorld(userId: string): void {
     this.navController.navigateForward([PATH.WORLD, userId]);
   }

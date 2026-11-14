@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
+import { AnalyticsService } from 'ta-firestore';
 import { STORE_SERVICE } from 'utils';
 
 jest.mock('@capacitor-firebase/analytics');
@@ -27,6 +28,7 @@ describe('BiteTribeStartComponent', () => {
     loginWithAppleAccount: jest.Mock;
     login: jest.Mock;
   };
+  let analytics: { logEvent: jest.Mock };
 
   const element = (): HTMLElement => fixture.nativeElement;
   const providerIds = (): (string | null)[] =>
@@ -47,8 +49,11 @@ describe('BiteTribeStartComponent', () => {
       login: jest.fn(),
     };
 
+    analytics = { logEvent: jest.fn() };
+
     TestBed.configureTestingModule({
       providers: [
+        { provide: AnalyticsService, useValue: analytics },
         provideRouter([]),
         { provide: TranslocoService, useValue: MockTranslocoService },
         { provide: STORE_SERVICE, useValue: store },
@@ -94,6 +99,38 @@ describe('BiteTribeStartComponent', () => {
             element().querySelector('.providers') as Node,
           ),
       ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+  });
+
+  describe('the Instagram link', () => {
+    const link = (): HTMLAnchorElement | null =>
+      element().querySelector('[data-testid="start-instagram"]');
+
+    it('leads to the BiteTribe account in a new tab, from the brand row', () => {
+      expect(link()?.closest('.brand')).not.toBeNull();
+      expect(link()?.getAttribute('href')).toBe(
+        'https://www.instagram.com/bitetribeapp/',
+      );
+      expect(link()?.getAttribute('target')).toBe('_blank');
+      expect(link()?.getAttribute('rel')).toBe('noopener');
+      // The glyph is decorative; the label names the link.
+      expect(link()?.hasAttribute('aria-label')).toBe(true);
+    });
+
+    it('logs the followed link with the page it was on', () => {
+      link()?.dispatchEvent(new MouseEvent('click', { cancelable: true }));
+
+      expect(analytics.logEvent).toHaveBeenCalledWith(
+        'instagram_link_clicked',
+        { surface: 'start' },
+      );
+    });
+
+    it.each(['ios', 'android'])('is not in the %s app', (platform) => {
+      fixture.componentRef.setInput('platform', platform);
+      fixture.detectChanges();
+
+      expect(link()).toBeNull();
     });
   });
 

@@ -576,6 +576,10 @@ page. Since [Issue #1706][#1706] the web start page leads with what BiteTribe is
 and a sign-up button; the store links sit beside that pitch under a screenshot
 of the map from 768px up, and below it on a phone. The native start page is
 unchanged and never showed them.
+Since [Issue #2006][#2006] the web start page's brand row also links to the
+BiteTribe Instagram account, with the same Instagram glyphs from
+`apps/bite-tribe/src/assets/social/` the city landing pages use; the native
+start page has no such link.
 
 ### The Five Assets
 
@@ -899,3 +903,4 @@ These are account-level and gate submission regardless of listing completeness:
 [#1451]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1451
 [#1453]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1453
 [#1706]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1706
+[#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006

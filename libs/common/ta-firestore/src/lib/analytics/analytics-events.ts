@@ -78,6 +78,8 @@ export const AnalyticsEvent = {
   CelebrationShown: 'celebration_shown',
   // Acquisition, consumer web app (issue #1759)
   StoreLinkClicked: 'store_link_clicked',
+  // Acquisition, the web start page's Instagram link (issue #2006)
+  InstagramLinkClicked: 'instagram_link_clicked',
   // Acquisition, a visit arriving from a city landing page (issue #1492)
   CityPageArrived: 'city_page_arrived',
 } as const;
@@ -385,6 +387,15 @@ export interface AnalyticsEventParamMap {
     store: StoreListing;
     surface: StoreLinkSurface;
   };
+  /**
+   * A web visitor followed the link to the BiteTribe Instagram account (GitHub
+   * issue #2006). Only the web start page carries the link in the app; the
+   * city landing pages carry it too, but log nothing by design. `surface`
+   * reuses the registered `surface` dimension.
+   */
+  [AnalyticsEvent.InstagramLinkClicked]: {
+    surface: 'start';
+  };
   // `city_page` is the city of the page the visitor came from, which is also
   // its `landingPages` document id and URL (`/eat/<city>`);
   // `destination` is where its link pointed: the call to action opens the
@@ -609,6 +620,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.WorldGlobeZoomed]: 'consumer',
   [AnalyticsEvent.CelebrationShown]: 'consumer',
   [AnalyticsEvent.StoreLinkClicked]: 'consumer',
+  [AnalyticsEvent.InstagramLinkClicked]: 'consumer',
   [AnalyticsEvent.CityPageArrived]: 'consumer',
 };
 

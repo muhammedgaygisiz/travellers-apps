@@ -1353,6 +1353,9 @@ Cologne (11 November 2026, the first day of the Karneval season) was the first
 with a themed Leela: a Rote Funken costume on the cover and the closing slide,
 generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
+Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
+scheduled rather than shared at once: made earlier that evening and set for 22:00
+on Instagram and on the Facebook Page.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1447,7 +1450,9 @@ name only.
 
 **@bitetribeapp follows every account it tags.** As of 11 November 2026 it
 follows all 55 featured so far, across all sixteen posts. That count includes
-`@chickenshop`, which London names in its caption but could not tag.
+`@chickenshop`, which London names in its caption but could not tag. Cusco's
+four tagged accounts were followed on 14 November 2026; Zurich's are not
+counted here.
 
 **Bern was tagged afterwards** (5 November 2026), through the post's Edit
 dialog, as a dry run for the skill: `@restaurant.kesar`, `@greekspot.ch` and
@@ -1567,6 +1572,31 @@ city come from one member. Leela wears a surf lifesaver's red-and-yellow cap
 and shirt, after the surf club's schnitzel, and the cover photo is Glenelg's
 Moseley Square, where the gelato is from. Leela's cover line is "A meat pie
 with the koalas, then gelato on Glenelg beach".
+
+**Cusco** (14 November 2026, scheduled for 22:00) tags four of five dish
+slides: `@jardinorganiko` (half cuy; the same name and phone number as the
+Google Maps listing, although it has one post and its bio gives Calle Palacio
+126 where Maps gives Calle Tandapata 103), `@raicesperuvianrestaurant` (alpaca
+grill; bio gives C. Plazoleta 681 and the same link as Maps),
+`@balkonazul.cusco` (papas a la huancaína; its posts give Calle Espaderos 116,
+where the Bite's pin is; the older `@balkonazul` was not used) and
+`@ruculacomidaperuana` (chaufa with tamarind pork belly; bio gives Triunfo 393,
+by the Plaza de Armas). Machupisci (sopa de quinua) has no account. Peru had
+93 Bites, 47 of them in and around Cusco, including the Sacred Valley and
+Machu Picchu Pueblo; all five came from the city itself. Leela wears a
+Cusqueña montera hat and lliclla shawl and holds chicha morada. Leela's cover
+line is "At 3,400 m, cuy, alpaca and quinoa soup taste even better". The city
+page `/eat/cusco` went up the same evening, with `cuzco` and `qosqo` as
+aliases.
+
+**Scheduling works from the web.** Instagram web's create dialog has a
+**Schedule content** switch, under the location, that takes a date and a time;
+with it on, **Share** becomes **Schedule** and the dialog ends on "Your post
+has been scheduled". Business Suite's composer does the same for the Page with
+its **Set date and time** switch, and its **Schedule** ends on "Your post is
+scheduled" with a boost offer, dismissed with **Maybe later**. The 16 October
+comic was scheduled from the Android app because it had music, which the web
+cannot add.
 
 ### On The Facebook Page
 

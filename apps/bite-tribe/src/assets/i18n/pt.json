@@ -192,6 +192,8 @@
   "theme": "Tema",
   "haptic-feedback": "Feedback háptico",
   "haptic-feedback-helper": "Vibrações suaves quando tocas. Os interruptores, os controlos segmentados e o gesto de puxar para atualizar seguem a definição do teu telemóvel.",
+  "sounds": "Sons",
+  "sounds-helper": "Alguns sons discretos quando publicas um Bite ou alcanças algo pela primeira vez. Seguem o modo silencioso do teu telemóvel.",
   "turkish": "Türkçe",
   "english": "English",
   "portuguese": "Português",

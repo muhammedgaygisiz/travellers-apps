@@ -297,6 +297,23 @@
               />
             </ion-item>
           }
+          @if (soundsSupported()) {
+            <ion-item data-testid="settings-sounds">
+              <ion-label>
+                {{ 'sounds' | transloco }}
+                <p data-testid="settings-sounds-helper">
+                  {{ 'sounds-helper' | transloco }}
+                </p>
+              </ion-label>
+              <ion-toggle
+                slot="end"
+                data-testid="settings-sounds-toggle"
+                [attr.aria-label]="'sounds' | transloco"
+                [checked]="soundsEnabled()"
+                (ionChange)="soundsEnabledChange.emit($event.detail.checked)"
+              />
+            </ion-item>
+          }
           <ion-item
             button
             detail="false"

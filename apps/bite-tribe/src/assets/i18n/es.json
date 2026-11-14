@@ -192,6 +192,8 @@
   "theme": "Tema",
   "haptic-feedback": "Respuesta háptica",
   "haptic-feedback-helper": "Vibraciones suaves al tocar. Los interruptores, los controles segmentados y el gesto de deslizar para actualizar siguen el ajuste de tu teléfono.",
+  "sounds": "Sonidos",
+  "sounds-helper": "Algunos sonidos suaves al publicar un Bite o lograr algo por primera vez. Siguen el modo silencio de tu teléfono.",
   "turkish": "Türkçe",
   "english": "English",
   "follow": "Seguir",

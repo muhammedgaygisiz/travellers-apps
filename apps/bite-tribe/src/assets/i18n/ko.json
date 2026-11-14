@@ -192,6 +192,8 @@
   "theme": "테마",
   "haptic-feedback": "햅틱 피드백",
   "haptic-feedback-helper": "탭할 때 가볍게 진동해요. 스위치, 세그먼트 컨트롤, 당겨서 새로고침은 휴대폰 자체 설정을 따라요.",
+  "sounds": "소리",
+  "sounds-helper": "Bite를 올리거나 처음으로 무언가를 달성하면 조용한 소리가 나요. 휴대폰의 무음 모드를 따라요.",
   "turkish": "Türkçe",
   "english": "English",
   "portuguese": "Português",

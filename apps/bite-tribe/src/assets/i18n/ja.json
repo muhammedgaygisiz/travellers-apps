@@ -192,6 +192,8 @@
   "theme": "テーマ",
   "haptic-feedback": "触覚フィードバック",
   "haptic-feedback-helper": "タップしたときに軽く振動します。スイッチ、セグメントコントロール、引っ張って更新の動作は、スマートフォン本体の設定に従います。",
+  "sounds": "サウンド",
+  "sounds-helper": "Biteを投稿したときや初めての達成時に、控えめなサウンドが鳴ります。スマートフォンのマナーモードに従います。",
   "turkish": "Türkçe",
   "english": "English",
   "portuguese": "Português",

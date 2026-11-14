@@ -28,6 +28,8 @@ export class SettingsService {
   emailVerificationResendRunning = this.emailVerification.resendRunning;
   hapticsEnabled = this.dataAccess.hapticsEnabled;
   hapticsSupported = this.dataAccess.hapticsSupported;
+  soundsEnabled = this.dataAccess.soundsEnabled;
+  soundsSupported = this.dataAccess.soundsSupported;
 
   readonly pushInstallations = signal<readonly PushInstallationView[]>([]);
   readonly pushPermission = signal<PushPermissionState>('prompt');
@@ -56,6 +58,10 @@ export class SettingsService {
    */
   setHapticsEnabled(enabled: boolean): Promise<void> {
     return this.dataAccess.setHapticsEnabled(enabled);
+  }
+
+  setSoundsEnabled(enabled: boolean): Promise<void> {
+    return this.dataAccess.setSoundsEnabled(enabled);
   }
 
   async saveSettings(settings: Settings): Promise<void> {

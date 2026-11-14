@@ -192,6 +192,8 @@
   "theme": "主题",
   "haptic-feedback": "触感反馈",
   "haptic-feedback-helper": "点按时轻微振动。开关、分段控件和下拉刷新遵循手机自身的设置。",
+  "sounds": "声音",
+  "sounds-helper": "发布 Bite 或首次达成时会播放几声轻柔的提示音。它们遵循手机的静音模式。",
   "turkish": "Türkçe",
   "english": "English",
   "portuguese": "Português",

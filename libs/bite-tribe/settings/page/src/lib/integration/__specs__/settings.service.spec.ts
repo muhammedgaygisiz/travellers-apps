@@ -25,6 +25,8 @@ describe(SettingsService.name, () => {
   let presentToast: jest.Mock;
   let setHapticsEnabled: jest.Mock;
   const hapticsEnabled = signal(true);
+  let setSoundsEnabled: jest.Mock;
+  const soundsEnabled = signal(true);
 
   const installation = (
     overrides: Partial<PushInstallation> = {},
@@ -55,6 +57,7 @@ describe(SettingsService.name, () => {
     navigateBack = jest.fn();
     presentToast = jest.fn().mockResolvedValue(undefined);
     setHapticsEnabled = jest.fn().mockResolvedValue(undefined);
+    setSoundsEnabled = jest.fn().mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -78,6 +81,9 @@ describe(SettingsService.name, () => {
             hapticsEnabled,
             hapticsSupported: true,
             setHapticsEnabled,
+            soundsEnabled,
+            soundsSupported: true,
+            setSoundsEnabled,
           },
         },
         {
@@ -109,6 +115,22 @@ describe(SettingsService.name, () => {
       await service.setHapticsEnabled(false);
 
       expect(setHapticsEnabled).toHaveBeenCalledWith(false);
+      expect(saveSettings).not.toHaveBeenCalled();
+      expect(presentToast).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sounds', () => {
+    it('reads the device setting and whether it can play at all', () => {
+      expect(service.soundsEnabled()).toBe(true);
+      expect(service.soundsSupported).toBe(true);
+    });
+
+    it('switches it on the device, with no save and no toast', async () => {
+      await service.setSoundsEnabled(false);
+
+      expect(setSoundsEnabled).toHaveBeenCalledWith(false);
+      expect(setHapticsEnabled).not.toHaveBeenCalled();
       expect(saveSettings).not.toHaveBeenCalled();
       expect(presentToast).not.toHaveBeenCalled();
     });

@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { ToastService } from 'toast';
 import {
+  BURST_TIMEOUT_MS,
   CELEBRATION_BURST,
   CELEBRATION_MESSAGE_KEYS,
   CelebrationMoment,
@@ -101,6 +102,7 @@ describe('CelebrationService', () => {
           endBurst = resolve;
         }),
     );
+    Object.assign(fire, { reset: jest.fn() });
     create.mockReturnValue(fire);
 
     window.matchMedia = jest.fn((query: string) => ({
@@ -303,6 +305,55 @@ describe('CelebrationService', () => {
 
     endBurst();
     await second;
+  });
+
+  describe('a burst that never finishes (issue #2039)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('keeps its canvas until the bound', async () => {
+      void service.celebrate('first-bite');
+      await jest.advanceTimersByTimeAsync(BURST_TIMEOUT_MS - 1);
+
+      expect(canvases()).toHaveLength(1);
+      expect(fire.reset).not.toHaveBeenCalled();
+    });
+
+    it('stops the burst, removes its canvas and resolves at the bound', async () => {
+      const celebrated = service.celebrate('first-bite');
+      await jest.advanceTimersByTimeAsync(BURST_TIMEOUT_MS);
+
+      await expect(celebrated).resolves.toBeUndefined();
+      expect(fire.reset).toHaveBeenCalledTimes(1);
+      expect(canvases()).toHaveLength(0);
+    });
+
+    it('draws the next celebration again', async () => {
+      void service.celebrate('first-bite');
+      await jest.advanceTimersByTimeAsync(BURST_TIMEOUT_MS);
+
+      void service.celebrate('first-follow', { displayName: 'Leela' });
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(create).toHaveBeenCalledTimes(2);
+      expect(canvases()).toHaveLength(1);
+    });
+
+    it('leaves a burst that ends in time alone', async () => {
+      const celebrated = service.celebrate('first-bite');
+      await jest.advanceTimersByTimeAsync(2000);
+      endBurst();
+      await celebrated;
+      await jest.advanceTimersByTimeAsync(BURST_TIMEOUT_MS);
+
+      expect(fire.reset).not.toHaveBeenCalled();
+      expect(jest.getTimerCount()).toBe(0);
+    });
   });
 
   it.each(Object.entries(CELEBRATION_MESSAGE_KEYS))(

@@ -65,6 +65,16 @@ const CANVAS_Z_INDEX = '100000';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 /**
+ * The longest a burst may hold its canvas (issue #2039). A burst runs about
+ * 2 s, but `canvas-confetti` settles its promise only when its worker reports
+ * the last frame drawn, and that report can come late or never: while the app
+ * is in the background, the WebView is paused or the renderer is starved. Past
+ * this bound the burst is stopped and its canvas removed regardless, so one
+ * stalled burst can neither stay on screen nor block every later one.
+ */
+export const BURST_TIMEOUT_MS = 4000;
+
+/**
  * The single way bite-tribe celebrates a moment.
  *
  * A celebration is one short confetti burst from the bottom of the screen, the
@@ -77,7 +87,7 @@ const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
  * **An overlay, never in the way.** The burst is drawn on a full-viewport
  * canvas appended to the document body - not to a page, so it keeps running
  * across a route change - with `pointer-events: none`, and the canvas is
- * removed when the burst ends.
+ * removed when the burst ends, or after {@link BURST_TIMEOUT_MS} at the latest.
  *
  * **One at a time.** A celebration that starts while a burst is still running
  * presents its toast but draws no second burst, and one that starts while the
@@ -150,13 +160,28 @@ export class CelebrationService {
     });
     this.document.body.appendChild(canvas);
 
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     try {
       const fire = confetti.create(canvas, { resize: true, useWorker: true });
+      const timedOut = new Promise<'timed-out'>((resolve) => {
+        timeout = setTimeout(() => resolve('timed-out'), BURST_TIMEOUT_MS);
+      });
 
-      await fire({ ...CELEBRATION_BURST, colors: this.colors(view) });
+      const outcome = await Promise.race([
+        fire({ ...CELEBRATION_BURST, colors: this.colors(view) }),
+        timedOut,
+      ]);
+
+      if (outcome === 'timed-out') {
+        // Stops the worker's animation, so nothing is left drawing into a
+        // canvas that is about to go.
+        fire.reset();
+      }
     } catch {
       // Nothing to fall back to; the toast already marks the moment.
     } finally {
+      clearTimeout(timeout);
       canvas.remove();
       this.bursting = false;
     }

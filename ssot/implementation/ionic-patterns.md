@@ -220,7 +220,12 @@ Details worth knowing before changing it:
   full-viewport canvas with `pointer-events: none`, appended to the document
   body rather than to a page, so it keeps running across a route change - a
   first Bite returns to home, finishing onboarding enters the app. The canvas
-  is removed when the burst ends.
+  is removed when the burst ends, and after `BURST_TIMEOUT_MS` (4 s) at the
+  latest: `canvas-confetti` settles only when its worker reports the last
+  frame, which can come late or never while the app is in the background or
+  the renderer is starved. Past the bound the burst is reset and the canvas
+  removed, so a stalled burst neither stays on screen nor holds the one-at-a-time
+  flag and blocks every later burst ([#2039]).
 - **Tertiary is left out of the colours.** `--ion-color-tertiary` sits a
   shade away from the page background in both modes (`#f1f1f1` on white,
   `#1c212b` on `#1a1c22`) and would draw invisible particles. The brand orange
@@ -359,3 +364,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1835]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1835
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
 [#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022
+[#2039]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2039

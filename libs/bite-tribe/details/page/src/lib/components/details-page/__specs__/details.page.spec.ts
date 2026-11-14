@@ -1032,6 +1032,59 @@ describe('DetailsPage', () => {
   });
 
   /** Reporting a Bite to the operators (issue #1608). */
+  // Issue #2018: "Copy Bite" on another member's listable Bite.
+  describe('copy', () => {
+    const OTHER_BITE = {
+      id: 'bite-1',
+      name: 'Hibiscus ice tea',
+      userId: 'author-uid',
+      imageStatus: 'uploaded',
+    } as Bite;
+
+    const copyButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="bite-details-copy"]');
+
+    const show = (bite: Bite, userId: string, authenticated = true): void => {
+      componentRef.setInput('bite', bite);
+      componentRef.setInput('userId', userId);
+      componentRef.setInput('isAuthenticated', authenticated);
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    it("is offered on somebody else's Bite", () => {
+      show(OTHER_BITE, 'reader-uid');
+
+      expect(copyButton()).not.toBeNull();
+    });
+
+    it("is never offered on the reader's own Bite", () => {
+      show(OTHER_BITE, 'author-uid');
+
+      expect(copyButton()).toBeNull();
+    });
+
+    it('is not offered to a reader who is not signed in', () => {
+      show(OTHER_BITE, '', false);
+
+      expect(copyButton()).toBeNull();
+    });
+
+    it('is not offered on a Bite that is not listable', () => {
+      show({ ...OTHER_BITE, imageStatus: 'pending' }, 'reader-uid');
+
+      expect(copyButton()).toBeNull();
+    });
+
+    it('opens Create Bite from the Bite on screen', () => {
+      show(OTHER_BITE, 'reader-uid');
+      const emitSpy = jest.spyOn(component.gotoNew, 'emit');
+
+      copyButton()?.click();
+
+      expect(emitSpy).toHaveBeenCalledWith(OTHER_BITE);
+    });
+  });
+
   describe('report', () => {
     const OTHER_BITE = {
       id: 'bite-1',

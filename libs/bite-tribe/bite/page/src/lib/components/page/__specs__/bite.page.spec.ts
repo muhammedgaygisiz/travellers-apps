@@ -20,7 +20,7 @@ import { Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { POSITION_SOURCE_COLORS } from '../model/position-source';
-import type { Geopoint, GooglePlace, PositionSource } from 'model';
+import type { Bite, Geopoint, GooglePlace, PositionSource } from 'model';
 
 import {
   getMediaLocationPermissionState,
@@ -134,6 +134,44 @@ describe('BitePage', () => {
       componentRef.setInput('isNew', false);
 
       expect(component.titleKey()).toBe('edit-bite');
+    });
+  });
+
+  // Issue #2018: an old copied price is dated under the price input.
+  describe('copiedPriceMonth', () => {
+    const copy = (createdAt: string): Bite =>
+      ({
+        name: 'Hibiscus ice tea',
+        price: 4.5,
+        copiedFrom: { biteId: 'sams-bite', createdAt },
+      }) as Bite;
+
+    const hint = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="copied-price-hint"]');
+
+    it('names the month of a copied price older than 30 days', () => {
+      componentRef.setInput('isNew', true);
+      componentRef.setInput('bite', copy('2020-03-02T19:00:00.000Z'));
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.copiedPriceMonth()).toBe('March 2020');
+      expect(hint()).not.toBeNull();
+    });
+
+    it('stays empty for a fresh copy', () => {
+      componentRef.setInput('isNew', true);
+      componentRef.setInput('bite', copy(new Date().toISOString()));
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.copiedPriceMonth()).toBe('');
+      expect(hint()).toBeNull();
+    });
+
+    it('stays empty when editing', () => {
+      componentRef.setInput('isNew', false);
+      componentRef.setInput('bite', copy('2020-03-02T19:00:00.000Z'));
+
+      expect(component.copiedPriceMonth()).toBe('');
     });
   });
 

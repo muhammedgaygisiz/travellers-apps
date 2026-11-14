@@ -23,6 +23,7 @@ const Mock = {
   getCurrencyByPosition: jest.fn(),
   currency: (): string => 'EUR',
   hasOwnBites: jest.fn(),
+  markTriedOutInBucketlists: jest.fn(),
 };
 
 const LoadingMock = {
@@ -456,6 +457,59 @@ describe('BiteService', () => {
         { name: 'Test Bite' },
         undefined,
       );
+    });
+  });
+
+  /**
+   * A copy of another member's Bite ticks the source off in the poster's
+   * bucket lists once it is posted (issue #2018).
+   */
+  describe('a Bite copied from another one', () => {
+    const copy = {
+      name: 'Hibiscus ice tea',
+      copiedFrom: { biteId: 'sams-bite', createdAt: '2026-11-13T19:00:00Z' },
+    };
+
+    it('ticks the source Bite off after the post', async () => {
+      Mock.cachedBite.mockReturnValue(copy);
+      // The real write drops the draft as its first act.
+      Mock.submitNewBite.mockImplementationOnce(async () => {
+        Mock.cachedBite.mockReturnValue(undefined);
+      });
+
+      await service.submitNewBite({ id: '', name: 'Hibiscus ice tea' });
+
+      expect(Mock.markTriedOutInBucketlists).toHaveBeenCalledWith('sams-bite');
+    });
+
+    it('keeps the source id off the document', async () => {
+      Mock.cachedBite.mockReturnValue(copy);
+
+      await service.submitNewBite({ id: '', name: 'Hibiscus ice tea' });
+
+      expect(Mock.submitNewBite).toHaveBeenCalledWith(
+        { name: 'Hibiscus ice tea' },
+        undefined,
+      );
+    });
+
+    it('ticks nothing when the post fails', async () => {
+      Mock.cachedBite.mockReturnValue(copy);
+      Mock.submitNewBite.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(
+        service.submitNewBite({ id: '', name: 'Hibiscus ice tea' }),
+      ).rejects.toThrow('offline');
+
+      expect(Mock.markTriedOutInBucketlists).not.toHaveBeenCalled();
+    });
+
+    it('ticks nothing for a Bite that is not a copy', async () => {
+      Mock.cachedBite.mockReturnValue(undefined);
+
+      await service.submitNewBite({ id: '', name: 'Test Bite' });
+
+      expect(Mock.markTriedOutInBucketlists).not.toHaveBeenCalled();
     });
   });
 });

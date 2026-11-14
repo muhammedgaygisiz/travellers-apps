@@ -7,6 +7,7 @@ import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Bite,
+  Bucketlist,
   CreateAndUploadImageCallbackParams,
   Geopoint,
   PublicUser,
@@ -66,7 +67,9 @@ describe(BiteDataAccessService.name, () => {
     saveEditedBite: jest.Mock;
     setEditingBite: jest.Mock;
     clearCachedBite: jest.Mock;
+    setBiteTriedOutStatus: jest.Mock;
   };
+  let bucketlists$: BehaviorSubject<Bucketlist[]>;
   let analytics: { logEvent: jest.Mock };
   let profileApi: { fetchFollowingWithDetails: jest.Mock };
   let blockedUserIds$: BehaviorSubject<string[]>;
@@ -109,7 +112,9 @@ describe(BiteDataAccessService.name, () => {
       saveEditedBite: jest.fn(),
       setEditingBite: jest.fn(),
       clearCachedBite: jest.fn(),
+      setBiteTriedOutStatus: jest.fn(),
     };
+    bucketlists$ = new BehaviorSubject<Bucketlist[]>([]);
     analytics = { logEvent: jest.fn() };
     profileApi = { fetchFollowingWithDetails: jest.fn().mockResolvedValue([]) };
     blockedUserIds$ = new BehaviorSubject<string[]>([]);
@@ -134,6 +139,7 @@ describe(BiteDataAccessService.name, () => {
             favCurrenciesFromSettings$: of(undefined),
             position$: of(undefined),
             cachedBite$: of(undefined),
+            bucketlists$,
             nearbyRestaurants$: of(undefined),
             tagSuggestionsForEditingBite$: of(undefined),
             publicUser$,
@@ -150,6 +156,56 @@ describe(BiteDataAccessService.name, () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  // Issue #2018: posting a copy ticks its source off in the poster's lists.
+  describe('markTriedOutInBucketlists', () => {
+    const list = (
+      id: string,
+      biteIds: string[],
+      triedOut: string[] = [],
+    ): Bucketlist => ({
+      id,
+      userId: 'me',
+      name: id,
+      biteIds,
+      triedOutBites: triedOut.map((biteId) => ({
+        biteId,
+        date: '2026-01-01T00:00:00.000Z',
+        timestamp: 0,
+      })),
+    });
+
+    it('ticks the Bite off in every list that holds it', () => {
+      bucketlists$.next([
+        list('lisbon', ['sams-bite', 'other']),
+        list('drinks', ['sams-bite']),
+        list('unrelated', ['other']),
+      ]);
+
+      service.markTriedOutInBucketlists('sams-bite');
+
+      expect(store.setBiteTriedOutStatus.mock.calls).toEqual([
+        [{ bucketlistId: 'lisbon', biteId: 'sams-bite', checked: true }],
+        [{ bucketlistId: 'drinks', biteId: 'sams-bite', checked: true }],
+      ]);
+    });
+
+    it('leaves a list where the Bite is already ticked off alone', () => {
+      bucketlists$.next([list('lisbon', ['sams-bite'], ['sams-bite'])]);
+
+      service.markTriedOutInBucketlists('sams-bite');
+
+      expect(store.setBiteTriedOutStatus).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when no list holds the Bite', () => {
+      bucketlists$.next([list('lisbon', ['other'])]);
+
+      service.markTriedOutInBucketlists('sams-bite');
+
+      expect(store.setBiteTriedOutStatus).not.toHaveBeenCalled();
+    });
   });
 
   // Issue #1917: who the "Ate with" picker may offer.

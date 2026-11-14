@@ -58,6 +58,8 @@
   "choose-from-gallery": "ከማዕከለ-ስዕላት ይምረጡ",
   "edit": "ያስተካክሉ",
   "edit-bite": "Bite ያስተካክሉ",
+  "copy-bite": "Bite ቅዳ",
+  "copied-price-hint": "ዋጋው ከ{{month}} ነው፤ አሁንም ትክክል ነው?",
   "edit-profile": "መገለጫ ያስተካክሉ",
   "profile-image": "የመገለጫ ምስል",
   "public-user": "ይፋዊ ተጠቃሚ",

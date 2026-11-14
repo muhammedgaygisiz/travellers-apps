@@ -58,6 +58,8 @@
   "choose-from-gallery": "从相册选择",
   "edit": "编辑",
   "edit-bite": "编辑Bite",
+  "copy-bite": "复制 Bite",
+  "copied-price-hint": "价格来自 {{month}}，现在还对吗？",
   "edit-profile": "编辑个人主页",
   "profile-image": "头像",
   "public-user": "公开用户",

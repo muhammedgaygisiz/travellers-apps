@@ -402,6 +402,23 @@
       </ion-button>
       }
 
+      <!-- Another member's Bite takes "Copy Bite" where the reader's own has
+      "Edit Bite": the same dish, the reader's own photo (issue #2018). Report
+      always follows it, so the safe padding stays on that button. -->
+      @if (canCopy()) {
+      <ion-button
+        fill="outline"
+        expand="block"
+        color="primary"
+        class="ion-margin-top"
+        data-testid="bite-details-copy"
+        (click)="newBite(biteData)"
+      >
+        <ion-icon name="copy-outline" slot="start" aria-hidden="true" />
+        {{ 'copy-bite' | transloco }}
+      </ion-button>
+      }
+
       <!-- Reporting sits last and quiet: it is a way out for a reader who
       should not have to look at a Bite, not an action the page invites. Never
       offered on the reader's own Bite (issue #1608). -->

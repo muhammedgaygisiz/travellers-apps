@@ -557,6 +557,7 @@ describe('DetailsService', () => {
         .mockImplementation();
     });
 
+    // The copy names its source but carries nothing personal (issue #2018).
     it('should navigate to new bite page with user agnostic bite info', () => {
       const originalBite: Bite = {
         id: 'bite123',
@@ -566,12 +567,21 @@ describe('DetailsService', () => {
         currency: 'CHF',
         restaurantId: '123',
         position: { latitude: 0, longitude: 0 },
+        createdAt: '2026-03-02T19:00:00.000Z',
       } as Bite;
       service.onGotoNewClick(originalBite);
       expect(cacheBiteSpy).toHaveBeenCalledTimes(1);
       expect(cacheBiteSpy).toHaveBeenCalledWith({
-        ...originalBite,
-        id: undefined,
+        name: 'Pizzoccheri',
+        place: 'Grotto Broggini',
+        price: 25,
+        currency: 'CHF',
+        restaurantId: '123',
+        position: { latitude: 0, longitude: 0 },
+        copiedFrom: {
+          biteId: 'bite123',
+          createdAt: '2026-03-02T19:00:00.000Z',
+        },
       });
       expect(mockNavController.navigateForward).toHaveBeenCalledWith([
         'new-bite',

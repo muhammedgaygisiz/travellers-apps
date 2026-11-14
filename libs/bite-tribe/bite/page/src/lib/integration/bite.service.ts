@@ -149,6 +149,7 @@ export class BiteService {
       biteData as unknown as Bite,
       this.cachedBite(),
     );
+    const copiedFromId = this.cachedBite()?.copiedFrom?.biteId;
 
     // Also read before the write, which would count as one. Nothing is
     // stored: deleting the only Bite and posting again celebrates again, as
@@ -157,6 +158,11 @@ export class BiteService {
 
     try {
       await this.dataAccess.submitNewBite(document, photoPosition ?? undefined);
+
+      // A copy of a bucket-listed Bite means the dish was eaten (#2018).
+      if (copiedFromId) {
+        this.dataAccess.markTriedOutInBucketlists(copiedFromId);
+      }
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated, {
         source: biteSourceOf(document),

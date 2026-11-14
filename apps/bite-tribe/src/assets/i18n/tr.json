@@ -58,6 +58,8 @@
   "choose-from-gallery": "Galeriden seç",
   "edit": "Düzenle",
   "edit-bite": "Bite'ı Düzenle",
+  "copy-bite": "Bite'ı kopyala",
+  "copied-price-hint": "{{month}} tarihli fiyat, hâlâ doğru mu?",
   "edit-profile": "Profili Düzenle",
   "profile-image": "Profil Resmi",
   "public-user": "Herkeze acik Kullanıcı",

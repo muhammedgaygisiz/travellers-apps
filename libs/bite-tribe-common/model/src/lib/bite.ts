@@ -88,6 +88,16 @@ export interface Bite {
   updatedAt?: string;
   updatedAtTimestamp?: number;
 
+  /**
+   * The Bite a Create Bite draft was copied from (GitHub issue #2018).
+   *
+   * Draft only, never stored: the create form submits its own controls plus
+   * the provenance `withDraftProvenance` merges, and this is neither. It tells
+   * the form how old the copied price is, and tells the submit which Bite to
+   * tick off in the poster's bucket lists.
+   */
+  copiedFrom?: { biteId: string; createdAt?: string };
+
   //derived attribute
   distance?: string;
   likes?: Like[];

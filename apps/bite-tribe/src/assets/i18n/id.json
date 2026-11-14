@@ -58,6 +58,8 @@
   "choose-from-gallery": "Pilih dari galeri",
   "edit": "Edit",
   "edit-bite": "Ubah Bite",
+  "copy-bite": "Salin Bite",
+  "copied-price-hint": "Harga dari {{month}}, masih benar?",
   "edit-profile": "Edit Profil",
   "profile-image": "Foto Profil",
   "public-user": "Pengguna Publik",

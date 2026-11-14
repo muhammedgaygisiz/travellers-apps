@@ -58,6 +58,8 @@
   "choose-from-gallery": "Elegir de la galería",
   "edit": "Editar",
   "edit-bite": "Editar Bite",
+  "copy-bite": "Copiar Bite",
+  "copied-price-hint": "Precio de {{month}}, ¿sigue siendo correcto?",
   "edit-profile": "Editar perfil",
   "profile-image": "Imagen de perfil",
   "public-user": "Perfil público",

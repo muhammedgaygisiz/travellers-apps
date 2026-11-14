@@ -535,6 +535,15 @@ export class DetailsPage {
   });
 
   /**
+   * "Copy Bite" is offered on another member's Bite that anyone may be shown,
+   * so somebody who ate the same dish only adds their own photo (GitHub issue
+   * #2018). It takes the slot "Edit Bite" has on the reader's own Bite.
+   */
+  protected readonly canCopy = computed(
+    () => this.canReport() && this.canSaveToBucketlist(),
+  );
+
+  /**
    * Asks why, then reports.
    *
    * A list of reasons rather than a text field: reporting should be one tap

@@ -113,6 +113,9 @@ export class BiteDataAccessService {
 
   currency = toSignal(this.storeService.currencyFromSettings$);
   favCurrencies = toSignal(this.storeService.favCurrenciesFromSettings$);
+  private readonly bucketlists = toSignal(this.storeService.bucketlists$, {
+    initialValue: [],
+  });
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
   nearbyRestaurants = toSignal(this.storeService.nearbyRestaurants$);
@@ -491,6 +494,27 @@ export class BiteDataAccessService {
 
     if (photoPosition !== undefined && bite.id) {
       void this.api.saveBitePhotoPosition(bite.id, photoPosition);
+    }
+  }
+
+  /**
+   * Ticks `biteId` off as tried out in each of the user's bucket lists that
+   * holds it (GitHub issue #2018): posting a Bite copied from it means the
+   * dish was eaten. A list where it is already ticked keeps its original
+   * date, and is not counted again towards completing the list.
+   */
+  markTriedOutInBucketlists(biteId: string): void {
+    for (const list of this.bucketlists() ?? []) {
+      const listed = list.biteIds?.includes(biteId);
+      const ticked = list.triedOutBites?.some((bite) => bite.biteId === biteId);
+
+      if (listed && !ticked) {
+        this.storeService.setBiteTriedOutStatus({
+          bucketlistId: list.id,
+          biteId,
+          checked: true,
+        });
+      }
     }
   }
 

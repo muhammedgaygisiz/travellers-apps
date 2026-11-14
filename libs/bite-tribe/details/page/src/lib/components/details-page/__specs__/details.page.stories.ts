@@ -428,3 +428,17 @@ export const ReportNotOfferedSignedOut: Story = {
     biteCreator: someoneElse,
   },
 };
+
+/**
+ * A signed-in reader on somebody else's listable Bite: "Copy Bite" sits where
+ * "Edit Bite" sits on the reader's own, above "Report this Bite" (issue
+ * #2018). Still without the photo, for the reason `withoutPhoto` gives.
+ */
+export const CopyOffered: Story = {
+  args: {
+    ...Default.args,
+    userId: '1',
+    bite: { ...withoutPhoto, imageStatus: 'uploaded' },
+    biteCreator: someoneElse,
+  },
+};

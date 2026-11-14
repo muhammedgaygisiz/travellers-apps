@@ -17,6 +17,7 @@ export class BiteDetailsPage {
   readonly image: Locator;
   readonly taggedUsers: Locator;
   readonly removeMe: Locator;
+  readonly copyButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -53,6 +54,8 @@ export class BiteDetailsPage {
     // The "Ate with" row (issues #1918 and #1920).
     this.taggedUsers = this.root.getByTestId('tagged-user');
     this.removeMe = this.root.getByTestId('tagged-users-remove-me');
+    // "Copy Bite" on another member's Bite (issue #2018).
+    this.copyButton = this.root.getByTestId('bite-details-copy');
   }
 
   /** Takes the signed-in user off the Bite, confirming the question. */

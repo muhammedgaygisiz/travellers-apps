@@ -297,10 +297,17 @@ export class BitePage {
     }
   });
 
+  /**
+   * The location's currency, or the user's preferred one, prefills the form -
+   * unless the draft already names one. A copied Bite, a menu item and an
+   * order line carry a price in their own currency, and replacing just the
+   * currency put that number under the wrong one: a EUR 15 copy posted as
+   * CHF 15 because the Bite stood in Switzerland (GitHub issue #2018).
+   */
   currencyInitFromInputEffect = effect(() => {
     const currency = this.currency();
 
-    if (currency) {
+    if (currency && !this.bite()?.currency) {
       this.biteFormGroup.controls['currency'].patchValue(currency);
     }
   });

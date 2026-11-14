@@ -1112,6 +1112,36 @@ describe('BitePage', () => {
       );
     });
 
+    // Issue #2018: a draft's price stays in the draft's own currency.
+    it("should keep the draft's currency over the location's", () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', {
+        name: 'PotatoThing',
+        price: 15,
+        currency: 'EUR',
+      } as Bite);
+      fixture.detectChanges();
+
+      // The location's currency resolves after the draft is in the form.
+      componentRef.setInput('currency', 'CHF');
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBe('EUR');
+    });
+
+    it("should use the location's currency for a draft without one", () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', { name: 'Margherita' } as Bite);
+      componentRef.setInput('currency', 'CHF');
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBe('CHF');
+    });
+
     it('should set position when input is provided', () => {
       const testPosition = { latitude: 42, longitude: 24 };
 

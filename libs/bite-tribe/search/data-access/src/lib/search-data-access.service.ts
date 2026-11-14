@@ -13,7 +13,6 @@ import type {
   PublicUser,
   SearchBite,
   SearchCategory,
-  SearchRestaurant,
   SearchResult,
 } from 'model';
 
@@ -25,7 +24,7 @@ interface SearchParams {
   countryCode: string;
 }
 
-/** Payload of the four callables that search on a free-text term. */
+/** Payload of the callables that search on a free-text term. */
 interface SearchTextRequest {
   searchText: string;
 }
@@ -35,9 +34,9 @@ interface SearchCountryRequest {
   countryCode: string;
 }
 
-/** The account behind a result. A restaurant has none. */
+/** The account behind a result. An anonymised Bite has none. */
 const authorOf = (result: SearchResult): string | undefined =>
-  result.category === 'restaurant' ? undefined : result.value.userId;
+  result.value.userId;
 
 @Injectable({ providedIn: 'root' })
 export class SearchDataAccessService {
@@ -97,36 +96,14 @@ export class SearchDataAccessService {
         return result.data.map((value) => ({ category: 'user', value }));
       }
 
-      if (params.category === 'bite') {
-        const result = await FirebaseFunctions.callByName<
-          SearchTextRequest,
-          SearchBite[]
-        >({
-          name: 'searchBites',
-          data: { searchText: params.searchText },
-        });
-        return result.data.map((value) => ({ category: 'bite', value }));
-      }
-
-      if (params.category === 'city') {
-        const result = await FirebaseFunctions.callByName<
-          SearchTextRequest,
-          SearchBite[]
-        >({
-          name: 'searchBitesByCity',
-          data: { searchText: params.searchText },
-        });
-        return result.data.map((value) => ({ category: 'city', value }));
-      }
-
       const result = await FirebaseFunctions.callByName<
         SearchTextRequest,
-        SearchRestaurant[]
+        SearchBite[]
       >({
-        name: 'searchRestaurants',
+        name: 'searchBites',
         data: { searchText: params.searchText },
       });
-      return result.data.map((value) => ({ category: 'restaurant', value }));
+      return result.data.map((value) => ({ category: 'bite', value }));
     } catch {
       return [];
     }

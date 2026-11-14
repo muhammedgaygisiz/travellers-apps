@@ -67,31 +67,6 @@ export class SearchService {
       return;
     }
 
-    if (
-      result.category === 'bite' ||
-      result.category === 'city' ||
-      result.category === 'country'
-    ) {
-      void this.navController.navigateForward([PATH.BITE, result.value.id]);
-      return;
-    }
-
-    if (result.value.restaurantId) {
-      void this.navController.navigateForward([
-        PATH.BITE,
-        result.value.biteId,
-        PATH.RESTAURANT,
-        result.value.restaurantId,
-      ]);
-      return;
-    }
-
-    void this.navController.navigateForward([
-      PATH.BITE,
-      result.value.biteId,
-      PATH.RESTAURANT,
-      PATH.PLACE,
-      encodeURIComponent(result.value.place ?? result.value.name),
-    ]);
+    void this.navController.navigateForward([PATH.BITE, result.value.id]);
   }
 }

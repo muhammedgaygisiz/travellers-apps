@@ -1,8 +1,12 @@
 import type { PublicUser } from './public-user';
 import type { Geopoint } from './geopoint';
 
-export type SearchCategory =
-  'user' | 'bite' | 'restaurant' | 'city' | 'country';
+/**
+ * Three categories since GitHub issue #2026: Bites search reads a Bite's name,
+ * restaurant, city, tags and description, so the former Restaurant and City
+ * categories folded into it. Country keeps its own exact-code picker search.
+ */
+export type SearchCategory = 'user' | 'bite' | 'country';
 
 export interface SearchBite {
   id: string;
@@ -19,20 +23,7 @@ export interface SearchBite {
   userId?: string;
 }
 
-export interface SearchRestaurant {
-  id: string;
-  name: string;
-  biteId: string;
-  restaurantId?: string;
-  place?: string;
-  image?: string;
-  imagePath?: string;
-  position?: Geopoint;
-}
-
 export type SearchResult =
   | { category: 'user'; value: PublicUser }
   | { category: 'bite'; value: SearchBite }
-  | { category: 'restaurant'; value: SearchRestaurant }
-  | { category: 'city'; value: SearchBite }
   | { category: 'country'; value: SearchBite };

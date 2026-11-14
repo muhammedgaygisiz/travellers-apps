@@ -1,6 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 
-type SearchCategory = 'Bite' | 'Restaurant' | 'City' | 'Country' | 'User';
+type SearchCategory = 'Bite' | 'Country' | 'User';
 
 /**
  * Page object for the search screen (route: /search).
@@ -38,22 +38,30 @@ export class SearchPage {
   }
 
   async expectResult(title: string): Promise<void> {
-    // Match the result title (<h2> → ARIA heading) specifically. A custom
-    // restaurant's subtitle can equal its name, so a plain getByText would
-    // resolve to both the title and subtitle and trip Playwright strict mode.
+    // Match the result title (<h2> → ARIA heading) specifically. A Bite's
+    // subtitle carries its restaurant, so a plain getByText for a restaurant
+    // name would resolve to every Bite there and trip Playwright strict mode.
     await expect(
       this.results.getByRole('heading', { name: title, exact: true }),
     ).toBeVisible();
   }
 
+  /**
+   * A result row on a phone, or a Bite card at desktop widths (GitHub issue
+   * #1791). Since #2026 every Bite category renders cards there, so Bites
+   * search results are cards in the desktop e2e viewport.
+   */
   result(title: string): Locator {
-    return this.results.locator('ion-item').filter({
+    return this.results.locator('ion-item, bt-bite').filter({
       has: this.page.getByRole('heading', { name: title, exact: true }),
     });
   }
 
+  /** Clicks the title, which opens the result in both the row and the card. */
   async openResult(title: string): Promise<void> {
-    await this.result(title).click();
+    await this.result(title)
+      .getByRole('heading', { name: title, exact: true })
+      .click();
   }
 
   async expectEmpty(): Promise<void> {

@@ -3,15 +3,16 @@
 ## Status
 
 **Level:** L1
-Supported today. Search across accounts, Bites and restaurants ships, with category separation,
-city and country search, the list/map switch, and infinite-scroll paging. What is specified and
+Supported today. Search ships in three categories - Users, Bites and Country - with the list/map
+switch and infinite-scroll paging. Bites search matches a Bite's name, restaurant, city, tags and
+description ([#2026]). What is specified and
 not built is the Pro gating of backend search; the broader fuzzy, typo-tolerant search is a
 separate page, [UC - Complete Universal Search](uc-complete-universal-search.md).
 
 ## Goal
 
-Anyone can find a person, a Bite or a restaurant by name, and can narrow to a city or a country
-without knowing where they are standing. This page owns what search matches, how results are
+Anyone can find a person by name, a Bite by any of the words that describe it - including its
+restaurant and its city - and every Bite of a country, without knowing where they are standing. This page owns what search matches, how results are
 categorised and paged, and the two views they can be read in.
 
 ## Actors
@@ -26,22 +27,23 @@ categorised and paged, and the two views they can be read in.
 
 - User opens search.
 - User enters search text. Free-text search starts at two characters, in every language: a kanji name is often two characters long, and a higher minimum made those names unsearchable ([#1882]). `searchPlaces` follows the same minimum.
-- Matching folds spellings a person treats as the same word, on the query and the stored value alike: hiragana, katakana and half-width kana, and full-width and half-width Latin. `らーめん`, `ラーメン` and `ﾗｰﾒﾝ` find each other. Kanji spellings do not, so `拉麺` does not match `ラーメン`, because that takes a dictionary rather than a character mapping. This is `foldSearchText` in `shared/utils/fold-search-text.ts`, used by `searchUsers`, `searchBites` and `searchRestaurants`.
-- Search returns users, Bites, and restaurants.
-- Search categories help separate result types.
-- User can search Bites by city when enriched location data exists.
+- Matching folds spellings a person treats as the same word, on the query and the stored value alike: hiragana, katakana and half-width kana, and full-width and half-width Latin. `らーめん`, `ラーメン` and `ﾗｰﾒﾝ` find each other. Kanji spellings do not, so `拉麺` does not match `ラーメン`, because that takes a dictionary rather than a character mapping. This is `foldSearchText` in `shared/utils/fold-search-text.ts`, used by `searchUsers` and `searchBites`.
+- Search has three categories: Users, Bites and Country. Each returns one result type, and none of them returns restaurants.
+- Bites search matches the search text against the Bite's `name`, `place` (the restaurant as written on the Bite), `city`, each of its `tags`, and its `description`. It does not match `country` text: the Country category is that search. Visibility and blocked accounts are part of the match, before the 20-result cap ([#2026]).
+- A Bite matches by city only once its address is enriched. `city` is the reverse geocode's name in Google's default language, so `Köln` does not find a Bite stored as `Cologne`.
+- A restaurant is reached through one of its Bites: searching its name returns its Bites, and the Bite page links to the restaurant. Search no longer opens a restaurant page directly ([#2026]).
 - User can search Bites by country. Country is picked from a searchable list of every ISO 3166-1 alpha-2 country instead of typed, so the category swaps the free-text searchbar for a picker. Names are localized through `Intl.DisplayNames`, never through Transloco. The query is an exact match on the Bite's persisted `countryCode`.
 - The result list pages in through infinite scroll, the same window the home feed and profile use. A country returns every one of its Bites in a single response, so rendering the whole set at once would request every result image at once. The map view still plots the complete result set.
-- Bite, restaurant, city, and country search results can switch between list and map views.
+- Bites and Country results can switch between list and map views.
 - The map view runs the page full width, so on desktop the map is not held to the 720px reading column the result list uses. The controls above it keep that column.
-- Bite markers carry their rating, the same marker the Bite gets on every other map. An unrated Bite keeps the plain pin, and restaurants have no rating of their own.
+- Bite markers carry their rating, the same marker the Bite gets on every other map. An unrated Bite keeps the plain pin.
 - `searchUsers` and `searchBites` have a second caller. The admin app's Bite lookup calls `searchBites` directly, and its account search deliberately does **not** call `searchUsers` — it filters the admin-only `listUsersWithRoles` instead, so an operator sees private profiles without the consumer-facing public-flag filter being relaxed for anyone. Neither the ranking nor the matching of these callables may be changed for an operator's benefit; see [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md) (issue [#1476]).
 - Backend search becomes a Pro capability through [epic-1122][#1122]. A free user keeps client-side search and filtering inside the 15 km result set they already loaded. See [Monetization](../product/monetization.md).
 
 ## MVP Classification
 
-**[MVP]** - search across accounts, Bites and restaurants, the category separation, city and
-country search, and the list/map switch. Finding a Bite is half of the discovery loop.
+**[MVP]** - search across accounts and Bites, the three categories, Bites search over name,
+restaurant, city, tags and description, country search, and the list/map switch. Finding a Bite is half of the discovery loop.
 
 **[Secondary]** - the Pro gating of backend search, specified under [epic-1122][#1122] and not built.
 A free user would keep client-side search inside the result set already loaded. See
@@ -59,10 +61,9 @@ location permission that decides which Bites are loaded in the first place belon
 - `search`
 - `searchUsers`
 - `searchBites`
-- `searchBitesByCity`
 - `searchBitesByCountry`
-- `searchRestaurants`
-- Playwright Bite and Restaurant search E2E smoke coverage.
+- Playwright Bite search E2E smoke coverage, including a match on the restaurant name.
+- `searchBitesByCity` and `searchRestaurants` stay deployed for app builds released before [#2026], which still call them. No current client does.
 
 ## Related GitHub Scope
 
@@ -73,6 +74,7 @@ location permission that decides which Bites are loaded in the first place belon
 - Issue [#722] adds country search.
 - Issue [#1476] reuses `searchBites` for the admin app's operator lookup without changing it.
 - Issue [#1882] lowers the minimum to two characters and folds kana and width.
+- Issue [#2026] folds the Restaurant and City categories into Bites search.
 
 ## Related Domains
 
@@ -101,3 +103,4 @@ location permission that decides which Bites are loaded in the first place belon
 [#1122]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1122
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882
+[#2026]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2026

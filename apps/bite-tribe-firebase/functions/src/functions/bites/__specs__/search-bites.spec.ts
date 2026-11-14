@@ -167,6 +167,55 @@ describe('searchBites', () => {
     expect(result.map((bite) => bite.id)).toEqual(['match']);
   });
 
+  /** GitHub issue #2026. */
+  describe('fields it matches', () => {
+    const search = (searchText: string): Promise<string[]> =>
+      handler({ auth: { uid: 'viewer' }, data: { searchText } }).then(
+        (result) => result.map((bite) => bite.id),
+      );
+
+    it.each([
+      ['the dish name', { name: 'Currywurst' }, 'currywurst'],
+      ['the restaurant name', { place: 'Zum Schiffchen' }, 'schiffchen'],
+      ['the city', { city: 'Düsseldorf' }, 'düsseldorf'],
+      ['a tag', { tags: ['altbier'] }, 'ALTBIER'],
+      ['the description', { description: 'Crispy and spicy' }, 'spicy'],
+    ])('finds a Bite by %s', async (_, fields, searchText) => {
+      mockBites([
+        biteDoc('match', { name: 'Dish', place: 'Somewhere', ...fields }),
+        biteDoc('other', { name: 'Dish', place: 'Somewhere' }),
+      ]);
+
+      await expect(search(searchText)).resolves.toEqual(['match']);
+    });
+
+    it('does not match the country name', async () => {
+      mockBites([
+        biteDoc('german', {
+          name: 'Dish',
+          place: 'Somewhere',
+          country: 'Germany',
+          countryCode: 'DE',
+        }),
+      ]);
+
+      await expect(search('germany')).resolves.toEqual([]);
+    });
+
+    it('ignores a field that is not a string', async () => {
+      mockBites([
+        biteDoc('odd', {
+          name: 'Dish',
+          place: 'Somewhere',
+          city: 42,
+          description: null,
+        }),
+      ]);
+
+      await expect(search('42')).resolves.toEqual([]);
+    });
+  });
+
   it('does not match a kanji spelling from its reading', async () => {
     mockBites([biteDoc('kanji', { name: '拉麺' })]);
 

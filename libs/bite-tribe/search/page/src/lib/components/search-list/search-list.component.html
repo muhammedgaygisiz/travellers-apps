@@ -54,9 +54,6 @@
           @if (getResultSubtitle(result); as subtitle) {
             <p>{{ subtitle }}</p>
           }
-          @if (isUnverifiedRestaurant(result)) {
-            <p>{{ 'not-verified-restaurant' | transloco }}</p>
-          }
         </ion-label>
       </ion-item>
     }

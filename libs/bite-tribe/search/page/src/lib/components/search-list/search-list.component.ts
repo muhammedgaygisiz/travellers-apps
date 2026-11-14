@@ -23,7 +23,7 @@ import {
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BiteComponent } from 'bite-tribe-common/bite';
-import type { Bite, SearchBite, SearchRestaurant, SearchResult } from 'model';
+import type { Bite, SearchBite, SearchResult } from 'model';
 
 /** Matches the home feed and profile windows, so every list pages alike. */
 const PAGE_SIZE = 50;
@@ -36,11 +36,7 @@ const PAGE_SIZE = 50;
 const DESKTOP_MEDIA_QUERY = '(width >= 1024px)';
 
 /** The categories whose results are Bites, and so can render as Bite cards. */
-const BITE_CATEGORIES = new Set<SearchResult['category']>([
-  'bite',
-  'city',
-  'country',
-]);
+const BITE_CATEGORIES = new Set<SearchResult['category']>(['bite', 'country']);
 
 interface BiteCard {
   result: SearchResult;
@@ -97,7 +93,7 @@ export class SearchListComponent {
   /**
    * Bite results render as the home feed's cards at desktop widths, where the
    * avatar list would be a narrow strip in a wide column. Phones keep the list,
-   * and so do User and Restaurant results, which are not Bites. A search
+   * and so do User results, which are not Bites. A search
    * returns one category, so the first result decides for the whole set.
    * See GitHub issue #1791.
    */
@@ -154,15 +150,7 @@ export class SearchListComponent {
       return result.value.fullName;
     }
 
-    if (
-      result.category === 'bite' ||
-      result.category === 'city' ||
-      result.category === 'country'
-    ) {
-      return this.getBiteSubtitle(result.value);
-    }
-
-    return this.getRestaurantSubtitle(result.value);
+    return this.getBiteSubtitle(result.value);
   }
 
   getResultImage(result: SearchResult): string | undefined {
@@ -178,19 +166,11 @@ export class SearchListComponent {
       return 'person-circle-outline';
     }
 
-    if (result.category === 'city' || result.category === 'country') {
+    if (result.category === 'country') {
       return 'location-outline';
     }
 
-    if (result.category === 'bite') {
-      return 'restaurant-outline';
-    }
-
-    return 'storefront-outline';
-  }
-
-  isUnverifiedRestaurant(result: SearchResult): boolean {
-    return result.category === 'restaurant' && !result.value.restaurantId;
+    return 'restaurant-outline';
   }
 
   /**
@@ -224,12 +204,6 @@ export class SearchListComponent {
     }
 
     return bite.place || bite.description;
-  }
-
-  private getRestaurantSubtitle(
-    restaurant: SearchRestaurant,
-  ): string | undefined {
-    return restaurant.place;
   }
 }
 

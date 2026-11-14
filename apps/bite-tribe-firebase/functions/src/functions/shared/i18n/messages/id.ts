@@ -44,6 +44,14 @@ export const id: NotificationMessages = {
   'leaderboard.climbed':
     'Kamu naik ke peringkat {{rank}} di papan peringkat! 🎉',
   'leaderboard.dropped': 'Kamu turun ke peringkat {{rank}} di papan peringkat.',
+  'leaderboard.mostLikedEnteredTop':
+    'Bite {{dish}} kamu masuk {{limit}} besar paling disukai di #{{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Bite {{dish}} kamu keluar dari {{limit}} besar paling disukai.',
+  'leaderboard.mostLikedClimbed':
+    'Bite {{dish}} kamu naik ke #{{rank}} di daftar paling disukai! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Bite {{dish}} kamu turun ke #{{rank}} di daftar paling disukai.',
   'countryBadge.title': '🎉 Lencana negara baru!',
   'countryBadge.body': 'Selamat! Kamu membuka lencana {{country}}',
   'countryBadge.followerTitle': '🌍 Lencana negara baru',

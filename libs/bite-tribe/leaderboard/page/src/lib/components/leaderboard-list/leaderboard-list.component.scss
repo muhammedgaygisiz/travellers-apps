@@ -92,8 +92,26 @@
     border-radius: 999px;
   }
 
-  .bite-count {
+  .bite-count,
+  .like-count {
     white-space: nowrap;
+  }
+
+  .bite-thumbnail {
+    --border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+
+    background: var(--ion-color-step-100, var(--ion-color-light));
+    color: var(--ion-color-medium);
+
+    img {
+      object-fit: cover;
+    }
   }
 
   .detail-placeholder {

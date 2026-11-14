@@ -11,6 +11,10 @@ import {
   rebuildWeeklyLeaderboard,
   weekOf,
 } from '../shared/utils/weekly-leaderboard';
+import {
+  LEADERBOARD_MOST_LIKED_DOC,
+  rebuildMostLiked,
+} from '../shared/utils/weekly-most-liked';
 import { removeCountryCodeFromUser } from '../shared/utils/user-country-codes';
 
 const db = getFirestore();
@@ -40,6 +44,32 @@ const rebuildWeeklyIfCurrent = async (
     await rebuildWeeklyLeaderboard(db);
   } catch (error) {
     logger.warn('failed to rebuild the weekly leaderboard', {
+      biteId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+/**
+ * A deleted Bite leaves the running Most liked board at once rather than at
+ * the next like (issue #2028). Only rebuilt when the board lists it.
+ */
+const dropFromMostLiked = async (biteId: string): Promise<void> => {
+  try {
+    const board = (
+      await db.collection('meta').doc(LEADERBOARD_MOST_LIKED_DOC).get()
+    ).data();
+    const listed =
+      Array.isArray(board?.['bites']) &&
+      (board['bites'] as { biteId?: string }[]).some(
+        (bite) => bite?.biteId === biteId,
+      );
+
+    if (listed) {
+      await rebuildMostLiked(db);
+    }
+  } catch (error) {
+    logger.warn('failed to drop a deleted Bite from the most-liked board', {
       biteId,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -149,5 +179,6 @@ export const decrementBiteCountOnBiteDelete = onDocumentDeleted(
 
     await rebuildLeaderboard(db);
     await rebuildWeeklyIfCurrent(biteId, bite.createdAtTimestamp);
+    await dropFromMostLiked(biteId);
   },
 );

@@ -29,6 +29,14 @@ computed from; what a notification about one of them says, and to whom, belongs 
   **This week / Last week** switch; **Last week** shows the previous week's final standings,
   frozen at the reset and dated. **All time** keeps the ranking by every Bite a user created.
   See GitHub issue [#2027].
+- The **Most liked** tab ranks Bites, not users, by the likes they received this week - any
+  Bite, however old - and has the same week switch, countdown and frozen last week. A row shows
+  the photo, the dish, its creator and the like count, and opens the Bite. One creator may hold
+  several places. A like counts for the week the backend saw it in (the like trigger), never
+  the `createdAt` the client wrote; removing it takes it off that week only while the week is
+  still running. A deleted Bite, one whose photo is not uploaded, and one whose creator is
+  private or gone are left out. There is no all-time most-liked ranking. See GitHub issue
+  [#2028].
 - Backend functions maintain Bite counts. The weekly board is built from the Bites whose
   `createdAtTimestamp` falls in the week, so it needs no per-user weekly counter and a deleted
   Bite drops out of its week by itself. A tie is decided by who reached the count first.
@@ -40,7 +48,9 @@ computed from; what a notification about one of them says, and to whom, belongs 
 - Leaderboard rank and profile contribution display are persisted.
 - Profile badges show lightweight contribution recognition.
 - Ranking-change notifications can nudge users when their position changes. They follow the
-  weekly ranking. The first daily run of a week only takes a new baseline: the reset would
+  weekly ranking, and a creator is also told when one of their Bites enters, climbs, falls on
+  or drops out of the Most liked top 10 - one notification per Bite, opening the **Most liked**
+  tab. The first daily run of a week only takes a new baseline: the reset would
   otherwise read as every ranked user dropping out.
 - A first Bite in a new country earns a country badge, which congratulates the
   user and, for a public profile, is announced to their followers.
@@ -80,6 +90,7 @@ them is collected in onboarding.
 - `resyncBiteCounts`
 - `sendDailyLeaderboardNotification`
 - `resetWeeklyLeaderboard`, `rebuildWeeklyLeaderboard`, `freezeLastWeek`
+- `recordLike`, `removeLike`, `rebuildMostLiked`, `freezeMostLikedLastWeek`
 - Profile country badges
 - `notifyOnNewCountryBadge`
 - `celebrateFirstCountry$` in the bite-tribe store's `AppEffect`
@@ -97,6 +108,13 @@ them is collected in onboarding.
   Monday reset), with `loadLeaderboard` taking a `board` of `thisWeek`, `lastWeek` or `allTime`.
   A call without one still gets the all-time ranking as a bare array, so builds from before the
   change keep working.
+- Issue [#2028] added the Most liked board: `/weeklyBiteLikes/{week}_{biteId}` counts each
+  Bite's likes per week and `/likeWeeks/{biteId}_{likerUid}` remembers the week each like was
+  counted in, both server-only; `/meta/leaderboardMostLiked` and
+  `/meta/leaderboardMostLikedLastWeek` hold the two boards, and
+  `/meta/leaderboardMostLikedDaily` the daily notification baseline. `loadLeaderboard` takes
+  `mostLiked` and `mostLikedLastWeek`. The board query needs the `weeklyBiteLikes` (`week`,
+  `likes` descending) composite index.
 - Issue [#954] added the ranking notifications, delivered by pull request [#971].
 - Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in
@@ -138,3 +156,4 @@ them is collected in onboarding.
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
+[#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028

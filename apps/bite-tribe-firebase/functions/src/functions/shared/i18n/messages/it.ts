@@ -46,6 +46,14 @@ export const it: NotificationMessages = {
   'leaderboard.climbed':
     'Hai raggiunto la posizione {{rank}} della classifica! 🎉',
   'leaderboard.dropped': 'Ora sei in posizione {{rank}} della classifica.',
+  'leaderboard.mostLikedEnteredTop':
+    'Il tuo Bite {{dish}} è entrato nella top {{limit}} dei più apprezzati al #{{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Il tuo Bite {{dish}} è uscito dalla top {{limit}} dei più apprezzati.',
+  'leaderboard.mostLikedClimbed':
+    'Il tuo Bite {{dish}} è salito al #{{rank}} dei più apprezzati! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Il tuo Bite {{dish}} è sceso al #{{rank}} dei più apprezzati.',
   'countryBadge.title': '🎉 Nuovo badge Paese!',
   'countryBadge.body': 'Complimenti! Hai sbloccato il badge di {{country}}',
   'countryBadge.followerTitle': '🌍 Nuovo badge Paese',

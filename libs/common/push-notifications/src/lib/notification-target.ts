@@ -81,7 +81,13 @@ export const toNotificationTarget = (
         : undefined;
 
     case 'LEADERBOARD_RANK_CHANGE':
-      return { commands: [PATH.LEADERBOARD] };
+      // A Bite's move on the Most liked board opens that tab (issue #2028).
+      return data['board'] === 'mostLiked'
+        ? {
+            commands: [PATH.LEADERBOARD],
+            extras: { queryParams: { board: 'mostLiked' } },
+          }
+        : { commands: [PATH.LEADERBOARD] };
 
     case 'NEW_COUNTRY_BADGE':
       // The badge lives on the profile of whoever earned it. The same payload

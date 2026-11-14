@@ -42,6 +42,14 @@ export const th: NotificationMessages = {
   'leaderboard.droppedOut': 'คุณหลุดจากท็อป {{limit}} บนกระดานผู้นำ',
   'leaderboard.climbed': 'คุณขยับขึ้นมาอยู่อันดับ {{rank}} บนกระดานผู้นำ! 🎉',
   'leaderboard.dropped': 'คุณตกลงมาอยู่อันดับ {{rank}} บนกระดานผู้นำ',
+  'leaderboard.mostLikedEnteredTop':
+    'Bite {{dish}} ของคุณติดอันดับ {{limit}} ที่ถูกใจมากที่สุดที่อันดับ {{rank}}! 🎉',
+  'leaderboard.mostLikedDroppedOut':
+    'Bite {{dish}} ของคุณหลุดจาก {{limit}} อันดับที่ถูกใจมากที่สุด',
+  'leaderboard.mostLikedClimbed':
+    'Bite {{dish}} ของคุณขึ้นไปอยู่อันดับ {{rank}} ในรายการที่ถูกใจมากที่สุด! 🎉',
+  'leaderboard.mostLikedDropped':
+    'Bite {{dish}} ของคุณตกไปอยู่อันดับ {{rank}} ในรายการที่ถูกใจมากที่สุด',
   'countryBadge.title': '🎉 เหรียญตราประเทศใหม่!',
   'countryBadge.body': 'ยินดีด้วย! คุณปลดล็อกเหรียญตรา {{country}} แล้ว',
   'countryBadge.followerTitle': '🌍 เหรียญตราประเทศใหม่',

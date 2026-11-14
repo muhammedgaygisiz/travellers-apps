@@ -225,4 +225,91 @@ test.describe('Use gamification signals', () => {
       }
     }
   });
+
+  test('ranks Bites by this week’s likes on the Most liked tab and opens one', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+
+    const runId = Date.now();
+    const author: RankedUser = {
+      id: `liked-author-${runId}`,
+      displayName: `Liked Author ${runId}`,
+      city: 'Sarajevo',
+      biteCount: 1,
+    };
+    const biteId = `liked-bite-${runId}`;
+    const dish = `Most Liked Ćevapi ${runId}`;
+    // More likes than any Bite other specs like in the shared emulator.
+    const likers = Array.from({ length: 6 }, (_, i) => `liker-${i}-${runId}`);
+
+    await seedRankedUser(page, author);
+    await seedFirestoreDocument(page, `bites/${biteId}`, {
+      userId: { stringValue: author.id },
+      name: { stringValue: dish },
+      place: { stringValue: `Liked Kitchen ${runId}` },
+      price: { stringValue: '8.00' },
+      currency: { stringValue: 'BAM' },
+      imageStatus: { stringValue: 'uploaded' },
+      createdAt: { stringValue: new Date().toISOString() },
+      createdAtTimestamp: { integerValue: String(Date.now()) },
+    });
+
+    for (const liker of likers) {
+      await seedFirestoreDocument(page, `bites/${biteId}/likes/${liker}`, {
+        userId: { stringValue: liker },
+        biteId: { stringValue: biteId },
+        likeType: { stringValue: 'drooling' },
+        createdAt: { stringValue: new Date().toISOString() },
+      });
+    }
+
+    // Each like is counted by the like trigger, which rebuilds the board.
+    await expect
+      .poll(
+        async () => {
+          const board = await getFirestoreDocument(
+            page,
+            'meta/leaderboardMostLiked',
+          );
+          const bites = (board?.['bites'] ?? []) as {
+            biteId: string;
+            likeCount: number;
+          }[];
+
+          return bites.find((bite) => bite.biteId === biteId)?.likeCount;
+        },
+        { timeout: 60_000 },
+      )
+      .toBe(likers.length);
+
+    try {
+      await loginAsTestUser(page);
+      await completeOnboardingIfNeeded(page);
+      await dismissCoachMarks(page);
+
+      const leaderboard = new LeaderboardPage(page);
+      await leaderboard.open();
+      await dismissCoachMarks(page);
+      await leaderboard.showMostLiked();
+
+      await expect(leaderboard.weekEnds).toContainText('Week ends in');
+
+      const row = leaderboard.biteRowFor(dish);
+      await expect(row.locator('.like-count')).toHaveText(
+        `${likers.length} likes`,
+      );
+      await expect(row.locator('ion-label p')).toHaveText(
+        `by ${author.displayName}`,
+      );
+
+      await row.click();
+      await page.waitForURL(`**/bite/${biteId}`);
+    } finally {
+      for (const liker of likers) {
+        await deleteFirestoreDocument(page, `bites/${biteId}/likes/${liker}`);
+      }
+      await deleteFirestoreDocument(page, `bites/${biteId}`);
+    }
+  });
 });

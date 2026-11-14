@@ -10,14 +10,29 @@ export type LeaderboardUser = Pick<
 
 /**
  * The rankings the leaderboard shows (issue #2027): the running week (the
- * default), last week's frozen final standings, and all time.
+ * default), last week's frozen final standings, and all time. `mostLiked`
+ * and `mostLikedLastWeek` rank Bites by the likes they received in the
+ * running and the previous week (issue #2028).
  */
-export type LeaderboardBoard = 'thisWeek' | 'lastWeek' | 'allTime';
+export type LeaderboardBoard =
+  'thisWeek' | 'lastWeek' | 'allTime' | 'mostLiked' | 'mostLikedLastWeek';
+
+/** One Bite on a Most liked board. */
+export interface MostLikedBite {
+  biteId: string;
+  name: string;
+  imageUrl: string;
+  userId: string;
+  displayName: string;
+  likeCount: number;
+}
 
 /** One ranking as `loadLeaderboard` returns it for a named board. */
 export interface LeaderboardRanking {
   board: LeaderboardBoard;
   users: LeaderboardUser[];
+  /** The ranked Bites; only on the two Most liked boards. */
+  bites?: MostLikedBite[];
   /** The week's bounds in epoch ms; absent on the all-time board. */
   start?: number;
   end?: number;

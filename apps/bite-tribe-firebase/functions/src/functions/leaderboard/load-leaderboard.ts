@@ -11,6 +11,12 @@ import {
   readWeeklyLeaderboard,
   WeeklyLeaderboard,
 } from '../shared/utils/weekly-leaderboard';
+import {
+  freezeMostLikedLastWeek,
+  MostLikedBite,
+  MostLikedBoard,
+  readMostLiked,
+} from '../shared/utils/weekly-most-liked';
 import { requireMember } from '../shared/roles';
 
 const db = getFirestore();
@@ -18,9 +24,12 @@ const db = getFirestore();
 /**
  * Which ranking the app asks for (issue #2027). `thisWeek` is the running
  * week, `lastWeek` the frozen final standings of the week before, and
- * `allTime` the ranking by every Bite a user created.
+ * `allTime` the ranking by every Bite a user created. `mostLiked` and
+ * `mostLikedLastWeek` rank Bites by the likes they received in the running
+ * and the previous week (issue #2028).
  */
-export type LeaderboardBoard = 'thisWeek' | 'lastWeek' | 'allTime';
+export type LeaderboardBoard =
+  'thisWeek' | 'lastWeek' | 'allTime' | 'mostLiked' | 'mostLikedLastWeek';
 
 export interface LoadLeaderboardRequest {
   board?: LeaderboardBoard;
@@ -30,12 +39,20 @@ export interface LoadLeaderboardRequest {
 export interface LeaderboardResponse {
   board: LeaderboardBoard;
   users: LeaderboardUser[];
+  /** The ranked Bites; only on the two Most liked boards. */
+  bites?: MostLikedBite[];
   /** The week's bounds, epoch ms; absent on the all-time board. */
   start?: number;
   end?: number;
 }
 
-const BOARDS: readonly LeaderboardBoard[] = ['thisWeek', 'lastWeek', 'allTime'];
+const BOARDS: readonly LeaderboardBoard[] = [
+  'thisWeek',
+  'lastWeek',
+  'allTime',
+  'mostLiked',
+  'mostLikedLastWeek',
+];
 
 const readAllTime = async (): Promise<LeaderboardUser[]> => {
   // Served from meta/leaderboard instead of querying the whole users
@@ -59,6 +76,17 @@ const fromWeek = (
 ): LeaderboardResponse => ({
   board,
   users: week.users,
+  start: week.start,
+  end: week.end,
+});
+
+const fromMostLiked = (
+  board: LeaderboardBoard,
+  week: MostLikedBoard,
+): LeaderboardResponse => ({
+  board,
+  users: [],
+  bites: week.bites,
   start: week.start,
   end: week.end,
 });
@@ -91,6 +119,14 @@ export const loadLeaderboard = onAppCheck<LoadLeaderboardRequest | undefined>(
 
     if (requested === 'allTime') {
       return { board: requested, users: await readAllTime() };
+    }
+
+    if (requested === 'mostLiked') {
+      return fromMostLiked(requested, await readMostLiked(db));
+    }
+
+    if (requested === 'mostLikedLastWeek') {
+      return fromMostLiked(requested, await freezeMostLikedLastWeek(db));
     }
 
     if (requested === 'lastWeek') {

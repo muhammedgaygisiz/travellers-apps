@@ -12,6 +12,11 @@ import {
   LEADERBOARD_LAST_WEEK_DOC,
   LEADERBOARD_WEEKLY_DOC,
 } from '../shared/utils/weekly-leaderboard';
+import {
+  LEADERBOARD_MOST_LIKED_DOC,
+  LEADERBOARD_MOST_LIKED_LAST_WEEK_DOC,
+  renameInMostLiked,
+} from '../shared/utils/weekly-most-liked';
 import { USERS_COLLECTION } from './display-name-utils';
 
 const REVIEWS_COLLECTION = 'reviews';
@@ -117,7 +122,9 @@ const renameInCollection = async (
  *
  * - `meta/leaderboard`, `meta/leaderboardDaily`, `meta/leaderboardWeekly` and
  *   `meta/leaderboardLastWeek`, the persisted rankings (the last two since
- *   issue #2027).
+ *   issue #2027), and `meta/leaderboardMostLiked` and
+ *   `meta/leaderboardMostLikedLastWeek`, whose entries name each Bite's
+ *   creator (issue #2028).
  * - `reviews.author`, denormalised at write time. The app resolves the name
  *   through `authorId` on read, but the stored field is readable by any member.
  * - `biteTrails.ownerName`, rendered as `@name` on every Bite Trail card.
@@ -138,6 +145,8 @@ export const syncDisplayNameCopies = async (
     leaderboardDaily,
     leaderboardWeekly,
     leaderboardLastWeek,
+    mostLiked,
+    mostLikedLastWeek,
     reviews,
     biteTrails,
   ] = await Promise.all([
@@ -147,6 +156,13 @@ export const syncDisplayNameCopies = async (
     renameInLeaderboardSnapshot(
       db,
       LEADERBOARD_LAST_WEEK_DOC,
+      uid,
+      displayName,
+    ),
+    renameInMostLiked(db, LEADERBOARD_MOST_LIKED_DOC, uid, displayName),
+    renameInMostLiked(
+      db,
+      LEADERBOARD_MOST_LIKED_LAST_WEEK_DOC,
       uid,
       displayName,
     ),
@@ -174,6 +190,8 @@ export const syncDisplayNameCopies = async (
     leaderboardDaily,
     leaderboardWeekly,
     leaderboardLastWeek,
+    mostLiked,
+    mostLikedLastWeek,
     reviews,
     biteTrails,
   });

@@ -21,6 +21,12 @@
         {{ 'leaderboard-tab-this-week' | transloco }}
       </ion-segment-button>
       <ion-segment-button
+        value="mostLiked"
+        data-testid="leaderboard-tab-most-liked"
+      >
+        {{ 'leaderboard-tab-most-liked' | transloco }}
+      </ion-segment-button>
+      <ion-segment-button
         value="allTime"
         data-testid="leaderboard-tab-all-time"
       >
@@ -28,7 +34,7 @@
       </ion-segment-button>
     </ion-segment>
 
-    @if (tab() === 'week') {
+    @if (weekBoards(); as weeks) {
       <ion-segment
         class="leaderboard-week-switch"
         [value]="board()"
@@ -36,13 +42,13 @@
         (ionChange)="selectWeek($any($event.detail.value))"
       >
         <ion-segment-button
-          value="thisWeek"
+          [value]="weeks.current"
           data-testid="leaderboard-week-this"
         >
           {{ 'leaderboard-tab-this-week' | transloco }}
         </ion-segment-button>
         <ion-segment-button
-          value="lastWeek"
+          [value]="weeks.last"
           data-testid="leaderboard-week-last"
         >
           {{ 'leaderboard-last-week' | transloco }}
@@ -66,12 +72,50 @@
       <div class="spinner-container">
         <ion-spinner color="primary" />
       </div>
-    } @else if (rankedUsers().length === 0) {
+    } @else if (isEmpty()) {
       <div class="empty-container">
         <ion-label data-testid="leaderboard-empty">{{
           emptyKey() | transloco
         }}</ion-label>
       </div>
+    } @else if (ranksBites()) {
+      <!-- Bites, not users: one creator may hold several places (#2028). -->
+      <ion-list data-testid="leaderboard-bites">
+        @for (bite of rankedBites(); track bite.biteId) {
+          <ion-item
+            class="ion-margin-vertical leaderboard-item leaderboard-bite"
+            button
+            [detail]="true"
+            (click)="biteClick.emit(bite)"
+          >
+            <ion-badge slot="start" color="primary" class="rank-badge">
+              {{ $index + 1 }}
+            </ion-badge>
+            <ion-thumbnail slot="start" class="bite-thumbnail">
+              @if (hasBiteImage(bite)) {
+                <img
+                  [src]="bite.imageUrl"
+                  [alt]="bite.name"
+                  (error)="onBiteImageError(bite.biteId)"
+                />
+              } @else {
+                <ion-icon name="image-outline" aria-hidden="true" />
+              }
+            </ion-thumbnail>
+            <ion-label>
+              <h2>{{ bite.name }}</h2>
+              <p>
+                {{ 'leaderboard-by' | transloco: { name: bite.displayName } }}
+              </p>
+            </ion-label>
+            <ion-badge slot="end" color="secondary" class="like-count">
+              {{
+                'leaderboard-like-count' | transloco: { count: bite.likeCount }
+              }}
+            </ion-badge>
+          </ion-item>
+        }
+      </ion-list>
     } @else {
       <ion-list>
         @for (user of rankedUsers(); track user.userId) {

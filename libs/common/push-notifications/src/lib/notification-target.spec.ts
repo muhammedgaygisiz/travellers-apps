@@ -77,6 +77,18 @@ describe(toNotificationTarget.name, () => {
     ).toEqual({ commands: ['leaderboard'] });
   });
 
+  it('opens the Most liked tab for a Bite that moved on it', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'LEADERBOARD_RANK_CHANGE', board: 'mostLiked', biteId: 'b-1' },
+        RECIPIENT,
+      ),
+    ).toEqual({
+      commands: ['leaderboard'],
+      extras: { queryParams: { board: 'mostLiked' } },
+    });
+  });
+
   it('targets the achiever profile for a follower of a country badge', () => {
     expect(
       toNotificationTarget(

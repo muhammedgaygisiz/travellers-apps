@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /* The Bite lookup's 1:2 split, for the same reason: a list to scan and a Bite to read. */
   .bite-reports {
     align-items: flex-start;

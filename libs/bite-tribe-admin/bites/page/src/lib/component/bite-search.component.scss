@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /*
    * The same 1:2 split as user management, and for the same reason: the results
    * are a column to scan and the selected Bite is the thing being read. Written

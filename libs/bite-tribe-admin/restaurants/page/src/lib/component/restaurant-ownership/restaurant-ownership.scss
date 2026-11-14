@@ -1,4 +1,8 @@
+@use 'selected-row';
+
 :host {
+  @include selected-row.selected-row;
+
   /*
    * The 1:2 split user management uses, written the same way and for the same
    * reason: Ionic ships `.ion-flex-1` but no `.ion-flex-2`, so the business

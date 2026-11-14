@@ -34,8 +34,9 @@
                 @for (page of pages(); track page.city) {
                   <ion-item
                     [button]="true"
-                    [color]="
-                      page.city === current()?.city ? 'light' : undefined
+                    [class.selected-row]="page.city === current()?.city"
+                    [attr.aria-current]="
+                      page.city === current()?.city ? 'true' : null
                     "
                     (click)="openPage.emit(page)"
                   >

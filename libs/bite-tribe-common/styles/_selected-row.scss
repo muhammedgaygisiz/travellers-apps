@@ -1,0 +1,20 @@
+/*
+ * The selected row of a list: the open entry in a master/detail screen.
+ *
+ * A tint of the primary colour rather than Ionic's `light` colour, which is a
+ * fixed near-white and turns into a glaring bar in dark mode. The leading bar
+ * marks the selection without relying on the tint alone; the template adds
+ * `aria-current` so the state is not visual only.
+ *
+ * Usage: `@use 'selected-row';` and `@include selected-row.selected-row;`
+ * inside the component's `:host`, then `[class.selected-row]` on the item.
+ */
+@mixin selected-row {
+  ion-item.selected-row {
+    --background: rgba(var(--ion-color-primary-rgb), 0.16);
+
+    &::part(native) {
+      box-shadow: inset 4px 0 0 var(--ion-color-primary);
+    }
+  }
+}

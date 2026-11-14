@@ -3,8 +3,9 @@
 ## Status
 
 **Level:** L1
-Supported today. The leaderboard and its persisted `/meta/leaderboard` document, the bite counts
-behind it, the daily ranking notification and the country badges all ship. What is still ahead
+Supported today. The leaderboard - a weekly ranking that resets every Monday 00:00 UTC, last
+week's frozen final standings, and the all-time ranking - with its persisted `/meta` documents,
+the bite counts behind it, the daily ranking notification and the country badges all ship. What is still ahead
 is BiteTrail gamification, which is [UC - Add BiteTrail Gamification](uc-add-bitetrail-gamification.md)'s rather than this
 page's.
 
@@ -22,12 +23,25 @@ computed from; what a notification about one of them says, and to whom, belongs 
 
 ## Flow
 
-- User opens the leaderboard.
-- Backend functions maintain Bite counts.
+- User opens the leaderboard. It opens on **This week**: the public users ranked by the Bites
+  they created since Monday 00:00 UTC, the same moment for everyone, so a new user can reach
+  the top in their first week. A countdown names when the week ends. The week tab has a
+  **This week / Last week** switch; **Last week** shows the previous week's final standings,
+  frozen at the reset and dated. **All time** keeps the ranking by every Bite a user created.
+  See GitHub issue [#2027].
+- Backend functions maintain Bite counts. The weekly board is built from the Bites whose
+  `createdAtTimestamp` falls in the week, so it needs no per-user weekly counter and a deleted
+  Bite drops out of its week by itself. A tie is decided by who reached the count first.
+- `resetWeeklyLeaderboard` runs every Monday 00:00 UTC: it freezes the week that ended into
+  `/meta/leaderboardLastWeek`, which nothing rebuilds afterwards, and starts the new week empty.
+  A read of a week that has not been reset or frozen yet does it on the spot, so the board never
+  shows last week as this week.
 - Leaderboard displays users by contribution signals.
 - Leaderboard rank and profile contribution display are persisted.
 - Profile badges show lightweight contribution recognition.
-- Ranking-change notifications can nudge users when their position changes.
+- Ranking-change notifications can nudge users when their position changes. They follow the
+  weekly ranking. The first daily run of a week only takes a new baseline: the reset would
+  otherwise read as every ranked user dropping out.
 - A first Bite in a new country earns a country badge, which congratulates the
   user and, for a public profile, is announced to their followers.
 - The badge is also celebrated in the app while it runs: a short confetti burst
@@ -65,6 +79,7 @@ them is collected in onboarding.
 - `incrementBiteCountOnBiteCreate`
 - `resyncBiteCounts`
 - `sendDailyLeaderboardNotification`
+- `resetWeeklyLeaderboard`, `rebuildWeeklyLeaderboard`, `freezeLastWeek`
 - Profile country badges
 - `notifyOnNewCountryBadge`
 - `celebrateFirstCountry$` in the bite-tribe store's `AppEffect`
@@ -77,6 +92,11 @@ them is collected in onboarding.
   [#1611] removed the email address from those entries: an entry holds the user id, display
   name, photo, city, public flag and Bite count, and a snapshot written by an older build is
   rebuilt the first time it is read.
+- Issue [#2027] made the leaderboard weekly: `/meta/leaderboardWeekly` (the running week, rebuilt
+  on every Bite create or delete in that week) and `/meta/leaderboardLastWeek` (frozen at the
+  Monday reset), with `loadLeaderboard` taking a `board` of `thisWeek`, `lastWeek` or `allTime`.
+  A call without one still gets the all-time ranking as a bare array, so builds from before the
+  change keep working.
 - Issue [#954] added the ranking notifications, delivered by pull request [#971].
 - Issue [#975] added the country badges; [#1212] turned a new badge into a notification for the
   user and their followers, and that contract lives in
@@ -117,3 +137,4 @@ them is collected in onboarding.
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
+[#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027

@@ -23,6 +23,10 @@ import {
   toLeaderboardEntry,
 } from '../shared/utils/leaderboard';
 import {
+  LEADERBOARD_LAST_WEEK_DOC,
+  rebuildWeeklyLeaderboard,
+} from '../shared/utils/weekly-leaderboard';
+import {
   DISPLAY_NAMES_COLLECTION,
   USERS_COLLECTION,
   normalizeDisplayName,
@@ -461,7 +465,32 @@ export const deleteProfileImagesForUser = async (
 };
 
 /**
- * Removes the user from both persisted leaderboard snapshots.
+ * Drops the user's entry from one snapshot in place, leaving the rest of the
+ * document as it is.
+ */
+const pruneSnapshot = async (
+  db: Firestore,
+  docId: string,
+  uid: string,
+): Promise<void> => {
+  const ref = db.collection(META_COLLECTION).doc(docId);
+  const users = (await ref.get()).data()?.['users'];
+
+  if (!Array.isArray(users)) {
+    return;
+  }
+
+  const remaining = (users as LeaderboardUser[])
+    .filter((user) => user?.userId !== uid)
+    .map(toLeaderboardEntry);
+
+  if (remaining.length !== users.length) {
+    await ref.set({ users: remaining }, { merge: true });
+  }
+};
+
+/**
+ * Removes the user from every persisted leaderboard snapshot.
  *
  * The leaderboard is a cached document, not a live query, and it stores each
  * entry's display name and photo. Nothing rebuilds it except a Bite
@@ -469,26 +498,18 @@ export const deleteProfileImagesForUser = async (
  * deleted user's personal data would sit in `/meta/leaderboard` until some
  * unrelated user happens to post. The daily baseline is pruned in place so the
  * next notification run does not treat the account as a user who dropped rank.
+ * Last week's frozen standings are pruned in place too, since they are never
+ * rebuilt; the running week is rebuilt, which skips the deleted account
+ * (issue #2027).
  */
 export const refreshLeaderboardsAfterDeletion = async (
   db: Firestore,
   uid: string,
 ): Promise<void> => {
-  const dailyRef = db.collection(META_COLLECTION).doc(LEADERBOARD_DAILY_DOC);
-  const dailySnapshot = await dailyRef.get();
-  const dailyUsers = dailySnapshot.data()?.['users'];
-
-  if (Array.isArray(dailyUsers)) {
-    const remaining = (dailyUsers as LeaderboardUser[])
-      .filter((user) => user?.userId !== uid)
-      .map(toLeaderboardEntry);
-
-    if (remaining.length !== dailyUsers.length) {
-      await dailyRef.set({ users: remaining }, { merge: true });
-    }
-  }
-
+  await pruneSnapshot(db, LEADERBOARD_DAILY_DOC, uid);
+  await pruneSnapshot(db, LEADERBOARD_LAST_WEEK_DOC, uid);
   await rebuildLeaderboard(db);
+  await rebuildWeeklyLeaderboard(db);
 };
 
 /**

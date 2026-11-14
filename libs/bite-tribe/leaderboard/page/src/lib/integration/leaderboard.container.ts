@@ -9,8 +9,10 @@ import { LeaderboardService } from './leaderboard.service';
   template: `
     <leaderboard-list
       class="ion-page"
-      [users]="service.users.value()"
-      [isLoading]="service.users.isLoading()"
+      [board]="service.board()"
+      [ranking]="service.ranking.value()"
+      [isLoading]="service.ranking.isLoading()"
+      (boardChange)="service.selectBoard($event)"
       (userClick)="service.userClicked($event)"
     />
 

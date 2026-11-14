@@ -1,11 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular/standalone';
-import { LeaderboardDataAccessService } from 'bite-tribe/leaderboard-data-access';
+import { signal } from '@angular/core';
+import {
+  LeaderboardBoard,
+  LeaderboardDataAccessService,
+} from 'bite-tribe/leaderboard-data-access';
 import { LeaderboardService } from '../leaderboard.service';
 
 class MockDataAccess {
-  users = {
-    value: jest.fn(() => []),
+  board = signal<LeaderboardBoard>('thisWeek');
+  ranking = {
+    value: jest.fn(() => ({ board: 'thisWeek', users: [] })),
     isLoading: jest.fn(() => false),
     reload: jest.fn(),
   };
@@ -37,7 +42,13 @@ describe(LeaderboardService.name, () => {
   it('should reload the leaderboard resource', () => {
     service.reload();
 
-    expect(service.users.reload).toHaveBeenCalledTimes(1);
+    expect(service.ranking.reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('should switch the board the ranking is loaded for', () => {
+    service.selectBoard('lastWeek');
+
+    expect(service.board()).toBe('lastWeek');
   });
 
   it('should navigate to public user profiles', () => {

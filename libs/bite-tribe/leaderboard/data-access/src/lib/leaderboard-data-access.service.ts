@@ -1,4 +1,4 @@
-import { Injectable, resource, ResourceLoader } from '@angular/core';
+import { Injectable, resource, signal } from '@angular/core';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
 
@@ -8,29 +8,59 @@ export type LeaderboardUser = Pick<
 > &
   Required<Pick<PublicUser, 'biteCount'>>;
 
+/**
+ * The rankings the leaderboard shows (issue #2027): the running week (the
+ * default), last week's frozen final standings, and all time.
+ */
+export type LeaderboardBoard = 'thisWeek' | 'lastWeek' | 'allTime';
+
+/** One ranking as `loadLeaderboard` returns it for a named board. */
+export interface LeaderboardRanking {
+  board: LeaderboardBoard;
+  users: LeaderboardUser[];
+  /** The week's bounds in epoch ms; absent on the all-time board. */
+  start?: number;
+  end?: number;
+}
+
+const emptyRanking = (board: LeaderboardBoard): LeaderboardRanking => ({
+  board,
+  users: [],
+});
+
 @Injectable({ providedIn: 'root' })
 export class LeaderboardDataAccessService {
+  readonly board = signal<LeaderboardBoard>('thisWeek');
+
   // The call is caught below, so this resource never enters an error state and
-  // `users.value()` is safe to read straight from the template — unlike the
+  // `ranking.value()` is safe to read straight from the template — unlike the
   // resources audited in GitHub issue #1232.
-  usersLoader: ResourceLoader<LeaderboardUser[], undefined> = async () => {
+  async loadRanking(board: LeaderboardBoard): Promise<LeaderboardRanking> {
     try {
       const result = await FirebaseFunctions.callByName<
-        void,
-        LeaderboardUser[]
+        { board: LeaderboardBoard },
+        LeaderboardRanking | LeaderboardUser[]
       >({
         name: 'loadLeaderboard',
-        data: undefined,
+        data: { board },
       });
+      const data = result.data;
 
-      return result.data;
+      // A function deployed before the weekly board ignores `board` and
+      // answers with the all-time users as a bare array.
+      if (Array.isArray(data)) {
+        return { board: 'allTime', users: data };
+      }
+
+      return data ?? emptyRanking(board);
     } catch {
-      return [];
+      return emptyRanking(board);
     }
-  };
+  }
 
-  users = resource({
-    loader: this.usersLoader.bind(this),
-    defaultValue: [],
+  ranking = resource({
+    params: () => ({ board: this.board() }),
+    loader: ({ params }) => this.loadRanking(params.board),
+    defaultValue: emptyRanking('thisWeek'),
   });
 }

@@ -662,9 +662,12 @@ which carries the same licence.
 | `posted`      | The loudest single bite of the 6.5 s recording, 5.845 s to 6.080 s, mixed to mono, a 30 ms fade-out, peak-normalised | 235 ms | -13 dBFS |
 | `celebration` | Resampled from 48 kHz to 44.1 kHz, mixed to mono, trimmed to its audible length, a 30 ms fade-out, peak-normalised   | 272 ms | -16 dBFS |
 
-Both stay within the issue's limits of 300 ms and -12 dBFS. `celebration` sits
-3 dB below `posted` so a celebrated first is never louder than an ordinary post.
-Neither native player sets a volume, so these files are where the loudness
+Both stay within the issue's limits of 300 ms and -12 dBFS. `celebration` peaks
+3 dB below `posted`, but the two **sound equally loud**: by short-term RMS they
+are within about 1 dB, measured in [Test Run 12](../history/test-runs/12-sounds-simulators.md#loudness-against-the-notification-sounds).
+The maintainer listened to all four shipped files on 14 November 2026, heard
+them as equally loud on both platforms, and kept the levels rather than
+re-mastering `celebration` softer. Neither native player sets a volume, so these files are where the loudness
 lives; the level is accepted on the reference devices by [Issue #1847][#1847],
 and a change there is a re-master here.
 

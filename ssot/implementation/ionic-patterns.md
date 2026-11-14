@@ -188,28 +188,35 @@ and pressed, in light and dark.
 
 ## Celebration Rule
 
-A few firsts in bite-tribe are celebrated (epic [#1741]): one short confetti
-burst from the bottom of the screen, the moment's own success toast, the
-`success` haptic that toast already plays, and the `celebration` sound (epic
-[#1742], issue [#1846]) through the Sound Rule in
-[Architecture - Capacitor](../architecture/capacitor.md#sound-rule). The ceiling is that burst. There is
-no full-screen takeover, no modal and no mascot, and a routine action is never
-celebrated.
+A few firsts and a completion in bite-tribe are celebrated (epic [#1741]), and
+since epic [#2012] a few round Bite counts and progress in the leaderboard's top
+ten: one short confetti burst from the bottom of the screen, the moment's own
+success toast, the `success` haptic that toast already plays, and the
+`celebration` sound (epic [#1742], issue [#1846]) through the Sound Rule in
+[Architecture - Capacitor](../architecture/capacitor.md#sound-rule). The ceiling is that burst, with one
+exception: a thousandth Bite plays the grand burst instead. There is no
+full-screen takeover, no modal and no mascot. Counts are celebrated rarely -
+only at the milestones, with growing gaps between them - so an ordinary post
+stays an ordinary post, and a rank is celebrated only for the user who
+climbed.
 
 **Every celebration goes through `CelebrationService` in
 `libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
-one of five `CelebrationMoment`s - `first-bite`, `first-country`,
-`onboarding-finished`, `first-follow`, `bite-trail-completed` - and owns
-everything else:
+one of eight `CelebrationMoment`s - `first-bite`, `first-country`,
+`onboarding-finished`, `first-follow`, `bite-trail-completed`, and from issue
+[#2013] `bite-milestone`, `leaderboard-top-ten`, `leaderboard-overtake` - and
+owns everything else:
 
 | Decision  | Value                                                                                                        |
 | --------- | ------------------------------------------------------------------------------------------------------------ |
 | Confetti  | `canvas-confetti`, one burst from `{ x: 0.5, y: 1 }` straight up, 80 particles over 120 ticks, about 2 s     |
+| Grand     | `CELEBRATION_GRAND_BURST`, a `bite-milestone` whose `count` is a multiple of 1,000. See below                |
 | Colours   | `--ion-color-primary`, `--bite-tribe-color` and `--ion-color-secondary`, read from the document at fire time |
-| Copy      | The moment's key in `CELEBRATION_MESSAGE_KEYS`, presented through `ToastService` with `outcome: 'success'`   |
+| Copy      | The moment's key in `CELEBRATION_MESSAGE_KEYS`, or `bite-milestone-thousand` for a thousandth Bite           |
 | Haptic    | The `success` the toast plays. The confetti plays none                                                       |
 | Sound     | `SoundsService.celebration()`, fired and not awaited, once per call. Silent mode and `Sounds` keep it quiet  |
-| Analytics | `celebration_shown` with the `moment`, once per call                                                         |
+| Analytics | `celebration_shown` with the `moment`, and `count` or `rank`, once per celebration that plays                |
+| Window    | `CELEBRATION_SETTLING_WINDOW_MS`, 3 s: held moments wait it out and only the highest plays                   |
 
 Details worth knowing before changing it:
 
@@ -230,6 +237,33 @@ Details worth knowing before changing it:
   shade away from the page background in both modes (`#f1f1f1` on white,
   `#1c212b` on `#1a1c22`) and would draw invisible particles. The brand orange
   `--bite-tribe-color` takes its place.
+- **One Bite, one celebration** ([#2013]). One post can earn several moments,
+  and all but `first-bite` arrive from separate snapshots seconds after it:
+  the `biteCount`, the leaderboard and, a few seconds later, the country. So
+  `first-country`, `bite-milestone`, `leaderboard-top-ten` and
+  `leaderboard-overtake` are _held_. The first held moment opens a settling
+  window of `CELEBRATION_SETTLING_WINDOW_MS`; when it closes, only the highest
+  moment raised in it plays, in the order of `CELEBRATION_PRECEDENCE`:
+  `first-bite`, `first-country`, `bite-milestone`, `leaderboard-top-ten`,
+  `leaderboard-overtake`. Of two raises of the same moment the later one wins.
+  A `first-bite` plays at once and opens - or takes over - a window of its own,
+  so every held moment in it is suppressed. A suppressed moment presents no
+  toast, draws no burst, plays no sound and logs no `celebration_shown`. A held
+  moment raised after the window closed opens a new one and plays on its own.
+  The other three moments are direct reactions to a tap and play at once,
+  window or not. The 3 s is a starting point, tuned on the reference devices
+  in the epic's acceptance story; a held moment therefore plays about 3 s after
+  its snapshot.
+- **The grand burst, for thousands only** ([#2013]). A `bite-milestone` whose
+  `count` is a multiple of 1,000 plays `CELEBRATION_GRAND_BURST` instead of
+  `CELEBRATION_BURST`: both bottom corners fire inwards at 60° and 120°, then
+  the bottom centre 250 ms later, 250 particles over 180 ticks, about 3 s. 50 of
+  them are food emoji (`CELEBRATION_GRAND_BURST_EMOJI`: 🍜 🍕 🌮 🍣) drawn with
+  `shapeFromText`; the rest are in the theme colours. A browser that cannot
+  draw the emoji throws the rest of the burst all the same. Canvas,
+  `pointer-events: none`, reduced motion and removal are as for the standard
+  burst, with its own bound, `GRAND_BURST_TIMEOUT_MS` (5 s). Call sites never
+  pass particle options; the moment and its `count` select the burst.
 - **One at a time.** A celebration that starts while a burst is running still
   presents its toast but draws no second burst, and one that starts while the
   sound is still playing plays no second sound, because `SoundsService` drops a
@@ -239,7 +273,7 @@ Details worth knowing before changing it:
   sound is not motion. The in-app haptics switch reaches the toast's haptic as
   it reaches every other one, and does not touch the confetti; the `Sounds`
   switch silences the sound and nothing else.
-- **One sound for every moment.** All five moments play the same
+- **One sound for every moment.** All eight moments play the same
   `celebration` sound; there is no sound per moment.
 - **Never rejects.** A failure of the library, of the burst or of the sound is
   swallowed, the posture `ToastService.present()` holds.
@@ -258,7 +292,8 @@ Details worth knowing before changing it:
   it. Its spec fails if another file imports the library.
 
 `Tech/Celebration` in Storybook (`libs/common/celebration/src/lib/__specs__/celebration.stories.ts`)
-fires the burst in light and dark. It is kept out of the Loki run, because at
+fires the standard burst and the grand one in light and dark. The grand burst
+is a `bite-milestone`, so it starts once the settling window has closed. It is kept out of the Loki run, because at
 rest it is a single button and a captured burst would be random.
 
 Where each moment is wired:
@@ -270,9 +305,13 @@ Where each moment is wired:
 | `onboarding-finished`  | `OnboardingService.finish()`                            | Once the completion write succeeds                                                                                    | [#1798] |
 | `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`     | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
 | `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                          | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
+| `bite-milestone`       | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
+| `leaderboard-top-ten`  | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
+| `leaderboard-overtake` | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
 
-`first-country` is the only moment that is not a direct reaction to a tap:
-the backend sets the country seconds after the post, so the store keeps the
+`first-country` was the first moment that is not a direct reaction to a tap,
+and is the only one wired so far: the backend sets the country seconds after
+the post, so the store keeps the
 user's own document listened to for the session. In the [#1801] pre-pass, that
 listener sometimes never reached the effect on the web. The cause was
 Capacitor's web plugin loader handing the Firestore listeners registered at
@@ -365,3 +404,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
 [#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022
 [#2039]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2039
+[#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
+[#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013

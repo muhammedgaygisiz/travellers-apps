@@ -63,7 +63,10 @@ computed from; what a notification about one of them says, and to whom, belongs 
   snapshot after sign-in only sets the baseline, a snapshot that adds several
   codes celebrates once, and a move into a new country counts like a post. Going
   from no codes to one celebrates nothing: that Bite is the user's first, and the
-  first-Bite celebration already played (epic [#1741]). The user's own push for
+  first-Bite celebration already played (epic [#1741]). The celebration plays
+  about 3 s after the snapshot, once a settling window has closed, because one
+  Bite can earn several celebrations and only the highest plays; a new country
+  outranks a Bite milestone and every leaderboard moment (issue [#2013]). The user's own push for
   the badge is not shown on top while the app is in the foreground, because
   neither app configures `presentationOptions` for `PushNotifications`, so the
   plugin presents nothing there. See GitHub issue [#1797] and the Celebration
@@ -120,6 +123,8 @@ them is collected in onboarding.
   user and their followers, and that contract lives in
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 - Issue [#1797] celebrates a new country badge in the app, part of epic [#1741].
+- Issue [#2013] holds the celebrations one Bite earns for a settling window and plays only the
+  highest, and adds the grand burst for every thousandth Bite, part of epic [#2012].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -157,3 +162,5 @@ them is collected in onboarding.
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
+[#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
+[#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013

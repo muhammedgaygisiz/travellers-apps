@@ -9,14 +9,19 @@ import { ToastService } from 'toast';
 import {
   BURST_TIMEOUT_MS,
   CELEBRATION_BURST,
+  CELEBRATION_GRAND_BURST,
+  CELEBRATION_GRAND_BURST_EMOJI,
   CELEBRATION_MESSAGE_KEYS,
+  CELEBRATION_SETTLING_WINDOW_MS,
+  CELEBRATION_THOUSAND_MESSAGE_KEY,
   CelebrationMoment,
   CelebrationService,
+  GRAND_BURST_TIMEOUT_MS,
 } from '../celebration.service';
 
 jest.mock('canvas-confetti', () => ({
   __esModule: true,
-  default: { create: jest.fn() },
+  default: { create: jest.fn(), shapeFromText: jest.fn() },
 }));
 jest.mock('ta-firestore', () => ({
   AnalyticsEvent: { CelebrationShown: 'celebration_shown' },
@@ -37,6 +42,15 @@ jest.mock('@capacitor/preferences', () => ({
 }));
 
 const create = confetti.create as jest.Mock;
+const shapeFromText = confetti.shapeFromText as jest.Mock;
+
+/** The moments held for the settling window (issue #2013). */
+const HELD: ReadonlySet<string> = new Set([
+  'first-country',
+  'bite-milestone',
+  'leaderboard-top-ten',
+  'leaderboard-overtake',
+]);
 
 // Read before any `clearAllMocks`, which would drop the recorded result.
 const biteSounds = (registerPlugin as jest.Mock).mock.results[0].value as {
@@ -96,14 +110,21 @@ describe('CelebrationService', () => {
     jest.clearAllMocks();
     reducedMotion = false;
 
+    // Every shot of a burst is its own promise; ending the burst ends them all.
+    const running: (() => void)[] = [];
+    endBurst = (): void => running.splice(0).forEach((end) => end());
     fire = jest.fn(
       () =>
         new Promise<void>((resolve) => {
-          endBurst = resolve;
+          running.push(resolve);
         }),
     );
     Object.assign(fire, { reset: jest.fn() });
     create.mockReturnValue(fire);
+    shapeFromText.mockImplementation(({ text }: { text: string }) => ({
+      type: 'bitmap',
+      text,
+    }));
 
     window.matchMedia = jest.fn((query: string) => ({
       matches:
@@ -223,7 +244,7 @@ describe('CelebrationService', () => {
   it('draws no second burst while one is running', async () => {
     const first = service.celebrate('first-bite');
     await Promise.resolve();
-    const second = service.celebrate('first-country', { country: 'Japan' });
+    const second = service.celebrate('first-follow', { displayName: 'Leela' });
     await second;
 
     expect(create).toHaveBeenCalledTimes(1);
@@ -238,7 +259,7 @@ describe('CelebrationService', () => {
     reducedMotion = true;
 
     await service.celebrate('first-bite');
-    await service.celebrate('first-country', { country: 'Japan' });
+    await service.celebrate('first-follow', { displayName: 'Leela' });
     await settle();
 
     expect(present).toHaveBeenCalledTimes(2);
@@ -360,9 +381,17 @@ describe('CelebrationService', () => {
     'presents exactly one success toast and one celebration sound for %s',
     async (moment, messageKey) => {
       reducedMotion = true;
+      jest.useFakeTimers();
 
-      await service.celebrate(moment as CelebrationMoment, { user: 'leela' });
-      await settle();
+      const celebrated = service.celebrate(moment as CelebrationMoment, {
+        user: 'leela',
+      });
+      await jest.advanceTimersByTimeAsync(
+        HELD.has(moment) ? CELEBRATION_SETTLING_WINDOW_MS : 0,
+      );
+      await celebrated;
+      await jest.advanceTimersByTimeAsync(0);
+      jest.useRealTimers();
 
       expect(present).toHaveBeenCalledTimes(1);
       expect(present).toHaveBeenCalledWith({
@@ -401,6 +430,282 @@ describe('CelebrationService', () => {
     expect(logEvent).toHaveBeenCalledTimes(1);
     expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
       moment: 'onboarding-finished',
+    });
+  });
+
+  describe('one Bite, one celebration (issue #2013)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /** Raises `moment` and lets its settling window close. */
+    const celebrateHeld = async (
+      moment: CelebrationMoment,
+      params?: Record<string, unknown>,
+    ): Promise<void> => {
+      const celebrated = service.celebrate(moment, params);
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      endBurst();
+      await celebrated;
+    };
+
+    it('holds a moment until the settling window closes', async () => {
+      reducedMotion = true;
+
+      void service.celebrate('first-country', { country: 'Japan' });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS - 1);
+
+      expect(present).not.toHaveBeenCalled();
+      expect(logEvent).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1);
+
+      expect(present).toHaveBeenCalledTimes(1);
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'country-badge-earned',
+        params: { country: 'Japan' },
+        outcome: 'success',
+      });
+    });
+
+    it('draws the standard burst for a hundredth Bite', async () => {
+      const celebrated = service.celebrate('bite-milestone', { count: 100 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+
+      expect(fire).toHaveBeenCalledTimes(1);
+      expect(fire).toHaveBeenCalledWith({
+        ...CELEBRATION_BURST,
+        colors: ['#4a90d9', '#fec56b', '#20201e'],
+      });
+      expect(shapeFromText).not.toHaveBeenCalled();
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({ messageKey: 'bite-milestone' }),
+      );
+
+      endBurst();
+      await celebrated;
+    });
+
+    it('draws the grand burst for a thousandth Bite', async () => {
+      const celebrated = service.celebrate('bite-milestone', { count: 1000 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+
+      const colors = ['#4a90d9', '#fec56b', '#20201e'];
+      const [left, right, centre, emoji] = CELEBRATION_GRAND_BURST;
+
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(fire.mock.calls).toEqual([
+        [{ ...left.options, colors }],
+        [{ ...right.options, colors }],
+      ]);
+      expect(left.options).toMatchObject({ origin: { x: 0, y: 1 }, angle: 60 });
+      expect(right.options).toMatchObject({
+        origin: { x: 1, y: 1 },
+        angle: 120,
+      });
+
+      await jest.advanceTimersByTimeAsync(250);
+
+      expect(fire).toHaveBeenCalledTimes(4);
+      expect(fire).toHaveBeenNthCalledWith(3, { ...centre.options, colors });
+      expect(fire).toHaveBeenNthCalledWith(4, {
+        ...emoji.options,
+        shapes: CELEBRATION_GRAND_BURST_EMOJI.map((text) => ({
+          type: 'bitmap',
+          text,
+        })),
+      });
+      expect(shapeFromText).toHaveBeenCalledWith({
+        text: '🍜',
+        scalar: emoji.options.scalar,
+      });
+      expect(
+        CELEBRATION_GRAND_BURST.reduce(
+          (total, shot) => total + (shot.options.particleCount ?? 0),
+          0,
+        ),
+      ).toBe(250);
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messageKey: CELEBRATION_THOUSAND_MESSAGE_KEY,
+          params: { count: 1000 },
+        }),
+      );
+      expect(canvases()).toHaveLength(1);
+
+      endBurst();
+      await celebrated;
+
+      expect(canvases()).toHaveLength(0);
+    });
+
+    it('still throws the confetti when the emoji cannot be drawn', async () => {
+      shapeFromText.mockImplementation(() => {
+        throw new Error('no OffscreenCanvas');
+      });
+
+      const celebrated = service.celebrate('bite-milestone', { count: 2000 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS + 250);
+
+      expect(fire).toHaveBeenCalledTimes(3);
+
+      endBurst();
+      await celebrated;
+    });
+
+    it('bounds the grand burst by its own timeout', async () => {
+      const celebrated = service.celebrate('bite-milestone', { count: 1000 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      await jest.advanceTimersByTimeAsync(GRAND_BURST_TIMEOUT_MS - 1);
+
+      expect(canvases()).toHaveLength(1);
+
+      await jest.advanceTimersByTimeAsync(1);
+      await celebrated;
+
+      expect(fire.reset).toHaveBeenCalledTimes(1);
+      expect(canvases()).toHaveLength(0);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('creates no canvas for the grand burst under reduced motion and still presents the toast', async () => {
+      reducedMotion = true;
+
+      await celebrateHeld('bite-milestone', { count: 1000 });
+
+      expect(create).not.toHaveBeenCalled();
+      expect(canvases()).toHaveLength(0);
+      expect(present).toHaveBeenCalledTimes(1);
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messageKey: CELEBRATION_THOUSAND_MESSAGE_KEY,
+        }),
+      );
+    });
+
+    it.each([
+      ['bite-milestone', 'first-country', 'country-badge-earned'],
+      ['first-country', 'leaderboard-overtake', 'country-badge-earned'],
+      ['leaderboard-overtake', 'leaderboard-top-ten', 'leaderboard-top-ten'],
+      ['leaderboard-top-ten', 'bite-milestone', 'bite-milestone'],
+    ] as const)(
+      'plays one toast and one burst for the higher of %s and %s',
+      async (earlier, later, messageKey) => {
+        const first = service.celebrate(earlier, { count: 50, rank: 3 });
+        await jest.advanceTimersByTimeAsync(1000);
+        const second = service.celebrate(later, { count: 50, rank: 3 });
+        await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+
+        expect(present).toHaveBeenCalledTimes(1);
+        expect(present).toHaveBeenCalledWith(
+          expect.objectContaining({ messageKey }),
+        );
+        expect(create).toHaveBeenCalledTimes(1);
+        expect(biteSounds.celebration).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledTimes(1);
+
+        endBurst();
+        await Promise.all([first, second]);
+      },
+    );
+
+    it('keeps the later of two raises of the same moment', async () => {
+      reducedMotion = true;
+
+      const first = service.celebrate('leaderboard-overtake', { rank: 5 });
+      const second = service.celebrate('leaderboard-overtake', { rank: 4 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      await Promise.all([first, second]);
+
+      expect(present).toHaveBeenCalledTimes(1);
+      expect(present).toHaveBeenCalledWith(
+        expect.objectContaining({ params: { rank: 4 } }),
+      );
+    });
+
+    it('plays a moment raised after the window has closed on its own', async () => {
+      reducedMotion = true;
+
+      await celebrateHeld('first-country', { country: 'Japan' });
+      await celebrateHeld('leaderboard-top-ten', { rank: 7 });
+
+      expect(present).toHaveBeenCalledTimes(2);
+      expect(logEvent).toHaveBeenNthCalledWith(
+        2,
+        AnalyticsEvent.CelebrationShown,
+        { moment: 'leaderboard-top-ten', rank: 7 },
+      );
+    });
+
+    it('suppresses the held moments after a first Bite in the window', async () => {
+      reducedMotion = true;
+
+      await service.celebrate('first-bite');
+      const later = service.celebrate('leaderboard-top-ten', { rank: 9 });
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      await later;
+
+      expect(present).toHaveBeenCalledTimes(1);
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+        moment: 'first-bite',
+      });
+    });
+
+    it('drops a held moment when a first Bite plays inside its window', async () => {
+      reducedMotion = true;
+
+      const held = service.celebrate('leaderboard-top-ten', { rank: 9 });
+      await jest.advanceTimersByTimeAsync(500);
+      await service.celebrate('first-bite');
+      await held;
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+
+      expect(present).toHaveBeenCalledTimes(1);
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+        moment: 'first-bite',
+      });
+    });
+
+    it('plays a direct moment at once while a window is open', async () => {
+      reducedMotion = true;
+
+      const held = service.celebrate('bite-milestone', { count: 5 });
+      await service.celebrate('first-follow', { displayName: 'Leela' });
+
+      expect(present).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+      await held;
+
+      expect(present).toHaveBeenCalledTimes(2);
+    });
+
+    it('logs the count of a milestone and the rank of a leaderboard moment', async () => {
+      reducedMotion = true;
+
+      await celebrateHeld('bite-milestone', { count: 300, rank: 2 });
+      await celebrateHeld('leaderboard-overtake', {
+        count: 300,
+        rank: 2,
+        user: 'Leela',
+      });
+
+      expect(logEvent.mock.calls).toEqual([
+        [
+          AnalyticsEvent.CelebrationShown,
+          { moment: 'bite-milestone', count: 300 },
+        ],
+        [
+          AnalyticsEvent.CelebrationShown,
+          { moment: 'leaderboard-overtake', rank: 2 },
+        ],
+      ]);
     });
   });
 

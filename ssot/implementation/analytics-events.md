@@ -88,7 +88,7 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 | World globe  | `world_globe_open`                    | `own_profile: boolean`                                                                                     | The world page is entered and its profile is known                                                  | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
 | World globe  | `world_globe_country_tap`             | `country_code: string`, `has_bites: boolean`, `source: 'globe' \| 'list'`                                  | A country is tapped on the globe or in the list under it                                            | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
 | World globe  | `world_globe_zoom`                    | `control: 'button' \| 'gesture'`                                                                           | The first zoom of a visit to the page; later ones are not counted                                   | `libs/bite-tribe/profile/page/.../integration/world.container.ts`                                           |
-| Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`                                                                                | Once per `celebrate()` call, including when reduced motion skips the confetti                       | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
+| Celebration  | `celebration_shown`                   | `moment: CelebrationMoment`, `count?: number`, `rank?: number`                                             | Once per celebration that plays, including when reduced motion skips the confetti; never suppressed | `libs/common/celebration/src/lib/celebration.service.ts`                                                    |
 | Acquisition  | `store_link_clicked`                  | `store: 'app_store' \| 'google_play'`, `surface: 'start' \| 'public_menu' \| 'about'`                      | A store badge or QR link is followed on the web; `bt-store-links` renders nothing in a native build | `libs/bite-tribe/store-links/src/lib/store-links.component.ts`                                              |
 | Acquisition  | `instagram_link_clicked`              | `surface: 'start'`                                                                                         | The Instagram link in the web start page's brand row is followed; the native start page has no link | `libs/bite-tribe/start/src/lib/start.component.ts`                                                          |
 | Acquisition  | `city_page_arrived`                   | `city_page: string`, `destination: 'start' \| 'bite'`                                                      | Once at start-up, when the app opens from a city landing page link carrying `?city_page=<city>`     | `libs/bite-tribe/shell/src/lib/city-page-attribution.ts`                                                    |
@@ -127,10 +127,15 @@ before the `--apply` reports `(not set)` for them.
 
 `celebration_shown` belongs to issue [#1795], the celebrations of epic [#1741].
 It answers whether the moments fire as rarely as the epic intends. `moment` is
-one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow` and
-`bite-trail-completed`, and was added to `provision-ga4.mjs`. It is logged
-even when reduced motion skips the confetti, because the toast still marks the
-moment.
+one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow`,
+`bite-trail-completed`, and since issue [#2013] of epic [#2012]
+`bite-milestone`, `leaderboard-top-ten` and `leaderboard-overtake`; it was
+added to `provision-ga4.mjs`. A `bite-milestone` also carries the `count` it
+reached and a leaderboard moment the `rank`; neither is a registered
+dimension, because they are read from the BigQuery export. It is logged even
+when reduced motion skips the confetti, because the toast still marks the
+moment, and never for a moment the settling window suppressed, because nothing
+was shown.
 
 `store_link_clicked` belongs to issue [#1759]. A web visitor who follows a
 store link installs the app under a new identity, so without it the web reads
@@ -948,3 +953,5 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#1492]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1492
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006
+[#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
+[#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013

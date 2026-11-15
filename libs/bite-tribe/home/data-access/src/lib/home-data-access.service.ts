@@ -123,6 +123,10 @@ export class HomeDataAccessService {
   isBitesLoading = toSignal(this.storeService.isBitesLoading$, {
     initialValue: true,
   });
+  /** My Bites' own read, apart from the feed's (GitHub issue #2073). */
+  isOwnBitesLoading = toSignal(this.storeService.isOwnBitesLoading$, {
+    initialValue: false,
+  });
   homeDistance = toSignal(this.storeService.homeDistance$);
   exchangeRates = toSignal(this.storeService.exchangeRates$, {
     initialValue: {},

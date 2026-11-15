@@ -3,7 +3,11 @@ import { AppActions } from './actions';
 import { AppSlice } from './app-slice.model';
 import { BiteActions } from '../bites/actions';
 import { fromAuth } from 'ta-firestore';
-import { routerRequestAction } from '@ngrx/router-store';
+import {
+  routerNavigationAction,
+  routerRequestAction,
+} from '@ngrx/router-store';
+import { isOwnBitesUrl } from '../bites/is-own-bites-url';
 
 const CLEAN_PROFILE_METADATA = {
   followers: 0,
@@ -271,4 +275,19 @@ export const reducer = createReducer<AppSlice>(
     ...state,
     profileMetadata: { ...CLEAN_PROFILE_METADATA },
   })),
+  // Raised before the page activates, so My Bites renders its first frame
+  // under the skeleton instead of its empty state (GitHub issue #2073).
+  on(routerNavigationAction, (state, { payload }) =>
+    isOwnBitesUrl(payload.event.urlAfterRedirects)
+      ? { ...state, loading: { ...state.loading, ownBites: true } }
+      : state,
+  ),
+  on(
+    BiteActions.loadedByUserFromAPI,
+    BiteActions.errorLoadingByUserFromAPI,
+    (state) => ({
+      ...state,
+      loading: { ...state.loading, ownBites: false },
+    }),
+  ),
 );

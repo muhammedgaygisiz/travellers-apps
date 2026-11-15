@@ -133,6 +133,7 @@ One detail is easy to get wrong and made the bar invisible during development: `
 | Page         | Placeholder            | Bound condition      |
 | ------------ | ---------------------- | -------------------- |
 | Home feed    | Bite skeleton list     | `showBiteSkeleton()` |
+| My Bites     | Bite skeleton list     | `showBiteSkeleton()` |
 | Profile      | `profile-skeleton`     | `showSkeleton()`     |
 | Bite details | Inline skeleton fields | `!bite()`            |
 | Restaurant   | Inline skeleton fields | `isLoading()`        |
@@ -147,6 +148,8 @@ This is deliberately additive: it does not change when a placeholder appears. Fi
 The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue [#1168].
 
 About already works that way. Its two counts live in a root service and refresh on every entry; a count that has no value yet holds its skeleton, while a count already on screen stays there and only the bar runs. The refresh starts when the page is created, not in an Ionic view lifecycle hook: re-entering a pushed page was observed not to raise `ionViewDidEnter` reliably, and the user count stayed stale. See GitHub issue [#2072].
+
+My Bites renders the Home component, but its condition has to follow its own read. It used to pass the feed's `loading.home`, which never covered that read, so the page showed its empty state until the Bites arrived. It now binds `loading.ownBites`. That flag is raised on `routerNavigationAction` for My Bites and My Profile, before the page renders, and cleared when the read succeeds or fails. See GitHub issue [#2073].
 
 ## Entry Feedback Contract
 
@@ -218,3 +221,4 @@ imagePath || image || ''
 [#1287]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1287
 [#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377
 [#2072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2072
+[#2073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2073

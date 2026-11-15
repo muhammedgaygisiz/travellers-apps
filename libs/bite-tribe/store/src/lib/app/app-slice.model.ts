@@ -6,6 +6,13 @@ export type AppSlice = {
   settings: Settings;
   loading?: {
     home?: boolean;
+    /**
+     * The signed-in user's own Bites are being read, for My Bites and My
+     * Profile. Kept apart from `home`, which settles with the feed and never
+     * covered this read, so My Bites showed its empty state until the Bites
+     * arrived (GitHub issue #2073).
+     */
+    ownBites?: boolean;
   };
   reloading?: {
     home?: boolean;

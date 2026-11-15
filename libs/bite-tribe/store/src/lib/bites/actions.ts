@@ -10,6 +10,9 @@ export const BiteActions = createActionGroup({
     // a skeleton (issue #1230).
     'Error loading by GPS position from API': emptyProps(),
     'Loaded By User From API': props<{ bites: Bite[] }>(),
+    // The read of the signed-in user's own Bites failed. It ends their loading
+    // state, so a failure cannot keep My Bites under a skeleton (issue #2073).
+    'Error loading by user from API': emptyProps(),
     'Loaded By Bucketlist From API': props<{ bites: Bite[] }>(),
     'Save new bite': emptyProps(),
     'Save existing bite': props<{ bite: Bite }>(),

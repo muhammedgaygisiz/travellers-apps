@@ -23,6 +23,7 @@ import { BucketlistActions } from '../bucketlists/actions';
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
 import { userId } from '../router/selectors';
+import { isOwnBitesUrl } from './is-own-bites-url';
 import { fromAuth } from 'ta-firestore';
 
 /**
@@ -56,21 +57,21 @@ export class BiteEffects {
   loadBitesByCurrentUser$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      filter(
-        ({ payload }) =>
-          payload.event.urlAfterRedirects.includes(PATH.MY_BITES) ||
-          payload.event.urlAfterRedirects.includes(PATH.MY_PROFILE),
-      ),
+      filter(({ payload }) => isOwnBitesUrl(payload.event.urlAfterRedirects)),
       switchMap(() => {
         const user = this.storeService.user();
 
         if (!user) {
-          return of([]);
+          return of(BiteActions.loadedByUserFromAPI({ bites: [] }));
         }
 
-        return from(this.api.bitesByUser(user?.uid));
+        // Caught inside the switch, so one failed read ends its own loading
+        // state and leaves the effect alive for the next entry (issue #2073).
+        return from(this.api.bitesByUser(user.uid)).pipe(
+          map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
+          catchError(() => of(BiteActions.errorLoadingByUserFromAPI())),
+        );
       }),
-      map((bites) => BiteActions.loadedByUserFromAPI({ bites })),
     );
   });
 

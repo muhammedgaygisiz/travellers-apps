@@ -4,7 +4,11 @@ import { AppSlice } from '../app-slice.model';
 import type { Bite, PublicUser, Settings } from 'model';
 import { BiteActions } from '../../bites/actions';
 import { fromAuth } from 'ta-firestore';
-import { routerRequestAction } from '@ngrx/router-store';
+import {
+  routerNavigationAction,
+  routerRequestAction,
+} from '@ngrx/router-store';
+import { PATH } from 'utils';
 
 describe('App Reducer', () => {
   describe('fromAuth.logoutSucceeded', () => {
@@ -591,6 +595,49 @@ describe('App Reducer', () => {
         reducer(INITIAL_STATE, BiteActions.deletedBite({ bite: DELETED_BITE }))
           .profile,
       ).toEqual({ displayName: 'Mo', biteCount: 0 });
+    });
+  });
+
+  // GitHub issue #2073: My Bites read the feed's flag, which never covered its
+  // own read, so it showed its empty state until the Bites arrived.
+  describe('loading.ownBites', () => {
+    const navigation = (
+      url: string,
+    ): ReturnType<typeof routerNavigationAction> =>
+      routerNavigationAction({
+        payload: {
+          event: { urlAfterRedirects: url },
+        } as unknown as Parameters<typeof routerNavigationAction>[0]['payload'],
+      });
+
+    it.each([`/${PATH.MY_BITES}`, `/${PATH.MY_PROFILE}`])(
+      'should be raised by a navigation to %s',
+      (url) => {
+        const state = reducer(
+          { loading: { home: false } } as AppSlice,
+          navigation(url),
+        );
+
+        expect(state.loading).toEqual({ home: false, ownBites: true });
+      },
+    );
+
+    it('should leave the state alone for any other page', () => {
+      const INITIAL_STATE = { loading: { home: false } } as AppSlice;
+
+      expect(reducer(INITIAL_STATE, navigation('/home'))).toBe(INITIAL_STATE);
+    });
+
+    it.each([
+      ['the Bites arrive', BiteActions.loadedByUserFromAPI({ bites: [] })],
+      ['the read fails', BiteActions.errorLoadingByUserFromAPI()],
+    ])('should be cleared when %s', (_case, action) => {
+      const state = reducer(
+        { loading: { home: false, ownBites: true } } as AppSlice,
+        action,
+      );
+
+      expect(state.loading).toEqual({ home: false, ownBites: false });
     });
   });
 });

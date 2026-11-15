@@ -106,8 +106,7 @@ language falls back to English.
 `limit_reached`) and `mode` (`create`, `edit`), and `description_source` on
 `bite_created` (`generated`, `generated_edited`, `manual`, `none`). See
 [Implementation - Analytics Events](../implementation/analytics-events.md). The function logs token counts per call,
-which is where the cost is read from until a budget alert is set on the billing
-account.
+which is where the cost of AI alone is read from.
 
 ## Code Anchors
 
@@ -120,12 +119,29 @@ libs/bite-tribe/bite/page/src/lib/components/page/bite.page.ts
 libs/bite-tribe/bite/page/src/lib/components/page/utils/shrink-image-for-description.ts
 ```
 
+## Production Setup
+
+Checked on 15 November 2026, before the first release that carries the
+function:
+
+- **Vertex AI API:** enabled on `bite-tribe`, for the samples on [#2030].
+  Not enabled on `bite-tribe-qa`, which needs none: see Outside Production.
+- **Permission:** the functions run as the project's default compute service
+  account, `<project number>-compute@developer.gserviceaccount.com`. Its
+  `roles/editor` includes `aiplatform.endpoints.predict`, so no role was added.
+  Should the functions ever get their own narrower account, it needs
+  `roles/aiplatform.user`.
+- **Cost:** no AI-only budget. Vertex costs fall under the existing
+  `Bite Tribe Cost Budget Alert`, 75 CHF a month over the whole billing
+  account; at about 0.05 cents a description, AI is not expected to move it.
+  The Cloud Billing Budget API was enabled on `bite-tribe` to read it.
+
 ## Current Limitations
 
-- The function needs the Vertex AI API enabled on the project and its
-  service account allowed to call it (`aiplatform.endpoints.predict`, part of
-  the `Vertex AI User` role). The samples on [#2030] ran against the API with
-  a user's credentials, not the function's.
-- There is no budget alert yet; the token logs are the only cost signal.
+- No production call has run yet: the function reaches `bite-tribe` with the
+  next release. The samples on [#2030] ran with a user's credentials, not the
+  function's.
+- The budget alert covers the whole account, so a rise in AI cost alone shows
+  only in the function's token logs.
 
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030

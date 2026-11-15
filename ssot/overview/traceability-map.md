@@ -108,7 +108,7 @@ Release state and changelog
 - [UC - Strengthen Location Currency And Data Quality Guidance](../use-cases/uc-strengthen-location-currency-and-data-quality-guidance.md): none
 - [UC - Subscribe To BiteTribe Pro](../use-cases/uc-subscribe-to-bitetribe-pro.md): [epic-1121](https://github.com/muhammedgaygisiz/travellers-apps/issues/1121), [epic-1122](https://github.com/muhammedgaygisiz/travellers-apps/issues/1122), [epic-1124](https://github.com/muhammedgaygisiz/travellers-apps/issues/1124)
 - [UC - Use Account And Legal Flows](../use-cases/uc-use-account-and-legal-flows.md): none
-- [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md): [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741)
+- [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md): [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741), [epic-2012](https://github.com/muhammedgaygisiz/travellers-apps/issues/2012)
 - [UC - Use Local Gallery Support](../use-cases/uc-use-local-gallery-support.md): none
 - [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md): [epic-1495](https://github.com/muhammedgaygisiz/travellers-apps/issues/1495)
 - [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734)

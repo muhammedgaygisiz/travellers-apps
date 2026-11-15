@@ -377,7 +377,9 @@ export interface AnalyticsEventParamMap {
    * be seen whether the moments fire as rarely as epic #1741 intends.
    * `moment` mirrors `CelebrationMoment` from `celebration`. It is inlined
    * because `celebration` emits this event and so depends on this library;
-   * `analytics-events.spec.ts` compares the two as text.
+   * `analytics-events.spec.ts` compares the two as text. `count` is the Bite
+   * count of a `bite-milestone` and `rank` the place of a leaderboard moment
+   * (issue #2013); a suppressed moment logs nothing.
    */
   [AnalyticsEvent.CelebrationShown]: {
     moment:
@@ -387,7 +389,12 @@ export interface AnalyticsEventParamMap {
       | 'first-follow'
       | 'bite-trail-completed'
       | 'weekly-award-bites'
-      | 'weekly-award-liked';
+      | 'weekly-award-liked'
+      | 'bite-milestone'
+      | 'leaderboard-top-ten'
+      | 'leaderboard-overtake';
+    count?: number;
+    rank?: number;
   };
   /**
    * A web visitor followed a store badge or QR link (GitHub issue #1759).

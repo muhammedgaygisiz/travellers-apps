@@ -94,7 +94,9 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'country_code', displayName: 'Country code' },
   { parameterName: 'has_bites', displayName: 'Country has Bites' },
   { parameterName: 'control', displayName: 'Zoom control' },
-  // The celebrations (issues #1795, #2031). `moment` is one of seven fixed values.
+  // The celebrations (issues #1795, #2031, #2013). `moment` is one of ten
+  // fixed values. The `count` and `rank` the #2013 moments carry are left
+  // out: they are read from the BigQuery export.
   { parameterName: 'moment', displayName: 'Celebration moment' },
   // A web visitor handed to a store (issue #1759). `store` is the listing; the
   // page it was followed from rides on the shared `surface` registered above.

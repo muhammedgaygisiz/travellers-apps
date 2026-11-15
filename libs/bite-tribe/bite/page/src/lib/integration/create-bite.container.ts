@@ -22,6 +22,7 @@ import type { Geopoint } from 'model';
       [position]="service.position()"
       [image]="service.image() || ''"
       [isNew]="true"
+      [descriptionGenerator]="service.descriptionGenerator"
       [nearbyRestaurants]="service.nearbyRestaurants() || []"
       [suggestedTags]="service.tagSuggestionsForEditingBite() || []"
       [taggableUsers]="service.taggableUsers()"

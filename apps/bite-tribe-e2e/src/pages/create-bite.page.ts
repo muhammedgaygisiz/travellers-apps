@@ -39,6 +39,7 @@ export class CreateBitePage {
   readonly ateWithCandidates: Locator;
   readonly ateWithChips: Locator;
   readonly copiedPriceHint: Locator;
+  readonly generateDescription: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -106,6 +107,8 @@ export class CreateBitePage {
     );
     // The date under a copied price older than 30 days (issue #2018).
     this.copiedPriceHint = page.getByTestId('copied-price-hint');
+    // The AI description action in the Description field's notch (issue #2030).
+    this.generateDescription = page.getByTestId('generate-description');
   }
 
   /**

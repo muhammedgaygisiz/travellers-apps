@@ -24,6 +24,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [storedPhotoPosition]="service.storedPhotoPosition()"
       [googlePlaces]="service.googlePlaces()"
       [googlePlacesLoading]="service.googlePlacesLoading()"
+      [descriptionGenerator]="service.descriptionGenerator"
       (submitBite)="service.submitEditedBite($event)"
       (placeChange)="onPlaceChange($event)"
       (searchGooglePlaces)="service.searchGooglePlaces($event)"

@@ -25,6 +25,7 @@ const Mock = {
   currency: (): string => 'EUR',
   hasOwnBites: jest.fn(),
   markTriedOutInBucketlists: jest.fn(),
+  generateDescription: jest.fn(),
 };
 
 const LoadingMock = {
@@ -572,6 +573,62 @@ describe('BiteService', () => {
       await service.submitNewBite({ id: '', name: 'Test Bite' });
 
       expect(Mock.markTriedOutInBucketlists).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('descriptionGenerator (issue #2030)', () => {
+    const inputs = { dishName: 'Mantı', language: 'de' };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns the description and counts a success', async () => {
+      Mock.generateDescription.mockResolvedValue({
+        status: 'ok',
+        description: 'Kleine Teigtaschen mit Joghurt.',
+      });
+
+      await expect(
+        service.descriptionGenerator(inputs, 'create'),
+      ).resolves.toBe('Kleine Teigtaschen mit Joghurt.');
+      expect(Mock.generateDescription).toHaveBeenCalledWith(inputs);
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteDescriptionGenerated,
+        { result: 'success', mode: 'create' },
+      );
+      expect(ToastMock.present).not.toHaveBeenCalled();
+    });
+
+    it('tells the user the day’s limit is used up', async () => {
+      Mock.generateDescription.mockResolvedValue({ status: 'limit' });
+
+      await expect(
+        service.descriptionGenerator(inputs, 'edit'),
+      ).resolves.toBeUndefined();
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'description-limit-reached',
+        outcome: 'failure',
+      });
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteDescriptionGenerated,
+        { result: 'limit_reached', mode: 'edit' },
+      );
+    });
+
+    it('tells the user no description could be written', async () => {
+      Mock.generateDescription.mockResolvedValue({ status: 'unavailable' });
+
+      await service.descriptionGenerator(inputs, 'create');
+
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'description-unavailable',
+        outcome: 'failure',
+      });
+      expect(AnalyticsMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.BiteDescriptionGenerated,
+        { result: 'error', mode: 'create' },
+      );
     });
   });
 });

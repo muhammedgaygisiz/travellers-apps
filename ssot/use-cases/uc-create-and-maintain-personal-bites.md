@@ -128,6 +128,7 @@ rest of the product reads.
 - User can post the Bite and stay on the form to add another Bite at the same place. Restaurant, currency, position, and the `Ate with` picks stay; image, dish name, price, rating, description, and tags reset, and the tags of the Bites already posted in that session become suggestions.
 - The user's first Bite is celebrated instead of confirmed: a short confetti burst and `Your first Bite is in!` replace the ordinary `Bite created successfully!` toast, on the post path and the add-another path alike, where the burst plays over the form. Whether it is the first is asked before the create, from the profile's `biteCount` when it counts a Bite and otherwise from Firestore for a single Bite of the user's. The store cannot answer: it holds the user's own Bites only once My Bites or My Profile has loaded them. Nothing is stored, so deleting the only Bite and posting again celebrates again, which epic [#1741] accepts. When the answer cannot be told - signed out, or the read failed - the ordinary toast is shown, and a failed create celebrates nothing. See GitHub issue [#1796] and the Celebration Rule in [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
 - Every later Bite is confirmed in sight, touch and sound together: the `Bite created successfully!` toast, its `success` haptic and the `posted` sound arrive at once, on the post path and the add-another path alike. The sound is fired and not awaited, so it never holds up the toast or the navigation. A first Bite plays no `posted` sound because the celebration takes its place and plays the `celebration` sound instead (issue [#1846]), and a failed create or an edit plays none. The phone's silent mode and the `Sounds` setting keep it quiet. See GitHub issue [#1845] and the Sound Rule in [Architecture - Capacitor](../architecture/capacitor.md#sound-rule).
+- User can ask for a description. **Generate**, a text button in the notch of the Description field, sends the dish name, the restaurant, the position and the photo to a Cloud Function that has Gemini write one sentence in the app language, explaining what the dish is. It is disabled until there is a dish name, shows `Generating…` while it runs, and asks before replacing a description the user wrote; a description it wrote and the user left as it is may be replaced without asking, for another version. Ten per user per UTC day, free for now and a Pro feature once Pro ships. The same button is on the edit form. When nothing comes back, or the day's ten are used, a toast says so and the field is left as it was. See GitHub issue [#2030] and [Architecture - AI](../architecture/ai.md).
 - User can edit the Bite later.
 - My Bites shows the total number of the user's Bites as a badge next to its title. It is the total, not the length of the list underneath: a filter narrows the list but never the badge. It is counted the way the profile header counts, from the user document's `biteCount` aggregate raised to the number of loaded Bites when that is higher (`totalBiteCount`), so the two surfaces never report different numbers. The badge is not shown while the Bites are still loading. See GitHub issue [#1783].
 
@@ -164,6 +165,8 @@ each under App Functionality.
 - `searchNearbyPlaces`
 - Shared restaurant selector.
 - Bite page suspicious price validation.
+- `generateBiteDescription` callable and its unit tests: the daily limit, the allowance given back on failure, the photo read from our own bucket only.
+- Bite page unit tests for Generate: disabled without a dish name, the replace prompt, the `description_source` sent with the Bite.
 - Playwright create-Bite E2E smoke coverage.
 - Playwright My Bites count E2E coverage: a Bite posted in the same session raises the title badge by one without a reload. See GitHub issue [#1783].
 - Playwright photo-upload-status E2E coverage: the poster-only wait message, the
@@ -199,6 +202,7 @@ each under App Functionality.
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#2018] added `Copy Bite` on another member's Bite, the copied-price date, and the automatic Bucket List tick on posting a copy.
 - Issue [#2035] made the price field show the currency code, after the Bosnia-Herzegovina convertible mark left the input 0px wide on a phone, and opens the shared currency selector on the selected currency.
+- Issue [#2030] added **Generate** for an AI-written description, the first AI feature; see [Architecture - AI](../architecture/ai.md).
 - Issue [#1290] stores the photo's position at `bites/{biteId}/authorPrivate/{uid}`, readable by the author alone, so `Aus Bild` is offered again when the Bite is edited. Classified `[Secondary]`.
 
 ## Related Domains
@@ -239,3 +243,4 @@ each under App Functionality.
 [#1917]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1917
 [#2018]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2018
 [#2035]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2035
+[#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030

@@ -4,6 +4,7 @@ Structural constraints: what the system is made of and what is not allowed to cr
 
 Part of the [SSOT index](../README.md).
 
+- [Architecture - AI](ai.md)
 - [Architecture - Analytics](analytics.md)
 - [Architecture - Auth](auth.md)
 - [Architecture - Capacitor](capacitor.md)

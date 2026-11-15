@@ -271,6 +271,24 @@ rather than assumed:
 - **No new identifier.** The events carry no uid of their own; the user link
   is the existing `setUserId`.
 
+### The AI Description Changes No Declaration
+
+**Generate** on the Bite form (issue [#2030], [Architecture - AI](../architecture/ai.md)) sends the
+dish name, restaurant, position and photo the form holds to a Cloud Function,
+which passes them to Gemini on Vertex AI. Checked against the table rather
+than assumed:
+
+- **Not shared.** Google Cloud processes the data on BiteTribe's behalf, as
+  it already does for Firestore and Storage. Play excludes transfers to a
+  service provider acting for the developer from "shared", and Apple counts
+  such a processor's handling as BiteTribe's own collection.
+- **Nothing new collected.** Photos and Precise Location are already declared
+  under App Functionality, and the dish name and restaurant are part of the
+  Bite the user is about to post. The answer is not stored; the only new
+  record is a per-user count of the day's descriptions.
+- **The privacy policy names it.** Its third-party services list gained a
+  Gemini entry saying what is sent and when.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -348,3 +366,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
 [#1864]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1864
+[#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030

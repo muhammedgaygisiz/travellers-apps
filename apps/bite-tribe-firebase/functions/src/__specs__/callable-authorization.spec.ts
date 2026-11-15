@@ -172,6 +172,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // the consumer app.
   blockUser: 'member',
   checkDisplayNameAvailability: 'member',
+  // Spends billed Vertex AI quota for the caller's own Bite form (issue #2030),
+  // so a table guest's anonymous session is not enough.
+  generateBiteDescription: 'member',
   claimDisplayName: 'member',
   countUsers: 'member',
   deleteOwnAccount: 'member',

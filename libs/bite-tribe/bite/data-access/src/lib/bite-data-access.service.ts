@@ -1,3 +1,4 @@
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import {
   computed,
   inject,
@@ -50,6 +51,25 @@ export const STALLED_UPLOAD_TIMEOUT_MS = 30 * 1000;
  * produces.
  */
 const STALLED_UPLOAD_ERROR_CODE = 'stalled';
+
+/** What the Bite form sends to have a description written (issue #2030). */
+export interface DescriptionRequest {
+  dishName: string;
+  restaurantName?: string;
+  latitude?: number;
+  longitude?: number;
+  /** A photo not uploaded yet, as a shrunk JPEG data URL. */
+  image?: string;
+  /** The download URL of an uploaded photo, when editing. */
+  imageUrl?: string;
+  language: string;
+}
+
+/** What `generateBiteDescription` answers. */
+export type DescriptionResult =
+  | { status: 'ok'; description: string }
+  | { status: 'limit' }
+  | { status: 'unavailable' };
 
 @Injectable({ providedIn: 'root' })
 export class BiteDataAccessService {
@@ -536,5 +556,28 @@ export class BiteDataAccessService {
 
   getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {
     return this.api.getCurrencyByPosition(position);
+  }
+
+  /**
+   * Asks the backend for a description of the dish (issue #2030). A call that
+   * fails - offline, App Check, the function - reads as unavailable, so the
+   * form never breaks over it.
+   */
+  async generateDescription(
+    request: DescriptionRequest,
+  ): Promise<DescriptionResult> {
+    try {
+      const result = await FirebaseFunctions.callByName<
+        DescriptionRequest,
+        DescriptionResult
+      >({
+        name: 'generateBiteDescription',
+        data: request,
+      });
+
+      return result.data ?? { status: 'unavailable' };
+    } catch {
+      return { status: 'unavailable' };
+    }
   }
 }

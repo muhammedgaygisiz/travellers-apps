@@ -289,7 +289,9 @@ const biteSources = (): string[] => {
 /** The `source` values the taxonomy will accept on `bite_created`. */
 const taxonomySources = (): string[] => {
   const source = readFileSync(ANALYTICS_EVENTS, 'utf8');
-  const entry = /\[AnalyticsEvent\.BiteCreated\]: \{ source:([^}]*)\};/.exec(
+  // The declaration spans lines since `description_source` joined it
+  // (issue #2030); the sources are the union on its `source` line.
+  const entry = /\[AnalyticsEvent\.BiteCreated\]: \{\s*source:([^;]*);/.exec(
     source,
   );
 

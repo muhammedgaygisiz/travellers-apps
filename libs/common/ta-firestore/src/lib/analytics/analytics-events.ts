@@ -31,6 +31,7 @@ export const AnalyticsEvent = {
   AccountDeletionFailed: 'account_deletion_failed',
   // Creation
   BiteCreated: 'bite_created',
+  BiteDescriptionGenerated: 'bite_description_generated',
   BiteImageUploaded: 'bite_image_uploaded',
   BiteImageUploadFailed: 'bite_image_upload_failed',
   BiteImageUploadRetried: 'bite_image_upload_retried',
@@ -141,7 +142,19 @@ export interface AnalyticsEventParamMap {
    * `scope:bite-tribe` - and compared against it as text by
    * `analytics-events.spec.ts`.
    */
-  [AnalyticsEvent.BiteCreated]: { source: 'visit' | 'menu' | 'manual' };
+  /**
+   * `description_source` (issue #2030): whether the posted description came
+   * from **Generate** as it was, edited after it, typed by hand, or is empty.
+   */
+  [AnalyticsEvent.BiteCreated]: {
+    source: 'visit' | 'menu' | 'manual';
+    description_source?: 'generated' | 'generated_edited' | 'manual' | 'none';
+  };
+  /** Every tap of **Generate** on the Bite form (issue #2030). */
+  [AnalyticsEvent.BiteDescriptionGenerated]: {
+    result: 'success' | 'error' | 'limit_reached';
+    mode: 'create' | 'edit';
+  };
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };
   [AnalyticsEvent.BiteImageUploadRetried]: never;
@@ -581,6 +594,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.AccountDeletionCompleted]: 'consumer',
   [AnalyticsEvent.AccountDeletionFailed]: 'consumer',
   [AnalyticsEvent.BiteCreated]: 'consumer',
+  [AnalyticsEvent.BiteDescriptionGenerated]: 'consumer',
   [AnalyticsEvent.BiteImageUploaded]: 'consumer',
   [AnalyticsEvent.BiteImageUploadFailed]: 'consumer',
   [AnalyticsEvent.BiteImageUploadRetried]: 'consumer',

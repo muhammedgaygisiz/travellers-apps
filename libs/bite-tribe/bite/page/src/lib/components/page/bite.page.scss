@@ -53,6 +53,41 @@
   .position-field {
     margin-bottom: 0.5rem;
   }
+
+  // The AI description action (#2030): a clear button sitting in a notch of
+  // the outlined field's top border, opposite the label.
+  .description {
+    position: relative;
+  }
+
+  .generate-description {
+    position: absolute;
+    top: -0.6rem;
+    right: 0.75rem;
+    z-index: 3; // above the outlined ion-textarea, which sits at 2
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.375rem;
+    border: 0;
+    background: var(--ion-background-color, #fff);
+    color: var(--ion-color-primary);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2rem;
+
+    &:disabled {
+      color: var(--ion-color-medium);
+      opacity: 0.6;
+    }
+
+    ion-icon,
+    ion-spinner {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
 }
 
 ion-modal {

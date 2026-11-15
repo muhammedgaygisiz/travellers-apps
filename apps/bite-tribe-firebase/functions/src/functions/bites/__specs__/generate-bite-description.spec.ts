@@ -214,6 +214,54 @@ describe('generateBiteDescription', () => {
   });
 });
 
+describe('generateBiteDescription outside production', () => {
+  const env = { ...process.env };
+
+  beforeEach(() => {
+    store.clear();
+    jest.mocked(generateWithGemini).mockReset();
+  });
+
+  afterEach(() => {
+    process.env = { ...env };
+  });
+
+  it('answers a sample text on QA without calling the model, and still counts it', async () => {
+    process.env['GCLOUD_PROJECT'] = 'bite-tribe-qa';
+
+    await expect(handler(member({ dishName: 'Mantı' }))).resolves.toEqual({
+      status: 'ok',
+      description:
+        '[QA] Sample description for Mantı. No AI is called outside production.',
+    });
+    expect(generateWithGemini).not.toHaveBeenCalled();
+    expect(store.get('aiUsage/ana')).toEqual({ day: today, descriptions: 1 });
+  });
+
+  it('answers a sample text in the emulator', async () => {
+    process.env['FUNCTIONS_EMULATOR'] = 'true';
+
+    await expect(handler(member({ dishName: 'Burek' }))).resolves.toEqual({
+      status: 'ok',
+      description:
+        '[DEV] Sample description for Burek. No AI is called outside production.',
+    });
+    expect(generateWithGemini).not.toHaveBeenCalled();
+  });
+
+  it('keeps the daily limit, so the limit message can be tested on QA', async () => {
+    process.env['GCLOUD_PROJECT'] = 'bite-tribe-qa';
+    store.set('aiUsage/ana', {
+      day: today,
+      descriptions: DAILY_DESCRIPTION_LIMIT,
+    });
+
+    await expect(handler(member({ dishName: 'Burek' }))).resolves.toEqual({
+      status: 'limit',
+    });
+  });
+});
+
 describe('input checks', () => {
   it('accepts only a JPEG or PNG data URL', () => {
     expect(imageFromDataUrl('data:image/png;base64,AAAA')).toEqual({

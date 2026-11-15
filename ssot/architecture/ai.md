@@ -40,6 +40,16 @@ for `responseMimeType: application/json` with a `responseSchema`, so the answer
 is parsed rather than scraped, and any failure - quota, network, a non-JSON or
 empty answer - is a `GeminiUnavailableError`.
 
+## Outside Production
+
+QA (`bite-tribe-qa`) and the emulator never call the model.
+`resolveDeploymentStage` decides, and the function answers
+`sampleDescription`: `[QA] Sample description for <dish>. No AI is called
+outside production.` (`[DEV]` in the emulator). Neither needs the Vertex AI
+API, credentials or billing, and a test run spends nothing. The daily limit
+still counts, so the limit message can be tested there. What the model writes
+is seen only in production.
+
 ## The Model
 
 `gemini-3.5-flash-lite` on the `global` endpoint, the cheapest tier, picked on
@@ -117,7 +127,5 @@ libs/bite-tribe/bite/page/src/lib/components/page/utils/shrink-image-for-descrip
   the `Vertex AI User` role). The samples on [#2030] ran against the API with
   a user's credentials, not the function's.
 - There is no budget alert yet; the token logs are the only cost signal.
-- Local runs need `gcloud auth application-default login`; without it the
-  emulated function answers `unavailable`.
 
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030

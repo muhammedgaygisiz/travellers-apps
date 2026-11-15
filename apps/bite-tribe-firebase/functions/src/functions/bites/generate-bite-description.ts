@@ -5,6 +5,10 @@ import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import {
+  DeploymentStage,
+  resolveDeploymentStage,
+} from '../shared/utils/deployment-stage';
+import {
   GeminiImage,
   generateWithGemini,
   GeminiUnavailableError,
@@ -196,6 +200,18 @@ const imageFromStorage = async (
     : { mimeType: 'image/jpeg', data: buffer.toString('base64') };
 };
 
+/**
+ * The answer outside production (issue #2030): QA and the emulator do not
+ * call Gemini, so they need neither Vertex AI nor credentials and spend
+ * nothing. The text names the stage and the dish, so a tester sees that the
+ * call went through and that no model wrote it.
+ */
+export const sampleDescription = (
+  stage: Exclude<DeploymentStage, 'production'>,
+  dishName: string,
+): string =>
+  `[${stage.toUpperCase()}] Sample description for ${dishName}. No AI is called outside production.`;
+
 /** What the model is told about this Bite, besides the photo. */
 export const describeInputs = (
   dishName: string,
@@ -221,6 +237,7 @@ export const describeInputs = (
  * A member may generate {@link DAILY_DESCRIPTION_LIMIT} per UTC day; a call
  * that produces nothing gives its allowance back. The answer is a suggestion
  * the user edits before posting: nothing is stored besides the day's count.
+ * Outside production it answers {@link sampleDescription} instead.
  */
 export const generateBiteDescription = onAppCheck<
   GenerateBiteDescriptionRequest,
@@ -241,6 +258,12 @@ export const generateBiteDescription = onAppCheck<
     logger.info('generateBiteDescription: daily limit reached', { uid });
 
     return { status: 'limit' };
+  }
+
+  const stage = resolveDeploymentStage();
+
+  if (stage !== 'production') {
+    return { status: 'ok', description: sampleDescription(stage, dishName) };
   }
 
   try {

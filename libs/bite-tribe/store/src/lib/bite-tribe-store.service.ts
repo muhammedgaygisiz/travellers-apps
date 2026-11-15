@@ -50,6 +50,7 @@ import {
   hasErrorLoadingBites,
   hasErrorLoadingGpsPosition,
   isBitesLoading,
+  isOwnBitesLoading,
   isPublicProfile,
   isReloadingHome,
   locationPermissionState,
@@ -160,6 +161,7 @@ export class BiteTribeStoreService implements StoreService {
   selectedBucketlistTitle$ = this.store.select(selectedBucketlistTitle);
   isAuthenticated$ = this.store.select(fromAuth.selectIsAuthenticated);
   isBitesLoading$ = this.store.select(isBitesLoading);
+  isOwnBitesLoading$ = this.store.select(isOwnBitesLoading);
   homeFilters$ = this.store.select(homeFilters);
   homeDistance$ = this.store.select(homeDistance);
   profileMetadata$ = this.store.select(profileMetadata);

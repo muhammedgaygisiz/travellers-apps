@@ -18,7 +18,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
       [userId]="service.userId()"
       [showHeaderMenu]="false"
       [showSpinner]="true"
-      [isBitesLoading]="service.isBitesLoading()"
+      [isBitesLoading]="service.isOwnBitesLoading()"
       [isReloading]="service.isReloading()"
       [hasErrorLoadingGpsPosition]="service.hasErrorLoadingGpsPosition()"
       [locationPermissionState]="service.locationPermissionState()"

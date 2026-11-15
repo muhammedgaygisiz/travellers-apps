@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
@@ -143,6 +143,43 @@ describe(BiteEffects.name, () => {
             expected,
             output,
           );
+        });
+      });
+    });
+
+    // GitHub issue #2073: a failed read ends My Bites' loading state instead
+    // of leaving it under a skeleton, and the effect survives for the next one.
+    describe('given the read fails', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(storeService, 'user')
+          .mockReturnValue({ uid: 'me' } as unknown as ReturnType<
+            typeof storeService.user
+          >);
+        jest
+          .spyOn(apiService, 'bitesByUser')
+          .mockReturnValueOnce(
+            throwError(() => new Error('offline')) as unknown as ReturnType<
+              BiteTribeApiService['bitesByUser']
+            >,
+          );
+      });
+
+      it('should report the failure and load on the next entry', () => {
+        scheduler.run(({ cold, expectObservable }) => {
+          const entry = routerNavigatedAction({
+            payload: {
+              event: { urlAfterRedirects: PATH.MY_BITES },
+            } as unknown as Parameters<
+              typeof routerNavigatedAction
+            >[0]['payload'],
+          });
+          actions$ = cold('a-b', { a: entry, b: entry });
+
+          expectObservable(effects.loadBitesByCurrentUser$).toBe('a-b', {
+            a: BiteActions.errorLoadingByUserFromAPI(),
+            b: BiteActions.loadedByUserFromAPI({ bites: [] }),
+          });
         });
       });
     });

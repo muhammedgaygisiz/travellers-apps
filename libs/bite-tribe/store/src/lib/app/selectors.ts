@@ -35,6 +35,12 @@ export const preferredCurrency = createSelector(
   (settings) => settings?.currency || 'EUR',
 );
 
+/** The signed-in user's own Bites are being read (GitHub issue #2073). */
+export const isOwnBitesLoading = createSelector(
+  slice,
+  (state) => !!state?.loading?.ownBites,
+);
+
 export const isReloadingHome = createSelector(
   slice,
   (state) => !!state?.reloading?.home,

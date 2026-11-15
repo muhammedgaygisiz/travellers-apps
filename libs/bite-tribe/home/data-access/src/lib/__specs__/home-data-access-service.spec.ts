@@ -83,6 +83,7 @@ class StoreMock {
   selectedBucketlistTitle$ = of('');
   isAuthenticated$ = of(false);
   isBitesLoading$ = of(true);
+  isOwnBitesLoading$ = of(false);
   homeDistance$ = of(null);
   exchangeRates$ = of({});
   preferedCurrency$ = of('EUR');

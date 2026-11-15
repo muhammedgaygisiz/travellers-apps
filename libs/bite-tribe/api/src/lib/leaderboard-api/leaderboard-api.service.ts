@@ -16,6 +16,11 @@ export const WEEKLY_LEADERBOARD = 'meta/leaderboardWeekly';
 /** One ranked user as the weekly board stores them. */
 export interface WeeklyLeaderboardEntry {
   userId: string;
+  /**
+   * The name the board shows, empty when the entry carries none. Named by the
+   * user who passes them (issue #2016).
+   */
+  displayName: string;
   /** The Bites the user created in this week, not the all-time count. */
   biteCount: number;
 }
@@ -79,8 +84,10 @@ const toWeeklyLeaderboard = (
 
   return {
     week: data['week'],
-    users: users
-      .filter(isEntry)
-      .map(({ userId, biteCount }) => ({ userId, biteCount })),
+    users: users.filter(isEntry).map(({ userId, displayName, biteCount }) => ({
+      userId,
+      displayName: typeof displayName === 'string' ? displayName : '',
+      biteCount,
+    })),
   };
 };

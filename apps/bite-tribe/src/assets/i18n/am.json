@@ -321,6 +321,7 @@
   "bite-milestone": "{{count}} ባይቶች! ያ ብዙ ጥሩ ምግብ ነው።",
   "bite-milestone-thousand": "{{count}} ባይቶች! እርስዎ እውነተኛ የምግብ አፍቃሪ ጀግና ነዎት።",
   "leaderboard-top-ten": "ከምርጥ አሥሩ ውስጥ ገብተዋል፣ በደረጃ #{{rank}}!",
+  "leaderboard-overtake": "{{user}}ን አልፈዋል፣ አሁን በደረጃ #{{rank}} ላይ ነዎት!",
   "onboarding-finished": "ወደ ጎሳው እንኳን በደህና መጡ!",
   "first-follow": "አሁን {{user}}ን ይከተላሉ። ወደዚህ የምግብ ጉዞ እንኳን በደህና መጡ!",
   "bite-trail-completed": "በ{{trail}} ላይ ያሉትን ሁሉንም ባይቶች ቀምሰዋል!",

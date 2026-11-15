@@ -312,7 +312,7 @@ Where each moment is wired:
 | `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                           | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
 | `bite-milestone`       | `celebrateProfileProgress$` in the store's `AppEffect`   | `reachedBiteMilestone`: a later snapshot whose `biteCount` crosses 5, 10, 50, 100 or a further hundred; the highest   | [#2014] |
 | `leaderboard-top-ten`  | `celebrateLeaderboardTopTen$` in the store's `AppEffect` | `enteredTopTen`: a later **This week** snapshot newly lists the user, above the most they had unlisted; once a week   | [#2015] |
-| `leaderboard-overtake` | Not wired yet                                            | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
+| `leaderboard-overtake` | `celebrateLeaderboardTopTen$` in the store's `AppEffect` | `overtookInTopTen`: a later **This week** snapshot ranks the user higher after their count rose, above the one passed | [#2016] |
 
 `first-country` was the first moment that is not a direct reaction to a tap:
 the backend sets the country seconds after the post, so the store keeps the
@@ -349,6 +349,18 @@ therefore celebrates nothing. `claimTopTenWeek` keeps the week in
 celebrated again. Only the **This week** board celebrates; **All time**
 celebrates nothing. Right after the Monday reset one Bite can be enough, which
 the epic accepts.
+
+`leaderboard-overtake` ([#2016]) reads the same listener in the same effect and
+opens no second one. `overtookInTopTen` answers the user's new rank and the
+display name of the user directly below them when both snapshots are of the
+same week and list the user, their rank improved, their own weekly count rose,
+and the user below was above them before and now has strictly fewer Bites. A
+tie, a climb made by somebody else losing Bites, and a new week answer nothing.
+It is asked only when `enteredTopTen` answered nothing, so one snapshot never
+celebrates both, and it remembers nothing: each Bite that passes someone plays
+it. The name comes from the board entry's `displayName`, which
+`weeklyLeaderboard$` now carries; an entry without one celebrates nothing.
+Only the user who climbed celebrates - the user passed is told nothing.
 
 **The share image names a first afterwards, by a different route.** The two
 moments that belong to one Bite, `first-bite` and `first-country`, can be named
@@ -438,4 +450,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
+[#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

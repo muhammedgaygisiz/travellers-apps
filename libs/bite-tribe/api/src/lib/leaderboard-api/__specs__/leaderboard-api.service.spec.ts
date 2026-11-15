@@ -60,7 +60,7 @@ describe(LeaderboardApiService.name, () => {
     subscription.unsubscribe();
   });
 
-  it('delivers the week and each ranked user’s id and weekly count, in order', () => {
+  it('delivers the week and each ranked user’s id, display name and weekly count, in order', () => {
     const boards: WeeklyLeaderboardSnapshot[] = [];
     const subscription = api.weeklyLeaderboard$.subscribe((board) =>
       boards.push(board),
@@ -87,8 +87,8 @@ describe(LeaderboardApiService.name, () => {
       {
         week: '2026-11-09',
         users: [
-          { userId: 'a', biteCount: 4 },
-          { userId: 'b', biteCount: 2 },
+          { userId: 'a', displayName: 'A', biteCount: 4 },
+          { userId: 'b', displayName: '', biteCount: 2 },
         ],
       },
     ]);

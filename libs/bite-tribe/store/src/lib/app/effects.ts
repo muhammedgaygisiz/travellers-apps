@@ -9,6 +9,7 @@ import {
   filter,
   from,
   map,
+  of,
   pairwise,
   switchMap,
   take,
@@ -46,6 +47,7 @@ import { newCountryCode } from './utils/new-country-codes';
 import { reachedBiteMilestone } from './utils/bite-milestone';
 import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
 import { claimTopTenWeek, enteredTopTen } from './utils/entered-top-ten';
+import { overtookInTopTen } from './utils/overtook-in-top-ten';
 import type { WeeklyBadge } from 'model';
 
 @Injectable()
@@ -180,8 +182,8 @@ export class AppEffect {
   );
 
   /**
-   * Celebrates entering the weekly leaderboard's top ten while the app runs
-   * (issue #2015).
+   * Celebrates entering the weekly leaderboard's top ten, and passing somebody
+   * inside it, while the app runs (issues #2015 and #2016).
    *
    * `rebuildWeeklyLeaderboard` rewrites `/meta/leaderboardWeekly` seconds
    * after `incrementBiteCountOnBiteCreate` counts a Bite, and every member may
@@ -191,8 +193,13 @@ export class AppEffect {
    * `celebrateProfileProgress$`. The first snapshot after sign-in only sets the
    * baseline; signing out removes the listener. See `enteredTopTen` for what
    * counts as entering - a place freed by somebody else does not - and
-   * `claimTopTenWeek` for why it plays at most once per week. Only the
-   * **This week** board celebrates; All time celebrates nothing.
+   * `claimTopTenWeek` for why it plays at most once per week.
+   *
+   * The same listener celebrates passing somebody inside the top ten (issue
+   * #2016) - see `overtookInTopTen` - and opens no second one. A snapshot that
+   * celebrates entering never also celebrates a pass, and only the user who
+   * climbed celebrates: being passed shows nothing. Only the **This week**
+   * board celebrates; All time celebrates nothing.
    * `CelebrationService` lets a higher moment of the same Bite win.
    */
   celebrateLeaderboardTopTen$ = createEffect(
@@ -211,19 +218,29 @@ export class AppEffect {
             concatMap(([previous, current]) => {
               const rank = enteredTopTen(previous, current, uid);
 
-              if (rank === undefined) {
-                return EMPTY;
+              if (rank !== undefined) {
+                return from(claimTopTenWeek(uid, current.week)).pipe(
+                  filter(Boolean),
+                  map(() => ({
+                    moment: 'leaderboard-top-ten' as const,
+                    params: { rank } as Record<string, unknown>,
+                  })),
+                );
               }
 
-              return from(claimTopTenWeek(uid, current.week)).pipe(
-                filter(Boolean),
-                map(() => rank),
-              );
+              const overtake = overtookInTopTen(previous, current, uid);
+
+              return overtake
+                ? of({
+                    moment: 'leaderboard-overtake' as const,
+                    params: { ...overtake } as Record<string, unknown>,
+                  })
+                : EMPTY;
             }),
           );
         }),
-        tap((rank) => {
-          void this.celebration.celebrate('leaderboard-top-ten', { rank });
+        tap(({ moment, params }) => {
+          void this.celebration.celebrate(moment, params);
         }),
       ),
     { dispatch: false },

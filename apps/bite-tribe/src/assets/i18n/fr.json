@@ -321,6 +321,7 @@
   "bite-milestone": "{{count}} Bites ! Ça fait beaucoup de bons plats.",
   "bite-milestone-thousand": "{{count}} Bites ! Tu es une vraie légende des foodies.",
   "leaderboard-top-ten": "Tu es dans le top 10, à la place n° {{rank}} !",
+  "leaderboard-overtake": "Tu as dépassé {{user}} et tu es maintenant n° {{rank}} !",
   "onboarding-finished": "Bienvenue dans la tribu !",
   "first-follow": "Vous suivez maintenant {{user}}. Bienvenue dans son voyage culinaire !",
   "bite-trail-completed": "Vous avez goûté tous les Bites de {{trail}} !",

@@ -1,6 +1,3 @@
-import type { PublicUser } from 'model';
-import { filter, map, OperatorFunction, pairwise, pipe } from 'rxjs';
-
 /** The codes as the profile flags read them: trimmed, upper case, once each. */
 const normalized = (countryCodes: string[] | null | undefined): string[] => [
   ...new Set(
@@ -31,19 +28,3 @@ export const newCountryCode = (
 
   return normalized(current).find((code) => !before.includes(code));
 };
-
-/**
- * Emits the country each later snapshot of the user's own profile adds. The
- * first snapshot only sets the baseline, so a start-up never celebrates codes
- * that were earned while the app was closed.
- */
-export const newCountryCodes = (): OperatorFunction<
-  Pick<PublicUser, 'countryCodes'>,
-  string
-> =>
-  pipe(
-    map((profile) => profile.countryCodes),
-    pairwise(),
-    map(([previous, current]) => newCountryCode(previous, current)),
-    filter((code): code is string => !!code),
-  );

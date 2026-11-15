@@ -87,7 +87,7 @@ computed from; what a notification about one of them says, and to whom, belongs 
   and `First Bite in a new country: {{country}}!`, with the country named in the
   user's language. The phone does not know the country when the post succeeds -
   `enrichBiteAddressOnWrite` derives it a few seconds later - so the store's
-  `celebrateFirstCountry$` keeps the user's own document listened to for the
+  `celebrateProfileProgress$` keeps the user's own document listened to for the
   session and celebrates when a snapshot adds a code to `countryCodes`. The first
   snapshot after sign-in only sets the baseline, a snapshot that adds several
   codes celebrates once, and a move into a new country counts like a post. Going
@@ -100,6 +100,20 @@ computed from; what a notification about one of them says, and to whom, belongs 
   neither app configures `presentationOptions` for `PushNotifications`, so the
   plugin presents nothing there. See GitHub issue [#1797] and the Celebration
   Rule in [Implementation - Ionic Patterns](../implementation/ionic-patterns.md).
+- A Bite-count milestone is celebrated in the app while it runs: the user's 5th,
+  10th, 50th and 100th Bite, and every further hundredth, play a short confetti
+  burst and `{{count}} Bites! That's a lot of good food.`, with the count written
+  in the user's language. Every thousandth plays the grand burst and
+  `{{count}} Bites! You're a true foodie legend.` instead. `biteCount` is raised
+  by `incrementBiteCountOnBiteCreate` seconds after the post, so the milestone is
+  read from the same listener as the country badge, never a second one: a
+  milestone is reached when one snapshot's `biteCount` is below it and the next
+  is at or above it. The first snapshot after sign-in only sets the baseline, a
+  snapshot that crosses several milestones celebrates the highest once, and a
+  drop celebrates nothing; deleting Bites and posting across a milestone again
+  replays it (epic [#2012]). The copy looks back at what the user reached and
+  never names the next milestone. It defers to a first Bite and a first country
+  by the precedence above. See GitHub issue [#2014].
 
 ## MVP Classification
 
@@ -126,7 +140,8 @@ them is collected in onboarding.
 - `awardWeeklyBadges`, `celebrateWeeklyAward$`, profile weekly badges
 - Profile country badges
 - `notifyOnNewCountryBadge`
-- `celebrateFirstCountry$` in the bite-tribe store's `AppEffect`
+- `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
+  `reachedBiteMilestone`
 
 ## Related GitHub Scope
 
@@ -159,6 +174,7 @@ them is collected in onboarding.
 - Issue [#1797] celebrates a new country badge in the app, part of epic [#1741].
 - Issue [#2013] holds the celebrations one Bite earns for a settling window and plays only the
   highest, and adds the grand burst for every thousandth Bite, part of epic [#2012].
+- Issue [#2014] celebrates the Bite-count milestones, part of epic [#2012].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -200,4 +216,5 @@ them is collected in onboarding.
 [#2032]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2032
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
+[#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043

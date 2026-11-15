@@ -318,6 +318,8 @@
   "bite-created-successfully": "Bite creato con successo!",
   "bite-created-first": "Il tuo primo Bite è online!",
   "country-badge-earned": "Primo Bite in un nuovo paese: {{country}}!",
+  "bite-milestone": "{{count}} Bite! È davvero tanto buon cibo.",
+  "bite-milestone-thousand": "{{count}} Bite! Sei una vera leggenda foodie.",
   "onboarding-finished": "Ti diamo il benvenuto nella tribù!",
   "first-follow": "Ora segui {{user}}. Ti diamo il benvenuto nel suo viaggio culinario!",
   "bite-trail-completed": "Hai provato tutti i Bite di {{trail}}!",

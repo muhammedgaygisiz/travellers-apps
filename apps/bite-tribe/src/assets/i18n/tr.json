@@ -318,6 +318,8 @@
   "bite-created-successfully": "Bite başarıyla oluşturuldu!",
   "bite-created-first": "İlk Bite'ın paylaşıldı!",
   "country-badge-earned": "Yeni bir ülkede ilk Bite'ın: {{country}}!",
+  "bite-milestone": "{{count}} Bite! Bu çok fazla güzel yemek demek.",
+  "bite-milestone-thousand": "{{count}} Bite! Sen gerçek bir yemek efsanesisin.",
   "onboarding-finished": "Kabileye hoş geldin!",
   "first-follow": "Artık {{user}} kullanıcısını takip ediyorsun. Bu lezzet yolculuğuna hoş geldin!",
   "bite-trail-completed": "{{trail}} listesindeki tüm Bite'ları denedin!",

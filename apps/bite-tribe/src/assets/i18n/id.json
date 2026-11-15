@@ -318,6 +318,8 @@
   "bite-created-successfully": "Bite berhasil dibuat!",
   "bite-created-first": "Bite pertamamu sudah masuk!",
   "country-badge-earned": "Bite pertamamu di negara baru: {{country}}!",
+  "bite-milestone": "{{count}} Bite! Itu banyak sekali makanan enak.",
+  "bite-milestone-thousand": "{{count}} Bite! Kamu benar-benar legenda kuliner.",
   "onboarding-finished": "Selamat datang di tribe!",
   "first-follow": "Kamu sekarang mengikuti {{user}}. Selamat bergabung dalam perjalanan kulinernya!",
   "bite-trail-completed": "Kamu sudah mencoba semua Bite di {{trail}}!",

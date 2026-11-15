@@ -53,8 +53,8 @@ export class ProfileApiService {
    * second registration overwrote the only id that could have removed the first
    * (issue #1310). Whoever subscribes now decides what that costs: the store
    * takes a single snapshot at login, and the listener goes with it, while
-   * `celebrateFirstCountry$` stays subscribed for the session to hear a new
-   * country code (issue #1797).
+   * `celebrateProfileProgress$` stays subscribed for the session to hear a new
+   * country code or Bite count (issues #1797 and #2014).
    *
    * A consumer that wants a live profile only has to stay subscribed. See
    * [[Architecture - State Management]] for what the store does instead.

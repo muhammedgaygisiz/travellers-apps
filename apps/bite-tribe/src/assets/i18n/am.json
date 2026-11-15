@@ -318,6 +318,8 @@
   "bite-created-successfully": "ባይት በተሳካ ሁኔታ ተፈጥሯል!",
   "bite-created-first": "የመጀመሪያው ባይትዎ ተለጥፏል!",
   "country-badge-earned": "በአዲስ ሀገር የመጀመሪያው ባይትዎ፦ {{country}}!",
+  "bite-milestone": "{{count}} ባይቶች! ያ ብዙ ጥሩ ምግብ ነው።",
+  "bite-milestone-thousand": "{{count}} ባይቶች! እርስዎ እውነተኛ የምግብ አፍቃሪ ጀግና ነዎት።",
   "onboarding-finished": "ወደ ጎሳው እንኳን በደህና መጡ!",
   "first-follow": "አሁን {{user}}ን ይከተላሉ። ወደዚህ የምግብ ጉዞ እንኳን በደህና መጡ!",
   "bite-trail-completed": "በ{{trail}} ላይ ያሉትን ሁሉንም ባይቶች ቀምሰዋል!",

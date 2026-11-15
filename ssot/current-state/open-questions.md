@@ -146,6 +146,28 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 - Should a creator be able to refuse image sharing of their Bites altogether, beyond choosing whether they are named (`UC-SBS` `R-31`)? Accepting the terms would otherwise be the only gate.
 - Does an image add any exposure that the Bite on screen does not? **Deferred to [#1772].** For now `UC-SBS` `R-3` lets a user share only their own Bites as images, so nobody else's Bite is exposed. When [#1772] widens the share, private creators and deleted accounts stay excluded, and the question left is whether a public creator's Bite that can be restricted in some other way needs the same exclusion.
 
+## Quality Goal Questions
+
+These belong to [#2067], under epic [#2063]. Each is settled with the maintainer before `Architecture - Quality` is written. The ranking is then recorded under `RD-QG` in [Recorded Decisions](../decisions/recorded-decisions.md), and a question leaves this section once it is answered there.
+
+- **Which qualities are BiteTribe's quality goals, and in which order?** At most five. The candidates are what the SSOT already requires without naming it a goal:
+  - responsiveness of the core flows: the feed resolves into Bites or a named failure within 15 s for the position and 20 s for the load, in [UC - Discover Bites](../use-cases/uc-discover-bites.md);
+  - working offline: the `Offline Write Rule` in [Architecture - Data Access](../architecture/data-access.md);
+  - security and trust: Firestore rules and App Check in [Architecture - Firebase](../architecture/firebase.md), and the principle that trust and safety are product foundations;
+  - international use: fourteen languages, per [Architecture - Internationalization](../architecture/internationalization.md);
+  - bounded cost: [Implementation - Performance Guidelines](../implementation/performance-guidelines.md);
+  - load size: the `Bundle Budget Rule` in [Architecture - Nx Workspace](../architecture/nx-workspace.md);
+  - explainability: the principle "Keep the system explainable" in [Principles](../product/principles.md).
+- **Is accessibility a goal, and against which standard?** No page states an accessibility requirement today. If it becomes a goal, its scenario needs a reference, for example a WCAG 2.2 level, and its evidence names what checks it.
+- **Is compatibility with the clients still in use a goal, or a release rule?** A merge to `develop` reaches the production backend at once, while native builds reach users only through a release, so older clients keep calling the backend. [#2065] records the risk. If it becomes a goal, its measure has to say how far back a client must keep working, for example the last N native releases or builds no older than a stated number of weeks.
+- **What are the targets where no number exists yet?** Each goal's scenario needs a measure. Open today:
+  - how fast a Bite is created and a Bite's details open, beyond the feed's 15 s and 20 s;
+  - whether the bundle's 500 kB warning is a target or only a signal, with 3 MB the ceiling;
+  - whether backend cost has a ceiling, per active user or per month;
+  - whether availability has a target beyond what Firebase provides.
+- **On which devices and network conditions are the scenarios measured?** [Current State - Release Candidate Test Charter](release-candidate-test-charter.md) names the devices, a Samsung SM-A566B and an iPhone 12 mini, but no network condition such as a slow or interrupted connection.
+- **Does test coverage measure a goal?** Coverage is reported and never fails a build, per `codecov.yml` and [Implementation - CI Pipeline](../implementation/ci-pipeline.md). A goal could require a floor for some projects, or coverage can stay informational and the goals be evidenced by named tests instead.
+
 ## Related Pages
 
 - [Current State - Roadmap](roadmap.md)
@@ -193,3 +215,6 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
+[#2063]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2063
+[#2065]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2065
+[#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067

@@ -1355,8 +1355,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026) was scheduled
-the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026) and Porto (16 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1604,6 +1603,22 @@ wears a Baba-Peranakan lace kebaya with a hibiscus hairpin and holds Hokkien
 noodles; the cover photo is the Old Town clock tower. Leela's cover line is
 "Skip the beach buffet: Phuket's Old Town eats are the real treasure". The
 city page `/eat/phuket` went up the same afternoon, with no aliases.
+
+**Porto** (16 November 2026, scheduled for 22:00) tags all five dish
+slides: `@cafe_santiago` (francesinha; bio gives Rua Passos Manuel 226,
+where the Bite's pin is), `@manteigaria.oficial` (pastéis de nata; the chain's
+official account, which lists Porto), `@pasteldebacalhau` (pastel de bacalhau
+with cheese; the chain's account, which lists Gaia, where this branch is, and
+names the Serra da Estrela cheese), `@laurearporto` (posta de bacalhau; "Portuguese
+Kitchen & GuestHouse in Porto") and `@timeoutmarketporto` (sopa de peixe; bio
+gives the São Bento station address, where the pin is). Portugal had 60 Bites,
+38 of them in and around Porto. Leela is dressed for the São João festival, with
+a paper-flower garland, a plastic hammer and a manjerico; the cover photo is the
+Ribeira from above. Leela's cover line is "In Porto, even the sandwich comes
+drowned in sauce". The city page `/eat/porto` went up the same night, with
+`oporto` as an alias. Adding its Bites needed two retries: the first
+search for "francesinha" came back empty, and "Laureado" matched a bife with
+the same sauce before the bacalhau.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

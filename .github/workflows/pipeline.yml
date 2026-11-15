@@ -18,9 +18,13 @@ permissions:
   actions: read
   contents: read
 
+# A newer push supersedes an older run of the same pull request. On develop it
+# never does: that run deploys, and cancelling it halfway left a function created
+# without its public invoker, which the next deploy then skipped as unchanged
+# (issue #2030). Develop runs queue instead.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CI: true
@@ -1130,8 +1134,8 @@ jobs:
       - deploy-firestore-indexes
       - tests
 
-    # Two function deploys must not overlap. The workflow-level group already
-    # supersedes an older run on the same ref; this one also covers a deploy
+    # Two function deploys must not overlap. The workflow-level group queues
+    # develop runs rather than cancelling them; this one also covers a deploy
     # started from a different run, and `cancel-in-progress: false` queues it
     # rather than killing a deploy halfway through.
     concurrency:

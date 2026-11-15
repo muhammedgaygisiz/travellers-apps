@@ -8,9 +8,9 @@ It exists because the format was previously only implicit. Forty `issue-*` pages
 
 ## Scope
 
-This page governs **GitHub issues**, and only issues.
+This page governs **GitHub issues**, epics included.
 
-- **Epics are excluded.** An `epic-*` page keeps its own shape.
+- **An epic is written in `Shape 3 - Epic`.** The rest of this page applies to an epic except where Shape 3 says otherwise.
 - **Use cases are excluded.** A `UC - *` page has its own format, defined in [Use Case Format](use-case-format.md), with its flow notation in [Actogram Format](actogram-format.md).
 - **It applies to issues created from 4 September 2026 onward.** Existing issues are not retrofitted. Updating an existing issue does not change its structure either: an issue keeps the shape it was filed with for its whole life, and only its content is edited.
 - **The SSOT does not mirror issues.** There is no `issue-*` page to keep in step with an issue body; for the current state of an issue, ask GitHub. What the SSOT keeps is the closing report, as a comment on the issue (see `Closing Report`) and, where the work produced a durable rule, on the page that owns it. Reports written before that rule was stated are in [records/](../history/records/README.md).
@@ -31,6 +31,8 @@ An issue title is `type(scope): description`, optionally prefixed with an ordina
 - `type` follows the vocabulary already in use: `feat`, `fix`, `refactor`, `docs`, `security`, `test`, `spec`, `launch`, `ci`, `perf`.
 - `scope` in parentheses names the app or library where the change lands, for example `feat(bite-tribe-admin)` or `fix(backend)`. It is omitted where the change has no single home, as in `docs:`.
 - `description` is lower case and states the outcome, not the task.
+
+An epic title is `epic: description`, lower case and stating the outcome, with no scope and no ordinal.
 
 ### The Ordinal
 
@@ -77,6 +79,30 @@ For a defect or a change already implemented. **The user-story form is not used.
 | `Open`                  | always   | What is still unverified, and why. "Nothing open." is a valid entry.       |
 | `App Store Review Area` | always   | See App Store Review Area below.                                           |
 | `Related Issues`        | always   | See Related Issues below.                                                  |
+
+## Shape 3 - Epic
+
+For an epic: an outcome larger than one issue, delivered by several issues. **It applies to epics filed after [#2004] was merged.** Existing epics keep the shape they were filed with, as issues do.
+
+The body opens with one or two sentences stating the outcome, before the first heading. It does not repeat the title as a heading and does not use the user-story sentence. INVEST applies to the epic's stories, not to the epic.
+
+| Section                 | When                                     | Content                                                                                                                                                                                                                                                                                                   |
+| ----------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Description`           | always                                   | The problem, the current state, and why this is an epic of its own and why now.                                                                                                                                                                                                                           |
+| `Goal`                  | always                                   | What is true once every story has landed.                                                                                                                                                                                                                                                                 |
+| `Scope`                 | always                                   | The areas the epic covers, one `###` per area, and in prose how it splits into stories. The stories themselves are not listed by number.                                                                                                                                                                  |
+| `Decisions`             | when a decision is already taken         | What was decided for the epic as a whole, and the options rejected.                                                                                                                                                                                                                                       |
+| `Open Questions`        | optional                                 | An open question is recorded in [Current State - Open Questions](../current-state/open-questions.md), which is where it is maintained. The epic may link to the ones that block one of its stories; it does not hold a question of its own. When a question is settled, the decision goes to `Decisions`. |
+| `Success Criteria`      | always                                   | Outcomes of the whole epic that can be checked once it is done. Not tasks, and not a copy of the stories' acceptance criteria.                                                                                                                                                                            |
+| `Validation`            | when a check spans more than one story   | A check that no single story owns, for example a rule-test suite that must cover every protected collection before the epic is done.                                                                                                                                                                      |
+| `Out Of Scope`          | when something was deliberately excluded | So the exclusion is not re-litigated.                                                                                                                                                                                                                                                                     |
+| `App Store Review Area` | always                                   | As for an issue. Where the stories differ, name which ones touch the review.                                                                                                                                                                                                                              |
+| `Related Issues`        | always                                   | `Depends on #1234` names another **epic**, with the reason. A single issue is named only when it blocks this epic and belongs to no epic. `Related to #1234` for everything else. An epic is never `Part of` another issue.                                                                               |
+
+- **An epic is the largest unit of work.** There is no level above it and no epic of epics: an epic is never part of another epic, and its children are issues, never epics. Work too large for one epic is split into several epics, which state their order with `Depends on`.
+- **Child issues are linked as native sub-issues**, never listed in the body; see [Sub-Issues](github-project-board-and-issue-handling.md#sub-issues). Each child also carries `Part of #<epic>` under `Related Issues`. A dependency that affects only one story is stated on that story, not on the epic.
+- **An epic carries no acceptance criteria.** Its stories carry the testable ones; the epic carries `Success Criteria`.
+- **When the last story is merged**, the epic gets a closing report in the `Closing Report` form below, covering the epic as a whole.
 
 ## Acceptance Criteria
 
@@ -130,6 +156,8 @@ A link states its kind, using one of three forms, in this order:
 - `Depends on #1234` - this issue cannot be merged before that one, with the reason stated. An ordinal alone does not survive someone picking issues off the board out of order.
 - `Part of #1234` - the owning epic.
 - `Related to #1234` - everything else: a superseded issue, a follow-up, or the existing issue found by the search rule below.
+
+An epic uses only `Depends on` and `Related to`, with the meaning its `Related Issues` row in `Shape 3 - Epic` gives them: there, `Depends on` names another epic. An epic is never `Part of` another issue.
 
 On GitHub, use `#1234`. In the SSOT, write it as a reference link - `[#1234]` in the text, with its definition at the end of the page.
 
@@ -190,3 +218,5 @@ Search for an existing issue on the same subject and link it rather than duplica
 - [Spec To Code Workflow](spec-to-code-workflow.md)
 - [Agent Operating Contract](agent-operating-contract.md)
 - [Current State - Open Questions](../current-state/open-questions.md)
+
+[#2004]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2004

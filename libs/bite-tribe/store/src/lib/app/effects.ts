@@ -45,6 +45,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { newCountryCode } from './utils/new-country-codes';
 import { reachedBiteMilestone } from './utils/bite-milestone';
 import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
+import { claimTopTenWeek, enteredTopTen } from './utils/entered-top-ten';
 import type { WeeklyBadge } from 'model';
 
 @Injectable()
@@ -173,6 +174,56 @@ export class AppEffect {
               count: milestone,
             });
           }
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Celebrates entering the weekly leaderboard's top ten while the app runs
+   * (issue #2015).
+   *
+   * `rebuildWeeklyLeaderboard` rewrites `/meta/leaderboardWeekly` seconds
+   * after `incrementBiteCountOnBiteCreate` counts a Bite, and every member may
+   * read it, so this keeps it listened to for the session and compares each
+   * snapshot with the one before. That costs one read per rewrite of the board
+   * per open app, the same posture as the user's own document in
+   * `celebrateProfileProgress$`. The first snapshot after sign-in only sets the
+   * baseline; signing out removes the listener. See `enteredTopTen` for what
+   * counts as entering - a place freed by somebody else does not - and
+   * `claimTopTenWeek` for why it plays at most once per week. Only the
+   * **This week** board celebrates; All time celebrates nothing.
+   * `CelebrationService` lets a higher moment of the same Bite win.
+   */
+  celebrateLeaderboardTopTen$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(fromAuth.AuthActions.loadedUser),
+        switchMap(({ user }) => {
+          const uid = user?.uid;
+
+          if (!uid) {
+            return EMPTY;
+          }
+
+          return this.api.weeklyLeaderboard$.pipe(
+            pairwise(),
+            concatMap(([previous, current]) => {
+              const rank = enteredTopTen(previous, current, uid);
+
+              if (rank === undefined) {
+                return EMPTY;
+              }
+
+              return from(claimTopTenWeek(uid, current.week)).pipe(
+                filter(Boolean),
+                map(() => rank),
+              );
+            }),
+          );
+        }),
+        tap((rank) => {
+          void this.celebration.celebrate('leaderboard-top-ten', { rank });
         }),
       ),
     { dispatch: false },

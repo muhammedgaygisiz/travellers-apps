@@ -320,6 +320,7 @@
   "country-badge-earned": "在新国家的第一个Bite：{{country}}！",
   "bite-milestone": "{{count}}个Bite！吃了好多美食呀。",
   "bite-milestone-thousand": "{{count}}个Bite！你是真正的美食传奇。",
+  "leaderboard-top-ten": "你进入了前十名，排名第{{rank}}！",
   "onboarding-finished": "欢迎加入Tribe！",
   "first-follow": "你已关注{{user}}，欢迎加入对方的美食之旅！",
   "bite-trail-completed": "你已尝遍{{trail}}上的所有Bite！",

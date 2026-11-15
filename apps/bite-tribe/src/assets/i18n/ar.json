@@ -320,6 +320,7 @@
   "country-badge-earned": "أول Bite لك في بلد جديد: {{country}}!",
   "bite-milestone": "{{count}} Bite! هذا كثير من الطعام الشهي.",
   "bite-milestone-thousand": "{{count}} Bite! أنت أسطورة حقيقية في عالم الطعام.",
+  "leaderboard-top-ten": "أنت ضمن العشرة الأوائل، في المركز {{rank}}!",
   "onboarding-finished": "مرحبًا بك في القبيلة!",
   "first-follow": "بدأت متابعة {{user}}. مرحبًا بك في هذه الرحلة الغذائية!",
   "bite-trail-completed": "لقد جرّبت كل Bites في {{trail}}!",

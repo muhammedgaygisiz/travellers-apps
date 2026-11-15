@@ -44,6 +44,7 @@ import {
 } from './account-api/account-api.service';
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { BiteTrailApiService } from './bite-trail-api/bite-trail-api.service';
+import { LeaderboardApiService } from './leaderboard-api/leaderboard-api.service';
 import type { LocalImageFile } from './utils/local-image-file';
 import { Observable } from 'rxjs';
 
@@ -62,8 +63,12 @@ export class BiteTribeApiService {
   private readonly accountApiService = inject(AccountApiService);
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
   private readonly biteTrailApiService = inject(BiteTrailApiService);
+  private readonly leaderboardApiService = inject(LeaderboardApiService);
 
   publicProfile$ = this.profileApiService.publicProfile$;
+
+  /** The running week's leaderboard, live; see `LeaderboardApiService`. */
+  weeklyLeaderboard$ = this.leaderboardApiService.weeklyLeaderboard$;
 
   loadSettings(): Promise<Settings> {
     return this.settingsApiService.loadSettingsByUserId();

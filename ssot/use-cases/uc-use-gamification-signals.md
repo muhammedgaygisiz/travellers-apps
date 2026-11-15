@@ -114,6 +114,25 @@ computed from; what a notification about one of them says, and to whom, belongs 
   replays it (epic [#2012]). The copy looks back at what the user reached and
   never names the next milestone. It defers to a first Bite and a first country
   by the precedence above. See GitHub issue [#2014].
+- Entering the weekly top ten is celebrated in the app while it runs, next to
+  the daily ranking push that reports it the day after: a short confetti burst
+  and `You're in the top ten, at #{{rank}}!`. `rebuildWeeklyLeaderboard`
+  rewrites `/meta/leaderboardWeekly` seconds after the Bite is counted, and any
+  member may read it, so the store's `celebrateLeaderboardTopTen$` keeps it
+  listened to for the session and compares each snapshot with the one before.
+  It celebrates when a snapshot newly lists the signed-in user and their own
+  weekly count has risen - above the last place's count on a full board,
+  above none on a board with places left or in a new week - so a place freed
+  by someone else deleting Bites, deleting their account or going private
+  celebrates nothing. A private profile is never listed, so it never
+  celebrates. The first snapshot after sign-in only sets the baseline, staying
+  in the top ten or dropping out celebrates nothing, and entering is celebrated
+  at most once per user per week on a device, so dropping out and coming back
+  in the same week does not replay it. Only **This week** celebrates; **All
+  time** celebrates nothing. Right after the Monday reset one Bite can be
+  enough, which rewards being among the first to post that week. It defers to
+  a first Bite, a first country and a Bite milestone by the precedence above.
+  See GitHub issue [#2015].
 
 ## MVP Classification
 
@@ -142,6 +161,9 @@ them is collected in onboarding.
 - `notifyOnNewCountryBadge`
 - `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
   `reachedBiteMilestone`
+- `celebrateLeaderboardTopTen$` in the same `AppEffect`, with `enteredTopTen` and
+  `claimTopTenWeek`, listening through `weeklyLeaderboard$` of `LeaderboardApiService`. It costs
+  one read per rewrite of `/meta/leaderboardWeekly` per open app
 
 ## Related GitHub Scope
 
@@ -175,6 +197,7 @@ them is collected in onboarding.
 - Issue [#2013] holds the celebrations one Bite earns for a settling window and plays only the
   highest, and adds the grand burst for every thousandth Bite, part of epic [#2012].
 - Issue [#2014] celebrates the Bite-count milestones, part of epic [#2012].
+- Issue [#2015] celebrates entering the weekly top ten, part of epic [#2012].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -217,4 +240,5 @@ them is collected in onboarding.
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
+[#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043

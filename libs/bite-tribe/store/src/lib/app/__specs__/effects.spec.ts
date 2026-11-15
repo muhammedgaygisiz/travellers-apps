@@ -19,6 +19,15 @@ import { LocationPermissionNotGrantedError } from 'geolocation';
 import { ToastService } from 'toast';
 import { CelebrationService } from 'celebration';
 import { TranslocoService } from '@jsverse/transloco';
+import type { WeeklyLeaderboardSnapshot } from 'bite-tribe/api';
+import { claimTopTenWeek } from '../utils/entered-top-ten';
+
+// The once-a-week memory is `entered-top-ten.spec.ts`'s; here it only says yes
+// or no, so the rule itself runs for real.
+jest.mock('../utils/entered-top-ten', () => ({
+  ...jest.requireActual('../utils/entered-top-ten'),
+  claimTopTenWeek: jest.fn(),
+}));
 
 const getCurrentPositionMock = jest.fn();
 jest.mock('geolocation', () => ({
@@ -41,6 +50,7 @@ const PlatformMock = {};
 
 const BiteTribeApiServiceMock = {
   publicProfile$: of({ displayName: 'test' } as PublicUser),
+  weeklyLeaderboard$: of() as Observable<WeeklyLeaderboardSnapshot>,
   loadSettings: jest.fn(),
   saveSettings: jest.fn(),
   saveUser: jest.fn(),
@@ -418,6 +428,131 @@ describe(AppEffect.name, () => {
 
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
       expect(profiles.observed).toBe(false);
+    });
+  });
+
+  describe('celebrateLeaderboardTopTen$', () => {
+    const WEEK = '2026-11-09';
+    const signedIn = fromAuth.AuthActions.loadedUser({
+      user: { uid: 'leela' } as unknown as Parameters<
+        typeof fromAuth.AuthActions.loadedUser
+      >[0]['user'],
+    });
+    const signedOut = fromAuth.AuthActions.loadedUser({
+      user: undefined as unknown as Parameters<
+        typeof fromAuth.AuthActions.loadedUser
+      >[0]['user'],
+    });
+
+    /** Ten other users with `counts`, and Leela at `rank` with `mine`. */
+    const board = (
+      counts: number[],
+      leela?: { rank: number; count: number },
+    ): WeeklyLeaderboardSnapshot => {
+      const users = counts.map((biteCount, index) => ({
+        userId: `u${index + 1}`,
+        biteCount,
+      }));
+
+      if (leela) {
+        users.splice(leela.rank - 1, 0, {
+          userId: 'leela',
+          biteCount: leela.count,
+        });
+      }
+
+      return { week: WEEK, users: users.slice(0, 10) };
+    };
+    const FULL = [9, 8, 7, 6, 5, 4, 3, 3, 3, 3];
+
+    let actions: Subject<Action>;
+    let boards: Subject<WeeklyLeaderboardSnapshot>;
+    let subscription: Subscription;
+    const originalBoard$ = BiteTribeApiServiceMock.weeklyLeaderboard$;
+    const flush = (): Promise<void> =>
+      new Promise((resolve) => setTimeout(resolve, 0));
+
+    beforeEach(() => {
+      CelebrationServiceMock.celebrate.mockClear();
+      jest.mocked(claimTopTenWeek).mockReset().mockResolvedValue(true);
+      actions = new Subject<Action>();
+      boards = new Subject<WeeklyLeaderboardSnapshot>();
+      actions$ = actions;
+      BiteTribeApiServiceMock.weeklyLeaderboard$ = boards;
+      subscription = effects.celebrateLeaderboardTopTen$.subscribe();
+    });
+
+    afterEach(() => {
+      subscription.unsubscribe();
+      BiteTribeApiServiceMock.weeklyLeaderboard$ = originalBoard$;
+    });
+
+    it('should have dispatch false set', () => {
+      expect(
+        getEffectsMetadata(effects).celebrateLeaderboardTopTen$?.dispatch,
+      ).toBeFalsy();
+    });
+
+    it('celebrates a snapshot that newly lists the user at #7 after a Bite of theirs', async () => {
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      boards.next(board([9, 8, 7, 6, 5, 4], { rank: 7, count: 4 }));
+      await flush();
+
+      expect(claimTopTenWeek).toHaveBeenCalledWith('leela', WEEK);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'leaderboard-top-ten',
+        { rank: 7 },
+      );
+    });
+
+    it('celebrates nothing for a snapshot that lists the user without their count having risen', async () => {
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      boards.next(board([8, 7, 6, 5, 4, 3, 3, 3, 3], { rank: 10, count: 3 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing for the first snapshot after sign-in', async () => {
+      actions.next(signedIn);
+      boards.next(board([9, 8], { rank: 3, count: 7 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing while the user stays in the top ten or drops out of it', async () => {
+      actions.next(signedIn);
+      boards.next(board([9, 8, 7], { rank: 4, count: 5 }));
+      boards.next(board([9, 8], { rank: 3, count: 8 }));
+      boards.next(board(FULL));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates nothing for a week already celebrated on this device', async () => {
+      jest.mocked(claimTopTenWeek).mockResolvedValue(false);
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      boards.next(board([9, 8, 7, 6, 5, 4], { rank: 7, count: 4 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('stops listening to the leaderboard once signed out', async () => {
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      actions.next(signedOut);
+      boards.next(board([9, 8, 7, 6, 5, 4], { rank: 7, count: 4 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      expect(boards.observed).toBe(false);
     });
   });
 

@@ -179,6 +179,16 @@ describe('renderCityPage', () => {
     );
   });
 
+  it('links the imprint from its footer', async () => {
+    mockGet.mockResolvedValue(snapshot(page));
+
+    const { body } = await respond('/eat/berlin');
+
+    expect(body).toContain(
+      '<a href="https://bitetribe.app/imprint">Imprint</a>',
+    );
+  });
+
   it('declares its canonical on bitetribe.app', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 

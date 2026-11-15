@@ -2,7 +2,7 @@
 <!--
   BiteTribe sitemap (issue #1454).
 
-  The app is a single-page app behind a login, so only the four routes that
+  The app is a single-page app behind a login, so only the routes that
   render without a session belong here. /start is deliberately absent: / already
   redirects to it, and both canonicalize to https://bitetribe.app/.
 
@@ -27,6 +27,12 @@
     <lastmod>2026-09-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://bitetribe.app/imprint</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
   </url>
   <url>
     <loc>https://bitetribe.app/account-deletion</loc>

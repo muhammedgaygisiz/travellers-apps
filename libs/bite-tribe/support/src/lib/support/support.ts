@@ -33,6 +33,9 @@ export class Support {
 
   readonly accountDeletionPath = `/${PATH.ACCOUNT_DELETION}`;
 
+  /** The imprint is a static file served by hosting (issue #1979), not a route. */
+  readonly imprintUrl = 'https://bitetribe.app/imprint';
+
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({
       screenName: 'Support',

@@ -187,18 +187,27 @@ Both live in `apps/bite-tribe/public`, which the `public` asset entry in
 
 There are two sitemaps, and each owns its own URLs:
 
-| Sitemap                                 | Owns                                                                 | Written by                                           |
-| --------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
-| `https://bitetribe.app/sitemap.xml`     | The four Angular routes that render without a session                | Hand, as the static file in `apps/bite-tribe/public` |
-| `https://bitetribe.app/eat/sitemap.xml` | Every published city landing page, with `lastmod` from `publishedAt` | `renderCityPage`, from the published set             |
+| Sitemap                                 | Owns                                                                  | Written by                                           |
+| --------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- |
+| `https://bitetribe.app/sitemap.xml`     | The four Angular routes that render without a session, and `/imprint` | Hand, as the static file in `apps/bite-tribe/public` |
+| `https://bitetribe.app/eat/sitemap.xml` | Every published city landing page, with `lastmod` from `publishedAt`  | `renderCityPage`, from the published set             |
 
-The static `sitemap.xml` lists four URLs: the root, `/support`, `/privacy` and
+The static `sitemap.xml` lists the root, `/support`, `/privacy` and
 `/account-deletion`. Those are the Angular routes that render without a
 session; the app is a single-page app behind a login, so no other route has
 anything to show a crawler. The city landing pages are not Angular routes and
 never appear in it - a growing, operator-published set cannot live in a static
 file - so they have the second sitemap, described under
 [City Landing Pages](#city-landing-pages).
+
+It also lists `/imprint`, which is not an Angular route either ([#1979]). It is
+the static file `apps/bite-tribe/public/imprint.html`, which a hosting rewrite in
+`firebase.json` serves at `/imprint`, ahead of the catch-all to `index.html`. It
+is a file, not a route, because a legal notice has to answer every visitor and
+every crawler, and the app's routes sit behind the App Check startup gate. It
+carries its own canonical, so it is not in `SELF_CANONICAL_PATHS`. Every city
+page's footer and the support page link to it. Why it exists, and who it names,
+is on [Current State - Open Questions](../current-state/open-questions.md).
 
 `robots.txt` allows everything except the authenticated surfaces, which render a
 redirect to `/start` for a signed-out crawler and would otherwise be indexed as
@@ -410,8 +419,6 @@ head tags; only the share stub redirects.
 - A phone with the app installed opens these links in the browser: the
   associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/` or `/bite/*`.
 - Pages are written in one language. `hreflang` arrives with the second.
-- Whether an editorial page needs an Impressum is open in [#1979]; see
-  [Current State - Open Questions](../current-state/open-questions.md).
 
 ## The Open Graph Image
 

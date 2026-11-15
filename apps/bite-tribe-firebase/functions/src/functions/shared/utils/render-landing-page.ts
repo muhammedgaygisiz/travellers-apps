@@ -265,6 +265,7 @@ export const renderLandingPage = (page: LandingPage): string => {
   <footer>
     <a href="${BITE_TRIBE_ORIGIN}/support">Support</a>
     <a href="${BITE_TRIBE_ORIGIN}/privacy">Privacy</a>
+    <a href="${BITE_TRIBE_ORIGIN}/imprint">Imprint</a>
   </footer>
 </body>
 </html>`;

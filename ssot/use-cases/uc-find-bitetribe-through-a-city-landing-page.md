@@ -77,9 +77,6 @@ into the app. It does not own the page's content, which an Operator curates in
 - **A second language.** A page is written in one language, which sets `<html lang>`.
   Pages in further languages, and the `hreflang` links between them, are likely but not
   planned.
-- **Impressum.** Whether an editorial page needs one is open in [#1979]. The pages went
-  live on 12 November 2026 without one, because the maintainer waived the gate; see
-  [Current State - Open Questions](../current-state/open-questions.md).
 - **A domain page for the city landing page.** The `landingPages` document has its own
   lifecycle (draft, published, withdrawn) and aliases, and is treated as an implementation
   detail for now. It earns a domain page if it grows in importance.
@@ -128,6 +125,7 @@ listings.
 - Issue [#1974] - let a city page answer under alias names with a redirect.
 - Issue [#1978] - link the city landing pages to the BiteTribe Instagram account.
 - Issue [#1980] - let the city page sitemap expire within minutes.
+- Issue [#1979] - the imprint every page's footer links to, at `bitetribe.app/imprint`.
 - Issue [#1490] - curating a page, which belongs to `UC-OPS`.
 
 ## Related Domains

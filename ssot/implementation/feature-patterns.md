@@ -140,10 +140,13 @@ One detail is easy to get wrong and made the bar invisible during development: `
 | Gallery      | Spinner                | `loading()`          |
 | Followers    | Spinner                | `isLoading()`        |
 | Search       | Spinner                | `isLoading()`        |
+| About        | Inline count skeletons | `loading()`          |
 
 This is deliberately additive: it does not change when a placeholder appears. Field-level indicators stay out of it — a deferred image placeholder, an upload spinner inside a form control, or a spinner inside a button report their own element, not the page.
 
 The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue [#1168].
+
+About already works that way. Its two counts live in a root service and refresh on every entry; a count that has no value yet holds its skeleton, while a count already on screen stays there and only the bar runs. The refresh starts when the page is created, not in an Ionic view lifecycle hook: re-entering a pushed page was observed not to raise `ionViewDidEnter` reliably, and the user count stayed stale. See GitHub issue [#2072].
 
 ## Entry Feedback Contract
 
@@ -214,3 +217,4 @@ imagePath || image || ''
 [#1232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1232
 [#1287]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1287
 [#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377
+[#2072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2072

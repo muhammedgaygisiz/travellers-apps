@@ -47,4 +47,25 @@ describe(AboutContainerComponent.name, () => {
       });
     });
   });
+
+  // The counts live in a root service and outlive the page; every entry has
+  // to refresh them, and Ionic does not reliably raise the view lifecycle
+  // events on re-entry (GitHub issue #2072).
+  describe('refreshing the counts', () => {
+    it('refreshes them when the page is created', () => {
+      const reload = jest.spyOn(component.service, 'reloadCounts');
+
+      component.ngOnInit();
+
+      expect(reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('refreshes them when a cached page is shown again', () => {
+      const reload = jest.spyOn(component.service, 'reloadCounts');
+
+      component.ionViewWillEnter();
+
+      expect(reload).toHaveBeenCalledTimes(1);
+    });
+  });
 });

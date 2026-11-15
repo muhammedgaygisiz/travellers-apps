@@ -56,6 +56,16 @@ $single-column-max-width: 720px;
     }
   }
 
+  // Holds a count's line while it loads: one line of body text, a few digits
+  // wide (GitHub issue #2072).
+  .count-skeleton {
+    display: inline-block;
+    width: 3.5em;
+    height: 1em;
+    margin: 0;
+    vertical-align: middle;
+  }
+
   .release {
     max-width: $single-column-max-width;
     margin-inline: auto;

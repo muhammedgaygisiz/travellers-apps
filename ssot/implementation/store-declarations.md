@@ -253,6 +253,21 @@ two platform entries, both for detecting whether the apps are installed:
   `com.instagram.android` and `com.facebook.katana`. That is the narrow form
   Google Play expects; the app does not ask for `QUERY_ALL_PACKAGES`.
 
+### The Always Location Key Changes No Declaration
+
+`Info.plist` declares `NSLocationAlwaysAndWhenInUseUsageDescription` next to
+`NSLocationWhenInUseUsageDescription`, localized in every `InfoPlist.strings`
+with the same text as the when-in-use string (issue [#2070]). BiteTribe never
+asks for Always location: `@capacitor/geolocation` only requests
+`.whenInUse`. The key exists because the plugin's native library,
+`IONGeolocationLib`, contains a call to `requestAlwaysAuthorization`, and App
+Store Connect's binary scan flags that symbol whether it runs or not. Build 101
+(1.2.0) drew an `ITMS-90683: Missing purpose string` delivery issue for it.
+
+Location is still used only while the app is open, to tag a Bite and show
+nearby Bites, so the nutrition labels and Play's Data safety form stay as they
+are. If the key is removed, the next upload draws the same delivery issue.
+
 ### Measuring The Share Funnel Changes No Declaration
 
 The six `share_*` events of issue [#1733] go through the same Firebase Analytics
@@ -367,3 +382,4 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1826]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1826
 [#1864]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1864
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
+[#2070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2070

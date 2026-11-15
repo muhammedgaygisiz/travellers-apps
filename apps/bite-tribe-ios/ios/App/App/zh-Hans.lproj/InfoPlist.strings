@@ -3,6 +3,7 @@
    See ssot/implementation/localization.md. */
 
 "NSCameraUsageDescription" = "BiteTribe需要使用相机，以便你拍摄菜品照片并与他人分享。";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "BiteTribe会使用你的位置来标记你用餐的地点，并查找附近的Bite。";
 "NSLocationWhenInUseUsageDescription" = "BiteTribe会使用你的位置来标记你用餐的地点，并查找附近的Bite。";
 "NSPhotoLibraryUsageDescription" = "BiteTribe需要访问照片图库，以便你选择并分享菜品照片。";
 "NSPhotoLibraryAddUsageDescription" = "BiteTribe会将根据你的Bite生成的图片保存到照片图库。";

@@ -3,6 +3,7 @@
    See ssot/implementation/localization.md. */
 
 "NSCameraUsageDescription" = "BiteTribe የምግብ ፎቶዎችን ለማንሳት እና ከሌሎች ጋር ለማጋራት የካሜራዎን መዳረሻ ይፈልጋል።";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "BiteTribe የት ምግብ እንደተመገቡ ለመመልከት እና በአቅራቢያዎ ያሉ Bites ለማግኘት አካባቢዎን ይጠቀማል።";
 "NSLocationWhenInUseUsageDescription" = "BiteTribe የት ምግብ እንደተመገቡ ለመመልከት እና በአቅራቢያዎ ያሉ Bites ለማግኘት አካባቢዎን ይጠቀማል።";
 "NSPhotoLibraryUsageDescription" = "BiteTribe የምግብ ፎቶዎችን መምረጥ እና ማጋራት እንዲችሉ የፎቶ ማከማቻዎን መዳረሻ ይፈልጋል።";
 "NSPhotoLibraryAddUsageDescription" = "BiteTribe ከBiteዎችዎ የሚፈጥሯቸውን ምስሎች በፎቶ ቤተ-መጽሐፍትዎ ውስጥ ያስቀምጣል።";

@@ -47,6 +47,8 @@
 	<string>1431506688471796</string>
 	<key>NSCameraUsageDescription</key>
 	<string>BiteTribe needs access to your camera to capture food photos and share them with others.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>BiteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BiteTribe uses your location to help you tag where you enjoyed a meal and discover nearby bites.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

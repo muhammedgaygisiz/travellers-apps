@@ -369,6 +369,15 @@ export class BitePage {
     { initialValue: !this.biteFormGroup.valid },
   );
 
+  /**
+   * Posting waits for a description being written (#2030): posted meanwhile,
+   * the Bite would go out without it, and after "Post and add another" the
+   * answer would land in the next Bite's empty form.
+   */
+  readonly cannotPost = computed(
+    () => this.isInvalid() || this.generatingDescription(),
+  );
+
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
 
   noGpsPosition = computed(() => {

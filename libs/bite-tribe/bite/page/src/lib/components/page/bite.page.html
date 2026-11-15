@@ -95,6 +95,8 @@
         <ion-textarea
           label="{{'description-label' | transloco}}"
           formControlName="description"
+          [readonly]="generatingDescription()"
+          [class.generating]="generatingDescription()"
           fill="outline"
           auto-grow="true"
           [maxlength]="500"
@@ -171,7 +173,7 @@
         color="primary"
         fill="outline"
         class="ion-margin-top"
-        [disabled]="isInvalid()"
+        [disabled]="cannotPost()"
         (click)="saveBiteAndAddAnother()"
         data-testid="post-bite-and-add-another"
       >
@@ -184,7 +186,7 @@
         color="primary"
         routerDirection="back"
         class="ion-margin-top safe-padding-bottom"
-        [disabled]="isInvalid()"
+        [disabled]="cannotPost()"
         (click)="saveBite()"
         data-testid="post-bite"
       >

@@ -60,6 +60,13 @@
     position: relative;
   }
 
+  // Locked while a description is written, so nothing typed meanwhile is
+  // overwritten by the answer (#2030). Greyed text, not opacity: the field's
+  // border and the Generate notch stay as they are.
+  .description ion-textarea.generating {
+    --color: var(--ion-color-medium);
+  }
+
   .generate-description {
     position: absolute;
     top: -0.6rem;
@@ -79,7 +86,7 @@
 
     &:disabled {
       color: var(--ion-color-medium);
-      opacity: 0.6;
+      // No opacity: it would fade the background too and let the field border show through the label.
     }
 
     ion-icon,

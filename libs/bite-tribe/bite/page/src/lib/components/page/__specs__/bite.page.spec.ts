@@ -2030,6 +2030,76 @@ describe('BitePage', () => {
       expect(component.generatingDescription()).toBe(false);
     });
 
+    it('locks the description field while a description is written', async () => {
+      let answer: (value: string) => void = () => undefined;
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              answer = resolve;
+            }),
+        ),
+      );
+      // No position: rendering one starts the map, which jest cannot run.
+      component.biteFormGroup.controls['name'].setValue('Mantı');
+
+      component.onGenerateDescription();
+      await flushPromises();
+      fixture.detectChanges();
+
+      const field = (): HTMLIonTextareaElement =>
+        fixture.nativeElement.querySelector(
+          'ion-textarea[formcontrolname="description"]',
+        );
+      expect(field().readonly).toBe(true);
+      expect(field().classList).toContain('generating');
+      // Read-only, not disabled: a disabled control would drop out of the
+      // Bite that Post sends.
+      expect(component.biteFormGroup.controls['description'].enabled).toBe(
+        true,
+      );
+
+      answer('Tiny beef dumplings.');
+      await flushPromises();
+      fixture.detectChanges();
+
+      expect(field().readonly).toBe(false);
+      expect(field().classList).not.toContain('generating');
+    });
+
+    it('holds posting while a description is written', async () => {
+      // After "Post and add another" the answer would otherwise land in the
+      // next Bite's form. Not rendered: a position starts the map.
+      let answer: (value: string) => void = () => undefined;
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              answer = resolve;
+            }),
+        ),
+      );
+      component.biteFormGroup.patchValue({
+        image: 'https://firebasestorage.googleapis.com/v0/b/b/o/p.jpg',
+        name: 'Mantı',
+        place: 'Kayseri Kitchen',
+        price: '9.99',
+        currency: 'TRY',
+        position: { latitude: 38.7, longitude: 35.5 },
+      });
+      expect(component.cannotPost()).toBe(false);
+
+      component.onGenerateDescription();
+      await flushPromises();
+      expect(component.cannotPost()).toBe(true);
+
+      answer('Tiny beef dumplings.');
+      await flushPromises();
+      expect(component.cannotPost()).toBe(false);
+    });
+
     it('asks before replacing a description the user wrote', async () => {
       const generator = jest.fn(async () => 'Generated.');
       componentRef.setInput('descriptionGenerator', generator);

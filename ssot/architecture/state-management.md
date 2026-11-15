@@ -56,6 +56,8 @@ Anything reading such an aggregate should treat it as a lower bound rather than 
 
 **One consumer does hold it: `celebrateProfileProgress$`** (issues [#1797] and [#2014]). A first Bite in a new country is only known once `enrichBiteAddressOnWrite` adds the code to `countryCodes`, and a Bite-count milestone once `incrementBiteCountOnBiteCreate` raises `biteCount`, both seconds after the post, so the in-app celebrations have to hear those writes. Both are read from this one subscription; a further celebration from the user's own document widens it rather than opening a second listener. The effect stays subscribed to `publicProfile$` from `loadedUser` until sign-out, and from then on every write to the user document listed above bills one read. That is the trade this celebration makes: a handful of reads per session, each now with a reader. The listener feeds the celebration only. The `app` slice is still the login snapshot, and everything above about stale aggregates still holds.
 
+The weekly leaderboard is the one other document the store keeps listened to for the session: `celebrateLeaderboardTopTen$` (issue [#2015]) subscribes to `weeklyLeaderboard$`, `/meta/leaderboardWeekly`, from `loadedUser` until sign-out, to hear a Bite take the user into the top ten. It bills one read per rewrite of the board per open app, feeds the celebration only and puts nothing in the store.
+
 ## A Reducer That Changes Nothing Must Return The Same State
 
 An NgRx entity adapter does not compare values. `updateManyMutably` treats every id it is handed as a mutation — `didMutateEntities` is `updates.length > 0` — and `takeNewKey` writes a freshly built `Object.assign({}, original, changes)` for each one. So `upsertMany` called with data the store already holds still produces a new state object, a new entities object, and new entity objects inside it.
@@ -114,3 +116,4 @@ apps/bite-tribe-firebase/functions/src/functions/bites/load-bites-by-location.ts
 [#1357]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1357
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
+[#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015

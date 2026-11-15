@@ -281,7 +281,10 @@ Details worth knowing before changing it:
   swallowed, the posture `ToastService.present()` holds.
 - **Detected at the moment it happens, with no "seen" store.** Nothing is
   written to `Preferences`, the account or Firestore to remember a moment, so
-  a second phone never replays one. A deliberate redo - deleting the only Bite
+  a second phone never replays one. The weekly moments are the exception: the
+  two weekly awards ([#2031]) and entering the top ten ([#2015]) remember the
+  week they played in `Preferences`, per account and device, so each plays at
+  most once a week on a phone. A deliberate redo - deleting the only Bite
   and posting again, unfollowing everybody and following again, un-ticking
   and re-ticking the last Bite - may replay one, which the epic accepts.
 - **Asked before the write, never inferred from the store.** Where "first"
@@ -300,16 +303,16 @@ rest it is a single button and a captured burst would be random.
 
 Where each moment is wired:
 
-| Moment                 | Call site                                               | How "first" or "done" is decided                                                                                      | Issue   |
-| ---------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
-| `first-bite`           | `BiteService.createBite`, post and post-and-add-another | `hasOwnBites()` before the create: the profile's `biteCount` when it counts a Bite, else one Firestore document       | [#1796] |
-| `first-country`        | `celebrateProfileProgress$` in the store's `AppEffect`  | Each later snapshot of the user's own document that adds a `countryCodes` entry; none when the codes were empty       | [#1797] |
-| `onboarding-finished`  | `OnboardingService.finish()`                            | Once the completion write succeeds                                                                                    | [#1798] |
-| `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`     | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
-| `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                          | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
-| `bite-milestone`       | `celebrateProfileProgress$` in the store's `AppEffect`  | `reachedBiteMilestone`: a later snapshot whose `biteCount` crosses 5, 10, 50, 100 or a further hundred; the highest   | [#2014] |
-| `leaderboard-top-ten`  | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
-| `leaderboard-overtake` | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
+| Moment                 | Call site                                                | How "first" or "done" is decided                                                                                      | Issue   |
+| ---------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
+| `first-bite`           | `BiteService.createBite`, post and post-and-add-another  | `hasOwnBites()` before the create: the profile's `biteCount` when it counts a Bite, else one Firestore document       | [#1796] |
+| `first-country`        | `celebrateProfileProgress$` in the store's `AppEffect`   | Each later snapshot of the user's own document that adds a `countryCodes` entry; none when the codes were empty       | [#1797] |
+| `onboarding-finished`  | `OnboardingService.finish()`                             | Once the completion write succeeds                                                                                    | [#1798] |
+| `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`      | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
+| `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                           | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
+| `bite-milestone`       | `celebrateProfileProgress$` in the store's `AppEffect`   | `reachedBiteMilestone`: a later snapshot whose `biteCount` crosses 5, 10, 50, 100 or a further hundred; the highest   | [#2014] |
+| `leaderboard-top-ten`  | `celebrateLeaderboardTopTen$` in the store's `AppEffect` | `enteredTopTen`: a later **This week** snapshot newly lists the user, above the most they had unlisted; once a week   | [#2015] |
+| `leaderboard-overtake` | Not wired yet                                            | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
 
 `first-country` was the first moment that is not a direct reaction to a tap:
 the backend sets the country seconds after the post, so the store keeps the
@@ -328,6 +331,24 @@ sign-in instances of their own, so removing one listener could remove another.
 It is fixed by loading the plugin once at startup; see the Web Plugin Loading
 Rule in [Architecture - Capacitor](../architecture/capacitor.md) and issue
 [#1835].
+
+`leaderboard-top-ten` ([#2015]) listens to `/meta/leaderboardWeekly` instead,
+through `weeklyLeaderboard$` on the API, for the session from `loadedUser` to
+sign-out: `rebuildWeeklyLeaderboard` rewrites it seconds after
+`incrementBiteCountOnBiteCreate` counts the Bite, and every member may read
+it. The listener is a second one, beside the user's own document, and bills
+one read per rewrite of the board per open app. `celebrateLeaderboardTopTen$`
+compares each snapshot with the one before; the first after sign-in only sets
+the baseline. `enteredTopTen` answers the user's rank when the earlier snapshot
+did not list them - or was of an earlier week - and the new one does, with a
+weekly count above the most they can have had unlisted: the last place's count
+on a full board, none on a board with places left or in a new week. A place
+freed by someone who deleted Bites, deleted their account or went private
+therefore celebrates nothing. `claimTopTenWeek` keeps the week in
+`Preferences`, so a user who drops out and comes back in the same week is not
+celebrated again. Only the **This week** board celebrates; **All time**
+celebrates nothing. Right after the Monday reset one Bite can be enough, which
+the epic accepts.
 
 **The share image names a first afterwards, by a different route.** The two
 moments that belong to one Bite, `first-bite` and `first-country`, can be named
@@ -416,4 +437,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
+[#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

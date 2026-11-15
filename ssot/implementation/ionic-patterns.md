@@ -303,18 +303,25 @@ Where each moment is wired:
 | Moment                 | Call site                                               | How "first" or "done" is decided                                                                                      | Issue   |
 | ---------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
 | `first-bite`           | `BiteService.createBite`, post and post-and-add-another | `hasOwnBites()` before the create: the profile's `biteCount` when it counts a Bite, else one Firestore document       | [#1796] |
-| `first-country`        | `celebrateFirstCountry$` in the store's `AppEffect`     | Each later snapshot of the user's own document that adds a `countryCodes` entry; none when the codes were empty       | [#1797] |
+| `first-country`        | `celebrateProfileProgress$` in the store's `AppEffect`  | Each later snapshot of the user's own document that adds a `countryCodes` entry; none when the codes were empty       | [#1797] |
 | `onboarding-finished`  | `OnboardingService.finish()`                            | Once the completion write succeeds                                                                                    | [#1798] |
 | `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`     | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
 | `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                          | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
-| `bite-milestone`       | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
+| `bite-milestone`       | `celebrateProfileProgress$` in the store's `AppEffect`  | `reachedBiteMilestone`: a later snapshot whose `biteCount` crosses 5, 10, 50, 100 or a further hundred; the highest   | [#2014] |
 | `leaderboard-top-ten`  | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
 | `leaderboard-overtake` | Not wired yet                                           | Filled in by its feature story in epic [#2012]                                                                        | [#2012] |
 
-`first-country` was the first moment that is not a direct reaction to a tap,
-and is the only one wired so far: the backend sets the country seconds after
-the post, so the store keeps the
-user's own document listened to for the session. In the [#1801] pre-pass, that
+`first-country` was the first moment that is not a direct reaction to a tap:
+the backend sets the country seconds after the post, so the store keeps the
+user's own document listened to for the session. `bite-milestone` ([#2014])
+reads the same listener, because `incrementBiteCountOnBiteCreate` raises
+`biteCount` seconds after the post too: `celebrateProfileProgress$` compares
+each snapshot with the one before and raises both moments from one listener,
+never two. The first snapshot after sign-in only sets the baseline, a snapshot
+that crosses several milestones raises the highest once, and a drop raises
+nothing. `CelebrationService` writes a numeric `count` into the toast in the
+document's language (`1,000`, `1.000`), while `celebration_shown` and the
+choice of burst read the number. In the [#1801] pre-pass, that
 listener sometimes never reached the effect on the web. The cause was
 Capacitor's web plugin loader handing the Firestore listeners registered at
 sign-in instances of their own, so removing one listener could remove another.
@@ -408,4 +415,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2039]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2039
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
+[#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

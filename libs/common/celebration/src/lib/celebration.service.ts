@@ -376,7 +376,7 @@ export class CelebrationService {
         messageKey: thousand
           ? CELEBRATION_THOUSAND_MESSAGE_KEY
           : CELEBRATION_MESSAGE_KEYS[moment],
-        params,
+        params: this.toastParams(params),
         outcome: 'success',
       }),
       this.burst(thousand ? GRAND : STANDARD),
@@ -448,6 +448,24 @@ export class CelebrationService {
     }
   }
 
+  /**
+   * `params` as the toast copy shows them: a numeric `count` is written in the
+   * document's language (`1,000`, `1.000`, ...), which bite-tribe keeps in step
+   * with the active Transloco language (issue #2014). Analytics and the choice
+   * of burst still read the number.
+   */
+  private toastParams(
+    params?: Record<string, unknown>,
+  ): Record<string, unknown> | undefined {
+    const count = params?.['count'];
+
+    if (typeof count !== 'number') {
+      return params;
+    }
+
+    return { ...params, count: formatCount(count, this.document) };
+  }
+
   /** The theme colours that are set, or the library's own when none is. */
   private colors(view: Window): string[] | undefined {
     const style = view.getComputedStyle(this.document.documentElement);
@@ -458,6 +476,20 @@ export class CelebrationService {
     return colors.length > 0 ? colors : undefined;
   }
 }
+
+/**
+ * `count` in the document's language, or in the runtime's default when the
+ * document names none or one `Intl` does not know.
+ */
+const formatCount = (count: number, document: Document): string => {
+  const lang = document.documentElement.lang || undefined;
+
+  try {
+    return new Intl.NumberFormat(lang).format(count);
+  } catch {
+    return new Intl.NumberFormat().format(count);
+  }
+};
 
 /** The place of `moment` in {@link CELEBRATION_PRECEDENCE}; lower wins. */
 const rank = (moment: CelebrationMoment): number =>

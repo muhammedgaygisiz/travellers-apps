@@ -532,7 +532,7 @@ describe('CelebrationService', () => {
       expect(present).toHaveBeenCalledWith(
         expect.objectContaining({
           messageKey: CELEBRATION_THOUSAND_MESSAGE_KEY,
-          params: { count: 1000 },
+          params: { count: new Intl.NumberFormat().format(1000) },
         }),
       );
       expect(canvases()).toHaveLength(1);
@@ -723,6 +723,46 @@ describe('CelebrationService', () => {
           { moment: 'leaderboard-overtake', rank: 2 },
         ],
       ]);
+    });
+
+    describe('the count in the toast', () => {
+      beforeEach(() => {
+        reducedMotion = true;
+      });
+
+      afterEach(() => {
+        document.documentElement.lang = '';
+      });
+
+      it.each([
+        ['en', '1,000'],
+        ['de', '1.000'],
+      ])(
+        "writes the count in the document's language, %s",
+        async (lang, shown) => {
+          document.documentElement.lang = lang;
+
+          await celebrateHeld('bite-milestone', { count: 1000 });
+
+          expect(present).toHaveBeenCalledWith(
+            expect.objectContaining({ params: { count: shown } }),
+          );
+          expect(logEvent).toHaveBeenCalledWith(
+            AnalyticsEvent.CelebrationShown,
+            { moment: 'bite-milestone', count: 1000 },
+          );
+        },
+      );
+
+      it('falls back to the default format for a language Intl rejects', async () => {
+        document.documentElement.lang = 'not a language';
+
+        await celebrateHeld('bite-milestone', { count: 5 });
+
+        expect(present).toHaveBeenCalledWith(
+          expect.objectContaining({ params: { count: '5' } }),
+        );
+      });
     });
   });
 

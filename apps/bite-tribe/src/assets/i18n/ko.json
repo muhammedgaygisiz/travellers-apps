@@ -318,6 +318,8 @@
   "bite-created-successfully": "Bite를 만들었어요!",
   "bite-created-first": "첫 번째 Bite가 올라갔어요!",
   "country-badge-earned": "새로운 국가에서의 첫 Bite: {{country}}!",
+  "bite-milestone": "{{count}}개의 Bite! 맛있는 음식을 정말 많이 드셨네요.",
+  "bite-milestone-thousand": "{{count}}개의 Bite! 당신은 진정한 미식가 전설이에요.",
   "onboarding-finished": "트라이브에 오신 것을 환영해요!",
   "first-follow": "이제 {{user}}님을 팔로우해요. 맛있는 여정을 함께하세요!",
   "bite-trail-completed": "이 트레일의 모든 Bite를 맛봤어요: {{trail}}!",

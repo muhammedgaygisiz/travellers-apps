@@ -1,5 +1,5 @@
 import { TestScheduler } from 'rxjs/testing';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { defer, Observable, of, Subject, Subscription } from 'rxjs';
 import { NavController, Platform } from '@ionic/angular';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
@@ -234,7 +234,7 @@ describe(AppEffect.name, () => {
     });
   });
 
-  describe('celebrateFirstCountry$', () => {
+  describe('celebrateProfileProgress$', () => {
     const signedIn = fromAuth.AuthActions.loadedUser({
       user: { uid: 'leela' } as unknown as Parameters<
         typeof fromAuth.AuthActions.loadedUser
@@ -258,7 +258,7 @@ describe(AppEffect.name, () => {
       actions$ = actions;
       BiteTribeApiServiceMock.publicProfile$ =
         profiles as unknown as Observable<PublicUser>;
-      subscription = effects.celebrateFirstCountry$.subscribe();
+      subscription = effects.celebrateProfileProgress$.subscribe();
     });
 
     afterEach(() => {
@@ -268,7 +268,7 @@ describe(AppEffect.name, () => {
 
     it('should have dispatch false set', () => {
       expect(
-        getEffectsMetadata(effects).celebrateFirstCountry$?.dispatch,
+        getEffectsMetadata(effects).celebrateProfileProgress$?.dispatch,
       ).toBeFalsy();
     });
 
@@ -323,6 +323,91 @@ describe(AppEffect.name, () => {
       profiles.next({ countryCodes: ['DE', 'JP'] });
 
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [4, 5],
+      [49, 50],
+      [199, 200],
+      [999, 1000],
+    ])(
+      'celebrates the milestone a snapshot taking biteCount from %i to %i reaches',
+      (previous, current) => {
+        actions.next(signedIn);
+        profiles.next({ biteCount: previous });
+        profiles.next({ biteCount: current });
+
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+          'bite-milestone',
+          { count: current },
+        );
+      },
+    );
+
+    it.each([
+      [5, 6],
+      [149, 150],
+      [200, 199],
+    ])(
+      'celebrates nothing for a snapshot taking biteCount from %i to %i',
+      (previous, current) => {
+        actions.next(signedIn);
+        profiles.next({ biteCount: previous });
+        profiles.next({ biteCount: current });
+
+        expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      },
+    );
+
+    it('celebrates the highest milestone a snapshot crosses, once', () => {
+      actions.next(signedIn);
+      profiles.next({ biteCount: 8 });
+      profiles.next({ biteCount: 12 });
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'bite-milestone',
+        { count: 10 },
+      );
+    });
+
+    it('celebrates no milestone for the first snapshot after sign-in', () => {
+      actions.next(signedIn);
+      profiles.next({ biteCount: 100 });
+
+      expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('raises both moments of one snapshot and leaves the choice to the service', () => {
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'], biteCount: 9 });
+      profiles.next({ countryCodes: ['DE', 'ES'], biteCount: 10 });
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(2);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'first-country',
+        expect.anything(),
+      );
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'bite-milestone',
+        { count: 10 },
+      );
+    });
+
+    it("opens one listener on the user's own document for both moments", () => {
+      let listeners = 0;
+      BiteTribeApiServiceMock.publicProfile$ = defer(() => {
+        listeners += 1;
+        return profiles;
+      }) as unknown as Observable<PublicUser>;
+
+      actions.next(signedIn);
+      profiles.next({ countryCodes: ['DE'], biteCount: 4 });
+      profiles.next({ countryCodes: ['DE', 'ES'], biteCount: 5 });
+
+      expect(listeners).toBe(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(2);
     });
 
     it('stops listening once signed out', () => {

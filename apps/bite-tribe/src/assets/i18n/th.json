@@ -318,6 +318,8 @@
   "bite-created-successfully": "สร้าง Bite สำเร็จแล้ว!",
   "bite-created-first": "Bite แรกของคุณมาแล้ว!",
   "country-badge-earned": "Bite แรกในประเทศใหม่: {{country}}!",
+  "bite-milestone": "{{count}} Bite! อาหารอร่อยเยอะมากเลย",
+  "bite-milestone-thousand": "{{count}} Bite! คุณคือตำนานนักกินตัวจริง",
   "onboarding-finished": "ยินดีต้อนรับสู่ทีม!",
   "first-follow": "ตอนนี้คุณติดตาม {{user}} แล้ว ยินดีต้อนรับสู่การเดินทางด้านอาหารนี้!",
   "bite-trail-completed": "คุณลองครบทุก Bite ใน {{trail}} แล้ว!",

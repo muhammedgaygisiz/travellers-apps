@@ -54,7 +54,7 @@ Aggregates the user moves themselves are therefore corrected optimistically in t
 
 Anything reading such an aggregate should treat it as a lower bound rather than as truth when it has a fully loaded list to compare against. Drift from a source that is not the user's own action — the weekly `resyncBiteCounts` job, a write from another device — is only reconciled at the next login, which is the accepted trade for not holding the listener.
 
-**One consumer does hold it: `celebrateFirstCountry$`** (issue [#1797]). A first Bite in a new country is only known once `enrichBiteAddressOnWrite` adds the code to `countryCodes`, seconds after the post, so the in-app celebration has to hear that write. The effect stays subscribed to `publicProfile$` from `loadedUser` until sign-out, and from then on every write to the user document listed above bills one read. That is the trade this celebration makes: a handful of reads per session, each now with a reader. The listener feeds the celebration only. The `app` slice is still the login snapshot, and everything above about stale aggregates still holds.
+**One consumer does hold it: `celebrateProfileProgress$`** (issues [#1797] and [#2014]). A first Bite in a new country is only known once `enrichBiteAddressOnWrite` adds the code to `countryCodes`, and a Bite-count milestone once `incrementBiteCountOnBiteCreate` raises `biteCount`, both seconds after the post, so the in-app celebrations have to hear those writes. Both are read from this one subscription; a further celebration from the user's own document widens it rather than opening a second listener. The effect stays subscribed to `publicProfile$` from `loadedUser` until sign-out, and from then on every write to the user document listed above bills one read. That is the trade this celebration makes: a handful of reads per session, each now with a reader. The listener feeds the celebration only. The `app` slice is still the login snapshot, and everything above about stale aggregates still holds.
 
 ## A Reducer That Changes Nothing Must Return The Same State
 
@@ -113,3 +113,4 @@ apps/bite-tribe-firebase/functions/src/functions/bites/load-bites-by-location.ts
 [#1310]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1310
 [#1357]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1357
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
+[#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014

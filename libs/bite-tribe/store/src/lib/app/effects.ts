@@ -9,6 +9,7 @@ import {
   filter,
   from,
   map,
+  pairwise,
   switchMap,
   take,
   tap,
@@ -41,7 +42,8 @@ import { publicUser } from './selectors';
 import { ToastService } from 'toast';
 import { CelebrationService } from 'celebration';
 import { TranslocoService } from '@jsverse/transloco';
-import { newCountryCodes } from './utils/new-country-codes';
+import { newCountryCode } from './utils/new-country-codes';
+import { reachedBiteMilestone } from './utils/bite-milestone';
 import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
 import type { WeeklyBadge } from 'model';
 
@@ -107,7 +109,7 @@ export class AppEffect {
    * unsubscribing here removes it rather than leaving it to bill for updates
    * this effect would never read. The profile the store holds is therefore a
    * login-time snapshot, and server-maintained aggregates on it are kept
-   * current by the reducer instead. `celebrateFirstCountry$` holds its own
+   * current by the reducer instead. `celebrateProfileProgress$` holds its own
    * subscription for the session, which feeds the celebration and not this
    * slice. See [[Architecture - State Management]].
    */
@@ -121,34 +123,56 @@ export class AppEffect {
   });
 
   /**
-   * Celebrates a first Bite in a new country while the app runs (issue #1797).
+   * Celebrates what a Bite earns once the backend has counted it, while the
+   * app runs: a first Bite in a new country (issue #1797) and a Bite-count
+   * milestone (issue #2014).
    *
-   * The phone does not know the country when the post succeeds: the backend
-   * derives it from the position a few seconds later and adds it to the user's
-   * `countryCodes`. So this keeps the user's own document listened to for the
-   * session - one read per change to it - and celebrates when a snapshot adds
-   * a code. Each sign-in starts a new baseline; see `newCountryCodes` for what
-   * is and is not celebrated.
+   * The phone knows neither when the post succeeds: the backend derives the
+   * country from the position a few seconds later and adds it to the user's
+   * `countryCodes`, and `incrementBiteCountOnBiteCreate` raises `biteCount`.
+   * So this keeps the user's own document listened to for the session - one
+   * listener, one read per change to it - and compares each snapshot with the
+   * one before. Each sign-in starts a new baseline, so a start-up never
+   * celebrates what was earned while the app was closed; see `newCountryCode`
+   * and `reachedBiteMilestone` for what is and is not celebrated. When one
+   * Bite earns both, `CelebrationService` plays only the higher one.
    *
    * The `countryBadge.title` push for the same badge is not shown on top while
    * the app is in the foreground: neither app configures `presentationOptions`
    * for `PushNotifications`, so the plugin presents nothing in the foreground
    * and only reports the push to its listener.
    */
-  celebrateFirstCountry$ = createEffect(
+  celebrateProfileProgress$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(fromAuth.AuthActions.loadedUser),
         switchMap(({ user }) =>
-          user ? this.api.publicProfile$.pipe(newCountryCodes()) : EMPTY,
+          user ? this.api.publicProfile$.pipe(pairwise()) : EMPTY,
         ),
-        tap((countryCode) => {
-          void this.celebration.celebrate('first-country', {
-            country: getLocalizedCountryName(
-              countryCode,
-              this.transloco.getActiveLang(),
-            ),
-          });
+        tap(([previous, current]) => {
+          const countryCode = newCountryCode(
+            previous.countryCodes,
+            current.countryCodes,
+          );
+          const milestone = reachedBiteMilestone(
+            previous.biteCount,
+            current.biteCount,
+          );
+
+          if (countryCode) {
+            void this.celebration.celebrate('first-country', {
+              country: getLocalizedCountryName(
+                countryCode,
+                this.transloco.getActiveLang(),
+              ),
+            });
+          }
+
+          if (milestone) {
+            void this.celebration.celebrate('bite-milestone', {
+              count: milestone,
+            });
+          }
         }),
       ),
     { dispatch: false },

@@ -318,6 +318,8 @@
   "bite-created-successfully": "Bite创建成功！",
   "bite-created-first": "你的第一个Bite已发布！",
   "country-badge-earned": "在新国家的第一个Bite：{{country}}！",
+  "bite-milestone": "{{count}}个Bite！吃了好多美食呀。",
+  "bite-milestone-thousand": "{{count}}个Bite！你是真正的美食传奇。",
   "onboarding-finished": "欢迎加入Tribe！",
   "first-follow": "你已关注{{user}}，欢迎加入对方的美食之旅！",
   "bite-trail-completed": "你已尝遍{{trail}}上的所有Bite！",

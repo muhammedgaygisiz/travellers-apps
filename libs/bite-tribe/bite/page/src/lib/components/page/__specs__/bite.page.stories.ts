@@ -6,6 +6,13 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
 
+/** Answers after a moment, as the backend does, with a Cusco-style text. */
+const fakeDescriptionGenerator = async (): Promise<string> => {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
+  return 'Tiny beef dumplings under garlic yoghurt and chilli butter, a Kayseri classic.';
+};
+
 export default {
   title: 'Pages/Create Bite',
   component: BitePage,
@@ -15,6 +22,12 @@ export default {
   args: {
     isNew: true,
   },
+  // The AI description (issue #2030): every story gets a fake generator, so
+  // Generate shows as it does in the app. Through props, because Storybook
+  // does not pass function-valued args on to the component.
+  render: (args) => ({
+    props: { ...args, descriptionGenerator: fakeDescriptionGenerator },
+  }),
   decorators: [
     applicationConfig({
       providers: [

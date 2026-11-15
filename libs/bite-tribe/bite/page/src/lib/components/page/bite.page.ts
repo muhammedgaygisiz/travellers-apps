@@ -18,7 +18,9 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonAlert,
   IonIcon,
+  IonSpinner,
   IonInput,
   IonItem,
   IonLabel,
@@ -32,6 +34,7 @@ import {
 } from '@ionic/angular/standalone';
 import { RestaurantSelectorComponent } from 'restaurant-selector';
 import { Platform } from '@ionic/angular';
+import { AlertButton } from '@ionic/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs';
@@ -60,6 +63,7 @@ import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { normalizePriceForBackend } from './utils/normalize-price-for-backend';
 import { ImageValidator } from './utils/image-validator';
+import { shrinkImageForDescription } from './utils/shrink-image-for-description';
 import { normalizePriceForForm } from './utils/normalize-price-for-form';
 import {
   getRestaurantsNearBite,
@@ -102,7 +106,9 @@ import {
     IonModal,
     PriceInputComponent,
     RestaurantSelectorComponent,
+    IonAlert,
     IonIcon,
+    IonSpinner,
     IonItem,
     IonLabel,
     IonList,
@@ -191,6 +197,12 @@ export class BitePage {
    * this is what lets the position modal offer the photo source again.
    */
   storedPhotoPosition = input<Geopoint>();
+
+  /**
+   * Writes a description with AI (issue #2030). Without it the form shows no
+   * **Generate** action.
+   */
+  descriptionGenerator = input<DescriptionGenerator>();
 
   submitBite = output<BiteSubmission>();
 
@@ -355,6 +367,15 @@ export class BitePage {
   isInvalid = toSignal(
     this.biteFormGroup.valueChanges.pipe(map(() => !this.biteFormGroup.valid)),
     { initialValue: !this.biteFormGroup.valid },
+  );
+
+  /**
+   * Posting waits for a description being written (#2030): posted meanwhile,
+   * the Bite would go out without it, and after "Post and add another" the
+   * answer would land in the next Bite's empty form.
+   */
+  readonly cannotPost = computed(
+    () => this.isInvalid() || this.generatingDescription(),
   );
 
   imageBase64 = toSignal(this.biteFormGroup.controls['image'].valueChanges);
@@ -713,6 +734,118 @@ export class BitePage {
       : [];
   });
 
+  /** Whether a description is being written (issue #2030). */
+  readonly generatingDescription = signal(false);
+
+  /** The last description written by AI, to tell it from a typed one. */
+  private readonly generatedDescription = signal<string | undefined>(undefined);
+
+  /** Whether the user is being asked before their text is replaced. */
+  readonly confirmingDescriptionReplace = signal(false);
+
+  private readonly dishName = toSignal(
+    this.biteFormGroup.controls['name'].valueChanges,
+    { initialValue: this.biteFormGroup.controls['name'].value },
+  );
+
+  /**
+   * **Generate** is shown but disabled until there is a dish name: without it
+   * the model would have only the photo to guess from (issue #2030).
+   */
+  readonly canGenerateDescription = computed(
+    () => !!this.dishName()?.trim() && !this.generatingDescription(),
+  );
+
+  /**
+   * Translated when the dialog opens rather than when the page is built: a
+   * page opened cold is built before the translations have loaded, and the
+   * alert would otherwise show their keys.
+   */
+  readonly replaceDescriptionButtons = signal<AlertButton[]>([]);
+
+  /**
+   * A description the user wrote is never replaced without asking. One that
+   * was written by AI and left as it is may be, for another version.
+   */
+  onGenerateDescription(): void {
+    const current = this.biteFormGroup.controls['description'].value?.trim();
+
+    if (current && current !== this.generatedDescription()?.trim()) {
+      this.replaceDescriptionButtons.set([
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('replace-description-confirm'),
+          role: 'confirm',
+        },
+      ]);
+      this.confirmingDescriptionReplace.set(true);
+      return;
+    }
+
+    void this.generateDescription();
+  }
+
+  onReplaceDescriptionDismiss(event: Event): void {
+    this.confirmingDescriptionReplace.set(false);
+
+    if ((event as CustomEvent<{ role?: string }>).detail?.role === 'confirm') {
+      void this.generateDescription();
+    }
+  }
+
+  private async generateDescription(): Promise<void> {
+    const generator = this.descriptionGenerator();
+
+    if (!generator || !this.canGenerateDescription()) {
+      return;
+    }
+
+    this.generatingDescription.set(true);
+
+    try {
+      const { name, place, position, image, imagePath } =
+        this.biteFormGroup.getRawValue();
+      const photo = image || imagePath || '';
+      const description = await generator(
+        {
+          dishName: name?.trim() ?? '',
+          restaurantName: place?.trim() || undefined,
+          latitude: position?.latitude,
+          longitude: position?.longitude,
+          image: photo.startsWith('data:image/')
+            ? await shrinkImageForDescription(photo, document)
+            : undefined,
+          imageUrl: photo.startsWith('https://') ? photo : undefined,
+          language: this.transloco.getActiveLang(),
+        },
+        this.isNew() ? 'create' : 'edit',
+      );
+
+      if (description) {
+        this.biteFormGroup.controls['description'].setValue(description);
+        this.biteFormGroup.controls['description'].markAsDirty();
+        this.generatedDescription.set(description);
+      }
+    } finally {
+      this.generatingDescription.set(false);
+    }
+  }
+
+  private descriptionSource(description: string): DescriptionSource {
+    const posted = description.trim();
+    const generated = this.generatedDescription()?.trim();
+
+    if (!posted) {
+      return 'none';
+    }
+
+    if (generated) {
+      return posted === generated ? 'generated' : 'generated_edited';
+    }
+
+    return 'manual';
+  }
+
   saveBite(): void {
     const newBite = this.toSubmittableBite();
 
@@ -758,7 +891,11 @@ export class BitePage {
 
     newBite.price = normalizePriceForBackend(newBite.price);
 
-    return { ...newBite, photoPosition: this.photoPositionToSubmit() };
+    return {
+      ...newBite,
+      photoPosition: this.photoPositionToSubmit(),
+      descriptionSource: this.descriptionSource(newBite.description ?? ''),
+    };
   }
 
   private resetForNextBite(postedTags: string[]): void {
@@ -781,6 +918,7 @@ export class BitePage {
 
     this.imagePosition.set(undefined);
     this.photoChanged.set(false);
+    this.generatedDescription.set(undefined);
 
     // The position carries over to the next Bite, but the photo it came from is
     // gone, so the row stops attributing it to a source it can no longer offer.
@@ -1043,4 +1181,33 @@ export type BiteFormValue = BitePage['biteFormGroup']['value'];
  */
 export type BiteSubmission = BiteFormValue & {
   photoPosition?: Geopoint | null;
+  /**
+   * Where the description came from (issue #2030), for analytics only: taken
+   * off before the Bite is written, like {@link photoPosition}.
+   */
+  descriptionSource?: DescriptionSource;
 };
+
+/** Where a posted Bite's description came from (issue #2030). */
+export type DescriptionSource =
+  'generated' | 'generated_edited' | 'manual' | 'none';
+
+/** What the form asks to have a description written from (issue #2030). */
+export interface DescriptionInputs {
+  dishName: string;
+  restaurantName?: string;
+  latitude?: number;
+  longitude?: number;
+  image?: string;
+  imageUrl?: string;
+  language: string;
+}
+
+/**
+ * Writes a description, or resolves to nothing when none could be written.
+ * The integration layer behind it tells the user why.
+ */
+export type DescriptionGenerator = (
+  inputs: DescriptionInputs,
+  mode: 'create' | 'edit',
+) => Promise<string | undefined>;

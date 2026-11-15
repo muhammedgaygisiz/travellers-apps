@@ -128,6 +128,7 @@ export { setUserSubscriptionTier } from './functions/users/set-user-subscription
 export { deleteOwnAccount } from './functions/users/delete-own-account';
 export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';
+export { generateBiteDescription } from './functions/bites/generate-bite-description';
 export { sendDailyLeaderboardNotification } from './functions/leaderboard/send-daily-leaderboard-notification';
 export { resetWeeklyLeaderboard } from './functions/leaderboard/reset-weekly-leaderboard';
 export { resyncBiteCounts } from './functions/leaderboard/resync-bite-counts';

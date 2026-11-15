@@ -3,7 +3,10 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteDataAccessService } from 'bite-tribe/bite-data-access';
 import { CelebrationService } from 'celebration';
 import type { Bite, Geopoint } from 'model';
-import type { BiteSubmission } from '../components/page/bite.page';
+import type {
+  BiteSubmission,
+  DescriptionGenerator,
+} from '../components/page/bite.page';
 import { biteSourceOf, withDraftProvenance } from './bite-provenance';
 import { withAddressInvalidatedIfMoved } from './bite-address';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
@@ -145,7 +148,7 @@ export class BiteService {
 
     // The photo position is taken off here and stored apart: anything left on
     // the document is readable by every member (GitHub issue #1290).
-    const { id, photoPosition, ...biteData } = newBite;
+    const { id, photoPosition, descriptionSource, ...biteData } = newBite;
     void id;
 
     // Read before the write: `submitNewBite` clears the draft as its first act,
@@ -171,6 +174,7 @@ export class BiteService {
 
       this.analytics.logEvent(AnalyticsEvent.BiteCreated, {
         source: biteSourceOf(document),
+        ...(descriptionSource ? { description_source: descriptionSource } : {}),
       });
 
       onCreated(first);
@@ -179,9 +183,45 @@ export class BiteService {
     }
   }
 
+  /**
+   * Writes a description with AI for the Bite form (issue #2030), and tells
+   * the user when none could be written. Every tap is counted by result.
+   */
+  readonly descriptionGenerator: DescriptionGenerator = async (
+    inputs,
+    mode,
+  ) => {
+    const result = await this.dataAccess.generateDescription(inputs);
+
+    this.analytics.logEvent(AnalyticsEvent.BiteDescriptionGenerated, {
+      result:
+        result.status === 'ok'
+          ? 'success'
+          : result.status === 'limit'
+            ? 'limit_reached'
+            : 'error',
+      mode,
+    });
+
+    if (result.status === 'ok') {
+      return result.description;
+    }
+
+    void this.toast.present({
+      messageKey:
+        result.status === 'limit'
+          ? 'description-limit-reached'
+          : 'description-unavailable',
+      outcome: 'failure',
+    });
+
+    return undefined;
+  };
+
   submitEditedBite(submission: BiteSubmission): void {
     // Taken off for the reason `createBite` gives (GitHub issue #1290).
-    const { photoPosition, ...editedBite } = submission;
+    const { photoPosition, descriptionSource, ...editedBite } = submission;
+    void descriptionSource;
     const bite = withAddressInvalidatedIfMoved(
       editedBite as unknown as Bite,
       this.biteValue(),

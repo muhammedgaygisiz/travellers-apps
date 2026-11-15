@@ -135,6 +135,7 @@ Closing records for epics that produced one are in [history/records/](history/re
 - [Architecture - Auth](architecture/auth.md)
 - [Architecture - Storage](architecture/storage.md)
 - [Architecture - Analytics](architecture/analytics.md)
+- [Architecture - AI](architecture/ai.md)
 - [Architecture - State Management](architecture/state-management.md)
 - [Architecture - Data Access](architecture/data-access.md)
 - [Architecture - Internationalization](architecture/internationalization.md)

@@ -68,9 +68,35 @@
       />
 
       <div class="ion-margin-vertical description">
+        <!-- AI description (#2030): a clear button in a notch of the field's
+        top border, opposite its label. -->
+        @if (descriptionGenerator()) {
+        <button
+          type="button"
+          class="generate-description"
+          data-testid="generate-description"
+          [disabled]="!canGenerateDescription()"
+          (click)="onGenerateDescription()"
+        >
+          @if (generatingDescription()) {
+          <ion-spinner name="crescent" aria-hidden="true" />
+          {{ 'generating-description' | transloco }} } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          {{ 'generate-description' | transloco }} }
+        </button>
+        <ion-alert
+          [isOpen]="confirmingDescriptionReplace()"
+          header="{{ 'replace-description-header' | transloco }}"
+          message="{{ 'replace-description-message' | transloco }}"
+          [buttons]="replaceDescriptionButtons()"
+          (didDismiss)="onReplaceDescriptionDismiss($event)"
+        />
+        }
         <ion-textarea
           label="{{'description-label' | transloco}}"
           formControlName="description"
+          [readonly]="generatingDescription()"
+          [class.generating]="generatingDescription()"
           fill="outline"
           auto-grow="true"
           [maxlength]="500"
@@ -147,7 +173,7 @@
         color="primary"
         fill="outline"
         class="ion-margin-top"
-        [disabled]="isInvalid()"
+        [disabled]="cannotPost()"
         (click)="saveBiteAndAddAnother()"
         data-testid="post-bite-and-add-another"
       >
@@ -160,7 +186,7 @@
         color="primary"
         routerDirection="back"
         class="ion-margin-top safe-padding-bottom"
-        [disabled]="isInvalid()"
+        [disabled]="cannotPost()"
         (click)="saveBite()"
         data-testid="post-bite"
       >

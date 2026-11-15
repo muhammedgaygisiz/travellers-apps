@@ -102,6 +102,11 @@ const CUSTOM_DIMENSIONS = [
   // The city landing page a visit came from (issue #1492). `destination` is
   // not registered: it has two values and reads fine as an event filter.
   { parameterName: 'city_page', displayName: 'City page' },
+  // The AI Bite description (issue #2030): what a Generate tap ended in, on
+  // which form, and where a posted Bite's description came from.
+  { parameterName: 'result', displayName: 'Generate result' },
+  { parameterName: 'mode', displayName: 'Bite form mode' },
+  { parameterName: 'description_source', displayName: 'Description source' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

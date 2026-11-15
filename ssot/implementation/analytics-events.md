@@ -54,7 +54,8 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 | Account      | `account_deletion_started`            | –                                                                                                          | User confirms the destructive delete-account alert                                                  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
 | Account      | `account_deletion_completed`          | –                                                                                                          | Backend cascade succeeds and the user is signed out                                                 | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
 | Account      | `account_deletion_failed`             | `reason: 'reauth_required' \| 'reauth_failed' \| 'account_changed' \| 'unknown'`                           | Deletion needs a fresh sign-in, targets an account other than the confirmed one, or fails outright  | `libs/bite-tribe/account/data-access/.../delete-my-account.service.ts`                                      |
-| Creation     | `bite_created`                        | `source: 'visit' \| 'menu' \| 'manual'`                                                                    | New Bite persisted                                                                                  | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
+| Creation     | `bite_created`                        | `source: 'visit' \| 'menu' \| 'manual'`, `description_source?`                                             | New Bite persisted                                                                                  | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
+| Creation     | `bite_description_generated`          | `result: 'success' \| 'error' \| 'limit_reached'`, `mode: 'create' \| 'edit'`                              | Generate on the Bite form answers                                                                   | `libs/bite-tribe/bite/page/.../integration/bite.service.ts`                                                 |
 | Creation     | `bucketlist_created`                  | –                                                                                                          | Bucket list created                                                                                 | `libs/bite-tribe/bucketlist/page/.../integration/bucketlists.service.ts`                                    |
 | Creation     | `bucketlist_rated`                    | `rating: number`                                                                                           | BiteTrail rating submitted                                                                          | `libs/bite-tribe/bucketlist/page/.../integration/rate-bucketlist.service.ts`                                |
 | Discovery    | `search_performed`                    | –                                                                                                          | Query first reaches the min length (once per search session)                                        | `libs/bite-tribe/search/page/.../integration/search.service.ts`                                             |
@@ -557,6 +558,27 @@ the existing exception handler:
   other. The activation funnel of [issue 987](https://github.com/muhammedgaygisiz/travellers-apps/issues/987) counts both as one step, which is
   what made the web's conversion visible at all.
 
+## The AI Description
+
+Issue [#2030] lets a user tap **Generate** on the Bite form for a suggested
+description ([Architecture - AI](../architecture/ai.md)). Two questions: how
+often it is used, and whether what it writes is kept.
+
+- `bite_description_generated` is one event per tap that reached the
+  function: `result` is `success`, `error` (nothing written, the toast says so)
+  or `limit_reached` (the day's ten are used), and `mode` is `create` or
+  `edit`. A cancelled replace prompt is not a tap that reached anything and
+  emits nothing.
+- `description_source` on `bite_created` says where the posted description
+  came from: `generated` (posted as written), `generated_edited` (generated,
+  then changed), `manual` or `none`. It is set on the create only; an edit
+  emits no `bite_created`.
+
+No free text: neither the dish name nor the description is a parameter.
+`result`, `mode` and `description_source` were added to `provision-ga4.mjs`;
+GA4 does not backfill, so earlier `bite_created` events report `(not set)`
+for `description_source`.
+
 ## The Share-As-Image Funnel
 
 [Epic-1723][#1723] lets a user turn one of their own Bites into an image for
@@ -951,3 +973,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#2006]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2006
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
+[#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030

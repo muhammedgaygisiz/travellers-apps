@@ -5,6 +5,7 @@ import { BiteTribeApiService, ProfileApiService } from 'bite-tribe/api';
 import { NetworkStatusService } from 'common/networkstatus';
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
   Bite,
   Bucketlist,
@@ -44,6 +45,11 @@ const captureUploadCallback = async (
 
   return api.uploadImage.mock.calls[0][1];
 };
+
+// A Capacitor plugin is a proxy: it is mocked here, not spied on.
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
 
 describe(BiteDataAccessService.name, () => {
   let service: BiteDataAccessService;
@@ -831,6 +837,45 @@ describe(BiteDataAccessService.name, () => {
         'EUR',
       );
       expect(api.getCurrencyByPosition).toHaveBeenCalledWith(position);
+    });
+  });
+
+  describe('generateDescription (issue #2030)', () => {
+    const request = { dishName: 'Mantı', language: 'en' };
+
+    it('asks the backend for a description', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { status: 'ok', description: 'Tiny dumplings.' },
+      });
+
+      await expect(service.generateDescription(request)).resolves.toEqual({
+        status: 'ok',
+        description: 'Tiny dumplings.',
+      });
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'generateBiteDescription',
+        data: request,
+      });
+    });
+
+    it('reads a failed call as unavailable', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('offline'));
+
+      await expect(service.generateDescription(request)).resolves.toEqual({
+        status: 'unavailable',
+      });
+    });
+
+    it('reads an empty answer as unavailable', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: undefined } as never);
+
+      await expect(service.generateDescription(request)).resolves.toEqual({
+        status: 'unavailable',
+      });
     });
   });
 });

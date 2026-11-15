@@ -433,7 +433,10 @@ describe('BitePage', () => {
       component.biteFormGroup.patchValue(validBite);
       component.saveBite();
 
-      expect(emitSpy).toHaveBeenCalledWith(validBite);
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...validBite,
+        descriptionSource: 'none',
+      });
     });
 
     // The source has to reach the backend, not just the screen: without it a
@@ -605,7 +608,10 @@ describe('BitePage', () => {
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
       component.saveBite();
 
-      expect(emitSpy).toHaveBeenCalledWith(validBite);
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...validBite,
+        descriptionSource: 'none',
+      });
     });
   });
 
@@ -901,7 +907,10 @@ describe('BitePage', () => {
 
       component.saveBiteAndAddAnother();
 
-      expect(emitSpy).toHaveBeenCalledWith(validBite);
+      expect(emitSpy).toHaveBeenCalledWith({
+        ...validBite,
+        descriptionSource: 'manual',
+      });
     });
 
     it('should not emit when the form is invalid', () => {
@@ -1964,6 +1973,218 @@ describe('BitePage', () => {
           subscription.unsubscribe();
         });
       });
+    });
+  });
+
+  describe('AI description (issue #2030)', () => {
+    // Promises only: real timers would also run the map component's.
+    const flushPromises = async (): Promise<void> => {
+      for (let i = 0; i < 10; i++) {
+        await Promise.resolve();
+      }
+    };
+
+    const fillDish = (): void => {
+      component.biteFormGroup.patchValue({
+        name: 'Mantı',
+        place: 'Kayseri Kitchen',
+        image: 'https://firebasestorage.googleapis.com/v0/b/b/o/p.jpg',
+        position: { latitude: 38.7, longitude: 35.5 },
+      });
+    };
+
+    it('is disabled until there is a dish name', () => {
+      componentRef.setInput('descriptionGenerator', jest.fn());
+
+      expect(component.canGenerateDescription()).toBe(false);
+
+      component.biteFormGroup.controls['name'].setValue('Mantı');
+      expect(component.canGenerateDescription()).toBe(true);
+    });
+
+    it('fills the description from the dish, place, position and photo', async () => {
+      const generator = jest.fn(
+        async () => 'Tiny beef dumplings under garlic yoghurt.',
+      );
+      componentRef.setInput('descriptionGenerator', generator);
+      componentRef.setInput('isNew', true);
+      fillDish();
+
+      component.onGenerateDescription();
+      await flushPromises();
+
+      expect(generator).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dishName: 'Mantı',
+          restaurantName: 'Kayseri Kitchen',
+          latitude: 38.7,
+          longitude: 35.5,
+          imageUrl: 'https://firebasestorage.googleapis.com/v0/b/b/o/p.jpg',
+          image: undefined,
+        }),
+        'create',
+      );
+      expect(component.biteFormGroup.controls['description'].value).toBe(
+        'Tiny beef dumplings under garlic yoghurt.',
+      );
+      expect(component.generatingDescription()).toBe(false);
+    });
+
+    it('locks the description field while a description is written', async () => {
+      let answer: (value: string) => void = () => undefined;
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              answer = resolve;
+            }),
+        ),
+      );
+      // No position: rendering one starts the map, which jest cannot run.
+      component.biteFormGroup.controls['name'].setValue('Mantı');
+
+      component.onGenerateDescription();
+      await flushPromises();
+      fixture.detectChanges();
+
+      const field = (): HTMLIonTextareaElement =>
+        fixture.nativeElement.querySelector(
+          'ion-textarea[formcontrolname="description"]',
+        );
+      expect(field().readonly).toBe(true);
+      expect(field().classList).toContain('generating');
+      // Read-only, not disabled: a disabled control would drop out of the
+      // Bite that Post sends.
+      expect(component.biteFormGroup.controls['description'].enabled).toBe(
+        true,
+      );
+
+      answer('Tiny beef dumplings.');
+      await flushPromises();
+      fixture.detectChanges();
+
+      expect(field().readonly).toBe(false);
+      expect(field().classList).not.toContain('generating');
+    });
+
+    it('holds posting while a description is written', async () => {
+      // After "Post and add another" the answer would otherwise land in the
+      // next Bite's form. Not rendered: a position starts the map.
+      let answer: (value: string) => void = () => undefined;
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(
+          () =>
+            new Promise<string>((resolve) => {
+              answer = resolve;
+            }),
+        ),
+      );
+      component.biteFormGroup.patchValue({
+        image: 'https://firebasestorage.googleapis.com/v0/b/b/o/p.jpg',
+        name: 'Mantı',
+        place: 'Kayseri Kitchen',
+        price: '9.99',
+        currency: 'TRY',
+        position: { latitude: 38.7, longitude: 35.5 },
+      });
+      expect(component.cannotPost()).toBe(false);
+
+      component.onGenerateDescription();
+      await flushPromises();
+      expect(component.cannotPost()).toBe(true);
+
+      answer('Tiny beef dumplings.');
+      await flushPromises();
+      expect(component.cannotPost()).toBe(false);
+    });
+
+    it('asks before replacing a description the user wrote', async () => {
+      const generator = jest.fn(async () => 'Generated.');
+      componentRef.setInput('descriptionGenerator', generator);
+      fillDish();
+      component.biteFormGroup.controls['description'].setValue('My own words.');
+
+      component.onGenerateDescription();
+
+      expect(component.confirmingDescriptionReplace()).toBe(true);
+      expect(generator).not.toHaveBeenCalled();
+
+      component.onReplaceDescriptionDismiss(
+        new CustomEvent('ionAlertDidDismiss', { detail: { role: 'cancel' } }),
+      );
+      expect(generator).not.toHaveBeenCalled();
+      expect(component.biteFormGroup.controls['description'].value).toBe(
+        'My own words.',
+      );
+    });
+
+    it('replaces a generated description without asking, for another version', async () => {
+      const generator = jest
+        .fn()
+        .mockResolvedValueOnce('First version.')
+        .mockResolvedValueOnce('Second version.');
+      componentRef.setInput('descriptionGenerator', generator);
+      fillDish();
+
+      component.onGenerateDescription();
+      await flushPromises();
+      component.onGenerateDescription();
+      await flushPromises();
+
+      expect(component.confirmingDescriptionReplace()).toBe(false);
+      expect(component.biteFormGroup.controls['description'].value).toBe(
+        'Second version.',
+      );
+    });
+
+    it('leaves the field alone when no description could be written', async () => {
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(async () => undefined),
+      );
+      fillDish();
+
+      component.onGenerateDescription();
+      await flushPromises();
+
+      expect(component.biteFormGroup.controls['description'].value).toBe('');
+    });
+
+    it('reports where the posted description came from', async () => {
+      componentRef.setInput(
+        'descriptionGenerator',
+        jest.fn(async () => 'Generated.'),
+      );
+      fillDish();
+      component.biteFormGroup.patchValue({ price: '9.99' });
+      const emitSpy = jest.spyOn(component.submitBite, 'emit');
+
+      component.onGenerateDescription();
+      await flushPromises();
+      component.saveBite();
+      expect(emitSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ descriptionSource: 'generated' }),
+      );
+
+      component.biteFormGroup.controls['description'].setValue(
+        'Generated, edited.',
+      );
+      component.saveBite();
+      expect(emitSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ descriptionSource: 'generated_edited' }),
+      );
+    });
+
+    it('shows no Generate action without a generator', () => {
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="generate-description"]',
+        ),
+      ).toBeNull();
     });
   });
 });

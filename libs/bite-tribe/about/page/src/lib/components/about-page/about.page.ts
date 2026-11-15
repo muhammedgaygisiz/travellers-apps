@@ -12,6 +12,7 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
+  IonSkeletonText,
   IonText,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -31,6 +32,7 @@ import { GlobeComponent } from 'bite-tribe-common/map/globe';
     IonItem,
     IonLabel,
     IonIcon,
+    IonSkeletonText,
     TranslocoPipe,
     StoreLinksComponent,
     GlobeComponent,
@@ -41,6 +43,13 @@ export class AboutPage {
 
   totalNumberBites = input<number>();
   totalNumberUsers = input<number>();
+
+  /**
+   * The counts are being read. The header bar runs for every read; a count
+   * with no value yet holds a skeleton of its own size meanwhile, so the page
+   * does not jump when it lands (GitHub issue #2072).
+   */
+  loading = input(false, { transform: booleanAttribute });
 
   /**
    * The countries with at least one Bite on BiteTribe (GitHub issue #1893).

@@ -1,7 +1,7 @@
 import { Component, input, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoTestingModule } from '@jsverse/transloco';
 import { GlobeComponent } from 'bite-tribe-common/map/globe';
 import { StoreLinksComponent } from 'bite-tribe/store-links';
 import { getIonicConfig } from 'utils';
@@ -35,6 +35,13 @@ describe(AboutPage.name, () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      // The header bar inside ta-page labels itself through Transloco.
+      imports: [
+        TranslocoTestingModule.forRoot({
+          langs: { en: {} },
+          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+        }),
+      ],
       providers: [provideIonicAngular(getIonicConfig())],
     })
       .overrideComponent(AboutPage, {
@@ -66,5 +73,48 @@ describe(AboutPage.name, () => {
     expect(fixture.nativeElement.textContent).toContain(
       'total-number-of-bites-on-bite-tribe',
     );
+  });
+
+  // GitHub issue #2072: the counts used to be blank while they loaded, and the
+  // layout jumped when they arrived.
+  describe('loading the counts', () => {
+    const byTestId = (id: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
+
+    it('holds a skeleton for each count while it loads', () => {
+      fixture.componentRef.setInput('loading', true);
+      fixture.detectChanges();
+
+      expect(byTestId('about-bites-count-skeleton')).not.toBeNull();
+      expect(byTestId('about-users-count-skeleton')).not.toBeNull();
+      expect(byTestId('about-bites-count')).toBeNull();
+    });
+
+    it('runs the header bar while the counts load', () => {
+      fixture.componentRef.setInput('loading', true);
+      fixture.detectChanges();
+
+      expect(byTestId('page-loading-bar')).not.toBeNull();
+    });
+
+    it('keeps a count it already has on screen while it refreshes', () => {
+      fixture.componentRef.setInput('totalNumberUsers', 312);
+      fixture.componentRef.setInput('loading', true);
+      fixture.detectChanges();
+
+      expect(byTestId('about-users-count')?.textContent?.trim()).toBe('312');
+      expect(byTestId('about-users-count-skeleton')).toBeNull();
+      expect(byTestId('about-bites-count-skeleton')).not.toBeNull();
+    });
+
+    it('shows the counts once they are read', () => {
+      fixture.componentRef.setInput('totalNumberBites', 1284);
+      fixture.componentRef.setInput('totalNumberUsers', 312);
+      fixture.detectChanges();
+
+      expect(byTestId('about-bites-count')?.textContent?.trim()).toBe('1284');
+      expect(byTestId('about-users-count')?.textContent?.trim()).toBe('312');
+      expect(byTestId('page-loading-bar')).toBeNull();
+    });
   });
 });

@@ -49,3 +49,14 @@ export const WithBiteCountries: Story = {
     autoSpin: false,
   },
 };
+
+/**
+ * The first visit, before either count is read: the header bar runs and each
+ * count holds a skeleton of its size, so the page does not jump when the
+ * numbers land (GitHub issue #2072).
+ */
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+};

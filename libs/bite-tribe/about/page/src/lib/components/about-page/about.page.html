@@ -1,4 +1,5 @@
 <ta-page
+  [loading]="loading()"
   [chrome]="{
     enableBackButton: true,
     showHeaderMenu: false,
@@ -43,7 +44,17 @@
           >
           <br />
 
-          <ion-text color="primary">{{totalNumberBites()}}</ion-text>
+          @if (totalNumberBites() === undefined && loading()) {
+          <ion-skeleton-text
+            class="count-skeleton"
+            data-testid="about-bites-count-skeleton"
+            [animated]="true"
+          />
+          } @else {
+          <ion-text color="primary" data-testid="about-bites-count"
+            >{{totalNumberBites()}}</ion-text
+          >
+          }
         </div>
         <div class="ion-margin-top">
           <ng-container
@@ -52,7 +63,17 @@
           >
           <br />
 
-          <ion-text color="primary">{{totalNumberUsers()}}</ion-text>
+          @if (totalNumberUsers() === undefined && loading()) {
+          <ion-skeleton-text
+            class="count-skeleton"
+            data-testid="about-users-count-skeleton"
+            [animated]="true"
+          />
+          } @else {
+          <ion-text color="primary" data-testid="about-users-count"
+            >{{totalNumberUsers()}}</ion-text
+          >
+          }
         </div>
         <div class="legal-section ion-margin-top">
           <ion-item

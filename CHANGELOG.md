@@ -1,5 +1,99 @@
 # Changelog
 
+## build-101 (2026-11-15)
+
+Tag: `build-1.1.2-101`
+
+<!-- changelog-start-rev: 2613c4e8 -->
+<!-- changelog-end-rev: 8b0d4847 -->
+
+### Features
+- **bite-tribe**: celebrate entering the weekly leaderboard top ten (#2015) (#2054) (8b0d4847)
+- publish an imprint on bitetribe.app and link it from the city pages (#1979) (#2055) (1f6850e3)
+- **bite-tribe**: celebrate every bite milestone from five to every hundredth (#2014) (#2053) (f905df8e)
+- **celebration**: play one celebration per bite and a grand burst for every thousandth (#2013) (#2042) (3cc2cb32)
+- **bite-tribe/bite**: generate a Bite description with Gemini (#2030) (#2050) (e1b31b2b)
+- **bite-tribe/leaderboard**: rank countries by the Bites posted in them (#2043) (#2049) (3240da48)
+- **bite-tribe/leaderboard**: show the top 3 on a podium (#2032) (#2048) (a712d23d)
+- **bite-tribe/leaderboard**: give the weekly top 3 a badge for a week (#2031) (#2045) (884e9a29)
+- **bite-tribe/leaderboard**: rank the week's most-liked Bites on a Most liked tab (#2028) (#2040) (b395ed38)
+- **bite-tribe/leaderboard**: rank this week's Bites and reset every Monday (#2027) (#2037) (c605cc39)
+- **celebration**: play the celebration sound with every celebration (#1846) (#2033) (b58e0969)
+- **bite-tribe/search**: one Bites search over name, restaurant, city, tags and description (#2026) (#2029) (0bb136bc)
+- **bite-tribe-common/map**: draw the maps dark in dark mode and keep every place to eat on them (#2022) (#2024) (707a480b)
+- **bite-tribe**: play a soft sound when a bite is posted (#1845) (#2023) (81acf5ae)
+- **bite-tribe**: copy another user's Bite and tick it off on post (#2018) (#2020) (bbe3bbab)
+- **bite-tribe**: let users switch sounds off on their device (#1844) (#2021) (c3698ce1)
+- **sounds**: play interface sounds through one service that follows the phone's silent mode (#1843) (#2019) (5fbd1a71)
+- **bite-tribe**: bundle two quiet cc0 interface sounds in the native wrappers (#1842) (#2011) (448b9254)
+- **bite-tribe-start**: link the web start page to the BiteTribe Instagram account (#2006) (#2008) (2ee793f2)
+- offer the photo's position again when a Bite is edited (#1290) (#1989) (960cb79c)
+- **functions**: link the city landing pages to the BiteTribe Instagram account (#1978) (#1985) (c756cca4)
+- **functions**: let a city page answer under alias names with a redirect (#1974) (#1975) (debc3795)
+- link a city landing page into the app with an attributable call to action (#1492) (#1972) (5c08a8ce)
+- **functions**: add structured data and a published-set sitemap for city landing pages (#1491) (#1971) (16e44970)
+- **bite-tribe-admin**: curate and publish a city landing page (#1490) (#1970) (43960ba0)
+- **functions**: serve a city landing page from an /eat rewrite (#1489) (#1969) (7ef81599)
+- a themed Leela on the city Top 5 slides, and record the Cologne post (#1964) (#1965) (61a6b503)
+- dish descriptions on the city Top 5 slides, and record the Kayseri post (#1959) (#1960) (bbcea89d)
+- **bite-tribe-firebase**: App Check enforcement is rehearsed on QA (#1221) (#1938) (1d5c2802)
+- **bite-tribe-firebase**: App Check enforcement can be rehearsed on a QA project (#1221) (#1936) (e323301d)
+- **bite-tribe/details**: a tagged user removes themselves from a Bite (#1920) (#1931) (5a87a6c5)
+- **functions**: a user is notified when they are tagged in a Bite (#1919) (#1930) (3e246bd3)
+- **bite-tribe/details**: the Bite details show who the creator ate with (#1918) (#1929) (d6a33a51)
+- **bite-tribe/bite**: tag followed users from the Bite form (#1917) (#1928) (238c1fe3)
+- **functions**: a Bite stores the users its creator tagged, and only valid tags survive (#1916) (#1927) (b87356b0)
+
+### Bug Fixes
+- **celebration**: clear the confetti canvas when a burst never finishes (#2039) (#2041) (0c01746e)
+- **bite-tribe/bite**: show the currency code in the price field and open the picker on the selected currency (#2035) (#2036) (cb0ef8da)
+- **bite-tribe-admin**: mark the selected row in admin lists so dark mode can read it (#1976) (#2009) (8577ad91)
+- **ta-firestore**: recover App Check readiness behind a loading screen (#1465) (#1986) (d12d0eba)
+- **functions**: let the city page sitemap expire within minutes, not a day (#1980) (#1981) (99fe2406)
+- **bite-tribe**: a tap on a bite presses while the finger is still down (#1935) (#1937) (565150ee)
+- **backend**: delete a table's live state with the table (#1590) (#1961) (ffe2b072)
+- **bite-tribe**: upload a new profile photo in the background, with status and retry (#1953) (#1955) (4ef92c32)
+- **bite-tribe**: keep each menu label on one line (#1948) (#1949) (65a519b7)
+- **bite-tribe**: the menu's About is about the app, and the menu fits its labels (#1944) (#1945) (6b2d2989)
+- **bite-tribe**: the theme picker offers only light and dark (#1942) (#1943) (ae1a860c)
+- **bite-tribe**: monitoring findings and web console noise (#1623, #1624, #1905) (#1939) (14dde8f6)
+- record the built commit in provenance and sync the version into the tagged tree (#1926) (8ca50034)
+
+### Documentation
+- record that the two interface sounds are kept equally loud (#1847) (#2044) (1b294635)
+- record the sounds acceptance run on the two phones (#1847) (#2056) (f256e12b)
+- **bite-tribe/bite**: record the AI production setup (#2030) (#2051) (62ffc055)
+- record the Cusco Top 5 post and scheduling from Instagram web (#2046) (#2047) (384e631c)
+- record the sounds acceptance run on the simulators (#1847) (#2038) (ae9e2627)
+- record pronouns in the Play Data safety form (#1864) (#2025) (4ddda10e)
+- post the city Top 5 carousels to the BiteTribe Facebook Page (#2007) (#2010) (8e30923a)
+- separate history and marketing from the specification in ssot (… (#2003) (12dc0331)
+- make check-ssot catch stale, unverified and dangling SSOT content (#1994) (#1998) (1b3e93a1)
+- make check-ssot catch stale, unverified and dangling SSOT conte… (#1997) (c44b2223)
+- record the Adelaide Top 5 post with the other city posts (#1990) (#1991) (0afcb1b8)
+- **skills**: publish the city landing page as the last step of the Top 5 skill (#1983) (#1984) (b1796248)
+- record the city landing page contract in the web metadata page (#1493) (#1973) (782e1420)
+- record how bitetribe.app mail is authenticated (#1516) (#1962) (6e18de88)
+- record the Korean, Japanese and Chinese languages post (#1950) (#1951) (b5b1bb8d)
+- record the Chiang Mai Top 5 post with the other city posts (#1940) (#1941) (8ebf06f5)
+- record the London Top 5 post with the other city posts (#1924) (#1925) (17ac5cf7)
+
+### Continuous Integration
+- queue develop runs instead of cancelling a deploy in flight (#2030) (#2052) (86d607cb)
+
+### Tests
+- **functions**: give the emulator suite 30 s per test (#1946) (#1947) (44e246f7)
+- **bite-tribe-e2e**: the tag-the-people-you-ate-with journey runs end to end (#1932) (#1933) (8cf064b6)
+
+### Chores
+- set up Search Console for bitetribe.app and stop the business app being indexed (#1982) (#1987) (1a2cbc64)
+- **android**: enable R8 on the release build and ship its mapping (#1449) (#1967) (056901b1)
+- remove the dependencies the version upgrades left unused (#1380) (#1966) (07cd3384)
+- retire the TypeScript 6 deprecation debt before TypeScript 7 (#1378) (#1963) (6c77e24f)
+- adopt the public Signal Forms API and fix the menu editor's save flow (#1377) (#1958) (841d6b7d)
+- adopt Angular 22 safe navigation and drop the migration shims (#1374) (#1956) (bd38f3f6)
+- prepare build 1.1.2-100 release (#1923) (fe881d99)
+
 ## build-100 (2026-11-08)
 <!-- changelog-start-rev: 1c7b9a0b -->
 <!-- changelog-end-rev: 2613c4e8 -->

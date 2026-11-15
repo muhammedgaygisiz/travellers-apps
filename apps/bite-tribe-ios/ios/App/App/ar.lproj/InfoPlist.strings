@@ -3,6 +3,7 @@
    See ssot/implementation/localization.md. */
 
 "NSCameraUsageDescription" = "يحتاج BiteTribe إلى الوصول إلى الكاميرا لالتقاط صور الطعام ومشاركتها.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "يستخدم BiteTribe موقعك لمساعدتك في تحديد المكان الذي استمتعت فيه بوجبة واكتشاف Bites القريبة.";
 "NSLocationWhenInUseUsageDescription" = "يستخدم BiteTribe موقعك لمساعدتك في تحديد المكان الذي استمتعت فيه بوجبة واكتشاف Bites القريبة.";
 "NSPhotoLibraryUsageDescription" = "يحتاج BiteTribe إلى الوصول إلى مكتبة الصور لاختيار صور الطعام ومشاركتها.";
 "NSPhotoLibraryAddUsageDescription" = "يحفظ BiteTribe الصور المُنشأة من أطباقك (Bites) في مكتبة الصور لديك.";

@@ -68,6 +68,18 @@ describe(Support.name, () => {
       expect(component.privacyPolicyPath).toBe(`/${PATH.PRIVACY_POLICY}`);
       expect(component.accountDeletionPath).toBe(`/${PATH.ACCOUNT_DELETION}`);
     });
+
+    // The imprint is a static file on the web host, not an app route, so the
+    // link is absolute: inside the native app a relative one would miss it.
+    it('should link the imprint on bitetribe.app', () => {
+      render();
+
+      const link: HTMLAnchorElement = fixture.nativeElement.querySelector(
+        '[data-testid="support-imprint"]',
+      );
+
+      expect(link.getAttribute('href')).toBe('https://bitetribe.app/imprint');
+    });
   });
 
   describe('contact address', () => {

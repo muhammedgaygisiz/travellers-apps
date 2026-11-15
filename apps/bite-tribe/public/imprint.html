@@ -1,0 +1,146 @@
+<!doctype html>
+<!--
+  BiteTribe imprint (issue #1979).
+
+  Served at https://bitetribe.app/imprint by a hosting rewrite in firebase.json.
+  A static file on purpose, not an Angular route: the app's routes sit behind
+  the App Check startup gate, and a legal notice must answer every visitor and
+  every crawler, scored or not.
+
+  Linked from every city page footer (render-landing-page.ts) and from the
+  support page. The decision behind it is in
+  ssot/current-state/open-questions.md.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Imprint | BiteTribe</title>
+    <meta
+      name="description"
+      content="Who publishes bitetribe.app and how to reach them."
+    />
+    <link rel="canonical" href="https://bitetribe.app/imprint" />
+    <link rel="icon" type="image/png" href="/assets/icons/favicon-196.png" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fg: #1d1d1b;
+        --muted: #6b6a65;
+        --line: #e4e2da;
+        --bg: #fff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #f1efe8;
+          --muted: #a9a79f;
+          --line: #3a3a37;
+          --bg: #1a1a18;
+        }
+      }
+      body {
+        margin: 0;
+        font:
+          16px/1.6 system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        color: var(--fg);
+        background: var(--bg);
+      }
+      a {
+        color: inherit;
+      }
+      header,
+      main,
+      footer {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        height: 56px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 18px;
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 24px 0 12px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 24px 0 4px;
+      }
+      address {
+        font-style: normal;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      footer {
+        margin-top: 32px;
+        border-top: 1px solid var(--line);
+        padding-top: 16px;
+        padding-bottom: 32px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer a {
+        margin-right: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="https://bitetribe.app/">
+        <img
+          src="/assets/icons/logo.svg"
+          alt=""
+          width="28"
+          height="36"
+        />BiteTribe
+      </a>
+    </header>
+    <main>
+      <h1>Imprint</h1>
+      <p class="muted">
+        Who publishes bitetribe.app, the BiteTribe app and the city pages under
+        bitetribe.app/eat.
+      </p>
+
+      <h2>Publisher and person responsible for the content</h2>
+      <address>
+        Muhammed Veysel Gaygisiz<br />
+        Alpenstrasse 23<br />
+        3006 Bern<br />
+        Switzerland
+      </address>
+
+      <h2>Contact</h2>
+      <p>
+        Email:
+        <a href="mailto:support@bitetribe.app">support@bitetribe.app</a>
+      </p>
+
+      <h2>About the name</h2>
+      <p>
+        BiteTribe is a product name. It is published by the person named above,
+        not by a company.
+      </p>
+    </main>
+    <footer>
+      <a href="https://bitetribe.app/support">Support</a>
+      <a href="https://bitetribe.app/privacy">Privacy</a>
+    </footer>
+  </body>
+</html>

@@ -69,6 +69,12 @@
             {{ 'support-links-account-deletion' | transloco }}
           </a>
         </li>
+        <li>
+          <!-- A static page on the web host, not an app route: absolute, so the native app opens bitetribe.app too. -->
+          <a [href]="imprintUrl" data-testid="support-imprint">
+            {{ 'imprint' | transloco }}
+          </a>
+        </li>
       </ul>
     </main>
 

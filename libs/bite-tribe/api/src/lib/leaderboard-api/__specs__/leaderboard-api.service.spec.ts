@@ -75,6 +75,7 @@ describe(LeaderboardApiService.name, () => {
               { userId: 'a', biteCount: 4, displayName: 'A', public: true },
               { userId: 'b', biteCount: 2 },
               { userId: 'broken' },
+              null,
             ],
           },
         },
@@ -91,6 +92,19 @@ describe(LeaderboardApiService.name, () => {
         ],
       },
     ]);
+
+    subscription.unsubscribe();
+  });
+
+  it('reads a board without a users list as an empty week', () => {
+    const boards: WeeklyLeaderboardSnapshot[] = [];
+    const subscription = api.weeklyLeaderboard$.subscribe((board) =>
+      boards.push(board),
+    );
+
+    deliver({ snapshot: { data: { week: '2026-11-16' } } }, undefined);
+
+    expect(boards).toEqual([{ week: '2026-11-16', users: [] }]);
 
     subscription.unsubscribe();
   });

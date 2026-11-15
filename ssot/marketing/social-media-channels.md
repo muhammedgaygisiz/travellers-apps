@@ -1355,7 +1355,8 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page.
+on Instagram and on the Facebook Page. Phuket (15 November 2026) was scheduled
+the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1588,6 +1589,21 @@ Cusqueña montera hat and lliclla shawl and holds chicha morada. Leela's cover
 line is "At 3,400 m, cuy, alpaca and quinoa soup taste even better". The city
 page `/eat/cusco` went up the same evening, with `cuzco` and `qosqo` as
 aliases.
+
+**Phuket** (15 November 2026, scheduled for 22:00) tags two of five dish
+slides: `@khaotom_dibuk` (rice soup with pork bones in black soup; the exact
+name, and its posts are the restaurant's own, with closing days for Phuket's
+vegetarian festival and #BreakfastPhuket) and `@gluaynamwa_fc` (gai pad med
+mamuang; despite the "FC", its bio names the Saphan Hin branch, where the
+Bite's pin is, and gives the phone number Wongnai lists for it). Keng Heng
+(Hokkien noodles), Khrua Ohm (kaeng som) and the fried banana stall on Ko
+Kaeo have no account that could be found. Thailand had 188 Bites, 86 of them
+on Phuket island, and the five favour the island's Hokkien-Peranakan food
+over the burgers and chain restaurants that make up much of the rest. Leela
+wears a Baba-Peranakan lace kebaya with a hibiscus hairpin and holds Hokkien
+noodles; the cover photo is the Old Town clock tower. Leela's cover line is
+"Skip the beach buffet: Phuket's Old Town eats are the real treasure". The
+city page `/eat/phuket` went up the same afternoon, with no aliases.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

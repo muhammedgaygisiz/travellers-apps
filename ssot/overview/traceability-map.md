@@ -145,13 +145,13 @@ Release state and changelog
 
 | Current State Page                                                                                             | Use In Planning                                                                                                  |
 | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| [Current State - Roadmap](../current-state/roadmap.md)                                                         | Prioritize launch preparation, product intelligence, public launch, and learning work.                           |
+| [Current State - Roadmap](../current-state/roadmap.md)                                                         | Check which phase BiteTribe is in, and whether the change fits that phase and the Strategic Rule.                |
 | [Current State - Product Direction](../current-state/product-direction.md)                                     | Group unbuilt work into product fronts and find the use cases that belong to one.                                |
 | [Current State - E2E Coverage](../current-state/e2e-coverage.md)                                               | Select the next uncovered use-case journey and preserve the latest Playwright coverage state.                    |
 | [Current State - Nx And Dependency Migration Roadmap](../current-state/nx-and-dependency-migration-roadmap.md) | Sequence Nx, Node.js, Angular, test-tooling, and dependency upgrades without combining unrelated migration risk. |
 | [Current State - Known Issues](../current-state/known-issues.md)                                               | Check whether a requested change touches an existing launch risk.                                                |
 | [Current State - Open Questions](../current-state/open-questions.md)                                           | Identify unclear product, analytics, or release decisions before implementation.                                 |
-| [Current State - Release State](../current-state/release-state.md)                                             | Decide whether a change is launch-blocking, release-candidate work, or post-launch learning.                     |
+| [Current State - Release State](../current-state/release-state.md)                                             | Check where each store release stands, and whether the change affects a release in progress.                     |
 
 ## Work Output Trace
 

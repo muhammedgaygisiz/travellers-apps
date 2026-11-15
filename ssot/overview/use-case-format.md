@@ -24,8 +24,9 @@ overlapping.
 
 ## Scope
 
-This page governs `UC - *` pages, and only those. `epic-*`, `issue-*`, `ADR-*`,
-`Architecture - *`, `Implementation - *` and domain pages keep their own shapes.
+This page governs `UC - *` pages, and only those. Issues and epics follow
+[GitHub Issue Format](github-issue-format.md); `ADR-*`, `Architecture - *`,
+`Implementation - *` and domain pages keep their own shapes.
 
 A use-case page is a statement about **behaviour**. It is not a design document, not a
 defect list and not a work plan. Where it needs one of those, it links to it.

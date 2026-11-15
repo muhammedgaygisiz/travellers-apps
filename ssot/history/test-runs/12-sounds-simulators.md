@@ -111,9 +111,13 @@ loudest moment, and far shorter. The issue's limits of 300 ms and -12 dBFS hold.
 **Observation, not a defect.** `Bundled Audio` places `celebration` 3 dB below
 `posted`. That holds for the peak. By short-term RMS the two are within about
 1 dB of each other, and `celebration` is the louder of the two in its loudest
-50 ms. They sound about equally loud, not one clearly softer than the other. The
-ear check on the reference devices decides whether `celebration` needs a
-re-master.
+50 ms. They sound about equally loud, not one clearly softer than the other.
+
+**Settled the same day by ear.** The maintainer listened to the four shipped
+files, the iOS `.caf` and the Android `.ogg` of each sound, played back to back
+on a Mac. They sounded equally loud on both platforms, and the levels were kept;
+`Bundled Audio` now says so. Loudness at the table, against a real
+notification, is still for the reference devices.
 
 ## Not Executable On A Simulator
 

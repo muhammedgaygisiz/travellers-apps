@@ -154,4 +154,103 @@ describe(LeaderboardDataAccessService.name, () => {
       data: { board: 'countries' },
     });
   });
+
+  describe('loaded rankings (#2081)', () => {
+    const settle = (): Promise<void> =>
+      TestBed.inject(ApplicationRef).whenStable();
+
+    it('should have no ranking for a board that never loaded', () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockReturnValue(new Promise(() => undefined));
+
+      expect(createService().loadedRanking()).toBeUndefined();
+    });
+
+    it('should keep a loaded ranking while it refreshes', async () => {
+      const service = createService();
+      const ranking = { board: 'thisWeek', users };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: ranking });
+      await settle();
+
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockReturnValue(new Promise(() => undefined));
+      service.ranking.reload();
+
+      expect(service.ranking.isLoading()).toBe(true);
+      expect(service.loadedRanking()).toEqual(ranking);
+    });
+
+    it('should keep a board loaded after switching away and back', async () => {
+      const service = createService();
+      const thisWeek = { board: 'thisWeek', users };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: thisWeek });
+      await settle();
+
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: { board: 'allTime', users: [] } });
+      service.board.set('allTime');
+      await settle();
+
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockReturnValue(new Promise(() => undefined));
+      service.board.set('thisWeek');
+
+      expect(service.loadedRanking()).toEqual(thisWeek);
+    });
+
+    it('should keep the loaded ranking when a refresh fails', async () => {
+      const service = createService();
+      const ranking = { board: 'thisWeek', users };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: ranking });
+      await settle();
+
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('unavailable'));
+      service.ranking.reload();
+      await settle();
+
+      expect(service.loadedRanking()).toEqual(ranking);
+    });
+
+    it('should read a failed first load as an empty ranking', async () => {
+      const service = createService();
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('unavailable'));
+      await settle();
+
+      expect(service.loadedRanking()).toEqual({ board: 'thisWeek', users: [] });
+    });
+
+    it('should keep a loaded country ranking while it refreshes', async () => {
+      const service = createService();
+      const ranking = {
+        board: 'countries',
+        countries: [{ countryCode: 'CH', biteCount: 3 }],
+      };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: ranking });
+      service.countryRanking.value();
+      await settle();
+
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockReturnValue(new Promise(() => undefined));
+      service.countryRanking.reload();
+
+      expect(service.loadedCountryRanking()).toEqual(ranking);
+    });
+  });
 });

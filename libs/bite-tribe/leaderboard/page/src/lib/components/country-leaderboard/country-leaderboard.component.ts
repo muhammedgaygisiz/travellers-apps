@@ -16,10 +16,10 @@ import {
   IonList,
   IonSegment,
   IonSegmentButton,
-  IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
+import { LeaderboardSkeletonComponent } from '../leaderboard-skeleton/leaderboard-skeleton.component';
 import { getLocalizedCountryName } from 'utils';
 import type {
   CountryBoard,
@@ -47,6 +47,7 @@ interface CountryEntry extends RankedCountry {
   standalone: true,
   imports: [
     PageComponent,
+    LeaderboardSkeletonComponent,
     IonBadge,
     IonContent,
     IonIcon,
@@ -55,7 +56,6 @@ interface CountryEntry extends RankedCountry {
     IonList,
     IonSegment,
     IonSegmentButton,
-    IonSpinner,
     TranslocoPipe,
   ],
   templateUrl: './country-leaderboard.component.html',
@@ -88,6 +88,12 @@ export class CountryLeaderboardComponent {
 
     return ranking?.board === this.board() ? ranking : undefined;
   });
+
+  /**
+   * Whether the board on screen has nothing to show yet: it is loading and
+   * never loaded before (#2081). A refresh of a loaded board keeps it.
+   */
+  isFirstLoad = computed(() => this.isLoading() && !this.shown());
 
   entries = computed<CountryEntry[]>(() =>
     (this.shown()?.countries ?? []).map((country, index) => ({

@@ -54,10 +54,10 @@
       }
     }
 
-    @if (isLoading()) {
-      <div class="spinner-container">
-        <ion-spinner color="primary" />
-      </div>
+    <!-- A refresh keeps the ranking on screen and shows only the header
+    progress bar; a board that never loaded shows its shape instead (#2081). -->
+    @if (isFirstLoad()) {
+      <leaderboard-skeleton data-testid="leaderboard-skeleton" />
     } @else if (!entries().length) {
       <div class="empty-container">
         <ion-label data-testid="country-leaderboard-empty">{{

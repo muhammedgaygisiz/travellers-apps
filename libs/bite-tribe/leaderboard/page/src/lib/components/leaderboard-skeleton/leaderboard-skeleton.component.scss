@@ -1,0 +1,62 @@
+@use '../podium';
+
+:host {
+  display: block;
+
+  @include podium.styles;
+
+  // A place's avatar at the size the loaded podium gives it (--podium-avatar).
+  .skeleton-podium-avatar {
+    width: var(--podium-avatar);
+    height: var(--podium-avatar);
+    margin: 0;
+    border-radius: 50%;
+  }
+
+  .skeleton-name {
+    width: 70%;
+    height: 0.8125rem;
+    margin-top: 0.375rem;
+    border-radius: 0.375rem;
+  }
+
+  .skeleton-count {
+    width: 45%;
+    height: 0.75rem;
+    border-radius: 0.375rem;
+  }
+
+  ion-item {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+
+  .skeleton-rank {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+  }
+
+  .skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  .skeleton-title {
+    width: 55%;
+    height: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .skeleton-subtitle {
+    width: 35%;
+    height: 0.875rem;
+  }
+
+  .skeleton-badge {
+    width: 64px;
+    height: 22px;
+    border-radius: 999px;
+  }
+}

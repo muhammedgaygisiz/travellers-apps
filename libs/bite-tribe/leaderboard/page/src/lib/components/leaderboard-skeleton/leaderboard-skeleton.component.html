@@ -1,0 +1,30 @@
+<div class="podium" aria-hidden="true">
+  <img class="podium__image" src="assets/leaderboard/podium.webp" alt="" />
+  @for (place of podiumPlaces; track place) {
+    <div [class]="'podium__place podium__place--' + place">
+      <div class="podium__entry">
+        <ion-skeleton-text class="skeleton-podium-avatar" [animated]="true" />
+        <ion-skeleton-text class="skeleton-name" [animated]="true" />
+        <ion-skeleton-text class="skeleton-count" [animated]="true" />
+      </div>
+    </div>
+  }
+</div>
+
+<ion-list aria-hidden="true">
+  @for (row of rows; track row) {
+    <ion-item class="ion-margin-vertical skeleton-row" lines="full">
+      <ion-skeleton-text slot="start" class="skeleton-rank" [animated]="true" />
+      <ion-skeleton-text
+        slot="start"
+        class="skeleton-avatar"
+        [animated]="true"
+      />
+      <ion-label>
+        <ion-skeleton-text class="skeleton-title" [animated]="true" />
+        <ion-skeleton-text class="skeleton-subtitle" [animated]="true" />
+      </ion-label>
+      <ion-skeleton-text slot="end" class="skeleton-badge" [animated]="true" />
+    </ion-item>
+  }
+</ion-list>

@@ -19,10 +19,10 @@ import {
   IonList,
   IonSegment,
   IonSegmentButton,
-  IonSpinner,
   IonThumbnail,
 } from '@ionic/angular/standalone';
 import { PageComponent } from 'common/ui/page';
+import { LeaderboardSkeletonComponent } from '../leaderboard-skeleton/leaderboard-skeleton.component';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LeaderboardBoard,
@@ -59,6 +59,7 @@ const LAST_WEEK_BOARDS: readonly LeaderboardBoard[] = [
   standalone: true,
   imports: [
     PageComponent,
+    LeaderboardSkeletonComponent,
     IonAvatar,
     IonBadge,
     IonButton,
@@ -69,7 +70,6 @@ const LAST_WEEK_BOARDS: readonly LeaderboardBoard[] = [
     IonList,
     IonSegment,
     IonSegmentButton,
-    IonSpinner,
     IonThumbnail,
     TranslocoPipe,
   ],
@@ -133,6 +133,12 @@ export class LeaderboardListComponent {
 
     return ranking?.board === this.board() ? ranking : undefined;
   });
+
+  /**
+   * Whether the board on screen has nothing to show yet: it is loading and
+   * never loaded before (#2081). A refresh of a loaded board keeps it.
+   */
+  isFirstLoad = computed(() => this.isLoading() && !this.shownRanking());
 
   /** The ranked Bites of a Most liked board, in the order stored. */
   rankedBites = computed(() => this.shownRanking()?.bites ?? []);

@@ -119,4 +119,30 @@ describe(CountryLeaderboardComponent.name, () => {
       ),
     ).not.toBeNull();
   });
+
+  it('shows a skeleton on a first load and keeps a loaded ranking while it refreshes (#2081)', () => {
+    const skeleton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="leaderboard-skeleton"]',
+      );
+
+    ref.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    expect(skeleton()).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="country-leaderboard-empty"]',
+      ),
+    ).toBeNull();
+
+    ref.setInput('ranking', { board: 'countries', countries });
+    fixture.detectChanges();
+
+    expect(skeleton()).toBeNull();
+    expect(
+      fixture.nativeElement.querySelectorAll('[data-testid="country-entry"]')
+        .length,
+    ).toBe(countries.length);
+  });
 });

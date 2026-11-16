@@ -89,21 +89,56 @@ describe(LeaderboardListComponent.name, () => {
     expect(users.map((user) => user.userId)).toEqual(['user-1', 'user-2']);
   });
 
-  it('should run the header progress bar while the spinner shows', () => {
-    componentRef.setInput('isLoading', true);
-    fixture.detectChanges();
+  describe('loading (#2081)', () => {
+    const query = (selector: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(selector);
 
-    expect(fixture.nativeElement.querySelector('ion-spinner')).toBeTruthy();
-    expect(
-      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
-    ).toBeTruthy();
+    it('shows a skeleton and the header progress bar on a first load', () => {
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
 
-    componentRef.setInput('isLoading', false);
-    fixture.detectChanges();
+      expect(query('[data-testid="leaderboard-skeleton"]')).toBeTruthy();
+      expect(query('[data-testid="leaderboard-podium"]')).toBeFalsy();
+      expect(query('[data-testid="leaderboard-empty"]')).toBeFalsy();
+      expect(query('ion-spinner')).toBeFalsy();
+      expect(query('[data-testid="page-loading-bar"]')).toBeTruthy();
+    });
 
-    expect(
-      fixture.nativeElement.querySelector('[data-testid="page-loading-bar"]'),
-    ).toBeFalsy();
+    it('keeps a loaded ranking on screen while it refreshes', () => {
+      componentRef.setInput('ranking', {
+        board: 'thisWeek',
+        users: [
+          {
+            userId: 'user-1',
+            displayName: 'Daniel',
+            photoUrl: '',
+            public: true,
+            biteCount: 3,
+          },
+        ],
+      });
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
+
+      expect(query('[data-testid="leaderboard-skeleton"]')).toBeFalsy();
+      expect(query('[data-testid="leaderboard-entry"]')).toBeTruthy();
+      expect(query('[data-testid="page-loading-bar"]')).toBeTruthy();
+
+      componentRef.setInput('isLoading', false);
+      fixture.detectChanges();
+
+      expect(query('[data-testid="page-loading-bar"]')).toBeFalsy();
+    });
+
+    it('shows a skeleton for a board that never loaded, not the last one', () => {
+      componentRef.setInput('board', 'allTime');
+      componentRef.setInput('ranking', { board: 'thisWeek', users: [] });
+      componentRef.setInput('isLoading', true);
+      fixture.detectChanges();
+
+      expect(query('[data-testid="leaderboard-skeleton"]')).toBeTruthy();
+      expect(query('[data-testid="leaderboard-empty"]')).toBeFalsy();
+    });
   });
 
   it('should track image errors by user id', () => {

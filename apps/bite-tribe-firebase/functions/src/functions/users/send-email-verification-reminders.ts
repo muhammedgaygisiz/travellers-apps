@@ -25,6 +25,7 @@ interface ReminderSummary {
   skippedTrustedProvider: number;
   skippedUnknownProvider: number;
   skippedMaxReminders: number;
+  skippedExempt: number;
   failed: number;
 }
 
@@ -35,6 +36,7 @@ const createSummary = (): ReminderSummary => ({
   skippedTrustedProvider: 0,
   skippedUnknownProvider: 0,
   skippedMaxReminders: 0,
+  skippedExempt: 0,
   failed: 0,
 });
 
@@ -49,6 +51,11 @@ const incrementSkipReason = (
 
   if (reason === 'trusted-provider') {
     summary.skippedTrustedProvider += 1;
+    return;
+  }
+
+  if (reason === 'exempt-account') {
+    summary.skippedExempt += 1;
     return;
   }
 

@@ -21,7 +21,8 @@ export interface EmailVerificationClassification extends EmailVerificationMetada
     | 'already-verified'
     | 'trusted-provider'
     | 'unknown-provider'
-    | 'missing-email';
+    | 'missing-email'
+    | 'exempt-account';
 }
 
 interface EmailVerificationUser {
@@ -36,6 +37,13 @@ export const MANUAL_RESEND_THROTTLE_MS = 60 * 60 * 1000;
 export const MAX_AUTOMATIC_REMINDERS = 3;
 
 const TRUSTED_PROVIDER_IDS = new Set(['google.com', 'apple.com']);
+
+// Shared accounts whose inbox nobody reads: they never get the in-app
+// "verify your email" prompt nor the reminder mail (issue \#2079).
+const VERIFICATION_EXEMPT_EMAILS = new Set(['public_test_user@test.com']);
+
+const isVerificationExempt = (email: string): boolean =>
+  VERIFICATION_EXEMPT_EMAILS.has(email.trim().toLowerCase());
 
 const getProviderIds = (
   user: Pick<EmailVerificationUser, 'providerData'>,
@@ -63,6 +71,17 @@ export const classifyEmailVerificationUser = (
       emailVerificationReminderCount: 0,
       eligibleForReminder: false,
       reason: 'missing-email',
+    };
+  }
+
+  if (isVerificationExempt(user.email)) {
+    return {
+      emailVerified: !!user.emailVerified,
+      emailVerificationRequired: false,
+      emailVerificationProvider: isPasswordOnly ? 'password' : 'unknown',
+      emailVerificationReminderCount: 0,
+      eligibleForReminder: false,
+      reason: 'exempt-account',
     };
   }
 

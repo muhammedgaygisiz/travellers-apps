@@ -147,4 +147,23 @@ describe('sendEmailVerificationRemindersForUsers', () => {
     expect(result.skippedTrustedProvider).toBe(1);
     expect(result.skippedMaxReminders).toBe(1);
   });
+
+  it('never reminds the shared public test account (issue #2079)', async () => {
+    listUsersMock.mockResolvedValueOnce({
+      users: [
+        authUser({
+          uid: 'public-test-user',
+          email: 'public_test_user@test.com',
+        }),
+      ],
+    });
+    const sender = jest.fn();
+
+    const result = await sendEmailVerificationRemindersForUsers(sender);
+
+    expect(sender).not.toHaveBeenCalled();
+    expect(getMock).not.toHaveBeenCalled();
+    expect(result.skippedExempt).toBe(1);
+    expect(result.sent).toBe(0);
+  });
 });

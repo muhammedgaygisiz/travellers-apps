@@ -53,7 +53,8 @@ reaches it; `Owner` names the page that holds the detail.
 
 **Google Fonts has no owner yet.** All three apps import the stylesheet from
 `fonts.googleapis.com` at runtime rather than bundling the typeface, and no SSOT page
-says so. Whether to keep it is a product and privacy question, not decided here.
+says so. Issue [#2085] replaces it with a copy of the typeface bundled with the apps,
+which removes the row.
 
 Behind Cloud Functions sit Google Cloud services the platform provides rather than the code
 calling them: Cloud Scheduler runs the `onSchedule` jobs and Secret Manager holds the
@@ -142,3 +143,5 @@ tools/analytics
 - [Architecture - Environments](environments.md)
 - [Architecture - Firebase](firebase.md)
 - [User Roles](../product/user-roles.md)
+
+[#2085]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2085

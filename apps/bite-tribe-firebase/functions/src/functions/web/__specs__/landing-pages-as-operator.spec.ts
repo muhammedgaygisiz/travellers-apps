@@ -226,6 +226,56 @@ describe('landing pages as operator', () => {
     });
   });
 
+  describe('post links (#2091)', () => {
+    it('stores the Instagram and Facebook post and reads them back', async () => {
+      await call(
+        saveLandingPageHandler,
+        input({
+          instagramPostUrl: ' https://www.instagram.com/p/DfAbC123/ ',
+          facebookPostUrl: 'https://www.facebook.com/bitetribeapp/posts/1',
+        }),
+      );
+
+      const [page] = await call(listLandingPagesHandler, {});
+
+      expect(page.instagramPostUrl).toBe(
+        'https://www.instagram.com/p/DfAbC123/',
+      );
+      expect(page.facebookPostUrl).toBe(
+        'https://www.facebook.com/bitetribeapp/posts/1',
+      );
+    });
+
+    it('treats a missing or blank link as none', async () => {
+      await call(saveLandingPageHandler, input({ facebookPostUrl: '  ' }));
+
+      const [page] = await call(listLandingPagesHandler, {});
+
+      expect(page.instagramPostUrl).toBe('');
+      expect(page.facebookPostUrl).toBe('');
+    });
+
+    it.each([
+      ['another host', { instagramPostUrl: 'https://example.com/p/1/' }],
+      [
+        'a look-alike host',
+        { instagramPostUrl: 'https://instagram.com.evil.test/p/1/' },
+      ],
+      ['plain http', { instagramPostUrl: 'http://www.instagram.com/p/1/' }],
+      ['a script URL', { facebookPostUrl: 'javascript:alert(1)' }],
+      [
+        'an Instagram link in the Facebook field',
+        { facebookPostUrl: 'https://www.instagram.com/p/1/' },
+      ],
+      ['not a URL', { instagramPostUrl: 'instagram post' }],
+    ])('refuses %s', async (_case, over) => {
+      await expect(
+        call(saveLandingPageHandler, input(over)),
+      ).rejects.toMatchObject({ code: 'invalid-argument' });
+      expect(db.exists('landingPages/berlin')).toBe(false);
+    });
+  });
+
   describe('aliases', () => {
     it('saves the aliases a page answers under', async () => {
       await call(

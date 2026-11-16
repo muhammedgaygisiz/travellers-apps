@@ -24,6 +24,8 @@ const draft: LandingPageDraft = {
   intro: 'Three places, one question: where is the fish best?',
   biteIds: ['b1', 'b2', 'b3'],
   aliases: [],
+  instagramPostUrl: 'https://www.instagram.com/p/DfAbC123/',
+  facebookPostUrl: '',
 };
 
 const entries: LandingPageEntry[] = [

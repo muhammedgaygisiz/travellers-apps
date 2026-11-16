@@ -415,6 +415,8 @@
   "admin-landing-field-title": "Title",
   "admin-landing-field-meta": "Meta description (shown in search results)",
   "admin-landing-field-intro": "Intro",
+  "admin-landing-field-instagram-post": "Instagram post (optional)",
+  "admin-landing-field-facebook-post": "Facebook post (optional)",
   "admin-landing-bites": "Bites ({{count}} of {{min}} to {{max}})",
   "admin-landing-no-bites": "No Bites chosen yet. Search below to add some.",
   "admin-landing-search-placeholder": "Search Bites by name or tag",

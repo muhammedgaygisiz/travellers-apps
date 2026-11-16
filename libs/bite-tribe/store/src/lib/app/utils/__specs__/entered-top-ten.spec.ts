@@ -21,11 +21,16 @@ const board = (
 ): WeeklyLeaderboardSnapshot => {
   const users = counts.map((biteCount, index) => ({
     userId: `u${index + 1}`,
+    displayName: `User ${index + 1}`,
     biteCount,
   }));
 
   if (extra.at !== undefined && extra.me !== undefined) {
-    users.splice(extra.at - 1, 0, { userId: ME, biteCount: extra.me });
+    users.splice(extra.at - 1, 0, {
+      userId: ME,
+      displayName: 'Leela',
+      biteCount: extra.me,
+    });
   }
 
   return { week, users: users.slice(0, 10) };

@@ -321,6 +321,7 @@
   "bite-milestone": "{{count}} Bite! Bu çok fazla güzel yemek demek.",
   "bite-milestone-thousand": "{{count}} Bite! Sen gerçek bir yemek efsanesisin.",
   "leaderboard-top-ten": "İlk ona girdin, {{rank}}. sıradasın!",
+  "leaderboard-overtake": "{{user}} adlı kullanıcıyı geçtin, artık {{rank}}. sıradasın!",
   "onboarding-finished": "Kabileye hoş geldin!",
   "first-follow": "Artık {{user}} kullanıcısını takip ediyorsun. Bu lezzet yolculuğuna hoş geldin!",
   "bite-trail-completed": "{{trail}} listesindeki tüm Bite'ları denedin!",

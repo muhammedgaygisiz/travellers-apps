@@ -321,6 +321,7 @@
   "bite-milestone": "{{count}}개의 Bite! 맛있는 음식을 정말 많이 드셨네요.",
   "bite-milestone-thousand": "{{count}}개의 Bite! 당신은 진정한 미식가 전설이에요.",
   "leaderboard-top-ten": "톱 10에 들었어요! 현재 {{rank}}위예요!",
+  "leaderboard-overtake": "{{user}}님을 제치고 현재 {{rank}}위예요!",
   "onboarding-finished": "트라이브에 오신 것을 환영해요!",
   "first-follow": "이제 {{user}}님을 팔로우해요. 맛있는 여정을 함께하세요!",
   "bite-trail-completed": "이 트레일의 모든 Bite를 맛봤어요: {{trail}}!",

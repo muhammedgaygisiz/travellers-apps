@@ -451,12 +451,14 @@ describe(AppEffect.name, () => {
     ): WeeklyLeaderboardSnapshot => {
       const users = counts.map((biteCount, index) => ({
         userId: `u${index + 1}`,
+        displayName: `User ${index + 1}`,
         biteCount,
       }));
 
       if (leela) {
         users.splice(leela.rank - 1, 0, {
           userId: 'leela',
+          displayName: 'Leela',
           biteCount: leela.count,
         });
       }
@@ -524,10 +526,10 @@ describe(AppEffect.name, () => {
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
     });
 
-    it('celebrates nothing while the user stays in the top ten or drops out of it', async () => {
+    it('celebrates nothing while the user stays in the top ten without passing anyone or drops out of it', async () => {
       actions.next(signedIn);
       boards.next(board([9, 8, 7], { rank: 4, count: 5 }));
-      boards.next(board([9, 8], { rank: 3, count: 8 }));
+      boards.next(board([9, 8, 7], { rank: 4, count: 6 }));
       boards.next(board(FULL));
       await flush();
 
@@ -542,6 +544,52 @@ describe(AppEffect.name, () => {
       await flush();
 
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    it('celebrates passing the user now below them at #4 after a Bite of theirs', async () => {
+      actions.next(signedIn);
+      boards.next(board([9, 8, 7, 5], { rank: 5, count: 4 }));
+      boards.next(board([9, 8, 7, 5], { rank: 4, count: 6 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'leaderboard-overtake',
+        { rank: 4, user: 'User 4' },
+      );
+      expect(claimTopTenWeek).not.toHaveBeenCalled();
+    });
+
+    it('celebrates only entering for a snapshot that brings the user into the top ten', async () => {
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      boards.next(board([9, 8, 7, 6, 5, 4], { rank: 7, count: 4 }));
+      await flush();
+
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+        'leaderboard-top-ten',
+        { rank: 7 },
+      );
+    });
+
+    it('opens one leaderboard listener for both moments', async () => {
+      let listeners = 0;
+      BiteTribeApiServiceMock.weeklyLeaderboard$ = defer(() => {
+        listeners += 1;
+        return boards;
+      });
+      subscription.unsubscribe();
+      subscription = effects.celebrateLeaderboardTopTen$.subscribe();
+
+      actions.next(signedIn);
+      boards.next(board(FULL));
+      boards.next(board([9, 8, 7, 6, 5], { rank: 6, count: 5 }));
+      boards.next(board([9, 8, 7, 6, 5], { rank: 5, count: 6 }));
+      await flush();
+
+      expect(listeners).toBe(1);
+      expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(2);
     });
 
     it('stops listening to the leaderboard once signed out', async () => {

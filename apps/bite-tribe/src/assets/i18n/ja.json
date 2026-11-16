@@ -321,6 +321,7 @@
   "bite-milestone": "{{count}} Bite達成！おいしいものをたくさん味わってきました。",
   "bite-milestone-thousand": "{{count}} Bite達成！あなたは本物のグルメレジェンドです。",
   "leaderboard-top-ten": "トップ10入り！現在{{rank}}位です！",
+  "leaderboard-overtake": "{{user}}さんを抜いて、現在{{rank}}位です！",
   "onboarding-finished": "Tribeへようこそ！",
   "first-follow": "{{user}}さんをフォローしました。{{user}}さんの食の旅をお楽しみください！",
   "bite-trail-completed": "{{trail}}のBiteをすべて試しました！",

@@ -133,6 +133,20 @@ computed from; what a notification about one of them says, and to whom, belongs 
   enough, which rewards being among the first to post that week. It defers to
   a first Bite, a first country and a Bite milestone by the precedence above.
   See GitHub issue [#2015].
+- Passing another user inside the weekly top ten is celebrated in the same way,
+  from the same listener, never a second one: a short confetti burst and
+  `You passed {{user}} and are now #{{rank}}!`, naming the user directly below
+  them now by the name the board shows. It celebrates when both snapshots of
+  the week list the signed-in user, their rank improved and their own weekly
+  count rose, and the user now below them was above them before and now has
+  strictly fewer Bites. A tie celebrates nothing, and so does a climb that
+  somebody else's lost Bites made. Only the user who climbed celebrates: the
+  user passed is shown no celebration, toast or notification, and neither is
+  anyone who drops or falls out of the top ten. A snapshot that celebrates
+  entering the top ten never also celebrates a pass, and passing someone
+  outside the top ten celebrates nothing. Only **This week** celebrates; **All
+  time** celebrates nothing. It defers to every other moment of the same Bite
+  by the precedence above. See GitHub issue [#2016].
 
 ## MVP Classification
 
@@ -162,8 +176,9 @@ them is collected in onboarding.
 - `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
   `reachedBiteMilestone`
 - `celebrateLeaderboardTopTen$` in the same `AppEffect`, with `enteredTopTen` and
-  `claimTopTenWeek`, listening through `weeklyLeaderboard$` of `LeaderboardApiService`. It costs
-  one read per rewrite of `/meta/leaderboardWeekly` per open app
+  `claimTopTenWeek`, and `overtookInTopTen`, listening through `weeklyLeaderboard$` of
+  `LeaderboardApiService`. It costs one read per rewrite of `/meta/leaderboardWeekly` per open
+  app, for both moments
 
 ## Related GitHub Scope
 
@@ -198,6 +213,7 @@ them is collected in onboarding.
   highest, and adds the grand burst for every thousandth Bite, part of epic [#2012].
 - Issue [#2014] celebrates the Bite-count milestones, part of epic [#2012].
 - Issue [#2015] celebrates entering the weekly top ten, part of epic [#2012].
+- Issue [#2016] celebrates passing another user inside the weekly top ten, part of epic [#2012].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -241,4 +257,5 @@ them is collected in onboarding.
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
+[#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043

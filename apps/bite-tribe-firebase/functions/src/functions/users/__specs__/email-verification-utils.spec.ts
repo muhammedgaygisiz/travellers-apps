@@ -33,6 +33,37 @@ describe('email verification utilities', () => {
     });
   });
 
+  it.each(['public_test_user@test.com', ' Public_Test_User@Test.com '])(
+    'exempts the shared public test account %p from verification (issue #2079)',
+    (email) => {
+      const result = classifyEmailVerificationUser(
+        user({ email, providerIds: ['password'] }),
+      );
+
+      expect(result).toMatchObject({
+        eligibleForReminder: false,
+        emailVerified: false,
+        emailVerificationRequired: false,
+        emailVerificationProvider: 'password',
+        reason: 'exempt-account',
+      });
+    },
+  );
+
+  it('writes the exemption onto an existing doc that still requires verification', () => {
+    const metadata = buildEmailVerificationMetadata(
+      user({ email: 'public_test_user@test.com' }),
+      {
+        email: 'public_test_user@test.com',
+        emailVerificationRequired: true,
+        emailVerificationReminderCount: 1,
+      },
+    );
+
+    expect(metadata.emailVerificationRequired).toBe(false);
+    expect(isAutomaticReminderDue(metadata)).toBe(false);
+  });
+
   it('skips trusted provider-linked users even when password is linked', () => {
     const result = classifyEmailVerificationUser(
       user({

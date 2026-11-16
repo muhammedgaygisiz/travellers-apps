@@ -18,3 +18,4 @@ Part of the [SSOT index](../../README.md).
 - [Test Run 11 - Android Build 96](11-android-build-96.md)
 - [Test Run 12 - Sounds, Simulators](12-sounds-simulators.md)
 - [Test Run 13 - Sounds, Devices](13-sounds-devices.md)
+- [Test Run 14 - iOS Simulator, Press And Release Epic](14-ios-simulator-press-release.md)

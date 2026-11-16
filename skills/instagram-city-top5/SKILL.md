@@ -285,6 +285,8 @@ Use the admin app in the user's Chrome at `https://bite-tribe-admin.web.app/land
    | Title             | `Top 5 dishes in <City>`.                                                                                                                                |
    | Meta description  | `Five dishes to eat in <City>, from real Bites: <the five dishes, short, joined with commas and "and">.`                                                 |
    | Intro             | One line for the place, then `Every one is a real Bite, photographed and rated by someone who ate it.` **No Leela**: she is on the slides, not the page. |
+   | Instagram post    | The post's own link from step 6, `https://www.instagram.com/p/<code>/`. The page and its card on `bitetribe.app/eat` link to it.                         |
+   | Facebook post     | The Page post's link from step 6, if it went up. Leave it empty otherwise.                                                                               |
 
    Intro lines so far: "Five dishes to eat in Granada, the city of free tapas, from meatballs to oxtail croquettes." and "Five dishes to eat in Split and on Hvar, from pašticada to grilled squid."
 

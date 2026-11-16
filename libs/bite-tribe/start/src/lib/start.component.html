@@ -76,6 +76,12 @@
             </li>
           </ul>
 
+          <!-- The city landing pages' index (#2091), served by a function, not
+          a route: a plain link, so the browser leaves the app for it. -->
+          <a class="city-guides" href="/eat" data-testid="start-city-guides">{{
+            'top-dishes-city-by-city' | transloco
+          }}</a>
+
           <div class="actions">
             <ion-button
               routerLink="/registration"

@@ -38,6 +38,8 @@ const draft: LandingPageDraft = {
   intro: 'Why these.',
   biteIds: ['b1'],
   aliases: [],
+  instagramPostUrl: '',
+  facebookPostUrl: '',
 };
 
 const published: LandingPage = {

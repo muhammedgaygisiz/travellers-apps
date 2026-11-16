@@ -358,7 +358,11 @@ describe('renderCityPage', () => {
         '<loc>https://bitetribe.app/eat/berlin</loc>\n    <lastmod>2026-11-12</lastmod>',
       );
       expect(body).toContain('<loc>https://bitetribe.app/eat/hamburg</loc>');
-      expect(body.match(/<url>/g)).toHaveLength(2);
+      // The index of them all, dated by the newest publication (#2091).
+      expect(body).toContain(
+        '<loc>https://bitetribe.app/eat</loc>\n    <lastmod>2026-11-12</lastmod>',
+      );
+      expect(body.match(/<url>/g)).toHaveLength(3);
     });
 
     it('is an empty urlset when nothing is published', async () => {
@@ -497,6 +501,192 @@ describe('renderCityPage', () => {
 
       expect(body).toContain('<loc>https://bitetribe.app/eat/cologne</loc>');
       expect(body).not.toContain('koeln');
+    });
+  });
+  describe('the city index at /eat (#2091)', () => {
+    const doc = (
+      id: string,
+      data: Record<string, unknown>,
+    ): { id: string; data: () => Record<string, unknown> } => ({
+      id,
+      data: (): Record<string, unknown> => data,
+    });
+    const city = (
+      id: string,
+      cityName: string,
+      countryCode: string,
+      extra: Record<string, unknown> = {},
+    ): { id: string; data: () => Record<string, unknown> } =>
+      doc(id, {
+        ...page,
+        city: id,
+        cityName,
+        countryCode,
+        title: `Top 5 dishes in ${cityName}`,
+        ...extra,
+      });
+
+    it('lists every published city, grouped by country', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [
+          city('zurich', 'Zurich', 'CH'),
+          city('bern', 'Bern', 'CH'),
+          city('berlin', 'Berlin', 'DE'),
+        ],
+      });
+
+      const { status, body, headers } = await respond('/eat');
+
+      expect(mockWhere).toHaveBeenCalledWith('status', '==', 'published');
+      expect(status).toBe(200);
+      expect(headers['Content-Type']).toBe('text/html; charset=utf-8');
+      // A new city shows within minutes, like the sitemap.
+      expect(headers['Cache-Control']).toBe(SITEMAP_CACHE_CONTROL);
+      expect(body).toMatch(/^<!doctype html>/);
+      expect(body).toContain(
+        '<title>What to eat in 3 cities – BiteTribe</title>',
+      );
+      expect(body).toContain(
+        '<h1>What you&#039;ll find on BiteTribe in 3 cities</h1>',
+      );
+      for (const id of ['zurich', 'bern', 'berlin']) {
+        expect(body).toContain(`href="https://bitetribe.app/eat/${id}"`);
+      }
+      // Countries by name, cities by name within each.
+      const order = ['Germany', 'Switzerland', '>Bern<', '>Zurich<'].map(
+        (text) => body.indexOf(text),
+      );
+      expect(order.every((at) => at > 0)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      expect(body).toContain('class="country-group n2"');
+      expect(body).toContain('🇨🇭');
+    });
+
+    it('also answers with a trailing slash', async () => {
+      mockQueryGet.mockResolvedValue({ docs: [city('bern', 'Bern', 'CH')] });
+
+      const { status } = await respond('/eat/');
+
+      expect(status).toBe(200);
+    });
+
+    it('declares itself canonical and lists the cities as structured data', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [city('bern', 'Bern', 'CH'), city('berlin', 'Berlin', 'DE')],
+      });
+
+      const { body } = await respond('/eat');
+
+      expect(body).toContain(
+        '<link rel="canonical" href="https://bitetribe.app/eat" />',
+      );
+      const data = jsonLd(body);
+      expect(data['@type']).toBe('ItemList');
+      expect(data.url).toBe('https://bitetribe.app/eat');
+      expect(
+        data.itemListElement.map((entry: { url: string }) => entry.url),
+      ).toEqual([
+        'https://bitetribe.app/eat/berlin',
+        'https://bitetribe.app/eat/bern',
+      ]);
+    });
+
+    it('answers 404 while nothing is published', async () => {
+      mockQueryGet.mockResolvedValue({ docs: [] });
+
+      const { status, headers } = await respond('/eat');
+
+      expect(status).toBe(404);
+      expect(headers['Cache-Control']).toBe(MISSING_CACHE_CONTROL);
+    });
+
+    it('carries a post link only for a city that has one', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [
+          city('malta', 'Malta', 'MT', {
+            instagramPostUrl: 'https://www.instagram.com/p/abc/',
+          }),
+          city('bern', 'Bern', 'CH'),
+        ],
+      });
+
+      const { body } = await respond('/eat');
+
+      expect(body.match(/See the post on/g)).toHaveLength(1);
+      expect(body).toContain(
+        '<a href="https://www.instagram.com/p/abc/" rel="noopener">Instagram</a>',
+      );
+      expect(body).not.toContain('>Facebook</a>');
+    });
+
+    it('places one bite character for every seven cities or so', async () => {
+      const docs = Array.from({ length: 10 }, (_, n) =>
+        city(`city-${n}`, `City ${n}`, 'DE'),
+      );
+      mockQueryGet.mockResolvedValue({ docs });
+
+      const { body } = await respond('/eat');
+
+      expect(body.match(/class="tribe-tile /g)).toHaveLength(2);
+    });
+
+    it('loads nothing from Instagram, Facebook or any analytics', async () => {
+      mockQueryGet.mockResolvedValue({
+        docs: [
+          city('malta', 'Malta', 'MT', {
+            instagramPostUrl: 'https://www.instagram.com/p/abc/',
+            facebookPostUrl: 'https://www.facebook.com/bitetribeapp/posts/1',
+          }),
+        ],
+      });
+
+      const { body } = await respond('/eat');
+
+      // The glyph next to the account link is served from bitetribe.app;
+      // what must not appear is anything loaded from a Meta host.
+      expect(body).not.toMatch(
+        /(src|srcset)="https:\/\/[^/"]*(instagram|facebook)/,
+      );
+      expect(body).not.toMatch(/gtag|googletagmanager|analytics/i);
+    });
+  });
+
+  describe('links between the pages (#2091)', () => {
+    it('links a city page back to the index', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(body).toContain(
+        '<a href="https://bitetribe.app/eat">More cities →</a>',
+      );
+      expect(body).toContain(
+        '<a href="https://bitetribe.app/eat">All cities</a>',
+      );
+    });
+
+    it('links a city page to its posts, and to none it does not have', async () => {
+      mockGet.mockResolvedValue(
+        snapshot({
+          ...page,
+          facebookPostUrl: 'https://www.facebook.com/bitetribeapp/posts/1',
+        }),
+      );
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(body).toContain(
+        '<p class="posts">See the post on <a href="https://www.facebook.com/bitetribeapp/posts/1" rel="noopener">Facebook</a></p>',
+      );
+      expect(body).not.toContain('>Instagram</a>');
+    });
+
+    it('shows no post line on a page without posts', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(body).not.toContain('See the post on');
     });
   });
 });

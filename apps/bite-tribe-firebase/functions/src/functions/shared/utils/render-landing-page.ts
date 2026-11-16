@@ -13,7 +13,7 @@ import { APP_STORE_URL, PLAY_STORE_URL } from './store-urls';
  * the wrong payload for a document whose job is to be parsed.
  */
 
-const STYLE = `
+export const STYLE = `
   :root { color-scheme: light dark; --fg:#1d1d1b; --muted:#6b6a65; --line:#e4e2da; --card:#f6f5f0; --bg:#fff; }
   @media (prefers-color-scheme: dark) { :root { --fg:#f1efe8; --muted:#a9a79f; --line:#3a3a37; --card:#262624; --bg:#1a1a18; } }
   * { box-sizing: border-box; }
@@ -37,6 +37,10 @@ const STYLE = `
   footer { border-top:1px solid var(--line); padding-top:16px; padding-bottom:32px; color:var(--muted); font-size:14px; }
   footer a { margin-right:16px; }
   .entry { display:block; text-decoration:none; }
+  .posts { color:var(--muted); font-size:14px; margin:-12px 0 24px; }
+  .more { margin:0 0 32px; font-weight:600; }
+  .city-card .posts { margin:4px 0 0; }
+  .dishes { color:var(--muted); font-size:14px; margin:2px 0 0; }
   .entry:hover h2 { text-decoration:underline; }
   .cta { display:block; text-align:center; text-decoration:none; font-weight:600; padding:14px 20px; border-radius:12px; background:#e8590c; color:#fff; }
   .stores { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:8px; }
@@ -100,7 +104,7 @@ export const INSTAGRAM_URL = 'https://www.instagram.com/bitetribeapp/';
  * like the logo and the store badges, so the page still loads nothing from
  * an Instagram host, and carries no embed, script or tracking.
  */
-const INSTAGRAM_LINK = `<a class="ig" href="${INSTAGRAM_URL}" rel="noopener" aria-label="BiteTribe on Instagram">
+export const INSTAGRAM_LINK = `<a class="ig" href="${INSTAGRAM_URL}" rel="noopener" aria-label="BiteTribe on Instagram">
       <picture>
         <source srcset="${BITE_TRIBE_ORIGIN}/assets/social/instagram-glyph-white.svg" media="(prefers-color-scheme: dark)" />
         <img src="${BITE_TRIBE_ORIGIN}/assets/social/instagram-glyph-black.svg" alt="" width="24" height="24" />
@@ -141,7 +145,7 @@ const renderItem =
  * each. A phone gets a bar pinned to the bottom with the button alone: it
  * cannot scan its own screen.
  */
-const renderCallToAction = (city: string): string => `
+export const renderCallToAction = (city: string): string => `
     <section class="get" aria-label="BiteTribe">
       <p class="get-lead">See every dish, price and photo on BiteTribe</p>
       <a class="cta" data-cta="primary" href="${escapeHtml(appLink('/', city))}">Open BiteTribe</a>
@@ -226,6 +230,45 @@ const formatMonth = (page: LandingPage): string | undefined => {
   }
 };
 
+/** `/eat`, the page that lists every city page (issue #2091). */
+export const CITY_INDEX_URL = `${BITE_TRIBE_ORIGIN}/eat`;
+
+/** The header every public `/eat` page shares: the logo and the account. */
+export const PAGE_HEADER = `<header>
+    <a class="brand" href="${BITE_TRIBE_ORIGIN}/"><img src="${LOGO_URL}" alt="" width="28" height="36" />BiteTribe</a>
+    ${INSTAGRAM_LINK}
+  </header>`;
+
+/** The footer every public `/eat` page shares. */
+export const PAGE_FOOTER = `<footer>
+    <a href="${CITY_INDEX_URL}">All cities</a>
+    <a href="${BITE_TRIBE_ORIGIN}/support">Support</a>
+    <a href="${BITE_TRIBE_ORIGIN}/privacy">Privacy</a>
+    <a href="${BITE_TRIBE_ORIGIN}/imprint">Imprint</a>
+  </footer>`;
+
+/**
+ * Links to the "Top 5 dishes" post a page mirrors (issue #2091). Plain links
+ * only: an embed would load Meta's script and set its cookies on a page that
+ * carries neither. Nothing when the page has no post recorded.
+ */
+export const renderPostLinks = (
+  page: Pick<LandingPage, 'instagramPostUrl' | 'facebookPostUrl'>,
+): string => {
+  const links = [
+    page.instagramPostUrl
+      ? `<a href="${escapeHtml(page.instagramPostUrl)}" rel="noopener">Instagram</a>`
+      : '',
+    page.facebookPostUrl
+      ? `<a href="${escapeHtml(page.facebookPostUrl)}" rel="noopener">Facebook</a>`
+      : '',
+  ].filter(Boolean);
+
+  return links.length
+    ? `<p class="posts">See the post on ${links.join(' · ')}</p>`
+    : '';
+};
+
 export const renderLandingPage = (page: LandingPage): string => {
   const month = formatMonth(page);
   const eyebrow = [page.cityName, month].filter(Boolean).join(' · ');
@@ -250,23 +293,18 @@ export const renderLandingPage = (page: LandingPage): string => {
   <style>${STYLE}</style>
 </head>
 <body>
-  <header>
-    <a class="brand" href="${BITE_TRIBE_ORIGIN}/"><img src="${LOGO_URL}" alt="" width="28" height="36" />BiteTribe</a>
-    ${INSTAGRAM_LINK}
-  </header>
+  ${PAGE_HEADER}
   <main>
     <p class="eyebrow">${escapeHtml(eyebrow)}</p>
     <h1>${escapeHtml(page.title)}</h1>
     <p class="intro">${escapeHtml(page.intro)}</p>
+    ${renderPostLinks(page)}
     ${renderCallToAction(page.city)}
     <ol>${page.items.map(renderItem(page.city)).join('')}
     </ol>
+    <p class="more"><a href="${CITY_INDEX_URL}">More cities →</a></p>
   </main>
-  <footer>
-    <a href="${BITE_TRIBE_ORIGIN}/support">Support</a>
-    <a href="${BITE_TRIBE_ORIGIN}/privacy">Privacy</a>
-    <a href="${BITE_TRIBE_ORIGIN}/imprint">Imprint</a>
-  </footer>
+  ${PAGE_FOOTER}
 </body>
 </html>`;
 };

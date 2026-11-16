@@ -35,6 +35,12 @@ export interface LandingPageDraft {
   biteIds: string[];
   /** Other names that redirect to `/eat/<city>`, e.g. `koeln` (#1974). */
   aliases: string[];
+  /**
+   * The "Top 5 dishes" post the page mirrors, linked from the page and from
+   * its card on `/eat` (#2091). Empty when there is none.
+   */
+  instagramPostUrl: string;
+  facebookPostUrl: string;
 }
 
 /** A stored page as `listLandingPages` returns it. */

@@ -64,6 +64,10 @@ export interface LandingPageInput {
   biteIds: string[];
   /** Other names the page answers under, each redirecting to it (#1974). */
   aliases: string[];
+  /** The page's "Top 5 dishes" post on Instagram, or empty (#2091). */
+  instagramPostUrl: string;
+  /** The same post on the Facebook Page, or empty (#2091). */
+  facebookPostUrl: string;
 }
 
 /** What the editor reads back: the stored page with plain-number times. */
@@ -187,6 +191,50 @@ const assertNamesFree = async (
   }
 };
 
+/**
+ * The hosts a post link may point at (issue #2091). The page renders it as a
+ * link to the reader, so anything else - another site, a `javascript:` URL -
+ * is refused rather than published.
+ */
+const POST_HOSTS = {
+  instagramPostUrl: ['www.instagram.com', 'instagram.com'],
+  facebookPostUrl: ['www.facebook.com', 'facebook.com', 'm.facebook.com'],
+} as const;
+
+const MAX_POST_URL = 300;
+
+export const parsePostUrl = (
+  value: unknown,
+  field: keyof typeof POST_HOSTS,
+): string => {
+  const raw = typeof value === 'string' ? value.trim() : '';
+
+  if (!raw) {
+    return '';
+  }
+
+  let url: URL | undefined;
+  try {
+    url = new URL(raw);
+  } catch {
+    url = undefined;
+  }
+
+  if (
+    !url ||
+    raw.length > MAX_POST_URL ||
+    url.protocol !== 'https:' ||
+    !(POST_HOSTS[field] as readonly string[]).includes(url.hostname)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      `${field} must be an https link on ${POST_HOSTS[field][0]}.`,
+    );
+  }
+
+  return url.toString();
+};
+
 const parseBiteIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     throw new HttpsError('invalid-argument', 'biteIds must be a list.');
@@ -240,6 +288,11 @@ export const parseLandingPageInput = (data: unknown): LandingPageInput => {
       input['aliases'],
       typeof input['city'] === 'string' ? input['city'].trim() : '',
     ),
+    instagramPostUrl: parsePostUrl(
+      input['instagramPostUrl'],
+      'instagramPostUrl',
+    ),
+    facebookPostUrl: parsePostUrl(input['facebookPostUrl'], 'facebookPostUrl'),
   };
 };
 
@@ -339,6 +392,12 @@ const toSummary = (data: Record<string, unknown>): LandingPageSummary => ({
   intro: String(data['intro'] ?? ''),
   biteIds: Array.isArray(data['biteIds']) ? (data['biteIds'] as string[]) : [],
   aliases: Array.isArray(data['aliases']) ? (data['aliases'] as string[]) : [],
+  instagramPostUrl:
+    typeof data['instagramPostUrl'] === 'string'
+      ? data['instagramPostUrl']
+      : '',
+  facebookPostUrl:
+    typeof data['facebookPostUrl'] === 'string' ? data['facebookPostUrl'] : '',
   items: Array.isArray(data['items'])
     ? (data['items'] as LandingPageItem[])
     : [],

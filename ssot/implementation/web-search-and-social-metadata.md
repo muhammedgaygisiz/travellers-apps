@@ -307,8 +307,9 @@ data and sitemap in [#1491], the links into the app in [#1492].
 
 `renderCityPage` in
 `apps/bite-tribe-firebase/functions/src/functions/web/render-city-page.ts`,
-reached through the `/eat/**` rewrite on the `bite-tribe` hosting target, next
-to `/s/**`. It reads one `landingPages` document with the Admin SDK and returns
+reached through the `/eat` and `/eat/**` rewrites on the `bite-tribe` hosting
+target, next to `/s/**`. `/eat/**` does not match the bare `/eat`, which is why
+it has its own entry, as `/download` does. It reads one `landingPages` document with the Admin SDK and returns
 a complete HTML document, so the browser never opens a Firestore connection:
 the security rules and App Check are not in the request path, and neither was
 loosened for it. The `i18n` block on the hosting target does not interfere with
@@ -321,6 +322,8 @@ the rewrite; that was checked against the emulator with `Accept-Language: de`.
 | `/eat/<alias>` of a published page                           | `301` to `/eat/<city>`                       | as a published page                                                                                |
 | `status: draft`, an unknown city, or any other shape of path | `404`                                        | `public, max-age=60, s-maxage=60`                                                                  |
 | `/eat/sitemap.xml`                                           | `200`, the published set                     | `public, max-age=300, s-maxage=300`: minutes, so a new page reaches the sitemap promptly ([#1980]) |
+| `/eat` or `/eat/`                                            | `200`, every published city ([#2091])        | as the sitemap, so a new city shows within minutes                                                 |
+| `/eat` with nothing published                                | `404`                                        | `public, max-age=60, s-maxage=60`                                                                  |
 
 An alias of a draft or withdrawn page answers `404` or `410` exactly as the
 page's own URL would, so an alias never reveals an unpublished page.
@@ -346,6 +349,7 @@ collection.
 | `items`                                 | The snapshot: three to five Bites, in order                                                                  |
 | `biteIds`                               | The editor's selection, kept only so it can reopen; the page never reads it                                  |
 | `publishedAt`, `updatedAt`, `updatedBy` | Server timestamps and the operator's uid                                                                     |
+| `instagramPostUrl`, `facebookPostUrl`   | The "Top 5 dishes" post the page mirrors, or empty ([#2091]); see The City Index below                       |
 
 **An entry is a Bite, shown as its photo, its name and where it is** -
 `biteId`, `name`, `imageUrl` (the Bite photo), `place` and `locality` (the
@@ -413,6 +417,54 @@ fixed once saved; an alias is how a second name is added.
 Every text field is escaped with `escapeHtml`, which replaces every occurrence
 since [#1488]. The share stub and the page share `renderSocialMeta` for their
 head tags; only the share stub redirects.
+
+### The City Index
+
+**`https://bitetribe.app/eat` lists every published city page, grouped by
+country.** Added by [#2091] on 16 November 2026. Until then no page linked to
+a city page: URL Inspection for `/eat/malta` showed "Referring page: None
+detected", and Google had left it "Crawled - currently not indexed". The index
+is that link. The web app's start page links to it (a plain `href="/eat"`, not
+a `routerLink`, since the router would send it to the wildcard route), every
+city page links back to it ("More cities" under the list, "All cities" in the
+footer), and it links to every city. It is listed in `/eat/sitemap.xml`, with
+the newest `publishedAt` as its `lastmod`.
+
+Rendered by `renderCityIndex` in `shared/utils/render-city-index.ts` from the
+same published set as the sitemap, with the city pages' header, footer, call
+to action and no-script rule. Nothing about it is maintained by hand: the
+count in the heading, Leela's speech bubble and the `<title>` follows the
+published set, a new country gets its own heading, and a withdrawn page drops
+out with the next cache refresh.
+
+- **Heading and title.** The `<h1>` says what the app holds ("What you'll find
+  on BiteTribe in N cities"); the `<title>` leads with the search phrase
+  ("What to eat in N cities – BiteTribe").
+- **Leela** greets the reader in a speech bubble and presents the cities as
+  her top 5 out of everything rated on BiteTribe, not as the whole of it.
+- **The grid** is one block per country, as wide as its cities (one to four
+  columns), packed densely so single-city countries share a row. Packing can
+  move a single-city country a little ahead of alphabetical order to fill a
+  gap.
+- **The bite characters** from [Marketing - Brand Characters](../marketing/brand-characters.md)
+  sit inside the grid on alternating edges, one on every second row of four
+  cards (every fourth row of two on a phone). Their number is
+  `floor((cities + 4) / 7)`, at most seven, so none is left on an empty row.
+- **How BiteTribe works**, under the grid: the street food comic redrawn with
+  Leela's current look, beside the tagline's three verbs as text, so a crawler
+  reads what the app does.
+- **The call to action** carries `city_page=index`.
+
+The character art, Leela's crop and the comic are served from
+`/assets/characters/` of the web build, like the logo, so the page still loads
+nothing from another host.
+
+**Post links.** A city with `instagramPostUrl` or `facebookPostUrl` shows "See
+the post on Instagram · Facebook" under its intro and on its index card. They
+are plain links, never embeds: an embed would load Meta's script and set its
+cookies on pages that carry neither. `saveLandingPage` accepts only an `https`
+link on `instagram.com` or `facebook.com` respectively, so the field cannot
+publish a link to anywhere else. The admin editor has a field for each.
 
 ### Not Yet
 
@@ -621,3 +673,4 @@ so both properties have the same two owners.
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982
 [#2005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2005
+[#2091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2091

@@ -26,6 +26,8 @@ const stored: LandingPage = {
   intro: 'Why these.',
   biteIds: ['b1', 'b2', 'b3'],
   aliases: ['bln'],
+  instagramPostUrl: 'https://www.instagram.com/p/abc/',
+  facebookPostUrl: '',
   status: 'draft',
   items: [1, 2, 3].map((n) => ({
     biteId: `b${n}`,
@@ -86,6 +88,8 @@ describe(LandingPagesService.name, () => {
       intro: 'Why these.',
       biteIds: ['b1', 'b2', 'b3'],
       aliases: ['bln'],
+      instagramPostUrl: 'https://www.instagram.com/p/abc/',
+      facebookPostUrl: '',
     });
     expect(service.publishable()).toBe(true);
   });

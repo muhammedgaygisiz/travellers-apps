@@ -102,6 +102,20 @@ describe('BiteTribeStartComponent', () => {
     });
   });
 
+  describe('the city guides link (#2091)', () => {
+    it('leads to the city index on the same host, leaving the app', () => {
+      const link: HTMLAnchorElement | null = element().querySelector(
+        '[data-testid="start-city-guides"]',
+      );
+
+      // A plain href, not a routerLink: /eat is served by a function, and the
+      // router would send it to the wildcard route instead.
+      expect(link?.getAttribute('href')).toBe('/eat');
+      expect(link?.hasAttribute('ng-reflect-router-link')).toBe(false);
+      expect(link?.closest('[data-testid="start-landing"]')).not.toBeNull();
+    });
+  });
+
   describe('the Instagram link', () => {
     const link = (): HTMLAnchorElement | null =>
       element().querySelector('[data-testid="start-instagram"]');

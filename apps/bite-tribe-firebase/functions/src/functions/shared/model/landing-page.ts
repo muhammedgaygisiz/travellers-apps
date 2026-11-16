@@ -51,6 +51,14 @@ export interface LandingPage {
   intro: string;
   /** Ordered, three to five Bites. */
   items: LandingPageItem[];
+  /**
+   * The "Top 5 dishes" post this page mirrors on Instagram, e.g.
+   * `https://www.instagram.com/p/<code>/` (issue #2091). Rendered as a plain
+   * link, never an embed.
+   */
+  instagramPostUrl?: string;
+  /** The same post on the Facebook Page (issue #2091). */
+  facebookPostUrl?: string;
   publishedAt?: Timestamp;
   updatedAt?: Timestamp;
   updatedBy?: string;

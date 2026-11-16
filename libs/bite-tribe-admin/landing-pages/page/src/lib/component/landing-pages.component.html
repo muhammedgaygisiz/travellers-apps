@@ -176,6 +176,30 @@
                     (ionInput)="onField('intro', $event.detail.value)"
                   />
                 </ion-item>
+                <ion-item>
+                  <ion-input
+                    type="url"
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-instagram-post' | transloco"
+                    placeholder="https://www.instagram.com/p/..."
+                    [value]="draft().instagramPostUrl"
+                    data-testid="admin-landing-instagram-post"
+                    (ionInput)="
+                      onField('instagramPostUrl', $event.detail.value)
+                    "
+                  />
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    type="url"
+                    labelPlacement="stacked"
+                    [label]="'admin-landing-field-facebook-post' | transloco"
+                    placeholder="https://www.facebook.com/..."
+                    [value]="draft().facebookPostUrl"
+                    data-testid="admin-landing-facebook-post"
+                    (ionInput)="onField('facebookPostUrl', $event.detail.value)"
+                  />
+                </ion-item>
               </ion-list>
 
               <h4 class="landing-pages__section">

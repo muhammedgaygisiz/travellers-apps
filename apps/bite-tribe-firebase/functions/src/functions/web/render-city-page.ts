@@ -3,9 +3,11 @@ import { onRequest } from 'firebase-functions/https';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { LandingPage } from '../shared/model/landing-page';
 import {
+  CITY_INDEX_URL,
   landingPageUrl,
   renderLandingPage,
 } from '../shared/utils/render-landing-page';
+import { renderCityIndex } from '../shared/utils/render-city-index';
 import { escapeHtml } from '../shared/utils/render-html';
 
 /**
@@ -64,7 +66,21 @@ const isoDate = (value: unknown): string | undefined =>
     ? value.toDate().toISOString().slice(0, 10)
     : undefined;
 
+/**
+ * The published set plus `/eat` itself (issue #2091), whose last change is the
+ * newest publication among them.
+ */
 export const renderSitemap = (pages: LandingPage[]): string => {
+  const newest = pages
+    .map((page) => isoDate(page.publishedAt))
+    .filter((date): date is string => !!date)
+    .sort()
+    .pop();
+  const index = pages.length
+    ? `  <url>
+    <loc>${escapeHtml(CITY_INDEX_URL)}</loc>${newest ? `\n    <lastmod>${newest}</lastmod>` : ''}
+  </url>\n`
+    : '';
   const urls = pages
     .map((page) => {
       const lastmod = isoDate(page.publishedAt);
@@ -77,23 +93,46 @@ export const renderSitemap = (pages: LandingPage[]): string => {
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
+${index}${urls}
 </urlset>
 `;
+};
+
+/** Every published page, by city. Draft and withdrawn pages are never listed. */
+const publishedPages = async (): Promise<LandingPage[]> => {
+  const published = await db
+    .collection('landingPages')
+    .where('status', '==', 'published')
+    .get();
+
+  return published.docs
+    .map((doc) => ({ ...(doc.data() as LandingPage), city: doc.id }))
+    .sort((a, b) => a.city.localeCompare(b.city));
 };
 
 export const renderCityPage = onRequest(async (req, res) => {
   try {
     const parts = req.path.split('/').filter(Boolean);
 
+    // `/eat`: every published city on one page (issue #2091). Cached like the
+    // sitemap rather than like a city page, because it changes whenever the
+    // published set does and a new city should show within minutes.
+    if (parts.length === 1 && parts[0] === 'eat') {
+      const pages = await publishedPages();
+
+      if (!pages.length) {
+        notFound(res);
+        return;
+      }
+
+      res.set('Cache-Control', SITEMAP_CACHE_CONTROL);
+      res.set('Content-Type', 'text/html; charset=utf-8');
+      res.status(200).send(renderCityIndex(pages));
+      return;
+    }
+
     if (parts.length === 2 && parts[0] === 'eat' && parts[1] === SITEMAP_PATH) {
-      const published = await db
-        .collection('landingPages')
-        .where('status', '==', 'published')
-        .get();
-      const pages = published.docs
-        .map((doc) => ({ ...(doc.data() as LandingPage), city: doc.id }))
-        .sort((a, b) => a.city.localeCompare(b.city));
+      const pages = await publishedPages();
 
       res.set('Cache-Control', SITEMAP_CACHE_CONTROL);
       res.set('Content-Type', 'application/xml; charset=utf-8');

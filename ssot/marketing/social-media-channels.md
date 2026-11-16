@@ -1135,6 +1135,23 @@ Published from the web uploader on the Mac, with the steps
   carry it at full size without the gutters; it is not saved here, since a
   story expires.
 
+### Redrawn With Leela's Current Look
+
+On 16 November 2026 ([#2091]) the comic was redrawn in ChatGPT from this
+image and Leela's Vienna reference sheet: the same six panels and story, with
+[her current look](brand-characters.md#her-current-look). The last panel was
+asked for without the logo, the characters or any lettering, so it shows only
+the five-star Pad Thai card and nothing had to be replaced by hand.
+
+![Street food comic, redrawn](assets/social/street-food-comic-leela-post.png)
+
+[`ssot/marketing/assets/social/street-food-comic-leela-post.png`](assets/social/street-food-comic-leela-post.png)
+is `1080x1350`, ready to post again. Its panels without the side gutters are
+the "How BiteTribe works" comic on `bitetribe.app/eat`, served from
+`/assets/characters/leela-comic.jpg`; see
+[Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#the-city-index).
+It has not been posted.
+
 ## The Istanbul Comic Post
 
 The second comic, prepared 27 September 2026 and **not yet published**. Posting
@@ -1770,3 +1787,4 @@ yet reflected.
 [#1944]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1944
 [#1948]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1948
 [#2007]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2007
+[#2091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2091

@@ -22,6 +22,8 @@ const emptyDraft = (): LandingPageDraft => ({
   intro: '',
   biteIds: [],
   aliases: [],
+  instagramPostUrl: '',
+  facebookPostUrl: '',
 });
 
 const entryFromSearch = (bite: SearchBite): LandingPageEntry => ({
@@ -120,6 +122,8 @@ export class LandingPagesService {
       metaDescription: page.metaDescription,
       intro: page.intro,
       aliases: page.aliases ?? [],
+      instagramPostUrl: page.instagramPostUrl ?? '',
+      facebookPostUrl: page.facebookPostUrl ?? '',
     });
     this.entries.set(
       page.items.map((item) => ({

@@ -24,6 +24,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import { LeaderboardSkeletonComponent } from '../leaderboard-skeleton/leaderboard-skeleton.component';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { countKey } from '../../utils/count-key';
 import {
   LeaderboardBoard,
   LeaderboardRanking,
@@ -78,6 +79,9 @@ const LAST_WEEK_BOARDS: readonly LeaderboardBoard[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaderboardListComponent {
+  /** "1 Bite", "3 Bites": the singular key for one (#2094). */
+  protected readonly countKey = countKey;
+
   private readonly transloco = inject(TranslocoService);
 
   board = input<LeaderboardBoard>('thisWeek');

@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -60,9 +61,17 @@ interface BiteCard {
     TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.preview]': 'preview()' },
 })
 export class SearchListComponent {
   results = input<SearchResult[]>([]);
+
+  /**
+   * One result previewed over the search map. A Bite shows as its card on
+   * every width, the way the home map previews one, and in a single column.
+   * See GitHub issue #2078.
+   */
+  preview = input(false, { transform: booleanAttribute });
   isLoading = input(false);
   hasSearched = input(false);
 
@@ -99,7 +108,11 @@ export class SearchListComponent {
    */
   showBiteCards = computed(() => {
     const [first] = this.results();
-    return this.isDesktop() && !!first && BITE_CATEGORIES.has(first.category);
+    return (
+      (this.isDesktop() || this.preview()) &&
+      !!first &&
+      BITE_CATEGORIES.has(first.category)
+    );
   });
 
   biteCards = computed<BiteCard[]>(() =>

@@ -98,7 +98,7 @@ export class SnapDrawerComponent implements OnInit, AfterViewInit {
     this.renderer.setStyle(
       drawerEl,
       'transition',
-      enabled ? 'transform 0.3s ease' : 'none'
+      enabled ? 'transform 0.3s ease' : 'none',
     );
   }
 

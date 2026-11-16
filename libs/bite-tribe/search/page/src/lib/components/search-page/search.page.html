@@ -86,13 +86,29 @@
       <ion-label>{{ 'no-search-results-found' | transloco }}</ion-label>
     </div>
     } @else {
-    <bt-map
-      class="search-map"
-      readonly
-      emitMarkerClick
-      [geopoints]="mapPositions()"
-      (clickOnMarker)="mapMarkerClick($event)"
-    />
+    <div class="search-map-area" [class.has-side-panel]="hasSidePanel()">
+      <bt-map
+        class="search-map"
+        readonly
+        emitMarkerClick
+        [geopoints]="mapPositions()"
+        (clickOnMarker)="mapMarkerClick($event)"
+      />
+      @if (selectedResult(); as result) {
+      <bt-map-selection
+        [heading]="result.value.name"
+        (closeClick)="selectedResult.set(undefined)"
+      >
+        <ng-template>
+          <search-list
+            preview
+            [results]="[result]"
+            (resultClick)="resultClick.emit($event)"
+          />
+        </ng-template>
+      </bt-map-selection>
+      }
+    </div>
     } } @else {
     <search-list
       [results]="results()"

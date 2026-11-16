@@ -8,10 +8,7 @@
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>
-    <div
-      class="container"
-      [class.has-side-panel]="!!selectedBite && isWideScreen()"
-    >
+    <div class="container" [class.has-side-panel]="hasSidePanel()">
       <bt-map
         readonly
         emitMarkerClick
@@ -38,43 +35,20 @@
           </ion-fab-button>
         </ion-fab>
       }
-      @if (selectedBite) {
-        @if (isWideScreen()) {
-          <aside class="side-panel" data-testid="map-side-panel">
-            <div class="side-panel-header">
-              <h4 class="bite-title">
-                {{ selectedBite.name }}
-              </h4>
-              <ion-button
-                fill="clear"
-                color="medium"
-                data-testid="map-side-panel-close"
-                [attr.aria-label]="'close' | transloco"
-                (click)="closeSelectedBite()"
-              >
-                <ion-icon name="close-outline" slot="icon-only" />
-              </ion-button>
-            </div>
+      @if (selectedBite; as bite) {
+        <bt-map-selection
+          [heading]="bite.name"
+          (closeClick)="closeSelectedBite()"
+        >
+          <ng-template>
             <bt-bite
-              [bite]="selectedBite"
+              [bite]="bite"
               [userId]="userId()"
               (biteClick)="biteClick.emit($event)"
               (likeButtonClick)="likeButtonClick.emit($event)"
             />
-          </aside>
-        } @else {
-          <bt-snap-drawer>
-            <h4 class="bite-title">
-              {{ selectedBite.name }}
-            </h4>
-            <bt-bite
-              [bite]="selectedBite"
-              [userId]="userId()"
-              (biteClick)="biteClick.emit($event)"
-              (likeButtonClick)="likeButtonClick.emit($event)"
-            />
-          </bt-snap-drawer>
-        }
+          </ng-template>
+        </bt-map-selection>
       }
     </div>
   </ion-content>

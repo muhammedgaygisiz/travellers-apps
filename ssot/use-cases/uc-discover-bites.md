@@ -24,6 +24,7 @@ them.
 - User browses Bites.
 - User can switch to map view.
 - Map zoom controls and zoom gestures are available to every user regardless of subscription tier.
+- Tapping a marker previews what it stands for without leaving the map, and both maps that open a marker do it the same way: the home map and the search map. A phone shows the preview in a drawer dragged up from the bottom; a screen 768px and wider shows it in a panel at the left of the map, with a close button. Tapping the map background closes it, and tapping the preview opens the Bite or result. The search preview is read-only: a Bite, City or Country result shows its Bite card, a Restaurant result its list row. Both maps render the shared `bt-map-selection`. See issues [#1789] and [#2078].
 - User can filter or search within the feed.
 - An empty feed and an empty search result are two different states and never share their copy. `No bites found. Be the first one.` invites a first Bite and is only correct when there is nothing to show; a search that excluded everything names the term instead and offers to clear it, because the Bites are still there and the next action is to change the search, not to create. See issue [#1331].
 - On a desktop browser (1024px and wider), a search whose results are Bites (Bite, City or Country) shows them as the feed's cards in the same two- or three-column grid; phones, and User and Restaurant results, keep the list. See issue [#1791].
@@ -69,6 +70,8 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 - Part of [epic-1122][#1122], which specifies loading a position other than the current one and any radius beyond 15 km as a Pro capability. Not built.
 - Issue [#1230] is the CoreLocation timeout defect the bounded position read (15s) and feed load (20s) now guard against.
 - Issue [#1331] separated the empty-feed and empty-search-result copy.
+- Issue [#1789] moved the home map's preview into a side panel on wide screens.
+- Issue [#2078] gave the search map the home map's marker preview on every width.
 - Issue [#1717] lists only Bites with an uploaded photo to anybody but their poster.
 - Issue [#2022] draws the map dark in dark mode, from the same OpenStreetMap tiles so every restaurant, café and bar icon stays on it.
 
@@ -90,5 +93,7 @@ onboarding rather than from this flow — see [UC - Guide New Users After Regist
 [#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
 [#1331]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1331
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
+[#1789]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1789
 [#1791]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1791
+[#2078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2078
 [#2022]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2022

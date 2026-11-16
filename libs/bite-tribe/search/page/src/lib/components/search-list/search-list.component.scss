@@ -80,3 +80,21 @@ $wide-desktop-breakpoint: 1280px;
     }
   }
 }
+
+// A single result previewed over the map: the drawer or panel already pads and
+// sizes it, so it drops the page column and the grid. See GitHub issue #2078.
+:host(.preview) {
+  ion-list {
+    max-width: none;
+    padding: 0;
+  }
+
+  ion-item {
+    margin: 0;
+  }
+
+  .bite-cards {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 0;
+  }
+}

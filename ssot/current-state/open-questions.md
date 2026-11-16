@@ -168,6 +168,23 @@ These belong to [#2067], under epic [#2063]. Each is settled with the maintainer
 - **On which devices and network conditions are the scenarios measured?** [Current State - Release Candidate Test Charter](release-candidate-test-charter.md) names the devices, a Samsung SM-A566B and an iPhone 12 mini, but no network condition such as a slow or interrupted connection.
 - **Does test coverage measure a goal?** Coverage is reported and never fails a build, per `codecov.yml` and [Implementation - CI Pipeline](../implementation/ci-pipeline.md). A goal could require a floor for some projects, or coverage can stay informational and the goals be evidenced by named tests instead.
 
+## Privacy Policy Questions
+
+These belong to [#2086]. Each is settled with the maintainer before the privacy policy is rewritten. The answers are then recorded in [Recorded Decisions](../decisions/recorded-decisions.md), and a question leaves this section once it is answered there.
+
+- **Which flows count as user data reaching a third party?** [Architecture - Context](../architecture/context.md) lists every external system the code calls. The candidates the policy does not name today:
+  - OpenStreetMap tiles: the device's IP address and the map area being viewed, sent from the device to a party that is not Google;
+  - Google Places and Geocoding: positions and search text, sent by the backend;
+  - the Gmail API: the user's email address and the mail sent to them;
+  - Firebase Crashlytics and Cloud Messaging: crash reports with the user ID, the push token;
+  - Sign in with Apple and Google Sign-In: a sign-in the user makes with the provider, which may count as the user's own relationship with it rather than a transfer by BiteTribe;
+  - App Attest, Play Integrity and reCAPTCHA Enterprise: an attestation of the device;
+  - Instagram and Facebook Stories: an image the user hands to another app on the device, which may not be a transfer by BiteTribe at all.
+- **Are processors named one by one, or by category?** Naming each keeps the policy exact and makes it change with every integration; a category such as "map tiles" or "email delivery" changes less but says less.
+- **Does the text need a legal review, and by whom?** The terms of use already need a Swiss or EU lawyer under [#1772]. Whether the privacy policy goes to the same review, and before or after it is published, is open.
+- **Do the store declarations change?** [Implementation - Store Declarations](../implementation/store-declarations.md) owns the App Store privacy nutrition labels and the Play data safety form. A flow named in the policy may need a matching declaration, or may already be covered by one.
+- **Should [Architecture - Context](../architecture/context.md) mark which systems receive user data?** A marker on the page would make the policy checkable against it, and the check of [#2066] could then fail when a new system that receives user data is added without the policy following.
+
 ## Related Pages
 
 - [Current State - Roadmap](roadmap.md)
@@ -217,4 +234,6 @@ These belong to [#2067], under epic [#2063]. Each is settled with the maintainer
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#2063]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2063
 [#2065]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2065
+[#2066]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2066
 [#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067
+[#2086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2086

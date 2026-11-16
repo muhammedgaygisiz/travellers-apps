@@ -30,7 +30,7 @@
       (ionChange)="selectTab($any($event.detail.value))"
     >
       <ion-segment-button value="week" data-testid="leaderboard-tab-week">
-        {{ 'leaderboard-tab-this-week' | transloco }}
+        {{ 'leaderboard-tab-weekly' | transloco }}
       </ion-segment-button>
       <ion-segment-button
         value="mostLiked"
@@ -139,7 +139,7 @@
                   publicUser ? user.displayName : ('anonymous' | transloco)
                 }}</span>
                 <span class="podium__count entry-count">{{
-                  'leaderboard-bite-count'
+                  countKey('leaderboard-bite-count', user.biteCount)
                     | transloco: { count: user.biteCount }
                 }}</span>
               </button>
@@ -168,7 +168,7 @@
                   'leaderboard-by' | transloco: { name: bite.displayName }
                 }}</span>
                 <span class="podium__count entry-count">{{
-                  'leaderboard-like-count'
+                  countKey('leaderboard-like-count', bite.likeCount)
                     | transloco: { count: bite.likeCount }
                 }}</span>
               </button>
@@ -237,7 +237,7 @@
                 class="like-count entry-count"
               >
                 {{
-                  'leaderboard-like-count'
+                  countKey('leaderboard-like-count', bite.likeCount)
                     | transloco: { count: bite.likeCount }
                 }}
               </ion-badge>
@@ -289,7 +289,7 @@
                 class="bite-count entry-count"
               >
                 {{
-                  'leaderboard-bite-count'
+                  countKey('leaderboard-bite-count', user.biteCount)
                     | transloco: { count: user.biteCount }
                 }}
               </ion-badge>

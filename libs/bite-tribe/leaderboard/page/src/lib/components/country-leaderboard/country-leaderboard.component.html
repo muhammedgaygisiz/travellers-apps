@@ -17,7 +17,7 @@
       (ionChange)="selectTab($any($event.detail.value))"
     >
       <ion-segment-button value="week" data-testid="country-tab-week">
-        {{ 'leaderboard-tab-this-week' | transloco }}
+        {{ 'leaderboard-tab-weekly' | transloco }}
       </ion-segment-button>
       <ion-segment-button value="allTime" data-testid="country-tab-all-time">
         {{ 'leaderboard-tab-all-time' | transloco }}
@@ -97,7 +97,7 @@
                 </span>
                 <span class="podium__name entry-name">{{ country.name }}</span>
                 <span class="podium__count entry-count">{{
-                  'leaderboard-bite-count'
+                  countKey('leaderboard-bite-count', country.biteCount)
                     | transloco: { count: country.biteCount }
                 }}</span>
               </button>
@@ -127,7 +127,7 @@
             </ion-label>
             <ion-badge slot="end" color="secondary" class="entry-count">
               {{
-                'leaderboard-bite-count'
+                countKey('leaderboard-bite-count', country.biteCount)
                   | transloco: { count: country.biteCount }
               }}
             </ion-badge>

@@ -18,6 +18,7 @@ import {
   IonSegmentButton,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { countKey } from '../../utils/count-key';
 import { PageComponent } from 'common/ui/page';
 import { LeaderboardSkeletonComponent } from '../leaderboard-skeleton/leaderboard-skeleton.component';
 import { getLocalizedCountryName } from 'utils';
@@ -63,6 +64,9 @@ interface CountryEntry extends RankedCountry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CountryLeaderboardComponent {
+  /** "1 Bite", "3 Bites": the singular key for one (#2094). */
+  protected readonly countKey = countKey;
+
   private readonly transloco = inject(TranslocoService);
 
   board = input<CountryBoard>('countries');

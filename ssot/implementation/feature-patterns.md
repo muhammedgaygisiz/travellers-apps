@@ -137,7 +137,8 @@ One detail is easy to get wrong and made the bar invisible during development: `
 | Profile      | `profile-skeleton`     | `showSkeleton()`     |
 | Bite details | Inline skeleton fields | `!bite()`            |
 | Restaurant   | Inline skeleton fields | `isLoading()`        |
-| Leaderboard  | Spinner                | `isLoading()`        |
+| Leaderboard  | `leaderboard-skeleton` | `isLoading()`        |
+| Countries    | `leaderboard-skeleton` | `isLoading()`        |
 | Gallery      | Spinner                | `loading()`          |
 | Followers    | Spinner                | `isLoading()`        |
 | Search       | Spinner                | `isLoading()`        |
@@ -148,6 +149,8 @@ This is deliberately additive: it does not change when a placeholder appears. Fi
 The end state is that a reload of content already on screen reports itself only through this bar instead of replacing that content with a placeholder. Adopting it is the first half of that move. See GitHub issue [#1168].
 
 About already works that way. Its two counts live in a root service and refresh on every entry; a count that has no value yet holds its skeleton, while a count already on screen stays there and only the bar runs. The refresh starts when the page is created, not in an Ionic view lifecycle hook: re-entering a pushed page was observed not to raise `ionViewDidEnter` reliably, and the user count stayed stale. See GitHub issue [#2072].
+
+The Leaderboard and its Countries page work that way too. Every ranking that loaded is kept in the root data-access service by board, so re-entering the page or switching back to a board shows the ranking it had while the refresh runs, and only the bar says so. Only a board that never loaded shows `leaderboard-skeleton` (`isFirstLoad()`: loading, and nothing loaded for that board). A failed refresh keeps the ranking on screen; a failed first load reads as an empty ranking. See GitHub issue [#2081].
 
 My Bites renders the Home component, but its condition has to follow its own read. It used to pass the feed's `loading.home`, which never covered that read, so the page showed its empty state until the Bites arrived. It now binds `loading.ownBites`. That flag is raised on `routerNavigationAction` for My Bites and My Profile, before the page renders, and cleared when the read succeeds or fails. See GitHub issue [#2073].
 
@@ -222,3 +225,4 @@ imagePath || image || ''
 [#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377
 [#2072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2072
 [#2073]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2073
+[#2081]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2081

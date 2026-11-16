@@ -21,7 +21,7 @@ const BOARDS_FROM_LINK: readonly LeaderboardBoard[] = [
     <leaderboard-list
       class="ion-page"
       [board]="service.board()"
-      [ranking]="service.ranking.value()"
+      [ranking]="service.loadedRanking()"
       [isLoading]="service.ranking.isLoading()"
       [currentUserId]="service.currentUserId()"
       (boardChange)="service.selectBoard($event)"

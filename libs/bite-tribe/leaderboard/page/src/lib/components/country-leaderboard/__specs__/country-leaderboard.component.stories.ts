@@ -91,3 +91,12 @@ export const Empty: Story = {
     },
   },
 };
+
+/** The first load of a country ranking shows its shape (issue #2081). */
+export const FirstLoad: Story = {
+  args: {
+    board: 'countries',
+    ranking: undefined,
+    isLoading: true,
+  },
+};

@@ -21,8 +21,10 @@ export class LeaderboardService {
 
   readonly board = this.dataAccess.board.asReadonly();
   readonly ranking = this.dataAccess.ranking;
+  readonly loadedRanking = this.dataAccess.loadedRanking;
   readonly countryBoard = this.dataAccess.countryBoard.asReadonly();
   readonly countryRanking = this.dataAccess.countryRanking;
+  readonly loadedCountryRanking = this.dataAccess.loadedCountryRanking;
 
   /** Opens the country ranking (issue #2043). */
   openCountries(): void {

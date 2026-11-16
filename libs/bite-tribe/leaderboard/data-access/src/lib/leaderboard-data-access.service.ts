@@ -1,4 +1,4 @@
-import { Injectable, resource, signal } from '@angular/core';
+import { computed, Injectable, resource, signal } from '@angular/core';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
 
@@ -68,30 +68,34 @@ const emptyRanking = (board: LeaderboardBoard): LeaderboardRanking => ({
 export class LeaderboardDataAccessService {
   readonly board = signal<LeaderboardBoard>('thisWeek');
 
-  // The call is caught below, so this resource never enters an error state and
-  // `ranking.value()` is safe to read straight from the template — unlike the
-  // resources audited in GitHub issue #1232.
+  /** Loads a ranking; a failure reads as an empty one. */
   async loadRanking(board: LeaderboardBoard): Promise<LeaderboardRanking> {
     try {
-      const result = await FirebaseFunctions.callByName<
-        { board: LeaderboardBoard },
-        LeaderboardRanking | LeaderboardUser[]
-      >({
-        name: 'loadLeaderboard',
-        data: { board },
-      });
-      const data = result.data;
-
-      // A function deployed before the weekly board ignores `board` and
-      // answers with the all-time users as a bare array.
-      if (Array.isArray(data)) {
-        return { board: 'allTime', users: data };
-      }
-
-      return data ?? emptyRanking(board);
+      return await this.fetchRanking(board);
     } catch {
       return emptyRanking(board);
     }
+  }
+
+  private async fetchRanking(
+    board: LeaderboardBoard,
+  ): Promise<LeaderboardRanking> {
+    const result = await FirebaseFunctions.callByName<
+      { board: LeaderboardBoard },
+      LeaderboardRanking | LeaderboardUser[]
+    >({
+      name: 'loadLeaderboard',
+      data: { board },
+    });
+    const data = result.data;
+
+    // A function deployed before the weekly board ignores `board` and
+    // answers with the all-time users as a bare array.
+    if (Array.isArray(data)) {
+      return { board: 'allTime', users: data };
+    }
+
+    return data ?? emptyRanking(board);
   }
 
   readonly countryBoard = signal<CountryBoard>('countries');
@@ -99,29 +103,72 @@ export class LeaderboardDataAccessService {
   /** Loads a country ranking; a failure reads as an empty one. */
   async loadCountries(board: CountryBoard): Promise<CountryRanking> {
     try {
-      const result = await FirebaseFunctions.callByName<
-        { board: CountryBoard },
-        CountryRanking
-      >({
-        name: 'loadLeaderboard',
-        data: { board },
-      });
-
-      return result.data?.countries ? result.data : { board, countries: [] };
+      return await this.fetchCountries(board);
     } catch {
       return { board, countries: [] };
     }
   }
 
+  private async fetchCountries(board: CountryBoard): Promise<CountryRanking> {
+    const result = await FirebaseFunctions.callByName<
+      { board: CountryBoard },
+      CountryRanking
+    >({
+      name: 'loadLeaderboard',
+      data: { board },
+    });
+
+    return result.data?.countries ? result.data : { board, countries: [] };
+  }
+
+  /**
+   * Every ranking loaded so far, by board (issue #2081). The page opens with
+   * the last one it had and refreshes it in place, so only a board that never
+   * loaded has nothing to show while it loads. A failed refresh keeps what
+   * was there; a failed first load reads as an empty ranking.
+   */
+  private readonly loadedRankings = signal<
+    Partial<Record<LeaderboardBoard, LeaderboardRanking>>
+  >({});
+  private readonly loadedCountryRankings = signal<
+    Partial<Record<CountryBoard, CountryRanking>>
+  >({});
+
+  /** The ranking of the board on screen, if it ever loaded. */
+  readonly loadedRanking = computed(() => this.loadedRankings()[this.board()]);
+  readonly loadedCountryRanking = computed(
+    () => this.loadedCountryRankings()[this.countryBoard()],
+  );
+
   countryRanking = resource({
     params: () => ({ board: this.countryBoard() }),
-    loader: ({ params }) => this.loadCountries(params.board),
+    loader: async ({ params }) => {
+      const { board } = params;
+      const fetched = await this.fetchCountries(board).catch(() => undefined);
+
+      this.loadedCountryRankings.update((loaded) => ({
+        ...loaded,
+        [board]: fetched ?? loaded[board] ?? { board, countries: [] },
+      }));
+
+      return this.loadedCountryRankings()[board] as CountryRanking;
+    },
     defaultValue: { board: 'countries', countries: [] } as CountryRanking,
   });
 
   ranking = resource({
     params: () => ({ board: this.board() }),
-    loader: ({ params }) => this.loadRanking(params.board),
+    loader: async ({ params }) => {
+      const { board } = params;
+      const fetched = await this.fetchRanking(board).catch(() => undefined);
+
+      this.loadedRankings.update((loaded) => ({
+        ...loaded,
+        [board]: fetched ?? loaded[board] ?? emptyRanking(board),
+      }));
+
+      return this.loadedRankings()[board] as LeaderboardRanking;
+    },
     defaultValue: emptyRanking('thisWeek'),
   });
 }

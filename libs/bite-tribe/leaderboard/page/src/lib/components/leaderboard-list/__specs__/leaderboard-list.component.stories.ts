@@ -231,3 +231,26 @@ export const OwnRowHighlighted: Story = {
     currentUserId: 'tom',
   },
 };
+
+/**
+ * The first load of a board: the shape of the podium and the rows, and the
+ * header progress bar (issue #2081).
+ */
+export const FirstLoad: Story = {
+  args: {
+    board: 'thisWeek',
+    ranking: undefined,
+    isLoading: true,
+  },
+};
+
+/**
+ * Re-entering the page refreshes a ranking already loaded: it stays on
+ * screen and only the header progress bar runs (issue #2081).
+ */
+export const Refreshing: Story = {
+  args: {
+    ...ThisWeek.args,
+    isLoading: true,
+  },
+};

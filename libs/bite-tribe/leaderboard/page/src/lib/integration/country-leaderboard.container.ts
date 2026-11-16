@@ -10,7 +10,7 @@ import { LeaderboardService } from './leaderboard.service';
     <country-leaderboard
       class="ion-page"
       [board]="service.countryBoard()"
-      [ranking]="service.countryRanking.value()"
+      [ranking]="service.loadedCountryRanking()"
       [isLoading]="service.countryRanking.isLoading()"
       (boardChange)="service.selectCountryBoard($event)"
       (countryClick)="service.countryClicked($event)"

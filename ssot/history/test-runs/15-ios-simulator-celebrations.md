@@ -26,8 +26,19 @@ was not run in this pass.**
 - Device: iPhone 17 simulator, iOS 26.4
 - Backend: the local Firebase emulators, development web bundle
 
-Defects filed: none. The settling window and the grand-burst constants were not
-changed: they can only be tuned by feel on hardware.
+Defects filed: none. The settling window and the grand burst's sizes were not
+changed: they can only be tuned by feel on hardware. One grand-burst constant
+was changed after the run, below.
+
+## Grand-Burst Tuning
+
+Watching the 1,000th Bite, the maintainer noticed that the paper confetti
+tumbled on the way down while the food emoji slid down upright. The emoji shot
+carried `flat: true`, which in `canvas-confetti` turns off the wobble, tilt and
+spin. The flag was removed from `CELEBRATION_GRAND_BURST`, and the 2,000th Bite
+replayed on a rebuilt app showed the emoji turned at every angle and squashed
+edge-on mid-flip, like the paper. An emoji is never drawn larger than before.
+Whether the flip reads well at full speed is for the reference devices.
 
 ## Entry State And Build Identity
 

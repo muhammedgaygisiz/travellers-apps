@@ -261,7 +261,9 @@ Details worth knowing before changing it:
   `CELEBRATION_BURST`: both bottom corners fire inwards at 60° and 120°, then
   the bottom centre 250 ms later, 250 particles over 180 ticks, about 3 s. 50 of
   them are food emoji (`CELEBRATION_GRAND_BURST_EMOJI`: 🍜 🍕 🌮 🍣) drawn with
-  `shapeFromText`; the rest are in the theme colours. A browser that cannot
+  `shapeFromText` and tumble on the way down like the paper confetti: the shot
+  is not `flat`, which would slide them down upright ([#2017]); the rest are
+  in the theme colours. A browser that cannot
   draw the emoji throws the rest of the burst all the same. Canvas,
   `pointer-events: none`, reduced motion and removal are as for the standard
   burst, with its own bound, `GRAND_BURST_TIMEOUT_MS` (5 s). Call sites never
@@ -451,4 +453,5 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
 [#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
+[#2017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2017
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031

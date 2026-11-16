@@ -107,8 +107,10 @@ export const CELEBRATION_GRAND_BURST_EMOJI = ['🍜', '🍕', '🌮', '🍣'] as
  * The bigger burst every thousandth Bite plays (issue #2013), the one
  * celebration above the standard burst's ceiling. Both bottom corners fire
  * inwards at once, then the bottom centre 250 ms later, with food emoji among
- * the confetti: 250 particles over about 3 s. The values are the starting point
- * for the on-device tuning in the epic's acceptance story.
+ * the confetti: 250 particles over about 3 s. The emoji are not `flat`, so they
+ * tumble and spin on the way down like the paper confetti; `flat` would slide
+ * them down upright (issue #2017). The values are the starting point for the
+ * on-device tuning in the epic's acceptance story.
  */
 export const CELEBRATION_GRAND_BURST: readonly CelebrationShot[] = [
   {
@@ -161,7 +163,6 @@ export const CELEBRATION_GRAND_BURST: readonly CelebrationShot[] = [
       startVelocity: 45,
       ticks: 180,
       scalar: 2,
-      flat: true,
       disableForReducedMotion: true,
     },
   },

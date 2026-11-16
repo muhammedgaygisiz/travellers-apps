@@ -523,6 +523,9 @@ describe('CelebrationService', () => {
         text: '🍜',
         scalar: emoji.options.scalar,
       });
+      // `flat` stops canvas-confetti's wobble and tilt, so the emoji would
+      // slide down upright instead of tumbling like the paper confetti.
+      expect(emoji.options.flat).toBeFalsy();
       expect(
         CELEBRATION_GRAND_BURST.reduce(
           (total, shot) => total + (shot.options.particleCount ?? 0),

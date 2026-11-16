@@ -214,6 +214,7 @@ is new marketing writing.
 | Website      | `https://bitetribe.app`                                               |
 | Category     | Food & Drink, where the platform asks                                 |
 | Avatar       | [`ssot/marketing/assets/social/avatar.png`](assets/social/avatar.png) |
+| Cover        | Facebook only, see [The Facebook Cover](#the-facebook-cover)          |
 
 **Leave the link title blank** where a platform offers one, as Instagram and
 Threads both do. YouTube requires one, so it gets `bitetribe.app` as the title -
@@ -508,6 +509,26 @@ node -e "const sharp=require('sharp'),fs=require('fs');const W=1024,H=Math.round
 Use `logo.svg`, not `apps/bite-tribe-ios/assets/icon-only.png`. Despite its alpha
 channel the iOS icon is fully opaque white behind the mascot, so compositing it
 on the dark ground produces a white rectangle.
+
+### The Facebook Cover
+
+[`ssot/marketing/assets/social/facebook-cover.jpg`](assets/social/facebook-cover.jpg),
+`1640x624`: the Play feature graphic
+([`ssot/assets/store-listing/feature-graphic/feature-graphic.svg`](../assets/store-listing/feature-graphic/feature-graphic.svg))
+rendered with sharp at `1278x624` and placed at the right edge of a `#1A1C22`
+canvas. Facebook shows a Page cover at about `820x312` on a wide screen and
+crops a phone to the centre, so the wider ground on the left keeps the logo and
+"Find it. Try it. Share it." inside the phone crop. Set on the BiteTribe Page
+on 16 November 2026 ([#2091]), after the Page had gone without one since it was
+created.
+
+**Changing the cover posts.** Facebook put "BiteTribe updated their cover
+photo." at the top of the Page's feed; it was left there.
+
+**The cover is set while acting as the Page.** Facebook opens the Page as the
+owner's personal profile, with a "Switch Now" banner; the Add Cover Photo
+button only exists after switching. Switch back before posting anywhere as a
+person, such as a group.
 
 ## The Launch Post
 
@@ -1146,11 +1167,14 @@ the five-star Pad Thai card and nothing had to be replaced by hand.
 ![Street food comic, redrawn](assets/social/street-food-comic-leela-post.png)
 
 [`ssot/marketing/assets/social/street-food-comic-leela-post.png`](assets/social/street-food-comic-leela-post.png)
-is `1080x1350`, ready to post again. Its panels without the side gutters are
-the "How BiteTribe works" comic on `bitetribe.app/eat`, served from
+is `1080x1350`. Its panels without the side gutters are the "How BiteTribe
+works" comic on `bitetribe.app/eat`, served from
 `/assets/characters/leela-comic.jpg`; see
 [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#the-city-index).
-It has not been posted.
+
+**It stays on the website and is not posted** (product owner's call, 16 November
+2026): the redrawn comic belongs to `/eat`, and the original remains the one on
+the feed.
 
 ## The Istanbul Comic Post
 
@@ -1386,6 +1410,12 @@ published on 12 November 2026 from the existing posts; Vienna has none, its
 dishes are not local. Adelaide's page (`/eat/adelaide`) went up the same day,
 with its post. The page itself is owned by
 [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages).
+
+**Each city page links back to its post** on Instagram and on the Facebook
+Page ([#2091]). All nineteen were filled in on 16 November 2026 through the
+admin editor. The Facebook link is `https://www.facebook.com/bitetribeapp/posts/<id>`,
+where the id is the `pcb.<id>` set of the post's photo links on the Page; the
+Page's feed shows no other permalink until a timestamp is hovered.
 
 ### The Slides
 
@@ -1677,6 +1707,47 @@ slide. Solothurn's line about "a seasonal gem available right now" lost the
 once completed the last hashtag on its own (Granada's `#andalucia` became
 `#andaluciaorienta`), and Publish did nothing until the caption was put back,
 so the skill reads every caption back before publishing.
+
+## Facebook Groups
+
+**Local groups are a second way to reach people in a city, posted as a person,
+not as the Page.** Started 16 November 2026 ([#2091]) with Bern.
+
+Read each group's rules before posting. Most local groups ban advertising, and
+a removed post is worse than none. On that day:
+
+| Group                | Size | Activity            | Rule                                                    | Outcome                           |
+| -------------------- | ---- | ------------------- | ------------------------------------------------------- | --------------------------------- |
+| Neu in Bern          | 6.6K | 18 posts a month    | none listed                                             | posted, 16 November 2026          |
+| WasWieWo in Bern     | 9.4K | 35 posts a month    | "Keine Werbung oder Spam"                               | not posted; ask the admins first  |
+| Expats World in Bern | 4.9K | 130 posts a month   | "No Promotions" - requests to `contact@expatsworld.com` | not posted; write to that address |
+| People Of Bern       | 7.2K | no posts that month | "No spam"                                               | skipped, inactive                 |
+| Bern nach Quartieren | 8.0K | 44 posts a month    | "Keine Verlinkungen möglich"                            | skipped, no links allowed         |
+
+The owner was already a member of Neu in Bern and WasWieWo in Bern. Searching
+for groups while acting as the Page does not find them; switch to the personal
+profile first.
+
+**The Neu in Bern post**, from the owner's personal profile, in Swiss German
+spelling (no ß), approved line by line:
+
+```text
+Hoi zäme 👋
+
+Ich bin Mo und lebe in Bern. Mit ein paar Freunden aus Bern und Solothurn arbeite ich seit zwei Jahren an einem Herzensprojekt: BiteTribe.
+
+Die Idee: Statt ganze Restaurants zu bewerten, teilt man einzelne Gerichte – mit Foto, dem Preis und der Location. So sieht man, wie weit weg ein Gericht ist.
+
+Inzwischen findet ihr in der App Gerichte aus der ganzen Welt – praktisch auch für die nächsten Ferien. 🌍
+
+Wenn ihr Lust habt, folgt uns auf Instagram (@bitetribeapp) oder Facebook (BiteTribe) – oder probiert die App direkt aus: bitetribe.app (gratis, iOS & Android).
+
+Ich freue mich über jedes Feedback, auch kritisches! 🙏
+```
+
+Two choices in it: the name is "Mo", and the Bern city page is not linked - the
+post introduces the app, not the marketing page. The link carries no campaign
+tag, so arrivals from it read as direct or as `facebook` in the digest.
 
 ## Wiring Back Into The Product
 

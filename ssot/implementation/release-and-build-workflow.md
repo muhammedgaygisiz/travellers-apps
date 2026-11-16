@@ -92,6 +92,7 @@ commit at all. See
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Push of a `build-*` tag | **The release build.** Builds both platforms, retains the artifacts, attaches the provenance to the GitHub release, and uploads to TestFlight and Play Open testing. |
 | `workflow_dispatch`     | Same minus the release attachment, with a `platform` choice; uploading is opt-in through `publish`                                                                   |
+| `workflow_call`         | How `release.yml` starts it, with the tag as `ref` and `publish` set by the release, because a tag pushed by a workflow starts no other workflow                     |
 
 Publishing is automatic on a tag and opt-in on a dispatch. A `build-*` tag is
 only ever created by the release helper, which refuses a dirty tree, refuses an

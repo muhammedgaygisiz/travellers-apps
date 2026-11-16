@@ -288,8 +288,9 @@ The documents are named after the window they count rather than reset in place,
 so every instance computes the same name from the same clock and they share a
 counter without coordinating. They are removed by a **TTL policy on
 `scanRateLimits.expiresAt`**, which is created by hand and has no Nx target -
-the third manual step in this epic, beside the rules and the indexes. Until it
-exists the collection grows: a document per bucket per minute.
+the one manual step left in this epic, since the rules and the indexes it used
+to sit beside deploy from CI (issue [#1567]). Until it exists the collection
+grows: a document per bucket per minute.
 
 **`/menus` stayed shut, and that is the decision rather than an omission**
 (issue [#1102], `RD-TS-7`). A public menu page needs the restaurant's name as

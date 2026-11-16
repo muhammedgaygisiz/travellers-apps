@@ -1,6 +1,6 @@
 # Current State - Open Questions
 
-**Last verified:** 2026-11-13
+**Last verified:** 2026-11-16
 
 ## Purpose
 
@@ -124,6 +124,7 @@ Moderation questions raised by threading are recorded on [epic-1284](../history/
 - What store screenshots and copy are needed for App Store and Google Play? **Settled** per slot in [Implementation - Store Listing Assets](../implementation/store-listing-assets.md), including which gaps are accepted rather than filled.
 - Who is included in the soft launch tester group? **Decided on 31 August 2026: the current users.** No separate cohort is assembled. Growth from there is expected to come through them telling friends and family, which is the point rather than a limitation - the soft launch is meant to grow but not fast, so that a defect reaches a handful of people instead of a few hundred. The property counted 40 active users over the seven days to 31 August 2026, which is the order of magnitude this starts from.
 - Which communities should be contacted during public launch, and in what order?
+- **How is a backend change kept compatible with the clients still in use?** A merge to `develop` reaches the production backend at once, while a native build reaches users only through a release and each user's update, and a consumer web tab keeps its build until its service worker updates it. Nothing guards the gap: no app checks a minimum version, and no page states a compatibility rule for callables, documents or security rules. The candidates are a written compatibility rule, a minimum-version check in the apps, or both. [Architecture - Deployment](../architecture/deployment.md#compatibility-risk) states the risk ([#2065]). Whether compatibility is also a quality goal, with a measure of how far back a client must keep working, is asked under `Quality Goal Questions`.
 - How are soft-launch testers told the app is live? **Decided on 31 August 2026: directly, by the maintainer.** No push campaign, no mailing list, no in-app announcement. The group is small enough that a personal message is both possible and better, and it avoids building an announcement channel for an audience of forty.
 - Who are the soft-launch influencers? **Decided on 31 August 2026: there are none.** No influencer was successfully recruited, so the influencer half of [issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)'s acceptance criterion is dropped from the soft launch rather than left blocking it. Recruiting is future work and belongs with the public launch campaign, [issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
 
@@ -159,7 +160,7 @@ These belong to [#2067], under epic [#2063]. Each is settled with the maintainer
   - load size: the `Bundle Budget Rule` in [Architecture - Nx Workspace](../architecture/nx-workspace.md);
   - explainability: the principle "Keep the system explainable" in [Principles](../product/principles.md).
 - **Is accessibility a goal, and against which standard?** No page states an accessibility requirement today. If it becomes a goal, its scenario needs a reference, for example a WCAG 2.2 level, and its evidence names what checks it.
-- **Is compatibility with the clients still in use a goal, or a release rule?** A merge to `develop` reaches the production backend at once, while native builds reach users only through a release, so older clients keep calling the backend. [#2065] records the risk. If it becomes a goal, its measure has to say how far back a client must keep working, for example the last N native releases or builds no older than a stated number of weeks.
+- **Is compatibility with the clients still in use a goal, or a release rule?** A merge to `develop` reaches the production backend at once, while native builds reach users only through a release, so older clients keep calling the backend. [#2065] records the risk on [Architecture - Deployment](../architecture/deployment.md#compatibility-risk), and how the backend is kept compatible is asked under `Release Questions`. If it becomes a goal, its measure has to say how far back a client must keep working, for example the last N native releases or builds no older than a stated number of weeks.
 - **What are the targets where no number exists yet?** Each goal's scenario needs a measure. Open today:
   - how fast a Bite is created and a Bite's details open, beyond the feed's 15 s and 20 s;
   - whether the bundle's 500 kB warning is a target or only a signal, with 3 MB the ceiling;

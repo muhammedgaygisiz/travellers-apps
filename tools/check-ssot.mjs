@@ -8,8 +8,9 @@
  * code path that resolves to nothing, issue state copied out of GitHub, a
  * current-state page nobody has verified, a generated block edited by hand or not
  * regenerated, the use-case format rules in ssot/overview/use-case-format.md, a
- * workspace directory the building block view does not name, and the word budgets of
- * what every agent reads before its task.
+ * workspace directory the building block view does not name, a Hosting target or
+ * workflow the deployment view does not name, and the word budgets of what every agent
+ * reads before its task.
  *
  * Exits non-zero when any rule fails, listing every failure. Warnings are listed
  * too but never change the exit code.
@@ -209,6 +210,50 @@ for (const { file, path } of unresolved) {
           OVERVIEW,
           'BLOCKS',
           `\`${dir}\` is not named; add it to \`Shape\` with its role and scope`,
+        );
+      }
+    }
+  }
+}
+
+// ---- the deployment view (ssot/architecture/deployment.md) ----
+// Every Hosting target in .firebaserc and every file in .github/workflows/ is named on the
+// page as a backtick identifier outside fenced code, so a new deploy target or a new
+// workflow cannot arrive unseen by the view. A workflow counts by its file name or its path.
+{
+  const DEPLOYMENT = join(SSOT, 'architecture', 'deployment.md');
+  const targets = [];
+  try {
+    const rc = JSON.parse(readFileSync('.firebaserc', 'utf8'));
+    for (const project of Object.values(rc.targets ?? {})) {
+      targets.push(...Object.keys(project.hosting ?? {}));
+    }
+  } catch (error) {
+    fail('.firebaserc', 'DEPLOY', `the Hosting targets cannot be read: ${error.message}`);
+  }
+  const workflows = treeList
+    .filter((p) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(p))
+    .sort();
+  if (!exists(DEPLOYMENT)) {
+    fail(DEPLOYMENT, 'DEPLOY', 'the deployment view does not exist');
+  } else {
+    const text = stripFences(readFileSync(DEPLOYMENT, 'utf8'));
+    const named = new Set([...text.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]));
+    for (const target of [...new Set(targets)].sort()) {
+      if (!named.has(target)) {
+        fail(
+          DEPLOYMENT,
+          'DEPLOY',
+          `Hosting target \`${target}\` in \`.firebaserc\` is not named; add it to \`Runtime Topology\``,
+        );
+      }
+    }
+    for (const path of workflows) {
+      if (!named.has(path) && !named.has(path.split('/').pop())) {
+        fail(
+          DEPLOYMENT,
+          'DEPLOY',
+          `\`${path}\` is not named; add it to \`Workflows\` with what it deploys`,
         );
       }
     }

@@ -125,9 +125,12 @@ is why a merged function could sit undeployed for as long as nobody remembered.
 
 Four things stay outside that job on purpose.
 
-- **Firestore indexes.** Deployed first, separately, and by hand, for the
-  reason under the collection-group rule above. The job asserts they are there
-  before it deploys anything.
+- **Firestore indexes.** Deployed first, by the `deploy-firestore-indexes` job
+  of the same run, for the reason under the collection-group rule above. That
+  job waits until every declared index is `READY`, and this one needs it, so no
+  function goes live before its index. Until issue [#1567] the indexes were
+  deployed by hand. An index removed from the file is skipped rather than
+  deleted; deleting one stays a local command.
 - **Deleting a function.** Removing an export makes the CI deploy fail rather
   than take a live endpoint away, because the CLI runs `--non-interactive` and
   the deletion prompt becomes an error. Deploy the removal locally and
@@ -255,6 +258,7 @@ Rules:
 [#1264]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1264
 [#1265]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1265
 [#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1472]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1472
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475

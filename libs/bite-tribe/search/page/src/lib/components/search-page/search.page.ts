@@ -4,8 +4,10 @@ import {
   computed,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -24,8 +26,11 @@ import { ChipRadioGroupComponent, type ChipRadioOption } from 'common/ui/chip';
 import { CountrySelectorComponent } from 'country-selector';
 import { getLocalizedCountryName } from 'utils';
 import type { Geopoint, SearchCategory, SearchResult } from 'model';
-import { MapComponent } from 'bite-tribe-common/map';
+import { MapComponent, MapSelectionComponent } from 'bite-tribe-common/map';
 import { SearchListComponent } from '../search-list/search-list.component';
+
+/** Every result but a user, which has no position and so no marker. */
+type MapSearchResult = Exclude<SearchResult, { category: 'user' }>;
 
 interface SearchCategoryOption {
   labelKey: string;
@@ -51,6 +56,7 @@ interface SearchCategoryOption {
     CountrySelectorComponent,
     SearchListComponent,
     MapComponent,
+    MapSelectionComponent,
   ],
 })
 export class SearchPage {
@@ -120,7 +126,7 @@ export class SearchPage {
   readonly mapPositions = computed(() =>
     this.results()
       .filter(
-        (result): result is Exclude<SearchResult, { category: 'user' }> =>
+        (result): result is MapSearchResult =>
           result.category !== 'user' && !!result.value.position,
       )
       .map(
@@ -158,21 +164,41 @@ export class SearchPage {
   viewModeChange(viewMode: unknown): void {
     if (viewMode === 'list' || viewMode === 'map') {
       this.viewMode.set(viewMode);
+      this.selectedResult.set(undefined);
     }
   }
 
+  /**
+   * The result whose marker was tapped, previewed over the map exactly as the
+   * home map previews a Bite: a drawer on a phone, a side panel on a wide
+   * screen. Tapping the preview opens the result. A new result set, or leaving
+   * the map, drops it. See GitHub issue #2078.
+   */
+  readonly selectedResult = linkedSignal<
+    SearchResult[],
+    MapSearchResult | undefined
+  >({
+    source: this.results,
+    computation: () => undefined,
+  });
+
+  private readonly selection = viewChild(MapSelectionComponent);
+
+  /** The open side panel covers the map's zoom control, which moves aside. */
+  readonly hasSidePanel = computed(
+    () => this.selection()?.isWideScreen() ?? false,
+  );
+
   mapMarkerClick(geopoint: Geopoint | undefined): void {
-    if (!geopoint?.id) {
-      return;
-    }
-
-    const result = this.results().find(
-      (candidate) => this.getResultId(candidate) === geopoint.id,
+    this.selectedResult.set(
+      geopoint?.id
+        ? this.results().find(
+            (candidate): candidate is MapSearchResult =>
+              candidate.category !== 'user' &&
+              this.getResultId(candidate) === geopoint.id,
+          )
+        : undefined,
     );
-
-    if (result) {
-      this.resultClick.emit(result);
-    }
   }
 
   private getResultId(result: SearchResult): string {

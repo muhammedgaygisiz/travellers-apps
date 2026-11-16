@@ -1,6 +1,6 @@
 export const findClosestSnap = (
   snapOffsets: number[],
-  value: number
+  value: number,
 ): number => {
   if (!snapOffsets?.length) {
     return value;

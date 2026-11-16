@@ -5,7 +5,7 @@ describe('computeSnapOffsets', () => {
     const snapPixels = [100, 300, 500];
     const windowInnerHeight = window.innerHeight;
     const expectedOffsets = snapPixels.map(
-      (snapPixel) => windowInnerHeight - snapPixel
+      (snapPixel) => windowInnerHeight - snapPixel,
     );
     const offsets = computeSnapOffsets(snapPixels);
     expect(offsets).toEqual(expectedOffsets);

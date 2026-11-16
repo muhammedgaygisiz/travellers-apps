@@ -1,10 +1,12 @@
-import { ComponentRef } from '@angular/core';
+import { Component, ComponentRef, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 import type { SearchbarInputEventDetail } from '@ionic/core';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { MapComponent } from 'bite-tribe-common/map';
+import type { Geopoint } from 'model';
 import { SearchPage } from '../search.page';
 
 addNecessaryIcons();
@@ -16,6 +18,15 @@ const MockTranslocoService = {
   },
   langChanges$: of(),
 };
+
+/** Leaflet does not draw in jsdom; the preview tests only need the markers' output. */
+@Component({ selector: 'bt-map', template: '' })
+class MapStubComponent {
+  geopoints = input<Geopoint[]>();
+  readonly = input<unknown>();
+  emitMarkerClick = input<unknown>();
+  clickOnMarker = output<Geopoint | undefined>();
+}
 
 describe(SearchPage.name, () => {
   let component: SearchPage;
@@ -249,7 +260,7 @@ describe(SearchPage.name, () => {
       expect(component.isMapView()).toBe(false);
     });
 
-    it('should emit the matching result when a map marker is selected', () => {
+    describe('marker preview (#2078)', () => {
       const result = {
         category: 'bite' as const,
         value: {
@@ -259,16 +270,130 @@ describe(SearchPage.name, () => {
           position: { latitude: 46.948, longitude: 7.447 },
         },
       };
-      const emitSpy = jest.spyOn(component.resultClick, 'emit');
-      componentRef.setInput('results', [result]);
+      const marker = { id: 'bite-bite-1', latitude: 0, longitude: 0 };
+      const originalMatchMedia = window.matchMedia;
 
-      component.mapMarkerClick({
-        id: 'bite-bite-1',
-        latitude: 0,
-        longitude: 0,
+      const mockMatchMedia = (wide: boolean): void => {
+        window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+          matches: query === '(min-width: 768px)' ? wide : false,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        }));
+      };
+
+      const query = (testId: string): HTMLElement | null =>
+        fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+      const openMapWithResult = (): void => {
+        createPage();
+        componentRef.setInput('selectedCategory', 'bite');
+        componentRef.setInput('hasSearched', true);
+        componentRef.setInput('results', [result]);
+        component.viewModeChange('map');
+        fixture.detectChanges();
+      };
+
+      beforeEach(() => {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+          imports: [SearchPage],
+          providers: [
+            provideIonicAngular(getIonicConfig()),
+            { provide: TranslocoService, useValue: MockTranslocoService },
+          ],
+        }).overrideComponent(SearchPage, {
+          remove: { imports: [MapComponent] },
+          add: { imports: [MapStubComponent] },
+        });
       });
 
-      expect(emitSpy).toHaveBeenCalledWith(result);
+      // matchMedia is read when the page is built, so each test builds its own.
+      const createPage = (): void => {
+        fixture = TestBed.createComponent(SearchPage);
+        component = fixture.componentInstance;
+        componentRef = fixture.componentRef;
+      };
+
+      afterEach(() => {
+        window.matchMedia = originalMatchMedia;
+      });
+
+      it('should preview the tapped result instead of opening it', () => {
+        createPage();
+        const emitSpy = jest.spyOn(component.resultClick, 'emit');
+        componentRef.setInput('results', [result]);
+
+        component.mapMarkerClick(marker);
+
+        expect(component.selectedResult()).toEqual(result);
+        expect(emitSpy).not.toHaveBeenCalled();
+      });
+
+      it('should close the preview on a tap on the map background', () => {
+        createPage();
+        componentRef.setInput('results', [result]);
+        component.mapMarkerClick(marker);
+
+        component.mapMarkerClick(undefined);
+
+        expect(component.selectedResult()).toBeUndefined();
+      });
+
+      it('should drop the preview when the results or the view change', () => {
+        createPage();
+        componentRef.setInput('results', [result]);
+        component.mapMarkerClick(marker);
+        componentRef.setInput('results', [{ ...result }]);
+        expect(component.selectedResult()).toBeUndefined();
+
+        component.mapMarkerClick(marker);
+        component.viewModeChange('list');
+        expect(component.selectedResult()).toBeUndefined();
+      });
+
+      it('should open the preview in the bottom drawer on a phone', () => {
+        mockMatchMedia(false);
+        openMapWithResult();
+
+        component.mapMarkerClick(marker);
+        fixture.detectChanges();
+
+        expect(query('map-snap-drawer')).toBeTruthy();
+        expect(query('map-side-panel')).toBeFalsy();
+        expect(component.hasSidePanel()).toBe(false);
+      });
+
+      it('should open the preview in the side panel on a wide screen', () => {
+        mockMatchMedia(true);
+        openMapWithResult();
+
+        component.mapMarkerClick(marker);
+        fixture.detectChanges();
+
+        expect(query('map-side-panel')?.textContent).toContain('Margherita');
+        expect(query('map-snap-drawer')).toBeFalsy();
+        expect(component.hasSidePanel()).toBe(true);
+
+        query('map-side-panel-close')?.click();
+        fixture.detectChanges();
+        expect(query('map-side-panel')).toBeFalsy();
+      });
+
+      it('should open the result when its preview is tapped', () => {
+        mockMatchMedia(true);
+        openMapWithResult();
+        const emitSpy = jest.spyOn(component.resultClick, 'emit');
+        component.mapMarkerClick(marker);
+        fixture.detectChanges();
+
+        (
+          fixture.nativeElement.querySelector(
+            '[data-testid="map-side-panel"] bt-bite ion-card',
+          ) as HTMLElement
+        ).click();
+
+        expect(emitSpy).toHaveBeenCalledWith(result);
+      });
     });
 
     it('should change between list and map views', () => {

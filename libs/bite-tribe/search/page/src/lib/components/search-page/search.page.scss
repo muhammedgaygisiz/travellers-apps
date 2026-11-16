@@ -94,6 +94,20 @@
     }
   }
 
+  // The side panel floats inside this box, over the map.
+  .search-map-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  // Keep the map's zoom control clear of the side panel while it is open.
+  .search-map-area.has-side-panel ::ng-deep .leaflet-top.leaflet-left {
+    left: calc(400px + 1rem);
+  }
+
   .search-map {
     display: block;
     flex: 1;

@@ -1,0 +1,26 @@
+@if (isWideScreen()) {
+  <aside class="side-panel" data-testid="map-side-panel">
+    <div class="side-panel-header">
+      <h4 class="selection-title">{{ heading() }}</h4>
+      <ion-button
+        fill="clear"
+        color="medium"
+        data-testid="map-side-panel-close"
+        [attr.aria-label]="'close' | transloco"
+        (click)="closeClick.emit()"
+      >
+        <ion-icon name="close-outline" slot="icon-only" />
+      </ion-button>
+    </div>
+    <div class="selection-content">
+      <ng-container [ngTemplateOutlet]="content()" />
+    </div>
+  </aside>
+} @else {
+  <bt-snap-drawer data-testid="map-snap-drawer">
+    <h4 class="selection-title centered">{{ heading() }}</h4>
+    <div class="selection-content">
+      <ng-container [ngTemplateOutlet]="content()" />
+    </div>
+  </bt-snap-drawer>
+}

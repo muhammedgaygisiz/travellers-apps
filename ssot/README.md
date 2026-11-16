@@ -129,6 +129,7 @@ Closing records for epics that produced one are in [history/records/](history/re
 ## Architecture
 
 - [Architecture - Overview](architecture/overview.md)
+- [Architecture - Context](architecture/context.md)
 - [Architecture - Firebase](architecture/firebase.md)
 - [Architecture - Nx Workspace](architecture/nx-workspace.md)
 - [Architecture - Capacitor](architecture/capacitor.md)
@@ -138,6 +139,7 @@ Closing records for epics that produced one are in [history/records/](history/re
 - [Architecture - AI](architecture/ai.md)
 - [Architecture - State Management](architecture/state-management.md)
 - [Architecture - Data Access](architecture/data-access.md)
+- [Architecture - Environments](architecture/environments.md)
 - [Architecture - Internationalization](architecture/internationalization.md)
 - [Architecture - Testing](architecture/testing.md)
 
@@ -180,6 +182,7 @@ Closing records for epics that produced one are in [history/records/](history/re
 ## Operations
 
 - [Analytics Operations](operations/analytics-operations.md)
+- [Mail Authentication](operations/mail-authentication.md)
 
 ## Current State
 

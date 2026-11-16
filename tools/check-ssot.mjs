@@ -7,8 +7,9 @@
  * nothing, a leftover Logseq wikilink, an issue number that does not link, a quoted
  * code path that resolves to nothing, issue state copied out of GitHub, a
  * current-state page nobody has verified, a generated block edited by hand or not
- * regenerated, the use-case format rules in ssot/overview/use-case-format.md, and the
- * word budgets of what every agent reads before its task.
+ * regenerated, the use-case format rules in ssot/overview/use-case-format.md, a
+ * workspace directory the building block view does not name, and the word budgets of
+ * what every agent reads before its task.
  *
  * Exits non-zero when any rule fails, listing every failure. Warnings are listed
  * too but never change the exit code.
@@ -184,6 +185,34 @@ for (const file of files) {
 const ignoredPaths = ignored([...new Set(unresolved.map((u) => u.path))]);
 for (const { file, path } of unresolved) {
   if (!ignoredPaths.has(path)) fail(file, 'PATH', `resolves to nothing: ${path}`);
+}
+
+// ---- the building block view (ssot/architecture/overview.md, `Shape`) ----
+// Every directory directly under apps/ and libs/ is named on the page as a backtick path
+// outside fenced code, so a new app or library family cannot arrive unseen by the view.
+{
+  const OVERVIEW = join(SSOT, 'architecture', 'overview.md');
+  const blocks = treeList
+    .filter((p) => /^(?:apps|libs)\/[^/]+$/.test(p))
+    .filter((p) => treeList.some((q) => q.startsWith(`${p}/`)))
+    .sort();
+  if (!exists(OVERVIEW)) {
+    fail(OVERVIEW, 'BLOCKS', 'the building block view does not exist');
+  } else {
+    const text = stripFences(readFileSync(OVERVIEW, 'utf8'));
+    const named = new Set(
+      [...text.matchAll(/`((?:apps|libs)\/[^`/\n]+)\/?`/g)].map((m) => m[1]),
+    );
+    for (const dir of blocks) {
+      if (!named.has(dir)) {
+        fail(
+          OVERVIEW,
+          'BLOCKS',
+          `\`${dir}\` is not named; add it to \`Shape\` with its role and scope`,
+        );
+      }
+    }
+  }
 }
 
 // ---- use-case format (ssot/overview/use-case-format.md) ----

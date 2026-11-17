@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026) and Porto (16 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026) and Amman (17 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1666,6 +1666,21 @@ drowned in sauce". The city page `/eat/porto` went up the same night, with
 `oporto` as an alias. Adding its Bites needed two retries: the first
 search for "francesinha" came back empty, and "Laureado" matched a bife with
 the same sauce before the bacalhau.
+
+**Amman** (17 November 2026, scheduled for 22:00) tags four of five dish
+slides: `@jabriofficial` (mansaf; "The Official Subhi Jabri & Sons and Jabri
+Restaurants", the company named on jabri.com.jo, which the Maps listing
+links), `@hashem.rests.jo` (falafel, ful and hummus; linked from
+hashemrestaurants.com, the Maps listing's website), `@fatatri` (feteer
+mousikos) and `@habibah_sweets` (kunafa). Shawerma Reem is named in the
+caption only: its largest account is labelled AI-generated, and
+`@shawerma.reem` is a different branch. `@hashem_restaurants` is a Lebanese
+chain, not the Amman restaurant. Jordan had 19 Bites, all of them in Amman.
+Leela wears a thobe with red tatreez embroidery and holds kunafa; the cover
+photo is Amman's hillside houses from above. Leela's cover line is "Amman runs
+on mansaf and kunafa – here's where I eat mine". The city page `/eat/amman`
+went up the same evening, with no aliases, and its Instagram and Facebook
+post links were added once both posts were live.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

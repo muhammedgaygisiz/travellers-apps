@@ -400,9 +400,17 @@ fixed once saved; an alias is how a second name is added.
   escapes every `<`, so no text can close the `<script>` element. It is the
   only script on the page.
 - One primary call to action, "Open BiteTribe", to `/?city_page=<city>`; and
-  each Bite links to `/bite/<id>?city_page=<city>`. A member lands on the Home
-  feed or the Bite; a signed-out visitor is sent to `/start` by `authGuard`,
-  which remembers a Bite and opens it after sign-in. The App Store and
+  each Bite links to
+  `https://bite-tribe.web.app/s/bite/<id>?city_page=<city>` ([#2101]). An
+  installed app opens that address at the Bite: iOS and Chrome on Android hand
+  a link to the app only when it leaves the page's own host, which is why it
+  is not `/bite/<id>` on `bitetribe.app`, and `/s/bite` is the path both
+  platforms already verify (`APP_LINK_ORIGIN` in `bite-tribe-origin.ts`).
+  Without the app, the share stub forwards to
+  `bitetribe.app/bite/<id>?city_page=<city>`, keeping a `city_page` only in
+  the editor's own shape. A member lands on the Home feed or the Bite; a
+  signed-out visitor is sent to `/start` by `authGuard`, which remembers a
+  Bite and opens it after sign-in. The App Store and
   Google Play badges from [#1453] link to the store listings, served from the
   same `/assets/store/` files the start page uses; Apple's white badge replaces
   the black one in dark mode. On a wide screen each badge sits under its QR
@@ -468,8 +476,10 @@ publish a link to anywhere else. The admin editor has a field for each.
 
 ### Not Yet
 
-- A phone with the app installed opens these links in the browser: the
-  associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/` or `/bite/*`.
+- A phone with the app installed opens the call to action in the browser:
+  the associated paths are `/s/bite/*`, `/t/*` and `/m/*`, not `/`. The Bite
+  entries open the app ([#2101]), except inside Instagram's in-app browser,
+  which hands no link to an app.
 - Pages are written in one language. `hreflang` arrives with the second.
 
 ## The Open Graph Image
@@ -674,3 +684,4 @@ so both properties have the same two owners.
 [#1982]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1982
 [#2005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2005
 [#2091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2091
+[#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101

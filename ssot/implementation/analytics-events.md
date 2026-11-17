@@ -163,7 +163,11 @@ app carries `?city_page=<city>`, and an app initializer logs the event before
 the first navigation, because `authGuard` sends a signed-out visitor to
 `/start` and the query string does not survive the redirect. `destination`
 is `start` for the page's call to action (the site root) and `bite` for an
-entry (`/bite/<id>`). Only a city in the editor's own shape on one of those
+entry (`/bite/<id>`). An entry links through the share address `/s/bite/<id>`
+so an installed app opens it ([#2101]); the share stub forwards `city_page`
+on to `/bite/<id>` for the web, and the app's `appUrlOpen` handler logs the
+same event through `logCityPageArrival`, since the initializer never sees a
+link the app handles. Only a city in the editor's own shape on one of those
 two paths is recorded. `city_page` was added to `provision-ga4.mjs`;
 `destination` reads fine as an event filter and is not registered.
 
@@ -980,3 +984,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2013]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2013
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
+[#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101

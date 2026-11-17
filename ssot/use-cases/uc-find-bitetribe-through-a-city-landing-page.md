@@ -60,10 +60,15 @@ into the app. It does not own the page's content, which an Operator curates in
   before it routes anywhere. A signed-in member lands on the Home feed or on the Bite,
   after the onboarding gate if they have not finished onboarding; a signed-out reader lands
   on the start page, and a Bite they chose opens after they sign in.
-- **Intended, not built:** on a phone with BiteTribe installed, the links open the app at
-  the Bite, or at a page of its own for the city, instead of the browser. Today they open
-  the browser, because the app claims only `/s/bite/*`, `/t/*` and `/m/*` as its links. No
-  issue owns this yet; it is `[Secondary]`, see `MVP Classification`.
+- On a phone with BiteTribe installed, a Bite entry opens the app at the Bite
+  ([#2101]): the entry links to the share address `/s/bite/<id>` on
+  `bite-tribe.web.app`, because a link that stays on `bitetribe.app` is never handed to
+  the app. Without the app, that address forwards the reader, city included, to the Bite
+  on `bitetribe.app`, and the step above applies.
+- **Intended, not built:** the call to action opens the app too, at the Home feed or a
+  page of its own for the city. Today it opens the browser, because the app claims only
+  `/s/bite/*`, `/t/*` and `/m/*` as its links. No issue owns this yet; it is
+  `[Secondary]`, see `MVP Classification`.
 - The reader can instead go to either store through its badge, or scan its QR code on a
   wide screen, or open the BiteTribe Instagram account from the header ([#1978]).
 - The page itself sets no cookie, stores nothing and runs no analytics script; the
@@ -110,7 +115,8 @@ listings.
 - `apps/bite-tribe-firebase/functions/src/functions/shared/utils/render-landing-page.ts` -
   the document, its structured data and its links into the app.
 - `libs/bite-tribe/shell/src/lib/city-page-attribution.ts` - the app reads the city off the
-  arriving link and logs `city_page_arrived`; see
+  arriving link and logs `city_page_arrived`, and `apps/bite-tribe/src/app/app.component.ts`
+  does the same for a Bite link the installed app opens; see
   [Implementation - Analytics Events](../implementation/analytics-events.md).
 - `apps/bite-tribe-firebase/functions/src/functions/web/__specs__/render-city-page.spec.ts`.
 
@@ -127,6 +133,7 @@ listings.
 - Issue [#1980] - let the city page sitemap expire within minutes.
 - Issue [#1979] - the imprint every page's footer links to, at `bitetribe.app/imprint`.
 - Issue [#1490] - curating a page, which belongs to `UC-OPS`.
+- Issue [#2101] - open a city page Bite in the app when it is installed.
 
 ## Related Domains
 
@@ -151,3 +158,4 @@ listings.
 [#1978]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1978
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
 [#1980]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1980
+[#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101

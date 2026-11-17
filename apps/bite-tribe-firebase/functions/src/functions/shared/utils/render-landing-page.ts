@@ -1,5 +1,5 @@
 import { LandingPage, LandingPageItem } from '../model/landing-page';
-import { BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
+import { APP_LINK_ORIGIN, BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
 import { escapeHtml, renderSocialMeta } from './render-html';
 import { APP_STORE_URL, PLAY_STORE_URL } from './store-urls';
 
@@ -70,13 +70,29 @@ export const STYLE = `
 /** The query parameter every link into the app carries (issue #1492). */
 export const CITY_PAGE_PARAM = 'city_page';
 
+/** The city shape the admin editor accepts, at the length the app reads. */
+const CITY_PAGE_VALUE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const MAX_CITY_PAGE_LENGTH = 60;
+
+/**
+ * Whether a `city_page` value is one a city page could have put on a link,
+ * the same test the app applies before recording it.
+ */
+export const isCityPageValue = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length <= MAX_CITY_PAGE_LENGTH &&
+  CITY_PAGE_VALUE.test(value);
+
 /**
  * A link into the app that says which city page it came from. The consumer
  * app records it as `city_page_arrived` at start-up; the page itself carries
  * no analytics, cookie or storage (epic #1487).
  */
-export const appLink = (path: string, city: string): string =>
-  `${BITE_TRIBE_ORIGIN}${path}?${CITY_PAGE_PARAM}=${encodeURIComponent(city)}`;
+export const appLink = (
+  path: string,
+  city: string,
+  origin: string = BITE_TRIBE_ORIGIN,
+): string => `${origin}${path}?${CITY_PAGE_PARAM}=${encodeURIComponent(city)}`;
 
 /**
  * The app's own logo, served by the web build, so the page carries the same
@@ -120,13 +136,23 @@ export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
  * One Bite. The whole entry links to the Bite in the app: a member lands on
  * it, and a signed-out visitor is sent to sign up by `authGuard`, which
  * remembers the Bite and opens it once they have (decided on #1487).
+ *
+ * The link is the share address `/s/bite/<id>` on `APP_LINK_ORIGIN`, not
+ * `/bite/<id>` on this page's own host: only a link that leaves this host is
+ * handed to an installed app, and `/s/bite` is the path both platforms already
+ * verify. Without the app, the share page forwards the reader, `city_page`
+ * included, to `/bite/<id>` on the canonical host.
  */
 const renderItem =
   (city: string) =>
   (item: LandingPageItem, index: number): string => {
     const name = escapeHtml(item.name);
     const location = [item.place, item.locality].filter(Boolean).join(' · ');
-    const href = appLink(`/bite/${encodeURIComponent(item.biteId)}`, city);
+    const href = appLink(
+      `/s/bite/${encodeURIComponent(item.biteId)}`,
+      city,
+      APP_LINK_ORIGIN,
+    );
 
     return `
       <li>

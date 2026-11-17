@@ -12,11 +12,16 @@ import {
   Platform,
 } from '@ionic/angular/standalone';
 import {
+  AnalyticsService,
   AppCheckGateComponent,
   AppCheckReadinessService,
   StageRibbonComponent,
 } from 'ta-firestore';
-import { addNecessaryIcons, AppForegroundService } from 'bite-tribe/shell';
+import {
+  addNecessaryIcons,
+  AppForegroundService,
+  logCityPageArrival,
+} from 'bite-tribe/shell';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { Router } from '@angular/router';
@@ -56,6 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly appForegroundService = inject(AppForegroundService);
   private readonly networkStatusService = inject(NetworkStatusService);
   private readonly transloco = inject(TranslocoService);
+  private readonly analytics = inject(AnalyticsService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
@@ -110,6 +116,14 @@ export class AppComponent implements OnInit, OnDestroy {
       if (path.startsWith('/s/bite/')) {
         const biteId = path.split('/s/bite/')[1];
         void this.navController.navigateForward(['bite', biteId]);
+
+        // A city landing page links its Bites here so that the app opens them
+        // (GitHub issue #2101), and the web start-up that records the
+        // arrival never runs for a link the app handles.
+        logCityPageArrival(this.analytics, {
+          pathname: `/${PATH.BITE}/${biteId}`,
+          search: url.search,
+        });
 
         return;
       }

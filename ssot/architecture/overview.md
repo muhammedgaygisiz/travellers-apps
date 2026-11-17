@@ -98,6 +98,26 @@ talks to outside the workspace is [Architecture - Context](context.md).
 - Native runtime concerns flow through Capacitor wrappers and sync targets.
 - UI text uses Transloco keys across app locale files.
 
+## Solution Strategy
+
+The fundamental choices the architecture rests on, what each serves, and where it was decided.
+This is a table of links: the reasoning stays on the decision it names. A choice that rests on
+no recorded decision says so, and closing that gap is separate work rather than a rationale
+written here. What each choice serves is what its decision gives; the ranked quality goals are
+[#2067]'s.
+
+| Choice                                                                                                                                | Serves                                                                              | Decided in                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The Bite, one dish someone ate, is the central entity; restaurants, menus, BiteTrails and the business tools support it               | the product question, what should I eat                                             | [ADR-0001 Dish First Product](../decisions/adr-0001-dish-first-product.md)                                                                                                               |
+| Firebase is the backend platform, and backend-owned query semantics and side effects live in Cloud Functions                          | delivery speed and native integration; security through rules and App Check         | [ADR-0002 Firebase Backend](../decisions/adr-0002-firebase-backend.md)                                                                                                                   |
+| One Nx monorepo, feature behavior in the smallest owning library, shared code in the library families above                           | focused changes across several apps that share one domain model                     | [ADR-0003 Nx Monorepo](../decisions/adr-0003-nx-monorepo.md)                                                                                                                             |
+| BiteTribe never settles a table's bill; the restaurant does, and BiteTribe delivers a visit summary                                   | no funds, card data or fiscal claim in the product                                  | [ADR-0004 Table Payment Model](../decisions/adr-0004-table-payment-model.md), `RD-TS-45` and `RD-TS-46` in [Recorded Decisions](../decisions/recorded-decisions.md)                      |
+| One Angular and Ionic codebase for the web, wrapped by Capacitor for iOS and Android, so the native apps ship the consumer web bundle | one product on three platforms                                                      | No recorded decision. [Architecture - Capacitor](capacitor.md) holds the rules that follow from it                                                                                       |
+| App-wide client state in NgRx, in `libs/bite-tribe/store`                                                                             | one place for state that more than one feature reads                                | No recorded decision. [Architecture - State Management](state-management.md) describes the pattern                                                                                       |
+| Visible text through Transloco keys, in every app locale                                                                              | use across languages                                                                | No recorded decision. [Architecture - Internationalization](internationalization.md) describes the pattern                                                                               |
+| Public, indexable pages rendered by Cloud Functions behind Hosting rewrites, not routes of the Angular app                            | pages a search engine can index without public read rules or an App Check exemption | Epic [#1487], see its [record](../history/records/epic-1487.md)                                                                                                                          |
+| The web apps and the backend deploy from every push to `develop`; the native apps are released by hand from a tag                     | a deployed state that is the reviewed commit, with no deploy from a workstation     | No ADR. Settled issue by issue: [#1464] for the Functions, [#1567] for the rules and indexes, [#1181] for the native builds. [Architecture - Deployment](deployment.md) shows the result |
+
 ## Feature Layering
 
 ```text
@@ -153,9 +173,16 @@ tools/check-ssot.mjs
 ## Related Architecture Pages
 
 - [Architecture - Context](context.md)
+- [Architecture - Deployment](deployment.md)
 - [Architecture - Nx Workspace](nx-workspace.md)
 - [Architecture - Firebase](firebase.md)
 - [Architecture - Capacitor](capacitor.md)
 - [Architecture - Data Access](data-access.md)
 - [Architecture - State Management](state-management.md)
 - [Implementation - Code Map](../implementation/code-map.md)
+
+[#1181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1181
+[#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
+[#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
+[#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067

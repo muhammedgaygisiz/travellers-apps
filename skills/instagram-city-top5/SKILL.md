@@ -6,7 +6,7 @@ argument-hint: <city>
 
 # Instagram City Top 5
 
-The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide, Zurich, Cusco, Phuket, Porto) all follow this recipe. The format and its history are owned by
+The city carousels on @bitetribeapp (Solothurn, Istanbul, Budapest, Vienna, Trieste, Bern, Split, Bratislava, Malta, Mostar, Granada, London, Chiang Mai, Kayseri, Cologne, Adelaide, Zurich, Cusco, Phuket, Porto, Amman) all follow this recipe. The format and its history are owned by
 [Marketing - Social Media Channels](../../ssot/marketing/social-media-channels.md#the-city-top-5-posts); this skill is how an agent produces one.
 
 All paths are relative to the repository root. Run commands from there.

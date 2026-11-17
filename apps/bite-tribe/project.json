@@ -40,7 +40,8 @@
           },
           {
             "glob": "**/*",
-            "input": "libs/bite-tribe-common/assets"
+            "input": "libs/bite-tribe-common/assets/fonts",
+            "output": "assets/fonts"
           },
           {
             "glob": "**/*",

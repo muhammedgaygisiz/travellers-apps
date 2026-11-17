@@ -8,6 +8,8 @@ Ionic theming and component behavior have repository-specific rules that are eas
 
 Theme tokens live in `apps/bite-tribe/src/theme/variables.scss`. The dark values come from a `dark-theme` mixin applied through `html.dark` and `@media (prefers-color-scheme: dark)`.
 
+The apps bring their own typeface: `--ion-font-family` names Outfit, which each app's `variables.scss` declares through [`_fonts.scss`](../../libs/bite-tribe-common/styles/_fonts.scss) from the files every build copies to `/assets/fonts/`, and no app loads a font from a third-party host.
+
 Use these adaptive tokens:
 
 | Token                                             | Use for                  |

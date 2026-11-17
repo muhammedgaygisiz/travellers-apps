@@ -14,6 +14,7 @@
     "storybook": [
       "default",
       "{workspaceRoot}/libs/bite-tribe-common/styles/**/*",
+      "{workspaceRoot}/libs/bite-tribe-common/assets/**/*",
       "{workspaceRoot}/ssot/marketing/assets/characters/**/*"
     ]
   },

@@ -413,8 +413,9 @@ change, and each was a real gap rather than a precaution:
 - **Files outside any project are declared as inputs.** Nx counts a
   `{workspaceRoot}/…` target input as touching that project. `build-storybook`
   declares the brand characters under `ssot/marketing/assets/characters`, which a story
-  renders, and `libs/bite-tribe-common/styles`, which the build reaches through
-  `stylePreprocessorOptions` and no project owns. It also declares `world-atlas`
+  renders, `libs/bite-tribe-common/styles`, which the build reaches through
+  `stylePreprocessorOptions` and no project owns, and `libs/bite-tribe-common/assets`,
+  whose fonts `staticDirs` serves. It also declares `world-atlas`
   as an external dependency, because the build copies its files without any
   project importing it.
 - **A `loki` target declares what the capture reads.** `storybook-host:loki`

@@ -103,8 +103,8 @@ talks to outside the workspace is [Architecture - Context](context.md).
 The fundamental choices the architecture rests on, what each serves, and where it was decided.
 This is a table of links: the reasoning stays on the decision it names. A choice that rests on
 no recorded decision says so, and closing that gap is separate work rather than a rationale
-written here. What each choice serves is what its decision gives; the ranked quality goals are
-[#2067]'s.
+written here. What each choice serves is what its decision gives; the ranked quality goals are on
+[Architecture - Quality](quality.md).
 
 | Choice                                                                                                                                | Serves                                                                              | Decided in                                                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -185,4 +185,3 @@ tools/check-ssot.mjs
 [#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
 [#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
-[#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067

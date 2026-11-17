@@ -11,17 +11,19 @@ jest.mock('firebase-functions/https', () => ({
 }));
 
 type Handler = (
-  req: { path: string },
+  req: { path: string; query?: Record<string, unknown> },
   res: { status: jest.Mock; send: jest.Mock },
 ) => Promise<void>;
 
 const handler = handleSharedLinkToBite as unknown as Handler;
 
-const respond = async (): Promise<{ status: number; body: string }> => {
+const respond = async (
+  query?: Record<string, unknown>,
+): Promise<{ status: number; body: string }> => {
   const res = { status: jest.fn(), send: jest.fn() };
   res.status.mockReturnValue(res);
 
-  await handler({ path: '/s/bite/bite-1' }, res);
+  await handler({ path: '/s/bite/bite-1', query }, res);
 
   return {
     status: res.status.mock.calls[0][0],
@@ -51,6 +53,39 @@ describe('handleSharedLinkToBite', () => {
 
     expect(status).toBe(200);
     expect(body).toContain('Margherita');
+  });
+
+  it('forwards a plain share link to the Bite', async () => {
+    mockGet.mockResolvedValue(snapshot({ ...bite, imageStatus: 'uploaded' }));
+
+    const { body } = await respond();
+
+    expect(body).toContain(
+      '<meta http-equiv="refresh" content="0;url=https://bitetribe.app/bite/bite-1" />',
+    );
+  });
+
+  it('forwards the city a city page link came from', async () => {
+    mockGet.mockResolvedValue(snapshot({ ...bite, imageStatus: 'uploaded' }));
+
+    const { body } = await respond({ city_page: 'buenos-aires' });
+
+    expect(body).toContain(
+      'content="0;url=https://bitetribe.app/bite/bite-1?city_page=buenos-aires"',
+    );
+  });
+
+  it.each([
+    ['markup', '"><script>'],
+    ['uppercase', 'Berlin'],
+    ['a repeated parameter', ['berlin', 'rome']],
+    ['an overlong value', 'a'.repeat(61)],
+  ])('drops a city_page value carrying %s', async (_case, value) => {
+    mockGet.mockResolvedValue(snapshot({ ...bite, imageStatus: 'uploaded' }));
+
+    const { body } = await respond({ city_page: value });
+
+    expect(body).toContain('content="0;url=https://bitetribe.app/bite/bite-1"');
   });
 
   it.each([

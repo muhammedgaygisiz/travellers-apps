@@ -4,8 +4,22 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { renderShareStub } from '../shared/utils/render-html';
 import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
 import { isListableBite } from '../shared/utils/bite-listability';
+import {
+  CITY_PAGE_PARAM,
+  isCityPageValue,
+} from '../shared/utils/render-landing-page';
 
 const db = getFirestore();
+
+/**
+ * A city page links its Bites here rather than to `/bite/<id>` so that an
+ * installed app opens them (see `renderItem`). Without the app the reader is
+ * forwarded on, and the city goes with them so the app can still record
+ * `city_page_arrived`. Only a value a city page could have written is
+ * forwarded.
+ */
+const cityPageQuery = (value: unknown): string =>
+  isCityPageValue(value) ? `?${CITY_PAGE_PARAM}=${value}` : '';
 
 export const handleSharedLinkToBite = onRequest(async (req, res) => {
   try {
@@ -59,7 +73,7 @@ export const handleSharedLinkToBite = onRequest(async (req, res) => {
     // wanted and could not do while the verified App Link host was the other
     // one. The function still answers on every host it always did.
     const canonicalUrl = `${BITE_TRIBE_ORIGIN}/s/bite/${encodeURIComponent(biteId)}`;
-    const redirectUrl = `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}`;
+    const redirectUrl = `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}${cityPageQuery(req.query?.[CITY_PAGE_PARAM])}`;
 
     res.status(200).send(
       renderShareStub({

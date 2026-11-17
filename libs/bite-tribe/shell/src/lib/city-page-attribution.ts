@@ -46,6 +46,25 @@ export const readCityPageArrival = (
 };
 
 /**
+ * Records the arrival a URL describes, if it describes one.
+ *
+ * Shared by the web start-up and the app's link handler: a city page links
+ * its Bites through the share address `/s/bite/<id>` so that an installed app
+ * opens them, and the app, which never sees that URL in `window.location`,
+ * passes on the Bite route it navigates to together with the link's query.
+ */
+export const logCityPageArrival = (
+  analytics: Pick<AnalyticsService, 'logEvent'>,
+  location: Pick<Location, 'pathname' | 'search'>,
+): void => {
+  const arrival = readCityPageArrival(location);
+
+  if (arrival) {
+    analytics.logEvent(AnalyticsEvent.CityPageArrived, arrival);
+  }
+};
+
+/**
  * Records a visit that arrived from a city landing page (issue #1492).
  *
  * An app initializer rather than a route hook, because it has to run before
@@ -57,12 +76,5 @@ export const readCityPageArrival = (
  */
 export const provideCityPageAttribution = (): EnvironmentProviders =>
   provideAppInitializer(() => {
-    const arrival = readCityPageArrival(window.location);
-
-    if (arrival) {
-      inject(AnalyticsService).logEvent(
-        AnalyticsEvent.CityPageArrived,
-        arrival,
-      );
-    }
+    logCityPageArrival(inject(AnalyticsService), window.location);
   });

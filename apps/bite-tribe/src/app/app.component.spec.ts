@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { Network } from '@capacitor/network';
 import { Preferences } from '@capacitor/preferences';
-import { fromAuth } from 'ta-firestore';
+import { AnalyticsService, fromAuth } from 'ta-firestore';
 import { NetworkStatusService } from 'common/networkstatus';
 
 jest.mock('@capacitor/app', () => ({
@@ -50,6 +50,8 @@ const MockTranslocoService = {
   setActiveLang: jest.fn(),
 };
 
+const MockAnalyticsService = { logEvent: jest.fn() };
+
 const MockAppForegroundService = {
   handleAppStateChange: jest.fn(),
   handleNetworkStatusChange: jest.fn(),
@@ -70,6 +72,7 @@ describe(AppComponent.name, () => {
         }),
         { provide: TranslocoService, useValue: MockTranslocoService },
         { provide: AppForegroundService, useValue: MockAppForegroundService },
+        { provide: AnalyticsService, useValue: MockAnalyticsService },
       ],
       imports: [AppComponent],
     }).compileComponents();
@@ -206,6 +209,26 @@ describe(AppComponent.name, () => {
           'bite',
           '123',
         ]);
+        expect(MockAnalyticsService.logEvent).not.toHaveBeenCalled();
+      });
+
+      it('should record the city page a city page link came from', () => {
+        jest
+          .spyOn(component.navController, 'navigateForward')
+          .mockImplementation();
+
+        const addListenerCalls = (App.addListener as jest.Mock).mock.calls;
+        const whereAppUrlOpen = ([event]: [string]): boolean =>
+          event === 'appUrlOpen';
+        const appUrlOpenListener = addListenerCalls.find(whereAppUrlOpen)[1];
+        appUrlOpenListener({
+          url: 'https://bite-tribe.web.app/s/bite/123?city_page=berlin',
+        });
+
+        expect(MockAnalyticsService.logEvent).toHaveBeenCalledWith(
+          'city_page_arrived',
+          { city_page: 'berlin', destination: 'bite' },
+        );
       });
     });
 

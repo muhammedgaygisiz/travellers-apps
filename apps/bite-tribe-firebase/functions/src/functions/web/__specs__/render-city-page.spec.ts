@@ -197,7 +197,14 @@ describe('renderCityPage', () => {
     expect(body).toContain(
       '<link rel="canonical" href="https://bitetribe.app/eat/berlin" />',
     );
-    expect(body).not.toContain('bite-tribe.web.app');
+    // The entries link through bite-tribe.web.app so an installed app opens
+    // them (issue #2101); nothing else on the page names that host.
+    expect(
+      body.replace(
+        /href="https:\/\/bite-tribe\.web\.app\/s\/bite\/[^"]+"/g,
+        '',
+      ),
+    ).not.toContain('bite-tribe.web.app');
   });
 
   it('does not redirect and carries no executable script', async () => {
@@ -395,7 +402,7 @@ describe('renderCityPage', () => {
 
       for (const n of [1, 2, 3]) {
         expect(body).toContain(
-          `<a class="entry" href="https://bitetribe.app/bite/bite-${n}?city_page=berlin">`,
+          `<a class="entry" href="https://bite-tribe.web.app/s/bite/bite-${n}?city_page=berlin">`,
         );
       }
     });

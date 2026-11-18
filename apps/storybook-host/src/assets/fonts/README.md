@@ -25,9 +25,9 @@ U+1F929 🤩, U+1F92F 🤯
 
 ```sh
 pip install fonttools brotli
-# Download the Noto Color Emoji unicode-range block(s) that contain the
-# codepoints from https://fonts.googleapis.com/css2?family=Noto+Color+Emoji
-pyftsubset <block>.woff2 \
+# Download the COLRv1 build of Noto Color Emoji, `2D/fonts/Noto-COLRv1.ttf`,
+# from https://github.com/googlefonts/noto-emoji
+pyftsubset Noto-COLRv1.ttf \
   --unicodes=2B50,1F389,1F447,1F44B,1F44D,1F924,1F929,1F92F \
   --output-file=noto-color-emoji-subset.woff2 --flavor=woff2 --glyph-names
 ```

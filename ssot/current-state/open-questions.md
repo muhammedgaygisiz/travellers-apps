@@ -124,7 +124,7 @@ Moderation questions raised by threading are recorded on [epic-1284](../history/
 - What store screenshots and copy are needed for App Store and Google Play? **Settled** per slot in [Implementation - Store Listing Assets](../implementation/store-listing-assets.md), including which gaps are accepted rather than filled.
 - Who is included in the soft launch tester group? **Decided on 31 August 2026: the current users.** No separate cohort is assembled. Growth from there is expected to come through them telling friends and family, which is the point rather than a limitation - the soft launch is meant to grow but not fast, so that a defect reaches a handful of people instead of a few hundred. The property counted 40 active users over the seven days to 31 August 2026, which is the order of magnitude this starts from.
 - Which communities should be contacted during public launch, and in what order?
-- **How is a backend change kept compatible with the clients still in use?** A merge to `develop` reaches the production backend at once, while a native build reaches users only through a release and each user's update, and a consumer web tab keeps its build until its service worker updates it. Nothing guards the gap: no app checks a minimum version, and no page states a compatibility rule for callables, documents or security rules. The candidates are a written compatibility rule, a minimum-version check in the apps, or both. [Architecture - Deployment](../architecture/deployment.md#compatibility-risk) states the risk ([#2065]). Whether compatibility is also a quality goal, with a measure of how far back a client must keep working, is asked under `Quality Goal Questions`.
+- **How is a backend change kept compatible with the clients still in use?** A merge to `develop` reaches the production backend at once, while a native build reaches users only through a release and each user's update, and a consumer web tab keeps its build until its service worker updates it. Nothing guards the gap: no app checks a minimum version, and no page states a compatibility rule for callables, documents or security rules. The candidates are a written compatibility rule, a minimum-version check in the apps, or both. [Architecture - Deployment](../architecture/deployment.md#compatibility-risk) states the risk ([#2065]). It is not a quality goal: `RD-QG-7` in [Recorded Decisions](../decisions/recorded-decisions.md) makes it a release rule, which leaves this question as the place it is settled.
 - How are soft-launch testers told the app is live? **Decided on 31 August 2026: directly, by the maintainer.** No push campaign, no mailing list, no in-app announcement. The group is small enough that a personal message is both possible and better, and it avoids building an announcement channel for an audience of forty.
 - Who are the soft-launch influencers? **Decided on 31 August 2026: there are none.** No influencer was successfully recruited, so the influencer half of [issue 912](https://github.com/muhammedgaygisiz/travellers-apps/issues/912)'s acceptance criterion is dropped from the soft launch rather than left blocking it. Recruiting is future work and belongs with the public launch campaign, [issue 913](https://github.com/muhammedgaygisiz/travellers-apps/issues/913).
 
@@ -146,28 +146,6 @@ These belong to [epic-1723][#1723], sharing a Bite as an image to Instagram and 
 - **Who writes the terms of use, and what do they license?** BiteTribe has a privacy policy and no terms, so no creator has licensed anyone to put their photo on another platform. `UC-SBS` `R-30` states what the licence must cover for somebody else's Bite to be shared as an image; it needs a Swiss or EU IP lawyer's confirmation before it is published. Issue [#1772] owns the work. Every existing account has to accept the terms actively before its Bites can be shared by others - an unannounced change of terms does not grant a licence. Gates the image share of somebody else's Bite, not of one's own.
 - Should a creator be able to refuse image sharing of their Bites altogether, beyond choosing whether they are named (`UC-SBS` `R-31`)? Accepting the terms would otherwise be the only gate.
 - Does an image add any exposure that the Bite on screen does not? **Deferred to [#1772].** For now `UC-SBS` `R-3` lets a user share only their own Bites as images, so nobody else's Bite is exposed. When [#1772] widens the share, private creators and deleted accounts stay excluded, and the question left is whether a public creator's Bite that can be restricted in some other way needs the same exclusion.
-
-## Quality Goal Questions
-
-These belong to [#2067], under epic [#2063]. Each is settled with the maintainer before `Architecture - Quality` is written. The ranking is then recorded under `RD-QG` in [Recorded Decisions](../decisions/recorded-decisions.md), and a question leaves this section once it is answered there.
-
-- **Which qualities are BiteTribe's quality goals, and in which order?** At most five. The candidates are what the SSOT already requires without naming it a goal:
-  - responsiveness of the core flows: the feed resolves into Bites or a named failure within 15 s for the position and 20 s for the load, in [UC - Discover Bites](../use-cases/uc-discover-bites.md);
-  - working offline: the `Offline Write Rule` in [Architecture - Data Access](../architecture/data-access.md);
-  - security and trust: Firestore rules and App Check in [Architecture - Firebase](../architecture/firebase.md), and the principle that trust and safety are product foundations;
-  - international use: fourteen languages, per [Architecture - Internationalization](../architecture/internationalization.md);
-  - bounded cost: [Implementation - Performance Guidelines](../implementation/performance-guidelines.md);
-  - load size: the `Bundle Budget Rule` in [Architecture - Nx Workspace](../architecture/nx-workspace.md);
-  - explainability: the principle "Keep the system explainable" in [Principles](../product/principles.md).
-- **Is accessibility a goal, and against which standard?** No page states an accessibility requirement today. If it becomes a goal, its scenario needs a reference, for example a WCAG 2.2 level, and its evidence names what checks it.
-- **Is compatibility with the clients still in use a goal, or a release rule?** A merge to `develop` reaches the production backend at once, while native builds reach users only through a release, so older clients keep calling the backend. [#2065] records the risk on [Architecture - Deployment](../architecture/deployment.md#compatibility-risk), and how the backend is kept compatible is asked under `Release Questions`. If it becomes a goal, its measure has to say how far back a client must keep working, for example the last N native releases or builds no older than a stated number of weeks.
-- **What are the targets where no number exists yet?** Each goal's scenario needs a measure. Open today:
-  - how fast a Bite is created and a Bite's details open, beyond the feed's 15 s and 20 s;
-  - whether the bundle's 500 kB warning is a target or only a signal, with 3 MB the ceiling;
-  - whether backend cost has a ceiling, per active user or per month;
-  - whether availability has a target beyond what Firebase provides.
-- **On which devices and network conditions are the scenarios measured?** [Current State - Release Candidate Test Charter](release-candidate-test-charter.md) names the devices, a Samsung SM-A566B and an iPhone 12 mini, but no network condition such as a slow or interrupted connection.
-- **Does test coverage measure a goal?** Coverage is reported and never fails a build, per `codecov.yml` and [Implementation - CI Pipeline](../implementation/ci-pipeline.md). A goal could require a floor for some projects, or coverage can stay informational and the goals be evidenced by named tests instead.
 
 ## Privacy Policy Questions
 
@@ -234,8 +212,6 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#1772]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1772
 [#1863]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1863
 [#1979]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1979
-[#2063]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2063
 [#2065]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2065
 [#2066]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2066
-[#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067
 [#2086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2086

@@ -37,6 +37,13 @@ const config: StorybookConfig = {
       from: '../../../ssot/marketing/assets/characters/',
       to: '/assets/characters/',
     },
+    // Outfit, served where each app's build copies it, so the stories render in
+    // the typeface the apps bundle rather than one fetched from Google Fonts
+    // (`libs/bite-tribe-common/styles/_fonts.scss`). See issue #2085.
+    {
+      from: '../../../libs/bite-tribe-common/assets/fonts/',
+      to: '/assets/fonts/',
+    },
     // The globe's country outlines, served where the app build copies them
     // (`apps/bite-tribe/project.json`). See issue #1787.
     {

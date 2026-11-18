@@ -91,6 +91,11 @@
           {{ 'onboarding-display-name-invalid' | transloco }}
         </ion-text>
       }
+      @case ('refused') {
+        <ion-text color="danger">
+          {{ 'content-refused' | transloco }}
+        </ion-text>
+      }
       @case ('error') {
         <ion-text color="danger">
           {{ 'onboarding-display-name-error' | transloco }}

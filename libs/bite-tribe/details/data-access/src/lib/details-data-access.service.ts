@@ -401,17 +401,30 @@ export class DetailsDataAccessService {
     visibleTaggedUsers(this.loadedTaggedUsers(), this.blockedUserIds()),
   );
 
-  saveNewReview(newReview: { review: string; biteId: string }): void {
-    this.storeService.saveReview(newReview);
+  /**
+   * Writes a review through the `saveReview` callable and puts the reloaded
+   * compartment into the store. Rejects when the text is refused or the call
+   * fails (issue #1610), leaving the reviews on screen as they were.
+   */
+  async saveNewReview(newReview: {
+    review: string;
+    biteId: string;
+  }): Promise<void> {
+    const reviews = await this.api.saveNewReview(newReview);
+
+    this.storeService.notifyLoadedReviews(reviews);
   }
 
-  saveReviewReply(reply: {
+  /** Answers a review inside its thread; rejects as {@link saveNewReview}. */
+  async saveReviewReply(reply: {
     review: string;
     biteId: string;
     parentReviewId: string;
     threadId: string;
-  }): void {
-    this.storeService.saveReviewReply(reply);
+  }): Promise<void> {
+    const reviews = await this.api.saveReviewReply(reply);
+
+    this.storeService.notifyLoadedReviews(reviews);
   }
 
   /**

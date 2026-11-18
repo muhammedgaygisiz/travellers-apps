@@ -33,6 +33,12 @@ export const pt: NotificationMessages = {
   'newReview.body': '{{reviewer}} avaliou o teu Bite «{{bite}}».',
   'newReviewReply.title': 'Nova resposta a uma avaliação',
   'newReviewReply.body': '{{replier}} respondeu a uma avaliação de «{{bite}}».',
+  'biteContentRefused.title':
+    'O teu Bite não passou na nossa verificação de conteúdo',
+  'biteContentRefused.bodyReverted':
+    'A tua alteração viola as nossas regras da comunidade, por isso o texto anterior foi reposto.',
+  'biteContentRefused.bodyDeleted':
+    'O teu novo Bite viola as nossas regras da comunidade e foi removido. Podes publicá-lo de novo com outro texto.',
   'weeklyBites.title': '🍽️ Os Bites da semana chegaram 🤩',
   'weeklyBites.bodyOne': 'A BiteTribe partilhou 1 novo Bite na semana passada',
   'weeklyBites.bodyMany':

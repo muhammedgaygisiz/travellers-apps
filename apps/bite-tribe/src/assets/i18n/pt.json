@@ -674,6 +674,8 @@
   "edit-review-label": "Edita a tua avaliação",
   "review-edited": "editada",
   "review-edit-failed": "Não foi possível guardar a alteração. Tenta novamente.",
+  "content-refused": "Isto viola as nossas regras da comunidade e não pode ser publicado. Altera o texto e tenta novamente.",
+  "review-save-failed": "Não foi possível publicar a tua avaliação. Tenta novamente.",
   "bucket-list-name-updated": "Nome da lista atualizado!",
   "no-bites-found-be-the-first": "Nenhum Bite encontrado. Compartilhe o primeiro.",
   "no-own-bites-yet": "Você ainda não compartilhou nenhum Bite. Crie o primeiro.",

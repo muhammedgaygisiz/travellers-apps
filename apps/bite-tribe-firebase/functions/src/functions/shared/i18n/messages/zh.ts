@@ -29,6 +29,11 @@ export const zh: NotificationMessages = {
   'newReview.body': '{{reviewer}}评价了你的Bite“{{bite}}”。',
   'newReviewReply.title': '评价有新回复',
   'newReviewReply.body': '{{replier}}回复了“{{bite}}”的一条评价。',
+  'biteContentRefused.title': '你的Bite未通过内容审核',
+  'biteContentRefused.bodyReverted':
+    '你的修改违反了社区准则，已恢复为之前的文字。',
+  'biteContentRefused.bodyDeleted':
+    '你的新Bite违反了社区准则，已被移除。你可以换一段文字重新发布。',
   'weeklyBites.title': '🍽️ 本周的Bite来啦 🤩',
   'weeklyBites.bodyOne': '上周BiteTribe上分享了1个新Bite',
   'weeklyBites.bodyMany': '上周BiteTribe上分享了{{count}}个新Bite',

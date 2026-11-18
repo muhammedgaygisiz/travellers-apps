@@ -159,12 +159,18 @@ export class BiteService {
     );
     const copiedFromId = this.cachedBite()?.copiedFrom?.biteId;
 
-    // Also read before the write, which would count as one. Nothing is
-    // stored: deleting the only Bite and posting again celebrates again, as
-    // epic #1741 accepts. An answer that cannot be told is not taken for none.
-    const first = (await this.dataAccess.hasOwnBites()) === false;
-
     try {
+      // Checked before anything is written, so a refused Bite leaves the user
+      // on the form with their text (issue #1610). No answer saves anyway.
+      if (!(await this.contentAllowed(document))) {
+        return;
+      }
+
+      // Also read before the write, which would count as one. Nothing is
+      // stored: deleting the only Bite and posting again celebrates again, as
+      // epic #1741 accepts. An answer that cannot be told is not taken for none.
+      const first = (await this.dataAccess.hasOwnBites()) === false;
+
       await this.dataAccess.submitNewBite(document, photoPosition ?? undefined);
 
       // A copy of a bucket-listed Bite means the dish was eaten (#2018).
@@ -218,7 +224,7 @@ export class BiteService {
     return undefined;
   };
 
-  submitEditedBite(submission: BiteSubmission): void {
+  async submitEditedBite(submission: BiteSubmission): Promise<void> {
     // Taken off for the reason `createBite` gives (GitHub issue #1290).
     const { photoPosition, descriptionSource, ...editedBite } = submission;
     void descriptionSource;
@@ -227,8 +233,31 @@ export class BiteService {
       this.biteValue(),
     );
 
+    // A refused edit keeps the user on the form, as a refused create does.
+    if (!(await this.contentAllowed(bite))) {
+      return;
+    }
+
     void this.dataAccess.submitEditedBite(bite, photoPosition);
     this.location.back();
+  }
+
+  /**
+   * The form's half of the Bite check (issue #1610). Only a refusal stops the
+   * save; offline or without an answer it goes ahead, and the server judges
+   * the written Bite in `moderateBiteOnWrite`.
+   */
+  private async contentAllowed(bite: Bite): Promise<boolean> {
+    if ((await this.dataAccess.checkBiteContent(bite)) !== 'refused') {
+      return true;
+    }
+
+    void this.toast.present({
+      messageKey: 'content-refused',
+      outcome: 'failure',
+    });
+
+    return false;
   }
 
   /** Runs a failed Bite read again, for the edit page's try-again action. */

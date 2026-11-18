@@ -674,6 +674,8 @@
   "edit-review-label": "编辑你的评价",
   "review-edited": "已编辑",
   "review-edit-failed": "无法保存你的修改，请重试。",
+  "content-refused": "此内容违反社区准则，无法发布。请修改文字后重试。",
+  "review-save-failed": "无法发布你的评价，请重试。",
   "bucket-list-name-updated": "心愿清单名称已更新！",
   "no-bites-found-be-the-first": "还没有Bite，来发布第一个吧。",
   "no-own-bites-yet": "你还没有分享过Bite，来创建你的第一个吧。",

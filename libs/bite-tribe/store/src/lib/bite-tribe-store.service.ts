@@ -3,11 +3,7 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
-import {
-  loadedReviewsFromApi,
-  saveNewReview,
-  saveReviewReply,
-} from './reviews/actions';
+import { loadedReviewsFromApi } from './reviews/actions';
 import { bites, sortedHomeBites } from './bites/home-bites.selector';
 import {
   bitesByUser,
@@ -283,19 +279,6 @@ export class BiteTribeStoreService implements StoreService {
    */
   notifySavedProfile(profile: PublicUser): void {
     this.store.dispatch(AppActions.savedPublicProfile({ profile }));
-  }
-
-  saveReview(newReview: { review: string; biteId: string }): void {
-    this.store.dispatch(saveNewReview(newReview));
-  }
-
-  saveReviewReply(reply: {
-    review: string;
-    biteId: string;
-    parentReviewId: string;
-    threadId: string;
-  }): void {
-    this.store.dispatch(saveReviewReply(reply));
   }
 
   /**

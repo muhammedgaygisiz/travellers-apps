@@ -33,6 +33,11 @@ export const id: NotificationMessages = {
   'newReview.body': '{{reviewer}} mengulas Bite-mu "{{bite}}".',
   'newReviewReply.title': 'Balasan baru untuk sebuah ulasan',
   'newReviewReply.body': '{{replier}} membalas ulasan untuk "{{bite}}".',
+  'biteContentRefused.title': 'Bite kamu tidak lolos pemeriksaan konten kami',
+  'biteContentRefused.bodyReverted':
+    'Perubahanmu melanggar pedoman komunitas kami, jadi teks sebelumnya dipulihkan.',
+  'biteContentRefused.bodyDeleted':
+    'Bite barumu melanggar pedoman komunitas kami dan telah dihapus. Kamu bisa mempostingnya lagi dengan teks lain.',
   'weeklyBites.title': '🍽️ Bite minggu ini sudah ada 🤩',
   'weeklyBites.bodyOne': 'BiteTribe membagikan 1 Bite baru minggu lalu',
   'weeklyBites.bodyMany':

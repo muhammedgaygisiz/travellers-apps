@@ -245,6 +245,15 @@ class FakeCollectionReference extends FakeQuery {
       `${this.collectionPath}/${id}`,
     );
   }
+
+  /** Writes under a generated id, numbered so a test can predict it. */
+  async add(data: DocData): Promise<FakeDocumentReference> {
+    const reference = this.doc(`generated-${this.documents.size + 1}`);
+
+    await reference.set(data);
+
+    return reference;
+  }
 }
 
 interface BatchOperation {

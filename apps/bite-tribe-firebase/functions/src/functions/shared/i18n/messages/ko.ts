@@ -30,6 +30,11 @@ export const ko: NotificationMessages = {
   'newReview.body': '{{reviewer}}님이 내 Bite에 리뷰를 남겼어요: "{{bite}}"',
   'newReviewReply.title': '리뷰에 새 답글이 달렸어요',
   'newReviewReply.body': '{{replier}}님이 리뷰에 답글을 남겼어요: "{{bite}}"',
+  'biteContentRefused.title': 'Bite가 콘텐츠 검사를 통과하지 못했어요',
+  'biteContentRefused.bodyReverted':
+    '수정한 내용이 커뮤니티 가이드라인에 어긋나서 이전 텍스트로 되돌렸어요.',
+  'biteContentRefused.bodyDeleted':
+    '새 Bite가 커뮤니티 가이드라인에 어긋나서 삭제됐어요. 다른 텍스트로 다시 게시할 수 있어요.',
   'weeklyBites.title': '🍽️ 이번 주의 Bite가 도착했어요 🤩',
   'weeklyBites.bodyOne': '지난주 BiteTribe에 새 Bite 1개가 공유됐어요.',
   'weeklyBites.bodyMany':

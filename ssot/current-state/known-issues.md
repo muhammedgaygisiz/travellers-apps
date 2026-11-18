@@ -44,6 +44,16 @@ Two authorization surfaces were already closed and are not part of this gap. Eve
 
 Firebase enforces `disabled` when a session is created or a token is refreshed, and cannot recall an ID token already issued. `setUserBlocked` calls `revokeRefreshTokens` alongside the disable, which records the revocation time but changes nothing for a caller that verifies without `checkRevoked`, and none does. **The consequence to know: a blocked admin can unblock themselves inside that window**, so blocking an operator is not a substitute for revoking their `admin` role. Accepted rather than solved ([#1474]); the reasoning is on [Architecture - Auth](../architecture/auth.md).
 
+### The content check has accepted gaps
+
+**Why it matters:** the check of [#1610] is the store's filtering safeguard, and three of its edges are open by decision rather than by oversight.
+
+- **A Bite saved offline, or by a client that skips the form, is readable for seconds.** `moderateBiteOnWrite` undoes it once the write reaches the server; until then other members can read the text. The pushes do not carry it. The bound is the price of saving a Bite offline (`RD-QG-1`), and the alternative - a hidden state every Bite read filters on - is the one the Bite photo question in [Current State - Open Questions](open-questions.md) declined.
+- **Photos are not checked.** Same page, same reason.
+- **Vertex down means the wordlist alone.** A model outage publishes what the short wordlist passes, logged as `checkContent: model unavailable`, rather than refusing every post.
+
+How the check works is in [Architecture - AI](../architecture/ai.md).
+
 ### Firebase App Check
 
 **Why it matters:** backend protection should be enabled without blocking legitimate app traffic.
@@ -259,3 +269,4 @@ a one-off step. It is the filter, not traffic, and it does not recur.
 [#1586]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1586
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

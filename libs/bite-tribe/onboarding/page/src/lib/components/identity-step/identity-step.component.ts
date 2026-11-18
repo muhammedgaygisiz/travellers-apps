@@ -40,7 +40,14 @@ export interface OnboardingIdentityDraft {
 }
 
 export type DisplayNameAvailabilityState =
-  'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'error';
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'taken'
+  | 'invalid'
+  // The name failed the content check when it was claimed (issue #1610).
+  | 'refused'
+  | 'error';
 
 @Component({
   selector: 'onboarding-identity-step',
@@ -129,7 +136,10 @@ export class IdentityStepComponent {
   private displayNameAvailabilityValidator(): ValidatorFn {
     return () => {
       const state = this.availability();
-      return state === 'taken' || state === 'invalid' || state === 'error'
+      return state === 'taken' ||
+        state === 'invalid' ||
+        state === 'refused' ||
+        state === 'error'
         ? { [state]: true }
         : null;
     };

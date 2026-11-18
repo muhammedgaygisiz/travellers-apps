@@ -33,6 +33,11 @@ export const tr: NotificationMessages = {
   'newReviewReply.title': 'Bir yoruma yeni yanıt',
   'newReviewReply.body':
     '{{replier}}, "{{bite}}" için yazılan bir yoruma yanıt verdi.',
+  'biteContentRefused.title': "Bite'ın içerik kontrolümüzden geçmedi",
+  'biteContentRefused.bodyReverted':
+    'Yaptığın değişiklik topluluk kurallarımıza aykırı olduğu için önceki metin geri yüklendi.',
+  'biteContentRefused.bodyDeleted':
+    "Yeni Bite'ın topluluk kurallarımıza aykırı olduğu için kaldırıldı. Farklı bir metinle yeniden paylaşabilirsin.",
   'weeklyBites.title': "🍽️ Haftanın Bite'ları burada 🤩",
   'weeklyBites.bodyOne': 'BiteTribe geçen hafta 1 yeni Bite paylaştı',
   'weeklyBites.bodyMany': 'BiteTribe geçen hafta {{count}} yeni Bite paylaştı',

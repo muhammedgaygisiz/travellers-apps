@@ -674,6 +674,8 @@
   "edit-review-label": "Yorumunu düzenle",
   "review-edited": "düzenlendi",
   "review-edit-failed": "Değişikliğin kaydedilemedi. Lütfen tekrar dene.",
+  "content-refused": "Bu, topluluk kurallarımıza aykırı ve yayınlanamaz. Lütfen metni değiştirip tekrar dene.",
+  "review-save-failed": "Yorumun paylaşılamadı. Lütfen tekrar dene.",
   "bucket-list-name-updated": "Yapılacaklar listesinin adı güncellendi!",
   "no-bites-found-be-the-first": "Bite bulunamadı. İlk sen ol.",
   "no-own-bites-yet": "Henüz bir Bite paylaşmadın. İlkini oluştur.",

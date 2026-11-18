@@ -15,6 +15,7 @@ import {
   PATH,
   getDisplayNameFailureReason,
   type DisplayNameFailureReason,
+  isContentRefused,
 } from 'utils';
 import { ToastService } from 'toast';
 import { Location } from '@angular/common';
@@ -162,7 +163,9 @@ export class ProfileService {
       console.error('Failed to save the profile:', error);
 
       await this.toast.present({
-        messageKey: 'profile-could-not-be-saved',
+        messageKey: isContentRefused(error)
+          ? 'content-refused'
+          : 'profile-could-not-be-saved',
         outcome: 'failure',
       });
 
@@ -202,6 +205,8 @@ export class ProfileService {
         return 'display-name-already-taken';
       case 'invalid':
         return 'display-name-invalid';
+      case 'refused':
+        return 'content-refused';
       default:
         return 'display-name-could-not-be-saved';
     }

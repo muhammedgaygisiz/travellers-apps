@@ -154,7 +154,7 @@ and nothing else reads it.
   Onboarding neither shows nor requires it, and BiteTribe asks for no gender.
 - **Free text.** No picker, because no fixed list covers every language and every person.
   Trimmed, at most 40 characters. A longer value is refused with a message that says the
-  limit, not cut off; the Firestore rules refuse it from any other client too.
+  limit, not cut off; `updateProfileText` refuses it from any other client too.
 - **Empty means absent.** Clearing the field removes `pronouns` from the user document
   rather than storing an empty string, so a profile that never had pronouns and one whose
   owner cleared them read the same.
@@ -165,8 +165,24 @@ and nothing else reads it.
   `Profile Visibility Contract` below.
 - **Never used.** Not searchable (`searchUsers` does not match or return it), not indexed,
   carried by no analytics event, and used for no suggestion or ranking.
-- **Content filtering.** It is user-authored text published to others, so the
-  pre-publication filter of [#1610] covers it alongside the display name once that ships.
+- **Content filtering.** It is user-authored text published to others, so it passes the
+  `Profile Text Check` below.
+
+## Profile Text Check
+
+Issue [#1610]: the text a profile publishes to other accounts is checked before it is
+written, by the content check in [Architecture - AI](../architecture/ai.md).
+
+- **What is checked.** The display name, when it is claimed, and the real name, city, about
+  and pronouns on every save - in profile edit and in onboarding alike.
+- **Where.** The display name in `claimDisplayName`, before the name is reserved, so a
+  refused name is never claimed and never copied onward. The other four in the
+  `updateProfileText` callable, which writes them; the rest of the profile is written by the
+  app as before. The Firestore rules refuse a client changing any of the five, and a first
+  write may carry them only empty.
+- **A refusal writes nothing** and says so: profile edit shows a toast that the text goes
+  against the community guidelines, and onboarding shows the same under the display name. A
+  refused city in onboarding keeps the user on the step without that message.
 
 ## Account Identity In The Menu
 
@@ -456,6 +472,7 @@ The user block contract is the blocking half of Apple's user-generated-content g
 reporting of abusive users; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
 Reporting adds no permission and no data declaration: a report is user content already
 declared as `Other User Content` in [Implementation - Store Declarations](../implementation/store-declarations.md).
+The `Profile Text Check` is the filtering half of the same guideline, for a profile's text.
 
 The profile visibility contract is what makes the public/private switch do what it says,
 which Apple guideline 5.1.1 and Google Play's User Data policy expect of a privacy control.
@@ -488,10 +505,14 @@ It changes no declaration: the data collected and its purpose are the same.
   `FollowSuggestionsService` in `libs/bite-tribe/follow-suggestions/data-access`; the
   `bt-follow-suggestions` component and its stories in
   `libs/bite-tribe/follow-suggestions/ui`.
-- Pronouns: `pronouns.ts` in `libs/bite-tribe-common/model`, `withPronounsWrite` in
-  `libs/bite-tribe/api`, the `pronouns` control of `edit-profile-page` and the header in
-  `profile-page`, the `validPronouns` rule in `firestore.rules`, and the
-  `Pages/Profile` `With Pronouns` stories.
+- Pronouns: `pronouns.ts` in `libs/bite-tribe-common/model`, the `pronouns` control of
+  `edit-profile-page` and the header in `profile-page`, the 40-character cap in
+  `update-profile-text.ts`, and the `Pages/Profile` `With Pronouns` stories.
+- Profile text check: `updateProfileText` in
+  `apps/bite-tribe-firebase/functions/src/functions/users/update-profile-text.ts`, the check
+  in `claim-display-name.ts`, `ProfileApiService.saveProfile`, and the
+  `checkedProfileTextFields` rule in `firestore.rules`, with its cases under
+  `profile text (issue #1610)` in `firestore-rules.emulator-spec.ts`.
 - Display name copies: the `syncDisplayNameCopiesOnUserUpdate` trigger in
   `apps/bite-tribe-firebase/functions/src/functions/users/sync-display-name-copies.ts`
   and its spec.
@@ -510,7 +531,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1799] celebrates the first person a user follows, part of epic [#1741].
 - Issue [#1827] is `Display Name Copies` above, part of epic [#1823].
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
-- Issue [#1610] is the content filter that is to cover pronouns with the display name.
+- Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 

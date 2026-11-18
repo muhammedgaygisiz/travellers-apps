@@ -32,6 +32,11 @@ export const th: NotificationMessages = {
   'newReview.body': '{{reviewer}} รีวิว Bite "{{bite}}" ของคุณ',
   'newReviewReply.title': 'มีการตอบกลับรีวิวใหม่',
   'newReviewReply.body': '{{replier}} ตอบกลับรีวิวของ "{{bite}}"',
+  'biteContentRefused.title': 'Bite ของคุณไม่ผ่านการตรวจสอบเนื้อหา',
+  'biteContentRefused.bodyReverted':
+    'การแก้ไขของคุณขัดต่อแนวทางชุมชนของเรา จึงได้คืนข้อความเดิมแล้ว',
+  'biteContentRefused.bodyDeleted':
+    'Bite ใหม่ของคุณขัดต่อแนวทางชุมชนของเราและถูกนำออกแล้ว คุณโพสต์ใหม่ด้วยข้อความอื่นได้',
   'weeklyBites.title': '🍽️ Bites ประจำสัปดาห์มาแล้ว 🤩',
   'weeklyBites.bodyOne': 'BiteTribe แชร์ Bite ใหม่ 1 รายการเมื่อสัปดาห์ที่แล้ว',
   'weeklyBites.bodyMany':

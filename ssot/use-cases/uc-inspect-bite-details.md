@@ -246,7 +246,7 @@ than displays.
 - One profile is read per distinct author, not per review, so a thread in which
   one person wrote ten messages costs one document read.
 - `author` is still written, so a reader has an attribution before the join
-  resolves, but it is now written from the profile. An account with no readable
+  resolves, but it is now written from the profile, by `saveReview`. An account with no readable
   profile writes an empty name rather than falling back to the provider's — the
   provider's name never reaches a review document. A later display-name change
   rewrites it on every review the person wrote, per `Display Name Copies` in
@@ -260,7 +260,7 @@ than displays.
 
 Issue [#721] lets the author of a review or reply change its text, from the thread
 it sits in. Implemented by `ReviewThreadComponent`, `ReviewApiService.updateReview`
-and the `/reviews` update rule in `firestore.rules`.
+and the `editReview` callable.
 
 - The signed-in author sees an Edit action on each root review and reply they wrote,
   and on nothing anybody else wrote - the Bite's creator included. A review that
@@ -270,11 +270,11 @@ and the `/reviews` update rule in `firestore.rules`.
   other way round. Empty or whitespace-only text cannot be saved, and saving unchanged
   text writes nothing.
 - A saved edit replaces `review` and sets `updatedAt` and `updatedAtTimestamp`, and
-  nothing else. The rules refuse an author's update that touches any other field or
-  leaves the text blank, so an edit cannot move a review to another Bite or thread,
-  re-address what it answers, or hand it to another account. An operator's update is
-  unaffected, and `author` is still rewritten by `syncDisplayNameCopies` through the
-  Admin SDK.
+  nothing else. `editReview` writes only those, refuses blank text and an edit by
+  anybody but the author, and the rules refuse every client update but an operator's,
+  so an edit cannot move a review to another Bite or thread, re-address what it
+  answers, or hand it to another account. `author` is still rewritten by
+  `syncDisplayNameCopies` through the Admin SDK.
 - An edited item shows an "edited" mark next to its age. The age, the position in the
   thread and the replies hanging off it stay the original's, because ordering reads
   `createdAtTimestamp`. There is no edit window and no edit history: the mark exists
@@ -282,6 +282,23 @@ and the `/reviews` update rule in `firestore.rules`.
   that the text changed, not what changed.
 - An edit notifies nobody. Both review notifications are creation triggers.
 - A failed save says so in a toast and leaves the original text on screen.
+
+## Review Content Check
+
+Issue [#1610]: a review or reply is checked before any other account can read it, by
+the content check in [Architecture - AI](../architecture/ai.md).
+
+- **Every write goes through a callable.** A new review and a reply through
+  `saveReview`, an edit through `editReview`; the rules refuse a client creating a
+  review. The callable checks the text, writes it with the author's display name and
+  the timestamps, and answers `saved` or `refused`.
+- **A refusal writes nothing.** The page shows a toast that the text goes against the
+  community guidelines; a refused edit leaves the original text on screen, as any failed
+  edit does. A review or reply that fails for another reason says it was not posted.
+- **The composer is cleared on send**, so the text of a refused new review or reply is
+  not kept for rewording.
+- A refused review notifies nobody: both review notifications are creation triggers,
+  and nothing is created.
 
 ## Rules And Invariants
 
@@ -320,7 +337,8 @@ dish explanation (`R-1` to `R-7`) is AI-generated content: the modal labels it a
 disclaimer, and the privacy policy names Gemini; no store declaration changes, because only public
 Bite content is sent (issue [#2106]). Editing a review (issue [#721]) is a second way to
 publish user-generated text under Guideline 1.2; it adds no permission or declaration, and
-an edited review can be reported and blocked like any other. The
+an edited review can be reported and blocked like any other. The Review Content Check is
+the filtering Guideline 1.2 names, for this page's text (issue [#1610]). The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
@@ -330,7 +348,9 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Like API.
 - Review API, including `saveReply`, `updateReview` and the display-name resolution in
   `loadReviewsByBiteId` and `loadDisplayNamesById`.
-- The `/reviews` update rule, with allow and deny cases for the author's edit in
+- The `saveReview` and `editReview` callables in
+  `apps/bite-tribe-firebase/functions/src/functions/reviews/save-review.ts`, and the
+  `/reviews` rules, with the cases refusing a client write in
   `firestore-rules.emulator-spec.ts`.
 - `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
   states for a bare root, an open thread, a folded one, the notification
@@ -367,6 +387,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language.
 - Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads.
 - Issue [#721] is the Review Edit Contract above - an author edits the text of their own review or reply, part of epic-1284.
+- Issue [#1610] is the Review Content Check above.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
@@ -412,3 +433,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1918]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1918
 [#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

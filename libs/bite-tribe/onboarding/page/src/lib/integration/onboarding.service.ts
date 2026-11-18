@@ -718,11 +718,9 @@ export class OnboardingService {
     } catch (error) {
       const reason = getDisplayNameFailureReason(error);
       this.displayNameAvailability.set(
-        reason === 'taken'
-          ? 'taken'
-          : reason === 'invalid'
-            ? 'invalid'
-            : 'error',
+        reason === 'taken' || reason === 'invalid' || reason === 'refused'
+          ? reason
+          : 'error',
       );
       this.availableDisplayName.set(null);
       this.setStepValid('identity', false);

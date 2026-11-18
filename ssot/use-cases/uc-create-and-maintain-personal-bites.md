@@ -133,6 +133,26 @@ rest of the product reads.
 - User can edit the Bite later.
 - My Bites shows the total number of the user's Bites as a badge next to its title. It is the total, not the length of the list underneath: a filter narrows the list but never the badge. It is counted the way the profile header counts, from the user document's `biteCount` aggregate raised to the number of loaded Bites when that is higher (`totalBiteCount`), so the two surfaces never report different numbers. The badge is not shown while the Bites are still loading. See GitHub issue [#1783].
 
+## Bite Content Check
+
+Issue [#1610]: a Bite's name, tags and description are checked before other accounts read
+them, by the content check in [Architecture - AI](../architecture/ai.md).
+
+- **The form asks first.** Create and edit call `checkBiteContent` before anything is
+  written. A refusal keeps the user on the form with their text and a toast that it goes
+  against the community guidelines. Offline, or without an answer within eight seconds,
+  the Bite saves anyway: it has to save offline.
+- **The server judges every write.** `moderateBiteOnWrite` checks each write that changes
+  the name, tags or description, whether or not the form asked. A failed edit gets its
+  previous text back; a failed new Bite is removed, with its photo and anything attached
+  to it. The author is told by a push, which opens the Bite after an edit and nothing
+  after a removal.
+- **What the form's check cannot close:** a Bite saved offline, or written by a client
+  that skips the form, is readable by other members for the seconds before the trigger
+  runs. The new-Bite and tagged-user pushes judge the text themselves and are not sent
+  for a refused Bite.
+- **The photo is not checked**; see [Current State - Open Questions](../current-state/open-questions.md).
+
 ## MVP Classification
 
 **[MVP]** — creating a Bite and editing it later, the photo requirement with its three
@@ -151,10 +171,15 @@ Photo Picker, which raises no permission prompt of its own, and `ACCESS_MEDIA_LO
 collected by the onboarding photos step rather than here - see [Architecture - Capacitor](../architecture/capacitor.md)
 and GitHub issue [#1409]. Both data types this flow writes are already declared in
 [Implementation - Store Declarations](../implementation/store-declarations.md): **Photos or Videos** and **Precise Location**,
-each under App Functionality.
+each under App Functionality. The Bite Content Check is the filtering Apple's
+user-generated-content guideline names, for a Bite's text; its photo is not filtered
+(issue [#1610]).
 
 ## Supported Evidence
 
+- Bite content check: `checkBiteContent` in `BiteDataAccessService` and `contentAllowed`
+  in `BiteService`, and on the server `check-bite-content.ts` and
+  `moderate-bite-on-write.ts` in `apps/bite-tribe-firebase/functions/src/functions/bites`.
 - `new-bite`
 - `bite/:biteId/edit`
 - "Post and add another Bite" action on `new-bite`.
@@ -200,6 +225,7 @@ each under App Functionality.
 - Issue [#1796] celebrates the user's first Bite in place of the ordinary creation toast, part of epic [#1741].
 - Issue [#1845] plays the `posted` sound with the creation toast, part of epic [#1742].
 - Issue [#1846] plays the `celebration` sound with every celebration, the first Bite's included, part of epic [#1742].
+- Issue [#1610] is the Bite Content Check above.
 - Issue [#2014] celebrates the user's 5th, 10th, 50th, 100th and every later hundredth Bite, part of epic [#2012].
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#2018] added `Copy Bite` on another member's Bite, the copied-price date, and the automatic Bucket List tick on posting a copy.
@@ -248,3 +274,4 @@ each under App Functionality.
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

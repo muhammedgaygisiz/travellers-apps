@@ -37,7 +37,7 @@ import {
   ModalController,
   NavController,
 } from '@ionic/angular/standalone';
-import { PATH } from 'utils';
+import { isContentRefused, PATH } from 'utils';
 import { ToastService } from 'toast';
 import {
   BiteExplanationComponent,
@@ -193,17 +193,35 @@ export class DetailsService {
     this.navController.back();
   }
 
-  saveReview(newReview: { review: string; biteId: string }): void {
-    this.dataAccess.saveNewReview(newReview);
+  /**
+   * Posts a review. Success needs no toast: the review appears in the list. A
+   * refusal says the text broke the community guidelines (issue #1610), and
+   * any other failure that the review was not posted, since either way it
+   * does not appear.
+   */
+  async saveReview(newReview: {
+    review: string;
+    biteId: string;
+  }): Promise<void> {
+    try {
+      await this.dataAccess.saveNewReview(newReview);
+    } catch (error) {
+      await this.reportReviewFailure(error, 'review-save-failed');
+    }
   }
 
-  saveReviewReply(reply: {
+  /** Answers a review in its thread, reporting failure as {@link saveReview}. */
+  async saveReviewReply(reply: {
     review: string;
     biteId: string;
     parentReviewId: string;
     threadId: string;
-  }): void {
-    this.dataAccess.saveReviewReply(reply);
+  }): Promise<void> {
+    try {
+      await this.dataAccess.saveReviewReply(reply);
+    } catch (error) {
+      await this.reportReviewFailure(error, 'review-save-failed');
+    }
   }
 
   /**
@@ -219,13 +237,22 @@ export class DetailsService {
     try {
       await this.dataAccess.updateReview(edit);
     } catch (error) {
-      console.error('Failed to update the review:', error);
-
-      await this.toast.present({
-        messageKey: 'review-edit-failed',
-        outcome: 'failure',
-      });
+      await this.reportReviewFailure(error, 'review-edit-failed');
     }
+  }
+
+  private async reportReviewFailure(
+    error: unknown,
+    failureKey: string,
+  ): Promise<void> {
+    if (!isContentRefused(error)) {
+      console.error('Failed to save the review:', error);
+    }
+
+    await this.toast.present({
+      messageKey: isContentRefused(error) ? 'content-refused' : failureKey,
+      outcome: 'failure',
+    });
   }
 
   addBiteToSelectedBucketList(list: Bucketlist): void {

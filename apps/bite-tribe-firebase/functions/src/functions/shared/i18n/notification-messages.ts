@@ -43,6 +43,11 @@ export type NotificationMessageKey =
   | 'newReview.body'
   | 'newReviewReply.title'
   | 'newReviewReply.body'
+  // A Bite whose text failed the content check after it was written (issue
+  // #1610): an edit is put back, a new Bite is removed.
+  | 'biteContentRefused.title'
+  | 'biteContentRefused.bodyReverted'
+  | 'biteContentRefused.bodyDeleted'
   | 'weeklyBites.title'
   | 'weeklyBites.bodyOne'
   | 'weeklyBites.bodyMany'

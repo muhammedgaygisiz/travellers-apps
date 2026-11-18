@@ -32,6 +32,8 @@ jest.mock('@capacitor-firebase/functions', () => ({
 }));
 
 jest.mock('utils', () => ({
+  ContentRefusedError: jest.requireActual('utils').ContentRefusedError,
+  isContentRefused: jest.requireActual('utils').isContentRefused,
   isBase64String: jest.fn(),
   getDownloadUrlFromFirebaseStorage: jest.fn(),
   loadAppRelease: jest
@@ -74,6 +76,10 @@ describe(ProfileApiService.name, () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(mockDate);
+    // `updateProfileText` accepts the text unless a test says otherwise.
+    jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+      data: { status: 'saved' },
+    });
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: MockedAuthService },
@@ -409,16 +415,15 @@ describe(ProfileApiService.name, () => {
 
           await service.updateUser(publicUser);
 
+          expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+            name: 'updateProfileText',
+            data: { fullName: '', city: '', about: '', pronouns: '' },
+          });
           expect(updateDocumentSpy).toHaveBeenCalledWith({
             reference: 'users/123',
             data: {
-              about: '',
-              city: '',
-              displayName: undefined,
-              fullName: '',
               email: undefined,
               photoUrl: undefined,
-              pronouns: { __type__: 'delete' },
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
@@ -429,8 +434,8 @@ describe(ProfileApiService.name, () => {
     });
 
     describe('pronouns (issue #1826)', () => {
-      const written = (): Record<string, unknown> => {
-        const calls = jest.mocked(FirebaseFirestore.updateDocument).mock.calls;
+      const sentText = (): Record<string, unknown> => {
+        const calls = jest.mocked(FirebaseFunctions.callByName).mock.calls;
 
         return calls[calls.length - 1][0].data as Record<string, unknown>;
       };
@@ -439,7 +444,7 @@ describe(ProfileApiService.name, () => {
         jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
       });
 
-      it('writes the pronouns trimmed', inject(
+      it('sends the pronouns trimmed', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
           const result = await service.updateUser({
@@ -447,12 +452,12 @@ describe(ProfileApiService.name, () => {
             pronouns: '  she/they ',
           } as PublicUser);
 
-          expect(written()['pronouns']).toBe('she/they');
+          expect(sentText()['pronouns']).toBe('she/they');
           expect(result.pronouns).toBe('she/they');
         },
       ));
 
-      it('removes the field when the pronouns are cleared', inject(
+      it('sends cleared pronouns as empty, which removes them', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
           const result = await service.updateUser({
@@ -460,8 +465,49 @@ describe(ProfileApiService.name, () => {
             pronouns: ' ',
           } as PublicUser);
 
-          expect(written()['pronouns']).toEqual({ __type__: 'delete' });
+          expect(sentText()['pronouns']).toBe('');
           expect(result).not.toHaveProperty('pronouns');
+        },
+      ));
+    });
+
+    /** Issue #1610: refused profile text is thrown, and nothing is written. */
+    describe('given refused text', () => {
+      it('takes an answer without data as saved, and writes the rest', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const updateDocument = jest
+            .spyOn(FirebaseFirestore, 'updateDocument')
+            .mockResolvedValue();
+          updateDocument.mockClear();
+          jest
+            .mocked(FirebaseFunctions.callByName)
+            .mockResolvedValue({ data: undefined } as never);
+
+          await service.saveProfile({ userId: '123' } as PublicUser);
+
+          expect(updateDocument).toHaveBeenCalledTimes(1);
+        },
+      ));
+
+      it('throws the refusal with its field and writes nothing', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const updateDocument = jest
+            .spyOn(FirebaseFirestore, 'updateDocument')
+            .mockResolvedValue();
+          updateDocument.mockClear();
+          jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+            data: { status: 'refused', field: 'about' },
+          });
+
+          await expect(
+            service.updateUser({ userId: '123', about: 'x' } as PublicUser),
+          ).rejects.toMatchObject({
+            name: 'ContentRefusedError',
+            field: 'about',
+          });
+          expect(updateDocument).not.toHaveBeenCalled();
         },
       ));
     });
@@ -502,13 +548,8 @@ describe(ProfileApiService.name, () => {
           expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
             reference: 'users/123',
             data: {
-              about: '',
-              city: '',
-              displayName: undefined,
-              fullName: '',
               email: undefined,
               photoUrl: 'download-url',
-              pronouns: { __type__: 'delete' },
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
@@ -549,10 +590,9 @@ describe(ProfileApiService.name, () => {
           expect(Object.keys(written)).not.toContain('subscriptionTier');
           expect(Object.keys(written)).not.toContain('normalizedDisplayName');
           expect(Object.keys(written)).not.toContain('createdAt');
-          expect(written).toMatchObject({
-            displayName: 'Super Mario',
-            photoUrl: 'download-url',
-          });
+          // The display name is `claimDisplayName`'s to write (issue #1610).
+          expect(Object.keys(written)).not.toContain('displayName');
+          expect(written).toMatchObject({ photoUrl: 'download-url' });
         },
       ));
     });

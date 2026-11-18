@@ -158,6 +158,8 @@ describe(DetailsDataAccessService.name, () => {
             bitesByUser: jest.fn(),
             removeSelfFromBiteTags: jest.fn(),
             updateReview: jest.fn(),
+            saveNewReview: jest.fn(),
+            saveReviewReply: jest.fn(),
           },
         },
         {
@@ -173,8 +175,6 @@ describe(DetailsDataAccessService.name, () => {
             userId$: of(),
             isAuthenticated$: of(),
             blockedUserIds$: of([]),
-            saveReview: jest.fn(),
-            saveReviewReply: jest.fn(),
             notifyLoadedReviews: jest.fn(),
             saveToBucketList: jest.fn(),
             createAndSaveToBucketList: jest.fn(),
@@ -747,17 +747,46 @@ describe(DetailsDataAccessService.name, () => {
     });
   });
 
-  describe('saveNewReview', () => {
-    let saveReviewSpy: jest.SpyInstance;
+  /**
+   * Issue #1610: a review and a reply are written by the `saveReview` callable
+   * and awaited, so a refusal reaches the page instead of vanishing in an
+   * effect.
+   */
+  describe.each([
+    ['saveNewReview', { review: 'Great bite!', biteId: 'bite-1' }],
+    [
+      'saveReviewReply',
+      {
+        review: 'Agreed',
+        biteId: 'bite-1',
+        parentReviewId: 'root-1',
+        threadId: 'root-1',
+      },
+    ],
+  ] as const)('%s', (method, payload) => {
+    const api = (): Record<string, jest.Mock> =>
+      TestBed.inject(BiteTribeApiService) as unknown as Record<
+        string,
+        jest.Mock
+      >;
 
-    beforeEach(() => {
-      saveReviewSpy = jest.spyOn(storeService, 'saveReview');
+    it('writes the review and puts the reloaded reviews into the store', async () => {
+      const reviews = [{ id: 'review-1' }];
+      api()[method].mockResolvedValue(reviews);
+
+      await (service[method] as (p: typeof payload) => Promise<void>)(payload);
+
+      expect(api()[method]).toHaveBeenCalledWith(payload);
+      expect(storeService.notifyLoadedReviews).toHaveBeenCalledWith(reviews);
     });
 
-    it('should call saveReview on store service', () => {
-      const newReview = { review: 'Great bite!', biteId: 'test-bite-id' };
-      service.saveNewReview(newReview);
-      expect(saveReviewSpy).toHaveBeenCalledWith(newReview);
+    it('rejects and leaves the store alone when the write fails', async () => {
+      api()[method].mockRejectedValue(new Error('refused'));
+
+      await expect(
+        (service[method] as (p: typeof payload) => Promise<void>)(payload),
+      ).rejects.toThrow('refused');
+      expect(storeService.notifyLoadedReviews).not.toHaveBeenCalled();
     });
   });
 

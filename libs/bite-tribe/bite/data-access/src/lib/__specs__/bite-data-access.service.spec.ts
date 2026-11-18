@@ -16,6 +16,7 @@ import type {
 } from 'model';
 import { BehaviorSubject, of } from 'rxjs';
 import {
+  BITE_CONTENT_CHECK_TIMEOUT_MS,
   BiteDataAccessService,
   STALLED_UPLOAD_TIMEOUT_MS,
 } from '../bite-data-access.service';
@@ -876,6 +877,88 @@ describe(BiteDataAccessService.name, () => {
       await expect(service.generateDescription(request)).resolves.toEqual({
         status: 'unavailable',
       });
+    });
+  });
+  /**
+   * Issue #1610: the form's check before it saves. Only an answered refusal
+   * stops the save, so offline, a failed call and a slow one all read as
+   * `unchecked`.
+   */
+  describe('checkBiteContent (issue #1610)', () => {
+    const bite = { id: '', name: 'Ramen', tags: ['noodles'], description: '' };
+
+    afterEach(() => jest.useRealTimers());
+
+    it('sends the text and reads the answer', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { status: 'refused', field: 'name' },
+      });
+
+      await expect(service.checkBiteContent(bite)).resolves.toBe('refused');
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'checkBiteContent',
+        data: { name: 'Ramen', tags: ['noodles'], description: '' },
+      });
+    });
+
+    it('names the Bite when it is an edit', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { status: 'allowed' },
+      });
+
+      await expect(
+        service.checkBiteContent({ ...bite, id: 'bite-1' }),
+      ).resolves.toBe('allowed');
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ biteId: 'bite-1' }),
+        }),
+      );
+    });
+
+    it('sends empty text for fields the Bite does not have, and reads no data as allowed', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: undefined } as never);
+
+      await expect(service.checkBiteContent({ id: '' } as never)).resolves.toBe(
+        'allowed',
+      );
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'checkBiteContent',
+        data: { name: '', tags: [], description: '' },
+      });
+    });
+
+    it('does not ask while offline', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockClear();
+      service.networkStatus = (() => ({
+        connected: false,
+        connectionType: 'none',
+      })) as never;
+
+      await expect(service.checkBiteContent(bite)).resolves.toBe('unchecked');
+      expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+    });
+
+    it('reads a failed call as unchecked', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('internal'));
+
+      await expect(service.checkBiteContent(bite)).resolves.toBe('unchecked');
+    });
+
+    it('stops waiting for a call that does not answer', async () => {
+      jest.useFakeTimers();
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockReturnValue(new Promise(() => undefined) as never);
+
+      const check = service.checkBiteContent(bite);
+      jest.advanceTimersByTime(BITE_CONTENT_CHECK_TIMEOUT_MS);
+
+      await expect(check).resolves.toBe('unchecked');
     });
   });
 });

@@ -674,6 +674,8 @@
   "edit-review-label": "レビューを編集",
   "review-edited": "編集済み",
   "review-edit-failed": "変更を保存できませんでした。もう一度お試しください。",
+  "content-refused": "この内容はコミュニティガイドラインに反するため公開できません。テキストを変更してもう一度お試しください。",
+  "review-save-failed": "レビューを投稿できませんでした。もう一度お試しください。",
   "bucket-list-name-updated": "バケットリストの名前を更新しました！",
   "no-bites-found-be-the-first": "Biteが見つかりません。最初の投稿者になりましょう。",
   "no-own-bites-yet": "まだBiteをシェアしていません。最初のBiteを作成しましょう。",

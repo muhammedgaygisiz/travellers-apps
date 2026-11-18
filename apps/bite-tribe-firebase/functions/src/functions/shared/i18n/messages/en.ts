@@ -33,6 +33,11 @@ export const en: NotificationMessages = {
   'newReview.body': '{{reviewer}} reviewed your Bite "{{bite}}".',
   'newReviewReply.title': 'New reply to a review',
   'newReviewReply.body': '{{replier}} replied to a review of "{{bite}}".',
+  'biteContentRefused.title': "Your Bite didn't pass our content check",
+  'biteContentRefused.bodyReverted':
+    'Your edit went against our community guidelines, so the previous text was restored.',
+  'biteContentRefused.bodyDeleted':
+    'Your new Bite went against our community guidelines and was removed. You can post it again with different text.',
   'weeklyBites.title': "🍽️ This week's bites are here 🤩",
   'weeklyBites.bodyOne': 'The BiteTribe shared 1 new bite last week',
   'weeklyBites.bodyMany': 'The BiteTribe shared {{count}} new bites last week',

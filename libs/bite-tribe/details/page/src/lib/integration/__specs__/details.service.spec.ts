@@ -26,6 +26,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
 import { BiteExplanationComponent } from '../../components/bite-explanation/bite-explanation.component';
 import { ToastService } from 'toast';
+import { ContentRefusedError } from 'utils';
 import { Capacitor } from '@capacitor/core';
 import { AnalyticsService } from 'ta-firestore';
 import SpyInstance = jest.SpyInstance;
@@ -62,8 +63,8 @@ const createMockDataAccess = (
     userId: signal('user1'),
     isAuthenticated: signal(true),
     saveNewTags: jest.fn(),
-    saveNewReview: jest.fn(),
-    saveReviewReply: jest.fn(),
+    saveNewReview: jest.fn().mockResolvedValue(undefined),
+    saveReviewReply: jest.fn().mockResolvedValue(undefined),
     updateReview: jest.fn().mockResolvedValue(undefined),
     saveToBucketList: jest.fn(),
     createAndSaveToBucketList: jest.fn(),
@@ -206,7 +207,7 @@ describe('DetailsService', () => {
     };
 
     // Act
-    service.saveReview(reviewData);
+    void service.saveReview(reviewData);
 
     // Assert
     expect(mockDataAccessService.saveNewReview).toHaveBeenCalledWith(
@@ -225,7 +226,7 @@ describe('DetailsService', () => {
     };
 
     // Act
-    service.saveReviewReply(reply);
+    void service.saveReviewReply(reply);
 
     // Assert
     expect(mockDataAccessService.saveReviewReply).toHaveBeenCalledWith(reply);
@@ -1464,6 +1465,69 @@ describe('DetailsService', () => {
 
       expect(mockToast.present).toHaveBeenCalledWith({
         messageKey: 'review-edit-failed',
+        outcome: 'failure',
+      });
+    });
+
+    it('says the edit was refused when the text broke the guidelines (issue #1610)', async () => {
+      jest
+        .mocked(service.dataAccess.updateReview)
+        .mockRejectedValueOnce(new ContentRefusedError('review'));
+
+      await service.updateReview(edit);
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /** Issue #1610: a review that is not posted says why. */
+  describe('saveReview and saveReviewReply', () => {
+    const review = { review: 'Text', biteId: 'bite123' };
+    const reply = { ...review, parentReviewId: 'root-1', threadId: 'root-1' };
+
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('posts without a toast, since the review appears in the list', async () => {
+      await service.saveReview(review);
+      await service.saveReviewReply(reply);
+
+      expect(mockToast.present).not.toHaveBeenCalled();
+    });
+
+    it('says a refused review or reply broke the guidelines', async () => {
+      jest
+        .mocked(service.dataAccess.saveNewReview)
+        .mockRejectedValueOnce(new ContentRefusedError('review'));
+      jest
+        .mocked(service.dataAccess.saveReviewReply)
+        .mockRejectedValueOnce(new ContentRefusedError('review'));
+
+      await service.saveReview(review);
+      await service.saveReviewReply(reply);
+
+      expect(mockToast.present).toHaveBeenNthCalledWith(1, {
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+      expect(mockToast.present).toHaveBeenNthCalledWith(2, {
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+
+    it('says a review that failed for any other reason was not posted', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.saveNewReview)
+        .mockRejectedValueOnce(new Error('offline'));
+
+      await service.saveReview(review);
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'review-save-failed',
         outcome: 'failure',
       });
     });

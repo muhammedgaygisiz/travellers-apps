@@ -709,6 +709,10 @@ beforeEach(async () => {
       day: '2026-11-18',
       explanations: 3,
     });
+    // A content-check verdict, written only by `checkContent` (issue #1610).
+    await setDoc(doc(db, 'contentChecks', 'a'.repeat(64)), {
+      category: 'none',
+    });
   });
 });
 
@@ -2656,6 +2660,28 @@ describe('AI explanations and counters', () => {
   });
 });
 
+describe('content-check verdicts', () => {
+  const verdict = (db: Firestore): DocumentReference =>
+    doc(db, 'contentChecks', 'a'.repeat(64));
+
+  /**
+   * Server-only (issue #1610): a client that could write a verdict would mark
+   * its own text as allowed before posting it, and one that could read them
+   * could probe which texts pass.
+   */
+  it('refuses every reader and writer there is', async () => {
+    for (const db of [signedOut(), asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(getDoc(verdict(db)));
+    }
+    await assertFails(setDoc(verdict(asConsumer()), { category: 'none' }));
+    await assertFails(
+      setDoc(doc(asConsumer(), 'contentChecks', 'b'.repeat(64)), {
+        category: 'none',
+      }),
+    );
+  });
+});
+
 describe('scan rate limits', () => {
   const counter = (db: Firestore): DocumentReference =>
     doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000');
@@ -3029,8 +3055,10 @@ describe('bites', () => {
 });
 
 describe('reviews', () => {
-  it('lets an account write a review as itself', async () => {
-    await assertSucceeds(
+  // Issue #1610: reviews are written by `saveReview` and `editReview`, which
+  // check the text first, so no client writes one.
+  it('refuses a client writing a review, even as itself', async () => {
+    await assertFails(
       addDoc(collection(asConsumer(), 'reviews'), {
         authorId: CONSUMER,
         author: 'Consumer',
@@ -3059,43 +3087,12 @@ describe('reviews', () => {
     );
   });
 
-  // Issue #721: an author corrects the text and nothing else.
-  it('lets an author edit the text of their own review', async () => {
-    await assertSucceeds(
+  it('refuses an author editing the text of their own review directly', async () => {
+    await assertFails(
       updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
         review: 'Good, but the broth was cold',
         updatedAt: '2026-11-18T12:00:00.000Z',
         updatedAtTimestamp: 1795521600000,
-      }),
-    );
-  });
-
-  it.each([
-    ['biteId', { biteId: 'another-bite' }],
-    ['authorId', { authorId: STRANGER }],
-    ['parentReviewId', { parentReviewId: 'another-review' }],
-    ['threadId', { threadId: 'another-thread' }],
-    ['createdAt', { createdAt: '2020-01-01T00:00:00.000Z' }],
-    ['author', { author: 'Somebody Else' }],
-  ])(
-    'refuses an author edit that changes %s',
-    async (_field, change: Record<string, unknown>) => {
-      await assertFails(
-        updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
-          review: 'Edited',
-          ...change,
-        }),
-      );
-    },
-  );
-
-  it.each([
-    ['empty', ''],
-    ['whitespace only', ' \n\t '],
-  ])('refuses an author edit to %s text', async (_label, text) => {
-    await assertFails(
-      updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
-        review: text,
       }),
     );
   });
@@ -3195,11 +3192,11 @@ describe('bite trails', () => {
 });
 
 describe('users', () => {
-  it('lets an account edit its own profile', async () => {
+  it('lets an account edit the parts of its own profile that are not text', async () => {
     await assertSucceeds(
       updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-        about: 'Still hungry',
-        city: 'Munich',
+        public: true,
+        photoUrl: 'https://example.com/me.jpg',
       }),
     );
   });
@@ -3238,7 +3235,8 @@ describe('users', () => {
   it('allows a profile edit that echoes the backend-owned values unchanged', async () => {
     await assertSucceeds(
       updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-        about: 'Echoed',
+        about: 'Hungry',
+        displayName: 'Consumer',
         biteCount: 7,
         subscriptionTier: 0,
         followersCount: 2,
@@ -3302,39 +3300,53 @@ describe('users', () => {
     });
   });
 
-  describe('pronouns (issue #1826)', () => {
-    it('lets an account set pronouns of up to 40 characters', async () => {
-      await assertSucceeds(
-        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-          pronouns: 'x'.repeat(40),
-        }),
-      );
-    });
+  /**
+   * Profile text reaches other accounts, so it is written by
+   * `claimDisplayName` and `updateProfileText`, which check it first (issue
+   * #1610). The pronoun cap of issue #1826 moved with it.
+   */
+  describe('profile text (issue #1610)', () => {
+    it.each([
+      ['displayName', { displayName: 'Renamed' }],
+      ['fullName', { fullName: 'Real Name' }],
+      ['city', { city: 'Munich' }],
+      ['about', { about: 'Still hungry' }],
+      ['pronouns', { pronouns: 'they/them' }],
+    ])(
+      'refuses a client changing %s',
+      async (_field, change: Record<string, unknown>) => {
+        await assertFails(
+          updateDoc(doc(asConsumer(), 'users', CONSUMER), change),
+        );
+      },
+    );
 
-    it('refuses pronouns longer than 40 characters', async () => {
+    it('refuses a client removing text it may not change', async () => {
       await assertFails(
         updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-          pronouns: 'x'.repeat(41),
+          about: deleteField(),
         }),
       );
     });
 
-    it('refuses pronouns that are not text', async () => {
-      await assertFails(
-        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-          pronouns: ['they', 'them'],
-        }),
-      );
-    });
-
-    it('lets an account clear its pronouns by removing the field', async () => {
-      await updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-        pronouns: 'they/them',
+    it('lets a first write carry the text fields only empty', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), 'users', CONSUMER));
       });
 
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          displayName: '',
+          about: 'Unchecked',
+        }),
+      );
       await assertSucceeds(
-        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
-          pronouns: deleteField(),
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          displayName: '',
+          fullName: '',
+          email: 'consumer@test.com',
         }),
       );
     });

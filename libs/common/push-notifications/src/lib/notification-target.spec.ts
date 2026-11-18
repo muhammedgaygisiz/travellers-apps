@@ -22,6 +22,20 @@ describe(toNotificationTarget.name, () => {
     },
   );
 
+  // Issue #1610: an edit that failed the content check was put back, so the
+  // Bite opens; a new Bite that failed was removed, so there is none to open.
+  it('opens the Bite of a refused edit, and nothing for a removed Bite', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'BITE_CONTENT_REFUSED', biteId: 'bite-1' },
+        RECIPIENT,
+      ),
+    ).toEqual({ commands: ['bite', 'bite-1'] });
+    expect(
+      toNotificationTarget({ type: 'BITE_CONTENT_REFUSED' }, RECIPIENT),
+    ).toBeUndefined();
+  });
+
   it('targets the thread a review reply belongs to', () => {
     // A Bite's review compartment holds many conversations, so the thread comes
     // along and the page opens on the right one (issue #1283).

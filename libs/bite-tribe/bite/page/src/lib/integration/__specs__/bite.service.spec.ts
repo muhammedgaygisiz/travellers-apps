@@ -26,6 +26,7 @@ const Mock = {
   hasOwnBites: jest.fn(),
   markTriedOutInBucketlists: jest.fn(),
   generateDescription: jest.fn(),
+  checkBiteContent: jest.fn(),
 };
 
 const LoadingMock = {
@@ -61,6 +62,7 @@ describe('BiteService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     Mock.hasOwnBites.mockResolvedValue(true);
+    Mock.checkBiteContent.mockResolvedValue('allowed');
     TestBed.configureTestingModule({
       providers: [
         { provide: BiteDataAccessService, useValue: Mock },
@@ -152,8 +154,8 @@ describe('BiteService', () => {
       );
     });
 
-    it('is handed on apart from an edited Bite, including its removal', () => {
-      service.submitEditedBite({
+    it('is handed on apart from an edited Bite, including its removal', async () => {
+      await service.submitEditedBite({
         id: '123',
         name: 'Edited Bite',
         photoPosition: null,
@@ -314,29 +316,29 @@ describe('BiteService', () => {
       expect(ToastMock.present).toHaveBeenCalledTimes(1);
     });
 
-    it('stays silent when a Bite is edited', () => {
-      service.submitEditedBite({ id: '123', name: 'Edited' } as never);
+    it('stays silent when a Bite is edited', async () => {
+      await service.submitEditedBite({ id: '123', name: 'Edited' } as never);
 
       expect(SoundsMock.posted).not.toHaveBeenCalled();
     });
   });
 
   describe('submitEditedBite', () => {
-    it('should submit edited bite', () => {
+    it('should submit edited bite', async () => {
       const editedBite = { id: '123', name: 'Edited Bite' };
-      service.submitEditedBite(editedBite);
+      await service.submitEditedBite(editedBite);
 
       expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite, undefined);
     });
 
-    it('should navigate back to previous page', () => {
+    it('should navigate back to previous page', async () => {
       const editedBite = { id: '123', name: 'Edited Bite' };
-      service.submitEditedBite(editedBite);
+      await service.submitEditedBite(editedBite);
 
       expect(Mock.back).toHaveBeenCalled();
     });
 
-    it('clears the old city and country when the edit moves the Bite', () => {
+    it('clears the old city and country when the edit moves the Bite', async () => {
       Mock.biteValue.mockReturnValue({
         id: '123',
         position: { latitude: 49.0665, longitude: 18.9219 },
@@ -349,7 +351,7 @@ describe('BiteService', () => {
         position: { latitude: 47.4979, longitude: 19.0402 },
       };
 
-      service.submitEditedBite(editedBite);
+      await service.submitEditedBite(editedBite);
 
       expect(Mock.submitEditedBite).toHaveBeenCalledWith(
         {
@@ -365,7 +367,7 @@ describe('BiteService', () => {
       );
     });
 
-    it('leaves the address alone when the edit keeps the position', () => {
+    it('leaves the address alone when the edit keeps the position', async () => {
       const position = { latitude: 49.0665, longitude: 18.9219 };
       Mock.biteValue.mockReturnValue({ id: '123', position, city: 'Martin' });
       const editedBite = {
@@ -374,9 +376,64 @@ describe('BiteService', () => {
         position: { ...position },
       };
 
-      service.submitEditedBite(editedBite);
+      await service.submitEditedBite(editedBite);
 
       expect(Mock.submitEditedBite).toHaveBeenCalledWith(editedBite, undefined);
+    });
+  });
+
+  /**
+   * Issue #1610: the form checks the text before it saves. A refusal keeps
+   * the user on the form with a toast; no answer saves anyway, because the
+   * Bite has to save offline and the server judges it in any case.
+   */
+  describe('the content check', () => {
+    it('keeps a refused new Bite on the form and says why', async () => {
+      Mock.checkBiteContent.mockResolvedValue('refused');
+
+      await service.submitNewBite({ id: '', name: 'Bad' });
+
+      expect(Mock.submitNewBite).not.toHaveBeenCalled();
+      expect(Mock.navigateBack).not.toHaveBeenCalled();
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+
+    it('keeps a refused edit on the form and says why', async () => {
+      Mock.checkBiteContent.mockResolvedValue('refused');
+
+      await service.submitEditedBite({ id: '123', name: 'Bad' });
+
+      expect(Mock.submitEditedBite).not.toHaveBeenCalled();
+      expect(Mock.back).not.toHaveBeenCalled();
+      expect(ToastMock.present).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+
+    it('saves a Bite it could not check, as when offline', async () => {
+      Mock.checkBiteContent.mockResolvedValue('unchecked');
+
+      await service.submitNewBite({ id: '', name: 'Ramen' });
+      await service.submitEditedBite({ id: '123', name: 'Ramen' });
+
+      expect(Mock.submitNewBite).toHaveBeenCalled();
+      expect(Mock.submitEditedBite).toHaveBeenCalled();
+    });
+
+    it('checks the text it is about to write', async () => {
+      await service.submitNewBite({
+        id: '',
+        name: 'Ramen',
+        tags: ['noodles'],
+      } as never);
+
+      expect(Mock.checkBiteContent).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Ramen', tags: ['noodles'] }),
+      );
     });
   });
 

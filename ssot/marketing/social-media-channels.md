@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026) and Amman (17 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026) and Diyarbakır (18 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1681,6 +1681,21 @@ photo is Amman's hillside houses from above. Leela's cover line is "Amman runs
 on mansaf and kunafa – here's where I eat mine". The city page `/eat/amman`
 went up the same evening, with no aliases, and its Instagram and Facebook
 post links were added once both posts were live.
+
+**Diyarbakır** (18 November 2026, scheduled for 22:00) tags all five dish
+slides: `@oz.amedcigercisi` twice (ciğer and sade kebab; its bio gives the
+address by the Ulu Cami in Sur), `@marianinyeri` (Keldani kahvesi; same name,
+and its posts link the Maps listing), `@suluklu.han` (erik şerbeti; the bio
+calls it the han's official account, and its phone number matches the
+venue's) and `@sitkiustadiyarbakir` (kadayıf; a verified account giving
+1968, the year Sıtkı Usta opened). The post was first shared at once instead
+of scheduled, so it was deleted and made again for 22:00, and the restaurants
+were notified of their tags twice. Leela wears an embroidered velvet dress
+and a coin headband and holds a liver skewer; the cover photo is the Ulu Cami
+and its minaret. Leela's cover line is "Inside Diyarbakır's black basalt
+walls, liver kebab is breakfast". The city page `/eat/diyarbakir` went up the
+same evening, with no aliases, and its Instagram and Facebook post links were
+added once both posts were live.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

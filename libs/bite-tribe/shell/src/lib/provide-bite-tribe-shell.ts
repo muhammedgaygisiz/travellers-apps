@@ -11,11 +11,16 @@ import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
   APP_TITLE,
+  BEFORE_ROUTING_AFTER_SIGN_IN,
   Environment,
   SIGNED_IN_ACCOUNT,
   SignedInAccount,
 } from 'utils';
-import { BiteTribeStoreService, provideBiteTribeStore } from 'bite-tribe/store';
+import {
+  BiteTribeStoreService,
+  provideBiteTribeStore,
+  SignInLanguageService,
+} from 'bite-tribe/store';
 import {
   computed,
   EnvironmentProviders,
@@ -46,6 +51,16 @@ export const provideBiteTribeShell = (
   { provide: APP_TITLE, useValue: 'Bite Tribe' },
   { provide: AFTER_LOGOUT_PAGE, useValue: '/start' },
   { provide: AFTER_LOGIN_PAGE, useValue: '/home' },
+  {
+    // Settles the app language against the account's before the sign-in
+    // routes onwards, asking when the two differ (issue #2104).
+    provide: BEFORE_ROUTING_AFTER_SIGN_IN,
+    useFactory: (): (() => Promise<void>) => {
+      const signInLanguage = inject(SignInLanguageService);
+
+      return () => signInLanguage.reconcile();
+    },
+  },
   {
     // The signed-in profile the store already keeps for the app, handed to the
     // shared page chrome so the menu can name the account it belongs to. It is

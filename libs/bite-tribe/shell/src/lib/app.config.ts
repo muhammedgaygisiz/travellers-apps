@@ -15,6 +15,7 @@ import {
   isServiceWorkerEnabled,
 } from './service-worker';
 import { provideDocumentLanguage } from './document-language';
+import { provideStartupLanguage } from './startup-language';
 import { provideCanonicalUrl } from './canonical-url';
 import { provideCityPageAttribution } from './city-page-attribution';
 import { provideDocumentTitle } from './document-title';
@@ -82,6 +83,9 @@ export const appConfig = (environment: Environment): ApplicationConfig => ({
     // with that language's rules (issue #1388). Registered after
     // `provideTransloco`, which owns the service it listens to.
     provideDocumentLanguage(),
+    // Opens in the stored choice, else the device language, from the first
+    // screen on (issue #2104). Also registered after `provideTransloco`.
+    provideStartupLanguage(),
     // Narrows the canonical link `index.html` ships to the active public route,
     // so the pages the sitemap lists do not also declare themselves duplicates
     // of the site root (issue #1454).

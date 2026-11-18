@@ -408,13 +408,19 @@ describe(AuthEffects.name, () => {
   });
 
   describe('successFulLogin$', () => {
+    const runSuccessfulLogin = async (...actions: Action[]): Promise<void> => {
+      actions$ = of(...actions);
+      effects.successFulLogin$.subscribe();
+      await new Promise((resolve) => setTimeout(resolve));
+    };
+
     describe('given a loginSucceeded action', () => {
       describe('and the visitor is already inside the app', () => {
         beforeEach(() => {
           (isAuthEntryPage as jest.Mock).mockReturnValue(false);
         });
 
-        it('should leave them on the page they opened', () => {
+        it('should leave them on the page they opened', async () => {
           (
             effects as unknown as {
               pageAfterLogin?: string;
@@ -422,11 +428,7 @@ describe(AuthEffects.name, () => {
             }
           ).pageAfterLogin = '/home';
 
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
-
-            expectObservable(effects.successFulLogin$);
-          });
+          await runSuccessfulLogin(AuthActions.loginSucceeded());
 
           expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
           expect(MockNavController.navigateBack).not.toHaveBeenCalled();
@@ -434,16 +436,12 @@ describe(AuthEffects.name, () => {
       });
 
       describe('and a requested URL was remembered before signing in', () => {
-        it('should return the visitor to it', () => {
+        it('should return the visitor to it', async () => {
           TestBed.inject(RequestedUrlService).remember('/bite/shared-123');
           (effects as unknown as { pageAfterLogin?: string }).pageAfterLogin =
             '/home';
 
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
-
-            expectObservable(effects.successFulLogin$);
-          });
+          await runSuccessfulLogin(AuthActions.loginSucceeded());
 
           expect(MockNavController.navigateRoot).toHaveBeenCalledWith(
             '/bite/shared-123',
@@ -451,21 +449,17 @@ describe(AuthEffects.name, () => {
           expect(MockNavController.navigateBack).not.toHaveBeenCalled();
         });
 
-        it('should keep it when the same sign-in is reported twice', () => {
+        it('should keep it when the same sign-in is reported twice', async () => {
           // The login effect and the startup session check both report one
           // sign-in; a second routing would land on the default page.
           TestBed.inject(RequestedUrlService).remember('/bite/shared-123');
           (effects as unknown as { pageAfterLogin?: string }).pageAfterLogin =
             '/home';
 
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('-ab', {
-              a: AuthActions.loginSucceeded(),
-              b: AuthActions.loginSucceeded(),
-            });
-
-            expectObservable(effects.successFulLogin$);
-          });
+          await runSuccessfulLogin(
+            AuthActions.loginSucceeded(),
+            AuthActions.loginSucceeded(),
+          );
 
           expect(MockNavController.navigateRoot).toHaveBeenCalledTimes(1);
           expect(MockNavController.navigateRoot).toHaveBeenCalledWith(
@@ -476,7 +470,7 @@ describe(AuthEffects.name, () => {
       });
 
       describe('and pageAfterLogin is defined', () => {
-        it('should navigate to pageAfterLogin', () => {
+        it('should navigate to pageAfterLogin', async () => {
           (
             effects as unknown as {
               pageAfterLogin?: string;
@@ -484,11 +478,7 @@ describe(AuthEffects.name, () => {
             }
           ).pageAfterLogin = '/custom-login-page';
 
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
-
-            expectObservable(effects.successFulLogin$);
-          });
+          await runSuccessfulLogin(AuthActions.loginSucceeded());
 
           expect(MockNavController.navigateBack).toHaveBeenCalledWith([
             '/custom-login-page',
@@ -497,15 +487,68 @@ describe(AuthEffects.name, () => {
       });
 
       describe('and neither a requested URL nor a pageAfterLogin exists', () => {
-        it('should navigate back to root', () => {
-          scheduler.run(({ cold, expectObservable }) => {
-            actions$ = cold('-a', { a: AuthActions.loginSucceeded() });
-
-            expectObservable(effects.successFulLogin$);
-          });
+        it('should navigate back to root', async () => {
+          await runSuccessfulLogin(AuthActions.loginSucceeded());
 
           expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
         });
+      });
+    });
+
+    describe('given work to run before routing after sign-in', () => {
+      const setBeforeRouting = (run: () => Promise<void>): void => {
+        (
+          effects as unknown as {
+            beforeRoutingAfterSignIn: () => Promise<void>;
+          }
+        ).beforeRoutingAfterSignIn = run;
+      };
+
+      it('should route only once that work has finished', async () => {
+        let finish: () => void = () => undefined;
+        setBeforeRouting(
+          () => new Promise<void>((resolve) => (finish = resolve)),
+        );
+
+        await runSuccessfulLogin(AuthActions.loginSucceeded());
+
+        expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
+
+        finish();
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
+      });
+
+      it('should still route when that work fails', async () => {
+        jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+        setBeforeRouting(() => Promise.reject(new Error('offline')));
+
+        await runSuccessfulLogin(AuthActions.loginSucceeded());
+
+        expect(MockNavController.navigateRoot).toHaveBeenCalledWith(['/']);
+      });
+
+      it('should not run it for a session restored inside the app', async () => {
+        (isAuthEntryPage as jest.Mock).mockReturnValue(false);
+        const run = jest.fn(async () => undefined);
+        setBeforeRouting(run);
+
+        await runSuccessfulLogin(AuthActions.loginSucceeded());
+
+        expect(run).not.toHaveBeenCalled();
+      });
+
+      it('should run it once when the same sign-in is reported twice', async () => {
+        const run = jest.fn(async () => undefined);
+        setBeforeRouting(run);
+
+        await runSuccessfulLogin(
+          AuthActions.loginSucceeded(),
+          AuthActions.loginSucceeded(),
+        );
+
+        expect(run).toHaveBeenCalledTimes(1);
       });
     });
   });

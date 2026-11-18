@@ -8,6 +8,7 @@ import {
 import { AuthActions } from './actions';
 import {
   catchError,
+  concatMap,
   exhaustMap,
   from,
   map,
@@ -30,6 +31,7 @@ import { RequestedUrlService } from '../requested-url.service';
 import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
+  BEFORE_ROUTING_AFTER_SIGN_IN,
   isAuthEntryPage,
   REQUIRED_ROLES,
 } from 'utils';
@@ -80,6 +82,10 @@ export class AuthEffects {
   private readonly pageAfterLogin = inject(AFTER_LOGIN_PAGE, {
     optional: true,
   });
+  private readonly beforeRoutingAfterSignIn = inject(
+    BEFORE_ROUTING_AFTER_SIGN_IN,
+    { optional: true },
+  );
 
   /**
    * Unbound in the consumer app, which requires no role of anyone. The two
@@ -192,7 +198,7 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSucceeded),
-        tap(() => {
+        concatMap(async () => {
           // A session restored on startup reports itself as a successful login
           // too, and by then the visitor is already on the page they opened the
           // app at — a shared Bite link, say. Only someone who came through the
@@ -213,6 +219,8 @@ export class AuthEffects {
 
           this.hasRoutedAfterSignIn = true;
 
+          await this.runBeforeRouting();
+
           const requestedUrl = this.requestedUrlService.consume();
           if (requestedUrl) {
             this.navController.navigateRoot(requestedUrl);
@@ -229,6 +237,14 @@ export class AuthEffects {
       ),
     { dispatch: false },
   );
+
+  private async runBeforeRouting(): Promise<void> {
+    try {
+      await this.beforeRoutingAfterSignIn?.();
+    } catch (error) {
+      console.warn('Work before routing after sign-in failed:', error);
+    }
+  }
 
   successFulLogout$ = createEffect(
     () =>

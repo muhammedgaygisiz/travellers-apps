@@ -926,5 +926,7 @@
   "zoom-in": "تكبير",
   "zoom-out": "تصغير",
   "show-whole-globe": "عرض الكرة الأرضية كاملة",
-  "country-bite-count": "Bites: {{count}}"
+  "country-bite-count": "Bites: {{count}}",
+  "account-language-prompt-header": "اختيار اللغة",
+  "account-language-prompt-message": "لغة حسابك هي {{accountLanguage}}، لكن التطبيق يعرض {{currentLanguage}}. أيّ اللغتين تُستخدم؟"
 }

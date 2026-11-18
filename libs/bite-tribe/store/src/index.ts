@@ -1,5 +1,6 @@
 export { provideBiteTribeStore } from './lib/provide-bite-tribe-store';
 export { BiteTribeStoreService } from './lib/bite-tribe-store.service';
+export { SignInLanguageService } from './lib/sign-in-language.service';
 
 export { biteTitleResolver } from './lib/utils/bite-title-resolver';
 export {

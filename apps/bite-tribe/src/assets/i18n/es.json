@@ -926,5 +926,7 @@
   "zoom-in": "Acercar",
   "zoom-out": "Alejar",
   "show-whole-globe": "Ver todo el globo",
-  "country-bite-count": "Bites: {{count}}"
+  "country-bite-count": "Bites: {{count}}",
+  "account-language-prompt-header": "Elige tu idioma",
+  "account-language-prompt-message": "Tu cuenta está configurada en {{accountLanguage}}, pero la app se muestra en {{currentLanguage}}. ¿Qué idioma quieres usar?"
 }

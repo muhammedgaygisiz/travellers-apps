@@ -926,5 +926,7 @@
   "zoom-in": "拡大",
   "zoom-out": "縮小",
   "show-whole-globe": "地球全体を表示",
-  "country-bite-count": "Bite: {{count}}件"
+  "country-bite-count": "Bite: {{count}}件",
+  "account-language-prompt-header": "言語の選択",
+  "account-language-prompt-message": "アカウントの言語は{{accountLanguage}}ですが、アプリは{{currentLanguage}}で表示されています。どちらの言語を使いますか？"
 }

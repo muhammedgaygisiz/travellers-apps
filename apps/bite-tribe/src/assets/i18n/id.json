@@ -926,5 +926,7 @@
   "zoom-in": "Perbesar",
   "zoom-out": "Perkecil",
   "show-whole-globe": "Tampilkan seluruh globe",
-  "country-bite-count": "Bites: {{count}}"
+  "country-bite-count": "Bites: {{count}}",
+  "account-language-prompt-header": "Pilih bahasa",
+  "account-language-prompt-message": "Akunmu diatur ke {{accountLanguage}}, tetapi aplikasi menampilkan {{currentLanguage}}. Bahasa mana yang ingin kamu gunakan?"
 }

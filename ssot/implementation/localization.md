@@ -151,7 +151,9 @@ carries only the app name and URL scheme.
 - Text wrapped in code cannot assume spaces. `wrapText` in `libs/bite-tribe/share-image/ui` breaks a name that does not fit a line at the word boundaries of `Intl.Segmenter`, and per character where that is unavailable; see issue [#1882].
 - Enter during IME composition belongs to the keyboard: it confirms the conversion. A handler that acts on Enter ignores it while `isComposing` is true or `keyCode` is 229, which is what Safari still reports after composition has ended. `bt-tags-input` does; see issue [#1882].
 - A price has the decimal places of its currency: none for JPY and KRW, two for EUR. A fixed `1.2-2` reads as wrong to anyone paying in yen. The currency decides this, not the app language; see issue [#1882].
-- Chinese takes no line-breaking CSS either, for the same reason as Japanese. `zh` is Simplified Chinese only: the iOS prompts live in `zh-Hans.lproj`, not `zh.lproj`, and onboarding prefills `zh` only for a device that does not read Traditional Chinese (`zh-Hant`, or the regions `TW`, `HK` and `MO`). Those devices get English and can still pick `中文`; see issue [#1880].
+- Chinese takes no line-breaking CSS either, for the same reason as Japanese. `zh` is Simplified Chinese only: the iOS prompts live in `zh-Hans.lproj`, not `zh.lproj`, and start-up and onboarding pick `zh` only for a device that does not read Traditional Chinese (`zh-Hant`, or the regions `TW`, `HK` and `MO`). Those devices get English and can still pick `中文`; see issue [#1880].
+- The language a start opens in is the one stored on the device under the `lang` preference, else the device language when the app ships it, else English. `provideStartupLanguage` in `libs/bite-tribe/shell` decides it; `languageForLocale` and `SHIPPED_LANGUAGES` in `libs/common/utils` are the one rule start-up and the onboarding language step share. Only a choice is ever stored - by onboarding, the settings page, or sign-in - never the device language itself. On the web the public pages `SELF_CANONICAL_PATHS` names stay English without a stored choice. See issue [#2104].
+- Sign-in settles the app language against the account's `settings/{uid}.language` before routing onwards, through the `BEFORE_ROUTING_AFTER_SIGN_IN` hook the consumer shell binds to `SignInLanguageService` in `libs/bite-tribe/store`. A difference is asked about once, and keeping the language on screen writes it to the account, so the account always holds the language the person reads and the backend catalog follows it. The behaviour is owned by [UC - Configure Personal Settings](../use-cases/uc-configure-personal-settings.md); see issue [#2104].
 - Load a language before activating it when the switch happens in place, and let anything that translates synchronously - loading overlays, alerts, toasts - wait for that switch to settle.
 
 ## Gender-Neutral Address
@@ -197,6 +199,9 @@ Sources: [UN Women gender-inclusive language guidelines](https://www.unwomen.org
 ```text
 libs/bite-tribe/shell/src/lib/app.config.ts
 libs/bite-tribe/shell/src/lib/document-language.ts
+libs/bite-tribe/shell/src/lib/startup-language.ts
+libs/bite-tribe/store/src/lib/sign-in-language.service.ts
+libs/common/utils/src/lib/device-language.ts
 libs/bite-tribe/onboarding/data-access/src/lib/onboarding-data-access.service.ts
 libs/bite-tribe/settings/data-access/src/lib/settings-data-access.service.ts
 apps/bite-tribe-firebase/functions/src/functions/shared/utils/get-user-language.ts
@@ -267,3 +272,4 @@ ls -d /tmp/bt-ios/Build/Products/Debug-iphonesimulator/App.app/*.lproj
 [#1881]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1881
 [#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882
 [#1880]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1880
+[#2104]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2104

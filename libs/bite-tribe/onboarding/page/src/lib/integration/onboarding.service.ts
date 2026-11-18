@@ -6,7 +6,13 @@ import {
   AnalyticsService,
   RequestedUrlService,
 } from 'ta-firestore';
-import { getCurrencyForDevice, getDisplayNameFailureReason, PATH } from 'utils';
+import {
+  getCurrencyForDevice,
+  getDisplayNameFailureReason,
+  languageForLocale,
+  PATH,
+  readDeviceLocale,
+} from 'utils';
 import {
   OnboardingDataAccessService,
   OnboardingProgressService,
@@ -210,7 +216,7 @@ export class OnboardingService {
     const settings = await this.dataAccess.loadSettings();
     this.settings.set(settings);
 
-    const locale = this.deviceLocale();
+    const locale = readDeviceLocale();
 
     this.selectedCurrency.set(
       settings?.currency ||
@@ -219,7 +225,12 @@ export class OnboardingService {
     this.favoriteCurrencies.set(settings?.favoriteCurrencies ?? []);
     this.setStepValid('currency', true);
 
-    const language = settings?.language || this.languageForLocale(locale);
+    const language =
+      settings?.language ||
+      languageForLocale(
+        locale,
+        ONBOARDING_LANGUAGES.map((option) => option.code),
+      );
     this.selectedLanguage.set(language);
     this.setStepValid('language', true);
     await this.dataAccess.applyLanguage(language);
@@ -257,10 +268,6 @@ export class OnboardingService {
     }
   }
 
-  private deviceLocale(): string {
-    return navigator.language || navigator.languages?.[0] || DEFAULT_LANGUAGE;
-  }
-
   /**
    * IANA zone the device is set to, which is the closest thing to the device
    * region a web view can read. A runtime without a resolvable zone leaves the
@@ -272,30 +279,6 @@ export class OnboardingService {
     } catch {
       return undefined;
     }
-  }
-
-  /**
-   * `zh` is Simplified Chinese only. A device reading Traditional Chinese
-   * (`zh-Hant`, or a region that writes it) gets English rather than a script
-   * it did not choose; the picker still offers `zh` (issue #1880).
-   */
-  private languageForLocale(locale: string): string {
-    const [language, ...subtags] = locale
-      .replace(/_/g, '-')
-      .toLowerCase()
-      .split('-');
-
-    if (
-      language === 'zh' &&
-      subtags.some((subtag) => ['hant', 'tw', 'hk', 'mo'].includes(subtag)) &&
-      !subtags.includes('hans')
-    ) {
-      return DEFAULT_LANGUAGE;
-    }
-
-    return ONBOARDING_LANGUAGES.some((option) => option.code === language)
-      ? language
-      : DEFAULT_LANGUAGE;
   }
 
   setCurrentStepValid(valid: boolean): void {

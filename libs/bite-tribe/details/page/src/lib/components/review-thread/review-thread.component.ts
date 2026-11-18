@@ -23,8 +23,6 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
-  IonNote,
-  IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -69,8 +67,6 @@ export interface ReviewReplySubmit {
     IonIcon,
     IonItem,
     IonLabel,
-    IonNote,
-    IonText,
     IonTextarea,
     ReactiveFormsModule,
     TranslocoPipe,

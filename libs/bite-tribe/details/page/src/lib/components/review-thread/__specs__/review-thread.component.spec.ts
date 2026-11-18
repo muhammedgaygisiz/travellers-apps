@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import type { Review, ReviewThread } from 'model';
 import { addNecessaryIcons } from 'utils';
 import {
+  ReviewEditSubmit,
   ReviewReplySubmit,
   ReviewThreadComponent,
 } from '../review-thread.component';
@@ -52,11 +53,13 @@ describe(ReviewThreadComponent.name, () => {
     canReply?: boolean;
     highlighted?: boolean;
     biteCreatorId?: string;
+    userId?: string;
   }): void => {
     componentRef.setInput('thread', inputs.thread);
     componentRef.setInput('canReply', inputs.canReply ?? true);
     componentRef.setInput('highlighted', inputs.highlighted ?? false);
     componentRef.setInput('biteCreatorId', inputs.biteCreatorId);
+    componentRef.setInput('userId', inputs.userId);
     componentRef.changeDetectorRef.detectChanges();
   };
 
@@ -272,5 +275,186 @@ describe(ReviewThreadComponent.name, () => {
     });
 
     expect(fixture.nativeElement.querySelector('.creator-badge')).toBeNull();
+  });
+
+  /** Editing one's own review or reply in place (issue #721). */
+  describe('editing', () => {
+    const queryAll = (testId: string): HTMLElement[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`),
+      );
+
+    const edits = (): ReviewEditSubmit[] => {
+      const submitted: ReviewEditSubmit[] = [];
+      component.submitEdit.subscribe((event) => submitted.push(event));
+
+      return submitted;
+    };
+
+    const openEditor = (): void => {
+      query('edit-review')?.click();
+      fixture.detectChanges();
+    };
+
+    it('offers an edit on the signed-in user’s own review and reply only', () => {
+      render({
+        thread: thread([
+          reply('reply-1'),
+          reply('reply-2', { authorId: 'mira', author: 'Mira' }),
+        ]),
+        userId: 'mira',
+      });
+
+      // The root and reply-2 are Mira's; reply-1 is Jonas's.
+      expect(queryAll('edit-review')).toHaveLength(2);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="reply-reply-1"] [data-testid="edit-review"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('offers the Bite creator no edit on somebody else’s review', () => {
+      render({ thread: thread(), biteCreatorId: 'ali', userId: 'ali' });
+
+      expect(query('edit-review')).toBeNull();
+    });
+
+    it('offers no edit while signed out', () => {
+      render({ thread: thread(), canReply: false, userId: undefined });
+
+      expect(query('edit-review')).toBeNull();
+    });
+
+    it('offers no edit on a legacy review without an author uid', () => {
+      render({
+        thread: {
+          root: review({ id: 'root-1', authorId: undefined }),
+          replies: [],
+        },
+        userId: 'mira',
+      });
+
+      expect(query('edit-review')).toBeNull();
+    });
+
+    it('swaps the text for an editor holding it', () => {
+      render({ thread: thread(), userId: 'mira' });
+
+      openEditor();
+
+      expect(query('edit-review-input')).toBeTruthy();
+      expect(component['editForm'].getRawValue().review).toBe(
+        'Best kebab in Kreuzberg.',
+      );
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'Best kebab in Kreuzberg.',
+      );
+    });
+
+    it('hands the trimmed new text to the page and closes the editor', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      openEditor();
+      component['editForm'].setValue({ review: '  Best kebab, slow queue. ' });
+      fixture.detectChanges();
+      query('save-edit')?.click();
+      fixture.detectChanges();
+
+      expect(submitted).toEqual([
+        { reviewId: 'root-1', review: 'Best kebab, slow queue.' },
+      ]);
+      expect(query('edit-review-input')).toBeNull();
+    });
+
+    it('writes nothing when no editor is open', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      component['saveEdit']();
+
+      expect(submitted).toEqual([]);
+    });
+
+    it('writes nothing when the text did not change', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      openEditor();
+      component['saveEdit']();
+
+      expect(submitted).toEqual([]);
+    });
+
+    it('cancels back to the original text and writes nothing', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      openEditor();
+      component['editForm'].setValue({ review: 'Changed my mind' });
+      query('cancel-edit')?.click();
+      fixture.detectChanges();
+
+      expect(submitted).toEqual([]);
+      expect(fixture.nativeElement.textContent).toContain(
+        'Best kebab in Kreuzberg.',
+      );
+    });
+
+    it.each([
+      ['empty', ''],
+      ['whitespace only', '  \n '],
+    ])('refuses to save %s text', (_label, text) => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      openEditor();
+      component['editForm'].setValue({ review: text });
+      fixture.detectChanges();
+
+      expect(component['editForm'].invalid).toBe(true);
+      component['saveEdit']();
+      expect(submitted).toEqual([]);
+    });
+
+    it('closes an open reply composer, and replying closes the editor', () => {
+      render({ thread: thread(), userId: 'mira' });
+
+      query('reply-to-review')?.click();
+      fixture.detectChanges();
+      openEditor();
+
+      expect(query('reply-input')).toBeNull();
+      expect(query('edit-review-input')).toBeTruthy();
+
+      component['startReply'](component.thread().root);
+      fixture.detectChanges();
+
+      expect(query('edit-review-input')).toBeNull();
+      expect(query('reply-input')).toBeTruthy();
+    });
+
+    it('marks an edited review and reply, and leaves the others unmarked', () => {
+      render({
+        thread: {
+          root: review({
+            id: 'root-1',
+            updatedAt: '2026-11-18T12:00:00.000Z',
+          }),
+          replies: [
+            reply('reply-1', { updatedAt: '2026-11-18T12:00:00.000Z' }),
+            reply('reply-2'),
+          ],
+        },
+      });
+
+      expect(queryAll('edited-marker')).toHaveLength(2);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="reply-reply-2"] [data-testid="edited-marker"]',
+        ),
+      ).toBeNull();
+    });
   });
 });

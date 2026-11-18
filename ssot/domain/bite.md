@@ -60,6 +60,11 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A review can be answered. A root review opens a thread, any authenticated user
   may reply inside it, and replies are one level deep. A new root review is a new
   conversation, not a continuation of an existing one. See [issue-1283](../history/records/issue-1283.md).
+- A review or reply can be edited by its author, and the edit changes its text only.
+  Its Bite, its thread, whom it answers, its author and its creation time are fixed when
+  it is written, and `firestore.rules` refuses an author's update to any of them. An
+  edited review carries `updatedAt` and is shown as edited. See
+  [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#721].
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
@@ -423,3 +428,4 @@ images/bites/{biteId}/{filename}
 [#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920
 [#1290]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1290
 [#2026]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2026
+[#721]: https://github.com/muhammedgaygisiz/travellers-apps/issues/721

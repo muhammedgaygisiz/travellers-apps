@@ -4,8 +4,9 @@
 
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
-directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the six contracts below all ship.
-Editing, deleting and reporting a review are not on this page at all — [epic-1284](../history/records/epic-1284.md) owns
+directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the seven contracts below all ship.
+An author editing their own review or reply is the Review Edit Contract (issue [#721]).
+Deleting and reporting a review are not on this page at all — [epic-1284](../history/records/epic-1284.md) owns
 them.
 
 ## Goal
@@ -16,8 +17,8 @@ nothing, and how a review and its thread are attributed.
 
 ## Actors
 
-- **Bite Creator** — opens the Bite, shares it, saves it to a bucket list, and writes or
-  answers a review on it. Marked inside a thread when it is their own Bite, and offered the
+- **Bite Creator** — opens the Bite, shares it, saves it to a bucket list, and writes,
+  answers or edits its own review on it. Marked inside a thread when it is their own Bite, and offered the
   retry when their own header photo failed to upload.
 
 ## Flow
@@ -216,8 +217,8 @@ turns the review compartment from a flat list into a thread list. Implemented by
 - Arriving from a tapped reply notification opens the Bite with that thread
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
-- Editing, deleting and reporting a review or reply are not part of this
-  contract. [epic-1284](../history/records/epic-1284.md) owns them.
+- Editing a review or reply is the Review Edit Contract below. Deleting and
+  reporting one are not part of this contract; [epic-1284](../history/records/epic-1284.md) owns them.
 
 ## Review Attribution Contract
 
@@ -255,6 +256,33 @@ than displays.
   blanking them would remove the only attribution they have. The existing data
   is small enough that no backfill was written for it.
 
+## Review Edit Contract
+
+Issue [#721] lets the author of a review or reply change its text, from the thread
+it sits in. Implemented by `ReviewThreadComponent`, `ReviewApiService.updateReview`
+and the `/reviews` update rule in `firestore.rules`.
+
+- The signed-in author sees an Edit action on each root review and reply they wrote,
+  and on nothing anybody else wrote - the Bite's creator included. A review that
+  carries no `authorId` offers it to nobody, because the app cannot tell who wrote it.
+- Edit swaps the text for an editor holding it, with Cancel and Save. One editor is
+  open at a time in a thread, and opening it closes an open reply composer, and the
+  other way round. Empty or whitespace-only text cannot be saved, and saving unchanged
+  text writes nothing.
+- A saved edit replaces `review` and sets `updatedAt` and `updatedAtTimestamp`, and
+  nothing else. The rules refuse an author's update that touches any other field or
+  leaves the text blank, so an edit cannot move a review to another Bite or thread,
+  re-address what it answers, or hand it to another account. An operator's update is
+  unaffected, and `author` is still rewritten by `syncDisplayNameCopies` through the
+  Admin SDK.
+- An edited item shows an "edited" mark next to its age. The age, the position in the
+  thread and the replies hanging off it stay the original's, because ordering reads
+  `createdAtTimestamp`. There is no edit window and no edit history: the mark exists
+  because an edit made after somebody answered is the risk, not a late one, and it says
+  that the text changed, not what changed.
+- An edit notifies nobody. Both review notifications are creation triggers.
+- A failed save says so in a toast and leaves the original text on screen.
+
 ## Rules And Invariants
 
 The dish explanation of issue [#2106]. The call, the model and the daily allowance follow
@@ -276,7 +304,10 @@ The dish explanation of issue [#2106]. The call, the model and the daily allowan
 review threads. Attribution is release-critical rather than polish — [#1308] was accepted
 as a release blocker because reviews published the name the identity provider holds.
 
-Not on this page: editing, deleting and reporting a review or reply, owned by
+The Review Edit Contract is **[Secondary]**: it came after launch, and a review that
+cannot be corrected is an annoyance rather than a broken page.
+
+Not on this page: deleting and reporting a review or reply, owned by
 [epic-1284](../history/records/epic-1284.md).
 
 ## App Store Review Area
@@ -287,7 +318,9 @@ build's configuration — see [issue-1190](../history/records/issue-1190.md). An
 rather than a cosmetic one: [#1308] published the name the identity provider holds. The
 dish explanation (`R-1` to `R-7`) is AI-generated content: the modal labels it as AI and carries a
 disclaimer, and the privacy policy names Gemini; no store declaration changes, because only public
-Bite content is sent (issue [#2106]). The
+Bite content is sent (issue [#2106]). Editing a review (issue [#721]) is a second way to
+publish user-generated text under Guideline 1.2; it adds no permission or declaration, and
+an edited review can be reported and blocked like any other. The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
@@ -295,11 +328,14 @@ data types this page renders are declared in [Implementation - Store Declaration
 - `bite/:biteId`
 - Bite details page and data-access.
 - Like API.
-- Review API, including `saveReply` and the display-name resolution in
+- Review API, including `saveReply`, `updateReview` and the display-name resolution in
   `loadReviewsByBiteId` and `loadDisplayNamesById`.
+- The `/reviews` update rule, with allow and deny cases for the author's edit in
+  `firestore-rules.emulator-spec.ts`.
 - `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
   states for a bare root, an open thread, a folded one, the notification
-  highlight, the creator badge, and the read-only view.
+  highlight, the creator badge, the read-only view, the author's own review, the open
+  editor, and an edited root review and reply.
 - `toReviewThreads` in `libs/bite-tribe/store`, which owns the grouping and the
   ordering.
 - The AI dish explanation (`R-1` to `R-7`): `explainBite` and
@@ -330,6 +366,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1232] is the Unresolvable Bite Contract above - one settled answer (shown, gone, or failed) for every way this page's read can end.
 - Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language.
 - Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads.
+- Issue [#721] is the Review Edit Contract above - an author edits the text of their own review or reply, part of epic-1284.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
@@ -365,6 +402,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1272]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1272
 [#1283]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1283
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
+[#721]: https://github.com/muhammedgaygisiz/travellers-apps/issues/721
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1726]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1726

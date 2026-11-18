@@ -943,6 +943,29 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** Issue #721: the author's edit, addressed to the Bite on screen. */
+  describe('saveReviewEdit', () => {
+    const edit = { reviewId: 'review-1', review: 'Edited' };
+
+    it('adds the Bite on screen to the edit the thread raised', () => {
+      const emitSpy = jest.spyOn(component.submitReviewEdit, 'emit');
+      componentRef.setInput('bite', { id: '123', name: 'Pizza' });
+
+      component.saveReviewEdit(edit);
+
+      expect(emitSpy).toHaveBeenCalledWith({ ...edit, biteId: '123' });
+    });
+
+    it('sends nothing while the Bite is not loaded', () => {
+      const emitSpy = jest.spyOn(component.submitReviewEdit, 'emit');
+      componentRef.setInput('bite', undefined);
+
+      component.saveReviewEdit(edit);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('isBucketlistBite', () => {
     it('should return true if bite is in any bucketlist', () => {
       const mockBite = { id: '1', name: 'Pizza' };

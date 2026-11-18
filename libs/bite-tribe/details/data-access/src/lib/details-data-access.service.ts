@@ -414,6 +414,21 @@ export class DetailsDataAccessService {
     this.storeService.saveReviewReply(reply);
   }
 
+  /**
+   * Writes the new text of the user's own review or reply and puts the
+   * reloaded compartment into the store (issue #721). Rejects when the write
+   * fails, leaving the store, and the text on screen, as they were.
+   */
+  async updateReview(edit: {
+    reviewId: string;
+    biteId: string;
+    review: string;
+  }): Promise<void> {
+    const reviews = await this.api.updateReview(edit);
+
+    this.storeService.notifyLoadedReviews(reviews);
+  }
+
   saveToBucketList(saveToBucketListEvent: SaveToBucketListParams): void {
     this.storeService.saveToBucketList(saveToBucketListEvent);
   }

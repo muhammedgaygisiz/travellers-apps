@@ -8,33 +8,12 @@
 >
   <ion-label>
     <div class="review-entry">
-      <div class="ion-display-flex ion-align-items-center review-row">
-        <h2>{{ root.author }}</h2>
-        @if (isCreator(root)) {
-          <ion-note class="creator-badge">
-            {{ 'review-creator-badge' | transloco }}
-          </ion-note>
-        }
-        <ion-text
-          ><p>{{ root.review }}</p></ion-text
-        >
-      </div>
-
-      <div class="review-footer">
-        <ion-note>{{ root.createdAt | timeAgo: activeLang() }}</ion-note>
-
-        @if (canReply()) {
-          <ion-button
-            fill="clear"
-            size="small"
-            data-testid="reply-to-review"
-            (click)="startReply(root)"
-          >
-            <ion-icon slot="start" name="arrow-undo-outline" />
-            {{ 'reply' | transloco }}
-          </ion-button>
-        }
-      </div>
+      <ng-container
+        *ngTemplateOutlet="
+          entry;
+          context: { $implicit: root, replyTestId: 'reply-to-review' }
+        "
+      />
     </div>
 
     @if (replies().length) {
@@ -42,7 +21,7 @@
         <ion-button
           fill="clear"
           size="small"
-          class="toggle-replies"
+          class="text-action toggle-replies"
           data-testid="show-replies"
           (click)="expand()"
         >
@@ -56,35 +35,12 @@
               class="review-entry reply"
               [attr.data-testid]="'reply-' + reply.id"
             >
-              <div class="ion-display-flex ion-align-items-center review-row">
-                <h2>{{ reply.author }}</h2>
-                @if (isCreator(reply)) {
-                  <ion-note class="creator-badge">
-                    {{ 'review-creator-badge' | transloco }}
-                  </ion-note>
-                }
-                <ion-text
-                  ><p>{{ reply.review }}</p></ion-text
-                >
-              </div>
-
-              <div class="review-footer">
-                <ion-note>{{
-                  reply.createdAt | timeAgo: activeLang()
-                }}</ion-note>
-
-                @if (canReply()) {
-                  <ion-button
-                    fill="clear"
-                    size="small"
-                    data-testid="reply-to-reply"
-                    (click)="startReply(reply)"
-                  >
-                    <ion-icon slot="start" name="arrow-undo-outline" />
-                    {{ 'reply' | transloco }}
-                  </ion-button>
-                }
-              </div>
+              <ng-container
+                *ngTemplateOutlet="
+                  entry;
+                  context: { $implicit: reply, replyTestId: 'reply-to-reply' }
+                "
+              />
             </div>
           }
         </div>
@@ -109,7 +65,7 @@
           data-testid="reply-input"
         />
 
-        <div class="reply-actions">
+        <div class="composer-actions">
           <ion-button
             fill="clear"
             size="small"
@@ -134,7 +90,7 @@
       <ion-button
         fill="clear"
         size="small"
-        class="toggle-replies"
+        class="text-action toggle-replies"
         data-testid="hide-replies"
         (click)="collapse()"
       >
@@ -144,3 +100,94 @@
     }
   </ion-label>
 </ion-item>
+
+<!--
+  One review or reply, the same for both: who wrote it and when on one line,
+  the text at full width under it, and the actions as quiet text under that.
+  The name used to share a line with the text, which capped it at a width that
+  cut most names short and left the text a narrow, ragged column (#721). While
+  the author edits, the editor takes the place of the text and the actions.
+-->
+<ng-template #entry let-review let-replyTestId="replyTestId">
+  <div class="review-meta">
+    <span class="review-author">{{ review.author }}</span>
+    @if (isCreator(review)) {
+      <span class="creator-badge">
+        {{ 'review-creator-badge' | transloco }}
+      </span>
+    }
+    <span class="review-age">
+      <span aria-hidden="true">·</span>
+      {{ review.createdAt | timeAgo: activeLang() }}
+      @if (review.updatedAt) {
+        <span class="edited-marker" data-testid="edited-marker"
+          >· {{ 'review-edited' | transloco }}</span
+        >
+      }
+    </span>
+  </div>
+
+  @if (editingId() === review.id) {
+    <form class="edit-composer" [formGroup]="editForm">
+      <ion-textarea
+        label="{{ 'edit-review-label' | transloco }}"
+        labelPlacement="stacked"
+        formControlName="review"
+        fill="outline"
+        mode="md"
+        rows="3"
+        [autoGrow]="true"
+        data-testid="edit-review-input"
+      />
+
+      <div class="composer-actions">
+        <ion-button
+          fill="clear"
+          size="small"
+          data-testid="cancel-edit"
+          (click)="cancelEdit()"
+        >
+          {{ 'cancel' | transloco }}
+        </ion-button>
+        <ion-button
+          size="small"
+          data-testid="save-edit"
+          [disabled]="editForm.invalid"
+          (click)="saveEdit()"
+        >
+          {{ 'save' | transloco }}
+        </ion-button>
+      </div>
+    </form>
+  } @else {
+    <p class="review-text">{{ review.review }}</p>
+
+    @if (canReply() || canEdit(review)) {
+      <div class="review-actions">
+        @if (canReply()) {
+          <ion-button
+            fill="clear"
+            size="small"
+            class="text-action"
+            [attr.data-testid]="replyTestId"
+            (click)="startReply(review)"
+          >
+            {{ 'reply' | transloco }}
+          </ion-button>
+        }
+
+        @if (canEdit(review)) {
+          <ion-button
+            fill="clear"
+            size="small"
+            class="text-action"
+            data-testid="edit-review"
+            (click)="startEdit(review)"
+          >
+            {{ 'edit' | transloco }}
+          </ion-button>
+        }
+      </div>
+    }
+  }
+</ng-template>

@@ -157,6 +157,7 @@ describe(DetailsDataAccessService.name, () => {
             reportBite: jest.fn(),
             bitesByUser: jest.fn(),
             removeSelfFromBiteTags: jest.fn(),
+            updateReview: jest.fn(),
           },
         },
         {
@@ -174,6 +175,7 @@ describe(DetailsDataAccessService.name, () => {
             blockedUserIds$: of([]),
             saveReview: jest.fn(),
             saveReviewReply: jest.fn(),
+            notifyLoadedReviews: jest.fn(),
             saveToBucketList: jest.fn(),
             createAndSaveToBucketList: jest.fn(),
             removeBiteFromBucketlist: jest.fn(),
@@ -206,6 +208,34 @@ describe(DetailsDataAccessService.name, () => {
 
     expect(api.removeSelfFromBiteTags).toHaveBeenCalledWith('bite-1');
     expect(reload).toHaveBeenCalled();
+  });
+
+  /** Issue #721: the edit lands, then the reloaded reviews reach the store. */
+  describe('updateReview', () => {
+    const edit = { reviewId: 'review-1', biteId: 'bite-1', review: 'Edited' };
+    const api = (): { updateReview: jest.Mock } =>
+      TestBed.inject(BiteTribeApiService) as unknown as {
+        updateReview: jest.Mock;
+      };
+
+    it('writes the edit and puts the reloaded reviews into the store', async () => {
+      const reviews = [{ id: 'review-1', review: 'Edited' }];
+      api().updateReview.mockResolvedValue(reviews);
+
+      await service.updateReview(edit);
+
+      expect(api().updateReview).toHaveBeenCalledWith(edit);
+      expect(storeService.notifyLoadedReviews).toHaveBeenCalledWith(reviews);
+    });
+
+    it('leaves the store alone and rejects when the write fails', async () => {
+      api().updateReview.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(service.updateReview(edit)).rejects.toThrow(
+        'permission-denied',
+      );
+      expect(storeService.notifyLoadedReviews).not.toHaveBeenCalled();
+    });
   });
 
   /** Reporting goes straight to the callable, not through the store (#1608). */

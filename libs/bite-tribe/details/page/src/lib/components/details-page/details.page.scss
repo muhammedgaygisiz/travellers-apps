@@ -90,37 +90,14 @@
     width: 100%;
   }
 
+  /**
+   * Flush with the review entries under it, which sit at the item's start.
+   * Ionic insets the header by 16px on its host, which left the heading
+   * indented past everything it labels (#721).
+   */
   ion-list-header {
+    padding-inline-start: 0;
+
     color: var(--ion-primary-color);
-  }
-
-  .review {
-    ion-label {
-      .review-row {
-        gap: 8px;
-        margin-bottom: 4px;
-
-        h2 {
-          font-weight: bold;
-          margin-bottom: 4px;
-
-          max-width: 120px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        p {
-          margin: 0;
-          font-size: 16px;
-        }
-      }
-
-      ion-note {
-        font-size: 14px;
-        margin-top: 4px;
-        display: block;
-      }
-    }
   }
 }

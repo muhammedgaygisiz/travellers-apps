@@ -10,14 +10,19 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import {
   IonButton,
   IonIcon,
   IonItem,
   IonLabel,
-  IonNote,
-  IonText,
   IonTextarea,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -30,6 +35,19 @@ import { TimeAgoPipe } from '../details-page/pipes/time-ago.pipe';
  * the screen, so it collapses instead (issue #1283).
  */
 const ALWAYS_VISIBLE_REPLIES = 2;
+
+/** What the page needs to write the new text of the user's own review. */
+export interface ReviewEditSubmit {
+  reviewId: string;
+  review: string;
+}
+
+/**
+ * Whitespace is not a review. The rules refuse it too, so letting it through
+ * here would only trade a disabled button for a failed save (issue #721).
+ */
+const notBlank = (control: AbstractControl<string>): ValidationErrors | null =>
+  control.value.trim() ? null : { blank: true };
 
 /** What the page needs to write the answer the user just typed. */
 export interface ReviewReplySubmit {
@@ -44,12 +62,11 @@ export interface ReviewReplySubmit {
   styleUrl: 'review-thread.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     IonButton,
     IonIcon,
     IonItem,
     IonLabel,
-    IonNote,
-    IonText,
     IonTextarea,
     ReactiveFormsModule,
     TranslocoPipe,
@@ -70,6 +87,12 @@ export class ReviewThreadComponent {
   /** Replying is open to any authenticated user, and to no one else. */
   canReply = input(false, { transform: booleanAttribute });
 
+  /**
+   * The signed-in user, so their own reviews and replies offer an edit. Absent
+   * while signed out, which offers none.
+   */
+  userId = input<string>();
+
   /** Set when a tapped reply notification pointed at this thread. */
   highlighted = input(false, { transform: booleanAttribute });
 
@@ -78,12 +101,23 @@ export class ReviewThreadComponent {
 
   submitReply = output<ReviewReplySubmit>();
 
+  submitEdit = output<ReviewEditSubmit>();
+
   private readonly formBuilder = inject(FormBuilder);
   private readonly host = inject(ElementRef<HTMLElement>);
 
   protected readonly replyForm = this.formBuilder.nonNullable.group({
     review: ['', Validators.required],
   });
+
+  protected readonly editForm = this.formBuilder.nonNullable.group({
+    review: ['', [Validators.required, notBlank]],
+  });
+
+  /** The review being edited in place, or nothing while none is. */
+  private readonly editing = signal<Review | undefined>(undefined);
+
+  protected readonly editingId = computed(() => this.editing()?.id);
 
   /** The review the open composer answers, or nothing while it is closed. */
   private readonly answering = signal<Review | undefined>(undefined);
@@ -146,6 +180,53 @@ export class ReviewThreadComponent {
     return !!creatorId && review.authorId === creatorId;
   }
 
+  /**
+   * Only the author edits, and only a review that names one: a review written
+   * before `authorId` was stored belongs to nobody the app can identify.
+   */
+  protected canEdit(review: Review): boolean {
+    const userId = this.userId();
+
+    return !!userId && review.authorId === userId;
+  }
+
+  /**
+   * Swaps the text for an editor holding it. One editor at a time across the
+   * thread, and never next to an open reply composer, so Save always means one
+   * thing.
+   */
+  protected startEdit(review: Review): void {
+    this.cancelReply();
+    this.editing.set(review);
+    this.editForm.reset({ review: review.review });
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(undefined);
+    this.editForm.reset();
+  }
+
+  /**
+   * Hands the new text to the page and closes the editor. The thread keeps
+   * rendering the stored text until the reloaded review arrives, so a failed
+   * save leaves the original in place rather than the draft.
+   */
+  protected saveEdit(): void {
+    const edited = this.editing();
+
+    if (!edited || !this.editForm.valid) {
+      return;
+    }
+
+    const review = this.editForm.getRawValue().review.trim();
+
+    if (review !== edited.review) {
+      this.submitEdit.emit({ reviewId: edited.id, review });
+    }
+
+    this.cancelEdit();
+  }
+
   protected expand(): void {
     this.expandedByUser.set(true);
   }
@@ -164,6 +245,7 @@ export class ReviewThreadComponent {
   protected startReply(review: Review): void {
     const isReply = !!review.parentReviewId;
 
+    this.cancelEdit();
     this.answering.set(review);
     this.expandedByUser.set(true);
     this.replyForm.reset({ review: isReply ? `@${review.author} ` : '' });

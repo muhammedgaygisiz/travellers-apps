@@ -4,6 +4,12 @@
 
 .review-thread {
   --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-label {
+    margin: 12px 0;
+    white-space: normal;
+  }
 
   /**
    * The thread a notification pointed at. A translucent tint over whatever is
@@ -18,78 +24,97 @@
   }
 }
 
-.review-entry {
-  .review-row {
-    gap: 8px;
-    margin-bottom: 4px;
+/**
+ * Who and when on one line, wrapping as a whole rather than truncating: the
+ * name is never cut short, and a long one pushes the age onto the next line
+ * instead of squeezing the text (#721).
+ */
+.review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  row-gap: 2px;
+  margin-bottom: 2px;
+}
 
-    h2 {
-      font-weight: bold;
-      margin-bottom: 4px;
+.review-author {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ion-text-color);
+  overflow-wrap: anywhere;
+}
 
-      max-width: 120px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+.review-age {
+  font-size: 13px;
+  color: var(--ion-color-medium);
+}
 
-    p {
-      margin: 0;
-      font-size: 16px;
-    }
-  }
-
-  .review-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-
-    ion-note {
-      font-size: 14px;
-      display: block;
-    }
-
-    ion-button {
-      margin: 0;
-      --padding-start: 4px;
-      --padding-end: 4px;
-    }
-  }
+.edited-marker {
+  font-style: italic;
 }
 
 .creator-badge {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--ion-color-primary);
 }
 
+.review-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ion-text-color);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/**
+ * Actions read as quiet text under the review rather than as buttons beside
+ * it, so the review stays the loudest thing in the entry. The buttons keep
+ * their height so they are still a comfortable tap.
+ */
+.review-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.text-action {
+  --padding-start: 0;
+  --padding-end: 0;
+  --color: var(--ion-color-medium);
+
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 /**
  * The one indent a thread ever gets. Answering a reply attaches to the same
- * root, so nothing nests below this level.
+ * root, so nothing nests below this level. The indent alone marks a reply:
+ * the entries under it no longer share the root's layout, so no rule is needed.
  */
-.replies {
-  margin-left: 12px;
-  padding-left: 12px;
-  border-left: 2px solid var(--ion-color-medium, #92949c);
-}
-
-.toggle-replies {
-  margin: 0;
-  --padding-start: 4px;
-  --padding-end: 4px;
-}
-
+.replies,
 .reply-composer {
-  margin-left: 12px;
-  padding-left: 12px;
-  margin-top: 8px;
+  margin-left: 16px;
+}
 
-  .reply-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
-    margin-top: 4px;
-  }
+.replies .review-entry {
+  margin-top: 10px;
+}
+
+.edit-composer,
+.reply-composer {
+  margin-top: 6px;
+}
+
+.composer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
 }

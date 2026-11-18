@@ -89,7 +89,7 @@ Release state and changelog
 - [UC - Guide New Users After Registration](../use-cases/uc-guide-new-users-after-registration.md): [epic-850](https://github.com/muhammedgaygisiz/travellers-apps/issues/850), [epic-907](https://github.com/muhammedgaygisiz/travellers-apps/issues/907), [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741)
 - [UC - Harden Platform And Backend Trust](../use-cases/uc-harden-platform-and-backend-trust.md): none
 - [UC - Improve Localization Quality](../use-cases/uc-improve-localization-quality.md): [epic-738](https://github.com/muhammedgaygisiz/travellers-apps/issues/738)
-- [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md): [epic-1915](https://github.com/muhammedgaygisiz/travellers-apps/issues/1915)
+- [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md): [epic-1284](https://github.com/muhammedgaygisiz/travellers-apps/issues/1284), [epic-1915](https://github.com/muhammedgaygisiz/travellers-apps/issues/1915)
 - [UC - Maintain Restaurants In The Business App](../use-cases/uc-maintain-restaurants-in-the-business-app.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-778](https://github.com/muhammedgaygisiz/travellers-apps/issues/778), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823)
 - [UC - Manage A Bite's Restaurant Assignment](../use-cases/uc-manage-a-bites-restaurant-assignment.md): [epic-1495](https://github.com/muhammedgaygisiz/travellers-apps/issues/1495)
 - [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md): [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823)

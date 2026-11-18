@@ -119,6 +119,21 @@ export class BiteDetailsPage {
     ).toBeVisible();
   }
 
+  /**
+   * Edits the user's own root review in place and waits until the new text is
+   * on screen with its "edited" mark (issue #721).
+   */
+  async editOwnReview(rootReviewId: string, text: string): Promise<void> {
+    const thread = this.thread(rootReviewId);
+    const input = thread.getByTestId('edit-review-input').locator('textarea');
+
+    await thread.getByTestId('edit-review').first().click();
+    await expect(input).toBeVisible();
+    await input.fill(text);
+    await thread.getByTestId('save-edit').click();
+    await expect(thread.getByText(text, { exact: true })).toBeVisible();
+  }
+
   async showReplies(rootReviewId: string): Promise<void> {
     await this.thread(rootReviewId).getByTestId('show-replies').click();
   }

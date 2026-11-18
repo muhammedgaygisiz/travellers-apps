@@ -1078,10 +1078,27 @@ service cloud.firestore {
 
     // ---------------------------------------------------------------- reviews
 
+    /**
+     * An author edits the text of their own review or reply and nothing else
+     * (issue #721). Everything that places the review - its Bite, its thread,
+     * whom it answers, who wrote it and when - is fixed at creation, so an
+     * edit cannot move a review to another Bite or thread or hand it to
+     * another account. `author` is rewritten by `syncDisplayNameCopies`
+     * through the Admin SDK, which these rules do not apply to.
+     */
+    function isOwnReviewEdit() {
+      return owns(resource.data, 'authorId')
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['review', 'updatedAt', 'updatedAtTimestamp'])
+        && request.resource.data.review is string
+        && request.resource.data.review.matches('[\\s\\S]*\\S[\\s\\S]*');
+    }
+
     match /reviews/{reviewId} {
       allow read: if isMember();
       allow create: if owns(request.resource.data, 'authorId');
-      allow update, delete: if isOperator() || owns(resource.data, 'authorId');
+      allow update: if isOperator() || isOwnReviewEdit();
+      allow delete: if isOperator() || owns(resource.data, 'authorId');
     }
 
     // ----------------------------------------------------------- bucket lists

@@ -9,18 +9,24 @@
  * current-state page nobody has verified, a generated block edited by hand or not
  * regenerated, the use-case format rules in ssot/overview/use-case-format.md, a
  * workspace directory the building block view does not name, a Hosting target or
- * workflow the deployment view does not name, and the word budgets of what every agent
- * reads before its task.
+ * workflow the deployment view does not name, a signal of an external system the
+ * context view does not name, and the word budgets of what every agent reads before
+ * its task.
  *
  * Exits non-zero when any rule fails, listing every failure. Warnings are listed
  * too but never change the exit code.
+ *
+ * Writes no file, except with `--accept` (npm run check:ssot -- --accept), which
+ * rewrites tools/check-ssot-baseline.json; see check-ssot-context.mjs.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
 import { MAP, regenerate } from './generate-traceability-map.mjs';
+import { checkContext } from './check-ssot-context.mjs';
 
 const SSOT = resolve('ssot');
+const ACCEPT = process.argv.slice(2).includes('--accept');
 // `Claude outputs` is where the Claude desktop app drops files; it is git-ignored.
 const SKIP = new Set(['assets', 'Claude outputs']);
 const failures = [];
@@ -260,6 +266,13 @@ for (const { file, path } of unresolved) {
   }
 }
 
+// ---- the context view (ssot/architecture/context.md, `Technical Context`) ----
+// Every signal of an external system in the code - a runtime dependency, a hostname, a
+// third-party action, a configuration key - is claimed by a system's `Signals` on the page
+// or by the generated baseline, so a new integration cannot arrive unseen by the view.
+// Large enough to live in its own module.
+const accepted = checkContext({ files: treeList, fail, warn, accept: ACCEPT });
+
 // ---- use-case format (ssot/overview/use-case-format.md) ----
 const SECTIONS = [
   ['Status', 'vvvv'], ['Goal', 'vvvv'], ['Actors', 'vvvv'], ['Lanes', '--vv'],
@@ -422,6 +435,7 @@ if (!failures.length) {
     console.log('\nWarnings (these do not fail the check):\n');
     print(console.log, byRule(warnings));
   }
+  if (accepted) console.log(accepted);
   process.exit(0);
 }
 const failed = byRule(failures);
@@ -431,4 +445,5 @@ if (warnings.length) {
   console.error('Warnings (these do not fail the check):\n');
   print(console.error, byRule(warnings));
 }
+if (accepted) console.error(accepted);
 process.exit(1);

@@ -277,20 +277,21 @@ that page describes a migration with an end state, while action versions are a
 permanent property of the workflows, and this page already owns the workflow
 inventory and the composite actions that call them.
 
-Current, as of the bump under
-[issue #1437][#1437].
+Versions current as of the bump under [issue #1437][#1437]; uses counted across
+`.github/workflows/` and `.github/actions/` on 17 November 2026.
 Every one declares `using: node24`.
 
 | Action                      | Version | Uses |
 | --------------------------- | ------- | ---- |
-| `actions/checkout`          | v7      | 22   |
-| `actions/upload-artifact`   | v7      | 6    |
-| `actions/setup-java`        | v6      | 3    |
+| `actions/checkout`          | v7      | 25   |
+| `actions/upload-artifact`   | v7      | 7    |
+| `actions/setup-java`        | v6      | 5    |
 | `actions/setup-node`        | v7      | 2    |
-| `actions/download-artifact` | v8      | 2    |
-| `actions/cache`             | v6      | 2    |
+| `actions/download-artifact` | v8      | 3    |
+| `actions/cache`             | v6      | 3    |
 | `actions/cache/restore`     | v6      | 1    |
-| `actions/github-script`     | v9      | 1    |
+| `actions/cache/save`        | v6      | 1    |
+| `actions/github-script`     | v9      | 2    |
 
 Third-party actions are versioned by their own projects and are not in this
 table: `FirebaseExtended/action-hosting-deploy`, `r0adkll/upload-google-play`,

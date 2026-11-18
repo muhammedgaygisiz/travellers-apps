@@ -62,6 +62,18 @@
   color: var(--ion-color-primary);
 }
 
+/*
+ * A deleted item holding up replies (#2116): it keeps its place in the
+ * thread, in the quiet colour of the metadata, so the replies under it read as
+ * answering something that is gone rather than nothing at all.
+ */
+.review-deleted {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ion-color-medium);
+}
+
 .review-text {
   margin: 0;
   font-size: 16px;

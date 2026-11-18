@@ -46,6 +46,7 @@ export { validateBiteTaggedUsersOnWrite } from './functions/bites/validate-bite-
 export { checkBiteContent } from './functions/bites/check-bite-content';
 export { moderateBiteOnWrite } from './functions/bites/moderate-bite-on-write';
 export { saveReview, editReview } from './functions/reviews/save-review';
+export { deleteReview } from './functions/reviews/delete-review';
 export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
 export { reportUser } from './functions/users/report-user';
 export {

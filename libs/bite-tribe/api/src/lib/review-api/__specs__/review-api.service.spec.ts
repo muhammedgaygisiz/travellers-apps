@@ -144,4 +144,30 @@ describe(ReviewApiService.name, () => {
       ).rejects.toBeInstanceOf(ContentRefusedError);
     });
   });
+
+  /** Issue #2116: the callable decides between deleting and a tombstone. */
+  describe('deleteReview', () => {
+    it('sends only the review id to deleteReview, then reloads the Bite', async () => {
+      callByName.mockResolvedValue({ data: { status: 'tombstoned' } });
+
+      await expect(
+        service.deleteReview({ reviewId: 'review-1', biteId: 'bite-1' }),
+      ).resolves.toEqual([{ id: 'review-1' }]);
+
+      expect(callByName).toHaveBeenCalledWith({
+        name: 'deleteReview',
+        data: { reviewId: 'review-1' },
+      });
+      expect(loadReviews).toHaveBeenCalledWith('bite-1');
+    });
+
+    it('rejects when the callable refuses', async () => {
+      callByName.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(
+        service.deleteReview({ reviewId: 'review-1', biteId: 'bite-1' }),
+      ).rejects.toThrow('permission-denied');
+      expect(loadReviews).not.toHaveBeenCalled();
+    });
+  });
 });

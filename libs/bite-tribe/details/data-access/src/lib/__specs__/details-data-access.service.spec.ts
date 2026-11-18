@@ -158,6 +158,7 @@ describe(DetailsDataAccessService.name, () => {
             bitesByUser: jest.fn(),
             removeSelfFromBiteTags: jest.fn(),
             updateReview: jest.fn(),
+            deleteReview: jest.fn(),
             saveNewReview: jest.fn(),
             saveReviewReply: jest.fn(),
           },
@@ -208,6 +209,34 @@ describe(DetailsDataAccessService.name, () => {
 
     expect(api.removeSelfFromBiteTags).toHaveBeenCalledWith('bite-1');
     expect(reload).toHaveBeenCalled();
+  });
+
+  /** Issue #2116: the delete lands, then the reloaded reviews reach the store. */
+  describe('deleteReview', () => {
+    const removal = { reviewId: 'review-1', biteId: 'bite-1' };
+    const api = (): { deleteReview: jest.Mock } =>
+      TestBed.inject(BiteTribeApiService) as unknown as {
+        deleteReview: jest.Mock;
+      };
+
+    it('deletes the review and puts the reloaded reviews into the store', async () => {
+      const reviews = [{ id: 'review-2', review: 'Still here' }];
+      api().deleteReview.mockResolvedValue(reviews);
+
+      await service.deleteReview(removal);
+
+      expect(api().deleteReview).toHaveBeenCalledWith(removal);
+      expect(storeService.notifyLoadedReviews).toHaveBeenCalledWith(reviews);
+    });
+
+    it('leaves the store alone and rejects when the delete fails', async () => {
+      api().deleteReview.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(service.deleteReview(removal)).rejects.toThrow(
+        'permission-denied',
+      );
+      expect(storeService.notifyLoadedReviews).not.toHaveBeenCalled();
+    });
   });
 
   /** Issue #721: the edit lands, then the reloaded reviews reach the store. */

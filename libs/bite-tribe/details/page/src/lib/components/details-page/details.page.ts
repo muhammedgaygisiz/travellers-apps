@@ -66,6 +66,7 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { getLocalizedRegionName } from 'bite-tribe-common/bite';
 import {
+  ReviewDeleteRequest,
   ReviewEditSubmit,
   ReviewReplySubmit,
   ReviewThreadComponent,
@@ -178,6 +179,8 @@ export class DetailsPage {
     biteId: string;
     review: string;
   }>();
+  /** The user's withdrawal of their own review or reply (issue #2116). */
+  submitReviewDelete = output<{ reviewId: string; biteId: string }>();
   likeButtonClick = output<LikeClick>();
   readonly logoutClick = output();
   readonly restaurantClick = output<Bite>();
@@ -697,6 +700,40 @@ export class DetailsPage {
     }
 
     this.submitReviewEdit.emit({ ...edit, biteId });
+  }
+
+  /**
+   * Asks before the user's own review or reply is withdrawn (issue #2116).
+   * The message is the same whether or not anybody answered it: either way the
+   * text and the name are gone for good, and what happens to the replies is
+   * not the author's to choose.
+   */
+  async confirmDeleteReview(request: ReviewDeleteRequest): Promise<void> {
+    const biteId = this.bite()?.id;
+
+    if (!biteId) {
+      return;
+    }
+
+    const kind = request.isReply ? 'reply' : 'review';
+    const alert = await this.alertController.create({
+      header: this.transloco.translate(`delete-${kind}-header`),
+      message: this.transloco.translate('delete-review-message'),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('delete-review-confirm'),
+          role: 'destructive',
+          handler: (): void =>
+            this.submitReviewDelete.emit({
+              reviewId: request.reviewId,
+              biteId,
+            }),
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   editBite(bite: Bite | undefined): void {

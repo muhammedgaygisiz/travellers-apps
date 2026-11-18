@@ -141,6 +141,17 @@ export class BiteDetailsPage {
     await expect(thread.getByText(text, { exact: true })).toBeVisible();
   }
 
+  /**
+   * Deletes the user's own review or reply, addressed by the entry that holds
+   * it, confirming the question (issue #2116).
+   */
+  async deleteOwnEntry(entry: Locator, header: string): Promise<void> {
+    await entry.getByTestId('delete-review').first().click();
+    const confirm = this.page.getByRole('alertdialog', { name: header });
+    await confirm.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(confirm).toHaveCount(0);
+  }
+
   async showReplies(rootReviewId: string): Promise<void> {
     await this.thread(rootReviewId).getByTestId('show-replies').click();
   }

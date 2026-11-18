@@ -171,8 +171,8 @@ export const ComposerOpen: Story = {
 };
 
 /**
- * Mira reading her own thread: her review and her reply offer an edit, Ali's
- * reply does not (issue #721).
+ * Mira reading her own thread: her review and her reply offer an edit and a
+ * delete, Ali's reply offers neither (issues #721 and #2116).
  */
 export const OwnReview: Story = {
   args: {
@@ -214,5 +214,35 @@ export const EditedReply: Story = {
   args: {
     ...WithReplies.args,
     thread: thread([edited(twoReplies[0]), twoReplies[1]]),
+  },
+};
+
+/**
+ * What a review looks like once its author deleted it after somebody
+ * answered: the loader hands a tombstone on with no text and no author
+ * (issue #2116).
+ */
+const deleted = (review: Review): Review => ({
+  ...review,
+  author: '',
+  authorId: undefined,
+  review: '',
+  updatedAt: undefined,
+  deletedAt: isoAgo(HOUR_MS),
+});
+
+/** A deleted root review still holding up the replies under it. */
+export const DeletedRootWithReplies: Story = {
+  args: {
+    ...WithReplies.args,
+    thread: { root: deleted(root), replies: twoReplies },
+  },
+};
+
+/** A deleted reply keeping its place between the replies around it. */
+export const DeletedReplyWithReplies: Story = {
+  args: {
+    ...WithReplies.args,
+    thread: thread([deleted(twoReplies[0]), twoReplies[1]]),
   },
 };

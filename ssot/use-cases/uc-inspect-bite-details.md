@@ -4,10 +4,10 @@
 
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
-directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the seven contracts below all ship.
-An author editing their own review or reply is the Review Edit Contract (issue [#721]).
-Deleting and reporting a review are not on this page at all — [epic-1284](../history/records/epic-1284.md) owns
-them.
+directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the eight contracts below all ship.
+An author editing their own review or reply is the Review Edit Contract (issue [#721]), and
+deleting it is the Review Delete Contract (issue [#2116]). Reporting a review or reply is
+not on this page yet — issue [#2117], under [epic-1284](../history/records/epic-1284.md), owns it.
 
 ## Goal
 
@@ -18,7 +18,7 @@ nothing, and how a review and its thread are attributed.
 ## Actors
 
 - **Bite Creator** — opens the Bite, shares it, saves it to a bucket list, and writes,
-  answers or edits its own review on it. Marked inside a thread when it is their own Bite, and offered the
+  answers, edits or deletes its own review on it. Marked inside a thread when it is their own Bite, and offered the
   retry when their own header photo failed to upload.
 
 ## Flow
@@ -217,8 +217,9 @@ turns the review compartment from a flat list into a thread list. Implemented by
 - Arriving from a tapped reply notification opens the Bite with that thread
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
-- Editing a review or reply is the Review Edit Contract below. Deleting and
-  reporting one are not part of this contract; [epic-1284](../history/records/epic-1284.md) owns them.
+- Editing a review or reply is the Review Edit Contract below, and deleting one
+  the Review Delete Contract. Reporting one is not part of this contract; issue
+  [#2117] owns it.
 
 ## Review Attribution Contract
 
@@ -283,6 +284,35 @@ and the `editReview` callable.
 - An edit notifies nobody. Both review notifications are creation triggers.
 - A failed save says so in a toast and leaves the original text on screen.
 
+## Review Delete Contract
+
+Issue [#2116] lets the author of a review or reply withdraw it, from the thread it sits
+in, without taking anybody else's reply down with it. Implemented by
+`ReviewThreadComponent`, `DetailsPage.confirmDeleteReview`, `ReviewApiService.deleteReview`
+and the `deleteReview` callable.
+
+- Delete is offered on exactly the items Edit is: the signed-in author's own, never one
+  without `authorId`, and not to the Bite's creator on somebody else's. It asks first, in
+  a destructive alert that names a review or a reply.
+- **An item nobody answered is deleted.** Its document is gone and the thread closes up
+  around it.
+- **An item somebody answered becomes a tombstone**, because the replies are not the
+  author's to remove. The document stays, with `review`, `author`, `authorId` and the
+  `updatedAt` fields removed and `deletedAt` and `deletedAtTimestamp` set; `biteId`,
+  `parentReviewId`, `threadId` and the created timestamps stay, so it keeps its place and
+  the replies under it keep their parent. It renders as one muted line - "This review was
+  deleted" or "This reply was deleted" - with no name, no age and no action.
+- **A tombstone holds replies up and takes no more.** `saveReview` refuses a reply to it
+  and `editReview` refuses to edit it. When the last reply under a tombstone is deleted,
+  the tombstone is deleted too, and so on up the parent chain.
+- **Only the callable deletes.** The rules refuse an author's client delete, because only
+  the backend can see whether anybody answered. An operator's delete is unaffected.
+- A delete notifies nobody. A tombstone carries no `authorId`, so its former author is not
+  among the participants a later reply notifies.
+- A failed delete says so in a toast and leaves the item on screen.
+- Deleting the account follows the same rule, per the `Deletion Contract` in
+  [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
+
 ## Review Content Check
 
 Issue [#1610]: a review or reply is checked before any other account can read it, by
@@ -322,9 +352,10 @@ review threads. Attribution is release-critical rather than polish — [#1308] w
 as a release blocker because reviews published the name the identity provider holds.
 
 The Review Edit Contract is **[Secondary]**: it came after launch, and a review that
-cannot be corrected is an annoyance rather than a broken page.
+cannot be corrected is an annoyance rather than a broken page. The Review Delete Contract
+is **[Secondary]** for the same reason.
 
-Not on this page: deleting and reporting a review or reply, owned by
+Not on this page: reporting a review or reply, owned by issue [#2117] under
 [epic-1284](../history/records/epic-1284.md).
 
 ## App Store Review Area
@@ -337,7 +368,8 @@ dish explanation (`R-1` to `R-7`) is AI-generated content: the modal labels it a
 disclaimer, and the privacy policy names Gemini; no store declaration changes, because only public
 Bite content is sent (issue [#2106]). Editing a review (issue [#721]) is a second way to
 publish user-generated text under Guideline 1.2; it adds no permission or declaration, and
-an edited review can be reported and blocked like any other. The Review Content Check is
+an edited review can be reported and blocked like any other. Deleting one (issue [#2116])
+adds no permission or declaration either. The Review Content Check is
 the filtering Guideline 1.2 names, for this page's text (issue [#1610]). The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
@@ -346,16 +378,18 @@ data types this page renders are declared in [Implementation - Store Declaration
 - `bite/:biteId`
 - Bite details page and data-access.
 - Like API.
-- Review API, including `saveReply`, `updateReview` and the display-name resolution in
-  `loadReviewsByBiteId` and `loadDisplayNamesById`.
+- Review API, including `saveReply`, `updateReview`, `deleteReview` and the display-name
+  resolution in `loadReviewsByBiteId` and `loadDisplayNamesById`.
 - The `saveReview` and `editReview` callables in
-  `apps/bite-tribe-firebase/functions/src/functions/reviews/save-review.ts`, and the
-  `/reviews` rules, with the cases refusing a client write in
-  `firestore-rules.emulator-spec.ts`.
+  `apps/bite-tribe-firebase/functions/src/functions/reviews/save-review.ts`, the
+  `deleteReview` callable and `removeReviewsByAuthor` in `delete-review.ts` next to it,
+  and the `/reviews` rules, with the cases refusing a client write and an author's
+  client delete in `firestore-rules.emulator-spec.ts`.
 - `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
   states for a bare root, an open thread, a folded one, the notification
   highlight, the creator badge, the read-only view, the author's own review, the open
-  editor, and an edited root review and reply.
+  editor, an edited root review and reply, and a deleted root and reply still holding up
+  replies.
 - `toReviewThreads` in `libs/bite-tribe/store`, which owns the grouping and the
   ordering.
 - The AI dish explanation (`R-1` to `R-7`): `explainBite` and
@@ -387,6 +421,8 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1186] fixed the raw-translation-keys defect the Unresolvable Bite Contract's alert now avoids by waiting for the active language.
 - Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads.
 - Issue [#721] is the Review Edit Contract above - an author edits the text of their own review or reply, part of epic-1284.
+- Issue [#2116] is the Review Delete Contract above - an author withdraws their own review or reply, and one somebody answered stays as a tombstone, part of epic-1284.
+- Issue [#2117] will add reporting a review or reply, part of epic-1284.
 - Issue [#1610] is the Review Content Check above.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
@@ -434,3 +470,5 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
+[#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117

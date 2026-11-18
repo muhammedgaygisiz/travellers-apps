@@ -5,12 +5,13 @@ import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import { checkContent } from '../shared/moderation/check-content';
 import { recordContentRefusal } from '../shared/moderation/content-refusal';
+import { isTombstone } from './delete-review';
 
 /**
  * Reviews and replies are written here rather than by the app (issue #1610),
  * so their text is checked before any other account can read it. The rules
  * refuse every client create and author edit of a review; this callable and
- * {@link editReview} are the way in.
+ * {@link editReview} are the way in, and `deleteReview` the way out.
  *
  * A refusal is an answer rather than an error, so the app can tell the user
  * what happened instead of reporting a failed save.
@@ -76,6 +77,32 @@ const authorNameOf = async (db: Firestore, uid: string): Promise<string> => {
   return typeof displayName === 'string' ? displayName.trim() : '';
 };
 
+/**
+ * A reply needs something to answer: a review that exists and has not been
+ * withdrawn. A tombstone (issue #2116) holds the replies already under it up,
+ * and takes no new ones.
+ */
+const requireAnswerable = async (
+  db: Firestore,
+  parentReviewId: string,
+): Promise<void> => {
+  const parent = await db
+    .collection(REVIEWS_COLLECTION)
+    .doc(parentReviewId)
+    .get();
+
+  if (!parent.exists) {
+    throw new HttpsError('not-found', 'No review found to reply to.');
+  }
+
+  if (isTombstone(parent.data())) {
+    throw new HttpsError(
+      'failed-precondition',
+      'A deleted review cannot be answered.',
+    );
+  }
+};
+
 export const saveReviewForUser = async (
   db: Firestore,
   uid: string,
@@ -91,6 +118,10 @@ export const saveReviewForUser = async (
 
   if (!(await db.collection(BITES_COLLECTION).doc(biteId).get()).exists) {
     throw new HttpsError('not-found', 'No Bite found for this review.');
+  }
+
+  if (parentReviewId) {
+    await requireAnswerable(db, parentReviewId);
   }
 
   const verdict = await checkContent(db, [{ field: 'review', value: review }]);

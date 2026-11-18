@@ -1087,13 +1087,17 @@ service cloud.firestore {
      *
      * The operator clause is the admin app's review migration. `author` is
      * rewritten by `syncDisplayNameCopies` through the Admin SDK, which these
-     * rules do not apply to. An author still deletes their own review here.
+     * rules do not apply to.
+     *
+     * An author deletes through `deleteReview` (issue #2116), not here: a
+     * review somebody answered becomes a tombstone instead of taking their
+     * reply with it, and only a callable can see whether anybody answered.
      */
     match /reviews/{reviewId} {
       allow read: if isMember();
       allow create: if false;
       allow update: if isOperator();
-      allow delete: if isOperator() || owns(resource.data, 'authorId');
+      allow delete: if isOperator();
     }
 
     // ----------------------------------------------------------- bucket lists

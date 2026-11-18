@@ -7,9 +7,12 @@ import { ContentRefusedError } from 'utils';
 type SaveReviewResponse =
   { status: 'saved'; reviewId: string } | { status: 'refused' };
 
+type DeleteReviewResponse = { status: 'deleted' | 'tombstoned' };
+
 /**
  * Reviews and replies are written by the `saveReview` and `editReview`
- * callables rather than straight to Firestore (issue #1610): the backend
+ * callables, and withdrawn by `deleteReview` (issue #2116), rather than
+ * straight to Firestore (issue #1610): the backend
  * checks the text before any other account can read it, and the rules refuse
  * a client write. A refusal arrives as an answer, and is thrown here as a
  * {@link ContentRefusedError} so the page can say what happened.
@@ -66,6 +69,25 @@ export class ReviewApiService {
       reviewId: payload.reviewId,
       review: payload.review,
     });
+
+    return loadReviewsByBiteId(payload.biteId);
+  }
+
+  /**
+   * Withdraws the signed-in user's own review or reply (issue #2116). The
+   * `deleteReview` callable decides what that means: an item nobody answered
+   * is removed, and one somebody answered stays as a tombstone so their reply
+   * keeps its place. The rules refuse a client delete, because only the
+   * backend can see whether anybody answered.
+   */
+  async deleteReview(payload: {
+    reviewId: string;
+    biteId: string;
+  }): Promise<Review[]> {
+    await FirebaseFunctions.callByName<
+      Record<string, string>,
+      DeleteReviewResponse
+    >({ name: 'deleteReview', data: { reviewId: payload.reviewId } });
 
     return loadReviewsByBiteId(payload.biteId);
   }

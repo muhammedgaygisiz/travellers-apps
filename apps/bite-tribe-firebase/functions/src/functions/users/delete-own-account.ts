@@ -13,6 +13,7 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { deleteBiteReportsByReporter } from '../bites/bite-report';
 import { removeTaggedUserFromBites } from '../bites/bite-tagged-users';
 import { deleteUserReportsForUser } from './user-report';
+import { removeReviewsByAuthor } from '../reviews/delete-review';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
 import {
@@ -55,7 +56,6 @@ const BUCKETLISTS_COLLECTION = 'bucketlists';
 const LIKES_COLLECTION = 'likes';
 const AUTHOR_PRIVATE_COLLECTION = 'authorPrivate';
 const RATINGS_COLLECTION = 'ratings';
-const REVIEWS_COLLECTION = 'reviews';
 const SELLS_COLLECTION = 'sells';
 const SETTINGS_COLLECTION = 'settings';
 
@@ -190,18 +190,15 @@ export const deleteBiteAuthorPrivateByUser = (
   );
 
 /**
- * Deletes every review the user wrote. Reviews store the author's display name
- * alongside the id, so they cannot survive the account.
+ * Removes every review the user wrote. Reviews store the author's display name
+ * alongside the id, so they cannot survive the account - but a review somebody
+ * answered becomes a tombstone rather than taking their reply with it, per
+ * `deleteReview` (issue #2116). A tombstone holds neither the name nor the id.
  */
 export const deleteReviewsByUser = (
   db: Firestore,
   uid: string,
-): Promise<number> =>
-  applyToQuery(
-    db,
-    db.collection(REVIEWS_COLLECTION).where('authorId', '==', uid),
-    (batch, ref) => batch.delete(ref),
-  );
+): Promise<number> => removeReviewsByAuthor(db, uid);
 
 export const deleteBucketlistsByUser = (
   db: Firestore,

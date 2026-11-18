@@ -57,14 +57,22 @@ const as = <T>(uid: string, data: T): CallableRequest<T> =>
     data,
   }) as unknown as CallableRequest<T>;
 
+/** Every review written by the test, leaving out the seeded `root-1`. */
 const reviews = async (): Promise<Record<string, unknown>[]> =>
-  (await db.collection('reviews').get()).docs.map((doc) => doc.data());
+  (await db.collection('reviews').get()).docs
+    .filter((doc) => doc.id !== 'root-1')
+    .map((doc) => doc.data());
 
 describe('saveReview', () => {
   beforeEach(() => {
     db = createFakeFirestore();
     db.seed('bites/bite-1', { name: 'Ramen', userId: OTHER });
     db.seed(`users/${AUTHOR}`, { displayName: 'Ana' });
+    db.seed('reviews/root-1', {
+      review: 'Root',
+      authorId: OTHER,
+      biteId: '/bites/bite-1',
+    });
     (recordContentRefusal as jest.Mock).mockClear();
   });
 
@@ -98,6 +106,40 @@ describe('saveReview', () => {
     expect(await reviews()).toEqual([
       expect.objectContaining({ parentReviewId: 'root-1', threadId: 'root-1' }),
     ]);
+  });
+
+  it('rejects a reply to a review that does not exist', async () => {
+    await expect(
+      saveReviewHandler(
+        as<SaveReviewRequest>(AUTHOR, {
+          biteId: 'bite-1',
+          review: 'Agreed',
+          parentReviewId: 'missing',
+          threadId: 'missing',
+        }),
+      ),
+    ).rejects.toMatchObject({ code: 'not-found' });
+  });
+
+  // Issue #2116: a tombstone holds up the replies under it and takes no more.
+  it('rejects a reply to a deleted review', async () => {
+    db.seed('reviews/root-1', {
+      biteId: '/bites/bite-1',
+      deletedAt: '2026-11-04T10:00:00.000Z',
+      deletedAtTimestamp: 4,
+    });
+
+    await expect(
+      saveReviewHandler(
+        as<SaveReviewRequest>(AUTHOR, {
+          biteId: 'bite-1',
+          review: 'Agreed',
+          parentReviewId: 'root-1',
+          threadId: 'root-1',
+        }),
+      ),
+    ).rejects.toMatchObject({ code: 'failed-precondition' });
+    expect(await reviews()).toEqual([]);
   });
 
   it('refuses objectionable text, writes nothing and records the attempt', async () => {
@@ -223,6 +265,21 @@ describe('editReview', () => {
       ),
     ).rejects.toMatchObject({ code: 'permission-denied' });
     expect(db.read('reviews/review-1')?.['review']).toBe('Good');
+  });
+
+  it('rejects an edit of a deleted review, which belongs to nobody', async () => {
+    db.seed('reviews/review-1', {
+      biteId: '/bites/bite-1',
+      deletedAt: '2026-11-04T10:00:00.000Z',
+      deletedAtTimestamp: 4,
+    });
+
+    await expect(
+      editReviewHandler(
+        as<EditReviewRequest>(AUTHOR, { reviewId: 'review-1', review: 'Back' }),
+      ),
+    ).rejects.toMatchObject({ code: 'permission-denied' });
+    expect(db.read('reviews/review-1')?.['review']).toBeUndefined();
   });
 
   it('rejects an edit of a review that does not exist', async () => {

@@ -313,6 +313,7 @@ class FakeWriteBatch {
  */
 export interface FakeTransaction {
   get(ref: FakeDocumentReference): Promise<DocumentSnapshot>;
+  get(query: FakeQuery): ReturnType<FakeQuery['get']>;
   set(
     ref: FakeDocumentReference,
     data: DocData,
@@ -358,7 +359,8 @@ export const createFakeFirestore = (): FakeFirestore => {
     ): Promise<T> => {
       const writes = new FakeWriteBatch(store);
       const transaction: FakeTransaction = {
-        get: (ref) => ref.get(),
+        get: ((target: FakeDocumentReference | FakeQuery) =>
+          target.get()) as FakeTransaction['get'],
         set: (ref, data, options) => {
           writes.set(ref, data, options);
 

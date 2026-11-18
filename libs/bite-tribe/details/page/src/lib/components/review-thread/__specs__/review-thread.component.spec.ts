@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import type { Review, ReviewThread } from 'model';
 import { addNecessaryIcons } from 'utils';
 import {
+  ReviewDeleteRequest,
   ReviewEditSubmit,
   ReviewReplySubmit,
   ReviewThreadComponent,
@@ -455,6 +456,141 @@ describe(ReviewThreadComponent.name, () => {
           '[data-testid="reply-reply-2"] [data-testid="edited-marker"]',
         ),
       ).toBeNull();
+    });
+  });
+
+  /** Issue #2116: withdrawing one's own review or reply. */
+  describe('deleting', () => {
+    const queryAll = (testId: string): HTMLElement[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`),
+      );
+
+    const requests = (): ReviewDeleteRequest[] => {
+      const requested: ReviewDeleteRequest[] = [];
+      component.deleteReview.subscribe((event) => requested.push(event));
+
+      return requested;
+    };
+
+    const tombstone = (overrides: Partial<Review> & { id: string }): Review =>
+      review({
+        author: '',
+        authorId: undefined,
+        review: '',
+        deletedAt: '2026-11-18T12:00:00.000Z',
+        ...overrides,
+      });
+
+    it('offers a delete on the signed-in user’s own review and reply only', () => {
+      render({
+        thread: thread([
+          reply('reply-1'),
+          reply('reply-2', { authorId: 'mira' }),
+        ]),
+        userId: 'mira',
+      });
+
+      expect(queryAll('delete-review')).toHaveLength(2);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="reply-reply-1"] [data-testid="delete-review"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('offers the Bite creator no delete on somebody else’s review', () => {
+      render({ thread: thread(), userId: 'creator', biteCreatorId: 'creator' });
+
+      expect(query('delete-review')).toBeNull();
+    });
+
+    it('offers no delete on a legacy review without an author uid', () => {
+      render({
+        thread: {
+          root: review({ id: 'root-1', authorId: undefined }),
+          replies: [],
+        },
+        userId: 'mira',
+      });
+
+      expect(query('delete-review')).toBeNull();
+    });
+
+    it('asks the page to delete a review, naming it a review', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const requested = requests();
+
+      query('delete-review')?.click();
+
+      expect(requested).toEqual([{ reviewId: 'root-1', isReply: false }]);
+    });
+
+    it('asks the page to delete a reply, naming it a reply', () => {
+      render({
+        thread: thread([reply('reply-1', { authorId: 'mira' })]),
+        userId: 'mira',
+      });
+      const requested = requests();
+
+      fixture.nativeElement
+        .querySelector(
+          '[data-testid="reply-reply-1"] [data-testid="delete-review"]',
+        )
+        .click();
+
+      expect(requested).toEqual([{ reviewId: 'reply-1', isReply: true }]);
+    });
+
+    it('closes an open editor before asking', () => {
+      render({ thread: thread(), userId: 'mira' });
+      query('edit-review')?.click();
+      fixture.detectChanges();
+
+      component['requestDelete'](component.thread().root);
+      fixture.detectChanges();
+
+      expect(query('edit-review-input')).toBeNull();
+    });
+
+    it('shows a deleted root in its place, with its replies still under it', () => {
+      render({
+        thread: {
+          root: tombstone({ id: 'root-1' }),
+          replies: [reply('reply-1')],
+        },
+        userId: 'jonas',
+      });
+
+      expect(query('deleted-review')?.textContent?.trim()).toBe(
+        'review-deleted',
+      );
+      expect(query('reply-reply-1')?.textContent).toContain(
+        'Was it very spicy?',
+      );
+    });
+
+    it('names a deleted reply as a reply', () => {
+      render({
+        thread: thread([
+          tombstone({ id: 'reply-1', parentReviewId: 'root-1' }),
+        ]),
+      });
+
+      expect(query('deleted-review')?.textContent?.trim()).toBe(
+        'reply-deleted',
+      );
+    });
+
+    it('offers nothing on a deleted item: no reply, edit or delete', () => {
+      render({
+        thread: { root: tombstone({ id: 'root-1' }), replies: [] },
+        userId: 'mira',
+      });
+
+      expect(query('reply-to-review')).toBeNull();
+      expect(query('edit-review')).toBeNull();
+      expect(query('delete-review')).toBeNull();
     });
   });
 });

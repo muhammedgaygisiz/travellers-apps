@@ -65,6 +65,7 @@ import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-cur
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { getLocalizedRegionName } from 'bite-tribe-common/bite';
 import {
+  ReviewEditSubmit,
   ReviewReplySubmit,
   ReviewThreadComponent,
 } from '../review-thread/review-thread.component';
@@ -163,6 +164,12 @@ export class DetailsPage {
     biteId: string;
     parentReviewId: string;
     threadId: string;
+  }>();
+  /** The user's edit of their own review or reply (issue #721). */
+  submitReviewEdit = output<{
+    reviewId: string;
+    biteId: string;
+    review: string;
   }>();
   likeButtonClick = output<LikeClick>();
   readonly logoutClick = output();
@@ -623,6 +630,17 @@ export class DetailsPage {
     }
 
     this.submitReviewReply.emit({ ...reply, biteId });
+  }
+
+  /** Same reasoning as `saveReply`: the Bite id is the one on screen. */
+  saveReviewEdit(edit: ReviewEditSubmit): void {
+    const biteId = this.bite()?.id;
+
+    if (!biteId) {
+      return;
+    }
+
+    this.submitReviewEdit.emit({ ...edit, biteId });
   }
 
   editBite(bite: Bite | undefined): void {

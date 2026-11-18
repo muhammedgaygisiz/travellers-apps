@@ -87,6 +87,37 @@ export class ReviewApiService {
   }
 
   /**
+   * Replaces the text of the signed-in user's own review or reply (issue #721).
+   *
+   * Only the text and the two `updatedAt` fields are written: the rules refuse
+   * an author's update that touches anything else, so the review cannot leave
+   * its Bite or its thread. `updatedAt` is what marks the review as edited,
+   * and ordering stays on `createdAtTimestamp`, so an edit never moves it.
+   *
+   * Unlike the two save paths this one throws rather than resolving to an empty
+   * list: the caller has to tell the user the edit did not land, and an empty
+   * compartment would also wipe the reviews on screen.
+   */
+  async updateReview(payload: {
+    reviewId: string;
+    biteId: string;
+    review: string;
+  }): Promise<Review[]> {
+    const now = new Date();
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${REVIEW_COLLECTION}/${payload.reviewId}`,
+      data: {
+        review: payload.review,
+        updatedAt: now.toISOString(),
+        updatedAtTimestamp: now.getTime(),
+      },
+    });
+
+    return loadReviewsByBiteId(payload.biteId);
+  }
+
+  /**
    * The name a review is written under.
    *
    * Read from the user's profile rather than from the Firebase Auth user: the

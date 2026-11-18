@@ -347,9 +347,11 @@
           [thread]="thread"
           [biteCreatorId]="biteCreatorData?.userId"
           [canReply]="isAuthenticated()"
+          [userId]="userId()"
           [highlighted]="thread.root.id === highlightedThreadId()"
           [activeLang]="activeLang()"
           (submitReply)="saveReply($event)"
+          (submitEdit)="saveReviewEdit($event)"
         />
         } }
       </ion-list>

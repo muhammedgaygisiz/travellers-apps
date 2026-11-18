@@ -31,6 +31,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (retryLoad)="service.retryBiteLoad()"
       (submitNewReview)="service.saveReview($event)"
       (submitReviewReply)="service.saveReviewReply($event)"
+      (submitReviewEdit)="service.updateReview($event)"
       (selectList)="service.addBiteToSelectedBucketList($event)"
       (removeBiteFromBucketlist)="service.removeBiteFromBucketlist($event)"
       (newList)="service.saveBiteToBucketListWithNewList($event)"

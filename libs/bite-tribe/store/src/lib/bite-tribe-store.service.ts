@@ -3,7 +3,11 @@ import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { BiteActions } from './bites/actions';
-import { saveNewReview, saveReviewReply } from './reviews/actions';
+import {
+  loadedReviewsFromApi,
+  saveNewReview,
+  saveReviewReply,
+} from './reviews/actions';
 import { bites, sortedHomeBites } from './bites/home-bites.selector';
 import {
   bitesByUser,
@@ -38,6 +42,7 @@ import type {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   Restaurant,
+  Review,
   SaveToBucketListParams,
   Settings,
 } from 'model';
@@ -291,6 +296,16 @@ export class BiteTribeStoreService implements StoreService {
     threadId: string;
   }): void {
     this.store.dispatch(saveReviewReply(reply));
+  }
+
+  /**
+   * Puts a Bite's review compartment, already reloaded after a write, into the
+   * store. An edit goes through the API directly rather than an effect because
+   * its caller has to know whether it landed (issue #721); this is how the
+   * result still reaches every reader.
+   */
+  notifyLoadedReviews(reviews: Review[]): void {
+    this.store.dispatch(loadedReviewsFromApi({ reviews }));
   }
 
   selectRestaurantToCreate(restaurant: Restaurant): void {

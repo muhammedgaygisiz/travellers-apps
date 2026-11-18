@@ -164,6 +164,28 @@ export class DetailsService {
     this.dataAccess.saveReviewReply(reply);
   }
 
+  /**
+   * Saves the user's edit of their own review or reply (issue #721). Success
+   * needs no toast: the new text and its "edited" mark are on screen. A failure
+   * says so, because the review would otherwise just snap back to the old text.
+   */
+  async updateReview(edit: {
+    reviewId: string;
+    biteId: string;
+    review: string;
+  }): Promise<void> {
+    try {
+      await this.dataAccess.updateReview(edit);
+    } catch (error) {
+      console.error('Failed to update the review:', error);
+
+      await this.toast.present({
+        messageKey: 'review-edit-failed',
+        outcome: 'failure',
+      });
+    }
+  }
+
   addBiteToSelectedBucketList(list: Bucketlist): void {
     const currBite = this.biteValue();
 

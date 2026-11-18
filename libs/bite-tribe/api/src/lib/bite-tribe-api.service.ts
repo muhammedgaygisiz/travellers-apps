@@ -94,6 +94,15 @@ export class BiteTribeApiService {
     return this.reviewApiService.saveReply(payload);
   }
 
+  /** Rejects when the write fails; see `ReviewApiService.updateReview`. */
+  updateReview(payload: {
+    reviewId: string;
+    biteId: string;
+    review: string;
+  }): Promise<Review[]> {
+    return this.reviewApiService.updateReview(payload);
+  }
+
   reviewsByBiteId(biteId: string): Promise<Review[]> {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }

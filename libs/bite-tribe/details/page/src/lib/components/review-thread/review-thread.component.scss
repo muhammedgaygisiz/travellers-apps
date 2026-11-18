@@ -55,7 +55,17 @@
       --padding-start: 4px;
       --padding-end: 4px;
     }
+
+    .review-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
   }
+}
+
+.edited-marker {
+  font-style: italic;
 }
 
 .creator-badge {
@@ -81,10 +91,17 @@
   --padding-end: 4px;
 }
 
+.edit-composer {
+  margin-top: 4px;
+}
+
+.edit-composer,
 .reply-composer {
-  margin-left: 12px;
-  padding-left: 12px;
-  margin-top: 8px;
+  &.reply-composer {
+    margin-left: 12px;
+    padding-left: 12px;
+    margin-top: 8px;
+  }
 
   .reply-actions {
     display: flex;

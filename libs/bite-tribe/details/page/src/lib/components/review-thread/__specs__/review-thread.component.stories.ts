@@ -169,3 +169,50 @@ export const ComposerOpen: Story = {
       ?.click();
   },
 };
+
+/**
+ * Mira reading her own thread: her review and her reply offer an edit, Ali's
+ * reply does not (issue #721).
+ */
+export const OwnReview: Story = {
+  args: {
+    ...WithReplies.args,
+    userId: MIRA,
+  },
+};
+
+/** The author's review swapped for the editor holding its text. */
+export const Editing: Story = {
+  args: {
+    ...OwnReview.args,
+  },
+  play: ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-testid="edit-review"]')
+      ?.click();
+  },
+};
+
+const edited = (review: Review): Review => ({
+  ...review,
+  updatedAt: isoAgo(HOUR_MS),
+});
+
+/**
+ * An edited root review. The mark is what keeps an edit made after somebody
+ * answered from passing silently; the age stays the review's own.
+ */
+export const EditedRootReview: Story = {
+  args: {
+    ...WithReplies.args,
+    thread: { root: edited(root), replies: twoReplies },
+  },
+};
+
+/** An edited reply, marked the same way inside the thread. */
+export const EditedReply: Story = {
+  args: {
+    ...WithReplies.args,
+    thread: thread([edited(twoReplies[0]), twoReplies[1]]),
+  },
+};

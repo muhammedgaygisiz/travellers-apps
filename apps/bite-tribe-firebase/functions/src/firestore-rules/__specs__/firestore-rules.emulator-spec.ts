@@ -3002,6 +3002,61 @@ describe('reviews', () => {
       }),
     );
   });
+
+  // Issue #721: an author corrects the text and nothing else.
+  it('lets an author edit the text of their own review', async () => {
+    await assertSucceeds(
+      updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
+        review: 'Good, but the broth was cold',
+        updatedAt: '2026-11-18T12:00:00.000Z',
+        updatedAtTimestamp: 1795521600000,
+      }),
+    );
+  });
+
+  it.each([
+    ['biteId', { biteId: 'another-bite' }],
+    ['authorId', { authorId: STRANGER }],
+    ['parentReviewId', { parentReviewId: 'another-review' }],
+    ['threadId', { threadId: 'another-thread' }],
+    ['createdAt', { createdAt: '2020-01-01T00:00:00.000Z' }],
+    ['author', { author: 'Somebody Else' }],
+  ])(
+    'refuses an author edit that changes %s',
+    async (_field, change: Record<string, unknown>) => {
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
+          review: 'Edited',
+          ...change,
+        }),
+      );
+    },
+  );
+
+  it.each([
+    ['empty', ''],
+    ['whitespace only', ' \n\t '],
+  ])('refuses an author edit to %s text', async (_label, text) => {
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'reviews', 'consumer-review'), {
+        review: text,
+      }),
+    );
+  });
+
+  it('still lets an operator update a review', async () => {
+    await assertSucceeds(
+      updateDoc(doc(asOperator(), 'reviews', 'consumer-review'), {
+        review: 'Moderated',
+      }),
+    );
+  });
+
+  it('still lets an author delete their own review', async () => {
+    await assertSucceeds(
+      deleteDoc(doc(asConsumer(), 'reviews', 'consumer-review')),
+    );
+  });
 });
 
 describe('bucket lists', () => {

@@ -284,4 +284,53 @@ describe(ReviewApiService.name, () => {
       ));
     });
   });
+
+  describe('updateReview', () => {
+    it('writes only the text and the edit timestamps, then reloads the Bite', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        const updateDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockResolvedValue(undefined as never);
+
+        await service.updateReview({
+          reviewId: 'review-1',
+          biteId: 'biteId123',
+          review: 'Great food, slow service',
+        });
+
+        // Anything beyond these three fields is refused by the rules (#721).
+        expect(updateDocumentSpy).toHaveBeenCalledWith({
+          reference: 'reviews/review-1',
+          data: {
+            review: 'Great food, slow service',
+            updatedAt: '2024-03-15T12:00:00.000Z',
+            updatedAtTimestamp: 1710504000000,
+          },
+        });
+        expect(
+          loadReviewsByBiteIdUtils.loadReviewsByBiteId,
+        ).toHaveBeenCalledWith('biteId123');
+      },
+    ));
+
+    // The caller tells the user the edit did not land, so the failure has to
+    // reach it instead of turning into an empty compartment.
+    it('rejects when the write fails', inject(
+      [ReviewApiService],
+      async (service: ReviewApiService) => {
+        jest
+          .spyOn(FirebaseFirestore, 'updateDocument')
+          .mockRejectedValue(new Error('permission-denied'));
+
+        await expect(
+          service.updateReview({
+            reviewId: 'review-1',
+            biteId: 'biteId123',
+            review: 'Edited',
+          }),
+        ).rejects.toThrow('permission-denied');
+      },
+    ));
+  });
 });

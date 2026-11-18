@@ -445,3 +445,81 @@ test.describe('Answer a review', () => {
     await expect(details.thread(otherRootId)).not.toHaveClass(/highlighted/);
   });
 });
+
+test.describe('Edit my review', () => {
+  // Issue #721: an author corrects their own review in place, and only theirs.
+  test('edits the text of my own review and marks it, and nobody else’s', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const biteId = `edit-bite-${runId}`;
+    const creatorId = `edit-creator-${runId}`;
+    const ownId = `edit-own-${runId}`;
+    const otherId = `edit-other-${runId}`;
+    const ownText = `Broth was cold ${runId}`;
+    const editedText = `Broth was cold, noodles were great ${runId}`;
+
+    await Promise.all([
+      seedUser(page, creatorId, `Edit Creator ${runId}`),
+      seedBite(page, biteId, `Edit Ramen ${runId}`, creatorId),
+    ]);
+
+    await seedReview(page, {
+      id: ownId,
+      biteId,
+      author: 'Test User',
+      authorId: TEST_USERS.default.uid,
+      review: ownText,
+      writtenAt: runId,
+    });
+    await seedReview(page, {
+      id: otherId,
+      biteId,
+      author: `Edit Creator ${runId}`,
+      authorId: creatorId,
+      review: `Come back on Sunday ${runId}`,
+      writtenAt: runId + 1,
+    });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+
+    const details = await openBite(page, `/bite/${biteId}`);
+
+    await expect(details.thread(ownId)).toBeVisible();
+    await expect(
+      details.thread(otherId).getByTestId('edit-review'),
+    ).toHaveCount(0);
+    await expect(
+      details.thread(ownId).getByTestId('edited-marker'),
+    ).toHaveCount(0);
+
+    await details.editOwnReview(ownId, editedText);
+    await expect(
+      details.thread(ownId).getByTestId('edited-marker'),
+    ).toBeVisible();
+
+    // Only the text and the edit timestamps changed; the review stayed on its
+    // Bite, under its author, with its original creation time.
+    await expect
+      .poll(
+        () => getDocumentByStringField(page, 'reviews', 'review', editedText),
+        { timeout: 15_000 },
+      )
+      .toMatchObject({
+        review: editedText,
+        biteId: `/bites/${biteId}`,
+        authorId: TEST_USERS.default.uid,
+        createdAtTimestamp: runId,
+        updatedAt: expect.any(String),
+      });
+
+    // Ordering reads the creation time, so the edit did not move it above the
+    // newer review.
+    await expect(
+      details.reviewThreads.first().getByTestId(`review-thread-${otherId}`),
+    ).toBeVisible();
+  });
+});

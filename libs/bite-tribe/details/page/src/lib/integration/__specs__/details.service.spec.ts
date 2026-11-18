@@ -62,6 +62,7 @@ const createMockDataAccess = (
     saveNewTags: jest.fn(),
     saveNewReview: jest.fn(),
     saveReviewReply: jest.fn(),
+    updateReview: jest.fn().mockResolvedValue(undefined),
     saveToBucketList: jest.fn(),
     createAndSaveToBucketList: jest.fn(),
     removeBiteFromBucketlist: jest.fn(),
@@ -1420,6 +1421,38 @@ describe('DetailsService', () => {
 
       expect(mockToast.present).toHaveBeenCalledWith({
         messageKey: 'ate-with-remove-failed',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /** Editing one's own review or reply (issue #721). */
+  describe('updateReview', () => {
+    const edit = {
+      reviewId: 'review-1',
+      biteId: 'bite123',
+      review: 'Edited text',
+    };
+
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('saves the edit without a toast, since the edited text is on screen', async () => {
+      await service.updateReview(edit);
+
+      expect(service.dataAccess.updateReview).toHaveBeenCalledWith(edit);
+      expect(mockToast.present).not.toHaveBeenCalled();
+    });
+
+    it('says the edit failed rather than letting the text snap back silently', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.updateReview)
+        .mockRejectedValueOnce(new Error('permission-denied'));
+
+      await service.updateReview(edit);
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'review-edit-failed',
         outcome: 'failure',
       });
     });

@@ -15,26 +15,19 @@
             {{ 'review-creator-badge' | transloco }}
           </ion-note>
         }
-        <ion-text
-          ><p>{{ root.review }}</p></ion-text
-        >
-      </div>
-
-      <div class="review-footer">
-        <ion-note>{{ root.createdAt | timeAgo: activeLang() }}</ion-note>
-
-        @if (canReply()) {
-          <ion-button
-            fill="clear"
-            size="small"
-            data-testid="reply-to-review"
-            (click)="startReply(root)"
+        @if (editingId() !== root.id) {
+          <ion-text
+            ><p>{{ root.review }}</p></ion-text
           >
-            <ion-icon slot="start" name="arrow-undo-outline" />
-            {{ 'reply' | transloco }}
-          </ion-button>
         }
       </div>
+
+      <ng-container
+        *ngTemplateOutlet="
+          entryFooter;
+          context: { $implicit: root, replyTestId: 'reply-to-review' }
+        "
+      />
     </div>
 
     @if (replies().length) {
@@ -63,28 +56,19 @@
                     {{ 'review-creator-badge' | transloco }}
                   </ion-note>
                 }
-                <ion-text
-                  ><p>{{ reply.review }}</p></ion-text
-                >
-              </div>
-
-              <div class="review-footer">
-                <ion-note>{{
-                  reply.createdAt | timeAgo: activeLang()
-                }}</ion-note>
-
-                @if (canReply()) {
-                  <ion-button
-                    fill="clear"
-                    size="small"
-                    data-testid="reply-to-reply"
-                    (click)="startReply(reply)"
+                @if (editingId() !== reply.id) {
+                  <ion-text
+                    ><p>{{ reply.review }}</p></ion-text
                   >
-                    <ion-icon slot="start" name="arrow-undo-outline" />
-                    {{ 'reply' | transloco }}
-                  </ion-button>
                 }
               </div>
+
+              <ng-container
+                *ngTemplateOutlet="
+                  entryFooter;
+                  context: { $implicit: reply, replyTestId: 'reply-to-reply' }
+                "
+              />
             </div>
           }
         </div>
@@ -144,3 +128,81 @@
     }
   </ion-label>
 </ion-item>
+
+<!--
+  The part of a root review and of a reply that is the same for both: the
+  editor that replaces the text while the author edits it, the age with its
+  "edited" mark, and the actions (issue #721).
+-->
+<ng-template #entryFooter let-review let-replyTestId="replyTestId">
+  @if (editingId() === review.id) {
+    <form class="edit-composer" [formGroup]="editForm">
+      <ion-textarea
+        label="{{ 'edit-review-label' | transloco }}"
+        labelPlacement="stacked"
+        formControlName="review"
+        fill="outline"
+        mode="md"
+        rows="3"
+        [autoGrow]="true"
+        data-testid="edit-review-input"
+      />
+
+      <div class="reply-actions">
+        <ion-button
+          fill="clear"
+          size="small"
+          data-testid="cancel-edit"
+          (click)="cancelEdit()"
+        >
+          {{ 'cancel' | transloco }}
+        </ion-button>
+        <ion-button
+          size="small"
+          data-testid="save-edit"
+          [disabled]="editForm.invalid"
+          (click)="saveEdit()"
+        >
+          {{ 'save' | transloco }}
+        </ion-button>
+      </div>
+    </form>
+  } @else {
+    <div class="review-footer">
+      <ion-note
+        >{{ review.createdAt | timeAgo: activeLang() }}
+        @if (review.updatedAt) {
+          <span class="edited-marker" data-testid="edited-marker"
+            >· {{ 'review-edited' | transloco }}</span
+          >
+        }
+      </ion-note>
+
+      <div class="review-actions">
+        @if (canEdit(review)) {
+          <ion-button
+            fill="clear"
+            size="small"
+            data-testid="edit-review"
+            (click)="startEdit(review)"
+          >
+            <ion-icon slot="start" name="create-outline" />
+            {{ 'edit' | transloco }}
+          </ion-button>
+        }
+
+        @if (canReply()) {
+          <ion-button
+            fill="clear"
+            size="small"
+            [attr.data-testid]="replyTestId"
+            (click)="startReply(review)"
+          >
+            <ion-icon slot="start" name="arrow-undo-outline" />
+            {{ 'reply' | transloco }}
+          </ion-button>
+        }
+      </div>
+    </div>
+  }
+</ng-template>

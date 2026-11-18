@@ -179,6 +179,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // allowance is per account, which an anonymous uid would reset at will.
   explainBite: 'member',
   claimDisplayName: 'member',
+  // The content-checked write paths of issue #1610: each acts on the
+  // caller's own Bite, review or profile only.
+  checkBiteContent: 'member',
+  saveReview: 'member',
+  editReview: 'member',
+  updateProfileText: 'member',
   countUsers: 'member',
   deleteOwnAccount: 'member',
   getCurrencyByPosition: 'member',

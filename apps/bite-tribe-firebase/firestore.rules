@@ -1079,25 +1079,20 @@ service cloud.firestore {
     // ---------------------------------------------------------------- reviews
 
     /**
-     * An author edits the text of their own review or reply and nothing else
-     * (issue #721). Everything that places the review - its Bite, its thread,
-     * whom it answers, who wrote it and when - is fixed at creation, so an
-     * edit cannot move a review to another Bite or thread or hand it to
-     * another account. `author` is rewritten by `syncDisplayNameCopies`
-     * through the Admin SDK, which these rules do not apply to.
+     * Reviews and replies are written by the `saveReview` and `editReview`
+     * callables (issue #1610), which check the text before any other account
+     * can read it, so no client creates one or edits its text. The author's
+     * edit of issue #721 is `editReview`'s, and keeps that issue's limit: the
+     * text and its two `updatedAt` fields, nothing that places the review.
+     *
+     * The operator clause is the admin app's review migration. `author` is
+     * rewritten by `syncDisplayNameCopies` through the Admin SDK, which these
+     * rules do not apply to. An author still deletes their own review here.
      */
-    function isOwnReviewEdit() {
-      return owns(resource.data, 'authorId')
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['review', 'updatedAt', 'updatedAtTimestamp'])
-        && request.resource.data.review is string
-        && request.resource.data.review.matches('[\\s\\S]*\\S[\\s\\S]*');
-    }
-
     match /reviews/{reviewId} {
       allow read: if isMember();
-      allow create: if owns(request.resource.data, 'authorId');
-      allow update: if isOperator() || isOwnReviewEdit();
+      allow create: if false;
+      allow update: if isOperator();
       allow delete: if isOperator() || owns(resource.data, 'authorId');
     }
 
@@ -1176,14 +1171,27 @@ service cloud.firestore {
     }
 
     /**
-     * Pronouns are free text the user publishes on their profile (GitHub issue
-     * #1826): a string of at most 40 characters, or no field at all. The edit
-     * form refuses a longer value with a message; this refuses it from any other
-     * client. Clearing them removes the field, which this allows.
+     * The free text a profile publishes to other accounts (issue #1610). The
+     * display name is written by `claimDisplayName`, the rest by
+     * `updateProfileText`, and both check it first, so a client write may not
+     * change any of them. The comparison is by value, as for the
+     * backend-owned fields: a client that sends the stored text back is
+     * unaffected. The pronoun cap of issue #1826 is `updateProfileText`'s.
      */
-    function validPronouns(data) {
+    function checkedProfileTextFields() {
+      return ['displayName', 'fullName', 'city', 'about', 'pronouns'];
+    }
+
+    /**
+     * A first write may carry the text fields only empty, so no profile text
+     * reaches another account unchecked through a create either.
+     */
+    function noProfileText(data) {
       return !('pronouns' in data)
-        || (data.pronouns is string && data.pronouns.size() <= 40);
+        && data.get('displayName', '') == ''
+        && data.get('fullName', '') == ''
+        && data.get('city', '') == ''
+        && data.get('about', '') == '';
     }
 
     /**
@@ -1225,11 +1233,11 @@ service cloud.firestore {
        */
       allow create: if isSelf(userId)
         && absentAll(backendOwnedUserFields())
-        && validPronouns(request.resource.data);
+        && noProfileText(request.resource.data);
 
       allow update: if isSelf(userId)
         && unchangedAll(backendOwnedUserFields())
-        && validPronouns(request.resource.data);
+        && unchangedAll(checkedProfileTextFields());
 
       /** Account deletion runs in `deleteOwnAccount` with the Admin SDK. */
       allow delete: if false;

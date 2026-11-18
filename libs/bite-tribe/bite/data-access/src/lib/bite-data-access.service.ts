@@ -66,6 +66,17 @@ export interface DescriptionRequest {
 }
 
 /** What `generateBiteDescription` answers. */
+/**
+ * The Bite form's check of its text before it saves (issue #1610).
+ * `unchecked` is no answer - offline, slow or failed - and the save goes ahead:
+ * the Bite has to save offline, and `moderateBiteOnWrite` judges it on the
+ * server either way.
+ */
+export type BiteContentCheck = 'allowed' | 'refused' | 'unchecked';
+
+/** How long the form waits for the check before it saves anyway. */
+export const BITE_CONTENT_CHECK_TIMEOUT_MS = 8000;
+
 export type DescriptionResult =
   | { status: 'ok'; description: string }
   | { status: 'limit' }
@@ -556,6 +567,50 @@ export class BiteDataAccessService {
 
   getCurrencyByPosition(position?: Geopoint): Promise<string | undefined> {
     return this.api.getCurrencyByPosition(position);
+  }
+
+  /**
+   * Asks the backend whether the Bite's name, tags and description may be
+   * published (issue #1610), so an online user hears a refusal on the form
+   * with their text still in it. Offline it does not ask, and a call that does
+   * not answer in {@link BITE_CONTENT_CHECK_TIMEOUT_MS} reads as `unchecked`.
+   */
+  async checkBiteContent(
+    bite: Pick<Bite, 'id' | 'name' | 'tags' | 'description'>,
+  ): Promise<BiteContentCheck> {
+    if (this.networkStatus()?.connected === false) {
+      return 'unchecked';
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<BiteContentCheck>((resolve) => {
+      timer = setTimeout(
+        () => resolve('unchecked'),
+        BITE_CONTENT_CHECK_TIMEOUT_MS,
+      );
+    });
+    const call = FirebaseFunctions.callByName<
+      { biteId?: string; name: string; tags: string[]; description: string },
+      { status: 'allowed' | 'refused' }
+    >({
+      name: 'checkBiteContent',
+      data: {
+        ...(bite.id ? { biteId: bite.id } : {}),
+        name: bite.name ?? '',
+        tags: bite.tags ?? [],
+        description: bite.description ?? '',
+      },
+    })
+      .then((result): BiteContentCheck =>
+        result.data?.status === 'refused' ? 'refused' : 'allowed',
+      )
+      .catch((): BiteContentCheck => 'unchecked');
+
+    try {
+      return await Promise.race([call, timeout]);
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /**

@@ -330,6 +330,24 @@ describe('OnboardingService', () => {
       expect(saveCompletedSteps).not.toHaveBeenCalled();
     });
 
+    // Issue #1610: a name that fails the content check is shown as refused.
+    it('shows a refused display name and stays on identity', async () => {
+      setup();
+      claimDisplayName.mockRejectedValue(
+        Object.assign(new Error('display_name_refused'), {
+          code: 'invalid-argument',
+        }),
+      );
+      await service.initialize();
+
+      service.updateIdentity({ displayName: 'Bad', photoUrl: '' });
+      await service.checkDisplayNameAvailability('Bad');
+      await service.next();
+
+      expect(service.currentStep().id).toBe('identity');
+      expect(service.displayNameAvailability()).toBe('refused');
+    });
+
     it('persists the visibility the user picked', async () => {
       setup(['identity']);
       await service.initialize();

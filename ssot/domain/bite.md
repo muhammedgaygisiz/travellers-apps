@@ -388,8 +388,8 @@ images/bites/{biteId}/{filename}
   instead of guessing, and `toReviewThreads` keeps its own ISO fallback for
   those.
 - A review's `biteId` is a path-shaped string, `/bites/{biteId}`, not a
-  Firestore reference. The write in `ReviewApiService` and the `where` value in
-  `loadReviewsByBiteId` build it the same way, so it is self-consistent; only
+  Firestore reference. The write in the `saveReview` callable and the `where`
+  value in `loadReviewsByBiteId` build it the same way, so it is self-consistent; only
   the two notification triggers unpick it, with `split('/').pop()`. Not a
   legacy shape — it is what every review write produces today.
 - Guest permissions and admin moderation are not clearly expressed as current Bite-domain capabilities. [epic-1284](../history/records/epic-1284.md) owns closing that gap for review threads.

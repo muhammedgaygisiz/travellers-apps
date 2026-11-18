@@ -1,3 +1,4 @@
+import { ContentRefusedError } from 'utils';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { ProfileService } from '../profile.service';
@@ -249,6 +250,39 @@ describe(ProfileService.name, () => {
       expect(savePublicProfileSpy).not.toHaveBeenCalled();
       expect(toastPresent).toHaveBeenCalledWith({
         messageKey: 'display-name-already-taken',
+        outcome: 'failure',
+      });
+    });
+
+    /** Issue #1610: refused text says so rather than "could not be saved". */
+    it('says a refused display name broke the guidelines, and saves nothing', async () => {
+      const publicUser = { displayName: 'Bad' } as unknown as PublicUser;
+      jest
+        .spyOn(profileDataAccessService, 'claimDisplayName')
+        .mockRejectedValueOnce({ message: 'display_name_refused' });
+      const savePublicProfileSpy = jest.spyOn(
+        profileDataAccessService,
+        'savePublicProfile',
+      );
+
+      await service.saveProfile(publicUser);
+
+      expect(savePublicProfileSpy).not.toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+
+    it('says refused profile text broke the guidelines', async () => {
+      jest
+        .spyOn(profileDataAccessService, 'savePublicProfile')
+        .mockRejectedValueOnce(new ContentRefusedError('about'));
+
+      await service.saveProfile({ userId: 'user123' } as PublicUser);
+
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
         outcome: 'failure',
       });
     });

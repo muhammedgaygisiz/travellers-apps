@@ -674,6 +674,8 @@
   "edit-review-label": "تعديل مراجعتك",
   "review-edited": "تم التعديل",
   "review-edit-failed": "تعذّر حفظ التعديل. يُرجى المحاولة مرة أخرى.",
+  "content-refused": "هذا يخالف إرشادات المجتمع ولا يمكن نشره. يرجى تغيير النص والمحاولة مرة أخرى.",
+  "review-save-failed": "تعذّر نشر مراجعتك. يرجى المحاولة مرة أخرى.",
   "bucket-list-name-updated": "تم تحديث اسم قائمة الآمال!",
   "no-bites-found-be-the-first": "لا توجد Bites. يمكن إضافة أول واحدة.",
   "no-own-bites-yet": "لا توجد Bites منشورة بعد. يمكن إنشاء أول واحد.",

@@ -135,9 +135,11 @@ for Bites ([#1608]) and profiles ([#1829]), removes a Bite ([#1475]) and blocks 
 the set `[MVP]`. Reporting a Bite is on the Bite detail page ([#1608]); reporting a profile
 ([#1829]) and user-to-user blocking ([#1609]) are on another account's profile, in
 [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md). Content
-filtering has no surface in the consumer app yet - [#1610] filtering before publication - and
-epic [#1284] covers reporting inside a review thread only. Not this page's behaviour, but this
-page is where the queue the reports arrive in lives.
+filtering ships too ([#1610]): published text is checked before another account can read it,
+per [Architecture - AI](../architecture/ai.md), and every refusal is recorded in Cloud
+Logging under `content refused`, which is where an operator sees what is being attempted -
+there is no admin-app view of it. Epic [#1284] covers reporting inside a review thread only.
+Not this page's behaviour, but this page is where the queue the reports arrive in lives.
 
 ## Supported Evidence
 

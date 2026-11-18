@@ -32,6 +32,11 @@ export const ar: NotificationMessages = {
     'مراجعة جديدة من {{reviewer}} على Bite «{{bite}}» الخاص بك.',
   'newReviewReply.title': 'رد جديد على مراجعة',
   'newReviewReply.body': 'رد جديد من {{replier}} على مراجعة لـ «{{bite}}».',
+  'biteContentRefused.title': 'لم يجتز Bite الخاص بك فحص المحتوى',
+  'biteContentRefused.bodyReverted':
+    'تعديلك يخالف إرشادات المجتمع، لذلك تمت استعادة النص السابق.',
+  'biteContentRefused.bodyDeleted':
+    'Bite الجديد الخاص بك يخالف إرشادات المجتمع وتمت إزالته. يمكنك نشره مجددًا بنص مختلف.',
   'weeklyBites.title': '🍽️ قضمات الأسبوع وصلت 🤩',
   'weeklyBites.bodyOne': 'شاركت BiteTribe قضمة جديدة واحدة الأسبوع الماضي',
   'weeklyBites.bodyMany': 'شاركت BiteTribe {{count}} قضمة جديدة الأسبوع الماضي',

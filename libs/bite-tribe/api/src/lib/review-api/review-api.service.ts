@@ -1,16 +1,24 @@
-import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { AuthService } from 'ta-firestore';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { BITE_COLLECTION, REVIEW_COLLECTION } from '../utils/constants';
+import { Injectable } from '@angular/core';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { loadReviewsByBiteId } from './utils/load-review-by-bite-id';
-import { loadDisplayNameById } from './utils/load-display-names-by-id';
 import { Review } from 'model';
+import { ContentRefusedError } from 'utils';
 
+type SaveReviewResponse =
+  { status: 'saved'; reviewId: string } | { status: 'refused' };
+
+/**
+ * Reviews and replies are written by the `saveReview` and `editReview`
+ * callables rather than straight to Firestore (issue #1610): the backend
+ * checks the text before any other account can read it, and the rules refuse
+ * a client write. A refusal arrives as an answer, and is thrown here as a
+ * {@link ContentRefusedError} so the page can say what happened.
+ *
+ * Every write throws when it does not land, so the caller can tell the user
+ * and keep the reviews on screen as they were.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReviewApiService {
-  private readonly authService = inject(AuthService);
-  private readonly errorHandler = inject(ErrorHandler);
-
   reviewsByBiteId(biteId: string): Promise<Review[]> {
     return loadReviewsByBiteId(biteId);
   }
@@ -19,29 +27,9 @@ export class ReviewApiService {
     review: string;
     biteId: string;
   }): Promise<Review[]> {
-    try {
-      const user = this.authService.getUser();
-      const author = await this.authorName(user?.uid);
+    await this.call('saveReview', payload);
 
-      await FirebaseFirestore.addDocument({
-        reference: REVIEW_COLLECTION,
-        data: {
-          review: payload.review,
-          biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
-          createdAt: new Date().toISOString(),
-          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
-          authorId: user?.uid || '',
-          author,
-        },
-      });
-
-      return loadReviewsByBiteId(payload.biteId);
-    } catch (error) {
-      console.error('Error saving new review:', error);
-      this.errorHandler.handleError(error);
-
-      return <Review[]>[];
-    }
+    return loadReviewsByBiteId(payload.biteId);
   }
 
   /**
@@ -59,79 +47,40 @@ export class ReviewApiService {
     parentReviewId: string;
     threadId: string;
   }): Promise<Review[]> {
-    try {
-      const user = this.authService.getUser();
-      const author = await this.authorName(user?.uid);
+    await this.call('saveReview', payload);
 
-      await FirebaseFirestore.addDocument({
-        reference: REVIEW_COLLECTION,
-        data: {
-          review: payload.review,
-          biteId: `/${BITE_COLLECTION}/${payload.biteId}`,
-          parentReviewId: payload.parentReviewId,
-          threadId: payload.threadId,
-          createdAt: new Date().toISOString(),
-          createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
-          authorId: user?.uid || '',
-          author,
-        },
-      });
-
-      return loadReviewsByBiteId(payload.biteId);
-    } catch (error) {
-      console.error('Error saving review reply:', error);
-      this.errorHandler.handleError(error);
-
-      return <Review[]>[];
-    }
+    return loadReviewsByBiteId(payload.biteId);
   }
 
   /**
    * Replaces the text of the signed-in user's own review or reply (issue #721).
-   *
-   * Only the text and the two `updatedAt` fields are written: the rules refuse
-   * an author's update that touches anything else, so the review cannot leave
-   * its Bite or its thread. `updatedAt` is what marks the review as edited,
-   * and ordering stays on `createdAtTimestamp`, so an edit never moves it.
-   *
-   * Unlike the two save paths this one throws rather than resolving to an empty
-   * list: the caller has to tell the user the edit did not land, and an empty
-   * compartment would also wipe the reviews on screen.
+   * Only the text and the two `updatedAt` fields change, so the review cannot
+   * leave its Bite or its thread, and ordering stays on `createdAtTimestamp`.
    */
   async updateReview(payload: {
     reviewId: string;
     biteId: string;
     review: string;
   }): Promise<Review[]> {
-    const now = new Date();
-
-    await FirebaseFirestore.updateDocument({
-      reference: `${REVIEW_COLLECTION}/${payload.reviewId}`,
-      data: {
-        review: payload.review,
-        updatedAt: now.toISOString(),
-        updatedAtTimestamp: now.getTime(),
-      },
+    await this.call('editReview', {
+      reviewId: payload.reviewId,
+      review: payload.review,
     });
 
     return loadReviewsByBiteId(payload.biteId);
   }
 
-  /**
-   * The name a review is written under.
-   *
-   * Read from the user's profile rather than from the Firebase Auth user: the
-   * latter's `displayName` is whatever Google or Apple knows the person as,
-   * which is their legal name, and publishing it defeated the display name the
-   * product asks for during onboarding (issue #1308).
-   *
-   * The stored name is still written, so a reader that has not resolved the
-   * author yet has something to show, but it is now the same name the read
-   * path resolves. An account with no readable profile writes an empty author
-   * instead of falling back to the provider's name — the whole point is that
-   * the provider's name never reaches a review document.
-   */
-  private async authorName(uid: string | undefined): Promise<string> {
-    return (await loadDisplayNameById(uid || '')) || '';
+  private async call(
+    name: 'saveReview' | 'editReview',
+    data: Record<string, string>,
+  ): Promise<void> {
+    const result = await FirebaseFunctions.callByName<
+      Record<string, string>,
+      SaveReviewResponse
+    >({ name, data });
+
+    if (result.data?.status === 'refused') {
+      throw new ContentRefusedError('review');
+    }
   }
 }

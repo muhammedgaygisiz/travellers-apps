@@ -674,6 +674,8 @@
   "edit-review-label": "Modifie ton avis",
   "review-edited": "modifié",
   "review-edit-failed": "Impossible d'enregistrer la modification. Réessaie.",
+  "content-refused": "Ce contenu enfreint nos règles de la communauté et ne peut pas être publié. Modifiez le texte et réessayez.",
+  "review-save-failed": "Votre avis n'a pas pu être publié. Veuillez réessayer.",
   "bucket-list-name-updated": "Nom de la liste de souhaits mis à jour !",
   "no-bites-found-be-the-first": "Aucun Bite trouvé. Partage le premier.",
   "no-own-bites-yet": "Tu n'as pas encore partagé de Bite. Crée le premier.",

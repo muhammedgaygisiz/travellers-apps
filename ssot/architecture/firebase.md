@@ -80,6 +80,15 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
   id itself for the per-account documents (`settings/{uid}`, a reaction, a
   rating, a follow relationship, a push installation).
+- **Published text is written by a callable that checks it** ([#1610]). A
+  review is created and edited by `saveReview` and `editReview`, and a profile's
+  display name, real name, city, about and pronouns by `claimDisplayName` and
+  `updateProfileText`; the rules refuse a client write of any of them, so the
+  owner deletes a review and writes the rest of a profile, and nothing else. A
+  Bite is the exception, because it has to save offline: its text is judged by
+  `moderateBiteOnWrite` after the write. The check is
+  [Architecture - AI](ai.md)'s `The Content Check`, and its verdicts sit in the
+  server-only `contentChecks`.
 - **Backend-owned fields are named.** A field the Admin SDK owns can sit on a
   document the client may otherwise write, so the rule names the field.
   `ownerUserIds`, `claimStatus`, `claimedAt` and `claimedAtTimestamp` on a
@@ -676,3 +685,4 @@ libs/bite-tribe/api
 [#1902]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1902
 [#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
 [#1493]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1493
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

@@ -674,6 +674,8 @@
   "edit-review-label": "Modifica la tua recensione",
   "review-edited": "modificata",
   "review-edit-failed": "Non è stato possibile salvare la modifica. Riprova.",
+  "content-refused": "Questo viola le linee guida della community e non può essere pubblicato. Modifica il testo e riprova.",
+  "review-save-failed": "Non è stato possibile pubblicare la tua recensione. Riprova.",
   "bucket-list-name-updated": "Nome della lista dei preferiti aggiornato!",
   "no-bites-found-be-the-first": "Nessun Bite trovato. Condividi il primo.",
   "no-own-bites-yet": "Non hai ancora condiviso un Bite. Crea il primo.",

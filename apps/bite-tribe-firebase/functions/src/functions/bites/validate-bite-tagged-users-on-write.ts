@@ -8,6 +8,7 @@ import {
   taggedUserIdsToWrite,
 } from './bite-tagged-users';
 import { notifyTaggedUsers } from '../notifications/notify-tagged-users';
+import { judgeBiteContent } from './bite-content';
 
 /**
  * Drops every tagged user the creator may not tag (GitHub issue #1916), then
@@ -42,7 +43,13 @@ export const validateBiteTaggedUsersOnWrite = onDocumentWritten(
     const valid = corrected ?? taggedUserIdsOf(after);
     const toNotify = await taggedUserIdsToNotify(db, before, after, valid);
 
-    if (toNotify.length > 0) {
+    // The push names the Bite, so refused text is not sent ahead of
+    // `moderateBiteOnWrite` undoing it (issue #1610).
+    if (
+      toNotify.length > 0 &&
+      after &&
+      (await judgeBiteContent(db, after)).verdict === 'allowed'
+    ) {
       await notifyTaggedUsers(db, biteId, after, toNotify);
     }
   },

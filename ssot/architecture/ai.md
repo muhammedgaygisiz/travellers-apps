@@ -3,10 +3,11 @@
 ## Purpose
 
 How BiteTribe calls a language model: where the call runs, what leaves the
-device, what it costs and how it is limited. There are two AI
-features: the generated Bite description of issue [#2030], and the dish
-explanation on the Bite details page of issue [#2106]. Both follow the shape on
-this page.
+device, what it costs and how it is limited. There are three AI
+features: the generated Bite description of issue [#2030], the dish
+explanation on the Bite details page of issue [#2106], and the content check
+of issue [#1610] that user-written text passes before another account can
+read it. All three follow the shape on this page.
 
 ## The Call Runs In A Cloud Function
 
@@ -83,6 +84,66 @@ Gemini on Vertex AI, structured JSON answer, stored, then answered
   disclaimer under the text is the app's own translated string, not the
   model's.
 
+## The Content Check
+
+Issue [#1610]: text a member publishes is checked before it becomes visible to
+another account, and text that fails is refused with a message that says so.
+`RD-UR-11` is the decision to check it automatically. `checkContent` in
+`shared/moderation/check-content.ts` is the one check, and every surface calls
+it on the server:
+
+| Surface                                         | Where it is checked                                       | What a refusal does                                                                               |
+| ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| A review or reply, created or edited            | the `saveReview` and `editReview` callables               | nothing is written; the app shows `content-refused`                                               |
+| A display name                                  | `claimDisplayName`, before the claim                      | nothing is claimed; `display_name_refused`                                                        |
+| A profile's real name, city, about and pronouns | the `updateProfileText` callable                          | nothing is written; the app shows `content-refused`                                               |
+| A Bite's name, tags and description             | the form's `checkBiteContent`, then `moderateBiteOnWrite` | the form keeps the user and their text; the trigger undoes a write that reached the server anyway |
+
+The Firestore rules refuse a client write of every field in that table except
+the Bite's, so the callables are the only way in. A Bite is the exception
+because it has to save offline (`RD-QG-1`) and a callable cannot be reached
+offline. Its check is therefore in two places: the form asks first whenever it
+is online, and `moderateBiteOnWrite` judges every write that changes the
+Bite's text, asked first or not. A failed edit gets its previous text back; a
+failed new Bite is removed with the operator delete's own steps, since it has
+no earlier text. The author is told by a `BITE_CONTENT_REFUSED` push either
+way. **The bound accepted for it:** between such a write and the trigger -
+seconds - the text is readable by other members. The new-Bite and tagged-user
+pushes judge the text themselves, so neither sends it out in that window.
+
+- **Two steps.** A short wordlist of terms that are objectionable in any
+  sentence a food app could hold (`objectionable-terms.ts`) refuses the
+  unambiguous cases for nothing; what passes it goes to the model, which reads
+  the sentence and so tells a slur from a dish and a bad review from abuse, in
+  every shipped language. Terms match as whole words after normalising case,
+  accents and look-alike digits, never as substrings, and words that are
+  ordinary food slang or ordinary in another language are left to the model.
+- **What the model is asked.** `moderationInstructions` names the categories
+  it may answer - `hate`, `harassment`, `sexual`, `violence`, `self_harm`,
+  `illegal` - or `none`, and says what is not objectionable: a dish or
+  ingredient that resembles slang, an honest negative review, casual swearing
+  that attacks nobody. An answer outside the list reads as `none`.
+- **One verdict per text.** A model verdict is kept in the server-only
+  `contentChecks/{sha256}` by a hash of the text it judged, never the text, so
+  the form's check, the trigger and the pushes pay for the same Bite once.
+- **When the model cannot answer, the wordlist's verdict stands.** Refusing
+  every post while Vertex is down would take the product offline over an
+  outage; publishing what the wordlist passed is the exposure the product had
+  before the check. The miss is logged as a warning and nothing is kept.
+- **A refusal is recorded** in Cloud Logging under the fixed message
+  `content refused`, with the account, the surface, the stage, what the
+  trigger did, the field, the verdict and the text cut to 300 characters.
+  Cloud Logging rather than a collection by the same decision that made it the
+  operator audit trail (epic [#1471]): the query is
+  `jsonPayload.message="content refused"`, and the logs expire on their own.
+- **Photos are not checked.** The decision and its reason are in
+  [Current State - Open Questions](../current-state/open-questions.md).
+
+The rules a member meets are on each use case:
+[UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) for reviews,
+[UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) for profiles and
+[UC - Create And Maintain Personal Bites](../use-cases/uc-create-and-maintain-personal-bites.md) for Bites.
+
 ## Outside Production
 
 QA (`bite-tribe-qa`) and the emulator never call the model.
@@ -92,8 +153,9 @@ tested there too. `generateBiteDescription` answers
 `sampleDescription`: `[QA] Sample description for <dish>. No AI is called
 outside production.` (`[DEV]` in the emulator). Neither needs the Vertex AI
 API, credentials or billing, and a test run spends nothing. The daily limit
-still counts, so the limit message can be tested there. What the model writes
-is seen only in production.
+still counts, so the limit message can be tested there. The content check
+runs its wordlist there and no model, so a refusal can be tested with a listed
+term. What the model writes is seen only in production.
 
 ## The Model
 
@@ -178,6 +240,14 @@ apps/bite-tribe-firebase/functions/src/functions/bites/delete-bite-explanations-
 libs/bite-tribe/details/data-access/src/lib/bite-explanation-data-access.service.ts
 libs/bite-tribe/details/page/src/lib/integration/details.service.ts
 libs/bite-tribe/details/page/src/lib/components/bite-explanation/bite-explanation.component.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/moderation/check-content.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/moderation/objectionable-terms.ts
+apps/bite-tribe-firebase/functions/src/functions/shared/moderation/content-refusal.ts
+apps/bite-tribe-firebase/functions/src/functions/reviews/save-review.ts
+apps/bite-tribe-firebase/functions/src/functions/users/update-profile-text.ts
+apps/bite-tribe-firebase/functions/src/functions/users/claim-display-name.ts
+apps/bite-tribe-firebase/functions/src/functions/bites/check-bite-content.ts
+apps/bite-tribe-firebase/functions/src/functions/bites/moderate-bite-on-write.ts
 ```
 
 ## Production Setup
@@ -204,6 +274,14 @@ function:
   function's.
 - The budget alert covers the whole account, so a rise in AI cost alone shows
   only in the function's token logs.
+- The content check has no daily allowance. A text already judged costs
+  nothing, but a member could still spend model calls by sending new text to
+  `checkBiteContent`; App Check and the member requirement are the only bound.
+- The content check's model verdicts have not been sampled against real Bites
+  and reviews yet, so its false-refusal rate is unknown. A refused member has no
+  appeal besides rewording.
 
+[#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106

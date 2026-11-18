@@ -30,6 +30,11 @@ export const am: NotificationMessages = {
   'newReview.body': '{{reviewer}} የእርስዎን Bite «{{bite}}» ገምግመዋል።',
   'newReviewReply.title': 'በግምገማ ላይ አዲስ ምላሽ',
   'newReviewReply.body': '{{replier}} «{{bite}}» ላይ ለተሰጠ ግምገማ ምላሽ ሰጥተዋል።',
+  'biteContentRefused.title': 'የእርስዎ Bite የይዘት ፍተሻችንን አላለፈም',
+  'biteContentRefused.bodyReverted':
+    'ያደረጉት ለውጥ የማህበረሰብ መመሪያዎቻችንን ስለሚጥስ የቀድሞው ጽሑፍ ተመልሷል።',
+  'biteContentRefused.bodyDeleted':
+    'አዲሱ Bite የማህበረሰብ መመሪያዎቻችንን ስለሚጥስ ተወግዷል። በሌላ ጽሑፍ እንደገና መለጠፍ ይችላሉ።',
   'weeklyBites.title': '🍽️ የሳምንቱ ባይትስ ደርሰዋል 🤩',
   'weeklyBites.bodyOne': 'BiteTribe ባለፈው ሳምንት 1 አዲስ Bite አጋርቷል',
   'weeklyBites.bodyMany': 'BiteTribe ባለፈው ሳምንት {{count}} አዲስ ባይትስ አጋርቷል',

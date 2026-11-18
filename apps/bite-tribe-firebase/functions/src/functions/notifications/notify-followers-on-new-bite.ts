@@ -5,6 +5,7 @@ import { User } from '../shared/model/user';
 import { Bite } from '../shared/model/bite';
 import { Translate } from '../shared/i18n/translate';
 import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
+import { judgeBiteContent } from '../bites/bite-content';
 
 const db = getFirestore();
 
@@ -77,6 +78,14 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
     logger.info(`--- Number of followers: ${followersSnap.size}`);
     if (followersSnap.empty) {
       logger.warn('--- No followers found, aborting notification');
+      return;
+    }
+
+    // The push carries the Bite's name, and it goes out before
+    // `moderateBiteOnWrite` may remove the Bite, so it judges the text itself
+    // (issue #1610). The verdict is shared through `contentChecks`.
+    if ((await judgeBiteContent(db, bite)).verdict === 'refused') {
+      logger.info('--- Bite content refused, no follower notification');
       return;
     }
 

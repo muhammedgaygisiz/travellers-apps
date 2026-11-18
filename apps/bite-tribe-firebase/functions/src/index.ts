@@ -43,6 +43,9 @@ export { deleteBiteReportsOnBiteDelete } from './functions/bites/delete-bite-rep
 export { deleteBiteExplanationsOnBiteDelete } from './functions/bites/delete-bite-explanations-on-bite-delete';
 export { deleteBiteAuthorPrivateOnBiteDelete } from './functions/bites/delete-bite-author-private-on-bite-delete';
 export { validateBiteTaggedUsersOnWrite } from './functions/bites/validate-bite-tagged-users-on-write';
+export { checkBiteContent } from './functions/bites/check-bite-content';
+export { moderateBiteOnWrite } from './functions/bites/moderate-bite-on-write';
+export { saveReview, editReview } from './functions/reviews/save-review';
 export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
 export { reportUser } from './functions/users/report-user';
 export {
@@ -120,6 +123,7 @@ export { createUserOnAuthCreate } from './functions/users/create-user-on-auth-cr
 export { upgradeGuestAccount } from './functions/users/upgrade-guest-account';
 export { claimTableVisit } from './functions/restaurants/claim-table-visit';
 export { claimDisplayName } from './functions/users/claim-display-name';
+export { updateProfileText } from './functions/users/update-profile-text';
 export { syncDisplayNameCopiesOnUserUpdate } from './functions/users/sync-display-name-copies';
 export { setUserRoles } from './functions/users/set-user-roles';
 export { setUserBlocked } from './functions/users/set-user-blocked';

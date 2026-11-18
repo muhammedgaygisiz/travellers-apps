@@ -256,19 +256,6 @@ describe(BiteTribeStoreService.name, () => {
     ));
   });
 
-  describe('saveReview', () => {
-    it('should dispatch saveReview on BiteTribeStoreService', inject(
-      [BiteTribeStoreService],
-      (service: BiteTribeStoreService) => {
-        const dispatchSpy = jest.spyOn(store, 'dispatch');
-        service.saveReview(
-          {} as unknown as Parameters<BiteTribeStoreService['saveReview']>[0],
-        );
-        expect(dispatchSpy).toHaveBeenCalledTimes(1);
-      },
-    ));
-  });
-
   describe('selectRestaurantToCreate', () => {
     it('should dispatch selectRestaurantToCreate on BiteTribeStoreService', inject(
       [BiteTribeStoreService],

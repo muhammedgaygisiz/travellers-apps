@@ -109,6 +109,25 @@ These belong to issue [#1283] and do not block its implementation. Each has a wo
 
 Moderation questions raised by threading are recorded on [epic-1284](../history/records/epic-1284.md), not here.
 
+## Content Filtering Questions
+
+These belong to issue [#1610], the check published text passes before another account can
+read it. The check is described in [Architecture - AI](../architecture/ai.md).
+
+- **Are Bite photos checked before they are published? Decided on 18 November 2026, on
+  [#1610]: no, not in this issue.** The text check alone ships. A photo is uploaded after its
+  Bite is written - offline too, and retried when it stalls - so checking it before anyone
+  sees it needs a state in which the Bite exists and is hidden from every other account, and
+  every Bite read in both apps would have to filter on it. That is the cost the text check
+  avoided by checking the form before the write. A photo is also a model call with an image
+  on every Bite, where text that was already judged costs nothing. Until then a photo is
+  handled after the fact: any member reports the Bite ([#1608]) and an operator removes it
+  ([#1475]). The question reopens if reports show objectionable photos arriving.
+- Who maintains the wordlist, and how does a term get added or removed? It is code today, so
+  a change is a pull request; nothing records why a term is on it beyond the review.
+- Does a member whose text is refused get a way to contest it? Today the only answer is to
+  reword, and a model refusal says which surface failed but not which words.
+
 ## Analytics Questions
 
 - Which events define activation?
@@ -215,3 +234,6 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#2065]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2065
 [#2066]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2066
 [#2086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2086
+[#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
+[#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610

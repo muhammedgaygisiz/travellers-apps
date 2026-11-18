@@ -34,6 +34,12 @@ export const es: NotificationMessages = {
   'newReviewReply.title': 'Nueva respuesta a una reseña',
   'newReviewReply.body':
     '{{replier}} ha respondido a una reseña de «{{bite}}».',
+  'biteContentRefused.title':
+    'Tu Bite no ha superado nuestra revisión de contenido',
+  'biteContentRefused.bodyReverted':
+    'Tu cambio infringe nuestras normas de la comunidad, así que se ha restaurado el texto anterior.',
+  'biteContentRefused.bodyDeleted':
+    'Tu nuevo Bite infringe nuestras normas de la comunidad y se ha eliminado. Puedes publicarlo de nuevo con otro texto.',
   'weeklyBites.title': '🍽️ Los Bites de la semana ya están aquí 🤩',
   'weeklyBites.bodyOne': 'La BiteTribe compartió 1 Bite nuevo la semana pasada',
   'weeklyBites.bodyMany':

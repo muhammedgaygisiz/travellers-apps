@@ -121,9 +121,13 @@ dismiss them, block the author or delete the Bite. **User-to-user blocking ships
 any account blocks another from its profile, per
 [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **Reporting a profile ships** ([#1829]): any account
 reports another from its profile, and the operator works the reports from the admin app's
-reported-profiles queue, where they block the account or close the reports. **The rest of
-the user-facing half - content filtering, and reporting a Review - does not exist yet**:
-[#1610] filtering before publication, and epic [#1284] for reporting inside a review thread -
+reported-profiles queue, where they block the account or close the reports. **Content
+filtering ships** ([#1610]): text a member publishes - reviews and replies, display names,
+profile text, and a Bite's name, tags and description - is checked before another account
+can read it and refused with a message when it fails, per `RD-UR-11` and
+[Architecture - AI](../architecture/ai.md). Photos are not checked; why is in
+[Current State - Open Questions](../current-state/open-questions.md). **What is left of the
+user-facing half is reporting a Review**: epic [#1284], for reporting inside a review thread -
 narrower than it looks, because it moderates review threads and nothing else. Store requirement
 rather than product polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category

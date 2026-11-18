@@ -674,6 +674,8 @@
   "edit-review-label": "Edit ulasanmu",
   "review-edited": "diedit",
   "review-edit-failed": "Perubahanmu tidak dapat disimpan. Coba lagi.",
+  "content-refused": "Ini melanggar pedoman komunitas kami dan tidak dapat dipublikasikan. Ubah teksnya lalu coba lagi.",
+  "review-save-failed": "Ulasanmu tidak dapat diposting. Silakan coba lagi.",
   "bucket-list-name-updated": "Nama daftar keinginan berhasil diperbarui!",
   "no-bites-found-be-the-first": "Belum ada Bites. Jadilah yang pertama.",
   "no-own-bites-yet": "Kamu belum membagikan Bite. Buat yang pertama.",

@@ -89,6 +89,10 @@ export {
 } from './lib/email-verification-error-reason';
 export { isEmailVerificationPromptVisible } from './lib/email-verification-prompt-visible';
 export {
+  ContentRefusedError,
+  isContentRefused,
+} from './lib/content-refused-error';
+export {
   getDisplayNameFailureReason,
   type DisplayNameFailureReason,
 } from './lib/display-name-error-reason';

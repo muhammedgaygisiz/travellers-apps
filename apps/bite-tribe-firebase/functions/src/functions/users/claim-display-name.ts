@@ -9,6 +9,8 @@ import {
   normalizeDisplayName,
 } from './display-name-utils';
 import { requireMember } from '../shared/roles';
+import { checkContent } from '../shared/moderation/check-content';
+import { recordContentRefusal } from '../shared/moderation/content-refusal';
 
 interface ClaimDisplayNameRequest {
   displayName?: unknown;
@@ -46,6 +48,26 @@ export const claimDisplayNameForUser = async (
   }
 
   const db = getFirestore();
+
+  // Checked before the claim, so a refused name is never reserved and never
+  // reaches the profile, the reviews or the Bites that copy it (issue #1610).
+  const verdict = await checkContent(db, [
+    { field: 'displayName', value: displayName },
+  ]);
+
+  if (verdict.verdict === 'refused') {
+    recordContentRefusal({
+      uid,
+      surface: 'displayName',
+      stage: 'callable',
+      targetId: uid,
+      verdict,
+      text: displayName,
+    });
+
+    throw new HttpsError('invalid-argument', 'display_name_refused');
+  }
+
   const userRef = db.collection(USERS_COLLECTION).doc(uid);
   const newClaimRef = db
     .collection(DISPLAY_NAMES_COLLECTION)

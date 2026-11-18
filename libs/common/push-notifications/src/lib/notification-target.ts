@@ -61,6 +61,13 @@ export const toNotificationTarget = (
         ? { commands: [PATH.BITE, data['biteId']] }
         : undefined;
 
+    case 'BITE_CONTENT_REFUSED':
+      // A refused edit was put back, so the Bite is worth opening; a refused
+      // new Bite was removed and its payload names none (issue #1610).
+      return data['biteId']
+        ? { commands: [PATH.BITE, data['biteId']] }
+        : undefined;
+
     case 'NEW_REVIEW_REPLY':
       // The reply is one message inside one conversation under the Bite, and
       // the compartment can hold many. Carrying the thread along lets the page

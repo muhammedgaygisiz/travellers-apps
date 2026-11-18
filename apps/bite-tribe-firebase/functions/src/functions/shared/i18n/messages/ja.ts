@@ -35,6 +35,11 @@ export const ja: NotificationMessages = {
   'newReviewReply.title': 'レビューに新しい返信があります',
   'newReviewReply.body':
     '{{replier}}さんが「{{bite}}」のレビューに返信しました。',
+  'biteContentRefused.title': 'Biteがコンテンツチェックを通過しませんでした',
+  'biteContentRefused.bodyReverted':
+    '編集内容がコミュニティガイドラインに反していたため、以前のテキストに戻しました。',
+  'biteContentRefused.bodyDeleted':
+    '新しいBiteがコミュニティガイドラインに反していたため、削除しました。別のテキストで再投稿できます。',
   'weeklyBites.title': '🍽️ 今週のBiteが届きました 🤩',
   'weeklyBites.bodyOne': '先週、BiteTribeで1件の新しいBiteがシェアされました',
   'weeklyBites.bodyMany':

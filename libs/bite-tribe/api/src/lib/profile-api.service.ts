@@ -22,14 +22,15 @@ import { Platform } from '@ionic/angular';
 import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-profile-image-and-mirror-to-firebase';
 import { USERS_COLLECTION } from './utils/user-collection-key';
 import {
+  ContentRefusedError,
   getDownloadUrlFromFirebaseStorage,
   isBase64String,
+  isContentRefused,
   loadAppRelease,
 } from 'utils';
 import { findLocalUploadedImage } from './utils/local-image-file';
 import { readLocalImageAsDataUrl } from './utils/read-local-image-as-data-url';
 import { uploadBase64ToFirebaseStorage } from './utils/upload-base64-to-firebase-storage';
-import { withPronounsWrite } from './utils/pronouns-write';
 import {
   markUserMetadataUpdated,
   shouldUpdateUserMetadata,
@@ -185,7 +186,8 @@ export class ProfileApiService {
 
   /**
    * Writes the profile, uploading a newly chosen photo first, and swallows a
-   * failure: the caller's copy comes back unchanged.
+   * failure: the caller's copy comes back unchanged. A refused text is the
+   * exception, and is thrown (issue #1610).
    *
    * Onboarding's path, which waits for the photo. Edit Profile uploads in the
    * background instead, through {@link saveProfile} and
@@ -213,6 +215,12 @@ export class ProfileApiService {
         photoUrl: newPhotoUrl || '',
       });
     } catch (error) {
+      // A refusal is the user's to act on, so it reaches the step that
+      // asked (issue #1610); any other failure is swallowed as before.
+      if (isContentRefused(error)) {
+        throw error;
+      }
+
       console.error('Error updating public user:', error);
       this.errorHandler.handleError(error);
 
@@ -223,6 +231,13 @@ export class ProfileApiService {
   /**
    * Writes the profile's user-owned fields and lets a failure through, for a
    * page that has to tell the user a save failed.
+   *
+   * The text other accounts read - real name, city, about and pronouns - goes
+   * to the `updateProfileText` callable first, which checks it and refuses
+   * what breaks the community guidelines (issue #1610); a refusal is thrown as
+   * a {@link ContentRefusedError} and nothing is written. The rest is written
+   * here. The display name is neither: `claimDisplayName` writes it, and the
+   * rules refuse a client changing any of these fields.
    *
    * With `photoUploadStartedAt`, the document is marked as waiting for a new
    * photo: `photoUrl` must then still be the current one, which stays on show
@@ -241,10 +256,25 @@ export class ProfileApiService {
             photoUploadStartedAtTimestamp: photoUploadStartedAt,
           }),
     };
+    const { displayName, fullName, city, about, pronouns, ...rest } =
+      updatedUser;
+    void displayName;
+
+    const textResult = await FirebaseFunctions.callByName<
+      Pick<PublicUser, 'fullName' | 'city' | 'about' | 'pronouns'>,
+      { status: 'saved' } | { status: 'refused'; field: string }
+    >({
+      name: 'updateProfileText',
+      data: { fullName, city, about, pronouns: pronouns ?? '' },
+    });
+
+    if (textResult.data?.status === 'refused') {
+      throw new ContentRefusedError(textResult.data.field);
+    }
 
     await FirebaseFirestore.updateDocument({
       reference: `${USERS_COLLECTION}/${publicUser.userId}`,
-      data: withPronounsWrite(updatedUser),
+      data: rest,
     });
 
     return this.toUpdatedUser(publicUser, updatedUser);
@@ -375,8 +405,8 @@ export class ProfileApiService {
    * — and Firestore rejects the whole update for those.
    *
    * `pronouns` is the one field that is absent rather than empty, so it is left
-   * out here when there are none, and {@link withPronounsWrite} turns that into
-   * the removal of the stored value (issue #1826).
+   * out here when there are none, and `updateProfileText` removes the stored
+   * value (issue #1826).
    */
   private toProfileUpdate(
     publicUser: PublicUser,

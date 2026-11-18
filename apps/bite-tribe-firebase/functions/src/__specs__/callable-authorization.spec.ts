@@ -104,6 +104,7 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   listUserReports: 'operator',
   // The review report queue (issue #2117), on the same terms.
   dismissReviewReports: 'operator',
+  hideReviewAsOperator: 'operator',
   listReviewReports: 'operator',
   listUsersWithRoles: 'operator',
   revokeRestaurantOwner: 'operator',

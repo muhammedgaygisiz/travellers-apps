@@ -54,6 +54,7 @@ export const OPERATOR_ACTIONS = [
   'dismissBiteReports',
   'dismissReviewReports',
   'dismissUserReports',
+  'hideReviewAsOperator',
   'issueTableQrTokens',
   'migrateRestaurantOwnerIds',
   'rebuildBiteCountries',

@@ -95,8 +95,12 @@ const renameInCollection = async (
     .collection(collection)
     .where(ownerField, '==', uid)
     .get();
+  // A hidden review (issue #2118) has had its name taken off on purpose;
+  // writing the new one would put it back.
   const stale = snapshot.docs.filter(
-    (doc) => doc.data()?.[field] !== displayName,
+    (doc) =>
+      doc.data()?.['hiddenAt'] === undefined &&
+      doc.data()?.[field] !== displayName,
   );
 
   for (let start = 0; start < stale.length; start += WRITE_BATCH_LIMIT) {

@@ -14,7 +14,19 @@ type Review = {
   review: string;
   parentReviewId?: string;
   threadId?: string;
+  /** Set on an item an operator hid (issue #2118). */
+  hiddenAt?: string;
+  /** Set on a tombstone (issue #2116), which carries no `authorId` either. */
+  deletedAt?: string;
 };
+
+/**
+ * An item that still speaks for its author in the thread. A hidden item keeps
+ * its `authorId` (issue #2118), and an account whose only words in a thread
+ * were taken out of it is no longer in that conversation.
+ */
+const isVisible = (review: Review | undefined): review is Review =>
+  !!review && review.hiddenAt === undefined && review.deletedAt === undefined;
 
 /**
  * The accounts that can be told about a reply: they have a user document and
@@ -62,7 +74,9 @@ const keepReachable = async (uids: string[]): Promise<string[]> => {
  * carry the other's branches (issue #1283).
  *
  * Participants are the root review's author, every reply author in the thread,
- * and the Bite creator. Deduplicated, and minus whoever just wrote — a
+ * and the Bite creator. An author counts only through an item still visible in
+ * the thread: one whose every item was hidden or deleted has left it
+ * (issue #2118). Deduplicated, and minus whoever just wrote — a
  * participant hears about a reply once no matter how much they have already
  * said in that thread, and never about their own.
  */
@@ -127,12 +141,16 @@ export const notifyThreadParticipantsOnReviewReply = onDocumentCreated(
       .get();
 
     const replyAuthorIds = threadSnap.docs
-      .map((doc) => (doc.data() as Review).authorId)
+      .map((doc) => doc.data() as Review)
+      .filter(isVisible)
+      .map((review) => review.authorId)
       .filter((uid): uid is string => !!uid);
+
+    const rootAuthorId = isVisible(root) ? root.authorId : undefined;
 
     const participants = [
       ...new Set(
-        [root?.authorId, bite.userId, ...replyAuthorIds].filter(
+        [rootAuthorId, bite.userId, ...replyAuthorIds].filter(
           (uid): uid is string => !!uid && uid !== replyAuthorId,
         ),
       ),

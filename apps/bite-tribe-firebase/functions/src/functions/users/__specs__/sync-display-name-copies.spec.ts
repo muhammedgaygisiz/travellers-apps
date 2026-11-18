@@ -109,6 +109,18 @@ describe('syncDisplayNameCopies', () => {
     expect(db.read('reviews/r3')?.['author']).toBe('Other');
   });
 
+  it('does not put a name back on a hidden review', async () => {
+    // Issue #2118: hiding took the name off the public document on purpose.
+    db.seed('reviews/r1', {
+      authorId: UID,
+      hiddenAt: '2026-11-18T10:00:00.000Z',
+    });
+
+    await syncDisplayNameCopies(asFirestore(db), UID, 'New Name');
+
+    expect(db.read('reviews/r1')).not.toHaveProperty('author');
+  });
+
   it("rewrites the owner name on the user's Bite Trails only", async () => {
     db.seed('biteTrails/t1', { ownerId: UID, ownerName: 'Old Name' });
     db.seed('biteTrails/t2', { ownerId: 'other', ownerName: 'Other' });

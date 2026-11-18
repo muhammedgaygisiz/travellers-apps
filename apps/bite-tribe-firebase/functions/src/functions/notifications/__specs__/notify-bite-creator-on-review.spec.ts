@@ -40,9 +40,19 @@ type ReviewDoc = {
   review?: string;
   parentReviewId?: string;
   threadId?: string;
+  hiddenAt?: string;
 };
 
+/**
+ * Runs the trigger as Firestore would, on a document that exists. A test that
+ * changes the stored review afterwards seeds it first and passes the created
+ * version as `data`.
+ */
 const runTrigger = (reviewId: string, data: ReviewDoc): Promise<void> => {
+  if (!db.exists(`reviews/${reviewId}`)) {
+    db.seed(`reviews/${reviewId}`, data);
+  }
+
   const handler = (
     require('../notify-bite-creator-on-review') as typeof import('../notify-bite-creator-on-review')
   ).notifyBiteCreatorOnReview as unknown as (event: {
@@ -127,6 +137,52 @@ describe('notifyBiteCreatorOnReview', () => {
       authorId: 'ali',
       author: 'ali',
       review: 'Still my favourite.',
+    });
+
+    expect(sent()).toEqual([]);
+  });
+
+  it('stays silent when the review was hidden before the send', async () => {
+    // An operator can hide a review while the trigger is still reading
+    // (issue #2118); the created version is what the event carries.
+    const created = {
+      biteId: '/bites/bite-1',
+      authorId: 'mira',
+      author: 'mira',
+      review: 'Best kebab in Kreuzberg.',
+    };
+
+    db.seed('reviews/root-1', {
+      biteId: '/bites/bite-1',
+      authorId: 'mira',
+      hiddenAt: '2026-11-18T10:00:00.000Z',
+    });
+
+    await runTrigger('root-1', created);
+
+    expect(sent()).toEqual([]);
+  });
+
+  it('stays silent when the review is gone before the send', async () => {
+    const handler = (
+      require('../notify-bite-creator-on-review') as typeof import('../notify-bite-creator-on-review')
+    ).notifyBiteCreatorOnReview as unknown as (event: {
+      data: { id: string; data: () => ReviewDoc };
+      params: { reviewId: string };
+    }) => Promise<void>;
+
+    // Not seeded: the document was deleted before the trigger read it again.
+    await handler({
+      data: {
+        id: 'root-2',
+        data: () => ({
+          biteId: '/bites/bite-1',
+          authorId: 'mira',
+          author: 'mira',
+          review: 'Gone already.',
+        }),
+      },
+      params: { reviewId: 'root-2' },
     });
 
     expect(sent()).toEqual([]);

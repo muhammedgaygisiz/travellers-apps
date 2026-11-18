@@ -4,6 +4,7 @@ import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import { isTombstone } from './delete-review';
+import { isHidden } from './hidden-review';
 import {
   REVIEW_REPORTS_COLLECTION,
   ReviewReport,
@@ -88,6 +89,15 @@ export const reportReviewHandler = async (
     throw new HttpsError(
       'failed-precondition',
       'A deleted review cannot be reported.',
+    );
+  }
+
+  // A hidden item (issue #2118) has already been acted on, and its text is
+  // no longer there for anybody to read.
+  if (isHidden(data)) {
+    throw new HttpsError(
+      'failed-precondition',
+      'A hidden review cannot be reported.',
     );
   }
 

@@ -40,6 +40,8 @@ type ReviewDoc = {
   review?: string;
   parentReviewId?: string;
   threadId?: string;
+  hiddenAt?: string;
+  deletedAt?: string;
 };
 
 /**
@@ -250,5 +252,59 @@ describe('notifyThreadParticipantsOnReviewReply', () => {
     await runTrigger('reply-1', orphaned);
 
     expect(sent()).toEqual([]);
+  });
+
+  it('leaves out a root author whose review was hidden', async () => {
+    // Issue #2118: the hidden item keeps its `authorId`, but its author has
+    // nothing left in the conversation.
+    seedReview('root-1', {
+      authorId: 'mira',
+      hiddenAt: '2026-11-18T10:00:00.000Z',
+    });
+    seedReview('reply-1', reply());
+
+    await runTrigger('reply-1', reply());
+
+    expect(notifiedTokens()).toEqual(['token-ali']);
+  });
+
+  it('leaves out a replier whose only reply was hidden', async () => {
+    seedParticipant('sven');
+    seedReview('reply-0', {
+      authorId: 'sven',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+      hiddenAt: '2026-11-18T10:00:00.000Z',
+    });
+    seedReview('reply-1', reply());
+
+    await runTrigger('reply-1', reply());
+
+    expect(notifiedTokens().sort()).toEqual(['token-ali', 'token-mira']);
+  });
+
+  it('keeps a replier who still has a visible reply beside a hidden one', async () => {
+    seedParticipant('sven');
+    seedReview('reply-0', {
+      authorId: 'sven',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+      hiddenAt: '2026-11-18T10:00:00.000Z',
+    });
+    seedReview('reply-00', {
+      authorId: 'sven',
+      review: 'Still here.',
+      parentReviewId: 'root-1',
+      threadId: 'root-1',
+    });
+    seedReview('reply-1', reply());
+
+    await runTrigger('reply-1', reply());
+
+    expect(notifiedTokens().sort()).toEqual([
+      'token-ali',
+      'token-mira',
+      'token-sven',
+    ]);
   });
 });

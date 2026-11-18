@@ -31,6 +31,7 @@ import {
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
+  ReviewReportReason,
 } from 'model';
 import {
   ActionSheetController,
@@ -484,6 +485,37 @@ export class DetailsService {
 
       await this.toast.present({
         messageKey: 'report-bite-failed',
+        outcome: 'failure',
+      });
+    }
+  }
+
+  /**
+   * Files a report on a review or reply and says it was received (GitHub
+   * issue #2117), on the terms {@link reportBite} sets: an already-filed
+   * report gets its own words, and a failure says so.
+   */
+  async reportReview(report: {
+    reviewId: string;
+    reason: ReviewReportReason;
+  }): Promise<void> {
+    try {
+      const { reported } = await this.dataAccess.reportReview(
+        report.reviewId,
+        report.reason,
+      );
+
+      await this.toast.present({
+        messageKey: reported
+          ? 'report-review-sent'
+          : 'report-review-already-sent',
+        outcome: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to report the review:', error);
+
+      await this.toast.present({
+        messageKey: 'report-review-failed',
         outcome: 'failure',
       });
     }

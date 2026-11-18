@@ -74,6 +74,7 @@ describe('admin ROUTES', () => {
         expect.arrayContaining([
           'bite-reports',
           'profile-reports',
+          'review-reports',
           'bite-search',
           'restaurant-candidates',
           'restaurant-ownership',

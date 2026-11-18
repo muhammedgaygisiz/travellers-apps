@@ -190,7 +190,8 @@ export class AdminDashboard {
    * where most Bite work starts and the lookup is where it goes when a report
    * names a Bite the queue does not hold (issue #1608). Reported profiles
    * follow reported Bites, because they are the same queue for another kind of
-   * report (issue #1829). Restaurant verification comes next because it is the daily
+   * report (issue #1829), and reported reviews and replies follow them for
+   * the same reason (issue #2117). Restaurant verification comes next because it is the daily
    * work; the migrations below it are each their own entry rather than one
    * "migrations" page, so an operator reaches the one they came for instead of
    * scrolling past five Bite tables (issue #1473). Restaurant ownership sits
@@ -220,6 +221,14 @@ export class AdminDashboard {
       icon: 'person-circle-outline',
       path: '/profile-reports',
       testId: 'admin-tool-profile-reports',
+      group: 'primary',
+    },
+    {
+      titleKey: 'admin-tool-review-reports',
+      descriptionKey: 'admin-tool-review-reports-description',
+      icon: 'chatbubbles-outline',
+      path: '/review-reports',
+      testId: 'admin-tool-review-reports',
       group: 'primary',
     },
     {

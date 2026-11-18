@@ -53,6 +53,15 @@ export interface ReviewDeleteRequest {
 }
 
 /**
+ * The reader asked to report somebody else's review or reply (issue #2117).
+ * The page asks why before anything is sent, and names which of the two.
+ */
+export interface ReviewReportRequest {
+  reviewId: string;
+  isReply: boolean;
+}
+
+/**
  * Whitespace is not a review. The rules refuse it too, so letting it through
  * here would only trade a disabled button for a failed save (issue #721).
  */
@@ -114,6 +123,8 @@ export class ReviewThreadComponent {
   submitEdit = output<ReviewEditSubmit>();
 
   deleteReview = output<ReviewDeleteRequest>();
+
+  reportReview = output<ReviewReportRequest>();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -209,6 +220,33 @@ export class ReviewThreadComponent {
    */
   protected isDeleted(review: Review): boolean {
     return !!review.deletedAt;
+  }
+
+  /**
+   * Report is offered on every item the signed-in member did not write
+   * (issue #2117): the same reader `canReply` admits, never on their own item
+   * and never on a tombstone, which has no text left to object to.
+   * `reportReview` refuses both regardless.
+   */
+  protected canReport(review: Review): boolean {
+    const userId = this.userId();
+
+    return (
+      this.canReply() &&
+      !!userId &&
+      review.authorId !== userId &&
+      !this.isDeleted(review)
+    );
+  }
+
+  /** Closes any open editor or composer first, as {@link requestDelete} does. */
+  protected requestReport(review: Review): void {
+    this.cancelEdit();
+    this.cancelReply();
+    this.reportReview.emit({
+      reviewId: review.id,
+      isReply: !!review.parentReviewId,
+    });
   }
 
   protected canAnswer(review: Review): boolean {

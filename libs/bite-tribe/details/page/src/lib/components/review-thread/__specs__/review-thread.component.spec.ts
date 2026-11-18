@@ -8,6 +8,7 @@ import {
   ReviewDeleteRequest,
   ReviewEditSubmit,
   ReviewReplySubmit,
+  ReviewReportRequest,
   ReviewThreadComponent,
 } from '../review-thread.component';
 
@@ -591,6 +592,85 @@ describe(ReviewThreadComponent.name, () => {
       expect(query('reply-to-review')).toBeNull();
       expect(query('edit-review')).toBeNull();
       expect(query('delete-review')).toBeNull();
+    });
+  });
+
+  describe('reporting', () => {
+    const queryAll = (testId: string): HTMLElement[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll(`[data-testid="${testId}"]`),
+      );
+
+    const requests = (): ReviewReportRequest[] => {
+      const requested: ReviewReportRequest[] = [];
+      component.reportReview.subscribe((event) => requested.push(event));
+
+      return requested;
+    };
+
+    it('offers a report on every item the signed-in member did not write', () => {
+      render({
+        thread: thread([
+          reply('reply-1'),
+          reply('reply-2', { authorId: 'mira' }),
+        ]),
+        userId: 'mira',
+      });
+
+      expect(queryAll('report-review')).toHaveLength(1);
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="reply-reply-1"] [data-testid="report-review"]',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('offers a reader who took no part a report on every item', () => {
+      render({ thread: thread([reply('reply-1')]), userId: 'ali' });
+
+      expect(queryAll('report-review')).toHaveLength(2);
+    });
+
+    it('offers no report while signed out or as a guest', () => {
+      render({ thread: thread([reply('reply-1')]), canReply: false });
+
+      expect(query('report-review')).toBeNull();
+    });
+
+    it('offers no report on a tombstone', () => {
+      render({
+        thread: {
+          root: review({
+            id: 'root-1',
+            author: '',
+            authorId: undefined,
+            review: '',
+            deletedAt: '2026-11-18T12:00:00.000Z',
+          }),
+          replies: [],
+        },
+        userId: 'ali',
+      });
+
+      expect(query('report-review')).toBeNull();
+    });
+
+    it('asks the page to report a reply, naming it a reply', () => {
+      render({ thread: thread([reply('reply-1')]), userId: 'mira' });
+      const requested = requests();
+
+      query('report-review')?.click();
+
+      expect(requested).toEqual([{ reviewId: 'reply-1', isReply: true }]);
+    });
+
+    it('asks the page to report a review, naming it a review', () => {
+      render({ thread: thread(), userId: 'ali' });
+      const requested = requests();
+
+      query('report-review')?.click();
+
+      expect(requested).toEqual([{ reviewId: 'root-1', isReply: false }]);
     });
   });
 });

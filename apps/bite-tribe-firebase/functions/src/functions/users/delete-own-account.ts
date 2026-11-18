@@ -14,6 +14,7 @@ import { deleteBiteReportsByReporter } from '../bites/bite-report';
 import { removeTaggedUserFromBites } from '../bites/bite-tagged-users';
 import { deleteUserReportsForUser } from './user-report';
 import { removeReviewsByAuthor } from '../reviews/delete-review';
+import { deleteReviewReportsForAccount } from '../reviews/review-report';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
 import {
@@ -575,6 +576,7 @@ export const deleteAccountForUser = async (
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
     const deletedBiteReports = await deleteBiteReportsByReporter(db, uid);
     const deletedUserReports = await deleteUserReportsForUser(db, uid);
+    const deletedReviewReports = await deleteReviewReportsForAccount(db, uid);
 
     await deleteSettingsForUser(db, uid);
     await deleteFollowUpRecordsForUser(db, uid);
@@ -605,6 +607,7 @@ export const deleteAccountForUser = async (
         deletedRestaurantStaff,
         deletedBiteReports,
         deletedUserReports,
+        deletedReviewReports,
       },
       { merge: true },
     );
@@ -625,6 +628,7 @@ export const deleteAccountForUser = async (
       deletedRestaurantStaff,
       deletedBiteReports,
       deletedUserReports,
+      deletedReviewReports,
     });
 
     return { status: 'completed' };

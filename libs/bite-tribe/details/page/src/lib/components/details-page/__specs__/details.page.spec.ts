@@ -1068,6 +1068,101 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** Issue #2117: the reason picker for somebody else's review or reply. */
+  describe('confirmReportReview', () => {
+    const capture = (): {
+      present: jest.Mock;
+      options: () => Parameters<AlertController['create']>[0] | undefined;
+    } => {
+      const present = jest.fn().mockResolvedValue(undefined);
+      let created: Parameters<AlertController['create']>[0] | undefined;
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async (options) => {
+          created = options;
+          return { present } as never;
+        });
+
+      return { present, options: () => created };
+    };
+
+    const submit = (
+      options: Parameters<AlertController['create']>[0] | undefined,
+    ): ((reason: unknown) => unknown) | undefined =>
+      (
+        options?.buttons as {
+          role?: string;
+          handler?: (v: unknown) => unknown;
+        }[]
+      ).find((button) => button.role === 'destructive')?.handler;
+
+    it('offers the review reasons and reports the chosen one', async () => {
+      const { present, options } = capture();
+      const emit = jest.spyOn(component.reportReview, 'emit');
+      componentRef.setInput('isAuthenticated', true);
+
+      await component.confirmReportReview({
+        reviewId: 'reply-1',
+        isReply: true,
+      });
+
+      expect(present).toHaveBeenCalled();
+      expect(options()?.header).toBe('report-reply-title');
+      expect(options()?.inputs?.map((input) => input.value)).toEqual([
+        'harassment',
+        'hate',
+        'spam',
+        'inappropriate',
+        'other',
+      ]);
+      expect(emit).not.toHaveBeenCalled();
+
+      expect(submit(options())?.('hate')).toBe(true);
+      expect(emit).toHaveBeenCalledWith({
+        reviewId: 'reply-1',
+        reason: 'hate',
+      });
+    });
+
+    it('names a review as a review', async () => {
+      const { options } = capture();
+      componentRef.setInput('isAuthenticated', true);
+
+      await component.confirmReportReview({
+        reviewId: 'review-1',
+        isReply: false,
+      });
+
+      expect(options()?.header).toBe('report-review-title');
+    });
+
+    it('keeps the alert open and reports nothing until a reason is chosen', async () => {
+      const { options } = capture();
+      const emit = jest.spyOn(component.reportReview, 'emit');
+      componentRef.setInput('isAuthenticated', true);
+
+      await component.confirmReportReview({
+        reviewId: 'reply-1',
+        isReply: true,
+      });
+
+      expect(submit(options())?.(undefined)).toBe(false);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('asks nothing of a reader who is not signed in', async () => {
+      const { present } = capture();
+      componentRef.setInput('isAuthenticated', false);
+
+      await component.confirmReportReview({
+        reviewId: 'reply-1',
+        isReply: true,
+      });
+
+      expect(present).not.toHaveBeenCalled();
+    });
+  });
+
   /** Issue #721: the author's edit, addressed to the Bite on screen. */
   describe('saveReviewEdit', () => {
     const edit = { reviewId: 'review-1', review: 'Edited' };

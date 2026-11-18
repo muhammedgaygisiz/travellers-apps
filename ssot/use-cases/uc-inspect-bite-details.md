@@ -4,10 +4,10 @@
 
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
-directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the eight contracts below all ship.
-An author editing their own review or reply is the Review Edit Contract (issue [#721]), and
-deleting it is the Review Delete Contract (issue [#2116]). Reporting a review or reply is
-not on this page yet — issue [#2117], under [epic-1284](../history/records/epic-1284.md), owns it.
+directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the nine contracts below all ship.
+An author editing their own review or reply is the Review Edit Contract (issue [#721]),
+deleting it is the Review Delete Contract (issue [#2116]), and another member reporting it
+is the Review Report Contract (issue [#2117]).
 
 ## Goal
 
@@ -217,9 +217,8 @@ turns the review compartment from a flat list into a thread list. Implemented by
 - Arriving from a tapped reply notification opens the Bite with that thread
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
-- Editing a review or reply is the Review Edit Contract below, and deleting one
-  the Review Delete Contract. Reporting one is not part of this contract; issue
-  [#2117] owns it.
+- Editing a review or reply is the Review Edit Contract below, deleting one the
+  Review Delete Contract, and reporting one the Review Report Contract.
 
 ## Review Attribution Contract
 
@@ -313,6 +312,38 @@ and the `deleteReview` callable.
 - Deleting the account follows the same rule, per the `Deletion Contract` in
   [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
 
+## Review Report Contract
+
+Issue [#2117] lets a member report a review or reply they should not have had to read, so
+abusive text in a thread reaches an operator. Implemented by `ReviewThreadComponent`,
+`DetailsPage.confirmReportReview`, `ReviewApiService.reportReview` and the `reportReview`
+callable.
+
+- **Report is offered on every item the signed-in member did not write**, reviews and
+  replies alike, and on nothing else: never on their own item, never on a tombstone, and
+  never to a signed-out reader or a table guest. It sits last among the item's actions.
+- **The reporter chooses a reason** from a fixed list: harassment or bullying, hate speech,
+  spam or advertising, offensive or inappropriate, or something else. The alert names a
+  review or a reply and says that nobody in the thread is told who reported it.
+- **One report per account per item.** `reportReview` writes
+  `/reviewReports/{reviewId}_{reporterUid}` with a `create`, so a second report from the
+  same account, open or already dismissed, is answered as already reported and writes
+  nothing. The answer is a toast either way, and a failure says the report was not sent.
+- **`reportReview` refuses** an item that does not exist, one the caller wrote, a
+  tombstone, a signed-out caller and a table guest.
+- **The report records** the item, its Bite, its thread, its author, the reporter, the
+  reason, an `open` status and the time. Only an operator can read it, and no client can
+  write it.
+- **A report is silent.** Nothing on the item changes, nobody is notified - the reported
+  author included - and the log line names the item and the reason but not the reporter.
+  In a thread of three people, a notified author would know who reported them.
+- **A report lives as long as the item and the two accounts.** Deleting the item deletes
+  its reports, through `deleteReviewReportsOnReviewDelete`. Deleting an account deletes the
+  reports it filed and the ones filed against its items, per
+  [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
+- What an operator does with a report is the reported-reviews queue in
+  [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md).
+
 ## Review Content Check
 
 Issue [#1610]: a review or reply is checked before any other account can read it, by
@@ -355,8 +386,8 @@ The Review Edit Contract is **[Secondary]**: it came after launch, and a review 
 cannot be corrected is an annoyance rather than a broken page. The Review Delete Contract
 is **[Secondary]** for the same reason.
 
-Not on this page: reporting a review or reply, owned by issue [#2117] under
-[epic-1284](../history/records/epic-1284.md).
+The Review Report Contract is **[MVP]**: it is the review-thread part of the
+user-generated-content safeguards `RD-UR-7` classes `[MVP]`.
 
 ## App Store Review Area
 
@@ -369,7 +400,9 @@ disclaimer, and the privacy policy names Gemini; no store declaration changes, b
 Bite content is sent (issue [#2106]). Editing a review (issue [#721]) is a second way to
 publish user-generated text under Guideline 1.2; it adds no permission or declaration, and
 an edited review can be reported and blocked like any other. Deleting one (issue [#2116])
-adds no permission or declaration either. The Review Content Check is
+adds no permission or declaration either. Reporting a review or reply (issue [#2117]) is
+the reporting mechanism Guideline 1.2 requires, for review threads; it adds no permission,
+no declaration and no store listing change. The Review Content Check is
 the filtering Guideline 1.2 names, for this page's text (issue [#1610]). The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
@@ -422,7 +455,8 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1283] is the Review Thread Contract above - the flat review list became `ReviewThreadComponent`'s one-level-deep threads.
 - Issue [#721] is the Review Edit Contract above - an author edits the text of their own review or reply, part of epic-1284.
 - Issue [#2116] is the Review Delete Contract above - an author withdraws their own review or reply, and one somebody answered stays as a tombstone, part of epic-1284.
-- Issue [#2117] will add reporting a review or reply, part of epic-1284.
+- Issue [#2117] is the Review Report Contract above - a member reports somebody else's review or reply to the operators, part of epic-1284.
+- Issue [#2118] will let an operator hide a reported review from its thread, part of epic-1284.
 - Issue [#1610] is the Review Content Check above.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
@@ -472,3 +506,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
+[#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118

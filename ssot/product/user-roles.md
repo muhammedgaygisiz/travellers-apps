@@ -81,7 +81,7 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
 | Report a Bite                                                                               | yes ⁵                     | yes ⁵            | yes ⁵                    |
-| Report a Review or a profile                                                                | **target** ⁵              | **target** ⁵     | **target** ⁵             |
+| Report a Review, a reply or a profile                                                       | yes ⁵                     | yes ⁵            | yes ⁵                    |
 | Block another user                                                                          | yes ⁵                     | yes ⁵            | yes ⁵                    |
 | Act on a report: dismiss it, block the author, delete the Bite                              | yes ⁵                     | no               | no                       |
 
@@ -121,15 +121,18 @@ dismiss them, block the author or delete the Bite. **User-to-user blocking ships
 any account blocks another from its profile, per
 [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md). **Reporting a profile ships** ([#1829]): any account
 reports another from its profile, and the operator works the reports from the admin app's
-reported-profiles queue, where they block the account or close the reports. **Content
+reported-profiles queue, where they block the account or close the reports. **Reporting a
+Review ships** ([#2117]): any account reports somebody else's review or reply from its
+thread on the Bite detail page, and the operator works the reports from the admin app's
+reported-reviews queue, where they block the author or keep the review; hiding it is
+[#2118]. With it **the user-facing half is complete**. **Content
 filtering ships** ([#1610]): text a member publishes - reviews and replies, display names,
 profile text, and a Bite's name, tags and description - is checked before another account
 can read it and refused with a message when it fails, per `RD-UR-11` and
 [Architecture - AI](../architecture/ai.md). Photos are not checked; why is in
-[Current State - Open Questions](../current-state/open-questions.md). **What is left of the
-user-facing half is reporting a Review**: epic [#1284], for reporting inside a review thread -
-narrower than it looks, because it moderates review threads and nothing else. Store requirement
-rather than product polish:
+[Current State - Open Questions](../current-state/open-questions.md). Reporting a Review was the
+last piece of the user-facing half, under epic [#1284]. Store requirement rather than product
+polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category
 at a **13+** age rating, and Apple's user-generated-content guideline asks for filtering,
 timely reporting, blocking and published contact details, with an equivalent Google Play
@@ -379,3 +382,5 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629
 [#1829]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1829
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
+[#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
+[#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118

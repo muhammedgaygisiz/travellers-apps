@@ -21,6 +21,7 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   ReportBiteResult,
+  ReportReviewResult,
   ReportUserResult,
   Restaurant,
   Review,
@@ -29,6 +30,7 @@ import {
   Settings,
   TableOrderingSettings,
   UserReportReason,
+  ReviewReportReason,
   WeekRange,
   WeeklyBites,
 } from 'model';
@@ -109,6 +111,14 @@ export class BiteTribeApiService {
     biteId: string;
   }): Promise<Review[]> {
     return this.reviewApiService.deleteReview(payload);
+  }
+
+  /** Rejects when the report fails; see `ReviewApiService.reportReview`. */
+  reportReview(
+    reviewId: string,
+    reason: ReviewReportReason,
+  ): Promise<ReportReviewResult> {
+    return this.reviewApiService.reportReview(reviewId, reason);
   }
 
   reviewsByBiteId(biteId: string): Promise<Review[]> {

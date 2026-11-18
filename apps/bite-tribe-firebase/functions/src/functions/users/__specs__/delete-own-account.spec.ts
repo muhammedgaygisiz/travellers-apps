@@ -450,6 +450,42 @@ describe('deleteAccountForUser', () => {
     });
   });
 
+  /**
+   * A review report names its reporter in its path and the reported author in
+   * `reviewAuthorId`, so both directions go (issue #2117). A reply the account
+   * wrote can outlive it as a tombstone, and its reports must not keep the uid.
+   */
+  it('removes the review reports the account filed and the ones against it', async () => {
+    seedFullAccount();
+    db.seed(`reviewReports/review-9_${UID}`, {
+      reviewId: 'review-9',
+      reviewAuthorId: 'someone-else',
+      reporterUid: UID,
+      status: 'open',
+    });
+    db.seed('reviewReports/review-8_someone-else', {
+      reviewId: 'review-8',
+      reviewAuthorId: UID,
+      reporterUid: 'someone-else',
+      status: 'dismissed',
+    });
+    db.seed('reviewReports/review-7_someone-else', {
+      reviewId: 'review-7',
+      reviewAuthorId: 'third',
+      reporterUid: 'someone-else',
+      status: 'open',
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.exists(`reviewReports/review-9_${UID}`)).toBe(false);
+    expect(db.exists('reviewReports/review-8_someone-else')).toBe(false);
+    expect(db.exists('reviewReports/review-7_someone-else')).toBe(true);
+    expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+      deletedReviewReports: 2,
+    });
+  });
+
   /** Most accounts work at no restaurant, and the count has to say so. */
   it('records no removal for an account that is not staff', async () => {
     db.seed(`users/${UID}`, { displayName: 'Gone User' });

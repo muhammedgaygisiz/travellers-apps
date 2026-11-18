@@ -1,0 +1,224 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="ion-display-flex ion-flex-row review-reports">
+      <div class="column column--list ion-padding">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{
+              'admin-review-reports-title' | transloco
+            }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              fill="outline"
+              data-testid="admin-review-reports-reload"
+              [disabled]="loading()"
+              (click)="reload.emit()"
+            >
+              {{ 'admin-reports-reload' | transloco }}
+            </ion-button>
+
+            @if (loading()) {
+              <div class="review-reports__loading">
+                <ion-spinner name="crescent" />
+              </div>
+            } @else if (failed()) {
+              <p data-testid="admin-review-reports-failed">
+                {{ 'admin-reports-load-failed' | transloco }}
+              </p>
+            } @else {
+              <ion-list lines="full" data-testid="admin-review-reports-list">
+                @for (review of reports(); track review.reviewId) {
+                  <ion-item
+                    [button]="true"
+                    [class.selected-row]="
+                      review.reviewId === selected()?.reviewId
+                    "
+                    [attr.aria-current]="
+                      review.reviewId === selected()?.reviewId ? 'true' : null
+                    "
+                    (click)="onSelect(review)"
+                  >
+                    <ion-label>
+                      <h3>
+                        {{
+                          review.exists
+                            ? authorOf(review)
+                            : ('admin-review-reports-gone-short' | transloco)
+                        }}
+                      </h3>
+                      <p class="review-reports__excerpt">
+                        {{ review.text || review.biteName }}
+                      </p>
+                    </ion-label>
+                    <ion-badge slot="end" color="danger">{{
+                      review.reportCount
+                    }}</ion-badge>
+                  </ion-item>
+                } @empty {
+                  @if (loaded()) {
+                    <p data-testid="admin-review-reports-empty">
+                      {{ 'admin-reports-empty' | transloco }}
+                    </p>
+                  }
+                }
+              </ion-list>
+
+              @if (truncated()) {
+                <ion-note
+                  class="review-reports__hint"
+                  data-testid="admin-review-reports-truncated"
+                >
+                  {{ 'admin-reports-truncated' | transloco }}
+                </ion-note>
+              }
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="column column--detail ion-padding">
+        @if (selected(); as review) {
+          <ion-card data-testid="admin-review-reports-detail">
+            <ion-card-header>
+              <ion-card-title>{{
+                (review.parent
+                  ? 'admin-review-reports-reply-on'
+                  : 'admin-review-reports-review-on'
+                ) | transloco: { bite: review.biteName || review.biteId }
+              }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              @if (review.parent; as parent) {
+                <h4 class="review-reports__section">
+                  {{ 'admin-review-reports-in-reply-to' | transloco }}
+                </h4>
+                <blockquote
+                  class="review-reports__quote review-reports__quote--parent"
+                  data-testid="admin-review-reports-parent"
+                >
+                  @if (parent.text) {
+                    <strong>{{ parent.authorDisplayName || '—' }}</strong>
+                    <p class="ion-text-wrap">{{ parent.text }}</p>
+                  } @else {
+                    <p>{{ 'admin-review-reports-parent-gone' | transloco }}</p>
+                  }
+                </blockquote>
+              }
+
+              <h4 class="review-reports__section">
+                {{ 'admin-review-reports-reported-text' | transloco }}
+              </h4>
+              @if (review.exists) {
+                <blockquote
+                  class="review-reports__quote"
+                  data-testid="admin-review-reports-text"
+                >
+                  <strong>{{ authorOf(review) || '—' }}</strong>
+                  <p class="ion-text-wrap">{{ review.text }}</p>
+                </blockquote>
+              } @else {
+                <ion-note
+                  class="review-reports__hint"
+                  data-testid="admin-review-reports-gone"
+                >
+                  {{ 'admin-review-reports-gone' | transloco }}
+                </ion-note>
+              }
+
+              <h4 class="review-reports__section">
+                {{ 'admin-reports-why' | transloco }}
+              </h4>
+              <ion-list lines="none" data-testid="admin-review-reports-reasons">
+                @for (entry of reasonCounts(); track entry.reason) {
+                  <ion-item>
+                    <ion-label>{{
+                      'admin-review-reports-reason-' + entry.reason | transloco
+                    }}</ion-label>
+                    <ion-badge slot="end">{{ entry.count }}</ion-badge>
+                  </ion-item>
+                }
+              </ion-list>
+              <ion-note class="review-reports__hint">
+                {{ 'admin-reports-first-reported' | transloco }}
+                {{ review.firstReportedAt | date: 'medium' }}
+              </ion-note>
+
+              @if (review.exists && review.authorUid) {
+                <h4 class="review-reports__section">
+                  {{ 'admin-reports-block-title' | transloco }}
+                </h4>
+                <ion-note class="review-reports__hint">
+                  {{
+                    (authorBlocked()
+                      ? 'admin-reports-author-is-blocked'
+                      : 'admin-review-reports-block-hint'
+                    ) | transloco
+                  }}
+                </ion-note>
+                <ion-button
+                  expand="block"
+                  color="danger"
+                  class="ion-margin-top"
+                  data-testid="admin-review-reports-block"
+                  [disabled]="!canBlock()"
+                  (click)="onBlockAuthor()"
+                >
+                  @if (action() === 'block') {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-reports-block' | transloco }}
+                </ion-button>
+              }
+
+              <h4 class="review-reports__section">
+                {{ 'admin-review-reports-keep-title' | transloco }}
+              </h4>
+              <ion-note class="review-reports__hint">
+                {{ 'admin-review-reports-dismiss-hint' | transloco }}
+              </ion-note>
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-input
+                    labelPlacement="stacked"
+                    [label]="'admin-reports-reason' | transloco"
+                    [placeholder]="
+                      'admin-review-reports-reason-placeholder' | transloco
+                    "
+                    [value]="reason()"
+                    data-testid="admin-review-reports-decision-reason"
+                    (ionInput)="onReasonChange($event.detail.value ?? '')"
+                  />
+                </ion-item>
+              </ion-list>
+              <ion-button
+                expand="block"
+                fill="outline"
+                class="ion-margin-top"
+                data-testid="admin-review-reports-dismiss"
+                [disabled]="!hasReason() || busy()"
+                (click)="onDismiss()"
+              >
+                @if (action() === 'dismiss') {
+                  <ion-spinner name="crescent" slot="start" />
+                }
+                {{ 'admin-review-reports-keep' | transloco }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <ion-card>
+            <ion-card-content>
+              <p>{{ 'admin-review-reports-select-hint' | transloco }}</p>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </ion-content>
+</ta-page>

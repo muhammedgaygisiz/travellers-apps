@@ -172,12 +172,24 @@ export const ComposerOpen: Story = {
 
 /**
  * Mira reading her own thread: her review and her reply offer an edit and a
- * delete, Ali's reply offers neither (issues #721 and #2116).
+ * delete, and Ali's reply offers a report instead (issues #721, #2116 and
+ * #2117).
  */
 export const OwnReview: Story = {
   args: {
     ...WithReplies.args,
     userId: MIRA,
+  },
+};
+
+/**
+ * Jonas reading a thread he took no part in: every review and reply offers
+ * Report next to Reply, and nothing offers an edit or a delete (issue #2117).
+ */
+export const OtherReaderCanReport: Story = {
+  args: {
+    ...WithReplies.args,
+    userId: JONAS,
   },
 };
 

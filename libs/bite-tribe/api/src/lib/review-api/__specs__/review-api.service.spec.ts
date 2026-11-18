@@ -170,4 +170,29 @@ describe(ReviewApiService.name, () => {
       expect(loadReviews).not.toHaveBeenCalled();
     });
   });
+
+  /** Issue #2117: a report changes nothing on screen, so nothing reloads. */
+  describe('reportReview', () => {
+    it('sends the review and the reason to reportReview and answers with its result', async () => {
+      callByName.mockResolvedValue({ data: { reported: true } });
+
+      await expect(
+        service.reportReview('reply-1', 'harassment'),
+      ).resolves.toEqual({ reported: true });
+
+      expect(callByName).toHaveBeenCalledWith({
+        name: 'reportReview',
+        data: { reviewId: 'reply-1', reason: 'harassment' },
+      });
+      expect(loadReviews).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the call fails', async () => {
+      callByName.mockRejectedValue(new Error('unavailable'));
+
+      await expect(service.reportReview('reply-1', 'spam')).rejects.toThrow(
+        'unavailable',
+      );
+    });
+  });
 });

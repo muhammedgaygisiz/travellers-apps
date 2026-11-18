@@ -19,6 +19,7 @@ class ReviewApiMock {
   saveNewReview = jest.fn();
   updateReview = jest.fn();
   deleteReview = jest.fn();
+  reportReview = jest.fn();
 }
 
 class RestaurantApiMock {
@@ -190,6 +191,25 @@ describe(BiteTribeApiService.name, () => {
           reported: true,
         });
         expect(spy).toHaveBeenCalledWith('bite-id', 'spam');
+      },
+    ));
+  });
+
+  describe('reportReview', () => {
+    it('should call reportReview on ReviewApiService', inject(
+      [BiteTribeApiService, ReviewApiService],
+      async (
+        service: BiteTribeApiService,
+        reviewApiService: ReviewApiService,
+      ) => {
+        const spy = jest
+          .spyOn(reviewApiService, 'reportReview')
+          .mockResolvedValue({ reported: false });
+
+        await expect(service.reportReview('reply-1', 'hate')).resolves.toEqual({
+          reported: false,
+        });
+        expect(spy).toHaveBeenCalledWith('reply-1', 'hate');
       },
     ));
   });

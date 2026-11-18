@@ -5,6 +5,7 @@
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
 directions actions, the header photo's upload state, reporting the Bite, and the six contracts below all ship.
+Explaining the Bite's dish with AI (`R-1` to `R-7`, issue [#2106]) is specified and not built.
 Editing, deleting and reporting a review are not on this page at all — [epic-1284](../history/records/epic-1284.md) owns
 them.
 
@@ -47,6 +48,7 @@ nothing, and how a review and its thread are attributed.
 - User can open directions to the Bite's place through the platform navigation experience.
 - A Bite made from a dish somebody ordered says so, and the line opens that restaurant's menu (issue [#1113]). It leads to the **menu** rather than to the dish: `restaurant/:restaurantId/menu` resolves which menu that is, and a dish that has since been deleted would otherwise be a dead address. Nothing on this page is resolved off the menu, which is what makes a rename or a deletion harmless - the dish's name was copied onto the Bite when it was created and is the heading at the top of this page (`RD-TS-53`). A Bite carrying no menu link renders no line, under the `Absent Field Contract` below.
 - User can save the Bite to an existing bucket list or create a new list for it.
+- _Intended, not met._ A member can have the Bite's dish explained by AI in their app language - what it is, where it comes from and its typical ingredients - through an `Explain me` button and a modal, under `R-1` to `R-7` (issue [#2106]).
 - A signed-in user can report somebody else's Bite to the BiteTribe operators, choosing one of five reasons: spam or advertising, not food, offensive or inappropriate, harassment or hate, or something else ([#1608]). The action sits last on the page and is never offered on the user's own Bite. The report is filed through `reportBite`, which keeps one report per account per Bite - a second tap is answered as already reported rather than filing again - and the Bite looks exactly the same to everyone afterwards, its author included, who is never told who reported it. What an operator then does with the report is `UC - Operate BiteTribe In The Admin App`'s.
 - User can understand creator/profile context, restaurant/place context, image, likes, reviews, and related data.
 - While the Bite loads, the share, navigation, and bucket-list actions are
@@ -254,6 +256,21 @@ than displays.
   blanking them would remove the only attribution they have. The existing data
   is small enough that no backfill was written for it.
 
+## Rules And Invariants
+
+The dish explanation of issue [#2106]. The call, the model and the daily allowance follow
+[Architecture - AI](../architecture/ai.md).
+
+| Id      | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **R-1** | _Intended, not met._ `Explain me` is offered to a signed-in member on every Bite, their own included, once the Bite has loaded and its photo is uploaded. It is not offered to an anonymous table guest or while the photo is pending or failed, and `explainBite` refuses all three, and any call without App Check.                                                                                                                                                          |
+| **R-2** | _Intended, not met._ The explanation is in the viewer's active Transloco language, English for any language the app does not ship. It has three parts - what the dish is, where it comes from, and its typical ingredients as usually made rather than on this plate - under the title "Explained by AI" and a fixed, translated disclaimer that it may be inaccurate and that allergens are a question for the restaurant. It never states an allergen or a dietary property. |
+| **R-3** | _Intended, not met._ The model is given the Bite's name, its place, city and country, and its uploaded photo. The creator's description and tags are never sent: the answer is shown to every later reader, so one user's free text must not steer it.                                                                                                                                                                                                                         |
+| **R-4** | _Intended, not met._ One explanation is kept per Bite and language, in the server-only `biteExplanations/{biteId}_{language}`, which no client can read or write. It is reused while the Bite's name is the one it was written for; a renamed Bite gets a new one on its next open. Deleting the Bite deletes its explanations.                                                                                                                                                |
+| **R-5** | _Intended, not met._ A dish the model cannot identify is answered as unknown, said so in the modal, and kept like an explanation, so it is not asked again.                                                                                                                                                                                                                                                                                                                    |
+| **R-6** | _Intended, not met._ A kept explanation costs nothing and is never limited. Only a new one is counted, at 20 per member per UTC day, and a call that produced nothing gives its count back. At the limit the modal says today's explanations are used up; kept ones still open. A failed call, a network error or no connection shows an error with a retry.                                                                                                                   |
+| **R-7** | _Intended, not met._ Every settled open sends `bite_explanation_requested` with `result` (`cached`, `generated`, `unknown`, `limit_reached`, `error`) and `language`.                                                                                                                                                                                                                                                                                                          |
+
 ## MVP Classification
 
 **[MVP]** — the whole page: everything it renders, every way its read can end, and the
@@ -265,10 +282,13 @@ Not on this page: editing, deleting and reporting a review or reply, owned by
 
 ## App Store Review Area
 
-Relevant on two counts. The `/s/bite/*` deep link is registered in the iOS Associated
+Relevant on three counts. The `/s/bite/*` deep link is registered in the iOS Associated
 Domains entitlement and an Android App Links intent filter, so it is part of the shipped
 build's configuration — see [issue-1190](../history/records/issue-1190.md). And review attribution is a privacy matter
 rather than a cosmetic one: [#1308] published the name the identity provider holds. The
+dish explanation (`R-1` to `R-7`) is AI-generated content: the modal labels it as AI and carries a
+disclaimer, and the privacy policy names Gemini; no store declaration changes, because only public
+Bite content is sent (issue [#2106]). The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
 ## Supported Evidence
@@ -308,6 +328,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.
 - Issue [#1608] is reporting a Bite to the operators, one of the user-generated-content safeguards `RD-UR-7` requires.
 - Issue [#1918] is the `Ate with` row, part of epic [#1915].
+- Issue [#2106] is the AI dish explanation, `R-1` to `R-7`.
 - Issue [#1920] is `Remove me` on that row - the user-generated-content control that lets a user leave somebody else's Bite.
 
 ## Related Domains
@@ -346,3 +367,4 @@ data types this page renders are declared in [Implementation - Store Declaration
 [#1915]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1915
 [#1918]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1918
 [#1920]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1920
+[#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106

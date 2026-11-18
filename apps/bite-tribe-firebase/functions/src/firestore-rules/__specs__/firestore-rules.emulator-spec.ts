@@ -695,6 +695,20 @@ beforeEach(async () => {
     await setDoc(doc(db, 'emailOptOuts', 'opt-out-token-1'), {
       uid: CONSUMER,
     });
+
+    // The AI dish explanations and the daily AI counters, written only by
+    // `explainBite` and `generateBiteDescription` through the Admin SDK
+    // (issues #2030, #2106).
+    await setDoc(doc(db, 'biteExplanations', 'consumer-bite_tr'), {
+      biteId: 'consumer-bite',
+      language: 'tr',
+      dishName: 'Mantı',
+      status: 'ok',
+    });
+    await setDoc(doc(db, 'aiUsage', CONSUMER), {
+      day: '2026-11-18',
+      explanations: 3,
+    });
   });
 });
 
@@ -2597,6 +2611,48 @@ describe('scan anomalies', () => {
         deleteDoc(anomalyDoc(asOperator(), RATE_LIMITED_ANOMALY)),
       );
     });
+  });
+});
+
+describe('AI explanations and counters', () => {
+  const explanation = (db: Firestore): DocumentReference =>
+    doc(db, 'biteExplanations', 'consumer-bite_tr');
+  const usage = (db: Firestore): DocumentReference =>
+    doc(db, 'aiUsage', CONSUMER);
+
+  /**
+   * Server-only (issue #2106): `explainBite` decides whether a kept
+   * explanation still fits the Bite and counts a new one against the
+   * allowance, so a client that could read the cache would skip the first,
+   * and one that could write it would put its own text in front of every
+   * later reader.
+   */
+  it('refuses every reader there is', async () => {
+    for (const db of [
+      signedOut(),
+      asConsumer(),
+      asStranger(),
+      asTableGuest(),
+    ]) {
+      await assertFails(getDoc(explanation(db)));
+      await assertFails(getDoc(usage(db)));
+    }
+    await assertFails(getDocs(collection(asConsumer(), 'biteExplanations')));
+  });
+
+  it('refuses every writer there is', async () => {
+    await assertFails(
+      setDoc(doc(asConsumer(), 'biteExplanations', 'consumer-bite_de'), {
+        biteId: 'consumer-bite',
+        dishName: 'Mantı',
+        status: 'ok',
+      }),
+    );
+    await assertFails(
+      updateDoc(explanation(asConsumer()), { whatItIs: 'Anything at all.' }),
+    );
+    await assertFails(deleteDoc(explanation(asConsumer())));
+    await assertFails(setDoc(usage(asConsumer()), { explanations: 0 }));
   });
 });
 

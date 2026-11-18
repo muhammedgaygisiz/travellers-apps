@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'bite-explanation-title' | transloco }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        fill="clear"
+        data-testid="bite-explanation-close"
+        (click)="closed.emit()"
+      >
+        {{ 'done' | transloco }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @let current = state();
+
+  <h2 class="dish-name">
+    <ion-icon name="sparkles-outline" color="primary" aria-hidden="true" />
+    {{ dishName() }}
+  </h2>
+
+  @switch (current.kind) {
+    @case ('loading') {
+      <div data-testid="bite-explanation-loading">
+        @for (section of [1, 2, 3]; track section) {
+          <section class="part">
+            <ion-skeleton-text [animated]="true" class="heading-skeleton" />
+            <ion-skeleton-text [animated]="true" />
+            <ion-skeleton-text [animated]="true" class="short" />
+          </section>
+        }
+      </div>
+    }
+    @case ('ok') {
+      @if (current.kind === 'ok') {
+        <section class="part" data-testid="bite-explanation-what">
+          <h3>{{ 'bite-explanation-what-it-is' | transloco }}</h3>
+          <p>{{ current.explanation.whatItIs }}</p>
+        </section>
+        <section class="part" data-testid="bite-explanation-origin">
+          <h3>{{ 'bite-explanation-origin' | transloco }}</h3>
+          <p>{{ current.explanation.origin }}</p>
+        </section>
+        <section class="part" data-testid="bite-explanation-ingredients">
+          <h3>{{ 'bite-explanation-ingredients' | transloco }}</h3>
+          <ul>
+            @for (ingredient of current.explanation.ingredients; track $index) {
+              <li>{{ ingredient }}</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+    @case ('unknown') {
+      <p class="message" data-testid="bite-explanation-unknown">
+        {{ 'bite-explanation-unknown' | transloco }}
+      </p>
+    }
+    @case ('limit') {
+      <p class="message" data-testid="bite-explanation-limit">
+        {{ 'bite-explanation-limit' | transloco }}
+      </p>
+    }
+    @case ('error') {
+      <p class="message" data-testid="bite-explanation-error">
+        {{ 'bite-explanation-error' | transloco }}
+      </p>
+      <ion-button
+        fill="outline"
+        data-testid="bite-explanation-retry"
+        (click)="retry.emit()"
+      >
+        {{ 'try-again' | transloco }}
+      </ion-button>
+    }
+  }
+
+  <p class="disclaimer" data-testid="bite-explanation-disclaimer">
+    {{ 'bite-explanation-disclaimer' | transloco }}
+  </p>
+</ion-content>

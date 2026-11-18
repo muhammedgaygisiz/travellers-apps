@@ -186,6 +186,9 @@ export class DetailsPage {
   /** The viewer takes themselves off this Bite's tagged users (#1920). */
   readonly removeSelfFromTags = output<string>();
 
+  /** Opens the AI explanation of the Bite's dish (issue #2106). */
+  readonly explainBite = output<Bite>();
+
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);
   private readonly platform = inject(Platform);
@@ -538,6 +541,24 @@ export class DetailsPage {
 
     return (
       this.isAuthenticated() && !!bite?.id && !!userId && bite.userId !== userId
+    );
+  });
+
+  /**
+   * Whether the AI explanation is offered (issue #2106, `UC-IBD` `R-1`): to a
+   * signed-in member - never an anonymous table guest, whom `isAuthenticated`
+   * leaves out - on every Bite, their own included, once its photo is up. A
+   * pending or failed upload hides it, because `explainBite` refuses to
+   * explain a Bite without its photo.
+   */
+  protected readonly canExplain = computed(() => {
+    const status = this.imageStatus();
+
+    return (
+      this.isAuthenticated() &&
+      !!this.bite()?.id &&
+      status !== 'pending' &&
+      status !== 'failed'
     );
   });
 

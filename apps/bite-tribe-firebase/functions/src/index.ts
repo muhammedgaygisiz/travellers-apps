@@ -40,6 +40,7 @@ export {
   listBiteReports,
 } from './functions/bites/bite-reports-as-operator';
 export { deleteBiteReportsOnBiteDelete } from './functions/bites/delete-bite-reports-on-bite-delete';
+export { deleteBiteExplanationsOnBiteDelete } from './functions/bites/delete-bite-explanations-on-bite-delete';
 export { deleteBiteAuthorPrivateOnBiteDelete } from './functions/bites/delete-bite-author-private-on-bite-delete';
 export { validateBiteTaggedUsersOnWrite } from './functions/bites/validate-bite-tagged-users-on-write';
 export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
@@ -129,6 +130,7 @@ export { deleteOwnAccount } from './functions/users/delete-own-account';
 export { checkDisplayNameAvailability } from './functions/users/check-display-name-availability';
 export { loadLeaderboard } from './functions/leaderboard/load-leaderboard';
 export { generateBiteDescription } from './functions/bites/generate-bite-description';
+export { explainBite } from './functions/bites/explain-bite';
 export { sendDailyLeaderboardNotification } from './functions/leaderboard/send-daily-leaderboard-notification';
 export { resetWeeklyLeaderboard } from './functions/leaderboard/reset-weekly-leaderboard';
 export { resyncBiteCounts } from './functions/leaderboard/resync-bite-counts';

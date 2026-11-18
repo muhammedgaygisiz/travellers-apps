@@ -38,7 +38,7 @@ import {
 } from './display-name-utils';
 import { requireMember } from '../shared/roles';
 import { EMAIL_OPT_OUTS_COLLECTION } from './email-opt-out';
-import { AI_USAGE_COLLECTION } from '../bites/generate-bite-description';
+import { AI_USAGE_COLLECTION } from '../shared/utils/ai-usage';
 import { NEW_USER_FOLLOW_UPS_COLLECTION } from './new-user-follow-up-picks';
 import {
   NEW_USER_MONTH_FOLLOW_UPS_COLLECTION,
@@ -460,7 +460,7 @@ export const deleteFollowUpRecordsForUser = async (
   await db.collection(NEW_USER_FOLLOW_UPS_COLLECTION).doc(uid).delete();
   await db.collection(NEW_USER_WEEK_FOLLOW_UPS_COLLECTION).doc(uid).delete();
   await db.collection(NEW_USER_MONTH_FOLLOW_UPS_COLLECTION).doc(uid).delete();
-  // The day's count of AI descriptions (issue #2030).
+  // The day's count of AI descriptions and explanations (#2030, #2106).
   await db.collection(AI_USAGE_COLLECTION).doc(uid).delete();
 };
 

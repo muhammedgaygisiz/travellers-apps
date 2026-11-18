@@ -3105,9 +3105,17 @@ describe('reviews', () => {
     );
   });
 
-  it('still lets an author delete their own review', async () => {
-    await assertSucceeds(
+  // Issue #2116: an author deletes through `deleteReview`, which is the only
+  // place that can see whether somebody answered the review.
+  it('refuses an author deleting their own review directly', async () => {
+    await assertFails(
       deleteDoc(doc(asConsumer(), 'reviews', 'consumer-review')),
+    );
+  });
+
+  it('still lets an operator delete a review', async () => {
+    await assertSucceeds(
+      deleteDoc(doc(asOperator(), 'reviews', 'consumer-review')),
     );
   });
 });

@@ -318,6 +318,32 @@ describe('deleteAccountForUser', () => {
     expect(db.exists(`bites/bite-2/likes/${UID}`)).toBe(false);
     expect(db.exists('reviews/review-1')).toBe(false);
     expect(db.exists('reviews/review-2')).toBe(true);
+  });
+
+  // Issue #2116: somebody else's reply is not the deleted account's to take.
+  it('keeps an answered review as a tombstone without the name or the uid', async () => {
+    db.seed('reviews/answered', {
+      authorId: UID,
+      author: 'Ana',
+      review: 'Great',
+      biteId: '/bites/bite-1',
+    });
+    db.seed('reviews/their-reply', {
+      authorId: 'someone-else',
+      review: 'Agreed',
+      biteId: '/bites/bite-1',
+      parentReviewId: 'answered',
+      threadId: 'answered',
+    });
+
+    await deleteAccountForUser(UID, NOW);
+
+    expect(db.read('reviews/answered')).toEqual({
+      biteId: '/bites/bite-1',
+      deletedAt: expect.any(String),
+      deletedAtTimestamp: expect.any(Number),
+    });
+    expect(db.exists('reviews/their-reply')).toBe(true);
     expect(db.exists('bucketlists/list-1')).toBe(false);
     expect(db.exists(`biteTrails/trail-1/ratings/${UID}`)).toBe(false);
   });

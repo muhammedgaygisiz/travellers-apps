@@ -31,6 +31,20 @@ export const AFTER_LOGOUT_PAGE = new InjectionToken<string>(
 export const AFTER_LOGIN_PAGE = new InjectionToken<string>('after-login-page');
 
 /**
+ * Work that has to finish after someone signs in through the sign-in pages and
+ * before they are routed onwards.
+ *
+ * The consumer app binds it to settle the app language against the account's
+ * (issue #2104): onboarding and Home must open in the language the person
+ * chose, not switch under them a moment later. An app that leaves it unbound
+ * routes at once. A restored session never runs it, because nobody passed the
+ * sign-in pages. A failure is swallowed: a sign-in that succeeded still routes.
+ */
+export const BEFORE_ROUTING_AFTER_SIGN_IN = new InjectionToken<
+  () => Promise<void>
+>('before-routing-after-sign-in');
+
+/**
  * The roles an app admits, any one of which is enough to sign in.
  *
  * Bound by the shell of each privileged app: `business` and `staff` in the

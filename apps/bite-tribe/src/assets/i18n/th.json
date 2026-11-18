@@ -926,5 +926,7 @@
   "zoom-in": "ซูมเข้า",
   "zoom-out": "ซูมออก",
   "show-whole-globe": "แสดงลูกโลกทั้งหมด",
-  "country-bite-count": "Bites: {{count}}"
+  "country-bite-count": "Bites: {{count}}",
+  "account-language-prompt-header": "เลือกภาษา",
+  "account-language-prompt-message": "บัญชีของคุณตั้งค่าภาษาเป็น {{accountLanguage}} แต่แอปแสดงภาษา {{currentLanguage}} คุณต้องการใช้ภาษาใด"
 }

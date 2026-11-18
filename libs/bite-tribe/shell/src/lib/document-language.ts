@@ -27,7 +27,7 @@ export const provideDocumentLanguage = (): EnvironmentProviders =>
     const destroyRef = inject(DestroyRef);
 
     // `langChanges$` replays the active language, so the document is tagged at
-    // startup and again on every switch - including the one the app component
+    // startup and again on every switch - including the one `provideStartupLanguage`
     // makes once the stored preference has been read.
     inject(TranslocoService)
       .langChanges$.pipe(takeUntilDestroyed(destroyRef))

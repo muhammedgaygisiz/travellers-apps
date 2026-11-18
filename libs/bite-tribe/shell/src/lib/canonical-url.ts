@@ -26,8 +26,12 @@ export const CANONICAL_ORIGIN = BITE_TRIBE_ORIGIN;
  *
  * `start` is not among them: `/` redirects to it, so it is the start page
  * reached by a second URL rather than a page of its own.
+ *
+ * On the web they also keep a stable language: a visitor without a stored
+ * choice reads them in English rather than in the browser language, so what is
+ * indexed and shared does not change with whoever opens it (issue #2104).
  */
-const SELF_CANONICAL_PATHS: readonly string[] = [
+export const SELF_CANONICAL_PATHS: readonly string[] = [
   PATH.SUPPORT,
   PATH.PRIVACY_POLICY,
   PATH.ACCOUNT_DELETION,
@@ -40,10 +44,15 @@ const SELF_CANONICAL_PATHS: readonly string[] = [
  * an unknown path - canonicalizes to the site root, because that is the only
  * thing a crawler without a session can actually read there.
  */
+export const isSelfCanonicalUrl = (routerUrl: string): boolean =>
+  SELF_CANONICAL_PATHS.includes(
+    routerUrl.split(/[?#]/)[0].replace(/^\/+|\/+$/g, ''),
+  );
+
 export const canonicalUrlFor = (routerUrl: string): string => {
   const path = routerUrl.split(/[?#]/)[0].replace(/^\/+|\/+$/g, '');
 
-  return SELF_CANONICAL_PATHS.includes(path)
+  return isSelfCanonicalUrl(routerUrl)
     ? `${CANONICAL_ORIGIN}/${path}`
     : `${CANONICAL_ORIGIN}/`;
 };

@@ -6,35 +6,13 @@ import {
 } from '@angular/core';
 import { IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { SHIPPED_LANGUAGES, type ShippedLanguage } from 'utils';
 
-export interface OnboardingLanguageOption {
-  readonly code: string;
-  /** Transloco key for the language name, e.g. `english`. */
-  readonly labelKey: string;
-}
+export type OnboardingLanguageOption = ShippedLanguage;
 
-/**
- * Languages the app ships translations for. Kept in sync with the Transloco
- * `availableLangs` in the shell config and the locale files under
- * `assets/i18n`; a code listed here without a locale file would fall back to
- * English at runtime.
- */
-export const ONBOARDING_LANGUAGES: readonly OnboardingLanguageOption[] = [
-  { code: 'en', labelKey: 'english' },
-  { code: 'am', labelKey: 'amharic' },
-  { code: 'ar', labelKey: 'arabic' },
-  { code: 'de', labelKey: 'german' },
-  { code: 'es', labelKey: 'spanish' },
-  { code: 'fr', labelKey: 'french' },
-  { code: 'id', labelKey: 'indonesian' },
-  { code: 'it', labelKey: 'italian' },
-  { code: 'ja', labelKey: 'japanese' },
-  { code: 'ko', labelKey: 'korean' },
-  { code: 'pt', labelKey: 'portuguese' },
-  { code: 'th', labelKey: 'thai' },
-  { code: 'tr', labelKey: 'turkish' },
-  { code: 'zh', labelKey: 'chinese' },
-];
+/** The languages the picker offers: every one the app ships. */
+export const ONBOARDING_LANGUAGES: readonly OnboardingLanguageOption[] =
+  SHIPPED_LANGUAGES;
 
 /**
  * Language onboarding step. Prefilled from the device locale; picking a

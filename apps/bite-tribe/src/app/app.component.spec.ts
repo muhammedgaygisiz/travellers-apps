@@ -347,39 +347,4 @@ describe(AppComponent.name, () => {
       ).toHaveBeenCalledWith({ connected: true });
     });
   });
-
-  describe('initLanguage', () => {
-    describe('given not lang in preferences', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(Preferences, 'get')
-          .mockImplementation(() => Promise.resolve({ value: null }));
-      });
-
-      it('should call setActiveLang with default lang', async () => {
-        const setActiveLangSpy = MockTranslocoService.setActiveLang;
-
-        await component.initLanguage();
-
-        expect(setActiveLangSpy).toHaveBeenCalledWith('en');
-      });
-    });
-
-    describe('given lang in preferences', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(Preferences, 'get')
-          .mockImplementation(() => Promise.resolve({ value: 'de' }));
-      });
-      it('should call setActiveLang with lang from preferences', async () => {
-        const setActiveLangSpy = MockTranslocoService.setActiveLang;
-        const testLang = 'fr';
-        (Preferences.get as jest.Mock).mockResolvedValue({ value: testLang });
-
-        await component.initLanguage();
-
-        expect(setActiveLangSpy).toHaveBeenCalledWith(testLang);
-      });
-    });
-  });
 });

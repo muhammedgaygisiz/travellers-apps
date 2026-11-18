@@ -926,5 +926,7 @@
   "zoom-in": "Yakınlaştır",
   "zoom-out": "Uzaklaştır",
   "show-whole-globe": "Tüm küreyi göster",
-  "country-bite-count": "Bite: {{count}}"
+  "country-bite-count": "Bite: {{count}}",
+  "account-language-prompt-header": "Dil seçimi",
+  "account-language-prompt-message": "Hesabının dili {{accountLanguage}}, uygulamanın dili ise şu anda {{currentLanguage}}. Hangi dili kullanmak istersin?"
 }

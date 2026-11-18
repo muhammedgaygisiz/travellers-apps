@@ -73,6 +73,14 @@ export { storagePathFromDownloadUrl } from './lib/storage-path-from-download-url
 export { isBase64String } from './lib/is-base64-string';
 export { isPrivacyPage } from './lib/is-privacy-page';
 export { isAuthEntryPage, isAuthEntryUrl } from './lib/is-auth-entry-page';
+export {
+  FALLBACK_LANGUAGE,
+  LANGUAGE_PREFERENCE_KEY,
+  languageForLocale,
+  readDeviceLocale,
+  SHIPPED_LANGUAGES,
+  type ShippedLanguage,
+} from './lib/device-language';
 export { isAccountDeletionPage } from './lib/is-account-deletion-page';
 export { getBitePriceInPreferredCurrency } from './lib/get-bite-price-in-preferred-currency';
 export {

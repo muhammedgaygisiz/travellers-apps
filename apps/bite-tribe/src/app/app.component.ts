@@ -28,8 +28,6 @@ import { Router } from '@angular/router';
 import { PATH } from 'utils';
 import { ConnectionStatus, Network } from '@capacitor/network';
 import { NetworkStatusService } from 'common/networkstatus';
-import { TranslocoService } from '@jsverse/transloco';
-import { Preferences } from '@capacitor/preferences';
 
 @Component({
   selector: 'bt-root',
@@ -60,15 +58,12 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly appForegroundService = inject(AppForegroundService);
   private readonly networkStatusService = inject(NetworkStatusService);
-  private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
 
   backButtonHandler = ({ canGoBack }: { canGoBack: boolean }): void =>
     this.handleBackButton(canGoBack);
 
   constructor() {
-    void this.initLanguage();
-
     addNecessaryIcons();
 
     this.initBackbuttonHandler();
@@ -77,11 +72,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.initAppStateChangeHandler();
     this.initNetworkStatusHandler();
-  }
-
-  async initLanguage(): Promise<void> {
-    const { value } = await Preferences.get({ key: 'lang' });
-    this.transloco.setActiveLang(value ?? 'en');
   }
 
   ngOnInit(): void {

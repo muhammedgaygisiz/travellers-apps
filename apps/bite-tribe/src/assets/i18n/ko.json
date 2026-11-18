@@ -926,5 +926,7 @@
   "zoom-in": "확대",
   "zoom-out": "축소",
   "show-whole-globe": "지구본 전체 보기",
-  "country-bite-count": "Bite: {{count}}개"
+  "country-bite-count": "Bite: {{count}}개",
+  "account-language-prompt-header": "언어 선택",
+  "account-language-prompt-message": "계정 언어({{accountLanguage}})와 지금 앱 언어({{currentLanguage}})가 달라요. 어떤 언어를 사용할까요?"
 }

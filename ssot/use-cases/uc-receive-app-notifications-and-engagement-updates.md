@@ -190,6 +190,11 @@ extends review notifications from one recipient to a conversation. Implemented b
 - A reply carries its own type, `NEW_REVIEW_REPLY`, with its own copy. The
   existing `NEW_BITE_REVIEW` text says "X reviewed your Bite", which is false for
   every recipient who is a reviewer rather than the creator.
+- A participant counts only through an item still visible in the thread. An account
+  whose every item there was hidden by an operator or deleted by its author has left the
+  conversation and is not notified (issue [#2118]); the Bite creator is a participant by
+  owning the Bite and stays one. A new root review is read again just before its
+  notification is sent, and one hidden or gone by then sends nothing.
 - A participant whose review predates the `authorId` field is unreachable and is
   skipped. The rest of the fan-out still goes out; one unattributable document
   does not silence a conversation.
@@ -301,6 +306,7 @@ Relevant.
 ## Related GitHub Scope
 
 - Issue [#1244] is the Notification Navigation Contract above - a tap reliably opens its own surface, cold start or not.
+- Issue [#2118] leaves out of a reply's fan-out an account whose only items in the thread are hidden or deleted, part of epic-1284.
 - Issue [#1366] is the Notification Collapse Contract above - a collapse key stops notifications piling up in the OS drawer.
 - Issue [#1200] is the Localization Contract above - notification copy follows the recipient's saved language.
 - Issue [#1194] is the Release Announcement Contract above - an operator-fired, per-platform new-version notification.
@@ -336,3 +342,4 @@ Relevant.
 [#1919]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1919
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
+[#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118

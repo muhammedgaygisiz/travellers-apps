@@ -76,6 +76,12 @@ A good Bite makes one concrete dish understandable enough that another person ca
   document only an operator can read; it changes nothing on the review, and it is deleted
   with the review. See the Review Report Contract in
   [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#2117].
+- An operator can hide a reported review or reply. Its text and author name move to the
+  operator-only `/hiddenReviews/{reviewId}`, which its own author may also read, and the
+  review document stays without them, marked `hiddenAt`, so its replies keep their parent.
+  The copy is deleted with the review, with its Bite and with its author's account. See the
+  Review Hide Contract in [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md)
+  and issue [#2118].
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
@@ -273,7 +279,7 @@ Current product expectation:
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
   - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
   - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../history/records/epic-1471.md).
-  - The report queue surfaces the reported Bites, through `listBiteReports`, and closes a report on a Bite that stays through `dismissBiteReports` ([#1608]). The reported reviews and replies have their own queue, through `listReviewReports` and `dismissReviewReports` ([#2117]); hiding one is [#2118].
+  - The report queue surfaces the reported Bites, through `listBiteReports`, and closes a report on a Bite that stays through `dismissBiteReports` ([#1608]). The reported reviews and replies have their own queue, through `listReviewReports` and `dismissReviewReports` ([#2117]), and an operator hides one from its thread through `hideReviewAsOperator` ([#2118]).
 
 ## Use Cases
 

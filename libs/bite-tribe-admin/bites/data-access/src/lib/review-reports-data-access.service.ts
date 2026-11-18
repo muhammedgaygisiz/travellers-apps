@@ -12,6 +12,11 @@ export interface DismissReviewReportsResult {
   dismissedReports: number;
 }
 
+export interface HideReviewAsOperatorResult {
+  reviewId: string;
+  dismissedReports: number;
+}
+
 interface SetUserBlockedRequest {
   uid: string;
   blocked: boolean;
@@ -47,6 +52,26 @@ export class ReviewReportsDataAccessService {
       DismissReviewReportsResult
     >({
       name: 'dismissReviewReports',
+      data: { reviewId, reason: reason.trim() },
+    });
+
+    return data;
+  }
+
+  /**
+   * Hides the review or reply from its thread and closes its open reports
+   * (issue #2118). Its text is kept where only operators and its author can
+   * read it, and the replies under it stay.
+   */
+  async hide(
+    reviewId: string,
+    reason: string,
+  ): Promise<HideReviewAsOperatorResult> {
+    const { data } = await FirebaseFunctions.callByName<
+      DismissReviewReportsRequest,
+      HideReviewAsOperatorResult
+    >({
+      name: 'hideReviewAsOperator',
       data: { reviewId, reason: reason.trim() },
     });
 

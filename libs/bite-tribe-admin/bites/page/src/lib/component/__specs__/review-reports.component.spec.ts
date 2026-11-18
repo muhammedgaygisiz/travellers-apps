@@ -202,6 +202,49 @@ describe(ReviewReportsComponent.name, () => {
     expect(component.reason()).toBe('');
   });
 
+  // Issue #2118.
+  it('hides a review only with a reason, and only once confirmed', async () => {
+    setInputs({ reports: [reported()], selected: reported() });
+    const emit = jest.spyOn(component.hideReview, 'emit');
+
+    expect(disabled('admin-review-reports-hide')).toBe(true);
+
+    component.onReasonChange('  Harassment, ticket 12.  ');
+    fixture.detectChanges();
+    expect(disabled('admin-review-reports-hide')).toBe(false);
+
+    const confirm = await confirmHandler(() => component.onHide());
+    expect(emit).not.toHaveBeenCalled();
+
+    confirm?.(undefined);
+    expect(emit).toHaveBeenCalledWith({
+      reviewId: 'reply-1',
+      reason: 'Harassment, ticket 12.',
+    });
+    expect(component.reason()).toBe('');
+  });
+
+  it('offers no hide on a review that is gone', async () => {
+    const gone = reported({ exists: false, text: '', authorUid: '' });
+    setInputs({ reports: [gone], selected: gone });
+    component.onReasonChange('Clearing the queue.');
+    fixture.detectChanges();
+    const emit = jest.spyOn(component.hideReview, 'emit');
+
+    await component.onHide();
+
+    expect(element('admin-review-reports-hide')).toBeNull();
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('offers no hide while another action is running', () => {
+    setInputs({ reports: [reported()], selected: reported(), action: 'block' });
+    component.onReasonChange('Harassment.');
+    fixture.detectChanges();
+
+    expect(disabled('admin-review-reports-hide')).toBe(true);
+  });
+
   it('clears the reason when another review is selected', () => {
     component.onReasonChange('typed for the first one');
 

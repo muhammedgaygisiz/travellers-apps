@@ -38,4 +38,20 @@ export interface Review {
    */
   deletedAt?: string;
   deletedAtTimestamp?: number;
+
+  /**
+   * Set when an operator hid the item (issue #2118). The text and `author` were
+   * moved to the operator-only `/hiddenReviews` store; `authorId` and
+   * everything that places the item stay, so its replies keep their parent.
+   * The loader hands it on with `review` and `author` empty.
+   */
+  hiddenAt?: string;
+  hiddenAtTimestamp?: number;
+
+  /**
+   * The hidden text, filled in only when the reader is the item's own author,
+   * who may read `/hiddenReviews/{id}` and sees what was hidden. Never set for
+   * anybody else.
+   */
+  hiddenReview?: string;
 }

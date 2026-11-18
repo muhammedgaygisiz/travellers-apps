@@ -47,9 +47,11 @@ interface ReasonCount {
  * answers above the reply itself, because a reply that is polite on its own
  * can be harassing in context, and the context is what a reporter saw.
  *
- * Two answers. **Block author** is the existing account block (#1474): it stops
- * the author signing in and removes nothing. **Keep** closes the reports with a
- * reason and takes the review out of the queue. Hiding a review is #2118.
+ * Three answers. **Block author** is the existing account block (#1474): it
+ * stops the author signing in and removes nothing. **Hide** (#2118) takes the
+ * item out of its thread, keeping its text for operators and its author and
+ * its replies in place. **Keep** closes the reports and leaves it up. Hide and
+ * Keep both take the review out of the queue and share one required reason.
  */
 @Component({
   selector: 'lib-review-reports',
@@ -92,10 +94,11 @@ export class ReviewReportsComponent {
   readonly selectReview = output<ReportedReview>();
   readonly blockAuthor = output<string>();
   readonly dismissReports = output<{ reviewId: string; reason: string }>();
+  readonly hideReview = output<{ reviewId: string; reason: string }>();
   readonly logoutClick = output<void>();
 
   /**
-   * Why the operator kept the review. Cleared whenever the selection changes,
+   * Why the operator hid or kept the review. Cleared whenever the selection changes,
    * so a reason typed for one review cannot be submitted against another.
    */
   readonly reason = signal('');
@@ -136,6 +139,11 @@ export class ReviewReportsComponent {
       !this.busy()
     );
   });
+
+  /** Only an item that still has its text can be hidden. */
+  readonly canHide = computed(
+    () => !!this.selected()?.exists && this.hasReason() && !this.busy(),
+  );
 
   /** What the queue and the confirmations call the author. */
   authorOf(review: ReportedReview): string {
@@ -184,6 +192,27 @@ export class ReviewReportsComponent {
       () => {
         this.reason.set('');
         this.dismissReports.emit({ reviewId: review.reviewId, reason });
+      },
+    );
+  }
+
+  async onHide(): Promise<void> {
+    const review = this.selected();
+
+    if (!review || !this.canHide()) {
+      return;
+    }
+
+    const reason = this.reason().trim();
+
+    await this.confirm(
+      'admin-review-reports-hide-confirm-title',
+      this.authorOf(review),
+      'admin-review-reports-hide-confirm-message',
+      'admin-review-reports-hide',
+      () => {
+        this.reason.set('');
+        this.hideReview.emit({ reviewId: review.reviewId, reason });
       },
     );
   }

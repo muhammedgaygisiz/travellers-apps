@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { ContentRefusedError } from 'utils';
+import { AuthService } from 'ta-firestore';
 import { ReviewApiService } from '../review-api.service';
 import * as loadReviewsByBiteIdUtils from '../utils/load-review-by-bite-id';
 
@@ -14,6 +15,9 @@ jest.mock('@capacitor-firebase/functions', () => ({
 
 const callByName = FirebaseFunctions.callByName as jest.Mock;
 const loadReviews = loadReviewsByBiteIdUtils.loadReviewsByBiteId as jest.Mock;
+
+/** The signed-in reader the service hands to every read (issue #2118). */
+let user: { uid: string } | null = null;
 
 /**
  * Reviews are written by the `saveReview` and `editReview` callables, which
@@ -32,14 +36,30 @@ describe(ReviewApiService.name, () => {
     loadReviews.mockClear();
     loadReviews.mockResolvedValue([{ id: 'review-1' }]);
 
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AuthService,
+          useValue: { getUser: (): typeof user => user },
+        },
+      ],
+    });
     service = TestBed.inject(ReviewApiService);
   });
 
   it('reads the reviews of a Bite', async () => {
     await service.reviewsByBiteId('bite-1');
 
-    expect(loadReviews).toHaveBeenCalledWith('bite-1');
+    expect(loadReviews).toHaveBeenCalledWith('bite-1', undefined);
+  });
+
+  it('reads as the signed-in reader, so their hidden items show them their text', async () => {
+    user = { uid: 'mira' };
+
+    await service.reviewsByBiteId('bite-1');
+
+    expect(loadReviews).toHaveBeenCalledWith('bite-1', 'mira');
+    user = null;
   });
 
   describe('saveNewReview', () => {
@@ -52,7 +72,7 @@ describe(ReviewApiService.name, () => {
         name: 'saveReview',
         data: { review: 'Lovely', biteId: 'bite-1' },
       });
-      expect(loadReviews).toHaveBeenCalledWith('bite-1');
+      expect(loadReviews).toHaveBeenCalledWith('bite-1', undefined);
     });
 
     it('throws a refusal, and reloads nothing', async () => {
@@ -129,7 +149,7 @@ describe(ReviewApiService.name, () => {
         name: 'editReview',
         data: { reviewId: 'review-1', review: 'Better' },
       });
-      expect(loadReviews).toHaveBeenCalledWith('bite-1');
+      expect(loadReviews).toHaveBeenCalledWith('bite-1', undefined);
     });
 
     it('throws a refusal', async () => {
@@ -158,7 +178,7 @@ describe(ReviewApiService.name, () => {
         name: 'deleteReview',
         data: { reviewId: 'review-1' },
       });
-      expect(loadReviews).toHaveBeenCalledWith('bite-1');
+      expect(loadReviews).toHaveBeenCalledWith('bite-1', undefined);
     });
 
     it('rejects when the callable refuses', async () => {

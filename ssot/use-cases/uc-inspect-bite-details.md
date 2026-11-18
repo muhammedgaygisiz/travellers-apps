@@ -4,10 +4,11 @@
 
 **Level:** L1
 Supported today. The detail page, its share and deep-link entry, the bucket-list and
-directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the nine contracts below all ship.
+directions actions, the header photo's upload state, reporting the Bite, the AI explanation of its dish (`R-1` to `R-7`), and the ten contracts below all ship.
 An author editing their own review or reply is the Review Edit Contract (issue [#721]),
-deleting it is the Review Delete Contract (issue [#2116]), and another member reporting it
-is the Review Report Contract (issue [#2117]).
+deleting it is the Review Delete Contract (issue [#2116]), another member reporting it
+is the Review Report Contract (issue [#2117]), and an operator hiding it is the Review
+Hide Contract (issue [#2118]).
 
 ## Goal
 
@@ -218,7 +219,8 @@ turns the review compartment from a flat list into a thread list. Implemented by
   already expanded and highlighted. See
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) for the fan-out.
 - Editing a review or reply is the Review Edit Contract below, deleting one the
-  Review Delete Contract, and reporting one the Review Report Contract.
+  Review Delete Contract, reporting one the Review Report Contract, and how a hidden one
+  reads the Review Hide Contract.
 
 ## Review Attribution Contract
 
@@ -308,6 +310,9 @@ and the `deleteReview` callable.
   the backend can see whether anybody answered. An operator's delete is unaffected.
 - A delete notifies nobody. A tombstone carries no `authorId`, so its former author is not
   among the participants a later reply notifies.
+- **A hidden item is deleted the same way** (Review Hide Contract): its author is offered
+  Delete on it, and `deleteReview` removes its kept copy in `/hiddenReviews` with it,
+  whether the item is deleted or becomes a tombstone.
 - A failed delete says so in a toast and leaves the item on screen.
 - Deleting the account follows the same rule, per the `Deletion Contract` in
   [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
@@ -330,7 +335,7 @@ callable.
   same account, open or already dismissed, is answered as already reported and writes
   nothing. The answer is a toast either way, and a failure says the report was not sent.
 - **`reportReview` refuses** an item that does not exist, one the caller wrote, a
-  tombstone, a signed-out caller and a table guest.
+  tombstone, a hidden item, a signed-out caller and a table guest.
 - **The report records** the item, its Bite, its thread, its author, the reporter, the
   reason, an `open` status and the time. Only an operator can read it, and no client can
   write it.
@@ -343,6 +348,48 @@ callable.
   [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md).
 - What an operator does with a report is the reported-reviews queue in
   [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md).
+
+## Review Hide Contract
+
+Issue [#2118] lets an operator take a reported review or reply out of its thread without
+taking the replies around it down. The operator's side is the reported-reviews queue in
+[UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md); this
+contract is how a hidden item reads on the Bite. Implemented by the `hideReviewAsOperator`
+callable, `loadReviewsByBiteId` and `ReviewThreadComponent`.
+
+- **The text leaves the public document.** `/reviews` is readable by every member, so a
+  flag the app filters on would still let anybody read it. `hideReviewAsOperator` moves
+  `review` and `author` to `/hiddenReviews/{reviewId}`, with the operator, the reason and
+  the time, removes them and the `updatedAt` fields from the review, and sets `hiddenAt`
+  and `hiddenAtTimestamp`. `authorId`, `biteId`, `parentReviewId`, `threadId` and the
+  created timestamps stay, so the item keeps its place and its replies keep their parent.
+- **To every reader but its author it is one muted line** - "This review was hidden by
+  BiteTribe" or "This reply was hidden by BiteTribe" - with no text, no name, no age and
+  no action, in the place the item had. Its replies stay attached and in order.
+- **Its author sees it marked.** For a hidden item the signed-in reader wrote, the loader
+  also reads `/hiddenReviews/{reviewId}`, and the thread shows the original text under a
+  "Hidden - only you can see this" marker, with Delete as the only action. An author whose
+  item just disappeared could not tell moderation from a bug, and would post it again.
+  Nobody else's hidden text is read, and the rules refuse it to anybody but an operator and
+  the author.
+- **A hidden item takes nothing new.** `saveReview` refuses a reply to it, `editReview` an
+  edit, and `reportReview` a report. Its author may delete it under the Review Delete
+  Contract.
+- **It is kept, not deleted**, so an operator's decision can be reviewed later. The copy
+  goes when the item goes: with the review document, through
+  `deleteHiddenReviewOnReviewDelete` (a delete by its author, its Bite's deletion, an empty
+  tombstone pruned, the console); with a tombstone, through `deleteReview`; and with the
+  author's account, per the `Deletion Contract` in
+  [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md). Un-hiding is not
+  built.
+- **Hiding notifies nobody**, the author included; the marker is the only signal. An
+  account whose only items in a thread are hidden or deleted is not among the participants
+  a later reply notifies, and a new review hidden before its notification is sent sends
+  none. See [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- A reply notification tapped after its item was hidden opens the Bite and its thread as
+  any other, with the hidden line where the item was.
+- A display-name change does not put a name back on a hidden item: `syncDisplayNameCopies`
+  skips it.
 
 ## Review Content Check
 
@@ -386,8 +433,8 @@ The Review Edit Contract is **[Secondary]**: it came after launch, and a review 
 cannot be corrected is an annoyance rather than a broken page. The Review Delete Contract
 is **[Secondary]** for the same reason.
 
-The Review Report Contract is **[MVP]**: it is the review-thread part of the
-user-generated-content safeguards `RD-UR-7` classes `[MVP]`.
+The Review Report Contract and the Review Hide Contract are **[MVP]**: they are the
+review-thread part of the user-generated-content safeguards `RD-UR-7` classes `[MVP]`.
 
 ## App Store Review Area
 
@@ -402,7 +449,9 @@ publish user-generated text under Guideline 1.2; it adds no permission or declar
 an edited review can be reported and blocked like any other. Deleting one (issue [#2116])
 adds no permission or declaration either. Reporting a review or reply (issue [#2117]) is
 the reporting mechanism Guideline 1.2 requires, for review threads; it adds no permission,
-no declaration and no store listing change. The Review Content Check is
+no declaration and no store listing change. Hiding one (issue [#2118]) is the timely action
+on reported content the same guideline asks for; `/hiddenReviews` holds text the app
+already held, so no data type or declaration changes. The Review Content Check is
 the filtering Guideline 1.2 names, for this page's text (issue [#1610]). The
 data types this page renders are declared in [Implementation - Store Declarations](../implementation/store-declarations.md).
 
@@ -421,8 +470,11 @@ data types this page renders are declared in [Implementation - Store Declaration
 - `ReviewThreadComponent` in `libs/bite-tribe/details/page`, with Storybook
   states for a bare root, an open thread, a folded one, the notification
   highlight, the creator badge, the read-only view, the author's own review, the open
-  editor, an edited root review and reply, and a deleted root and reply still holding up
-  replies.
+  editor, an edited root review and reply, a deleted root and reply still holding up
+  replies, and a hidden root, a hidden reply and a hidden item seen by its own author.
+- `hideReviewAsOperator` in `review-reports-as-operator.ts`, `hidden-review.ts` and
+  `deleteHiddenReviewOnReviewDelete` next to it, with `hide-review.spec.ts`, and the
+  `/hiddenReviews` allow and deny cases in `firestore-rules.emulator-spec.ts`.
 - `toReviewThreads` in `libs/bite-tribe/store`, which owns the grouping and the
   ordering.
 - The AI dish explanation (`R-1` to `R-7`): `explainBite` and
@@ -456,7 +508,7 @@ data types this page renders are declared in [Implementation - Store Declaration
 - Issue [#721] is the Review Edit Contract above - an author edits the text of their own review or reply, part of epic-1284.
 - Issue [#2116] is the Review Delete Contract above - an author withdraws their own review or reply, and one somebody answered stays as a tombstone, part of epic-1284.
 - Issue [#2117] is the Review Report Contract above - a member reports somebody else's review or reply to the operators, part of epic-1284.
-- Issue [#2118] will let an operator hide a reported review from its thread, part of epic-1284.
+- Issue [#2118] is the Review Hide Contract above - an operator hides a reported review or reply from its thread, keeping its text for operators and its author, part of epic-1284.
 - Issue [#1610] is the Review Content Check above.
 - Issue [#1308] is the Review Attribution Contract above - reviews now publish the BiteTribe display name rather than the identity provider's real name; accepted as a release blocker.
 - Issue [#1168] is the header photo's upload-status reporting, sharing `bt-bite-image-status` with the feed card.

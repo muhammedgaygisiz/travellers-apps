@@ -673,4 +673,109 @@ describe(ReviewThreadComponent.name, () => {
       expect(requested).toEqual([{ reviewId: 'root-1', isReply: false }]);
     });
   });
+
+  /** Issue #2118: an item an operator hid. */
+  describe('hidden items', () => {
+    const hidden = (
+      overrides: Partial<Review> & { id: string },
+      keptText?: string,
+    ): Review =>
+      review({
+        author: '',
+        review: '',
+        hiddenAt: '2026-11-18T12:00:00.000Z',
+        ...(keptText === undefined ? {} : { hiddenReview: keptText }),
+        ...overrides,
+      });
+
+    it('shows a hidden root in its place, with its replies still under it', () => {
+      render({
+        thread: { root: hidden({ id: 'root-1' }), replies: [reply('reply-1')] },
+        userId: 'jonas',
+      });
+
+      expect(query('hidden-review')?.textContent?.trim()).toBe('review-hidden');
+      expect(query('reply-reply-1')?.textContent).toContain(
+        'Was it very spicy?',
+      );
+    });
+
+    it('names a hidden reply as a reply', () => {
+      render({
+        thread: thread([
+          hidden({
+            id: 'reply-1',
+            authorId: 'jonas',
+            parentReviewId: 'root-1',
+          }),
+        ]),
+        userId: 'mira',
+      });
+
+      expect(query('hidden-review')?.textContent?.trim()).toBe('reply-hidden');
+    });
+
+    it('offers another reader nothing on it: no reply, edit, delete or report', () => {
+      render({
+        thread: { root: hidden({ id: 'root-1' }), replies: [] },
+        userId: 'jonas',
+      });
+
+      expect(query('reply-to-review')).toBeNull();
+      expect(query('edit-review')).toBeNull();
+      expect(query('delete-review')).toBeNull();
+      expect(query('report-review')).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain('Mira');
+    });
+
+    it('shows its author the kept text under the marker, with only a delete', () => {
+      render({
+        thread: {
+          root: hidden({ id: 'root-1' }, 'Best kebab in Kreuzberg.'),
+          replies: [],
+        },
+        userId: 'mira',
+      });
+
+      expect(query('hidden-marker')?.textContent?.trim()).toBe(
+        'review-hidden-own-marker',
+      );
+      expect(query('own-hidden-review')?.textContent).toContain(
+        'Best kebab in Kreuzberg.',
+      );
+      expect(query('delete-review')).toBeTruthy();
+      expect(query('edit-review')).toBeNull();
+      expect(query('reply-to-review')).toBeNull();
+    });
+
+    it('shows the kept text to nobody but the author', () => {
+      // Defence in depth: the loader never reads it for anybody else.
+      render({
+        thread: {
+          root: hidden({ id: 'root-1' }, 'Best kebab in Kreuzberg.'),
+          replies: [],
+        },
+        userId: 'jonas',
+      });
+
+      expect(query('own-hidden-review')).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain('Best kebab');
+    });
+
+    it('lets its author ask to delete it', () => {
+      render({
+        thread: {
+          root: hidden({ id: 'root-1' }, 'Best kebab in Kreuzberg.'),
+          replies: [],
+        },
+        userId: 'mira',
+      });
+      const requested: ReviewDeleteRequest[] = [];
+      component.deleteReview.subscribe((event) => requested.push(event));
+
+      query('delete-review')?.click();
+
+      expect(requested).toEqual([{ reviewId: 'root-1', isReply: false }]);
+    });
+  });
 });

@@ -42,6 +42,16 @@ describe(ReviewReportsDataAccessService.name, () => {
     });
   });
 
+  // Issue #2118: hiding takes the same trimmed, required reason.
+  it('hides a review through hideReviewAsOperator with a trimmed reason', async () => {
+    await service.hide('reply-1', '  Harassment.  ');
+
+    expect(callByNameMock).toHaveBeenCalledWith({
+      name: 'hideReviewAsOperator',
+      data: { reviewId: 'reply-1', reason: 'Harassment.' },
+    });
+  });
+
   // The existing account block (issue #1474), never an unblock.
   it('blocks the author through setUserBlocked', async () => {
     await service.blockAuthor('u1');

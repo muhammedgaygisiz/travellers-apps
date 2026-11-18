@@ -258,3 +258,47 @@ export const DeletedReplyWithReplies: Story = {
     thread: thread([deleted(twoReplies[0]), twoReplies[1]]),
   },
 };
+
+/**
+ * What an operator's hide leaves on the public document: no text and no name,
+ * with `authorId` kept (issue #2118). The loader fills `hiddenReview` in only
+ * for the item's own author.
+ */
+const hidden = (review: Review, keptFor?: string): Review => ({
+  ...review,
+  author: '',
+  review: '',
+  updatedAt: undefined,
+  hiddenAt: isoAgo(HOUR_MS),
+  ...(keptFor === review.authorId ? { hiddenReview: review.review } : {}),
+});
+
+/** A hidden root review, its replies still attached and in order. */
+export const HiddenRootWithReplies: Story = {
+  args: {
+    ...WithReplies.args,
+    userId: JONAS,
+    thread: { root: hidden(root), replies: twoReplies },
+  },
+};
+
+/** A hidden reply keeping its place between the replies around it. */
+export const HiddenReply: Story = {
+  args: {
+    ...WithReplies.args,
+    userId: JONAS,
+    thread: thread([hidden(twoReplies[0]), twoReplies[1]]),
+  },
+};
+
+/**
+ * Ali reading the thread their hidden reply is in: they see the text under the
+ * marker, and can only delete it. Nobody else sees it.
+ */
+export const HiddenSeenByItsAuthor: Story = {
+  args: {
+    ...WithReplies.args,
+    userId: ALI,
+    thread: thread([hidden(twoReplies[0], ALI), twoReplies[1]]),
+  },
+};

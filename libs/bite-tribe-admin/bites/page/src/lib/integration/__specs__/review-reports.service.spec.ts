@@ -26,6 +26,7 @@ describe(ReviewReportsService.name, () => {
   let list: jest.Mock;
   let dismiss: jest.Mock;
   let blockAuthor: jest.Mock;
+  let hide: jest.Mock;
   let present: jest.Mock;
 
   beforeEach(() => {
@@ -37,6 +38,7 @@ describe(ReviewReportsService.name, () => {
       .fn()
       .mockResolvedValue({ reviewId: 'r1', dismissedReports: 2 });
     blockAuthor = jest.fn().mockResolvedValue(undefined);
+    hide = jest.fn().mockResolvedValue({ reviewId: 'r1', dismissedReports: 2 });
     present = jest.fn().mockResolvedValue(undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -44,7 +46,7 @@ describe(ReviewReportsService.name, () => {
       providers: [
         {
           provide: ReviewReportsDataAccessService,
-          useValue: { list, dismiss, blockAuthor },
+          useValue: { list, dismiss, blockAuthor, hide },
         },
         { provide: BiteTribeStoreService, useValue: { logout: jest.fn() } },
         { provide: ToastService, useValue: { present } },
@@ -95,6 +97,33 @@ describe(ReviewReportsService.name, () => {
     expect(present).toHaveBeenCalledWith({
       messageKey: 'admin-review-reports-dismissed',
       outcome: 'success',
+    });
+  });
+
+  it('hides a review: it leaves the queue (issue #2118)', async () => {
+    await service.load();
+    service.select(reported());
+
+    await service.hide('r1', 'Harassment.');
+
+    expect(hide).toHaveBeenCalledWith('r1', 'Harassment.');
+    expect(service.reports().map((review) => review.reviewId)).toEqual(['r2']);
+    expect(present).toHaveBeenCalledWith({
+      messageKey: 'admin-review-reports-hidden',
+      outcome: 'success',
+    });
+  });
+
+  it('keeps a review in the queue when hiding fails', async () => {
+    await service.load();
+    hide.mockRejectedValue(new Error('unavailable'));
+
+    await service.hide('r1', 'Harassment.');
+
+    expect(service.reports()).toHaveLength(2);
+    expect(present).toHaveBeenCalledWith({
+      messageKey: 'admin-review-reports-hide-failed',
+      outcome: 'failure',
     });
   });
 

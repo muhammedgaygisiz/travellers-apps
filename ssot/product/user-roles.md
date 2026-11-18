@@ -124,8 +124,8 @@ reports another from its profile, and the operator works the reports from the ad
 reported-profiles queue, where they block the account or close the reports. **Reporting a
 Review ships** ([#2117]): any account reports somebody else's review or reply from its
 thread on the Bite detail page, and the operator works the reports from the admin app's
-reported-reviews queue, where they block the author or keep the review; hiding it is
-[#2118]. With it **the user-facing half is complete**. **Content
+reported-reviews queue, where they block the author, hide the review from its thread
+([#2118]) or keep it. With it **the user-facing half is complete**. **Content
 filtering ships** ([#1610]): text a member publishes - reviews and replies, display names,
 profile text, and a Bite's name, tags and description - is checked before another account
 can read it and refused with a message when it fails, per `RD-UR-11` and

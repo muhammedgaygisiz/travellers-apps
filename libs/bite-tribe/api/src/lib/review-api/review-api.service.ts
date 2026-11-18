@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { AuthService } from 'ta-firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { loadReviewsByBiteId } from './utils/load-review-by-bite-id';
 import { ReportReviewResult, Review, ReviewReportReason } from 'model';
@@ -22,8 +23,18 @@ type DeleteReviewResponse = { status: 'deleted' | 'tombstoned' };
  */
 @Injectable({ providedIn: 'root' })
 export class ReviewApiService {
+  private readonly authService = inject(AuthService);
+
+  /**
+   * Every read carries the signed-in reader, so their own hidden items can
+   * show them what was hidden (issue #2118).
+   */
+  private load(biteId: string): Promise<Review[]> {
+    return loadReviewsByBiteId(biteId, this.authService.getUser()?.uid);
+  }
+
   reviewsByBiteId(biteId: string): Promise<Review[]> {
-    return loadReviewsByBiteId(biteId);
+    return this.load(biteId);
   }
 
   async saveNewReview(payload: {
@@ -32,7 +43,7 @@ export class ReviewApiService {
   }): Promise<Review[]> {
     await this.call('saveReview', payload);
 
-    return loadReviewsByBiteId(payload.biteId);
+    return this.load(payload.biteId);
   }
 
   /**
@@ -52,7 +63,7 @@ export class ReviewApiService {
   }): Promise<Review[]> {
     await this.call('saveReview', payload);
 
-    return loadReviewsByBiteId(payload.biteId);
+    return this.load(payload.biteId);
   }
 
   /**
@@ -70,7 +81,7 @@ export class ReviewApiService {
       review: payload.review,
     });
 
-    return loadReviewsByBiteId(payload.biteId);
+    return this.load(payload.biteId);
   }
 
   /**
@@ -89,7 +100,7 @@ export class ReviewApiService {
       DeleteReviewResponse
     >({ name: 'deleteReview', data: { reviewId: payload.reviewId } });
 
-    return loadReviewsByBiteId(payload.biteId);
+    return this.load(payload.biteId);
   }
 
   /**

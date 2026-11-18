@@ -173,10 +173,18 @@ export const fromStored = (
   return explanation ? { status: 'ok', cached: true, explanation } : undefined;
 };
 
-/** The Bite's photo in our own bucket, by its path or its download URL. */
-const photoPathOf = (bite: Record<string, unknown>): string | undefined =>
-  (typeof bite['imagePath'] === 'string' && bite['imagePath']) ||
-  storagePathOf(bite['image'], getStorage().bucket().name);
+/**
+ * The Storage path of the Bite's photo in our own bucket. `imagePath` is the
+ * download URL `setBiteImagePathOnUpload` writes, not a Storage path, so both
+ * it and the older `image` field go through {@link storagePathOf}, which also
+ * refuses a URL of any other bucket or host.
+ */
+export const photoPathOf = (
+  bite: Record<string, unknown>,
+  bucket: string = getStorage().bucket().name,
+): string | undefined =>
+  storagePathOf(bite['imagePath'], bucket) ??
+  storagePathOf(bite['image'], bucket);
 
 /**
  * Explains a Bite's dish in the member's app language (issue #2106): what it

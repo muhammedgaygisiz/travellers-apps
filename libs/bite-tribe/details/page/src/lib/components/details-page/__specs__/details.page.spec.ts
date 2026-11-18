@@ -505,6 +505,62 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** The two-column layout from the desktop breakpoint (issue #2113). */
+  describe('Desktop layout', () => {
+    const originalMatchMedia = window.matchMedia;
+
+    const renderAt = (matches: boolean): ComponentFixture<DetailsPage> => {
+      window.matchMedia = jest.fn().mockReturnValue({
+        matches,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+      });
+
+      const desktopFixture = TestBed.createComponent(DetailsPage);
+      desktopFixture.componentRef.setInput('isAuthenticated', true);
+      desktopFixture.componentRef.setInput('userId', 'viewer');
+      desktopFixture.componentRef.setInput('bite', {
+        id: 'bite-1',
+        name: 'Som Tam',
+        userId: 'creator',
+        imageStatus: 'uploaded',
+      } as Bite);
+      desktopFixture.detectChanges();
+
+      return desktopFixture;
+    };
+
+    const desktopLayout = (f: ComponentFixture<DetailsPage>): Element | null =>
+      f.nativeElement.querySelector('[data-testid="bite-details-desktop"]');
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    // No position here: Leaflet does not run under jsdom, so Directions, which
+    // sits on the map card, is left to the e2e suite.
+    it('renders two columns from the breakpoint, keeping every action reachable', () => {
+      const desktop = desktopLayout(renderAt(true));
+
+      expect(desktop).toBeTruthy();
+      for (const testId of [
+        'bite-details-share',
+        'bite-details-bucket-list',
+        'bite-details-copy',
+        'bite-details-report',
+        'new-review-input',
+      ]) {
+        expect(
+          desktop?.querySelector(`[data-testid="${testId}"]`),
+        ).toBeTruthy();
+      }
+    });
+
+    it('keeps the phone layout below the breakpoint', () => {
+      expect(desktopLayout(renderAt(false))).toBeNull();
+    });
+  });
+
   /** The AI explanation of the dish (issue #2106, `UC-IBD` `R-1`). */
   describe('Explain me', () => {
     const explainButton = (): HTMLElement | null =>

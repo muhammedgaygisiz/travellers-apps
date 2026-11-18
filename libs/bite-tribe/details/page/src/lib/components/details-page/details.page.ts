@@ -8,6 +8,7 @@ import {
   inject,
   input,
   output,
+  Signal,
   signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
@@ -71,6 +72,12 @@ import {
 } from '../review-thread/review-thread.component';
 
 const NEW_LIST_NAME_INPUT = 'name';
+
+/**
+ * The app's desktop breakpoint, `$desktop-breakpoint` in
+ * `libs/common/ui/page/src/lib/page.component.scss`.
+ */
+const DESKTOP_MEDIA_QUERY = '(width >= 1024px)';
 
 @Component({
   selector: 'details-page',
@@ -199,6 +206,34 @@ export class DetailsPage {
   activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang?.() || 'en',
   });
+
+  /**
+   * Whether the two-column desktop layout renders (issue #2113). A media
+   * query listener rather than CSS alone, for the reason the search list gives:
+   * rendering both layouts and hiding one would put two maps, two composers
+   * and two copies of every review thread in the DOM.
+   */
+  protected readonly isDesktop = this.watchDesktopMedia();
+
+  private watchDesktopMedia(): Signal<boolean> {
+    const isDesktop = signal(false);
+
+    if (typeof matchMedia !== 'function') {
+      return isDesktop.asReadonly();
+    }
+
+    const query = matchMedia(DESKTOP_MEDIA_QUERY);
+    const onChange = (event: MediaQueryListEvent): void =>
+      isDesktop.set(event.matches);
+
+    isDesktop.set(query.matches);
+    query.addEventListener('change', onChange);
+    this.destroyRef.onDestroy(() =>
+      query.removeEventListener('change', onChange),
+    );
+
+    return isDesktop.asReadonly();
+  }
 
   private reportedFailure: 'not-found' | 'unavailable' | undefined;
 

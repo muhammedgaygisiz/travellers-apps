@@ -1,12 +1,318 @@
 @let biteData = bite(); @let biteCreatorData = biteCreator();
 <ta-page
-  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showFooter: false }"
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+    desktopLayout: true
+  }"
   [isAuthenticated]="isAuthenticated()"
   [loading]="!biteData"
   (logoutClick)="logoutClick.emit()"
 >
   <ion-content>
-    @if (!biteData) {
+    <!-- From the desktop breakpoint a loaded Bite gets two columns: the photo
+    and the map on the left, the facts and the reviews on the right (issue
+    #2113). Below it, and while the Bite loads, the phone layout in the else
+    branch renders unchanged. -->
+    @if (isDesktop() && biteData) { @let desktopIsOwnBite =
+    biteCreatorData?.userId && biteCreatorData?.userId === userId(); @let
+    desktopPosition = position(); @let desktopDistance = desktopPosition &&
+    biteData.position ? (biteData.position | calcDistance : desktopPosition |
+    roundDistance | toMetric) : '';
+    <div class="desktop-layout" data-testid="bite-details-desktop">
+      <section class="desktop-media">
+        @if (imageStatus() === 'pending' || imageStatus() === 'failed') {
+        <bt-bite-image-status
+          class="dish-image-state desktop-card"
+          [bite]="biteData"
+          [userId]="userId()"
+          [enableRetry]="enableImageRetry()"
+          (retryImageUpload)="retryImageUpload.emit($event)"
+        />
+        } @else if (biteData | getImage; as imageSrc) {
+        <button
+          type="button"
+          class="dish-image-button desktop-photo"
+          data-testid="dish-image-button"
+          (click)="openImageViewer(imageSrc)"
+        >
+          <img [src]="imageSrc" class="dish-image" alt="Dish Image" />
+        </button>
+        } @if (biteData.position) {
+        <div class="desktop-card desktop-map-card">
+          <div class="map">
+            <bt-map [geopoints]="[biteData.position]" readonly />
+          </div>
+          <div class="desktop-map-footer">
+            <div class="desktop-map-place">
+              @if (biteData.place) {
+              <span
+                class="link desktop-place-name"
+                role="button"
+                tabindex="0"
+                (click)="onRestaurantClick(biteData)"
+                (keydown.enter)="onRestaurantClick(biteData)"
+                >{{ biteData.place }}</span
+              >
+              } @if (biteLocation()) {
+              <span class="desktop-muted">{{ biteLocation() }}</span>
+              }
+            </div>
+            <ion-button
+              fill="outline"
+              color="primary"
+              data-testid="bite-details-navigation"
+              (click)="openNavigation()"
+            >
+              <ion-icon
+                name="navigate-outline"
+                slot="start"
+                aria-hidden="true"
+              />
+              {{ 'bite-details-directions' | transloco }}
+            </ion-button>
+          </div>
+        </div>
+        }
+      </section>
+
+      <section class="desktop-info">
+        <div class="desktop-card desktop-facts">
+          <div class="desktop-byline">
+            @if (biteCreatorData && biteCreatorData.public) {
+            <div
+              class="ion-display-flex ion-flex-row bite-creator-container ion-align-items-center"
+            >
+              @if (biteCreatorData.photoUrl) {
+              <img
+                [src]="biteCreatorData.photoUrl"
+                alt="Bite Creator"
+                class="profile-image"
+              />
+              } @else {
+              <ion-icon name="person-circle-outline" class="profile-image" />
+              }
+              <ion-label (click)="goToProfile.emit(biteCreatorData)">
+                <span class="link">
+                  {{ biteCreatorData.displayName || 'Anonymous' }}
+                </span>
+              </ion-label>
+            </div>
+            }
+            <span class="desktop-muted desktop-age"
+              >{{ biteData.createdAt | timeAgo: activeLang() }}</span
+            >
+          </div>
+
+          <bt-tagged-users
+            [users]="taggedUsers()"
+            [viewerIsTagged]="viewerIsTagged()"
+            (openProfile)="goToProfile.emit($event)"
+            (removeMe)="confirmRemoveSelfFromTags()"
+          />
+
+          <h1 class="desktop-title">{{ biteData.name }}</h1>
+
+          <div class="desktop-rating-price">
+            <star-rating readonly [rating]="biteData.rating" />
+            <div class="desktop-prices">
+              @if (biteData.priceInPreferredCurrency && biteData.currency !==
+              biteData.priceInPreferredCurrencySymbol) {
+              <span class="price desktop-price-main"
+                >{{ biteData.priceInPreferredCurrency | currency:
+                (biteData.priceInPreferredCurrencySymbol || 'USD') }}</span
+              >
+              } @else if (biteData.price && biteData.currency !==
+              preferredCurrency()) {
+              <span class="price desktop-price-main"
+                >{{ biteData | convertToPreferredCurrency: exchangeRates() :
+                preferredCurrency() | currency: (preferredCurrency() || 'USD')
+                }}</span
+              >
+              } @if (biteData.price) {
+              <span class="price desktop-muted"
+                >{{ biteData.price | currency: (biteData.currency || 'USD')
+                }}</span
+              >
+              }
+            </div>
+          </div>
+
+          <div class="restaurant-distance desktop-muted">
+            @if (biteData.place) {
+            <span
+              class="link"
+              role="button"
+              tabindex="0"
+              (click)="onRestaurantClick(biteData)"
+              (keydown.enter)="onRestaurantClick(biteData)"
+              >{{ biteData.place }}</span
+            >
+            } @if (desktopDistance) { @if (biteData.place) { · } {{
+            desktopDistance }} } @if (biteLocation()) { · {{ biteLocation() }} }
+            @if (biteData.menuItemId && biteData.restaurantId) { ·
+            <span
+              class="link"
+              role="button"
+              tabindex="0"
+              data-testid="bite-from-menu"
+              (click)="onMenuItemClick(biteData)"
+              (keydown.enter)="onMenuItemClick(biteData)"
+              >{{ 'bite-from-menu' | transloco }}</span
+            >
+            }
+          </div>
+
+          <div class="desktop-actions">
+            @if (canSaveToBucketlist()) {
+            <ion-button
+              color="primary"
+              data-testid="bite-details-bucket-list"
+              (click)="showBucketListsSelection($event)"
+            >
+              <ion-icon
+                slot="start"
+                aria-hidden="true"
+                [name]="biteData | getBucketlistsIcon: bucketlists()"
+              />
+              {{ (isBucketlistBite() ? 'bite-details-saved-to-list' :
+              'bite-details-save-to-list' ) | transloco }}
+            </ion-button>
+            }
+            <bt-likes
+              [biteId]="biteData.id"
+              [likeCounts]="likeCounts()"
+              [userLikeType]="userLikeType()"
+              [readonly]="isOwnBiteLike()"
+              (likeButtonClick)="likeButtonClick.emit($event)"
+            />
+            <ion-button
+              fill="outline"
+              color="primary"
+              data-testid="bite-details-share"
+              (click)="onShareBiteClicked(biteData)"
+            >
+              <ion-icon
+                name="share-social-outline"
+                slot="start"
+                aria-hidden="true"
+              />
+              {{ 'bite-details-share' | transloco }}
+            </ion-button>
+            @if (desktopIsOwnBite) {
+            <ion-button
+              fill="outline"
+              color="primary"
+              (click)="editBite(biteData)"
+            >
+              <ion-icon name="create-outline" slot="start" aria-hidden="true" />
+              {{ 'edit-bite' | transloco }}
+            </ion-button>
+            } @if (canCopy()) {
+            <ion-button
+              fill="outline"
+              color="primary"
+              data-testid="bite-details-copy"
+              (click)="newBite(biteData)"
+            >
+              <ion-icon name="copy-outline" slot="start" aria-hidden="true" />
+              {{ 'copy-bite' | transloco }}
+            </ion-button>
+            } @else if (isBucketlistBite()) {
+            <ion-button
+              fill="outline"
+              color="primary"
+              (click)="newBite(biteData)"
+            >
+              <ion-icon name="pizza-outline" slot="start" aria-hidden="true" />
+              {{ 'create-bite' | transloco }}
+            </ion-button>
+            } @if (canExplain()) {
+            <ion-button
+              fill="outline"
+              color="primary"
+              class="explain-button"
+              data-testid="bite-details-explain"
+              (click)="explainBite.emit(biteData)"
+            >
+              <ion-icon
+                name="sparkles-outline"
+                slot="start"
+                aria-hidden="true"
+              />
+              {{ 'explain-bite' | transloco }}
+            </ion-button>
+            }
+          </div>
+
+          @if (biteData.description) {
+          <div class="description">
+            <p>{{ biteData.description }}</p>
+          </div>
+          } @if (biteData.tags?.length) {
+          <bt-tags-input [readonly]="true" [tags]="biteData.tags" />
+          }
+        </div>
+
+        <div class="desktop-card desktop-reviews">
+          <ion-list lines="full">
+            <ion-list-header lines="none">
+              <ion-label>{{ 'reviews-label' | transloco }}</ion-label>
+            </ion-list-header>
+            @for (thread of reviewThreads(); track thread.root.id) {
+            <bt-review-thread
+              [thread]="thread"
+              [biteCreatorId]="biteCreatorData?.userId"
+              [canReply]="isAuthenticated()"
+              [userId]="userId()"
+              [highlighted]="thread.root.id === highlightedThreadId()"
+              [activeLang]="activeLang()"
+              (submitReply)="saveReply($event)"
+              (submitEdit)="saveReviewEdit($event)"
+            />
+            }
+          </ion-list>
+
+          <form [formGroup]="reviewFormGroup">
+            <ion-textarea
+              label="{{ 'write-review-label' | transloco }}"
+              labelPlacement="stacked"
+              formControlName="review"
+              fill="outline"
+              mode="md"
+              rows="3"
+              data-testid="new-review-input"
+            />
+          </form>
+          <div class="desktop-review-submit">
+            <ion-button
+              color="primary"
+              [disabled]="isReviewFieldInvalid()"
+              (click)="saveReview()"
+            >
+              {{ 'add-your-review' | transloco }}
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Quiet and last, as on the phone (issue #1608). -->
+        @if (canReport()) {
+        <ion-button
+          fill="clear"
+          color="medium"
+          size="small"
+          class="desktop-report"
+          data-testid="bite-details-report"
+          (click)="onReportBite()"
+        >
+          <ion-icon name="flag-outline" slot="start" aria-hidden="true" />
+          {{ 'report-bite' | transloco }}
+        </ion-button>
+        }
+      </section>
+    </div>
+    } @else { @if (!biteData) {
     <ion-skeleton-text
       [animated]="true"
       style="width: 100vw; height: 40vh; border-radius: 0; margin: 0"
@@ -455,6 +761,7 @@
       </ion-button>
       } }
     </div>
+    }
   </ion-content>
 
   <ion-modal

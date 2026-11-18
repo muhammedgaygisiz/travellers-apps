@@ -64,6 +64,14 @@ describe(ReviewApiService.name, () => {
       expect(loadReviews).not.toHaveBeenCalled();
     });
 
+    it('takes an answer without data as saved', async () => {
+      callByName.mockResolvedValue({ data: undefined });
+
+      await expect(
+        service.saveNewReview({ review: 'Lovely', biteId: 'bite-1' }),
+      ).resolves.toEqual([{ id: 'review-1' }]);
+    });
+
     it('throws when the call fails', async () => {
       callByName.mockRejectedValue(new Error('offline'));
 

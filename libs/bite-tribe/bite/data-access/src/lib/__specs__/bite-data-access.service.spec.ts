@@ -916,6 +916,20 @@ describe(BiteDataAccessService.name, () => {
       );
     });
 
+    it('sends empty text for fields the Bite does not have, and reads no data as allowed', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValue({ data: undefined } as never);
+
+      await expect(service.checkBiteContent({ id: '' } as never)).resolves.toBe(
+        'allowed',
+      );
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'checkBiteContent',
+        data: { name: '', tags: [], description: '' },
+      });
+    });
+
     it('does not ask while offline', async () => {
       jest.mocked(FirebaseFunctions.callByName).mockClear();
       service.networkStatus = (() => ({

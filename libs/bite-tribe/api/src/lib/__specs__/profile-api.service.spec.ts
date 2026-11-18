@@ -473,6 +473,23 @@ describe(ProfileApiService.name, () => {
 
     /** Issue #1610: refused profile text is thrown, and nothing is written. */
     describe('given refused text', () => {
+      it('takes an answer without data as saved, and writes the rest', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          const updateDocument = jest
+            .spyOn(FirebaseFirestore, 'updateDocument')
+            .mockResolvedValue();
+          updateDocument.mockClear();
+          jest
+            .mocked(FirebaseFunctions.callByName)
+            .mockResolvedValue({ data: undefined } as never);
+
+          await service.saveProfile({ userId: '123' } as PublicUser);
+
+          expect(updateDocument).toHaveBeenCalledTimes(1);
+        },
+      ));
+
       it('throws the refusal with its field and writes nothing', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {

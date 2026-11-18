@@ -8,7 +8,7 @@ import {
   PipeTransform,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { addNecessaryIcons } from 'utils';
+import { addNecessaryIcons, AppUpdateService } from 'utils';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { of } from 'rxjs';
 
@@ -235,5 +235,29 @@ describe('AppMenuComponent', () => {
     );
     expect(loginButton).toBeNull();
     expect(logoutButton).toBeNull();
+  });
+
+  describe('ready web version', () => {
+    const updateRow = (): DebugElement | null =>
+      fixture.debugElement.query(By.css('[data-testid="menu-app-update"]'));
+
+    it('shows no update row while no version is ready', () => {
+      fixture.detectChanges();
+
+      expect(updateRow()).toBeNull();
+    });
+
+    it('offers a ready version under the version row and loads it on tap', () => {
+      const apply = jest.fn();
+      TestBed.inject(AppUpdateService).announce(apply);
+
+      fixture.detectChanges();
+
+      expect(updateRow()).not.toBeNull();
+
+      updateRow()?.nativeElement.click();
+
+      expect(apply).toHaveBeenCalledTimes(1);
+    });
   });
 });

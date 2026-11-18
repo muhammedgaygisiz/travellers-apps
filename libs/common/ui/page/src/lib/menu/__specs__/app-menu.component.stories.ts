@@ -1,9 +1,25 @@
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
-import { addNecessaryIcons, getIonicConfig } from 'utils';
+import { addNecessaryIcons, AppUpdateService, getIonicConfig } from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { AppMenuComponent } from '../app-menu.component';
 
 addNecessaryIcons();
+
+/**
+ * An app whose service worker has a newer version ready (issue #2135).
+ */
+const updateReady = applicationConfig({
+  providers: [
+    {
+      provide: AppUpdateService,
+      useFactory: (): AppUpdateService => {
+        const appUpdate = new AppUpdateService();
+        appUpdate.announce(() => undefined);
+        return appUpdate;
+      },
+    },
+  ],
+});
 
 /**
  * A flat-colour data URI rather than a remote avatar: the menu only needs a
@@ -92,4 +108,15 @@ export const SignedOut: Story = {
     isAuthenticated: false,
     account: undefined,
   },
+};
+
+/**
+ * A newer web version is ready. A row under the version offers it, with a
+ * reload icon, and loads it on tap (issue #2135).
+ */
+export const UpdateReady: Story = {
+  args: {
+    account: { displayName: 'Muhammed', photoUrl: PHOTO_URL },
+  },
+  decorators: [updateReady],
 };

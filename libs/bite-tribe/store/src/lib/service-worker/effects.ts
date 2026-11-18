@@ -2,7 +2,8 @@ import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType, rootEffectsInit } from '@ngrx/effects';
 import { switchMap, tap } from 'rxjs';
 import { SwUpdate } from '@angular/service-worker';
-import { AlertController, Platform } from '@ionic/angular/standalone';
+import { Platform } from '@ionic/angular/standalone';
+import { AppUpdateService } from 'utils';
 
 @Injectable()
 export class ServiceWorkerEffects {
@@ -11,9 +12,8 @@ export class ServiceWorkerEffects {
   private readonly document = inject(DOCUMENT);
 
   private readonly platform = inject(Platform);
-  private readonly alertController = inject(AlertController);
+  private readonly appUpdate = inject(AppUpdateService);
 
-  private updateAlert: HTMLIonAlertElement | undefined;
   private applyingUpdate = false;
 
   swUpdateEffect$ = createEffect(
@@ -22,7 +22,7 @@ export class ServiceWorkerEffects {
         ofType(rootEffectsInit),
         switchMap(() => {
           return this.updates.versionUpdates.pipe(
-            tap(async (evt) => {
+            tap((evt) => {
               console.log('Service Worker event:', evt);
 
               if (this.platform.is('hybrid')) {
@@ -31,16 +31,9 @@ export class ServiceWorkerEffects {
 
               switch (evt.type) {
                 case 'VERSION_DETECTED':
+                  // Downloads in the background. Nothing to tell the member
+                  // until it is ready (issue #2135).
                   console.log('Version detected:', evt.version);
-
-                  this.updateAlert = await this.alertController.create({
-                    header: 'App Update Available',
-                    message: `A new version of the app is available. Please wait while we download it for you in the background.`,
-                    backdropDismiss: false,
-                    buttons: ['OK'],
-                  });
-
-                  await this.updateAlert.present();
                   break;
                 case 'VERSION_READY': {
                   console.log(
@@ -49,17 +42,15 @@ export class ServiceWorkerEffects {
                     evt.latestVersion,
                   );
 
-                  this.updateAlert?.dismiss();
-
-                  // Nobody can click a dialog in a background tab, so it would
-                  // keep running the old build for as long as it stays open.
+                  // Nobody looks at a background tab, so it would keep running
+                  // the old build for as long as it stays open.
                   // See GitHub issue #1904.
                   if (this.document.visibilityState === 'hidden') {
                     this.applyUpdate();
                     break;
                   }
 
-                  await this.presentReadyAlert();
+                  this.announceUpdate();
                   break;
                 }
                 case 'VERSION_INSTALLATION_FAILED':
@@ -83,33 +74,26 @@ export class ServiceWorkerEffects {
     { dispatch: false },
   );
 
-  private async presentReadyAlert(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: 'App Update Ready',
-      message:
-        'The app has been updated to the latest version. We will now refresh to apply the update.',
-      backdropDismiss: false,
-      buttons: [
-        {
-          text: 'Restart Now',
-          handler: (): void => this.applyUpdate(),
-        },
-      ],
-    });
+  /**
+   * Offers the ready version in the menu instead of a dialog: a badge on the
+   * menu button and a row that loads it on tap. The member reloads when it
+   * suits them (issue #2135).
+   */
+  private announceUpdate(): void {
+    this.appUpdate.announce(() => this.applyUpdate());
 
-    // A tab the member leaves while the dialog is up would otherwise wait
-    // behind it until they come back.
+    // A tab the member leaves while an update waits applies it then, so it
+    // does not stay on the old build until they come back (issue #1904).
     const onVisibilityChange = (): void => {
       if (this.document.visibilityState === 'hidden') {
+        this.document.removeEventListener(
+          'visibilitychange',
+          onVisibilityChange,
+        );
         this.applyUpdate();
       }
     };
     this.document.addEventListener('visibilitychange', onVisibilityChange);
-    void alert.onDidDismiss().then(() => {
-      this.document.removeEventListener('visibilitychange', onVisibilityChange);
-    });
-
-    await alert.present();
   }
 
   private applyUpdate(): void {

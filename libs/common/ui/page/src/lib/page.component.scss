@@ -8,6 +8,20 @@ $desktop-breakpoint: 1024px;
 $desktop-content-max-width: 1440px;
 
 :host {
+  /* Tells the member a newer version is ready, without interrupting them. The
+   * menu explains it (issue #2135). */
+  .menu-badge {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--ion-toolbar-background, #fff);
+    border-radius: 50%;
+    background: var(--ion-color-danger);
+    pointer-events: none;
+  }
+
   ion-toolbar {
     --ion-color-secondary: black;
     --border-width: 0 0 3px;

@@ -7,6 +7,21 @@
         {{ release().buildNumber }})</small
       >
     </ion-item>
+    @if (updateReady()) {
+      <ion-item
+        class="app-update"
+        data-testid="menu-app-update"
+        [button]="true"
+        [detail]="false"
+        (click)="appUpdate.apply()"
+      >
+        <ion-icon name="refresh-outline" slot="start" color="primary" />
+        <small class="app-update-label">{{
+          'app-update-available' | transloco
+        }}</small>
+        <span class="app-update-dot" slot="end" aria-hidden="true"></span>
+      </ion-item>
+    }
   </ion-item-group>
 
   @if (!hideAuthButton()) {

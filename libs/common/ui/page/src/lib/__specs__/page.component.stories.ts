@@ -5,10 +5,31 @@ import {
   Meta,
   StoryObj,
 } from '@storybook/angular';
-import { addNecessaryIcons, APP_TITLE, getIonicConfig } from 'utils';
+import {
+  addNecessaryIcons,
+  APP_TITLE,
+  AppUpdateService,
+  getIonicConfig,
+} from 'utils';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 
 addNecessaryIcons();
+
+/**
+ * An app whose service worker has a newer version ready (issue #2135).
+ */
+const updateReady = applicationConfig({
+  providers: [
+    {
+      provide: AppUpdateService,
+      useFactory: (): AppUpdateService => {
+        const appUpdate = new AppUpdateService();
+        appUpdate.announce(() => undefined);
+        return appUpdate;
+      },
+    },
+  ],
+});
 
 export default {
   title: 'Components/Page',
@@ -106,4 +127,13 @@ export const AddButtonPending: Story = {
     loading: true,
     addButtonPending: true,
   },
+};
+
+/**
+ * A newer web version is ready. The menu button carries a badge instead of a
+ * dialog interrupting the member; the menu explains it (issue #2135).
+ */
+export const UpdateReady: Story = {
+  ...Primary,
+  decorators: [updateReady],
 };

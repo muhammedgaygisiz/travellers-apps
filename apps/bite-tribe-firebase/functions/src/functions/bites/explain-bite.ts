@@ -88,6 +88,24 @@ Use only what the dish name, the restaurant, the place and the photo support. If
 Never state allergens or dietary properties, such as vegan, vegetarian, halal, kosher, gluten-free or "contains nuts".
 No hashtags, no emojis, no first person, no superlatives such as "best" or "must-try".`;
 
+/**
+ * The shape the model must answer in. Every property is required: Gemini
+ * leaves out a property the schema does not require, and with only `status`
+ * required it answered `ok` with no explanation at all, which failed every
+ * production call on 18 November 2026. An `unknown` answer fills the other
+ * fields with empty values, which are ignored.
+ */
+export const EXPLANATION_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    status: { type: 'STRING', enum: ['ok', 'unknown'] },
+    whatItIs: { type: 'STRING' },
+    origin: { type: 'STRING' },
+    ingredients: { type: 'ARRAY', items: { type: 'STRING' } },
+  },
+  required: ['status', 'whatItIs', 'origin', 'ingredients'],
+};
+
 /** What the model is told about the Bite, besides the photo. */
 export const explanationInputs = (bite: {
   name: string;
@@ -288,16 +306,7 @@ export const explainBite = onAppCheck<
       system: explanationInstructions(AI_LANGUAGES[language]),
       text: explanationInputs({ ...bite, name: dishName }),
       image: await imageFromStoragePath(photoPathOf(bite)),
-      responseSchema: {
-        type: 'OBJECT',
-        properties: {
-          status: { type: 'STRING', enum: ['ok', 'unknown'] },
-          whatItIs: { type: 'STRING' },
-          origin: { type: 'STRING' },
-          ingredients: { type: 'ARRAY', items: { type: 'STRING' } },
-        },
-        required: ['status'],
-      },
+      responseSchema: EXPLANATION_SCHEMA,
       maxOutputTokens: 600,
     });
 

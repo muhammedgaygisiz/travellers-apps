@@ -128,6 +128,7 @@ import { usageDay } from '../../shared/utils/ai-usage';
 import {
   DAILY_EXPLANATION_LIMIT,
   deleteBiteExplanationsForBite,
+  EXPLANATION_SCHEMA,
   explainBite,
   explanationInputs,
   explanationInstructions,
@@ -460,6 +461,31 @@ describe('deleteBiteExplanationsForBite', () => {
       deleteBiteExplanationsForBite(fakeDb as never, 'b1'),
     ).resolves.toBe(2);
     expect([...store.keys()]).toEqual(['biteExplanations/b2_tr']);
+  });
+});
+
+describe('EXPLANATION_SCHEMA', () => {
+  /**
+   * Gemini leaves out what the schema does not require: with only `status`
+   * required it answered `ok` and nothing else, on every production call.
+   */
+  it('requires every property, so the model cannot leave one out', () => {
+    expect([...EXPLANATION_SCHEMA.required].sort()).toEqual(
+      Object.keys(EXPLANATION_SCHEMA.properties).sort(),
+    );
+  });
+
+  it('is the schema the model is asked for', async () => {
+    store.clear();
+    store.set('bites/b1', { ...somTam });
+    jest.mocked(generateWithGemini).mockReset();
+    jest.mocked(generateWithGemini).mockResolvedValue({ json: answer });
+
+    await handler(member({ biteId: 'b1', language: 'en' }));
+
+    expect(
+      jest.mocked(generateWithGemini).mock.calls[0][0].responseSchema,
+    ).toBe(EXPLANATION_SCHEMA);
   });
 });
 

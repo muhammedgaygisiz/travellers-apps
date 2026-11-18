@@ -24,6 +24,8 @@ import {
   PublicUser,
   RemoveBiteFromBucketlistParams,
   ReportBiteResult,
+  ReportReviewResult,
+  ReviewReportReason,
   SaveToBucketListParams,
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -495,6 +497,18 @@ export class DetailsDataAccessService {
     reason: BiteReportReason,
   ): Promise<ReportBiteResult> {
     return this.api.reportBite(biteId, reason);
+  }
+
+  /**
+   * Reports somebody else's review or reply (GitHub issue #2117). Straight to
+   * the callable for the reason {@link reportBite} is: the thread on screen
+   * does not change when a report is filed.
+   */
+  reportReview(
+    reviewId: string,
+    reason: ReviewReportReason,
+  ): Promise<ReportReviewResult> {
+    return this.api.reportReview(reviewId, reason);
   }
 
   /**

@@ -47,6 +47,12 @@ export { checkBiteContent } from './functions/bites/check-bite-content';
 export { moderateBiteOnWrite } from './functions/bites/moderate-bite-on-write';
 export { saveReview, editReview } from './functions/reviews/save-review';
 export { deleteReview } from './functions/reviews/delete-review';
+export { reportReview } from './functions/reviews/report-review';
+export {
+  dismissReviewReports,
+  listReviewReports,
+} from './functions/reviews/review-reports-as-operator';
+export { deleteReviewReportsOnReviewDelete } from './functions/reviews/delete-review-reports-on-review-delete';
 export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
 export { reportUser } from './functions/users/report-user';
 export {

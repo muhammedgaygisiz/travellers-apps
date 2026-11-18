@@ -21,6 +21,8 @@ import {
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
+  REVIEW_REPORT_REASONS,
+  ReviewReportReason,
   ReviewThread,
 } from 'model';
 import {
@@ -67,6 +69,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { getLocalizedRegionName } from 'bite-tribe-common/bite';
 import {
   ReviewDeleteRequest,
+  ReviewReportRequest,
   ReviewEditSubmit,
   ReviewReplySubmit,
   ReviewThreadComponent,
@@ -192,6 +195,11 @@ export class DetailsPage {
   readonly goBack = output();
   readonly retryLoad = output();
   readonly reportBite = output<{ biteId: string; reason: BiteReportReason }>();
+  /** A report on somebody else's review or reply (issue #2117). */
+  readonly reportReview = output<{
+    reviewId: string;
+    reason: ReviewReportReason;
+  }>();
 
   /** The viewer takes themselves off this Bite's tagged users (#1920). */
   readonly removeSelfFromTags = output<string>();
@@ -729,6 +737,48 @@ export class DetailsPage {
               reviewId: request.reviewId,
               biteId,
             }),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Asks why, then reports somebody else's review or reply (issue #2117).
+   *
+   * The same picker as {@link onReportBite}, with the review list of reasons,
+   * and the same promise up front: nobody in the thread is told. In a thread
+   * of three people that is the thing a hesitating reporter worries about.
+   */
+  async confirmReportReview(request: ReviewReportRequest): Promise<void> {
+    if (!this.isAuthenticated()) {
+      return;
+    }
+
+    const kind = request.isReply ? 'reply' : 'review';
+    const alert = await this.alertController.create({
+      header: this.transloco.translate(`report-${kind}-title`),
+      message: this.transloco.translate('report-review-message'),
+      inputs: REVIEW_REPORT_REASONS.map((reason) => ({
+        type: 'radio' as const,
+        label: this.transloco.translate(`report-review-reason-${reason}`),
+        value: reason,
+      })),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('report-review-submit'),
+          role: 'destructive',
+          handler: (reason: ReviewReportReason | undefined): boolean => {
+            if (!reason) {
+              return false;
+            }
+
+            this.reportReview.emit({ reviewId: request.reviewId, reason });
+
+            return true;
+          },
         },
       ],
     });

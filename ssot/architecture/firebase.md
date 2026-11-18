@@ -47,6 +47,7 @@ newUserMonthFollowUps
 emailOptOuts
 biteReports
 userReports
+reviewReports
 ```
 
 Every one of these is named in `firestore.rules`, and anything not named there
@@ -70,7 +71,8 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   readable by an operator alone and written by no client: `reportBite` files a
   report through the Admin SDK so that the reported author can never read who
   reported them ([#1608]). `userReports` is the same for a reported profile, filed
-  by `reportUser` ([#1829]). `/users/{uid}` is the one collection whose reads were
+  by `reportUser` ([#1829]), and `reviewReports` for a reported review or reply, filed
+  by `reportReview` ([#2117]). `/users/{uid}` is the one collection whose reads were
   narrowed: another member reads a profile only while it is public, because a
   read returns the whole document and a private profile's fields are the thing
   being protected ([#1863]). See the `Profile Visibility Contract` in
@@ -689,3 +691,4 @@ libs/bite-tribe/api
 [#1493]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1493
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
+[#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117

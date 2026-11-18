@@ -155,6 +155,7 @@ describe(DetailsDataAccessService.name, () => {
           provide: BiteTribeApiService,
           useValue: {
             reportBite: jest.fn(),
+            reportReview: jest.fn(),
             bitesByUser: jest.fn(),
             removeSelfFromBiteTags: jest.fn(),
             updateReview: jest.fn(),
@@ -278,6 +279,19 @@ describe(DetailsDataAccessService.name, () => {
       reported: true,
     });
     expect(api.reportBite).toHaveBeenCalledWith('bite-1', 'spam');
+  });
+
+  /** A review report goes straight to the callable too (#2117). */
+  it('reports a review through the API and hands back its answer', async () => {
+    const api = TestBed.inject(BiteTribeApiService) as unknown as {
+      reportReview: jest.Mock;
+    };
+    api.reportReview.mockResolvedValue({ reported: false });
+
+    await expect(service.reportReview('reply-1', 'hate')).resolves.toEqual({
+      reported: false,
+    });
+    expect(api.reportReview).toHaveBeenCalledWith('reply-1', 'hate');
   });
 
   /** The share image works out which first a Bite was from these (#1837). */

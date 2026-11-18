@@ -4,3 +4,5 @@ export { BiteReportsContainer } from './lib/integration/bite-reports-container.c
 export { BiteReportsComponent } from './lib/component/bite-reports.component';
 export { ProfileReportsContainer } from './lib/integration/profile-reports-container.component';
 export { ProfileReportsComponent } from './lib/component/profile-reports.component';
+export { ReviewReportsContainer } from './lib/integration/review-reports-container.component';
+export { ReviewReportsComponent } from './lib/component/review-reports.component';

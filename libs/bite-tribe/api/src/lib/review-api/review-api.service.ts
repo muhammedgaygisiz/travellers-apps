@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { loadReviewsByBiteId } from './utils/load-review-by-bite-id';
-import { Review } from 'model';
+import { ReportReviewResult, Review, ReviewReportReason } from 'model';
 import { ContentRefusedError } from 'utils';
 
 type SaveReviewResponse =
@@ -90,6 +90,24 @@ export class ReviewApiService {
     >({ name: 'deleteReview', data: { reviewId: payload.reviewId } });
 
     return loadReviewsByBiteId(payload.biteId);
+  }
+
+  /**
+   * Reports somebody else's review or reply to the BiteTribe operators
+   * (issue #2117). Nothing in the compartment changes, so nothing is reloaded.
+   * Errors are not swallowed: a reporter told their report went through when
+   * it did not will not file it again.
+   */
+  async reportReview(
+    reviewId: string,
+    reason: ReviewReportReason,
+  ): Promise<ReportReviewResult> {
+    const result = await FirebaseFunctions.callByName<
+      { reviewId: string; reason: ReviewReportReason },
+      ReportReviewResult
+    >({ name: 'reportReview', data: { reviewId, reason } });
+
+    return result.data;
   }
 
   private async call(

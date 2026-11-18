@@ -14,6 +14,7 @@ import {
   bookmarkOutline,
   businessOutline,
   cameraOutline,
+  chatbubblesOutline,
   checkmarkCircleOutline,
   checkmarkOutline,
   chevronDownOutline,
@@ -148,6 +149,8 @@ export const addNecessaryIcons = (): void => {
     mapOutline,
     footstepsOutline,
     flagOutline,
+    // The reported-reviews queue in the admin app (issue #2117).
+    chatbubblesOutline,
     heart,
     heartOutline,
     chevronExpandOutline,

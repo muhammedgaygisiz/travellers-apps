@@ -81,6 +81,7 @@ const createMockDataAccess = (
     saveBiteImage: jest.fn().mockResolvedValue(undefined),
     reloadBite: jest.fn(),
     reportBite: jest.fn().mockResolvedValue({ reported: true }),
+    reportReview: jest.fn().mockResolvedValue({ reported: true }),
     removeSelfFromBiteTags: jest.fn().mockResolvedValue(undefined),
     ownBites: jest.fn().mockResolvedValue([]),
   };
@@ -1699,6 +1700,50 @@ describe('DetailsService', () => {
 
       expect(mockToast.present).toHaveBeenCalledWith({
         messageKey: 'report-bite-failed',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  describe('reportReview', () => {
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('files the report and says it was received', async () => {
+      await service.reportReview({ reviewId: 'reply-1', reason: 'hate' });
+
+      expect(service.dataAccess.reportReview).toHaveBeenCalledWith(
+        'reply-1',
+        'hate',
+      );
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-review-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says so when the account had already reported it', async () => {
+      jest
+        .mocked(service.dataAccess.reportReview)
+        .mockResolvedValueOnce({ reported: false });
+
+      await service.reportReview({ reviewId: 'reply-1', reason: 'spam' });
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-review-already-sent',
+        outcome: 'success',
+      });
+    });
+
+    it('says the report failed rather than pretending it went through', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.reportReview)
+        .mockRejectedValueOnce(new Error('unavailable'));
+
+      await service.reportReview({ reviewId: 'reply-1', reason: 'spam' });
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'report-review-failed',
         outcome: 'failure',
       });
     });

@@ -110,6 +110,7 @@ export * from './lib/bite-listability';
  */
 export * from './lib/bite-report';
 export * from './lib/user-report';
+export * from './lib/review-report';
 /**
  * A value export: the length limit and the trim rule are applied by the edit
  * form and by the profile write alike (issue #1826).

@@ -102,6 +102,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // The same queue for profiles (issue #1829), on the same terms.
   dismissUserReports: 'operator',
   listUserReports: 'operator',
+  // The review report queue (issue #2117), on the same terms.
+  dismissReviewReports: 'operator',
+  listReviewReports: 'operator',
   listUsersWithRoles: 'operator',
   revokeRestaurantOwner: 'operator',
   sendNewVersionNotification: 'operator',
@@ -200,6 +203,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // A signed-in account reporting a profile (issue #1829), for the same
   // reasons as `reportBite`.
   reportUser: 'member',
+  // A signed-in account reporting a review or reply (issue #2117), for the
+  // same reasons as `reportBite`.
+  reportReview: 'member',
   // A tagged user taking themselves off a Bite (issue #1920). Acts for the
   // caller alone, and a table guest is never tagged.
   removeSelfFromBiteTags: 'member',

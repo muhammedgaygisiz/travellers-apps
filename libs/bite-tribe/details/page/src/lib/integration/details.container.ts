@@ -47,6 +47,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (gotoNew)="service.onGotoNewClick($event)"
       (shareBite)="service.onShareBiteClick($event)"
       (reportBite)="service.reportBite($event)"
+      (reportReview)="service.reportReview($event)"
       (removeSelfFromTags)="service.removeSelfFromBiteTags($event)"
       (explainBite)="service.explainBite($event)"
     />

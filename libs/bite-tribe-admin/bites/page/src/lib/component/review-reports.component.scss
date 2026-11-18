@@ -1,0 +1,83 @@
+@use 'selected-row';
+
+:host {
+  @include selected-row.selected-row;
+
+  /* The other report queues' 1:2 split: a list to scan and an item to read. */
+  .review-reports {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .column--list {
+    flex: 1;
+  }
+
+  .column--detail {
+    flex: 2;
+  }
+
+  @media (min-width: 768px) {
+    .review-reports {
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .column {
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .review-reports {
+      flex-direction: column;
+    }
+  }
+
+  .review-reports__loading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  .review-reports__excerpt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .review-reports__hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .review-reports__quote {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--ion-color-danger);
+    border-radius: 0.25rem;
+    background: var(--ion-color-step-50, #f7f7f7);
+
+    p {
+      margin: 0.25rem 0 0;
+    }
+  }
+
+  /* The context is quieter than the item it explains. */
+  .review-reports__quote--parent {
+    border-left-color: var(--ion-color-medium);
+    color: var(--ion-color-step-700, #4d4d4d);
+  }
+
+  .review-reports__section {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+}

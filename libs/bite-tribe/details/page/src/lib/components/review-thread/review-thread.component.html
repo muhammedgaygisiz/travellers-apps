@@ -171,7 +171,7 @@
     } @else {
       <p class="review-text">{{ review.review }}</p>
 
-      @if (canAnswer(review) || canEdit(review)) {
+      @if (canAnswer(review) || canEdit(review) || canReport(review)) {
         <div class="review-actions">
           @if (canAnswer(review)) {
             <ion-button
@@ -204,6 +204,19 @@
               (click)="requestDelete(review)"
             >
               {{ 'delete' | transloco }}
+            </ion-button>
+          }
+
+          <!-- Last and quiet, like Report on the Bite itself (#2117). -->
+          @if (canReport(review)) {
+            <ion-button
+              fill="clear"
+              size="small"
+              class="text-action"
+              data-testid="report-review"
+              (click)="requestReport(review)"
+            >
+              {{ 'report-review' | transloco }}
             </ion-button>
           }
         </div>

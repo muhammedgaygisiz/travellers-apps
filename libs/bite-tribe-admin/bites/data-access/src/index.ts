@@ -8,3 +8,5 @@ export { BiteReportsDataAccessService } from './lib/bite-reports-data-access.ser
 export type { DismissBiteReportsResult } from './lib/bite-reports-data-access.service';
 export { UserReportsDataAccessService } from './lib/user-reports-data-access.service';
 export type { DismissUserReportsResult } from './lib/user-reports-data-access.service';
+export { ReviewReportsDataAccessService } from './lib/review-reports-data-access.service';
+export type { DismissReviewReportsResult } from './lib/review-reports-data-access.service';

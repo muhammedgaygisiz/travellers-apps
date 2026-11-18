@@ -1388,6 +1388,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * A report on a review or reply (GitHub issue #2117).
+     *
+     * ```text
+     * /reviewReports/{reviewId}_{reporterUid}
+     * ```
+     *
+     * The same terms as `/biteReports`: readable by an operator and by nobody
+     * else, the reported author and the reporter included, and written only by
+     * `reportReview` and `dismissReviewReports` through the Admin SDK. In a
+     * thread of three people, a report the author could see would name the
+     * reporter.
+     */
+    match /reviewReports/{reportId} {
+      allow read: if isOperator();
+      allow write: if false;
+    }
+
     // ------------------------------------------------------------------- rest
 
     /**

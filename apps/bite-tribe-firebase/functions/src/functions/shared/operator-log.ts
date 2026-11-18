@@ -52,6 +52,7 @@ export const OPERATOR_ACTIONS = [
   'clusterRestaurantCandidateForBite',
   'deleteBiteAsOperator',
   'dismissBiteReports',
+  'dismissReviewReports',
   'dismissUserReports',
   'issueTableQrTokens',
   'migrateRestaurantOwnerIds',

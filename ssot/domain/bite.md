@@ -71,6 +71,11 @@ A good Bite makes one concrete dish understandable enough that another person ca
   the replies under it keep their parent. A tombstone takes no new reply and goes when the
   last reply under it does. See the Review Delete Contract in
   [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#2116].
+- A review or reply can be reported by any other member, once per account, through the
+  `reportReview` callable. The report is a `/reviewReports/{reviewId}_{reporterUid}`
+  document only an operator can read; it changes nothing on the review, and it is deleted
+  with the review. See the Review Report Contract in
+  [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#2117].
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
@@ -268,7 +273,7 @@ Current product expectation:
   - Delete any Bite, through `deleteBiteAsOperator` with a reason. This is the one modeled operator capability over a Bite.
   - Editing somebody else's Bite is deliberately not one: an operator can remove a Bite or leave it, and nothing in between.
   - Hiding, tombstoning and notifying the author are out of scope by decision, not by omission. See [epic-1471](../history/records/epic-1471.md).
-  - The report queue surfaces the reported Bites, through `listBiteReports`, and closes a report on a Bite that stays through `dismissBiteReports` ([#1608]). Reporting inside a review thread still belongs to [epic-1284](../history/records/epic-1284.md).
+  - The report queue surfaces the reported Bites, through `listBiteReports`, and closes a report on a Bite that stays through `dismissBiteReports` ([#1608]). The reported reviews and replies have their own queue, through `listReviewReports` and `dismissReviewReports` ([#2117]); hiding one is [#2118].
 
 ## Use Cases
 
@@ -436,3 +441,5 @@ images/bites/{biteId}/{filename}
 [#2026]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2026
 [#721]: https://github.com/muhammedgaygisiz/travellers-apps/issues/721
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
+[#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
+[#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118

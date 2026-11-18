@@ -368,6 +368,15 @@ describe(ReviewThreadComponent.name, () => {
       expect(query('edit-review-input')).toBeNull();
     });
 
+    it('writes nothing when no editor is open', () => {
+      render({ thread: thread(), userId: 'mira' });
+      const submitted = edits();
+
+      component['saveEdit']();
+
+      expect(submitted).toEqual([]);
+    });
+
     it('writes nothing when the text did not change', () => {
       render({ thread: thread(), userId: 'mira' });
       const submitted = edits();

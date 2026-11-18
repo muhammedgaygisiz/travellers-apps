@@ -17,6 +17,7 @@ import { BiteTrail, Like } from 'model';
 class ReviewApiMock {
   reviewsByBiteId = jest.fn();
   saveNewReview = jest.fn();
+  updateReview = jest.fn();
 }
 
 class RestaurantApiMock {
@@ -294,6 +295,22 @@ describe(BiteTribeApiService.name, () => {
         const reviewData = { biteId: 'bite-id', review: 'Great!' };
         service.saveNewReview(reviewData);
         expect(saveNewReviewSpy).toHaveBeenCalledWith(reviewData);
+      },
+    ));
+  });
+
+  describe('updateReview', () => {
+    it('should call updateReview on ReviewApiService', inject(
+      [BiteTribeApiService, ReviewApiService],
+      (service: BiteTribeApiService, reviewApiService: ReviewApiService) => {
+        const updateReviewSpy = jest.spyOn(reviewApiService, 'updateReview');
+        const edit = {
+          reviewId: 'review-1',
+          biteId: 'bite-id',
+          review: 'Edited',
+        };
+        service.updateReview(edit);
+        expect(updateReviewSpy).toHaveBeenCalledWith(edit);
       },
     ));
   });

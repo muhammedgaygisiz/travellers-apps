@@ -9,6 +9,7 @@ import {
   removeLike as removeLikeAction,
   saveLike,
 } from '../likes/actions';
+import { loadedReviewsFromApi } from '../reviews/actions';
 
 describe(BiteTribeStoreService.name, () => {
   let store: Store;
@@ -94,6 +95,27 @@ describe(BiteTribeStoreService.name, () => {
         >[0];
         service.saveNewRestaurant(entity);
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  describe('notifyLoadedReviews', () => {
+    it('puts the reloaded reviews into the store', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        const reviews = [
+          {
+            id: 'review-1',
+            author: 'Mira',
+            biteId: '/bites/1',
+            review: 'Edited',
+          },
+        ];
+        service.notifyLoadedReviews(reviews);
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          loadedReviewsFromApi({ reviews }),
+        );
       },
     ));
   });

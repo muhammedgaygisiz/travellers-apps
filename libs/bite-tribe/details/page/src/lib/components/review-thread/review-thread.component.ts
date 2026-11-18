@@ -49,7 +49,7 @@ export interface ReviewEditSubmit {
  * here would only trade a disabled button for a failed save (issue #721).
  */
 const notBlank = (control: AbstractControl<string>): ValidationErrors | null =>
-  control.value?.trim() ? null : { blank: true };
+  control.value.trim() ? null : { blank: true };
 
 /** What the page needs to write the answer the user just typed. */
 export interface ReviewReplySubmit {

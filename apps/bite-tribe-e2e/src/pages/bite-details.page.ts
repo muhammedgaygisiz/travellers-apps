@@ -8,6 +8,7 @@ export class BiteDetailsPage {
   readonly shareButton: Locator;
   readonly navigationButton: Locator;
   readonly bucketListButton: Locator;
+  readonly bucketListIcon: Locator;
   readonly bucketListPopoverItems: Locator;
   readonly newBucketListItem: Locator;
   readonly newBucketListAlert: Locator;
@@ -44,6 +45,12 @@ export class BiteDetailsPage {
     this.shareButton = this.root.getByTestId('bite-details-share');
     this.navigationButton = this.root.getByTestId('bite-details-navigation');
     this.bucketListButton = this.root.getByTestId('bite-details-bucket-list');
+    // The bookmark whose name says whether the Bite is on a list: the control
+    // itself on the phone, the icon inside the labelled button on desktop
+    // (issue #2113).
+    this.bucketListIcon = this.root.locator(
+      'ion-icon[data-testid="bite-details-bucket-list"], [data-testid="bite-details-bucket-list"] ion-icon',
+    );
     // The composer at the foot of the compartment, which starts a new thread. A
     // reply composer inside a thread carries the same form control name, so this
     // is scoped by test id rather than by control (issue #1283).
@@ -220,7 +227,7 @@ export class BiteDetailsPage {
 
   /** True once the Bite belongs to at least one bucket list. */
   async expectBucketListMembership(isMember: boolean): Promise<void> {
-    await expect(this.bucketListButton).toHaveAttribute(
+    await expect(this.bucketListIcon).toHaveAttribute(
       'name',
       isMember ? 'bookmark' : 'bookmark-outline',
     );

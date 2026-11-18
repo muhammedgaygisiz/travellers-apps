@@ -45,20 +45,9 @@
             <bt-map [geopoints]="[biteData.position]" readonly />
           </div>
           <div class="desktop-map-footer">
-            <div class="desktop-map-place">
-              @if (biteData.place) {
-              <span
-                class="link desktop-place-name"
-                role="button"
-                tabindex="0"
-                (click)="onRestaurantClick(biteData)"
-                (keydown.enter)="onRestaurantClick(biteData)"
-                >{{ biteData.place }}</span
-              >
-              } @if (biteLocation()) {
-              <span class="desktop-muted">{{ biteLocation() }}</span>
-              }
-            </div>
+            <!-- The region only: the restaurant's name, a link, is in the facts
+            card, and a second copy would make it ambiguous which to follow. -->
+            <span class="desktop-muted">{{ biteLocation() }}</span>
             <ion-button
               fill="outline"
               color="primary"

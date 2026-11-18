@@ -180,16 +180,6 @@
       padding: 0.75rem 1.25rem;
     }
 
-    .desktop-map-place {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .desktop-place-name {
-      font-weight: 600;
-    }
-
     .link {
       @include globals.link;
     }

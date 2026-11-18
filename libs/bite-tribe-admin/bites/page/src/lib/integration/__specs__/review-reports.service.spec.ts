@@ -125,4 +125,20 @@ describe(ReviewReportsService.name, () => {
       outcome: 'failure',
     });
   });
+
+  it('has no selection before one is made', async () => {
+    await service.load();
+
+    expect(service.selected()).toBeUndefined();
+  });
+
+  it('signs out through the store', () => {
+    const store = TestBed.inject(BiteTribeStoreService) as unknown as {
+      logout: jest.Mock;
+    };
+
+    service.logout();
+
+    expect(store.logout).toHaveBeenCalled();
+  });
 });

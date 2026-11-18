@@ -209,4 +209,85 @@ describe(ReviewReportsComponent.name, () => {
 
     expect(component.reason()).toBe('');
   });
+
+  it('counts no reasons while nothing is selected', () => {
+    expect(component.reasonCounts()).toEqual([]);
+  });
+
+  it('counts a reason the listing left out as none', () => {
+    const review = reported({
+      reasons: { harassment: 1 } as ReportedReview['reasons'],
+    });
+    setInputs({ reports: [review], selected: review });
+
+    expect(component.reasonCounts()).toEqual([
+      { reason: 'harassment', count: 1 },
+    ]);
+  });
+
+  it('names an author without a display name by their uid', () => {
+    expect(component.authorOf(reported({ authorDisplayName: '' }))).toBe('u1');
+  });
+
+  it('asks nothing when blocking without a selection', async () => {
+    const create = jest.spyOn(alertController, 'create');
+
+    await component.onBlockAuthor();
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('asks nothing when the author was already blocked', async () => {
+    setInputs({
+      reports: [reported()],
+      selected: reported(),
+      blockedAuthors: new Set(['u1']),
+    });
+    const create = jest.spyOn(alertController, 'create');
+
+    await component.onBlockAuthor();
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('offers no block on a review whose author deleted their account', () => {
+    const orphan = reported({ authorUid: '', authorDisplayName: '' });
+    setInputs({ reports: [orphan], selected: orphan });
+
+    expect(component.canBlock()).toBe(false);
+    expect(element('admin-review-reports-block')).toBeNull();
+  });
+
+  it('asks nothing when keeping without a reason', async () => {
+    setInputs({ reports: [reported()], selected: reported() });
+    const create = jest.spyOn(alertController, 'create');
+
+    await component.onDismiss();
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('asks nothing when keeping without a selection', async () => {
+    component.onReasonChange('Fine');
+    const create = jest.spyOn(alertController, 'create');
+
+    await component.onDismiss();
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('offers no block while nothing is selected', () => {
+    expect(component.authorBlocked()).toBe(false);
+    expect(component.canBlock()).toBe(false);
+  });
+
+  it('offers no block while another action is under way', () => {
+    setInputs({
+      reports: [reported()],
+      selected: reported(),
+      action: 'dismiss',
+    });
+
+    expect(component.canBlock()).toBe(false);
+  });
 });

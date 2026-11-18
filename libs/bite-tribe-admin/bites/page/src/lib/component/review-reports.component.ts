@@ -126,13 +126,16 @@ export class ReviewReportsComponent {
     return !!uid && this.blockedAuthors().has(uid);
   });
 
-  readonly canBlock = computed(
-    () =>
-      !!this.selected()?.exists &&
-      !!this.selected()?.authorUid &&
+  readonly canBlock = computed(() => {
+    const review = this.selected();
+
+    return (
+      !!review?.exists &&
+      !!review.authorUid &&
       !this.authorBlocked() &&
-      !this.busy(),
-  );
+      !this.busy()
+    );
+  });
 
   /** What the queue and the confirmations call the author. */
   authorOf(review: ReportedReview): string {

@@ -1,9 +1,14 @@
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
+import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import {
+  AI_LANGUAGES,
+  aiLanguageCode,
+  returnDailyAllowance,
+  takeDailyAllowance,
+} from '../shared/utils/ai-usage';
 import {
   DeploymentStage,
   resolveDeploymentStage,
@@ -13,21 +18,19 @@ import {
   generateWithGemini,
   GeminiUnavailableError,
 } from '../shared/utils/gemini';
+import {
+  imageFromStorageUrl,
+  MAX_IMAGE_BASE64_LENGTH,
+} from '../shared/utils/storage-image';
 
-/**
- * One document per user, `aiUsage/{uid}`, counting the AI descriptions of the
- * current UTC day (issue #2030). Server-only: no client reads or writes it.
- */
-export const AI_USAGE_COLLECTION = 'aiUsage';
+export { AI_USAGE_COLLECTION, usageDay } from '../shared/utils/ai-usage';
+export { storagePathOf } from '../shared/utils/storage-image';
 
 /** How many descriptions one user may generate per UTC day. */
 export const DAILY_DESCRIPTION_LIMIT = 10;
 
 /** The longest description the model may write, in characters. */
 export const MAX_DESCRIPTION_LENGTH = 120;
-
-/** The largest base64 photo accepted: the app sends one shrunk to 768 px. */
-const MAX_IMAGE_BASE64_LENGTH = 2_000_000;
 
 export interface GenerateBiteDescriptionRequest {
   dishName?: unknown;
@@ -46,24 +49,6 @@ export type GenerateBiteDescriptionResponse =
   | { status: 'ok'; description: string }
   | { status: 'limit' }
   | { status: 'unavailable' };
-
-/** The app languages, by code, as the model should be told them. */
-const LANGUAGES: Record<string, string> = {
-  am: 'Amharic',
-  ar: 'Arabic',
-  de: 'German',
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  id: 'Indonesian',
-  it: 'Italian',
-  ja: 'Japanese',
-  ko: 'Korean',
-  pt: 'Portuguese',
-  th: 'Thai',
-  tr: 'Turkish',
-  zh: 'Chinese',
-};
 
 /**
  * The instructions, tuned on the Cusco City Top 5 dishes (issue #2030): the
@@ -88,58 +73,6 @@ const coordinate = (value: unknown, limit: number): number | undefined =>
     ? value
     : undefined;
 
-/** The UTC day a call counts against, `YYYY-MM-DD`. */
-export const usageDay = (now: number): string =>
-  new Date(now).toISOString().slice(0, 10);
-
-/**
- * Counts one description against the user's day. Returns false, counting
- * nothing, once the day's limit is used up.
- */
-export const takeDailyAllowance = async (
-  db: Firestore,
-  uid: string,
-  now: number = Date.now(),
-): Promise<boolean> => {
-  const ref = db.collection(AI_USAGE_COLLECTION).doc(uid);
-  const day = usageDay(now);
-
-  return db.runTransaction(async (transaction) => {
-    const data = (await transaction.get(ref)).data();
-    const used = data?.['day'] === day ? Number(data['descriptions']) || 0 : 0;
-
-    if (used >= DAILY_DESCRIPTION_LIMIT) {
-      return false;
-    }
-
-    transaction.set(ref, { day, descriptions: used + 1 }, { merge: true });
-
-    return true;
-  });
-};
-
-/** Gives back an allowance taken for a call that produced nothing. */
-export const returnDailyAllowance = async (
-  db: Firestore,
-  uid: string,
-  now: number = Date.now(),
-): Promise<void> => {
-  const ref = db.collection(AI_USAGE_COLLECTION).doc(uid);
-  const day = usageDay(now);
-
-  await db.runTransaction(async (transaction) => {
-    const data = (await transaction.get(ref)).data();
-
-    if (data?.['day'] === day && Number(data['descriptions']) > 0) {
-      transaction.set(
-        ref,
-        { descriptions: Number(data['descriptions']) - 1 },
-        { merge: true },
-      );
-    }
-  });
-};
-
 /** Reads a photo sent as a data URL. */
 export const imageFromDataUrl = (value: unknown): GeminiImage | undefined => {
   if (typeof value !== 'string' || value.length > MAX_IMAGE_BASE64_LENGTH) {
@@ -151,53 +84,6 @@ export const imageFromDataUrl = (value: unknown): GeminiImage | undefined => {
   );
 
   return match ? { mimeType: match[1], data: match[2] } : undefined;
-};
-
-/**
- * The Storage path of one of our own download URLs, or nothing. Only our
- * bucket is read, through the Admin SDK, so a URL cannot make the function
- * fetch anything else.
- */
-export const storagePathOf = (
-  value: unknown,
-  bucket: string,
-): string | undefined => {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  try {
-    const url = new URL(value);
-    const prefix = `/v0/b/${bucket}/o/`;
-
-    if (
-      url.hostname !== 'firebasestorage.googleapis.com' ||
-      !url.pathname.startsWith(prefix)
-    ) {
-      return undefined;
-    }
-
-    return decodeURIComponent(url.pathname.slice(prefix.length));
-  } catch {
-    return undefined;
-  }
-};
-
-const imageFromStorage = async (
-  value: unknown,
-): Promise<GeminiImage | undefined> => {
-  const bucket = getStorage().bucket();
-  const path = storagePathOf(value, bucket.name);
-
-  if (!path) {
-    return undefined;
-  }
-
-  const [buffer] = await bucket.file(path).download();
-
-  return buffer.length * 1.37 > MAX_IMAGE_BASE64_LENGTH
-    ? undefined
-    : { mimeType: 'image/jpeg', data: buffer.toString('base64') };
 };
 
 /**
@@ -254,7 +140,14 @@ export const generateBiteDescription = onAppCheck<
   const db = getFirestore();
   const uid = request.auth.uid;
 
-  if (!(await takeDailyAllowance(db, uid))) {
+  if (
+    !(await takeDailyAllowance(
+      db,
+      uid,
+      'descriptions',
+      DAILY_DESCRIPTION_LIMIT,
+    ))
+  ) {
     logger.info('generateBiteDescription: daily limit reached', { uid });
 
     return { status: 'limit' };
@@ -268,9 +161,9 @@ export const generateBiteDescription = onAppCheck<
 
   try {
     const image =
-      imageFromDataUrl(data.image) ?? (await imageFromStorage(data.imageUrl));
-    const language =
-      LANGUAGES[text(data.language, 5).toLowerCase()] ?? LANGUAGES['en'];
+      imageFromDataUrl(data.image) ??
+      (await imageFromStorageUrl(data.imageUrl));
+    const language = AI_LANGUAGES[aiLanguageCode(data.language)];
     const answer = await generateWithGemini({
       system: descriptionInstructions(language),
       text: describeInputs(
@@ -307,7 +200,7 @@ export const generateBiteDescription = onAppCheck<
       uid,
       error: error instanceof Error ? error.message : String(error),
     });
-    await returnDailyAllowance(db, uid);
+    await returnDailyAllowance(db, uid, 'descriptions');
 
     return { status: 'unavailable' };
   }

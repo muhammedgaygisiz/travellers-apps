@@ -505,6 +505,74 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** The AI explanation of the dish (issue #2106, `UC-IBD` `R-1`). */
+  describe('Explain me', () => {
+    const explainButton = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="bite-details-explain"]',
+      );
+
+    const show = (overrides: Partial<Bite> = {}, signedIn = true): void => {
+      componentRef.setInput('isAuthenticated', signedIn);
+      componentRef.setInput('userId', 'viewer');
+      componentRef.setInput('bite', {
+        id: 'bite-1',
+        name: 'Som Tam',
+        userId: 'creator',
+        imageStatus: 'uploaded',
+        ...overrides,
+      } as Bite);
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    it('is offered to a member on somebody else’s Bite, and on their own', () => {
+      show();
+      expect(explainButton()).toBeTruthy();
+
+      show({ userId: 'viewer' });
+      expect(explainButton()).toBeTruthy();
+    });
+
+    it('is offered on a Bite written before upload states were kept', () => {
+      show({ imageStatus: undefined });
+
+      expect(explainButton()).toBeTruthy();
+    });
+
+    it('is not offered to a guest or a signed-out reader', () => {
+      show({}, false);
+
+      expect(explainButton()).toBeFalsy();
+    });
+
+    it.each(['pending', 'failed'] as const)(
+      'is not offered while the photo is %s',
+      (imageStatus) => {
+        show({ imageStatus, createdAt: new Date().toISOString() });
+
+        expect(explainButton()).toBeFalsy();
+      },
+    );
+
+    it('is not offered before the Bite has loaded', () => {
+      componentRef.setInput('isAuthenticated', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(explainButton()).toBeFalsy();
+    });
+
+    it('asks for the explanation of the Bite on screen', () => {
+      const emit = jest.spyOn(component.explainBite, 'emit');
+      show();
+
+      explainButton()?.click();
+
+      expect(emit).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'bite-1', name: 'Som Tam' }),
+      );
+    });
+  });
+
   describe('Bite Display', () => {
     const actionTestIds = [
       'bite-details-share',

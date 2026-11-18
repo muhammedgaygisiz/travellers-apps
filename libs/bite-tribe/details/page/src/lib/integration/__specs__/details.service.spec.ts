@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DetailsService } from '../details.service';
 import {
+  BiteExplanationDataAccessService,
   DetailsDataAccessService,
   SaveImageDeniedError,
   ShareImageUnavailableError,
@@ -23,6 +24,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
+import { BiteExplanationComponent } from '../../components/bite-explanation/bite-explanation.component';
 import { ToastService } from 'toast';
 import { Capacitor } from '@capacitor/core';
 import { AnalyticsService } from 'ta-firestore';
@@ -122,6 +124,11 @@ const mockModalController = {
 
 const mockTransloco = {
   translate: jest.fn((key: string) => key),
+  getActiveLang: jest.fn(() => 'tr'),
+};
+
+const mockExplanationDataAccess = {
+  explainBite: jest.fn(),
 };
 
 const mockAnalytics = {
@@ -133,6 +140,10 @@ const shareProviders = [
   { provide: ActionSheetController, useValue: mockActionSheetController },
   { provide: ModalController, useValue: mockModalController },
   { provide: TranslocoService, useValue: mockTransloco },
+  {
+    provide: BiteExplanationDataAccessService,
+    useValue: mockExplanationDataAccess,
+  },
 ];
 
 describe('DetailsService', () => {
@@ -1426,6 +1437,103 @@ describe('DetailsService', () => {
   });
 
   /** Reporting a Bite to the operators (issue #1608). */
+  describe('explainBite', () => {
+    const somTam = { ...mockBite, id: 'b1', name: 'Som Tam' } as Bite;
+    const explanation = {
+      whatItIs: 'A pounded papaya salad.',
+      origin: 'Isan, Thailand.',
+      ingredients: ['papaya', 'lime', 'chilli'],
+    };
+
+    /** The props the modal was created with. */
+    const modalProps = (): Record<string, unknown> =>
+      mockModalController.create.mock.calls.at(-1)?.[0].componentProps;
+
+    const shownState = (): unknown =>
+      (modalProps()['state'] as () => unknown)();
+
+    beforeEach(() => {
+      mockModalController.create.mockClear();
+      mockModal.present.mockClear();
+      mockModal.dismiss.mockClear();
+      mockAnalytics.logEvent.mockClear();
+      mockExplanationDataAccess.explainBite.mockReset();
+    });
+
+    it('opens the modal, asks in the active language and shows the explanation', async () => {
+      mockExplanationDataAccess.explainBite.mockResolvedValue({
+        status: 'ok',
+        cached: false,
+        explanation,
+      });
+
+      await service.explainBite(somTam);
+
+      expect(mockModalController.create).toHaveBeenCalledWith(
+        expect.objectContaining({ component: BiteExplanationComponent }),
+      );
+      expect(mockModal.present).toHaveBeenCalled();
+      expect(mockExplanationDataAccess.explainBite).toHaveBeenCalledWith(
+        'b1',
+        'tr',
+      );
+      expect((modalProps()['dishName'] as () => string)()).toBe('Som Tam');
+      expect(shownState()).toEqual({ kind: 'ok', explanation });
+      expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
+        'bite_explanation_requested',
+        { result: 'generated', language: 'tr' },
+      );
+    });
+
+    it.each([
+      [{ status: 'ok', cached: true, explanation }, 'cached', 'ok'],
+      [{ status: 'unknown', cached: true }, 'unknown', 'unknown'],
+      [{ status: 'limit' }, 'limit_reached', 'limit'],
+      [{ status: 'unavailable' }, 'error', 'error'],
+    ])(
+      'answers %j as %s in analytics and %s in the modal',
+      async (result, param, kind) => {
+        mockExplanationDataAccess.explainBite.mockResolvedValue(result);
+
+        await service.explainBite(somTam);
+
+        expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
+          'bite_explanation_requested',
+          { result: param, language: 'tr' },
+        );
+        expect(shownState()).toMatchObject({ kind });
+      },
+    );
+
+    it('asks again on Retry, through a loading state', async () => {
+      mockExplanationDataAccess.explainBite
+        .mockResolvedValueOnce({ status: 'unavailable' })
+        .mockResolvedValueOnce({ status: 'ok', cached: false, explanation });
+
+      await service.explainBite(somTam);
+      expect(shownState()).toEqual({ kind: 'error' });
+
+      (modalProps()['retry'] as { emit: () => void }).emit();
+      expect(shownState()).toEqual({ kind: 'loading' });
+      await mockExplanationDataAccess.explainBite.mock.results[1].value;
+      await Promise.resolve();
+
+      expect(mockExplanationDataAccess.explainBite).toHaveBeenCalledTimes(2);
+      expect(shownState()).toEqual({ kind: 'ok', explanation });
+    });
+
+    it('closes the modal on Done', async () => {
+      mockExplanationDataAccess.explainBite.mockResolvedValue({
+        status: 'limit',
+      });
+
+      await service.explainBite(somTam);
+      (modalProps()['closed'] as { emit: () => void }).emit();
+
+      expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
   describe('reportBite', () => {
     beforeEach(() => mockToast.present.mockClear());
 

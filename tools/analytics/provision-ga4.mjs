@@ -109,6 +109,9 @@ const CUSTOM_DIMENSIONS = [
   { parameterName: 'result', displayName: 'Generate result' },
   { parameterName: 'mode', displayName: 'Bite form mode' },
   { parameterName: 'description_source', displayName: 'Description source' },
+  // The AI dish explanation (issue #2106) reuses `result` above for how a
+  // request settled; `language` is the app language it was asked in.
+  { parameterName: 'language', displayName: 'App language' },
   // Which app the session came from (issue #1098). Both apps report to one
   // property through one measurement id, so this is the only thing separating
   // a staff shift from a diner's session - and `activeUsers` counts people,

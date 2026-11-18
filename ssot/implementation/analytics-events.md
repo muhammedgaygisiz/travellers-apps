@@ -61,6 +61,7 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 | Discovery    | `search_performed`                    | –                                                                                                          | Query first reaches the min length (once per search session)                                        | `libs/bite-tribe/search/page/.../integration/search.service.ts`                                             |
 | Discovery    | `restaurant_viewed`                   | `verified: boolean`                                                                                        | Restaurant / place page entered                                                                     | `libs/bite-tribe/restaurant/page/.../integration/*restaurant-container*.ts`                                 |
 | Discovery    | `bite_viewed`                         | –                                                                                                          | Bite details page entered                                                                           | `libs/bite-tribe/details/page/.../integration/details.container.ts`                                         |
+| Discovery    | `bite_explanation_requested`          | `result: 'cached' \| 'generated' \| 'unknown' \| 'limit_reached' \| 'error'`, `language: string`           | The AI dish explanation modal settles on an answer                                                  | `libs/bite-tribe/details/page/.../integration/details.service.ts`                                           |
 | Onboarding   | `onboarding_assistant_started`        | –                                                                                                          | Assistant loads for the first time in a session                                                     | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
 | Onboarding   | `onboarding_step_completed`           | `step: OnboardingStepId`                                                                                   | A step is persisted and marked complete on advance                                                  | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
 | Onboarding   | `onboarding_assistant_completed`      | –                                                                                                          | Completion flag is written on the finish step                                                       | `libs/bite-tribe/onboarding/page/.../integration/onboarding.service.ts`                                     |
@@ -572,6 +573,12 @@ Issue [#2030] lets a user tap **Generate** on the Bite form for a suggested
 description ([Architecture - AI](../architecture/ai.md)). Two questions: how
 often it is used, and whether what it writes is kept.
 
+- `bite_explanation_requested` (issue [#2106]) is one event per answer the
+  explanation modal settles on, Retry included: `cached` and `generated` are an
+  explanation shown, kept or newly written, `unknown` a dish the model could
+  not place, `limit_reached` the day's twenty new ones used up, and `error`
+  anything that failed. `language` is the app language it was asked in, a GA4
+  dimension of its own; `result` shares the dimension registered for the generated description.
 - `bite_description_generated` is one event per tap that reached the
   function: `result` is `success`, `error` (nothing written, the toast says so)
   or `limit_reached` (the day's ten are used), and `mode` is `create` or
@@ -985,3 +992,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
 [#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101
+[#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106

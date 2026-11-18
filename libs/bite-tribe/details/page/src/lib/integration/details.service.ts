@@ -5,6 +5,8 @@ import {
   LocalImagePickerService,
 } from 'bite-tribe-common/bite';
 import {
+  BiteExplanationDataAccessService,
+  type BiteExplanationResult,
   DetailsDataAccessService,
   isShareCancelled,
   SaveImageDeniedError,
@@ -38,8 +40,13 @@ import {
 import { PATH } from 'utils';
 import { ToastService } from 'toast';
 import {
+  BiteExplanationComponent,
+  type BiteExplanationState,
+} from '../components/bite-explanation/bite-explanation.component';
+import {
   AnalyticsEvent,
   type AnalyticsEventParamMap,
+  type BiteExplanationRequestResult,
   AnalyticsService,
   type ShareImageAction,
   type ShareImageCelebrationParam,
@@ -92,6 +99,38 @@ const toCelebrationParam = (
 ): ShareImageCelebrationParam =>
   celebration.moment === 'first-country' ? 'first_country' : 'first_bite';
 
+/** What the modal shows for each answer of `explainBite` (issue #2106). */
+const toExplanationState = (
+  result: BiteExplanationResult,
+): BiteExplanationState => {
+  switch (result.status) {
+    case 'ok':
+      return { kind: 'ok', explanation: result.explanation };
+    case 'unknown':
+      return { kind: 'unknown' };
+    case 'limit':
+      return { kind: 'limit' };
+    default:
+      return { kind: 'error' };
+  }
+};
+
+/** Each answer as `bite_explanation_requested` names it (`UC-IBD` `R-7`). */
+const toExplanationResultParam = (
+  result: BiteExplanationResult,
+): BiteExplanationRequestResult => {
+  switch (result.status) {
+    case 'ok':
+      return result.cached ? 'cached' : 'generated';
+    case 'unknown':
+      return 'unknown';
+    case 'limit':
+      return 'limit_reached';
+    default:
+      return 'error';
+  }
+};
+
 /** The app entries a device offers, each only while its app is installed. */
 const NATIVE_APP_ENTRIES: { choice: ShareMenuTarget; labelKey: string }[] = [
   { choice: 'instagram-story', labelKey: 'share-menu-instagram-story' },
@@ -115,6 +154,9 @@ export class DetailsService {
   private readonly modalController = inject(ModalController);
   private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
+  private readonly explanationDataAccess = inject(
+    BiteExplanationDataAccessService,
+  );
 
   bite = this.dataAccess.bite;
 
@@ -302,6 +344,55 @@ export class DetailsService {
         outcome: 'failure',
       });
     }
+  }
+
+  /**
+   * Explains the Bite's dish in the viewer's app language (issue #2106,
+   * `UC-IBD` `R-1` to `R-7`).
+   *
+   * The modal opens at once with a loading state, and the answer is handed in
+   * when it arrives. A failed call offers Retry, which asks again in the same
+   * modal. The language is the active Transloco language - the device or
+   * account language since #2104; the backend falls back to English for any
+   * other. Every answer is counted once, as `bite_explanation_requested`.
+   */
+  async explainBite(bite: Bite): Promise<void> {
+    const language = this.transloco.getActiveLang() || 'en';
+    const state = signal<BiteExplanationState>({ kind: 'loading' });
+    const retry = new EventEmitter<void>();
+    const closed = new EventEmitter<void>();
+    const modal = await this.modalController.create({
+      component: BiteExplanationComponent,
+      // Ionic assigns componentProps onto the instance, so inputs are handed
+      // over as signals and outputs as emitters - see the share composer.
+      componentProps: {
+        dishName: signal(bite.name),
+        state,
+        retry,
+        closed,
+      },
+    });
+
+    const ask = async (): Promise<void> => {
+      state.set({ kind: 'loading' });
+
+      const result = await this.explanationDataAccess.explainBite(
+        bite.id,
+        language,
+      );
+
+      this.analytics.logEvent(AnalyticsEvent.BiteExplanationRequested, {
+        result: toExplanationResultParam(result),
+        language,
+      });
+      state.set(toExplanationState(result));
+    };
+
+    retry.subscribe(() => void ask());
+    closed.subscribe(() => void modal.dismiss());
+
+    await modal.present();
+    await ask();
   }
 
   async reportBite(report: {

@@ -217,6 +217,22 @@
         <span>{{ biteData?.createdAt | timeAgo: activeLang() }}</span>
       </div>
 
+      <!-- The AI explanation of the dish (issue #2106): for a member, on every
+      Bite, once its photo is up - an explanation is never written without it. -->
+      @if (biteData && canExplain()) {
+      <ion-button
+        fill="outline"
+        size="small"
+        color="primary"
+        class="explain-button ion-margin-bottom"
+        data-testid="bite-details-explain"
+        (click)="explainBite.emit(biteData)"
+      >
+        <ion-icon name="sparkles-outline" slot="start" aria-hidden="true" />
+        {{ 'explain-bite' | transloco }}
+      </ion-button>
+      }
+
       <div
         class="ion-display-flex ion-flex-row ion-justify-content-between ion-margin-bottom"
       >

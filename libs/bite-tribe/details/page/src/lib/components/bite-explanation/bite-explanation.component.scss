@@ -1,0 +1,49 @@
+.dish-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.part {
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+  }
+
+  p,
+  ul {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  ul {
+    padding-inline-start: 20px;
+  }
+}
+
+.heading-skeleton {
+  width: 40%;
+  height: 16px;
+}
+
+.short {
+  width: 70%;
+}
+
+.message {
+  margin: 8px 0 16px;
+  line-height: 1.5;
+}
+
+.disclaimer {
+  margin-top: 24px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ion-color-medium);
+}

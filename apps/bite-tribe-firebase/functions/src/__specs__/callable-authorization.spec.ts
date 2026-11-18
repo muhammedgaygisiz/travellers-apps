@@ -175,6 +175,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // Spends billed Vertex AI quota for the caller's own Bite form (issue #2030),
   // so a table guest's anonymous session is not enough.
   generateBiteDescription: 'member',
+  // Spends billed Vertex AI quota on a cache miss (issue #2106), and its
+  // allowance is per account, which an anonymous uid would reset at will.
+  explainBite: 'member',
   claimDisplayName: 'member',
   countUsers: 'member',
   deleteOwnAccount: 'member',

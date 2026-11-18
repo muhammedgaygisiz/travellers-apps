@@ -16,6 +16,7 @@ export {
   type AnalyticsEventName,
   type AnalyticsEventParamMap,
   type AnalyticsSurface,
+  type BiteExplanationRequestResult,
   type ShareImageAction,
   type ShareImageCelebrationParam,
   type ShareImageParams,

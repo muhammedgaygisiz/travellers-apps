@@ -40,6 +40,7 @@ export const AnalyticsEvent = {
   // Discovery
   SearchPerformed: 'search_performed',
   RestaurantViewed: 'restaurant_viewed',
+  BiteExplanationRequested: 'bite_explanation_requested',
   BiteViewed: 'bite_viewed',
   // Onboarding funnel (epic #850)
   OnboardingAssistantStarted: 'onboarding_assistant_started',
@@ -154,6 +155,16 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.BiteDescriptionGenerated]: {
     result: 'success' | 'error' | 'limit_reached';
     mode: 'create' | 'edit';
+  };
+  /**
+   * Every answer the AI dish explanation settles on (issue #2106): `cached`
+   * and `generated` are an explanation shown, so `cached / (cached +
+   * generated)` is the cache's hit rate. `language` is the app language it
+   * was asked in.
+   */
+  [AnalyticsEvent.BiteExplanationRequested]: {
+    result: BiteExplanationRequestResult;
+    language: string;
   };
   [AnalyticsEvent.BiteImageUploaded]: never;
   [AnalyticsEvent.BiteImageUploadFailed]: { code: string };
@@ -429,6 +440,10 @@ export interface AnalyticsEventParamMap {
   };
 }
 
+/** How a request for the AI dish explanation settled (issue #2106). */
+export type BiteExplanationRequestResult =
+  'cached' | 'generated' | 'unknown' | 'limit_reached' | 'error';
+
 /** Which store listing a store link points at (issue #1759). */
 export type StoreListing = 'app_store' | 'google_play';
 
@@ -609,6 +624,7 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.BucketListRated]: 'consumer',
   [AnalyticsEvent.SearchPerformed]: 'consumer',
   [AnalyticsEvent.RestaurantViewed]: 'consumer',
+  [AnalyticsEvent.BiteExplanationRequested]: 'consumer',
   [AnalyticsEvent.BiteViewed]: 'consumer',
   [AnalyticsEvent.OnboardingAssistantStarted]: 'consumer',
   [AnalyticsEvent.OnboardingStepCompleted]: 'consumer',

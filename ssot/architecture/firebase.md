@@ -84,7 +84,9 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   review is created and edited by `saveReview` and `editReview`, and a profile's
   display name, real name, city, about and pronouns by `claimDisplayName` and
   `updateProfileText`; the rules refuse a client write of any of them, so the
-  owner deletes a review and writes the rest of a profile, and nothing else. A
+  owner writes the rest of a profile and nothing else. A review is deleted by
+  `deleteReview` too ([#2116]), because only the backend can see whether
+  somebody answered it and it has to stay as a tombstone. A
   Bite is the exception, because it has to save offline: its text is judged by
   `moderateBiteOnWrite` after the write. The check is
   [Architecture - AI](ai.md)'s `The Content Check`, and its verdicts sit in the
@@ -686,3 +688,4 @@ libs/bite-tribe/api
 [#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
 [#1493]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1493
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116

@@ -66,6 +66,7 @@ const createMockDataAccess = (
     saveNewReview: jest.fn().mockResolvedValue(undefined),
     saveReviewReply: jest.fn().mockResolvedValue(undefined),
     updateReview: jest.fn().mockResolvedValue(undefined),
+    deleteReview: jest.fn().mockResolvedValue(undefined),
     saveToBucketList: jest.fn(),
     createAndSaveToBucketList: jest.fn(),
     removeBiteFromBucketlist: jest.fn(),
@@ -1433,6 +1434,34 @@ describe('DetailsService', () => {
 
       expect(mockToast.present).toHaveBeenCalledWith({
         messageKey: 'ate-with-remove-failed',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /** Withdrawing one's own review or reply (issue #2116). */
+  describe('deleteReview', () => {
+    const removal = { reviewId: 'review-1', biteId: 'bite123' };
+
+    beforeEach(() => mockToast.present.mockClear());
+
+    it('deletes without a toast, since the thread shows the result', async () => {
+      await service.deleteReview(removal);
+
+      expect(service.dataAccess.deleteReview).toHaveBeenCalledWith(removal);
+      expect(mockToast.present).not.toHaveBeenCalled();
+    });
+
+    it('says the delete failed rather than leaving the review up silently', async () => {
+      jest.spyOn(console, 'error').mockImplementation();
+      jest
+        .mocked(service.dataAccess.deleteReview)
+        .mockRejectedValueOnce(new Error('permission-denied'));
+
+      await service.deleteReview(removal);
+
+      expect(mockToast.present).toHaveBeenCalledWith({
+        messageKey: 'review-delete-failed',
         outcome: 'failure',
       });
     });

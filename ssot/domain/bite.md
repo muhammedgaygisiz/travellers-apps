@@ -65,6 +65,12 @@ A good Bite makes one concrete dish understandable enough that another person ca
   it is written, and `firestore.rules` refuses an author's update to any of them. An
   edited review carries `updatedAt` and is shown as edited. See
   [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#721].
+- A review or reply can be deleted by its author, through the `deleteReview` callable
+  only. One nobody answered is removed; one somebody answered becomes a tombstone -
+  the same document without its text, `author` or `authorId`, with `deletedAt` set - so
+  the replies under it keep their parent. A tombstone takes no new reply and goes when the
+  last reply under it does. See the Review Delete Contract in
+  [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) and issue [#2116].
 - A Bite can be added to bucket lists.
 - A Bite can be part of BiteTrail-based journeys.
 - A Bite is the only entity with a public share link and a native deep link
@@ -429,3 +435,4 @@ images/bites/{biteId}/{filename}
 [#1290]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1290
 [#2026]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2026
 [#721]: https://github.com/muhammedgaygisiz/travellers-apps/issues/721
+[#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116

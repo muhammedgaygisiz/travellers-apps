@@ -442,6 +442,20 @@ export class DetailsDataAccessService {
     this.storeService.notifyLoadedReviews(reviews);
   }
 
+  /**
+   * Withdraws the user's own review or reply and puts the reloaded compartment
+   * into the store (issue #2116). Rejects when the delete fails, leaving the
+   * review on screen as it was.
+   */
+  async deleteReview(removal: {
+    reviewId: string;
+    biteId: string;
+  }): Promise<void> {
+    const reviews = await this.api.deleteReview(removal);
+
+    this.storeService.notifyLoadedReviews(reviews);
+  }
+
   saveToBucketList(saveToBucketListEvent: SaveToBucketListParams): void {
     this.storeService.saveToBucketList(saveToBucketListEvent);
   }

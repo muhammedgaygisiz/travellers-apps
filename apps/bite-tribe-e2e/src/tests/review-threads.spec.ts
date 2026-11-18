@@ -4,6 +4,7 @@ import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
 import {
   getDocumentByStringField,
+  getFirestoreDocument,
   queryDocumentsByStringField,
   seedFirestoreDocument,
 } from '../support/firestore';
@@ -521,5 +522,101 @@ test.describe('Edit my review', () => {
     await expect(
       details.reviewThreads.first().getByTestId(`review-thread-${otherId}`),
     ).toBeVisible();
+  });
+});
+
+test.describe('Delete my review', () => {
+  // Issue #2116: an author withdraws what they wrote, and an answered review
+  // stays as a tombstone so somebody else's reply keeps its place.
+  test('deletes my unanswered review, and leaves my answered one as a tombstone', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const biteId = `delete-bite-${runId}`;
+    const creatorId = `delete-creator-${runId}`;
+    const aloneId = `delete-alone-${runId}`;
+    const answeredId = `delete-answered-${runId}`;
+    const replyId = `delete-reply-${runId}`;
+    const replyText = `Agreed, the broth was the best part ${runId}`;
+
+    await Promise.all([
+      seedUser(page, creatorId, `Delete Creator ${runId}`),
+      seedBite(page, biteId, `Delete Ramen ${runId}`, creatorId),
+    ]);
+
+    await seedReview(page, {
+      id: aloneId,
+      biteId,
+      author: 'Test User',
+      authorId: TEST_USERS.default.uid,
+      review: `Too salty ${runId}`,
+      writtenAt: runId,
+    });
+    await seedReview(page, {
+      id: answeredId,
+      biteId,
+      author: 'Test User',
+      authorId: TEST_USERS.default.uid,
+      review: `Great broth ${runId}`,
+      writtenAt: runId + 1,
+    });
+    await seedReview(page, {
+      id: replyId,
+      biteId,
+      author: `Delete Creator ${runId}`,
+      authorId: creatorId,
+      review: replyText,
+      parentReviewId: answeredId,
+      threadId: answeredId,
+      writtenAt: runId + 2,
+    });
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+
+    const details = await openBite(page, `/bite/${biteId}`);
+
+    await expect(details.thread(aloneId)).toBeVisible();
+    await expect(
+      details.reply(replyId).getByTestId('delete-review'),
+    ).toHaveCount(0);
+
+    await details.deleteOwnEntry(
+      details.thread(aloneId),
+      'Delete your review?',
+    );
+    await expect(details.thread(aloneId)).toHaveCount(0);
+    await expect
+      .poll(() => getFirestoreDocument(page, `reviews/${aloneId}`), {
+        timeout: 15_000,
+      })
+      .toBeUndefined();
+
+    await details.deleteOwnEntry(
+      details.thread(answeredId),
+      'Delete your review?',
+    );
+    await expect(
+      details.thread(answeredId).getByTestId('deleted-review'),
+    ).toHaveText('This review was deleted.');
+    await expect(
+      details.reply(replyId).getByText(replyText, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      details.thread(answeredId).getByTestId('reply-to-review'),
+    ).toHaveCount(0);
+
+    // The tombstone keeps its place and nothing that names its author.
+    const tombstone = await getFirestoreDocument(page, `reviews/${answeredId}`);
+    expect(tombstone).toMatchObject({
+      biteId: `/bites/${biteId}`,
+      createdAtTimestamp: runId + 1,
+      deletedAt: expect.any(String),
+    });
+    expect(tombstone).not.toHaveProperty('review');
+    expect(tombstone).not.toHaveProperty('author');
+    expect(tombstone).not.toHaveProperty('authorId');
   });
 });

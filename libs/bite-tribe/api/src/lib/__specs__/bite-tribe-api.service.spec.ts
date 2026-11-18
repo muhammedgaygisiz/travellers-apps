@@ -18,6 +18,7 @@ class ReviewApiMock {
   reviewsByBiteId = jest.fn();
   saveNewReview = jest.fn();
   updateReview = jest.fn();
+  deleteReview = jest.fn();
 }
 
 class RestaurantApiMock {
@@ -1164,6 +1165,18 @@ describe(BiteTribeApiService.name, () => {
         await service.createBiteTrail(trailData);
 
         expect(createBiteTrailSpy).toHaveBeenCalledWith(trailData);
+      },
+    ));
+  });
+
+  describe('deleteReview', () => {
+    it('should call deleteReview on ReviewApiService', inject(
+      [BiteTribeApiService, ReviewApiService],
+      (service: BiteTribeApiService, reviewApiService: ReviewApiService) => {
+        const deleteReviewSpy = jest.spyOn(reviewApiService, 'deleteReview');
+        const removal = { reviewId: 'review-1', biteId: 'bite-id' };
+        service.deleteReview(removal);
+        expect(deleteReviewSpy).toHaveBeenCalledWith(removal);
       },
     ));
   });

@@ -51,9 +51,12 @@ export const loadReviewsByBiteId = async (
     },
   });
 
+  // A tombstone has no text and no author (issue #2116); it is handed on with
+  // both empty so every reader still gets the strings `Review` promises.
   const reviews = reviewDocs.snapshots.map(
     (reviewDoc) =>
       ({
+        ...(reviewDoc.data?.['deletedAt'] ? { review: '', author: '' } : {}),
         ...reviewDoc.data,
         id: reviewDoc.id,
       }) as Review,

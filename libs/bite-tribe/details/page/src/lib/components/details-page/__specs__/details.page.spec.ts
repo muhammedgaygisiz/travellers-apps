@@ -999,6 +999,75 @@ describe('DetailsPage', () => {
     });
   });
 
+  /** Issue #2116: asks first, then withdraws on the Bite on screen. */
+  describe('confirmDeleteReview', () => {
+    const capture = (): {
+      present: jest.Mock;
+      options: () => Parameters<AlertController['create']>[0] | undefined;
+    } => {
+      const present = jest.fn().mockResolvedValue(undefined);
+      let created: Parameters<AlertController['create']>[0] | undefined;
+      jest
+        .spyOn(alertController, 'create')
+        .mockImplementation(async (options) => {
+          created = options;
+          return { present } as never;
+        });
+
+      return { present, options: () => created };
+    };
+
+    it('deletes only once the user confirms', async () => {
+      const { present, options } = capture();
+      const emit = jest.spyOn(component.submitReviewDelete, 'emit');
+      componentRef.setInput('bite', { id: '123', name: 'Pizza' });
+
+      await component.confirmDeleteReview({
+        reviewId: 'review-1',
+        isReply: false,
+      });
+
+      expect(present).toHaveBeenCalled();
+      expect(options()?.header).toBe('delete-review-header');
+      expect(emit).not.toHaveBeenCalled();
+
+      const buttons = options()?.buttons as {
+        role?: string;
+        handler?: () => void;
+      }[];
+      buttons.find((button) => button.role === 'destructive')?.handler?.();
+
+      expect(emit).toHaveBeenCalledWith({
+        reviewId: 'review-1',
+        biteId: '123',
+      });
+    });
+
+    it('names a reply as a reply', async () => {
+      const { options } = capture();
+      componentRef.setInput('bite', { id: '123', name: 'Pizza' });
+
+      await component.confirmDeleteReview({
+        reviewId: 'reply-1',
+        isReply: true,
+      });
+
+      expect(options()?.header).toBe('delete-reply-header');
+    });
+
+    it('asks nothing while the Bite is not loaded', async () => {
+      const { present } = capture();
+      componentRef.setInput('bite', undefined);
+
+      await component.confirmDeleteReview({
+        reviewId: 'review-1',
+        isReply: false,
+      });
+
+      expect(present).not.toHaveBeenCalled();
+    });
+  });
+
   /** Issue #721: the author's edit, addressed to the Bite on screen. */
   describe('saveReviewEdit', () => {
     const edit = { reviewId: 'review-1', review: 'Edited' };

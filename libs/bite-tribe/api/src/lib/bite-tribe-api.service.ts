@@ -103,6 +103,14 @@ export class BiteTribeApiService {
     return this.reviewApiService.updateReview(payload);
   }
 
+  /** Rejects when the delete fails; see `ReviewApiService.deleteReview`. */
+  deleteReview(payload: {
+    reviewId: string;
+    biteId: string;
+  }): Promise<Review[]> {
+    return this.reviewApiService.deleteReview(payload);
+  }
+
   reviewsByBiteId(biteId: string): Promise<Review[]> {
     return this.reviewApiService.reviewsByBiteId(biteId);
   }

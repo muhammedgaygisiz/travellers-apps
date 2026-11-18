@@ -29,4 +29,13 @@ export interface Review {
   createdAtTimestamp?: number;
   updatedAt?: string;
   updatedAtTimestamp?: number;
+
+  /**
+   * Set when the author withdrew a review somebody had answered (issue #2116).
+   * The document stays as a tombstone so the replies under it keep their
+   * parent: its text, `author` and `authorId` are gone, and the loader hands it
+   * on with `review` and `author` empty.
+   */
+  deletedAt?: string;
+  deletedAtTimestamp?: number;
 }

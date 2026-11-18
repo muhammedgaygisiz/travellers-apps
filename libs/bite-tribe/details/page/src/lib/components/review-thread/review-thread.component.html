@@ -106,88 +106,108 @@
   the text at full width under it, and the actions as quiet text under that.
   The name used to share a line with the text, which capped it at a width that
   cut most names short and left the text a narrow, ragged column (#721). While
-  the author edits, the editor takes the place of the text and the actions.
+  the author edits, the editor takes the place of the text and the actions. A
+  deleted item that still holds up replies is one muted line in its place
+  (#2116).
 -->
 <ng-template #entry let-review let-replyTestId="replyTestId">
-  <div class="review-meta">
-    <span class="review-author">{{ review.author }}</span>
-    @if (isCreator(review)) {
-      <span class="creator-badge">
-        {{ 'review-creator-badge' | transloco }}
-      </span>
-    }
-    <span class="review-age">
-      <span aria-hidden="true">·</span>
-      {{ review.createdAt | timeAgo: activeLang() }}
-      @if (review.updatedAt) {
-        <span class="edited-marker" data-testid="edited-marker"
-          >· {{ 'review-edited' | transloco }}</span
-        >
-      }
-    </span>
-  </div>
-
-  @if (editingId() === review.id) {
-    <form class="edit-composer" [formGroup]="editForm">
-      <ion-textarea
-        label="{{ 'edit-review-label' | transloco }}"
-        labelPlacement="stacked"
-        formControlName="review"
-        fill="outline"
-        mode="md"
-        rows="3"
-        [autoGrow]="true"
-        data-testid="edit-review-input"
-      />
-
-      <div class="composer-actions">
-        <ion-button
-          fill="clear"
-          size="small"
-          data-testid="cancel-edit"
-          (click)="cancelEdit()"
-        >
-          {{ 'cancel' | transloco }}
-        </ion-button>
-        <ion-button
-          size="small"
-          data-testid="save-edit"
-          [disabled]="editForm.invalid"
-          (click)="saveEdit()"
-        >
-          {{ 'save' | transloco }}
-        </ion-button>
-      </div>
-    </form>
+  @if (isDeleted(review)) {
+    <p class="review-deleted" data-testid="deleted-review">
+      {{
+        (review.parentReviewId ? 'reply-deleted' : 'review-deleted') | transloco
+      }}
+    </p>
   } @else {
-    <p class="review-text">{{ review.review }}</p>
+    <div class="review-meta">
+      <span class="review-author">{{ review.author }}</span>
+      @if (isCreator(review)) {
+        <span class="creator-badge">
+          {{ 'review-creator-badge' | transloco }}
+        </span>
+      }
+      <span class="review-age">
+        <span aria-hidden="true">·</span>
+        {{ review.createdAt | timeAgo: activeLang() }}
+        @if (review.updatedAt) {
+          <span class="edited-marker" data-testid="edited-marker"
+            >· {{ 'review-edited' | transloco }}</span
+          >
+        }
+      </span>
+    </div>
 
-    @if (canReply() || canEdit(review)) {
-      <div class="review-actions">
-        @if (canReply()) {
+    @if (editingId() === review.id) {
+      <form class="edit-composer" [formGroup]="editForm">
+        <ion-textarea
+          label="{{ 'edit-review-label' | transloco }}"
+          labelPlacement="stacked"
+          formControlName="review"
+          fill="outline"
+          mode="md"
+          rows="3"
+          [autoGrow]="true"
+          data-testid="edit-review-input"
+        />
+
+        <div class="composer-actions">
           <ion-button
             fill="clear"
             size="small"
-            class="text-action"
-            [attr.data-testid]="replyTestId"
-            (click)="startReply(review)"
+            data-testid="cancel-edit"
+            (click)="cancelEdit()"
           >
-            {{ 'reply' | transloco }}
+            {{ 'cancel' | transloco }}
           </ion-button>
-        }
-
-        @if (canEdit(review)) {
           <ion-button
-            fill="clear"
             size="small"
-            class="text-action"
-            data-testid="edit-review"
-            (click)="startEdit(review)"
+            data-testid="save-edit"
+            [disabled]="editForm.invalid"
+            (click)="saveEdit()"
           >
-            {{ 'edit' | transloco }}
+            {{ 'save' | transloco }}
           </ion-button>
-        }
-      </div>
+        </div>
+      </form>
+    } @else {
+      <p class="review-text">{{ review.review }}</p>
+
+      @if (canAnswer(review) || canEdit(review)) {
+        <div class="review-actions">
+          @if (canAnswer(review)) {
+            <ion-button
+              fill="clear"
+              size="small"
+              class="text-action"
+              [attr.data-testid]="replyTestId"
+              (click)="startReply(review)"
+            >
+              {{ 'reply' | transloco }}
+            </ion-button>
+          }
+
+          @if (canEdit(review)) {
+            <ion-button
+              fill="clear"
+              size="small"
+              class="text-action"
+              data-testid="edit-review"
+              (click)="startEdit(review)"
+            >
+              {{ 'edit' | transloco }}
+            </ion-button>
+
+            <ion-button
+              fill="clear"
+              size="small"
+              class="text-action"
+              data-testid="delete-review"
+              (click)="requestDelete(review)"
+            >
+              {{ 'delete' | transloco }}
+            </ion-button>
+          }
+        </div>
+      }
     }
   }
 </ng-template>

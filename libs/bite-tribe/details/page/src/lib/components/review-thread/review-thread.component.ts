@@ -43,6 +43,16 @@ export interface ReviewEditSubmit {
 }
 
 /**
+ * The user asked to withdraw their own review or reply (issue #2116). The page
+ * asks for confirmation before anything is written, so it needs to know which
+ * of the two to name.
+ */
+export interface ReviewDeleteRequest {
+  reviewId: string;
+  isReply: boolean;
+}
+
+/**
  * Whitespace is not a review. The rules refuse it too, so letting it through
  * here would only trade a disabled button for a failed save (issue #721).
  */
@@ -102,6 +112,8 @@ export class ReviewThreadComponent {
   submitReply = output<ReviewReplySubmit>();
 
   submitEdit = output<ReviewEditSubmit>();
+
+  deleteReview = output<ReviewDeleteRequest>();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -187,7 +199,34 @@ export class ReviewThreadComponent {
   protected canEdit(review: Review): boolean {
     const userId = this.userId();
 
-    return !!userId && review.authorId === userId;
+    return !!userId && review.authorId === userId && !this.isDeleted(review);
+  }
+
+  /**
+   * A withdrawn review that still holds up somebody's reply (issue #2116). It
+   * keeps its place and shows only that it was deleted: no name, no age, and
+   * nothing to answer, edit or delete.
+   */
+  protected isDeleted(review: Review): boolean {
+    return !!review.deletedAt;
+  }
+
+  protected canAnswer(review: Review): boolean {
+    return this.canReply() && !this.isDeleted(review);
+  }
+
+  /**
+   * Asks the page to withdraw the review. Any editor or composer open in the
+   * thread closes first, so nothing is left pointing at an item that may be
+   * about to disappear.
+   */
+  protected requestDelete(review: Review): void {
+    this.cancelEdit();
+    this.cancelReply();
+    this.deleteReview.emit({
+      reviewId: review.id,
+      isReply: !!review.parentReviewId,
+    });
   }
 
   /**

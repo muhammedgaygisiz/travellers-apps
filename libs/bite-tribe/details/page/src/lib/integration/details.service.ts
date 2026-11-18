@@ -255,6 +255,27 @@ export class DetailsService {
     });
   }
 
+  /**
+   * Withdraws the user's own review or reply (issue #2116). Like an edit,
+   * success needs no toast - the item is gone, or replaced by its "deleted"
+   * line - and a failure says so, because the item would otherwise just stay.
+   */
+  async deleteReview(removal: {
+    reviewId: string;
+    biteId: string;
+  }): Promise<void> {
+    try {
+      await this.dataAccess.deleteReview(removal);
+    } catch (error) {
+      console.error('Failed to delete the review:', error);
+
+      await this.toast.present({
+        messageKey: 'review-delete-failed',
+        outcome: 'failure',
+      });
+    }
+  }
+
   addBiteToSelectedBucketList(list: Bucketlist): void {
     const currBite = this.biteValue();
 

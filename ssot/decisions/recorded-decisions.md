@@ -25,6 +25,7 @@ A decision is cited as **`RD-<REGISTER>-<n>`**.
 | `RD-GL-*`  | The glossary's terms and the naming rule                                                                                                                    | [Glossary](../product/glossary.md)                                                 |
 | `RD-TS-*`  | Guest table sessions and table orders: occupancy, sharing, identity, expiry, the staff queue, QR abuse protection, and how a meal is settled and summarised | [Table Visit](../domain/table-visit.md)                                            |
 | `RD-PM-*`  | Published restaurant menus: who may publish one, what a printed menu code names, and who is shown which page                                                | [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md)             |
+| `RD-QG-*`  | The architecture's quality goals: which qualities they are, their order, and how each is measured                                                           | [Architecture - Quality](../architecture/quality.md)                               |
 
 Decisions about **how the specification work is written and tracked** are not system
 decisions and are deliberately not here: they are `RD-PD-*`, in
@@ -165,6 +166,24 @@ Taken 7 September 2026.
 | `RD-DRC-18` | **Detection is one Use Case with two entries and one shared kernel,** not two Use Cases. Entry A has no human actor and Entry B is Operator work, which is the argument for splitting; the argument that wins is that both execute the same clustering code, so `R-1`, `R-5`, `R-7`, `R-8`, `R-9` and `R-10` would have to be stated twice and kept in agreement by hand. `K5` is the only step whose behaviour differs by entry, which makes `RD-VRC-10` one gated step instead of a fact duplicated across two pages                                                                                                                                                                                                                                                                                                                |
 | `RD-DRC-19` | **Automatic detection is a mechanism, not an entry.** It has no actor: it runs in the Functions runtime, is callable from no client, and no human is in the loop. `AF-4` reserves the word _actogram_ for a flow containing at least one interaction step, and names a flow without one a mechanism. The page therefore has one entry - the Operator's - and two mechanisms that converge on the shared kernel. This revises the framing of `RD-DRC-18` rather than reversing it: detection remains one Use Case owning both producers, for the reason `RD-DRC-18` gives. `AF-4` also says such a mechanism is written inside the Use Case whose actor causes it, which would place it in `UC-CMB`; it stays here because both producers execute the same clustering code, which is `RD-DRC-18`'s argument. Recorded 8 September 2026 |
 
+## `RD-QG-*` - Quality goals
+
+Taken 17 November 2026 by the maintainer, on issue [#2067] under epic [#2063]. They settle
+what `Quality Goal Questions` in [Current State - Open Questions](../current-state/open-questions.md)
+asked.
+
+| #         | Decision                                                                                                                                                                                                                                                                                                                                 |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RD-QG-1` | **Three quality goals, ranked on [Architecture - Quality](../architecture/quality.md).** Chosen from ISO/IEC 25010:2023, used as a checklist; three rather than five, because only a short ranking decides a trade-off. Working offline, bounded cost, load size and explainability are not goals of their own                           |
+| `RD-QG-2` | **International use is a product constraint, not a quality goal.** It is functional completeness every locale needs, and [Principles](../product/principles.md) already names it a first-class constraint                                                                                                                                |
+| `RD-QG-3` | **Performance efficiency has time targets for the home feed, a Bite's details and saving a Bite.** The values and the conditions they are measured under are on [Architecture - Quality](../architecture/quality.md); nothing measures them yet                                                                                          |
+| `RD-QG-4` | **The 3 MB error budget is the bundle measure; the 500 kB warning is neither a target nor a signal.** The initial bundle was 2.94 MB on 17 November 2026, so the warning fires on every build; a follow-up issue sets a real warning after analysing the bundle                                                                          |
+| `RD-QG-5` | **The feed's 15 s and 20 s limits serve Reliability, not speed.** They bound when the feed gives up instead of hanging ([#1230]); its speed target is `QS-4` on [Architecture - Quality](../architecture/quality.md)                                                                                                                     |
+| `RD-QG-6` | **Accessibility is not a quality goal today.** Nothing at architecture level requires or checks it; rules a use case states, such as in [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md), stay there                                                                                                 |
+| `RD-QG-7` | **Compatibility with the clients still in use is a release rule, not a quality goal.** The risk is on [Architecture - Deployment](../architecture/deployment.md#compatibility-risk) ([#2065]); the remedy stays open under `Release Questions` in [Current State - Open Questions](../current-state/open-questions.md#release-questions) |
+| `RD-QG-8` | **Test coverage stays informational and measures no goal.** Goals are evidenced by named tests, CI checks and build budgets, for the reason `Coverage Is Informational` in [Implementation - CI Pipeline](../implementation/ci-pipeline.md) gives                                                                                        |
+| `RD-QG-9` | **Backend cost and availability get no target.** Cost stays bounded by [Implementation - Performance Guidelines](../implementation/performance-guidelines.md) and watched by the budget alert on [Architecture - AI](../architecture/ai.md); availability is what Firebase provides                                                      |
+
 ## Provenance
 
 Created 8 September 2026, when the register was centralised.
@@ -187,6 +206,7 @@ treating them as verified.
 - [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md)
 - [UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md)
 - [Table Visit](../domain/table-visit.md)
+- [Architecture - Quality](../architecture/quality.md)
 - [SSOT](../README.md)
 
 [#1072]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1072
@@ -243,3 +263,7 @@ treating them as verified.
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
 [#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753
 [#1069]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1069
+[#1230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1230
+[#2063]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2063
+[#2065]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2065
+[#2067]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2067

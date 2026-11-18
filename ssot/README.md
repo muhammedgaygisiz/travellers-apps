@@ -131,6 +131,7 @@ Closing records for epics that produced one are in [history/records/](history/re
 - [Architecture - Overview](architecture/overview.md)
 - [Architecture - Context](architecture/context.md)
 - [Architecture - Deployment](architecture/deployment.md)
+- [Architecture - Quality](architecture/quality.md)
 - [Architecture - Firebase](architecture/firebase.md)
 - [Architecture - Nx Workspace](architecture/nx-workspace.md)
 - [Architecture - Capacitor](architecture/capacitor.md)

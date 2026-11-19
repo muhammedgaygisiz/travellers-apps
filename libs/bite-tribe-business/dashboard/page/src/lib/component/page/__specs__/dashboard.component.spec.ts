@@ -155,11 +155,19 @@ describe(DashboardComponent.name, () => {
     it('stays hidden with neither', () => {
       compRef.setInput('gpsPosition', null);
       compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
       fixture.detectChanges();
 
       expect(component.showMap()).toBe(false);
       expect(fixture.nativeElement.querySelector('bt-map')).toBeNull();
-      // Nor its card: an empty card read as a broken map (issue #2127).
+      // The column keeps a placeholder rather than an empty card or a gap
+      // (issue #2127).
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeTruthy();
+      // And not the empty map card, which read as a broken map.
       expect(
         fixture.nativeElement.querySelector(
           '[data-testid="dashboard-map-card"]',
@@ -259,6 +267,20 @@ describe(DashboardComponent.name, () => {
       expect(contact?.href).toBe('mailto:support@bitetribe.app');
     });
 
+    it('says the restaurant shows once its position is set, for restaurants without one', () => {
+      compRef.setInput('restaurants', [
+        restaurant({ position: {} as Restaurant['position'] }),
+      ]);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        )?.textContent,
+      ).toContain('dashboard-map-placeholder-no-position');
+    });
+
     it('holds the map column with a placeholder', () => {
       compRef.setInput('restaurants', []);
       compRef.setInput('restaurantsLoaded', true);
@@ -291,6 +313,11 @@ describe(DashboardComponent.name, () => {
       fixture.detectChanges();
 
       expect(emptyState()).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeNull();
     });
 
     it('goes away once a restaurant is assigned', () => {

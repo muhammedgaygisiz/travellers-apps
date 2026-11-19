@@ -21,15 +21,16 @@
               />
             </ion-card-content>
           </ion-card>
-        } @else if (showNoRestaurant()) {
-          <!-- Where the restaurant will be, so the first screen of an account
-          waiting for its assignment still shows the dashboard's shape
-          (GitHub issue #2127). -->
+        } @else if (restaurantsLoaded()) {
+          <!-- The map column keeps its shape when there is nothing to put on
+          the map: no restaurant yet, or none with a usable position (GitHub
+          issue #2127). An empty column read as a broken page. It waits for
+          the read, so it never tells an owner "once assigned" mid-load. -->
           <ion-card data-testid="dashboard-map-placeholder">
             <ion-card-content>
               <div class="map-placeholder">
                 <ion-icon name="map-outline" aria-hidden="true" />
-                <p>{{ 'dashboard-map-placeholder' | transloco }}</p>
+                <p>{{ mapPlaceholderKey() | transloco }}</p>
               </div>
             </ion-card-content>
           </ion-card>

@@ -102,6 +102,17 @@ export class DashboardComponent {
    * staff account with no restaurant record falls through `staffEntryGuard`
    * to this same page and gets the same state.
    */
+  /**
+   * What the map placeholder says (GitHub issue #2127): that the restaurant
+   * shows once assigned, or - for restaurants without a usable position -
+   * once its position is set on its page.
+   */
+  readonly mapPlaceholderKey = computed(() =>
+    (this.restaurants() ?? []).length === 0
+      ? 'dashboard-map-placeholder'
+      : 'dashboard-map-placeholder-no-position',
+  );
+
   readonly showNoRestaurant = computed(
     () => this.restaurantsLoaded() && (this.restaurants() ?? []).length === 0,
   );

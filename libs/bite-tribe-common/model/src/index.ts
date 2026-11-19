@@ -112,6 +112,11 @@ export * from './lib/bite-report';
 export * from './lib/user-report';
 export * from './lib/review-report';
 /**
+ * A value export: the collection name and the id builder are how the client
+ * reads the state of its follow button (issue #2163).
+ */
+export * from './lib/follow-request';
+/**
  * A value export: the length limit and the trim rule are applied by the edit
  * form and by the profile write alike (issue #1826).
  */

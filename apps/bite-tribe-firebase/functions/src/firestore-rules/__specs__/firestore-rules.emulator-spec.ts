@@ -3493,6 +3493,85 @@ describe('users', () => {
   });
 });
 
+/**
+ * A request to follow a private profile (issue #2163): readable by its owner
+ * and its requester, and by nobody else, and written only by the callables.
+ * The requester reads one that may not exist, to know what their button says,
+ * so a missing document is part of what is tested.
+ */
+describe('follow requests', () => {
+  const REQUEST = `${CONSUMER}_${STRANGER}`;
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'followRequests', REQUEST), {
+        ownerUid: CONSUMER,
+        requesterUid: STRANGER,
+        createdAt: '2026-11-19T10:00:00.000Z',
+      });
+    });
+  });
+
+  it('lets the owner read the request and list those addressed to them', async () => {
+    await assertSucceeds(getDoc(doc(asConsumer(), 'followRequests', REQUEST)));
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(asConsumer(), 'followRequests'),
+          where('ownerUid', '==', CONSUMER),
+        ),
+      ),
+    );
+  });
+
+  it('lets the requester read their request, and one they have not made', async () => {
+    await assertSucceeds(getDoc(doc(asStranger(), 'followRequests', REQUEST)));
+    await assertSucceeds(
+      getDoc(doc(asStranger(), 'followRequests', `${OWNER}_${STRANGER}`)),
+    );
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(asStranger(), 'followRequests'),
+          where('requesterUid', '==', STRANGER),
+        ),
+      ),
+    );
+  });
+
+  it('refuses anybody else, alone or by listing', async () => {
+    await assertFails(getDoc(doc(asOwner(), 'followRequests', REQUEST)));
+    await assertFails(getDoc(doc(asOperator(), 'followRequests', REQUEST)));
+    await assertFails(getDocs(collection(asOwner(), 'followRequests')));
+    await assertFails(getDocs(collection(asConsumer(), 'followRequests')));
+    await assertFails(
+      getDocs(
+        query(
+          collection(asOwner(), 'followRequests'),
+          where('ownerUid', '==', CONSUMER),
+        ),
+      ),
+    );
+  });
+
+  it('refuses writing a request from a client, its parties included', async () => {
+    await assertFails(
+      setDoc(doc(asStranger(), 'followRequests', `${OWNER}_${STRANGER}`), {
+        ownerUid: OWNER,
+        requesterUid: STRANGER,
+        createdAt: '2026-11-19T10:00:00.000Z',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'followRequests', REQUEST), {
+        createdAt: '2026-11-20T10:00:00.000Z',
+      }),
+    );
+    await assertFails(deleteDoc(doc(asConsumer(), 'followRequests', REQUEST)));
+    await assertFails(deleteDoc(doc(asStranger(), 'followRequests', REQUEST)));
+  });
+});
+
 describe('settings', () => {
   it('lets an account read and write only its own settings', async () => {
     await assertSucceeds(

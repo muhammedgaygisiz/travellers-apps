@@ -138,6 +138,14 @@ export { syncDisplayNameCopiesOnUserUpdate } from './functions/users/sync-displa
 export { setUserRoles } from './functions/users/set-user-roles';
 export { setUserBlocked } from './functions/users/set-user-blocked';
 export { blockUser, unblockUser } from './functions/users/block-user';
+export {
+  requestFollow,
+  withdrawFollowRequest,
+} from './functions/users/request-follow';
+export {
+  acceptFollowRequest,
+  declineFollowRequest,
+} from './functions/users/answer-follow-request';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
 export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';

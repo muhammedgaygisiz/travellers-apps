@@ -47,6 +47,26 @@ export const loadBlockedUids = async (
   }
 };
 
+/**
+ * Whether either account has blocked the other, read as the two `blocked`
+ * documents that would say so. Unlike {@link loadBlockedUids} a read failure
+ * is not swallowed: this guards a write, and a write that should have been
+ * refused is the worse outcome.
+ */
+export const blocksEitherWay = async (
+  db: Firestore,
+  uid: string,
+  otherUid: string,
+): Promise<boolean> => {
+  const users = db.collection(USERS_COLLECTION);
+  const [ownBlock, otherBlock] = await Promise.all([
+    users.doc(uid).collection(BLOCKED_SUBCOLLECTION).doc(otherUid).get(),
+    users.doc(otherUid).collection(BLOCKED_SUBCOLLECTION).doc(uid).get(),
+  ]);
+
+  return ownBlock.exists || otherBlock.exists;
+};
+
 /** Whether `uid` names an account in `blockedUids`. */
 export const isBlockedUid = (
   uid: unknown,

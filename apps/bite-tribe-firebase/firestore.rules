@@ -1288,6 +1288,38 @@ service cloud.firestore {
       }
     }
 
+    /**
+     * A request to follow a private profile (GitHub issue #2163).
+     *
+     * ```text
+     * /followRequests/{ownerUid}_{requesterUid}
+     * ```
+     *
+     * Kept outside both follow subcollections, so nothing that reads
+     * `followers` or `following` takes a request for a follow. Readable by its
+     * two parties: the owner lists what is addressed to them, and the
+     * requester reads their own to know what their button says.
+     *
+     * `get` decides on the id, because the requester's button reads a request
+     * that may not exist, and a missing document has no fields to own. A uid
+     * holds no underscore, so the id names its two parties exactly. `list`
+     * decides on the stored fields, so a `where('ownerUid', ...)` query can be
+     * proven against every document it could return.
+     *
+     * Written only by the four follow-request callables, `blockUser` and
+     * `deleteOwnAccount` through the Admin SDK: a client that could write one
+     * could accept its own request.
+     */
+    match /followRequests/{requestId} {
+      allow get: if isMember()
+        && (requestId.matches(uid() + '_[^_]+')
+          || requestId.matches('[^_]+_' + uid()));
+      allow list: if isMember()
+        && (owns(resource.data, 'ownerUid')
+          || owns(resource.data, 'requesterUid'));
+      allow write: if false;
+    }
+
     // --------------------------------------------------------------- settings
 
     match /settings/{userId} {

@@ -64,6 +64,7 @@ import {
   deleteAccountForUser,
   deleteBlockEdgesForUser,
   deleteFollowEdgesForUser,
+  deleteFollowRequestsForUser,
   deleteOwnAccountHandler,
   refreshLeaderboardsAfterDeletion,
   REAUTH_MAX_AGE_SECONDS,
@@ -169,6 +170,34 @@ describe('deleteBlockEdgesForUser', () => {
     expect(db.exists(`users/${UID}/blockedBy/blocker-1`)).toBe(false);
     expect(db.exists(`users/blocker-1/blocked/${UID}`)).toBe(false);
     expect(db.exists('users/blocker-1/blocked/someone-else')).toBe(true);
+  });
+});
+
+describe('deleteFollowRequestsForUser', () => {
+  beforeEach(() => {
+    db = createFakeFirestore();
+  });
+
+  it('deletes every follow request the user sent or received', async () => {
+    db.seed(`followRequests/${UID}_requester-1`, {
+      ownerUid: UID,
+      requesterUid: 'requester-1',
+    });
+    db.seed(`followRequests/owner-1_${UID}`, {
+      ownerUid: 'owner-1',
+      requesterUid: UID,
+    });
+    db.seed('followRequests/owner-1_requester-1', {
+      ownerUid: 'owner-1',
+      requesterUid: 'requester-1',
+    });
+
+    const deleted = await deleteFollowRequestsForUser(asFirestore(db), UID);
+
+    expect(deleted).toBe(2);
+    expect(db.exists(`followRequests/${UID}_requester-1`)).toBe(false);
+    expect(db.exists(`followRequests/owner-1_${UID}`)).toBe(false);
+    expect(db.exists('followRequests/owner-1_requester-1')).toBe(true);
   });
 });
 
@@ -537,6 +566,7 @@ describe('deleteAccountForUser', () => {
       anonymizedSales: 1,
       deletedFollowEdges: 0,
       deletedBlockEdges: 0,
+      deletedFollowRequests: 0,
       deletedPushTokens: 1,
       deletedRestaurantStaff: 1,
     });

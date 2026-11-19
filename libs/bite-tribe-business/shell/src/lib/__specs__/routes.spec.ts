@@ -592,4 +592,22 @@ describe('business ROUTES', () => {
       },
     );
   });
+
+  /**
+   * Every page names itself in the tab (GitHub issue #1977). Angular only sets
+   * a title for a route that declares one, so an untitled route used to keep
+   * the "Login" title of the page before it. The start page and redirects
+   * fall back to the app's name alone.
+   */
+  it('gives every routed page a title', () => {
+    const untitled = ROUTES.filter(
+      (route) =>
+        !route.redirectTo &&
+        route.path !== 'start' &&
+        route.path !== '**' &&
+        !route.title,
+    ).map((route) => route.path);
+
+    expect(untitled).toEqual([]);
+  });
 });

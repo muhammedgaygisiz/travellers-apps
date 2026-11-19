@@ -11,6 +11,7 @@ import {
   AFTER_LOGIN_PAGE,
   AFTER_LOGOUT_PAGE,
   APP_TITLE,
+  provideAppTitleStrategy,
   Environment,
   REQUIRED_ROLES,
 } from 'utils';
@@ -33,6 +34,9 @@ export const provideBiteTribeBusinessShell = (
     useClass: IonicRouteStrategy,
   },
   { provide: APP_TITLE, useValue: 'Bite Tribe Business' },
+  // Every route sets the tab title, so "Login" does not outlive sign-in
+  // (issue #1977). The document uses the one-word brand `index.html` uses.
+  provideAppTitleStrategy('BiteTribe Business'),
   // Sign-in refuses any account that does not hold this role, and reports
   // the refusal as a generic login failure. The consumer app leaves the
   // token unbound, which is what keeps it ungated (issue #1469).

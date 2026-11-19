@@ -83,12 +83,14 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'dashboard',
+    title: 'Dashboard',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then((m) => m.DashboardContainer),
     canActivate: [authGuard, roleGuard('business', 'staff'), staffEntryGuard()],
   },
   {
     path: 'bite-trails',
+    title: 'BiteTrails',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then(
         (m) => m.BiteTrailsContainer,
@@ -97,6 +99,7 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: 'restaurants',
+    title: 'Restaurants',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then(
         (m) => m.RestaurantsContainer,
@@ -105,6 +108,7 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: 'create-bite-trail',
+    title: 'New BiteTrail',
     loadComponent: () =>
       import('bite-tribe-business/create-bite-trail').then(
         (m) => m.CreateBiteTrailContainer,
@@ -113,6 +117,7 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: 'restaurant/:restaurantId',
+    title: 'Restaurant',
     loadComponent: () =>
       import('bite-tribe-business/restaurant').then(
         (m) => m.EditRestaurantContainer,
@@ -134,6 +139,7 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'restaurant/:restaurantId/staff',
+    title: 'Staff',
     loadComponent: () =>
       import('bite-tribe-business/staff').then(
         (m) => m.RestaurantStaffContainer,
@@ -159,6 +165,7 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'restaurant/:restaurantId/floor-plan',
+    title: 'Floor plan',
     loadComponent: () =>
       import('bite-tribe-business/floor-plan').then(
         (m) => m.FloorPlanContainer,
@@ -186,6 +193,7 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'restaurant/:restaurantId/tables',
+    title: 'Tables',
     loadComponent: () =>
       import('bite-tribe-business/table-management').then(
         (m) => m.TablePlanContainer,
@@ -214,6 +222,7 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'restaurant/:restaurantId/orders',
+    title: 'Orders',
     loadComponent: () =>
       import('bite-tribe-business/table-management').then(
         (m) => m.OrderQueueContainer,
@@ -237,6 +246,7 @@ export const ROUTES: Routes = withAuthRoutes([
    */
   {
     path: 'restaurant/:restaurantId/floor-plan/qr-codes',
+    title: 'Table QR codes',
     loadComponent: () =>
       import('bite-tribe-business/floor-plan').then(
         (m) => m.TableQrSheetsContainer,
@@ -249,6 +259,7 @@ export const ROUTES: Routes = withAuthRoutes([
   },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
+    title: 'Menu',
     loadComponent: () =>
       import('bite-tribe-business/edit-menu').then((m) => m.EditMenuContainer),
     canActivate: [

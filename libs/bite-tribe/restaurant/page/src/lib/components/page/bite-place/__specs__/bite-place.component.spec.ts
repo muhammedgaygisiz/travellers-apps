@@ -200,4 +200,58 @@ describe('BitePlaceComponent', () => {
       ]);
     });
   });
+
+  describe('loading and not found (issue #2125)', () => {
+    const PLACE_BITE = { id: 'b-1', place: 'Einstein au Jardin' } as Bite;
+    const query = (testId: string): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        `[data-testid="${testId}"]`,
+      );
+
+    beforeEach(() => {
+      uniqueBitesByNameMock.mockReturnValue([]);
+    });
+
+    it('shows a skeleton, not the banner and an empty name, while the Bites load', () => {
+      componentRef.setInput('bitesLoading', true);
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(true);
+      expect(query('place-loading')).toBeTruthy();
+      expect(query('place-unverified-explainer')).toBeNull();
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'h1:not([aria-hidden])',
+        ),
+      ).toBeNull();
+    });
+
+    it('shows the place with its one-line explainer once loaded', () => {
+      componentRef.setInput('bite', PLACE_BITE);
+      componentRef.setInput('bites', [PLACE_BITE]);
+      componentRef.setInput('bitesLoading', false);
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(false);
+      expect(query('place-loading')).toBeNull();
+      expect(query('place-unverified-explainer')).toBeTruthy();
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent,
+      ).toContain('Einstein au Jardin');
+    });
+
+    it('shows the not-found state with a way back instead of the skeleton', () => {
+      componentRef.setInput('notFound', true);
+      fixture.detectChanges();
+
+      expect(component.isLoading()).toBe(false);
+      expect(query('place-loading')).toBeNull();
+      expect(query('place-not-found')).toBeTruthy();
+
+      const backClicks: unknown[] = [];
+      component.backClick.subscribe(() => backClicks.push(true));
+      query('place-not-found-back')?.click();
+      expect(backClicks).toHaveLength(1);
+    });
+  });
 });

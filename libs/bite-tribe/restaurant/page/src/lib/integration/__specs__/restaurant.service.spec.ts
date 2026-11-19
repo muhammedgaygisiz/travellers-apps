@@ -329,6 +329,33 @@ describe('RestaurantService', () => {
     });
   });
 
+  describe('placeNotFound (issue #2125)', () => {
+    it('is false while the Bites are still loading', () => {
+      mockHomeDataAccessService.restaurantBitesResource.status.set('loading');
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+      expect(service.placeNotFound()).toBe(false);
+    });
+
+    it('is true once loaded with no Bite to name the place by', () => {
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+      expect(service.placeNotFound()).toBe(true);
+    });
+
+    it('is false when the loaded Bites hold the source Bite', () => {
+      mockDataAccessService.bite.set(undefined);
+      expect(service.placeNotFound()).toBe(false);
+    });
+  });
+
+  describe('navigateBackToFeed', () => {
+    it('goes back to the home feed', () => {
+      service.navigateBackToFeed();
+      expect(mockNavController.navigateBack).toHaveBeenCalledWith(['home']);
+    });
+  });
+
   describe('navigateBackToBite', () => {
     it('goes back to the Bite the restaurant was opened from', () => {
       service.navigateBackToBite();

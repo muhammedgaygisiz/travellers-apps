@@ -6,7 +6,12 @@ import {
   output,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonContent,
+  IonIcon,
+  IonSkeletonText,
+} from '@ionic/angular/standalone';
 import { Bite, LikeClick } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { getPosition } from '../../../utils/get-position';
@@ -23,8 +28,10 @@ import { TagsInputComponent } from 'common/ui/tags';
   styleUrl: './bite-place.component.scss',
   imports: [
     PageComponent,
+    IonButton,
     IonContent,
     IonIcon,
+    IonSkeletonText,
     MapComponent,
     DistanceComponent,
     TranslocoPipe,
@@ -36,8 +43,24 @@ export class BitePlaceComponent {
   bite = input<Bite>();
   bites = input<Bite[]>();
   userId = input<string>();
+  /** The place's Bites have not arrived yet (first load only). */
+  bitesLoading = input(false);
+  /** The Bite this place was opened from, and so the place, is gone. */
+  notFound = input(false);
 
   readonly showBitesClick = output<Bite | undefined>();
+  readonly backClick = output<void>();
+
+  /**
+   * Holds a skeleton until the Bites arrive. The page used to render its
+   * "not verified" banner at once, next to an empty name, rating and Bite
+   * count, and fill them in as the read landed. A place whose Bites can no
+   * longer be found ends in the not-found state instead. See GitHub issue
+   * #2125, and #2124 for the verified restaurant page.
+   */
+  isLoading = computed(
+    () => !this.notFound() && (this.bitesLoading() || !this.bite()),
+  );
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();
 

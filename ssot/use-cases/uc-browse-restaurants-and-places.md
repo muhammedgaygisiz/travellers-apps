@@ -82,6 +82,25 @@ screen before the state backing them existed.
   nothing, because an absent value is never read as no. The line belongs to
   the loaded page, so it cannot appear before the restaurant has.
 
+## Place Page State Contract
+
+Issue [#2125] gave the unverified place page the same three states. Before
+it, the "not verified" banner rendered at once beside an empty name, rating
+and Bite count, and a place whose Bite was gone kept that empty page for good.
+
+- The page is loading, loaded, or not found. While the route's Bites have not
+  arrived, or no Bite names the place yet, it renders a skeleton of the
+  banner, the name, the rating line, the distance and the map.
+- Under the banner, one line says what "not verified" means for the guest:
+  the name and location come from the Bites shared there, and BiteTribe has
+  not checked them. A place is never supplied by a restaurant; it becomes one
+  only when a BiteTribe operator verifies a candidate (see the
+  [Glossary](../product/glossary.md)).
+- When the Bites have loaded and neither they nor the store hold the Bite the
+  page was opened from, the place has no name, position or rating to show. It
+  ends in a not-found state with "Back to your feed", not "Back to the Bite",
+  because that Bite is what could not be found.
+
 ## MVP Classification
 
 **[MVP]** - the whole page. A Bite that cannot be followed to the place it was eaten is a
@@ -118,6 +137,8 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
 - Issue [#2124] made the page wait for its Bites as well as its document, and
   gave it the not-found state. Part of [#2123].
+- Issue [#2125] gave the unverified place page its loading and not-found
+  states and the one-line explainer. Part of [#2123].
 
 ## Related Domains
 
@@ -142,4 +163,5 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123
 [#2124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2124
+[#2125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2125
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830

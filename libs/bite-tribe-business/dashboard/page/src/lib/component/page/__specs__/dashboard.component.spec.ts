@@ -259,6 +259,32 @@ describe(DashboardComponent.name, () => {
       expect(contact?.href).toBe('mailto:support@bitetribe.app');
     });
 
+    it('holds the map column with a placeholder', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        )?.textContent,
+      ).toContain('dashboard-map-placeholder');
+    });
+
+    it('shows the real map instead once there is a device position', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      compRef.setInput('gpsPosition', { latitude: 1, longitude: 1 });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeNull();
+      expect(fixture.nativeElement.querySelector('bt-map')).toBeTruthy();
+    });
+
     it('waits for the read rather than flashing while it loads', () => {
       compRef.setInput('restaurants', []);
       compRef.setInput('restaurantsLoaded', false);

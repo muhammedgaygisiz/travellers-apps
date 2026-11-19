@@ -21,6 +21,18 @@
               />
             </ion-card-content>
           </ion-card>
+        } @else if (showNoRestaurant()) {
+          <!-- Where the restaurant will be, so the first screen of an account
+          waiting for its assignment still shows the dashboard's shape
+          (GitHub issue #2127). -->
+          <ion-card data-testid="dashboard-map-placeholder">
+            <ion-card-content>
+              <div class="map-placeholder">
+                <ion-icon name="map-outline" aria-hidden="true" />
+                <p>{{ 'dashboard-map-placeholder' | transloco }}</p>
+              </div>
+            </ion-card-content>
+          </ion-card>
         }
       </div>
       <div

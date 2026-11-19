@@ -327,14 +327,11 @@ V11  OP   judges whether the draft is ready to submit                     [decis
 
 ```
 V11a UI   uploads the image and puts its download URL on the draft
-                 [conditional: an image was supplied at V9] [not implemented]
+                 [conditional: an image was supplied at V9]
           └─→ SYS  stores the image under the Candidate id and returns its URL
           └─◁ OP   sees an error on the form where the upload fails, with the draft
                    intact and the Candidate untouched
-          INV:R-10 is VIOLATED here: no pre-transaction upload exists. The image is
-               written to /restaurants after the transaction has committed, by a direct
-               client write, so this step's perception and its failure branch describe
-               agreed behaviour that no code produces (E11)
+          INV:R-10
           ├─ the upload fails    ↺ V11   the loop is left when the Operator submits
           │                              successfully or abandons the review
           └─ the upload succeeds → V12
@@ -468,7 +465,7 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | **R-7**  | Verification is idempotent. A second call for the same Candidate creates nothing and returns the existing Restaurant, marked as an existing result and not as a created one, so a caller can tell `END-V5` from `END-V4`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | **R-8**  | `bite.restaurantId` has **four** writers. `V23` is the only transactional one, and the only one inside this Use Case. Two more sit in the Bite form, which carries a `restaurantId` control set when a Bite Creator picks a verified nearby Restaurant: the whole form value is persisted on create **and on edit**. The fourth is the Admin App's Candidate-free save path, which links the unassigned Bites behind a picked place name in client-side writes outside any transaction, skipping any that already name a Restaurant as this page's `R-20` does ([#1631]); its rules are owned by `UC - Manage A Bite's Restaurant Assignment`. Detection is deliberately **not** a writer — see `UC-DRC` `R-6` and `RD-VRC-9`. |
 | **R-9**  | `V15` to `V24` are one transaction. The Candidate read at `V15` and the evidence read at `V18` happen inside it, before any write, so no observable state has a Restaurant without its Menu, or Bites pointing at a Restaurant whose Candidate is still `pending`.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| **R-10** | _Intended, not met._ Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. An image is therefore uploaded at `V11a`, before the callable, so only its URL crosses the boundary. Today the image is instead written after the transaction has committed, by a direct client write to `/restaurants`. Since [#1078] that write is authorised by the Operator's `admin` clause rather than by open rules, so it still works and is still outside the transaction. Owned by [#1504].                                                                                                                                                                                                         |
+| **R-10** | Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. An image is therefore uploaded at `V11a`, before the callable, under the Candidate id, so only its URL crosses the boundary and the transaction writes it. A failed upload stops the flow before the callable: nothing is created, the Candidate stays `pending`, and resubmitting runs the whole flow again. Candidate verification makes no client write to `/restaurants`. Met since [#1504].                                                                                                                                                                                                                                   |
 | **R-11** | The Initial Menu is a **draft derived from evidence**, not a statement about the real menu. Its prices are averages of what Bite Creators reported.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | **R-12** | A Bite Creator is never notified and sees no state change from this Use Case, other than their Bite now appearing under a Restaurant.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | **R-13** | _Intended, not met._ A Candidate the Operator judges not to be a restaurant is left `dismissed` (`V4a`, `UC-DIS`). No surface and no writer exist, so `dismissed` is a declared status that nothing can reach. Owned in three parts, all in epic [#1495] and all `[Secondary]`: [#1501] the backend writer, [#1508] the Operator surface, [#1502] un-dismissal.                                                                                                                                                                                                                                                                                                                                                                |
@@ -487,7 +484,6 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | E5  | The model deletes `merged`, and the code still carries the status and the `mergedIntoCandidateId` branch at `V17` | The branch exists in code and is unreachable in practice, because nothing writes the status                                                                                                                                                                                                                                                                                                                                                                                                                                | Gap, [#1499]    |
 | E7  | An evidence Bite already belongs to another Restaurant                                                            | Skipped at `V18` since [#1498]: `V23` leaves it untouched, `V19` does not derive a dish from it, and its id is written to `skippedBiteIds` and returned by the callable (`R-20`). Reachable by a Bite Creator editing their own Bite, per `R-8`. Detection excludes assigned Bites, so the divergence appears between clustering and verification. Until [#1505] the Operator is not shown which Bites were skipped                                                                                                        | Closed, [#1498] |
 | E10 | The Operator corrects `name` or `position` at `V8`                                                                | Detection's only protection against re-detecting an already verified place is a 0.82 name score within 200 m, so a correction past either threshold defeats it: later Bites at the place resolve to this Candidate's id, and `UC-DRC` `R-8` refuses the write, so they stay unlinked instead of reaching the Restaurant. Nothing records that the value was corrected (`R-19`), and the Restaurant's geohash from `V20a` no longer matches the Candidate's. Strengthening that check is explicitly out of scope in [#1497] | Defect, [#1522] |
-| E11 | The image upload runs after the verification transaction has committed                                            | The Restaurant is created without it; the failure surfaces as an unhandled rejection on the form, and a resubmit returns the idempotent result so the upload is never retried. The write is a direct client write to `/restaurants`, authorised since [#1078] by the Operator's `admin` clause rather than by open rules. `V11a` and `R-10` close it                                                                                                                                                                       | Defect, [#1504] |
 
 `E1`, `E2`, `E3`, `E4` and `E6` were removed under `UF-12`: each restated a branch the
 actogram already carries. Their ids are retired and are not reused.
@@ -497,6 +493,12 @@ Candidates `pending`, `V2` listed the five strongest and did not page, so every 
 beyond the fifth was unreachable by any path. [#1507] built the paging half of `R-17`, and
 moving between pages is now `V3a`'s branch back to `V2`, which `UF-12` keeps out of this
 table.
+
+`E11` is **retired** and its id is not reused. It recorded that the image was uploaded
+after the verification transaction had committed, by a direct client write to
+`/restaurants`, so a failed upload left a verified Candidate and a Restaurant without
+it, and a resubmit returned the idempotent result and never retried. [#1504] built
+`V11a` in front of the transaction and closed `R-10`.
 
 `E9` is **retired** and its id is not reused. It recorded that a verified Candidate
 returned to `pending` while still carrying `verifiedRestaurantId` reached `V18` and
@@ -549,9 +551,7 @@ holds in production from the merge.
   `UC-DRC` `R-8` closes on detection's ([#1497]).
 
 `V11a` is `[MVP]` where an image was supplied: storing it is not optional once the
-Operator has provided it. `R-10` is `[MVP]` and not built — the upload runs after the
-transaction today (`E11`) — but it has an owner in [#1504], so it is not a blocker
-without an issue.
+Operator has provided it. `R-10` is `[MVP]` and built since [#1504].
 
 ## App Store Review Area
 
@@ -591,7 +591,7 @@ discovered in review.
 - [#1473] — moves the Operator surface into `bite-tribe-admin`. `V2`, `V3`, `V5`.
 - [#1078] — ownership-scoped `firestore.rules`. Closed the "Not enforced" half of
   `Authorization`, and re-authorised the post-transaction image write through the
-  Operator's `admin` clause (`R-10`, `E11`).
+  Operator's `admin` clause until [#1504] removed that write (`R-10`, `E11`).
 - [#1069] / [#1077] — owner assignment, delivered outside this flow. `G7`, `R-15`, `UC-ARO`.
 - [#1506] — the Candidate list's server-side order and the statement that more are
   pending. `V2`, `V3`, `R-17`.
@@ -603,7 +603,7 @@ discovered in review.
 - [#1498] — a Bite that already belongs to a Restaurant is skipped, not reassigned.
   `V18`, `V19`, `V23`, `R-20`, `E7`.
 - [#1499] — removing the `merged` status and its resolution branch. `V17`, `E5`.
-- [#1504] — the image upload moves in front of the transaction. `V11a`, `R-10`, `E11`.
+- [#1504] — the image upload moved in front of the transaction; the form's image is optional. `V11a`, `R-10`, `E11` (closed).
 - [#1497] — built detection's guard against writing `pending` onto a decided Candidate,
   closing the reset half of the now-retired `E9` that detection caused; [#1521] closed the
   duplicate that followed.

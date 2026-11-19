@@ -109,7 +109,9 @@ export class NewRestaurantPageComponent {
   readonly googlePlaceSelected = output<string>();
 
   restaurantFormGroup = this.formBuilder.group({
-    image: ['', Validators.required],
+    // Optional (decided 8 September 2026): a restaurant may be published
+    // without a photo, and the consumer app renders that (issue #1504).
+    image: [''],
     name: ['', Validators.required],
     description: [''],
     position: [null as Geopoint | null, Validators.required],

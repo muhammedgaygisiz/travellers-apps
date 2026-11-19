@@ -293,6 +293,7 @@
   "no-social-media-links": "SNSのリンクはありません",
   "menu": "メニュー",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}}週連続",
   "no-menu-yet": "まだ項目がありません。カテゴリを追加して始めてください。",
   "menu-item-not-available": "提供していません",
   "save-menu": "メニューを保存",

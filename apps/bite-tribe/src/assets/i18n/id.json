@@ -292,6 +292,7 @@
   "no-social-media-links": "Tidak ada tautan media sosial",
   "menu": "Menu",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}} minggu berturut-turut",
   "add-category": "Tambahkan kategori",
   "save-menu": "Simpan menu",
   "no-menu-yet": "Belum ada menu",

@@ -292,6 +292,7 @@
   "no-social-media-links": "Keine Social-Media-Links",
   "menu": "Speisekarte",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}} Wochen in Folge",
   "add-category": "Kategorie hinzufügen",
   "save-menu": "Speisekarte speichern",
   "no-menu-yet": "Noch keine Speisekarte",

@@ -135,6 +135,26 @@ export const OwnProfile: Story = {
 };
 
 /**
+ * The own profile of a user who has posted 6 weeks in a row (issue #2148): a
+ * chip with a flame beside Show on globe. `lastPostingWeek` is a far-future Monday so
+ * the story never ages into a broken streak and changes its Loki reference;
+ * the page only hides a run older than last week.
+ */
+export const OwnProfileWithPostingStreak: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      biteCount: 23,
+      postingStreak: { weeks: 6, lastPostingWeek: '2099-12-28' },
+    },
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
+/**
  * A newly chosen photo still uploading: the previous one stays on show
  * (GitHub issue #1953). No start time, so the story never turns into the
  * failed state while it is being captured.

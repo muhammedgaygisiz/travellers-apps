@@ -292,6 +292,7 @@
   "no-social-media-links": "Sosyal Medya Bağlantısı Yok",
   "menu": "Menü",
   "bites": "Bite'ler",
+  "posting-streak-weeks": "{{weeks}} hafta üst üste",
   "add-category": "Kategori ekle",
   "save-menu": "Menüyü kaydet",
   "no-menu-yet": "Henüz menü yok",

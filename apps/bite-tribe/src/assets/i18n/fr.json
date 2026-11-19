@@ -292,6 +292,7 @@
   "no-social-media-links": "Aucun lien vers les reseaux sociaux",
   "menu": "Menu",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}} semaines d’affilée",
   "add-category": "Ajouter une catégorie",
   "save-menu": "Enregistrer le menu",
   "no-menu-yet": "Pas encore de menu",

@@ -293,6 +293,7 @@
   "no-social-media-links": "소셜 미디어 링크 없음",
   "menu": "메뉴",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}}주 연속",
   "no-menu-yet": "아직 항목이 없어요. 지금 카테고리를 추가해 시작해 보세요.",
   "menu-item-not-available": "주문 불가",
   "save-menu": "메뉴 저장",

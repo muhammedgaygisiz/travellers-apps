@@ -293,6 +293,7 @@
   "no-social-media-links": "没有社交媒体链接",
   "menu": "菜单",
   "bites": "Bite",
+  "posting-streak-weeks": "连续 {{weeks}} 周",
   "no-menu-yet": "这里还没有内容，现在就添加一个分类吧。",
   "menu-item-not-available": "暂不供应",
   "save-menu": "保存菜单",

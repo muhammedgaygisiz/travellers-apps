@@ -293,6 +293,7 @@
   "no-social-media-links": "No Social Media Links",
   "menu": "Menu",
   "bites": "Bites",
+  "posting-streak-weeks": "{{weeks}} weeks in a row",
   "no-menu-yet": "No item here yet, start by adding a category now.",
   "menu-item-not-available": "Not available",
   "save-menu": "Save Menu",

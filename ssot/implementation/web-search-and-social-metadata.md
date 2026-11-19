@@ -179,6 +179,21 @@ actually shows.
 Route titles are still hardcoded English in `routes.ts`. Translating them is
 open work and is not tracked by [#1454].
 
+### The Admin And Business Apps
+
+The admin and business apps use `provideAppTitleStrategy` from `common/utils`
+(issue [#1977]). Before it they kept Angular's default strategy, which only
+sets a title for a route that declares one: their routes declared none and the
+shared auth routes do (`Login`), so after signing in the tab said "Login" on
+every page until a full reload.
+
+The strategy renders `<route title> – <app name>`, or the app name alone for a
+route without a title, using the name `index.html` writes ("BiteTribe Admin",
+"BiteTribe Business"), not the header's `APP_TITLE`. Every routed page in both
+apps carries a title - an admin page uses the name its dashboard tile shows -
+and each app's `routes.spec.ts` fails on one that does not. Both apps are
+`noindex`, so these titles are for the tab, not for search.
+
 ## robots.txt And sitemap.xml
 
 Both live in `apps/bite-tribe/public`, which the `public` asset entry in
@@ -685,3 +700,4 @@ so both properties have the same two owners.
 [#2005]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2005
 [#2091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2091
 [#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101
+[#1977]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1977

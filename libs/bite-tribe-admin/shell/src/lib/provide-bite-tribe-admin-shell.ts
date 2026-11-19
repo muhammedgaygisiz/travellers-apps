@@ -12,6 +12,7 @@ import {
   AFTER_LOGOUT_PAGE,
   APP_TITLE,
   Environment,
+  provideAppTitleStrategy,
   REQUIRED_ROLES,
 } from 'utils';
 import { provideBiteTribeStore } from 'bite-tribe/store';
@@ -33,6 +34,9 @@ export const provideBiteTribeAdminShell = (
     useClass: IonicRouteStrategy,
   },
   { provide: APP_TITLE, useValue: 'BiteTribe Admin' },
+  // Every route sets the tab title, so "Login" does not outlive sign-in
+  // (issue #1977).
+  provideAppTitleStrategy('BiteTribe Admin'),
   // Sign-in refuses any account that does not hold this role, and reports
   // the refusal as a generic login failure. The consumer app leaves the
   // token unbound, which is what keeps it ungated (issue #1469).

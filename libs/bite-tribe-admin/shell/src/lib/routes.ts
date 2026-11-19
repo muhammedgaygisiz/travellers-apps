@@ -30,12 +30,14 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'dashboard',
+      title: 'Dashboard',
       loadComponent: () =>
         import('bite-tribe-admin/dashboard').then((m) => m.AdminDashboard),
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
       path: 'user-management',
+      title: 'User management',
       loadComponent: () =>
         import('bite-tribe-admin/user-management').then(
           (m) => m.UserManagementContainer,
@@ -44,30 +46,35 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'bite-search',
+      title: 'Bite search',
       loadComponent: () =>
         import('bite-tribe-admin/bites').then((m) => m.BiteSearchContainer),
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
       path: 'bite-reports',
+      title: 'Reported Bites',
       loadComponent: () =>
         import('bite-tribe-admin/bites').then((m) => m.BiteReportsContainer),
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
       path: 'profile-reports',
+      title: 'Reported profiles',
       loadComponent: () =>
         import('bite-tribe-admin/bites').then((m) => m.ProfileReportsContainer),
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
       path: 'review-reports',
+      title: 'Reported reviews',
       loadComponent: () =>
         import('bite-tribe-admin/bites').then((m) => m.ReviewReportsContainer),
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
       path: 'landing-pages',
+      title: 'City pages',
       loadComponent: () =>
         import('bite-tribe-admin/landing-pages').then(
           (m) => m.LandingPagesContainer,
@@ -76,6 +83,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'restaurant-candidates',
+      title: 'Restaurant candidates',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(
           (m) => m.RestaurantCandidatesContainer,
@@ -84,6 +92,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'table-sessions',
+      title: 'Table sessions',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(
           (m) => m.TableSessionsContainer,
@@ -92,6 +101,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'restaurant-ownership',
+      title: 'Restaurant ownership',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(
           (m) => m.RestaurantOwnershipContainer,
@@ -100,6 +110,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'bite-places',
+      title: 'Bite places',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(
           (m) => m.BitePlacesContainer,
@@ -108,6 +119,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'new-restaurant',
+      title: 'New restaurant',
       loadComponent: () =>
         import('bite-tribe-admin/restaurants').then(
           (m) => m.NewRestaurantContainer,
@@ -116,6 +128,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'new-version-notification',
+      title: 'New version notification',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.NewVersionNotificationContainer,
@@ -124,6 +137,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'review-timestamps-backfill',
+      title: 'Review timestamps backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.ReviewTimestampsBackfillContainer,
@@ -132,6 +146,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'menu-item-ids-backfill',
+      title: 'Menu item ids backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.MenuItemIdsBackfillContainer,
@@ -140,6 +155,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'restaurant-owner-ids-migration',
+      title: 'Restaurant owner ids migration',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.RestaurantOwnerIdsMigrationContainer,
@@ -148,6 +164,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'bite-image-status-backfill',
+      title: 'Bite image status backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.BiteImageStatusBackfillContainer,
@@ -156,6 +173,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'bite-countries-rebuild',
+      title: 'Bite countries',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.BiteCountriesRebuildContainer,
@@ -164,6 +182,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'menu-item-stats-recompute',
+      title: 'Menu item Bite stats',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.MenuItemStatsRecomputeContainer,
@@ -172,6 +191,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'bite-address-backfill',
+      title: 'Bite address backfill',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.BiteAddressBackfillContainer,
@@ -180,6 +200,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'restaurant-clustering',
+      title: 'Restaurant clustering',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.RestaurantClusteringContainer,
@@ -188,6 +209,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'image-migration',
+      title: 'Image migration',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.ImageMigrationContainer,
@@ -196,6 +218,7 @@ export const ROUTES: Routes = withAuthRoutes(
     },
     {
       path: 'geohash-migration',
+      title: 'Geohash migration',
       loadComponent: () =>
         import('bite-tribe-admin/migrations').then(
           (m) => m.GeohashMigrationContainer,

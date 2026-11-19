@@ -42,17 +42,17 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   dashboard shows it a checklist (issue [#2126]): photo, category (issue
   [#2131]), address, opening hours, description, a link, facilities, and
   "menu reviewed". Each item opens
-  the screen that completes it - the menu editor for the menu, the edit page
-  for the rest, or the edit page to create a menu when there is none. Every
+  the screen that completes it - the menu editor for the menu, the section of
+  the Restaurant that holds the field for the rest (issue [#2183]), or the
+  overview to create a menu when there is none. Every
   item is read from the stored Restaurant, never a local flag, so all owners
   see the same state on every device; the dashboard re-reads the Restaurants
   each time it is shown, so returning from an edit shows it ticked. A
   Restaurant whose every item is ticked drops out, and the checklist goes
   with it. "Menu reviewed" is ticked by the owner's first menu save, because
   a menu built from Bite evidence is a draft only the owner can correct; an
-  operator's save from the admin app does not count. A category joins the list
-  once issue [#2131] adds one.
-- The Restaurant Owner sets the Restaurant's photo on the edit page (issue
+  operator's save from the admin app does not count.
+- The Restaurant Owner sets the Restaurant's photo in its photo section (issue
   [#2126]). The business app could not before: a photo came from candidate
   verification or not at all. The photo is one box, the way Create Bite's is: the shared
   image-upload shows the current photo with its edit and delete overlay, and
@@ -87,30 +87,25 @@ and the floor-plan editor's printable table sheets are a different printed thing
 
 ### How The Restaurant Page Is Laid Out
 
-Two columns inside a centred 78 rem measure, from the Ionic `lg` breakpoint
-(issue [#1572]). The picture, the social links, the About text and the address
-run down the left; the map, the menu code, table ordering, the facilities and
-the opening hours run down the right; and the
-ways _out_ of the page - the menu, the staff, the floor plan - sit in a row
-under both.
+An overview, and one section at a time (issue [#2183]). `restaurant/:restaurantId`
+lists the Restaurant's sections - photo, kind of place, About, links, address,
+position on the map, opening hours, facilities, ordering at the table - one row
+each, showing what the section holds now or "Not set yet" for one the setup
+checklist still counts. While anything is missing, the setup progress sits at
+the top with the next item to do. Below the rows are the ways _out_: the menu
+(edit, or create when there is none), the menu code, the staff, the floor plan
+and the live tables.
 
-It is the shape the admin app's Create Restaurant page already had. The two
-surfaces edit substantially the same fields, and before this the business one
-inherited `PageComponent`'s default 720 px cap and rendered on a laptop as a
-phone screen stretched to roughly two thousand pixels: the owner scrolled past
-the whole form to reach the buttons. The map and the week are what went right,
-because they are the two blocks that want width and height rather than a label
-and a field - and because the opening-hours table is the tallest thing on the
-page, so beside the map it balances the columns instead of lengthening them.
+Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
+section's fields and its one Save. A successful save returns to the overview,
+which reads the Restaurant again and shows the new value; a failed save stays on
+the section with the edit kept, so it can be tried again. The photo is the
+exception that stays: its upload reports its own progress in place. Every item
+of the dashboard's setup checklist opens its own section directly.
 
-The columns stack below the breakpoint, in the order they are written. That is
-the opposite of what the floor-plan editor does in the same app, and
-deliberately: this page is a form, and a labelled input is a labelled input at
-any width. See [Floor Plan](../domain/floor-plan.md) for why a drag surface is not.
-
-Each field group keeps its own Save, unlike the admin page's single one. The
-admin page creates a restaurant in one write; this one edits an existing
-restaurant a field group at a time, through a service call per group.
+It replaced every form on one page (issue [#1572]'s two columns), which a
+checklist item opened at the top, leaving the owner to find the field the item
+meant.
 
 ### What A Restaurant No Longer Does Here
 
@@ -125,7 +120,7 @@ anything behind it is something every restaurant can do, and verifying a
 candidate creates a Restaurant out of other people's Bites.
 
 And, since issue [#1079], maintaining a Restaurant it was not assigned. The edit
-routes - `restaurant/:restaurantId` and its menu - carry `documentOwnerGuard` on
+routes - `restaurant/:restaurantId`, its sections and its menu - carry `documentOwnerGuard` on
 top of the role gate, so a Restaurant assigned to another account is refused by
 direct URL rather than merely being unlinked from the list. The refusal is a
 toast and a return to the account's own list; it never says who does hold the
@@ -148,7 +143,8 @@ all be reviewed for the first time.
 ## Supported Evidence
 
 - Business `dashboard`, `bite-trails` and `restaurants`
-- `restaurant/:restaurantId`
+- `restaurant/:restaurantId`, the overview
+- `restaurant/:restaurantId/edit/:section`, one section
 - `restaurant/:restaurantId/menu/:menuId`
 - `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, stating the gender-neutral restroom across a reload and taking the answer back as a removed field, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
 - `apps/bite-tribe-business-e2e/src/tests/edit-menu.spec.ts` covers the edit-menu page: a category title and an item name stay unsaved through a pause in typing and persist on Save, which keeps the owner in the editor with a toast and hides the field's buttons, an empty title, empty name, or zero price cannot be saved, and a renamed item's variant is renamed with it
@@ -172,6 +168,7 @@ all be reviewed for the first time.
 - Issue [#1830] added the facilities field group and its first facility, the gender-neutral
   restroom, which the consumer restaurant page shows. Part of epic [#1823].
 - Issue [#2131] added the category picker and its checklist item. Part of epic [#2123].
+- Issue [#2183] split the page into an overview and one view per section, and pointed every checklist item at its own section. Part of epic [#2123].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
@@ -212,3 +209,4 @@ all be reviewed for the first time.
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
 [#2127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2127
 [#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123
+[#2183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2183

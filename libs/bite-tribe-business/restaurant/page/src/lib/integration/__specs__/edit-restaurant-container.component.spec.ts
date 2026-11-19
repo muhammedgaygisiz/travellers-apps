@@ -4,6 +4,7 @@ import { addNecessaryIcons } from 'utils';
 import { EditRestaurantContainer } from '../edit-restaurant-container.component';
 import { EditRestaurantService } from '../edit-restaurant.service';
 import { of } from 'rxjs';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
 
 jest.mock('heic2any', () => jest.fn());
@@ -31,6 +32,10 @@ describe(EditRestaurantContainer.name, () => {
           useValue: {},
         },
         { provide: TranslocoService, useValue: MockTranslocoService },
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of(convertToParamMap({ section: 'links' })) },
+        },
       ],
     });
 
@@ -40,5 +45,9 @@ describe(EditRestaurantContainer.name, () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('reads the section from the route (#2183)', () => {
+    expect(component.section()).toBe('links');
   });
 });

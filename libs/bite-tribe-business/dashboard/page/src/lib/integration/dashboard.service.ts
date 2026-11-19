@@ -44,23 +44,28 @@ export class DashboardService {
   /**
    * Opens the screen that completes a checklist item (GitHub issue #2126):
    * the menu editor for "menu reviewed" when the restaurant has a menu, and
-   * the edit page for everything else - including a restaurant with no menu
-   * yet, whose edit page is where one is created.
+   * otherwise the section of the restaurant that holds the field (GitHub
+   * issue #2183). "Menu reviewed" without a menu opens the restaurant's
+   * overview, which is where one is created.
    */
   setupItemClicked({ restaurant, item }: SetupItemClick): void {
-    const menuId = restaurant.menuId?.split('/').filter(Boolean).pop();
+    if (item.target === 'edit-menu') {
+      const menuId = restaurant.menuId?.split('/').filter(Boolean).pop();
 
-    if (item.target === 'edit-menu' && menuId) {
-      void this.navController.navigateForward([
-        'restaurant',
-        restaurant.id,
-        'menu',
-        menuId,
-      ]);
+      void this.navController.navigateForward(
+        menuId
+          ? ['restaurant', restaurant.id, 'menu', menuId]
+          : ['restaurant', restaurant.id],
+      );
       return;
     }
 
-    void this.navController.navigateForward(['restaurant', restaurant.id]);
+    void this.navController.navigateForward([
+      'restaurant',
+      restaurant.id,
+      'edit',
+      item.target,
+    ]);
   }
 
   /**

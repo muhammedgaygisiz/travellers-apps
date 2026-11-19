@@ -16,12 +16,13 @@ import {
   IonLabel,
   IonList,
 } from '@ionic/angular/standalone';
-import { Geopoint, Restaurant } from 'model';
-import { MapComponent } from 'bite-tribe-common/map';
 import {
+  Geopoint,
+  Restaurant,
   restaurantSetupChecklist,
   SetupItem,
-} from '../../utils/restaurant-setup-checklist';
+} from 'model';
+import { MapComponent } from 'bite-tribe-common/map';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 /** A checklist item an owner tapped, with the restaurant it belongs to. */

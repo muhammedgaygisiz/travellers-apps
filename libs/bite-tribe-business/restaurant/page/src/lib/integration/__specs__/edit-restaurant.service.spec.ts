@@ -16,7 +16,10 @@ jest.mock('@capacitor-firebase/analytics');
 describe('EditRestaurantService', () => {
   let service: EditRestaurantService;
   let dataAccessMock: jest.Mocked<RestaurantDataAccessService>;
-  let navControllerMock: { navigateForward: jest.Mock };
+  let navControllerMock: {
+    navigateForward: jest.Mock;
+    navigateBack: jest.Mock;
+  };
   let toastMock: { present: jest.Mock };
   let photoUploadMock: {
     upload: ReturnType<typeof signal>;
@@ -38,7 +41,7 @@ describe('EditRestaurantService', () => {
       submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
-    navControllerMock = { navigateForward: jest.fn() };
+    navControllerMock = { navigateForward: jest.fn(), navigateBack: jest.fn() };
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
     photoUploadMock = {
       upload: signal(undefined),
@@ -160,6 +163,62 @@ describe('EditRestaurantService', () => {
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
       });
+    });
+  });
+
+  /** One section at a time (GitHub issue #2183). */
+  describe('sections', () => {
+    it('opens a section of the restaurant on screen', () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+
+      service.gotoSection('opening-hours');
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+        'edit',
+        'opening-hours',
+      ]);
+    });
+
+    it('opens nothing without a restaurant', () => {
+      service.gotoSection('about');
+
+      expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
+    });
+
+    it('returns to the overview once a section is saved', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      await service.submitDescription('A great place');
+
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+      ]);
+    });
+
+    it('stays on the section when the save fails, so the edit can be retried', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
+
+      await service.submitDescription('A great place');
+
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
     });
   });
 

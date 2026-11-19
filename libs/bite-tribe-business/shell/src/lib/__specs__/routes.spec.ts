@@ -180,6 +180,7 @@ describe('business ROUTES', () => {
   describe('which restaurants the edit routes admit', () => {
     const EDIT_PATHS = [
       'restaurant/:restaurantId',
+      'restaurant/:restaurantId/edit/:section',
       'restaurant/:restaurantId/menu/:menuId',
       'restaurant/:restaurantId/staff',
       'restaurant/:restaurantId/floor-plan',

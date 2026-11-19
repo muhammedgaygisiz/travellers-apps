@@ -362,35 +362,106 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
-  describe('createMenu', () => {
-    it('should emit createMenu event when createMenu is called', () => {
+  /** One section at a time (GitHub issue #2183). */
+  describe('section', () => {
+    it.each([
+      ['about', '[data-testid="restaurant-description"]'],
+      ['address', '[data-testid="restaurant-street"]'],
+      ['categories', '[data-testid="restaurant-categories"]'],
+      ['facilities', '[data-testid="gender-neutral-restroom"]'],
+      ['table-ordering', '[data-testid="table-ordering-enabled"]'],
+      ['menu-code', 'bt-business-menu-qr'],
+    ] as const)('shows only the %s fields', (section, selector) => {
       componentRef.setInput('restaurant', {
         id: '1',
         name: 'Test Restaurant',
       } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
+      componentRef.setInput('section', section);
+      fixture.detectChanges();
 
-      const emitSpy = jest.spyOn(component.createMenu, 'emit');
-      component.createMenu.emit();
-      expect(emitSpy).toHaveBeenCalled();
-    });
-
-    it('should not render Create Menu button when restaurant already has a menuId', () => {
-      componentRef.setInput('restaurant', {
-        id: '1',
-        name: 'Test Restaurant',
-        menuId: '/menus/existing-menu',
-      } as Restaurant);
-      componentRef.changeDetectorRef.detectChanges();
-
-      const button = fixture.nativeElement.querySelector(
-        '[aria-label="Create a new menu for this restaurant"]',
-      );
-      expect(button).toBeNull();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector(selector)).toBeTruthy();
+      expect(
+        el.querySelectorAll('ion-button[data-testid^="save-"]').length,
+      ).toBeLessThanOrEqual(1);
+      const others = [
+        '[data-testid="restaurant-description"]',
+        '[data-testid="restaurant-street"]',
+        '[data-testid="restaurant-categories"]',
+        '[data-testid="gender-neutral-restroom"]',
+        '[data-testid="table-ordering-enabled"]',
+        'bt-business-menu-qr',
+      ].filter((other) => other !== selector);
+      others.forEach((other) => expect(el.querySelector(other)).toBeNull());
     });
   });
 
   describe('initDescription', () => {
+    /** GitHub issue #2183: the reload after opening a section lands late. */
+    it('keeps what the owner typed when the restaurant is read again', () => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        description: '',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.descriptionForm.controls.description.setValue('Typed first');
+      component.descriptionForm.markAsDirty();
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        description: '',
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.descriptionForm.value.description).toBe('Typed first');
+    });
+
+    it.each([
+      ['addressForm', { street: 'Typed' }],
+      ['facilitiesForm', { genderNeutralRestroom: 'yes' }],
+      ['categoriesForm', { categories: ['bar'] }],
+      ['tableOrderingForm', { enabled: true }],
+      ['positionForm', { position: { latitude: 1, longitude: 2 } }],
+    ] as const)(
+      'keeps an edited %s when the restaurant is read again',
+      (formName, edit) => {
+        const form = component[formName] as unknown as {
+          patchValue: (v: unknown) => void;
+          markAsDirty: () => void;
+          value: Record<string, unknown>;
+        };
+        componentRef.setInput('restaurant', {
+          id: '1',
+          name: 'R',
+        } as Restaurant);
+        componentRef.changeDetectorRef.detectChanges();
+
+        form.patchValue(edit);
+        form.markAsDirty();
+        componentRef.setInput('restaurant', {
+          id: '1',
+          name: 'R',
+        } as Restaurant);
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(form.value).toMatchObject(edit);
+      },
+    );
+
+    it('keeps edited links when the restaurant is read again', () => {
+      componentRef.setInput('restaurant', { id: '1', name: 'R' } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      component.addSocialMedia();
+      component.socialMediaForm.markAsDirty();
+      componentRef.setInput('restaurant', { id: '1', name: 'R' } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.links.length).toBe(1);
+    });
+
     it('should populate description form from restaurant', () => {
       componentRef.setInput('restaurant', {
         id: '1',

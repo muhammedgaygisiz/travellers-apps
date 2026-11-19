@@ -1,4 +1,4 @@
-import { restaurantCategoriesOf, type Restaurant } from 'model';
+import { restaurantCategoriesOf, type Restaurant } from './restaurant';
 
 export type SetupItemKey =
   | 'image'
@@ -10,12 +10,40 @@ export type SetupItemKey =
   | 'facilities'
   | 'menu-reviewed';
 
+/**
+ * The parts of a restaurant the business app edits one at a time, each in a
+ * view of its own under `restaurant/:restaurantId/edit/:section` (GitHub issue
+ * #2183). The order is the order the overview lists them in.
+ */
+export const RESTAURANT_SECTIONS = [
+  'photo',
+  'categories',
+  'about',
+  'links',
+  'address',
+  'position',
+  'opening-hours',
+  'facilities',
+  'table-ordering',
+  'menu-code',
+] as const;
+
+export type RestaurantSection = (typeof RESTAURANT_SECTIONS)[number];
+
+export const isRestaurantSection = (
+  value: unknown,
+): value is RestaurantSection =>
+  (RESTAURANT_SECTIONS as readonly unknown[]).includes(value);
+
 export interface SetupItem {
   readonly key: SetupItemKey;
   readonly labelKey: string;
   readonly done: boolean;
-  /** The screen that completes the item. */
-  readonly target: 'edit-restaurant' | 'edit-menu';
+  /**
+   * The screen that completes the item: the menu editor, or the restaurant
+   * section that holds the field (GitHub issue #2183).
+   */
+  readonly target: 'edit-menu' | RestaurantSection;
 }
 
 const hasText = (value: string | undefined): boolean => !!value?.trim();
@@ -37,24 +65,42 @@ export const restaurantSetupChecklist = (
   const item = (
     key: SetupItemKey,
     done: boolean,
-    target: SetupItem['target'] = 'edit-restaurant',
+    target: SetupItem['target'],
   ): SetupItem => ({ key, labelKey: `setup-checklist-${key}`, done, target });
 
   const address = restaurant.address;
 
   return [
-    item('image', hasText(restaurant.imagePath) || hasText(restaurant.image)),
-    item('categories', restaurantCategoriesOf(restaurant).length > 0),
-    item('address', hasText(address?.street) && hasText(address?.city)),
-    item('opening-hours', (restaurant.openingHours?.length ?? 0) > 0),
-    item('description', hasText(restaurant.description)),
+    item(
+      'image',
+      hasText(restaurant.imagePath) || hasText(restaurant.image),
+      'photo',
+    ),
+    item(
+      'categories',
+      restaurantCategoriesOf(restaurant).length > 0,
+      'categories',
+    ),
+    item(
+      'address',
+      hasText(address?.street) && hasText(address?.city),
+      'address',
+    ),
+    item(
+      'opening-hours',
+      (restaurant.openingHours?.length ?? 0) > 0,
+      'opening-hours',
+    ),
+    item('description', hasText(restaurant.description), 'about'),
     item(
       'social-links',
       (restaurant.socialMediaLinks ?? []).some((link) => hasText(link.url)),
+      'links',
     ),
     item(
       'facilities',
       restaurant.facilities?.genderNeutralRestroom !== undefined,
+      'facilities',
     ),
     item(
       'menu-reviewed',

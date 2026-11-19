@@ -291,7 +291,11 @@ export class BitePage {
       name: bite.name,
       place: bite.place,
       price,
-      currency: bite.currency,
+      // Only a draft that names a currency sets it. Patching `undefined` over
+      // the field emptied a required control - the default, or a location
+      // currency that had already arrived - and left Post disabled for a
+      // Bite made from a menu that states no currency (issue #2129).
+      ...(bite.currency ? { currency: bite.currency } : {}),
       tags: bite.tags || [],
       taggedUserIds: bite.taggedUserIds || [],
       position: bite.position,

@@ -38,7 +38,7 @@ report one account files against another.
   the follow suggestions on the onboarding finish step, the Following list and home.
   Whether it is the first is asked before the write, as one document of the user's
   own `following` subcollection (`followsAnyone`): the store cannot answer, because
-  its `followingCount` is the login-time snapshot and `profileMetadata.following` is
+  its `followingCount` trails the follower-count trigger by seconds and `profileMetadata.following` is
   the count of whichever profile is open, which on a follow is the person being
   followed. A later follow raises no toast, as before; a failed follow, or one where
   the answer cannot be told, celebrates nothing. Nothing is stored, so unfollowing

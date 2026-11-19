@@ -52,13 +52,11 @@ export class ProfileApiService {
    * without owning its removal meant paying for updates nobody read until the
    * process ended — and paying twice after a sign-out and back in, because the
    * second registration overwrote the only id that could have removed the first
-   * (issue #1310). Whoever subscribes now decides what that costs: the store
-   * takes a single snapshot at login, and the listener goes with it, while
-   * `celebrateProfileProgress$` stays subscribed for the session to hear a new
-   * country code or Bite count (issues #1797 and #2014).
-   *
-   * A consumer that wants a live profile only has to stay subscribed. See
-   * [[Architecture - State Management]] for what the store does instead.
+   * (issue #1310). Whoever subscribes now decides what that costs. The store
+   * and `celebrateProfileProgress$` share one subscription for the session
+   * (`ownProfileSessions$`, issue #2148), so the signed-in user's document is
+   * listened to once, and signing out removes the listener. See
+   * [[Architecture - State Management]].
    */
   public publicProfile$: Observable<PublicUser & { id?: string }> =
     this.authService.isLoggedIn$.pipe(
@@ -630,8 +628,8 @@ export class ProfileApiService {
    * their `following` subcollection, or `undefined` when that cannot be told:
    * signed out, or the read failed.
    *
-   * Not read off the profile. The store's copy of `followingCount` is the
-   * login-time snapshot, and `profileMetadata.following` is the count of
+   * Not read off the profile. The store's copy of `followingCount` trails the
+   * follower-count trigger by seconds, and `profileMetadata.following` is the count of
    * whichever profile is open - on a follow, the person being followed
    * (issue #1799).
    */

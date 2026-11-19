@@ -86,8 +86,9 @@ export class FollowSuggestionsService {
   readonly pendingIds = this.pending.asReadonly();
 
   /**
-   * Whether the user follows anybody. The profile's `followingCount` is read
-   * once at login, so a follow made from a suggestion is counted on top.
+   * Whether the user follows anybody. The profile's `followingCount` is the
+   * server's and trails the follower-count trigger by seconds, so a follow
+   * made from a suggestion is counted on top.
    */
   readonly followsAnyone = computed(
     () =>

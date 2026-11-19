@@ -301,7 +301,7 @@ Details worth knowing before changing it:
   depends on what the user already has, the call site asks before it writes,
   because the write itself would count. The store cannot answer: it holds the
   user's own Bites only after My Bites or My Profile loaded them, and its
-  `followingCount` is the login-time snapshot. A first that cannot be told -
+  `followingCount` is the server's, which trails the trigger by seconds. A first that cannot be told -
   signed out, or the read failed - is not taken for one.
 - **Only this library imports `canvas-confetti`**, and only bite-tribe calls
   it. Its spec fails if another file imports the library.

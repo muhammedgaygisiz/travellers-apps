@@ -1142,7 +1142,8 @@ service cloud.firestore {
      * Every one of them is written by a Function through the Admin SDK, and
      * every one of them is read as a fact about the account rather than as
      * something the account said about itself: an entitlement
-     * (`subscriptionTier`), a leaderboard input (`biteCount`), a social count,
+     * (`subscriptionTier`), a leaderboard input (`biteCount`), the weekly
+     * posting streak (`postingStreak`, issue #2146), a social count,
      * the display-name reservation, or the email-verification state that gates
      * parts of the app. `subscriptionTier` is the sharpest of them — under the
      * blanket rule an account could grant itself Pro with one write.
@@ -1159,6 +1160,7 @@ service cloud.firestore {
         'normalizedDisplayName',
         'countryCodes',
         'weeklyBadges',
+        'postingStreak',
         'lastSeen',
         'lastSeenTimestamp',
         'appVersion',

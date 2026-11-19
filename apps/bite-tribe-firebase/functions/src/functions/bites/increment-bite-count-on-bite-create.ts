@@ -16,6 +16,7 @@ import {
   rebuildMostLiked,
 } from '../shared/utils/weekly-most-liked';
 import { removeCountryCodeFromUser } from '../shared/utils/user-country-codes';
+import { applyBiteToPostingStreak } from '../shared/utils/user-posting-streak';
 
 const db = getFirestore();
 
@@ -76,6 +77,37 @@ const dropFromMostLiked = async (biteId: string): Promise<void> => {
   }
 };
 
+/**
+ * Applies the new Bite to the author's weekly posting streak (issue #2146).
+ * The Bite's own creation time decides its week; one without it falls back to
+ * the event's. A failure here must not fail the trigger: the count and the
+ * boards matter more, and the weekly resync recomputes the streak anyway.
+ */
+const updatePostingStreak = async (
+  biteId: string,
+  authorUid: string,
+  createdAtTimestamp: unknown,
+  eventTime: string,
+): Promise<void> => {
+  const now = Date.now();
+  const eventAt = Date.parse(eventTime);
+  const createdAt =
+    typeof createdAtTimestamp === 'number'
+      ? createdAtTimestamp
+      : Number.isFinite(eventAt)
+        ? eventAt
+        : now;
+
+  try {
+    await applyBiteToPostingStreak(db, authorUid, createdAt, now);
+  } catch (error) {
+    logger.warn('failed to update the posting streak', {
+      biteId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 export const incrementBiteCountOnBiteCreate = onDocumentCreated(
   'bites/{biteId}',
   async (event) => {
@@ -107,6 +139,13 @@ export const incrementBiteCountOnBiteCreate = onDocumentCreated(
 
     logger.info(
       `incrementBiteCountOnBiteCreate: incremented biteCount for ${authorUid}`,
+    );
+
+    await updatePostingStreak(
+      biteId,
+      authorUid,
+      bite.createdAtTimestamp,
+      event.time,
     );
 
     await rebuildLeaderboard(db);

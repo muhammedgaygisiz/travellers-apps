@@ -5,6 +5,11 @@ import {
 } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/scheduler';
+import {
+  readPostingStreak,
+  samePostingStreak,
+} from '../shared/utils/posting-streak';
+import { recomputeUserPostingStreak } from '../shared/utils/user-posting-streak';
 
 const USERS_COLLECTION = 'users';
 const BITES_COLLECTION = 'bites';
@@ -41,6 +46,10 @@ const getActualBiteCount = async (userId: string): Promise<number> => {
  * bites (e.g. after failed create/delete triggers). This function processes
  * every user, counts their bites, and rewrites `biteCount` whenever it differs
  * from the actual count, keeping the aggregate aligned.
+ *
+ * The same pass recomputes the weekly posting streak, `postingStreak`, from the
+ * user's Bites (issue #2146). Running on Monday, it zeroes every streak whose
+ * last posting week is older than the week that has just ended.
  */
 export const resyncBiteCounts = onSchedule(
   {
@@ -55,23 +64,48 @@ export const resyncBiteCounts = onSchedule(
     let batch = db.batch();
     let batchSize = 0;
     let updatedUsers = 0;
+    let updatedStreaks = 0;
+
+    const now = Date.now();
 
     for (const userDoc of usersSnapshot.docs) {
+      const user = userDoc.data();
       const actualBiteCount = await getActualBiteCount(userDoc.id);
-      const storedBiteCount = getStoredBiteCount(userDoc.data());
+      const storedBiteCount = getStoredBiteCount(user);
+      // The streak is recomputed from the Bites that exist, which is how a
+      // deleted Bite and a missed week reach it (issue #2146).
+      const postingStreak = await recomputeUserPostingStreak(
+        db,
+        userDoc.id,
+        now,
+      );
+      const update: DocumentData = {};
 
-      if (actualBiteCount === storedBiteCount) {
+      if (actualBiteCount !== storedBiteCount) {
+        logger.info('resyncBiteCounts: correcting biteCount', {
+          userId: userDoc.id,
+          storedBiteCount,
+          actualBiteCount,
+        });
+        update['biteCount'] = actualBiteCount;
+      }
+
+      if (
+        !samePostingStreak(
+          readPostingStreak(user['postingStreak']),
+          postingStreak,
+        )
+      ) {
+        update['postingStreak'] = postingStreak;
+        updatedStreaks++;
+      }
+
+      if (Object.keys(update).length === 0) {
         continue;
       }
 
-      logger.info('resyncBiteCounts: correcting biteCount', {
-        userId: userDoc.id,
-        storedBiteCount,
-        actualBiteCount,
-      });
-
       batch.update(userDoc.ref, {
-        biteCount: actualBiteCount,
+        ...update,
         updatedAt: FieldValue.serverTimestamp(),
       });
       batchSize++;
@@ -91,6 +125,7 @@ export const resyncBiteCounts = onSchedule(
     logger.info('resyncBiteCounts: weekly biteCount resync complete', {
       totalUsers: usersSnapshot.size,
       updatedUsers,
+      updatedStreaks,
     });
   },
 );

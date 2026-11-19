@@ -4,6 +4,7 @@ import { PageComponent } from '../page.component';
 import {
   addNecessaryIcons,
   APP_TITLE,
+  AppUpdateService,
   getIonicConfig,
   SIGNED_IN_ACCOUNT,
   SignedInAccount,
@@ -215,6 +216,25 @@ describe('PageComponent', () => {
       account.set(undefined);
 
       expect(props['account']()).toBeUndefined();
+    });
+  });
+
+  describe('ready web version', () => {
+    const badge = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="menu-update-badge"]');
+
+    it('leaves the menu button without a badge while no version is ready', () => {
+      fixture.detectChanges();
+
+      expect(badge()).toBeNull();
+    });
+
+    it('puts a badge on the menu button once a version is ready', () => {
+      TestBed.inject(AppUpdateService).announce(jest.fn());
+
+      fixture.detectChanges();
+
+      expect(badge()).not.toBeNull();
     });
   });
 

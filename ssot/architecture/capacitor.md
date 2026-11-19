@@ -133,7 +133,21 @@ Two consequences to keep in mind:
 - Do not gate this on the build configuration. Web and native ship the same bundle, so the decision has to stay a runtime platform check.
 - Existing native installs need one more app start before the cleanup runs. On the first start after the update the old worker still serves the old bundle, so the new code is not executing yet.
 
-The update alert in `libs/bite-tribe/store/src/lib/service-worker/effects.ts` keeps its `hybrid` guard. `SwUpdate.versionUpdates` is `NEVER` while the worker is disabled, so on native the effect is inert either way.
+The update handling in `libs/bite-tribe/store/src/lib/service-worker/effects.ts` keeps its `hybrid` guard. `SwUpdate.versionUpdates` is `NEVER` while the worker is disabled, so on native the effect is inert either way.
+
+### A Ready Web Version Is Announced, Not Forced
+
+On the web no dialog opens when a new version is deployed (issue [#2135]). `VERSION_DETECTED` is only logged while ngsw downloads in the background. On `VERSION_READY` the effect calls `AppUpdateService.announce` (`libs/common/utils/src/lib/app-update.ts`): the header menu button in `libs/common/ui/page/src/lib/page.component.html` gets a badge, and the menu shows a row under the version row, with a reload icon and the translated `app-update-available` label. Tapping it activates the new version and reloads.
+
+The rule from issue [#1904] stays: a tab that is hidden when the version becomes ready, or that the member leaves while the row waits, applies the update itself, so a background tab does not stay on an old build for days.
+
+The row names no version number. The web app deploys on every merge to `develop` while version and build change only at a release, so a number would mostly repeat the current one.
+
+### Translations Are Revalidated, Not Cached For An Hour
+
+Firebase Hosting answers every file it has no rule for with `cache-control: max-age=3600`. The Transloco catalogues under `/assets/i18n/` have no content hash in their name, so a tab that no service worker controls (a first visit, or one that ended before `registerWhenStable:30000` registered the worker) got the new `index.html` and new bundles on reload but the previous catalogue from the HTTP cache, for up to an hour. The next load was controlled by the newly installed ngsw, which checks hashes and cache-busts, which is why a second refresh used to fix it.
+
+The `bite-tribe` hosting target in `firebase.json` therefore sends `Cache-Control: no-cache` (revalidate by ETag) for `/assets/i18n/**`, `/`, `/index.html`, `/ngsw.json`, `/ngsw-worker.js` and every app route that falls through to `index.html`. The app-route glob excludes the function rewrites (`/s`, `/eat`, `/download`, `/unsubscribe`), which set their own `Cache-Control`, and the static `/imprint`, `/assets` and `/media` paths. Hashed bundles keep the default. Verified on 19 November 2026 against the hosting emulator, where develop's headers plus the production default kept the old catalogue after a reload and the new headers did not (issue [#2135]).
 
 ## Contextual Permission Rule
 
@@ -924,3 +938,5 @@ libs/common/ta-firestore/src/lib/preload-firestore-web-plugin.ts
 [#1846]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1846
 [#1872]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1872
 [#1883]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1883
+[#1904]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1904
+[#2135]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2135

@@ -47,6 +47,8 @@ export {
   type AppRelease,
 } from './lib/app-release';
 
+export { AppUpdateService } from './lib/app-update';
+
 export { addNecessaryIcons } from './lib/add-necessary-icons';
 export * from './lib/get-ionic-config';
 export type { Environment, Emulators } from './lib/environment';

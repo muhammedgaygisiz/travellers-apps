@@ -24,3 +24,20 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+// The row that loads a ready web version (issue #2135). It reads as an action,
+// so it takes the primary colour, and repeats the menu button's dot so the
+// member can see which entry the badge was about.
+.app-update-label {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.app-update-dot {
+  flex-shrink: 0;
+  margin-inline-start: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ion-color-danger);
+}

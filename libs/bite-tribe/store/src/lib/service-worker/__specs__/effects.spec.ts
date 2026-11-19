@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { rootEffectsInit } from '@ngrx/effects';
 import { SwUpdate, type VersionEvent } from '@angular/service-worker';
-import { AlertController, Platform } from '@ionic/angular/standalone';
+import { Platform } from '@ionic/angular/standalone';
+import { AppUpdateService } from 'utils';
 import { of, Subject, type Subscription } from 'rxjs';
 import { ServiceWorkerEffects } from '../effects';
 
@@ -19,28 +20,22 @@ const flush = (): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, 0));
 
 /**
- * A background tab cannot click "Restart Now", so a ready update there must
- * apply itself rather than leave the tab on an old build for days. See GitHub
- * issue #1904.
+ * A ready update is offered in the menu instead of a dialog (issue #2135). A
+ * background tab still applies it itself rather than stay on an old build for
+ * days (issue #1904).
  */
 describe(ServiceWorkerEffects.name, () => {
   let versionUpdates: Subject<VersionEvent>;
   let subscription: Subscription;
   let visibility: Visibility;
   let visibilityListeners: Array<() => void>;
-  let dismissAlert: () => void;
+  let appUpdate: AppUpdateService;
 
   const swUpdate = {
     versionUpdates: new Subject<VersionEvent>(),
     activateUpdate: jest.fn(),
   };
   const reload = jest.fn();
-  const alert = {
-    present: jest.fn(),
-    dismiss: jest.fn(),
-    onDidDismiss: jest.fn(),
-  };
-  const alertController = { create: jest.fn() };
   const platform = { is: jest.fn() };
   const fakeDocument = {
     get visibilityState(): Visibility {
@@ -71,22 +66,17 @@ describe(ServiceWorkerEffects.name, () => {
     visibility = 'visible';
     visibilityListeners = [];
     platform.is.mockReturnValue(false);
-    alert.present.mockResolvedValue(undefined);
-    alert.onDidDismiss.mockReturnValue(
-      new Promise<void>((resolve) => (dismissAlert = resolve)),
-    );
-    alertController.create.mockResolvedValue(alert);
 
     TestBed.configureTestingModule({
       providers: [
         ServiceWorkerEffects,
         provideMockActions(() => of(rootEffectsInit())),
         { provide: SwUpdate, useValue: swUpdate },
-        { provide: AlertController, useValue: alertController },
         { provide: Platform, useValue: platform },
         { provide: DOCUMENT, useValue: fakeDocument },
       ],
     });
+    appUpdate = TestBed.inject(AppUpdateService);
     subscription =
       TestBed.inject(ServiceWorkerEffects).swUpdateEffect$.subscribe();
   });
@@ -108,8 +98,8 @@ describe(ServiceWorkerEffects.name, () => {
       expect(reload).toHaveBeenCalledTimes(1);
     });
 
-    it('does not wait behind the dialog', () => {
-      expect(alertController.create).not.toHaveBeenCalled();
+    it('does not offer it in the menu', () => {
+      expect(appUpdate.ready()).toBe(false);
     });
   });
 
@@ -123,39 +113,46 @@ describe(ServiceWorkerEffects.name, () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
+  it('opens nothing and announces nothing while a version only downloads', async () => {
+    versionUpdates.next({
+      type: 'VERSION_DETECTED',
+      version: { hash: 'new' },
+    });
+    await flush();
+
+    expect(appUpdate.ready()).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
+  });
+
   describe('VERSION_READY in a visible tab', () => {
     beforeEach(async () => {
       versionUpdates.next(versionReady);
       await flush();
     });
 
-    it('shows the dialog and does not reload by itself', () => {
-      expect(alertController.create).toHaveBeenCalledWith(
-        expect.objectContaining({ header: 'App Update Ready' }),
-      );
-      expect(alert.present).toHaveBeenCalled();
+    it('offers the update in the menu and does not reload by itself', () => {
+      expect(appUpdate.ready()).toBe(true);
       expect(reload).not.toHaveBeenCalled();
     });
 
-    it('reloads once when Restart Now is clicked', async () => {
-      const [{ buttons }] = alertController.create.mock.calls[0];
-      buttons[0].handler();
-      buttons[0].handler();
+    it('reloads once when the member taps the menu row', async () => {
+      appUpdate.apply();
+      appUpdate.apply();
       await flush();
 
       expect(swUpdate.activateUpdate).toHaveBeenCalledTimes(1);
       expect(reload).toHaveBeenCalledTimes(1);
     });
 
-    it('applies the update when the member leaves the tab with the dialog up', async () => {
+    it('applies the update when the member leaves the tab', async () => {
       goHidden();
       await flush();
 
       expect(reload).toHaveBeenCalledTimes(1);
     });
 
-    it('stops watching the tab once the dialog is gone', async () => {
-      dismissAlert();
+    it('stops watching the tab once it applied the update', async () => {
+      goHidden();
       await flush();
 
       expect(visibilityListeners).toHaveLength(0);
@@ -184,6 +181,6 @@ describe(ServiceWorkerEffects.name, () => {
     await flush();
 
     expect(reload).not.toHaveBeenCalled();
-    expect(alertController.create).not.toHaveBeenCalled();
+    expect(appUpdate.ready()).toBe(false);
   });
 });

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -13,7 +14,12 @@ import {
   IonItemGroup,
   IonList,
 } from '@ionic/angular/standalone';
-import { appRelease, SignedInAccount, SupportedLang } from 'utils';
+import {
+  appRelease,
+  AppUpdateService,
+  SignedInAccount,
+  SupportedLang,
+} from 'utils';
 import { PageMenuTarget } from '../page-config';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -27,6 +33,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export class AppMenuComponent {
   protected readonly release = appRelease;
   protected readonly SupportedLang = SupportedLang;
+  protected readonly appUpdate = inject(AppUpdateService);
+
+  /**
+   * A newer web version is ready. The row under the version loads it on tap,
+   * in place of the dialogs that used to interrupt the member (issue #2135).
+   */
+  protected readonly updateReady = this.appUpdate.ready;
 
   isAuthenticated = input<boolean | null>(false);
 

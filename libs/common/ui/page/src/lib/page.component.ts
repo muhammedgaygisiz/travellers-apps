@@ -31,7 +31,7 @@ import {
   PageMenuConfig,
   PageMenuTarget,
 } from './page-config';
-import { APP_TITLE, SIGNED_IN_ACCOUNT } from 'utils';
+import { APP_TITLE, AppUpdateService, SIGNED_IN_ACCOUNT } from 'utils';
 import { UpperCasePipe } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -70,6 +70,12 @@ export class PageComponent {
   });
 
   popoverController = inject(PopoverController);
+
+  /**
+   * A newer web version is ready. The menu button carries a badge until the
+   * member loads it from the menu, instead of a dialog (issue #2135).
+   */
+  protected readonly updateReady = inject(AppUpdateService).ready;
 
   menuConfig = input<PageMenuConfig>({});
 

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  inject,
+} from '@angular/core';
 import { DashboardComponent } from '../component/page/dashboard.component';
 import { DashboardService } from './dashboard.service';
 
@@ -11,6 +16,8 @@ import { DashboardService } from './dashboard.service';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       [restaurants]="service.restaurantsValue()"
+      [restaurantsLoaded]="service.restaurantsLoaded()"
+      (checkAgainClick)="service.refreshRestaurants()"
       (logoutClick)="service.logout()"
       (sectionClick)="service.sectionClicked($event)"
       (setupItemClick)="service.setupItemClicked($event)"
@@ -27,5 +34,17 @@ export class DashboardContainer {
    */
   ionViewWillEnter(): void {
     this.service.refreshRestaurants();
+  }
+
+  /**
+   * An account waiting for its restaurant is usually on a call with the
+   * operator who assigns it, in another tab or app. Coming back here re-reads,
+   * so the restaurant shows without signing out (GitHub issue #2127).
+   */
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') {
+      this.service.refreshRestaurants();
+    }
   }
 }

@@ -121,3 +121,16 @@ export const SetUp: Story = {
     gpsPosition: { latitude: 40.8467, longitude: 14.2585 },
   },
 };
+
+/**
+ * An account holding the business role but no restaurant yet (GitHub issue
+ * #2127). Assigning the restaurant is a second operator step, so the page
+ * says that is what happens next and offers support and "Check again",
+ * instead of a bare map that read as a broken app.
+ */
+export const NoRestaurantYet: Story = {
+  args: {
+    restaurants: [],
+    restaurantsLoaded: true,
+  },
+};

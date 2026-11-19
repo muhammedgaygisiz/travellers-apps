@@ -21,6 +21,7 @@ describe('DashboardService', () => {
     const mockResource = {
       value: jest.fn().mockReturnValue(undefined),
       reload: jest.fn(),
+      status: jest.fn().mockReturnValue('loading'),
     };
 
     dataAccessMock = {
@@ -172,5 +173,25 @@ describe('DashboardService', () => {
     expect(
       (dataAccessMock.restaurants as unknown as { reload: jest.Mock }).reload,
     ).toHaveBeenCalled();
+  });
+
+  describe('restaurantsLoaded (issue #2127)', () => {
+    const statusOf = (): jest.Mock =>
+      (dataAccessMock.restaurants as unknown as { status: jest.Mock }).status;
+
+    it('is false while the read is in flight', () => {
+      statusOf().mockReturnValue('loading');
+      expect(service.restaurantsLoaded()).toBe(false);
+    });
+
+    it('is true once the read resolved, even with nothing in it', () => {
+      statusOf().mockReturnValue('resolved');
+      expect(service.restaurantsLoaded()).toBe(true);
+    });
+
+    it('is false after a failed read, which is not "no restaurant"', () => {
+      statusOf().mockReturnValue('error');
+      expect(service.restaurantsLoaded()).toBe(false);
+    });
   });
 });

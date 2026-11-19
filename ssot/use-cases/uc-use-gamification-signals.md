@@ -214,6 +214,10 @@ them is collected in onboarding.
 - Issue [#2014] celebrates the Bite-count milestones, part of epic [#2012].
 - Issue [#2015] celebrates entering the weekly top ten, part of epic [#2012].
 - Issue [#2016] celebrates passing another user inside the weekly top ten, part of epic [#2012].
+- Epic [#2034] specifies a weekly posting streak, not built yet. On 19 November 2026 the
+  maintainer settled the three questions it left open: epic [#1741]'s "no streaks" line now
+  reads "no loss-framed streaks", the streak is shown on its owner's profile only, and its
+  week runs Monday to Sunday in `Europe/Zurich` for every user, as the weekly summary does.
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -247,6 +251,7 @@ them is collected in onboarding.
 [#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027

@@ -154,6 +154,10 @@ export class ProfileDataAccessService {
     this.storeService.unfollowUser(user);
   }
 
+  submitWithdrawFollowRequestClick(user: PublicUser): void {
+    this.storeService.withdrawFollowRequest(user);
+  }
+
   submitBlockClick(user: PublicUser): void {
     this.storeService.blockUser(user);
   }

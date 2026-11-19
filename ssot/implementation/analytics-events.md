@@ -109,7 +109,9 @@ personal data in a product event. `user_followed` is the first follow event the
 app has had, so followers can be told apart from everybody else when reading
 retention. From a profile it is counted on the tap, because that follow is
 optimistic and its write reports no outcome; from a suggestion it is counted once
-the write succeeds.
+the write succeeds. A tap that sends a request to a private profile is not a
+follow and emits nothing ([#2164]); the follow it may become is written by the
+owner's accept.
 
 The share-funnel events belong to issue [#1733] and are described under
 [The Share-As-Image Funnel](#the-share-as-image-funnel) below.
@@ -1007,3 +1009,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2000]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2000
 [#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
+[#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164

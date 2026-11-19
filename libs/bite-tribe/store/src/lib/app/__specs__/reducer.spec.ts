@@ -25,6 +25,7 @@ describe('App Reducer', () => {
           followers: 0,
           following: 0,
           isFollowedByMe: false,
+          isRequestedByMe: false,
         },
       };
 
@@ -48,6 +49,7 @@ describe('App Reducer', () => {
           followers: 0,
           following: 0,
           isFollowedByMe: false,
+          isRequestedByMe: false,
         },
       };
 
@@ -390,6 +392,7 @@ describe('App Reducer', () => {
           followers: 0,
           following: 0,
           isFollowedByMe: false,
+          isRequestedByMe: false,
         },
       } as AppSlice;
       const NEW_STATE = {
@@ -397,6 +400,7 @@ describe('App Reducer', () => {
           followers: 10,
           following: 5,
           isFollowedByMe: true,
+          isRequestedByMe: false,
         },
       } as AppSlice;
 
@@ -404,6 +408,7 @@ describe('App Reducer', () => {
         followers: 10,
         following: 5,
         isFollowedByMe: true,
+        isRequestedByMe: false,
       });
 
       expect(reducer(INITIAL_STATE, loadedProfileMetadataAction)).toEqual({
@@ -419,6 +424,7 @@ describe('App Reducer', () => {
           followers: 10,
           following: 5,
           isFollowedByMe: true,
+          isRequestedByMe: false,
         },
       } as AppSlice;
       const NEW_STATE = {
@@ -426,6 +432,7 @@ describe('App Reducer', () => {
           followers: 0,
           following: 0,
           isFollowedByMe: false,
+          isRequestedByMe: false,
         },
       } as AppSlice;
 
@@ -440,11 +447,21 @@ describe('App Reducer', () => {
   describe('followedUser', () => {
     it('should optimistically increment followers and mark as followed', () => {
       const INITIAL_STATE = {
-        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 2,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as AppSlice;
 
       expect(reducer(INITIAL_STATE, AppActions.followedUser())).toEqual({
-        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+        profileMetadata: {
+          followers: 3,
+          following: 5,
+          isFollowedByMe: true,
+          isRequestedByMe: false,
+        },
       } as AppSlice);
     });
   });
@@ -452,22 +469,82 @@ describe('App Reducer', () => {
   describe('unfollowedUser', () => {
     it('should optimistically decrement followers and clear followed', () => {
       const INITIAL_STATE = {
-        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+        profileMetadata: {
+          followers: 3,
+          following: 5,
+          isFollowedByMe: true,
+          isRequestedByMe: false,
+        },
       } as AppSlice;
 
       expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
-        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 2,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as AppSlice);
     });
 
     it('should not decrement followers below zero', () => {
       const INITIAL_STATE = {
-        profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 0,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as AppSlice;
 
       expect(reducer(INITIAL_STATE, AppActions.unfollowedUser())).toEqual({
-        profileMetadata: { followers: 0, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 0,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as AppSlice);
+    });
+  });
+
+  // GitHub issue #2164.
+  describe('follow requests', () => {
+    const METADATA = {
+      followers: 3,
+      following: 5,
+      isFollowedByMe: false,
+      isRequestedByMe: false,
+    };
+
+    it('marks the request once it is sent, and counts no follower', () => {
+      const state = { profileMetadata: METADATA } as AppSlice;
+
+      expect(
+        reducer(state, AppActions.requestedFollow()).profileMetadata,
+      ).toEqual({ ...METADATA, isRequestedByMe: true });
+    });
+
+    it('clears the request once it is withdrawn', () => {
+      const state = {
+        profileMetadata: { ...METADATA, isRequestedByMe: true },
+      } as AppSlice;
+
+      expect(
+        reducer(state, AppActions.withdrewFollowRequest()).profileMetadata,
+      ).toEqual(METADATA);
+    });
+
+    it('clears the request a block deletes', () => {
+      const state = {
+        blockedUserIds: [],
+        profileMetadata: { ...METADATA, isRequestedByMe: true },
+      } as unknown as AppSlice;
+
+      expect(
+        reducer(state, AppActions.blockedUser({ userId: 'blocked' }))
+          .profileMetadata.isRequestedByMe,
+      ).toBe(false);
     });
   });
 
@@ -476,21 +553,36 @@ describe('App Reducer', () => {
     it('adds the account and drops the follow the block removed', () => {
       const INITIAL_STATE = {
         blockedUserIds: ['other'],
-        profileMetadata: { followers: 3, following: 5, isFollowedByMe: true },
+        profileMetadata: {
+          followers: 3,
+          following: 5,
+          isFollowedByMe: true,
+          isRequestedByMe: false,
+        },
       } as AppSlice;
 
       expect(
         reducer(INITIAL_STATE, AppActions.blockedUser({ userId: 'blocked' })),
       ).toEqual({
         blockedUserIds: ['other', 'blocked'],
-        profileMetadata: { followers: 2, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 2,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as AppSlice);
     });
 
     it('leaves the follower count alone when there was no follow', () => {
       const INITIAL_STATE = {
         blockedUserIds: [],
-        profileMetadata: { followers: 3, following: 5, isFollowedByMe: false },
+        profileMetadata: {
+          followers: 3,
+          following: 5,
+          isFollowedByMe: false,
+          isRequestedByMe: false,
+        },
       } as unknown as AppSlice;
 
       expect(

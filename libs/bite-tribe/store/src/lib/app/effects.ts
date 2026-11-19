@@ -50,7 +50,7 @@ import { reachedPostingStreakMilestone } from './utils/posting-streak-milestone'
 import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
 import { claimTopTenWeek, enteredTopTen } from './utils/entered-top-ten';
 import { overtookInTopTen } from './utils/overtook-in-top-ten';
-import type { WeeklyBadge } from 'model';
+import type { PublicUser, WeeklyBadge } from 'model';
 
 @Injectable()
 export class AppEffect {
@@ -459,6 +459,10 @@ export class AppEffect {
    * (issue #1799), and the follow suggestions celebrate theirs the same way.
    * Whether it is the first is asked before the write, which would count as
    * one; an answer that cannot be told is not taken for none.
+   *
+   * A private profile is followed by request instead (issue #2164): the rules
+   * refuse the client its follow edges, and only the owner's accept writes
+   * them. A request is not a follow, so it raises no celebration.
    */
   followUser$ = createEffect(
     () => {
@@ -466,6 +470,12 @@ export class AppEffect {
         ofType(AppActions.followUser),
         throttleTime(500),
         tap(async ({ user }) => {
+          if (user.public !== true) {
+            await this.requestFollow(user);
+
+            return;
+          }
+
           const followedAnybody = await this.api.followsAnyone();
           const followed = await this.api.followUser(user);
 
@@ -481,6 +491,36 @@ export class AppEffect {
     },
     { dispatch: false },
   );
+
+  /**
+   * Withdraws a pending request from the Requested button (issue #2164). A
+   * second tap while the first is in flight is dropped.
+   */
+  withdrawFollowRequest$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AppActions.withdrawFollowRequest),
+      exhaustMap(({ user }) =>
+        from(this.api.withdrawFollowRequest(user.userId)).pipe(
+          map(() => {
+            void this.toast.present({
+              messageKey: 'follow-request-withdrawn',
+              outcome: 'success',
+            });
+
+            return AppActions.withdrewFollowRequest();
+          }),
+          catchError(() => {
+            void this.toast.present({
+              messageKey: 'follow-request-withdraw-failed',
+              outcome: 'failure',
+            });
+
+            return EMPTY;
+          }),
+        ),
+      ),
+    );
+  });
 
   unfollowUser$ = createEffect(
     () => {
@@ -588,4 +628,29 @@ export class AppEffect {
     },
     { dispatch: false },
   );
+
+  /**
+   * Sends the request and tells the user it went out. A refusal reloads the
+   * button's state, because the backend may know better than the page: the
+   * profile turned public, or the owner already accepted an earlier request.
+   */
+  private async requestFollow(user: PublicUser): Promise<void> {
+    try {
+      await this.api.requestFollow(user.userId);
+    } catch {
+      void this.toast.present({
+        messageKey: 'follow-request-failed',
+        outcome: 'failure',
+      });
+      this.store.dispatch(AppActions.reloadProfileMetadata());
+
+      return;
+    }
+
+    this.store.dispatch(AppActions.requestedFollow());
+    void this.toast.present({
+      messageKey: 'follow-request-sent',
+      outcome: 'success',
+    });
+  }
 }

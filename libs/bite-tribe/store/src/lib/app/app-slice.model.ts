@@ -22,6 +22,8 @@ export type AppSlice = {
     followers: number;
     following: number;
     isFollowedByMe: boolean;
+    /** A pending request to follow a private profile (issue #2164). */
+    isRequestedByMe: boolean;
   };
   exchangeRates: Record<string, number>;
   /**

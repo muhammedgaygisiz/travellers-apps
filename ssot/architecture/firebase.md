@@ -88,7 +88,10 @@ now scopes every write by ownership. Three rules of thumb carry the file:
   account that may write it: `Restaurant.ownerUserIds`, `Bite.userId`,
   `Review.authorId`, `Bucketlist.userId`, `BiteTrail.ownerId`, or the document
   id itself for the per-account documents (`settings/{uid}`, a reaction, a
-  rating, a follow relationship, a push installation).
+  rating, a follow relationship, a push installation). A follow relationship is
+  the one such write that also reads the other account: it is allowed only onto a
+  public profile, because a private one is followed by request and only
+  `acceptFollowRequest` writes its edges ([#2164]).
 - **Published text is written by a callable that checks it** ([#1610]). A
   review is created and edited by `saveReview` and `editReview`, and a profile's
   display name, real name, city, about and pronouns by `claimDisplayName` and
@@ -702,3 +705,4 @@ libs/bite-tribe/api
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
 [#2163]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2163
+[#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164

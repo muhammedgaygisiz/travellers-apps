@@ -10,7 +10,8 @@ has collected an optional home city since [#1271], so a profile without one stay
 normal case. Follow suggestions ship with [#1708]. The visited-countries globe
 ships with [#1787]. A changed display name reaches every stored copy of it since
 [#1827]. A profile can state its pronouns since [#1826]. A profile can be reported to the
-Operator since [#1829]. A private profile is unreadable to other accounts since [#1863].
+Operator since [#1829]. A private profile is unreadable to other accounts since [#1863],
+and is followed by request since [#2164]; the owner's side of a request is not built yet.
 
 ## Goal
 
@@ -30,7 +31,25 @@ report one account files against another.
 
 - User views or edits their own profile.
 - User opens public profiles.
-- User follows or unfollows other users.
+- User follows or unfollows other users. A public profile is followed in one tap.
+- User asks to follow another account's private profile ([#2164], epic [#2144]). Follow
+  sends a request through `requestFollow` and writes no follow edge, and the button then
+  reads `Requested`; a toast says the request went out. Tapping `Requested` withdraws the
+  request through `withdrawFollowRequest`, with no confirmation, and the button reads
+  `Follow` again. The button reads the request from `/followRequests/{ownerUid}_{viewerUid}`
+  beside the follow state, so a pending request still reads `Requested` after a reload,
+  and an accepted one reads `Stop following`, as any follow does. The store learns of a
+  request or a withdrawal once the callable has answered, so no follower count moves
+  and a refusal leaves the button as it was, says so, and reloads its state. A request
+  is not a follow: it raises no first-follow celebration and is not counted as
+  `user_followed`. A profile without a saved visibility choice is private here too, as
+  everywhere else.
+- A client may write a follow edge only onto a public profile ([#2164]). The rules refuse
+  creating or rewriting either edge onto a private one, so the request is the only way
+  in, and still let the follower delete their own edges onto either, so a private
+  profile can be unfollowed. An app build from before [#2164] that follows a private
+  profile is refused and puts its button back, as on any failed follow; following a
+  private profile granted nothing before epic [#2144], so nothing is lost.
 - The first person a user follows is celebrated: a short confetti burst and
   `You're now following {{user}}. Welcome to their food journey!`, naming the
   followed account by display name only, never a real name ([#1308]). Every follow
@@ -487,11 +506,17 @@ It changes no declaration: the data collected and its purpose are the same.
 - `profile/:userId`
 - `followers/:userId/:type`
 - `blockUser` and `unblockUser` callables.
-- Follow requests, backend only ([#2163]): the `requestFollow`, `withdrawFollowRequest`,
+- Follow requests ([#2163]): the `requestFollow`, `withdrawFollowRequest`,
   `acceptFollowRequest` and `declineFollowRequest` callables in `request-follow.ts` and
   `answer-follow-request.ts` under `apps/bite-tribe-firebase/functions/src/functions/users`,
   with `follow-requests.spec.ts`, and the `follow requests` cases in
   `firestore-rules.emulator-spec.ts`.
+- The requester's side ([#2164]): `requestFollow`, `withdrawFollowRequest` and
+  `followRequestPending` on `ProfileApiService`; the private-profile branch of the store's
+  `followUser$` and its `withdrawFollowRequest$`, with their cases in `effects.spec.ts`;
+  the `Requested` button of `profile-page`, `profile-follow-request.spec.ts` and the
+  `Other Private Profile Requested` story; and the `follow edges onto a private profile`
+  cases in `firestore-rules.emulator-spec.ts`.
 - Profile reports: the `reportUser` callable; the Report entry and reason dialog of
   `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.
@@ -540,7 +565,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
-- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance, and changes nothing a user sees: the app still follows every profile in one tap until the requester's story switches the button. Three of the epic's questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Three of the epic's questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
@@ -592,3 +617,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2163]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2163
+[#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164

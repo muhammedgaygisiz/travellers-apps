@@ -13,6 +13,7 @@ const CLEAN_PROFILE_METADATA = {
   followers: 0,
   following: 0,
   isFollowedByMe: false,
+  isRequestedByMe: false,
 };
 
 const initialState: AppSlice = {
@@ -218,12 +219,13 @@ export const reducer = createReducer<AppSlice>(
   })),
   on(
     AppActions.loadedProfileMetadata,
-    (state, { followers, following, isFollowedByMe }) => ({
+    (state, { followers, following, isFollowedByMe, isRequestedByMe }) => ({
       ...state,
       profileMetadata: {
         followers,
         following,
         isFollowedByMe,
+        isRequestedByMe,
       },
     }),
   ),
@@ -248,12 +250,21 @@ export const reducer = createReducer<AppSlice>(
       isFollowedByMe: false,
     },
   })),
+  on(AppActions.requestedFollow, (state) => ({
+    ...state,
+    profileMetadata: { ...state.profileMetadata, isRequestedByMe: true },
+  })),
+  on(AppActions.withdrewFollowRequest, (state) => ({
+    ...state,
+    profileMetadata: { ...state.profileMetadata, isRequestedByMe: false },
+  })),
   on(AppActions.loadedBlockedUsers, (state, { userIds }) => ({
     ...state,
     blockedUserIds: userIds,
   })),
   // Blocking removes the follow in both directions on the backend, so the
-  // viewed profile no longer counts the blocker among its followers.
+  // viewed profile no longer counts the blocker among its followers. It
+  // deletes a pending follow request too (issue #2163).
   on(AppActions.blockedUser, (state, { userId }) => ({
     ...state,
     blockedUserIds: state.blockedUserIds.includes(userId)
@@ -265,6 +276,7 @@ export const reducer = createReducer<AppSlice>(
         ? Math.max(state.profileMetadata.followers - 1, 0)
         : state.profileMetadata.followers,
       isFollowedByMe: false,
+      isRequestedByMe: false,
     },
   })),
   on(AppActions.unblockedUser, (state, { userId }) => ({

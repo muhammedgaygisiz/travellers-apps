@@ -34,6 +34,7 @@ class Mock {
   savePublicProfile = jest.fn().mockResolvedValue(undefined);
   retryProfilePhotoUpload = jest.fn().mockResolvedValue(true);
   submitUnfollowClick = jest.fn();
+  submitWithdrawFollowRequestClick = jest.fn();
   reportUser = jest.fn();
   claimDisplayName = jest.fn().mockResolvedValue({
     displayName: '',
@@ -411,11 +412,41 @@ describe(ProfileService.name, () => {
     });
 
     it('counts the follow as coming from a profile', () => {
-      service.followButtonClicked({ userId: 'user123' } as PublicUser);
+      service.followButtonClicked({
+        userId: 'user123',
+        public: true,
+      } as PublicUser);
 
       expect(logEvent).toHaveBeenCalledWith('user_followed', {
         source: 'profile',
       });
+    });
+
+    // GitHub issue #2164.
+    it('counts no follow for a request to a private profile', () => {
+      logEvent.mockClear();
+
+      service.followButtonClicked({
+        userId: 'user123',
+        public: false,
+      } as PublicUser);
+
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  // GitHub issue #2164.
+  describe('withdrawFollowRequestClicked', () => {
+    it('hands the withdrawal to dataAccess', () => {
+      const user = { userId: 'private-id', public: false } as PublicUser;
+      const spy = jest.spyOn(
+        profileDataAccessService,
+        'submitWithdrawFollowRequestClick',
+      );
+
+      service.withdrawFollowRequestClicked(user);
+
+      expect(spy).toHaveBeenCalledWith(user);
     });
   });
 

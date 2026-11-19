@@ -405,6 +405,10 @@ export class BiteTribeStoreService implements StoreService {
     this.store.dispatch(AppActions.unfollowUser({ user }));
   }
 
+  withdrawFollowRequest(user: PublicUser): void {
+    this.store.dispatch(AppActions.withdrawFollowRequest({ user }));
+  }
+
   blockUser(user: PublicUser): void {
     this.store.dispatch(AppActions.blockUser({ user }));
   }

@@ -27,12 +27,14 @@ const profileMetadata: ProfileMetaData = {
   followers: 12,
   following: 7,
   isFollowedByMe: false,
+  isRequestedByMe: false,
 };
 
 const noProfileMetadata: ProfileMetaData = {
   followers: 0,
   following: 0,
   isFollowedByMe: false,
+  isRequestedByMe: false,
 };
 
 const baseUser: PublicUser = {
@@ -243,6 +245,15 @@ export const OtherPrivateProfile: Story = {
     userId: currentUserId,
     profileMetadata,
     bites: [bite],
+  },
+};
+
+// The same private profile after the viewer asked to follow it: the button
+// reads Requested, and tapping it withdraws the request (issue #2164).
+export const OtherPrivateProfileRequested: Story = {
+  args: {
+    ...OtherPrivateProfile.args,
+    profileMetadata: { ...profileMetadata, isRequestedByMe: true },
   },
 };
 

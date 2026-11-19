@@ -31,6 +31,7 @@ class Mock {
   notifySavedProfile = jest.fn();
   followUser = jest.fn();
   unfollowUser = jest.fn();
+  withdrawFollowRequest = jest.fn();
   blockUser = jest.fn();
   unblockUser = jest.fn();
 }
@@ -214,6 +215,18 @@ describe('ProfileDataAccessService', () => {
         const mockUser = MOCK_PUBLIC_USER;
         service.submitUnfollowClick(mockUser);
         expect(unfollowUserSpy).toHaveBeenCalledWith(mockUser);
+      },
+    ));
+  });
+
+  // GitHub issue #2164.
+  describe('submitWithdrawFollowRequestClick', () => {
+    it('should call withdrawFollowRequest on storeService', inject(
+      [ProfileDataAccessService],
+      (service: ProfileDataAccessService) => {
+        const withdrawSpy = jest.spyOn(storeService, 'withdrawFollowRequest');
+        service.submitWithdrawFollowRequestClick(MOCK_PUBLIC_USER);
+        expect(withdrawSpy).toHaveBeenCalledWith(MOCK_PUBLIC_USER);
       },
     ));
   });

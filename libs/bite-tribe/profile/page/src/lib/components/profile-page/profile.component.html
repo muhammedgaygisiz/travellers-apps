@@ -87,6 +87,15 @@
                 <ion-button fill="outline" (click)="openConfirmationDialog()"
                   >{{ 'stop-following' | transloco }}
                 </ion-button>
+              } @else if (this.profileMetadata()?.isRequestedByMe) {
+                <!-- A pending request to a private profile (issue #2164).
+                One tap withdraws it, as one tap sent it. -->
+                <ion-button
+                  fill="outline"
+                  data-testid="profile-follow-requested"
+                  (click)="withdrawFollowRequest()"
+                  >{{ 'follow-requested' | transloco }}
+                </ion-button>
               } @else {
                 <ion-button fill="outline" (click)="onFollow()"
                   >{{ 'follow' | transloco }}

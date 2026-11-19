@@ -71,6 +71,7 @@ class ProfileApiMock {
   fetchFollowing = jest.fn();
   isCurrentUserFollowing = jest.fn();
   isFollowedByCurrentUser = jest.fn();
+  followRequestPending = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -1050,6 +1051,9 @@ describe(BiteTribeApiService.name, () => {
         const isFollowedByCurrentUserSpy = jest
           .spyOn(profileApiService, 'isFollowedByCurrentUser')
           .mockResolvedValue(true);
+        const followRequestPendingSpy = jest
+          .spyOn(profileApiService, 'followRequestPending')
+          .mockResolvedValue(false);
         const fetchFollowersSpy = jest.spyOn(
           profileApiService,
           'fetchFollowers',
@@ -1066,9 +1070,11 @@ describe(BiteTribeApiService.name, () => {
           followers: 12,
           following: 4,
           isFollowedByMe: true,
+          isRequestedByMe: false,
         });
         expect(getUserByIdSpy).toHaveBeenCalledWith(userId);
         expect(isFollowedByCurrentUserSpy).toHaveBeenCalledWith(userId);
+        expect(followRequestPendingSpy).toHaveBeenCalledWith(userId);
         // The aggregate path must not load the whole subcollections.
         expect(fetchFollowersSpy).not.toHaveBeenCalled();
         expect(fetchFollowingSpy).not.toHaveBeenCalled();
@@ -1093,6 +1099,9 @@ describe(BiteTribeApiService.name, () => {
         const isCurrentUserFollowingSpy = jest
           .spyOn(profileApiService, 'isCurrentUserFollowing')
           .mockReturnValue(Promise.resolve(true));
+        jest
+          .spyOn(profileApiService, 'followRequestPending')
+          .mockResolvedValue(true);
 
         const userId = 'user-id';
         const metadata = await service.fetchFollowMetadata(userId);
@@ -1101,6 +1110,7 @@ describe(BiteTribeApiService.name, () => {
           followers: 2,
           following: 1,
           isFollowedByMe: true,
+          isRequestedByMe: true,
         });
         expect(fetchFollowersSpy).toHaveBeenCalledWith(userId);
         expect(fetchFollowingSpy).toHaveBeenCalledWith(userId);

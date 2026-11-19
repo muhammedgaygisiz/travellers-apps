@@ -26,6 +26,9 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (retryPhotoUpload)="service.retryProfilePhotoUpload()"
       (followButtonClick)="service.followButtonClicked($event)"
       (unfollowButtonClick)="service.unfollowButtonClicked($event)"
+      (withdrawFollowRequestClick)="
+        service.withdrawFollowRequestClicked($event)
+      "
       (blockButtonClick)="service.blockButtonClicked($event)"
       (unblockButtonClick)="service.unblockButtonClicked($event)"
       (reportProfile)="service.reportUser($event)"

@@ -23,6 +23,7 @@ import {
   ReportBiteResult,
   ReportReviewResult,
   ReportUserResult,
+  RequestFollowResult,
   Restaurant,
   Review,
   SaveToBucketListParams,
@@ -33,6 +34,7 @@ import {
   ReviewReportReason,
   WeekRange,
   WeeklyBites,
+  WithdrawFollowRequestResult,
 } from 'model';
 import { MenuApiService } from './menu-api/menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
@@ -502,6 +504,14 @@ export class BiteTribeApiService {
     return this.profileApiService.followUser(user);
   }
 
+  requestFollow(userId: string): Promise<RequestFollowResult> {
+    return this.profileApiService.requestFollow(userId);
+  }
+
+  withdrawFollowRequest(userId: string): Promise<WithdrawFollowRequestResult> {
+    return this.profileApiService.withdrawFollowRequest(userId);
+  }
+
   async followsAnyone(): Promise<boolean | undefined> {
     return this.profileApiService.followsAnyone();
   }
@@ -639,6 +649,7 @@ export class BiteTribeApiService {
     followers: number;
     following: number;
     isFollowedByMe: boolean;
+    isRequestedByMe: boolean;
   }> {
     // Prefer the aggregate counts stored on the user document over loading the
     // whole followers/following subcollections, mirroring how `biteCount` is
@@ -652,13 +663,16 @@ export class BiteTribeApiService {
       typeof followersCount === 'number' &&
       typeof followingCount === 'number'
     ) {
-      const isFollowedByMe =
-        await this.profileApiService.isFollowedByCurrentUser(userId);
+      const [isFollowedByMe, isRequestedByMe] = await Promise.all([
+        this.profileApiService.isFollowedByCurrentUser(userId),
+        this.profileApiService.followRequestPending(userId),
+      ]);
 
       return {
         followers: followersCount,
         following: followingCount,
         isFollowedByMe,
+        isRequestedByMe,
       };
     }
 
@@ -666,11 +680,14 @@ export class BiteTribeApiService {
     const following = await this.profileApiService.fetchFollowing(userId);
     const isCurrentUserFollowing =
       await this.profileApiService.isCurrentUserFollowing(followers);
+    const isRequestedByMe =
+      await this.profileApiService.followRequestPending(userId);
 
     return {
       followers: followers.length ?? 0,
       following: following.length ?? 0,
       isFollowedByMe: isCurrentUserFollowing,
+      isRequestedByMe,
     };
   }
 

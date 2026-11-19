@@ -4,7 +4,7 @@
   .photo {
     position: relative;
 
-    &.is-pending bt-restaurant-image {
+    &.is-pending image-upload {
       filter: blur(4px);
     }
   }
@@ -19,7 +19,13 @@
     gap: 8px;
     padding: 16px;
     text-align: center;
+    border-radius: 12px;
+    pointer-events: none;
     background: rgb(var(--ion-background-color-rgb, 255, 255, 255), 0.7);
+
+    bt-retry-upload-button {
+      pointer-events: auto;
+    }
   }
 
   .photo-actions {

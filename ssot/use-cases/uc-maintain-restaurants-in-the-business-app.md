@@ -43,7 +43,12 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   once issue [#2131] adds one.
 - The Restaurant Owner sets the Restaurant's photo on the edit page (issue
   [#2126]). The business app could not before: a photo came from candidate
-  verification or not at all. It uploads the way a Bite or profile photo does:
+  verification or not at all. The photo is one box, the way Create Bite's is: the shared
+  image-upload shows the current photo with its edit and delete overlay, and
+  the upload box only once the photo is deleted; Cancel brings it back. A
+  Restaurant with no photo shows the upload box alone - never the consumer
+  app's "not verified" placeholder, because every Restaurant on this page is
+  verified and held by the account. It uploads the way a Bite or profile photo does:
   Save marks the Restaurant `imageStatus: pending` and sends the photo in the
   background, the old photo stays on show with the new one blurred under a
   spinner, and `setRestaurantImagePathOnUpload` points the Restaurant at it

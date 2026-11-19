@@ -7,6 +7,35 @@ import {
   UserManagementDataAccessService,
 } from 'bite-tribe-admin/user-management-data-access';
 
+/**
+ * The restaurants a refused role write names, when `setUserRoles` refused to
+ * drop `business` from an account that still owns them (issue #1539).
+ *
+ * Read from the error's `details` rather than its message, so the toast stays
+ * in the app's own words. Any other failure returns `undefined`.
+ */
+export const ownedRestaurantsOf = (error: unknown): string[] | undefined => {
+  const details: unknown =
+    typeof error === 'object' && error !== null && 'details' in error
+      ? error.details
+      : undefined;
+
+  if (
+    typeof details !== 'object' ||
+    details === null ||
+    !('reason' in details) ||
+    details.reason !== 'role-holdings' ||
+    !('holdings' in details) ||
+    !Array.isArray(details.holdings)
+  ) {
+    return undefined;
+  }
+
+  return details.holdings.filter(
+    (holding): holding is string => typeof holding === 'string',
+  );
+};
+
 @Injectable({ providedIn: 'root' })
 export class UserManagementService {
   private readonly dataAccess = inject(UserManagementDataAccessService);
@@ -65,10 +94,17 @@ export class UserManagementService {
       });
     } catch (error) {
       console.error('Failed to save roles:', error);
-      await this.toastService.present({
-        messageKey: 'admin-users-save-failed',
-        outcome: 'failure',
-      });
+      const restaurants = ownedRestaurantsOf(error);
+
+      await this.toastService.present(
+        restaurants?.length
+          ? {
+              messageKey: 'admin-users-save-refused-owns-restaurants',
+              params: { restaurants: restaurants.join(', ') },
+              outcome: 'failure',
+            }
+          : { messageKey: 'admin-users-save-failed', outcome: 'failure' },
+      );
     } finally {
       this.savingUid.set(undefined);
     }

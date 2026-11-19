@@ -1,5 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
+import { RESTAURANT_COLLECTION } from '../restaurants/restaurant-authority';
 import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
 import {
@@ -117,6 +119,86 @@ const assertRolesCompatible = (roles: BiteTribeRole[]): void => {
 };
 
 /**
+ * What an account holds through a role, listed so that dropping the role
+ * cannot leave those holdings behind (issue #1539).
+ *
+ * `assignRestaurantOwner` refuses an account without `business`, because the
+ * business app turns such an account away at the door. Without this list the
+ * same invariant would hold only at the moment of assignment: revoking the
+ * role afterwards left the restaurant naming an owner who could not open it.
+ *
+ * Each entry returns a readable label per holding, so the refusal can name
+ * what to revoke first. A role whose holdings matter adds one entry here.
+ */
+interface RoleHoldings {
+  readonly role: BiteTribeRole;
+  readonly holdingsOf: (uid: string) => Promise<string[]>;
+}
+
+const ownedRestaurantsOf = async (uid: string): Promise<string[]> => {
+  const snapshot = await getFirestore()
+    .collection(RESTAURANT_COLLECTION)
+    .where('ownerUserIds', 'array-contains', uid)
+    .get();
+
+  return snapshot.docs.map((doc) => {
+    const name: unknown = doc.get('name');
+
+    return typeof name === 'string' && name ? `${name} (${doc.id})` : doc.id;
+  });
+};
+
+/**
+ * The `details.reason` of the refusal, so the admin app can show the holdings
+ * without parsing the message.
+ */
+export const ROLE_HOLDINGS_REFUSAL = 'role-holdings';
+
+const ROLE_HOLDINGS: readonly RoleHoldings[] = [
+  { role: 'business', holdingsOf: ownedRestaurantsOf },
+];
+
+const currentRolesOf = (
+  claims: Record<string, unknown> | undefined,
+): BiteTribeRole[] => {
+  const roles = claims?.[ROLES_CLAIM];
+
+  return Array.isArray(roles) ? roles.filter(isBiteTribeRole) : [];
+};
+
+/**
+ * Refuses a write that drops a role while the account still holds something
+ * through it.
+ *
+ * Only a role the account holds now and the submitted set leaves out is
+ * checked, so a grant, or a write that keeps every current role, reads
+ * nothing from Firestore. Refusing rather than cascading is deliberate: taking
+ * a restaurant away is an operator decision with its own reason and log entry,
+ * not a side effect of a role write.
+ */
+const assertDroppedRolesHoldNothing = async (
+  uid: string,
+  currentRoles: BiteTribeRole[],
+  roles: BiteTribeRole[],
+): Promise<void> => {
+  for (const { role, holdingsOf } of ROLE_HOLDINGS) {
+    if (!currentRoles.includes(role) || roles.includes(role)) {
+      continue;
+    }
+
+    const holdings = await holdingsOf(uid);
+
+    if (holdings.length) {
+      throw new HttpsError(
+        'failed-precondition',
+        `The account still owns ${holdings.join(', ')}. Revoke its ownership on Restaurant ownership before removing the ${role} role.`,
+        { reason: ROLE_HOLDINGS_REFUSAL, role, holdings },
+      );
+    }
+  }
+};
+
+/**
  * Grants and revokes BiteTribe roles on another account.
  *
  * This is the callable behind the admin app's role management, and it is the
@@ -137,6 +219,10 @@ const assertRolesCompatible = (roles: BiteTribeRole[]): void => {
  * `business` and `staff` cannot be granted together. The two are mutually
  * exclusive on one account, and the refusal happens before the target is even
  * resolved so a conflicting payload cannot cost an Auth lookup (issue #1075).
+ *
+ * `business` cannot be removed while the account still owns a restaurant. The
+ * refusal names the restaurants, so the operator knows what to revoke first
+ * (issue #1539).
  */
 export const setUserRolesHandler = async (
   request: CallableRequest<SetUserRolesRequest>,
@@ -154,6 +240,14 @@ export const setUserRolesHandler = async (
       'You cannot remove your own admin role.',
     );
   }
+
+  const target = await getAuth().getUser(targetUid);
+
+  await assertDroppedRolesHoldNothing(
+    targetUid,
+    currentRolesOf(target.customClaims),
+    roles,
+  );
 
   const writtenRoles = await setRoles(targetUid, roles);
 

@@ -139,9 +139,11 @@ restaurant, and the toast names the restaurants to revoke ([#1539]).
 
 ### Account Deletion
 
-If the owner deletes their own account, the restaurant is not released today.
-It keeps naming an owner that no longer exists until you revoke it by hand
-([#1568]).
+If the owner deletes their own account, the account is taken off each
+restaurant it owns ([#1568]). Other owners keep the restaurant. If it was the
+last owner, the restaurant becomes `revoked`, just as after a manual revoke,
+and you can assign it to someone else. Nobody is notified, so check the
+restaurant on `Restaurant ownership` when an owner tells you they are leaving.
 
 ### What Stays With The Restaurant
 

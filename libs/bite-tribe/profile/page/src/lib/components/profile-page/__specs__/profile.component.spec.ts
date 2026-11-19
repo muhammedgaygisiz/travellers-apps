@@ -379,6 +379,40 @@ describe('ProfileComponent', () => {
 
       expect(chip()).toBeNull();
     });
+
+    it('renders no chip on another private profile', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        public: false,
+        postingStreak: streak,
+      });
+      compRef.setInput('userId', 'user2');
+      fixture.detectChanges();
+
+      expect(component.postingStreak()).toBe(0);
+      expect(chip()).toBeNull();
+    });
+
+    it('renders no chip at 1 week', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        postingStreak: { weeks: 1, lastPostingWeek: '2026-11-16' },
+      });
+      compRef.setInput('userId', 'user1');
+      fixture.detectChanges();
+
+      expect(chip()).toBeNull();
+    });
+
+    it('hides the flame from screen readers, so only the text is read', () => {
+      compRef.setInput('user', { userId: 'user1', postingStreak: streak });
+      compRef.setInput('userId', 'user1');
+      fixture.detectChanges();
+
+      const flame = chip()?.querySelector('ion-icon');
+      expect(flame?.getAttribute('name')).toBe('flame');
+      expect(flame?.getAttribute('aria-hidden')).toBe('true');
+    });
   });
 
   describe('profile visibility', () => {

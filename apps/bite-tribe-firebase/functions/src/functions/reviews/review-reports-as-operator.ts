@@ -5,6 +5,12 @@ import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import { isTombstone } from './delete-review';
 import {
+  HiddenReview,
+  hiddenReviewRef,
+  hiddenUpdate,
+  isHidden,
+} from './hidden-review';
+import {
   REVIEW_REPORT_REASONS,
   REVIEW_REPORTS_COLLECTION,
   ReviewReportReason,
@@ -208,7 +214,9 @@ export const listReviewReportsHandler = async (
       biteId: '',
     };
     const review = reviews.get(reviewId);
-    const live = review !== undefined && !isTombstone(review);
+    // A hidden item has no text left on the public document to judge.
+    const live =
+      review !== undefined && !isTombstone(review) && !isHidden(review);
     const biteId = biteIdOf(review?.['biteId']) || reportedBiteId;
     const parentId = stringOf(review?.['parentReviewId']);
     const parent = parentId ? parents.get(parentId) : undefined;
@@ -227,11 +235,13 @@ export const listReviewReportsHandler = async (
             parent: {
               reviewId: parentId,
               text:
-                parent && !isTombstone(parent)
+                parent && !isTombstone(parent) && !isHidden(parent)
                   ? stringOf(parent['review'])
                   : '',
               authorDisplayName:
-                parent && !isTombstone(parent) ? nameOf(parent) : '',
+                parent && !isTombstone(parent) && !isHidden(parent)
+                  ? nameOf(parent)
+                  : '',
             },
           }
         : {}),
@@ -344,4 +354,130 @@ export const dismissReviewReportsHandler = async (
 
 export const dismissReviewReports = onAppCheck<DismissReviewReportsRequest>(
   dismissReviewReportsHandler,
+);
+
+interface HideReviewAsOperatorRequest {
+  reviewId?: unknown;
+  reason?: unknown;
+}
+
+export interface HideReviewAsOperatorResult {
+  reviewId: string;
+  dismissedReports: number;
+}
+
+/**
+ * Takes a review or reply out of its thread and keeps its text (GitHub issue
+ * #2118).
+ *
+ * The **Hide** answer in the queue, beside Keep and Block author. Neither of
+ * those removes the text, and a delete would take the replies under it down
+ * with it. So in one transaction this:
+ *
+ * - copies the text and the author's name to `/hiddenReviews/{reviewId}`, with
+ *   the operator, the reason and the time;
+ * - removes them from the public document and sets `hiddenAt`, leaving
+ *   everything that places it, so the item keeps its place in the thread;
+ * - dismisses the open reports on it, which leaves the queue.
+ *
+ * The reason is required for the reason it is on `deleteBiteAsOperator`: the
+ * log entry is the only record of why.
+ */
+export const hideReviewAsOperatorHandler = async (
+  request: CallableRequest<HideReviewAsOperatorRequest>,
+): Promise<HideReviewAsOperatorResult> => {
+  requireAdmin(request);
+  const reviewId = parseReviewId(request.data?.reviewId);
+  const reason = parseReason(request.data?.reason);
+  const operatorUid = request.auth?.uid ?? '';
+
+  const db = getFirestore();
+  const reference = db.collection(REVIEWS_COLLECTION).doc(reviewId);
+
+  const dismissedReports = await db.runTransaction(async (transaction) => {
+    const stored = await transaction.get(reference);
+
+    if (!stored.exists) {
+      throw new HttpsError('not-found', `No review found for ${reviewId}.`);
+    }
+
+    const data = stored.data() ?? {};
+
+    if (isTombstone(data)) {
+      throw new HttpsError(
+        'failed-precondition',
+        'A deleted review cannot be hidden.',
+      );
+    }
+
+    if (isHidden(data)) {
+      throw new HttpsError(
+        'failed-precondition',
+        'This review is already hidden.',
+      );
+    }
+
+    const reports = await transaction.get(
+      db
+        .collection(REVIEW_REPORTS_COLLECTION)
+        .where('reviewId', '==', reviewId),
+    );
+    const open = reports.docs.filter((doc) => doc.data()['status'] === 'open');
+
+    if (open.length > WRITE_BATCH_LIMIT) {
+      // A transaction holds 500 writes. No review has had this many accounts
+      // report it; failing loudly is better than half a hide.
+      throw new HttpsError(
+        'resource-exhausted',
+        `Review ${reviewId} has too many open reports to hide in one step.`,
+      );
+    }
+
+    const now = new Date();
+    const parentReviewId = stringOf(data['parentReviewId']);
+    const createdAt = stringOf(data['createdAt']);
+    const updatedAt = stringOf(data['updatedAt']);
+    const copy: HiddenReview = {
+      reviewId,
+      review: stringOf(data['review']),
+      author: stringOf(data['author']),
+      authorId: stringOf(data['authorId']),
+      biteId: stringOf(data['biteId']),
+      threadId: stringOf(data['threadId']) || reviewId,
+      ...(parentReviewId ? { parentReviewId } : {}),
+      ...(createdAt ? { createdAt } : {}),
+      ...(updatedAt ? { updatedAt } : {}),
+      hiddenBy: operatorUid,
+      reason,
+      hiddenAt: now.toISOString(),
+      hiddenAtTimestamp: now.getTime(),
+    };
+
+    transaction.set(hiddenReviewRef(db, reviewId), copy);
+    transaction.update(reference, hiddenUpdate(now));
+    open.forEach((doc) =>
+      transaction.update(doc.ref, {
+        status: 'dismissed',
+        dismissedAt: now.toISOString(),
+        dismissedAtTimestamp: now.getTime(),
+      }),
+    );
+
+    return open.length;
+  });
+
+  logOperatorAction(request, {
+    action: 'hideReviewAsOperator',
+    targetType: 'review',
+    targetId: reviewId,
+    outcome: 'succeeded',
+    reason,
+    details: { dismissedReports },
+  });
+
+  return { reviewId, dismissedReports };
+};
+
+export const hideReviewAsOperator = onAppCheck<HideReviewAsOperatorRequest>(
+  hideReviewAsOperatorHandler,
 );

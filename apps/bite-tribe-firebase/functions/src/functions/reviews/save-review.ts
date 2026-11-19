@@ -6,6 +6,7 @@ import { requireMember } from '../shared/roles';
 import { checkContent } from '../shared/moderation/check-content';
 import { recordContentRefusal } from '../shared/moderation/content-refusal';
 import { isTombstone } from './delete-review';
+import { isHidden } from './hidden-review';
 
 /**
  * Reviews and replies are written here rather than by the app (issue #1610),
@@ -101,6 +102,15 @@ const requireAnswerable = async (
       'A deleted review cannot be answered.',
     );
   }
+
+  // A hidden item (issue #2118) keeps the replies it had and takes no more:
+  // a reply to text nobody can read starts a conversation about nothing.
+  if (isHidden(parent.data())) {
+    throw new HttpsError(
+      'failed-precondition',
+      'A hidden review cannot be answered.',
+    );
+  }
 };
 
 export const saveReviewForUser = async (
@@ -182,6 +192,15 @@ export const editReviewForUser = async (
     throw new HttpsError(
       'permission-denied',
       'Only the author can edit a review.',
+    );
+  }
+
+  // Editing would put text back on a document an operator took it off
+  // (issue #2118).
+  if (isHidden(stored.data())) {
+    throw new HttpsError(
+      'failed-precondition',
+      'A hidden review cannot be edited.',
     );
   }
 

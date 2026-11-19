@@ -682,6 +682,16 @@ beforeEach(async () => {
       reason: 'harassment',
       status: 'open',
     });
+    await setDoc(doc(db, 'hiddenReviews', 'review-1'), {
+      reviewId: 'review-1',
+      review: 'Hidden text.',
+      author: 'Consumer',
+      authorId: CONSUMER,
+      biteId: '/bites/consumer-bite',
+      threadId: 'review-1',
+      hiddenBy: OPERATOR,
+      reason: 'harassment',
+    });
     await setDoc(doc(db, 'accountDeletions', 'deletion-1'), {
       userId: 'gone-uid',
     });
@@ -3589,6 +3599,39 @@ describe('backend-owned collections', () => {
     await assertFails(
       updateDoc(doc(asOperator(), 'reviewReports', report), {
         status: 'dismissed',
+      }),
+    );
+  });
+
+  it('lets only an operator and the author read a hidden review, and nobody write it', async () => {
+    await assertSucceeds(
+      getDoc(doc(asOperator(), 'hiddenReviews', 'review-1')),
+    );
+    await assertSucceeds(getDocs(collection(asOperator(), 'hiddenReviews')));
+    await assertSucceeds(
+      getDoc(doc(asConsumer(), 'hiddenReviews', 'review-1')),
+    );
+    // Another member cannot read the text, alone or by listing.
+    await assertFails(getDoc(doc(asStranger(), 'hiddenReviews', 'review-1')));
+    await assertFails(getDocs(collection(asStranger(), 'hiddenReviews')));
+    await assertFails(getDocs(collection(asConsumer(), 'hiddenReviews')));
+    await assertFails(
+      setDoc(doc(asConsumer(), 'hiddenReviews', 'review-2'), {
+        authorId: CONSUMER,
+        review: 'Mine.',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'hiddenReviews', 'review-1'), {
+        review: 'Edited.',
+      }),
+    );
+    await assertFails(
+      deleteDoc(doc(asConsumer(), 'hiddenReviews', 'review-1')),
+    );
+    await assertFails(
+      updateDoc(doc(asOperator(), 'hiddenReviews', 'review-1'), {
+        reason: 'changed',
       }),
     );
   });

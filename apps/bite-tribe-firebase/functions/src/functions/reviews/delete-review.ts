@@ -11,6 +11,7 @@ import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
+import { hiddenReviewRef, isHidden } from './hidden-review';
 
 /**
  * Withdrawing a review or reply (GitHub issue #2116).
@@ -68,6 +69,8 @@ export const tombstoneUpdate = (now: Date): Record<string, unknown> => ({
   authorId: FieldValue.delete(),
   updatedAt: FieldValue.delete(),
   updatedAtTimestamp: FieldValue.delete(),
+  hiddenAt: FieldValue.delete(),
+  hiddenAtTimestamp: FieldValue.delete(),
   deletedAt: now.toISOString(),
   deletedAtTimestamp: now.getTime(),
 });
@@ -158,6 +161,13 @@ export const deleteReviewForUser = async (
 
     if (!replies.empty) {
       transaction.update(reference, tombstoneUpdate(new Date()));
+
+      // A hidden item's kept text goes with it (issue #2118). A deleted
+      // document's copy is removed by `deleteHiddenReviewOnReviewDelete`; a
+      // tombstone is an update, which that trigger never sees.
+      if (isHidden(stored.data())) {
+        transaction.delete(hiddenReviewRef(db, reviewId));
+      }
 
       return { status: 'tombstoned' as const, prunedTombstones: 0 };
     }

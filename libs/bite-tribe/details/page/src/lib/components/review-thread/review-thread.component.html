@@ -108,13 +108,40 @@
   cut most names short and left the text a narrow, ragged column (#721). While
   the author edits, the editor takes the place of the text and the actions. A
   deleted item that still holds up replies is one muted line in its place
-  (#2116).
+  (#2116), and so is a hidden one (#2118), except to its own author, who sees
+  the text under a marker and can only delete it.
 -->
 <ng-template #entry let-review let-replyTestId="replyTestId">
   @if (isDeleted(review)) {
     <p class="review-deleted" data-testid="deleted-review">
       {{
         (review.parentReviewId ? 'reply-deleted' : 'review-deleted') | transloco
+      }}
+    </p>
+  } @else if (isOwnHidden(review)) {
+    <div class="review-hidden-own" data-testid="own-hidden-review">
+      <p class="review-hidden-marker" data-testid="hidden-marker">
+        <ion-icon name="eye-off-outline" aria-hidden="true" />
+        {{ 'review-hidden-own-marker' | transloco }}
+      </p>
+      <p class="review-text">{{ review.hiddenReview }}</p>
+
+      <div class="review-actions">
+        <ion-button
+          fill="clear"
+          size="small"
+          class="text-action"
+          data-testid="delete-review"
+          (click)="requestDelete(review)"
+        >
+          {{ 'delete' | transloco }}
+        </ion-button>
+      </div>
+    </div>
+  } @else if (isHidden(review)) {
+    <p class="review-deleted" data-testid="hidden-review">
+      {{
+        (review.parentReviewId ? 'reply-hidden' : 'review-hidden') | transloco
       }}
     </p>
   } @else {
@@ -171,7 +198,7 @@
     } @else {
       <p class="review-text">{{ review.review }}</p>
 
-      @if (canAnswer(review) || canEdit(review) || canReport(review)) {
+      @if (canAnswer(review) || canDelete(review) || canReport(review)) {
         <div class="review-actions">
           @if (canAnswer(review)) {
             <ion-button

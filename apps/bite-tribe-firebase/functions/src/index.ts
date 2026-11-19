@@ -50,8 +50,10 @@ export { deleteReview } from './functions/reviews/delete-review';
 export { reportReview } from './functions/reviews/report-review';
 export {
   dismissReviewReports,
+  hideReviewAsOperator,
   listReviewReports,
 } from './functions/reviews/review-reports-as-operator';
+export { deleteHiddenReviewOnReviewDelete } from './functions/reviews/delete-hidden-review-on-review-delete';
 export { deleteReviewReportsOnReviewDelete } from './functions/reviews/delete-review-reports-on-review-delete';
 export { removeSelfFromBiteTags } from './functions/bites/remove-self-from-bite-tags';
 export { reportUser } from './functions/users/report-user';

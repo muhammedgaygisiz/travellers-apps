@@ -174,4 +174,71 @@ describe(loadReviewsByBiteId.name, () => {
       ]);
     });
   });
+
+  /** Issue #2118: the text of a hidden item is read for its author only. */
+  describe('given a hidden review', () => {
+    const hidden = {
+      id: 'hidden1',
+      data: {
+        biteId: '/bites/biteId123',
+        authorId: 'mo',
+        hiddenAt: '2026-11-18T10:00:00.000Z',
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (FirebaseFirestore.getCollection as jest.Mock).mockResolvedValue({
+        snapshots: [hidden],
+      });
+      (FirebaseFirestore.getDocument as jest.Mock).mockImplementation(
+        async ({ reference }: { reference: string }) => ({
+          snapshot: {
+            data: reference.startsWith('hiddenReviews/')
+              ? { review: 'The original text.' }
+              : { displayName: 'Mo' },
+          },
+        }),
+      );
+    });
+
+    it('hands it on with no text and no author to another reader', async () => {
+      const [review] = await loadReviewsByBiteId('biteId123', 'someone-else');
+
+      expect(review).toMatchObject({ review: '', author: '' });
+      expect(review.hiddenReview).toBeUndefined();
+      expect(FirebaseFirestore.getDocument).not.toHaveBeenCalledWith({
+        reference: 'hiddenReviews/hidden1',
+      });
+    });
+
+    it('reads the kept text for its own author', async () => {
+      const [review] = await loadReviewsByBiteId('biteId123', 'mo');
+
+      expect(review).toMatchObject({
+        review: '',
+        author: '',
+        hiddenReview: 'The original text.',
+      });
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: 'hiddenReviews/hidden1',
+      });
+    });
+
+    it('falls back to the hidden line when the kept text cannot be read', async () => {
+      (FirebaseFirestore.getDocument as jest.Mock).mockImplementation(
+        async ({ reference }: { reference: string }) => {
+          if (reference.startsWith('hiddenReviews/')) {
+            throw new Error('permission-denied');
+          }
+
+          return { snapshot: { data: { displayName: 'Mo' } } };
+        },
+      );
+
+      const [review] = await loadReviewsByBiteId('biteId123', 'mo');
+
+      expect(review.hiddenReview).toBeUndefined();
+    });
+  });
 });

@@ -5,7 +5,7 @@ import { ReportedReview } from 'model';
 import { ReviewReportsDataAccessService } from 'bite-tribe-admin/bites-data-access';
 
 /** The action under way on the selected review, if any. */
-export type ReviewReportAction = 'block' | 'dismiss';
+export type ReviewReportAction = 'block' | 'dismiss' | 'hide';
 
 /**
  * Runs the operator's queue of reported reviews and replies and holds what it
@@ -85,6 +85,23 @@ export class ReviewReportsService {
       () => this.dataAccess.dismiss(reviewId, reason),
       'admin-review-reports-dismissed',
       'admin-review-reports-dismiss-failed',
+      () =>
+        this.found.update((reviews) =>
+          reviews.filter((review) => review.reviewId !== reviewId),
+        ),
+    );
+  }
+
+  /**
+   * Hides the review from its thread (issue #2118): its reports close with it,
+   * so it leaves the queue.
+   */
+  async hide(reviewId: string, reason: string): Promise<void> {
+    await this.run(
+      'hide',
+      () => this.dataAccess.hide(reviewId, reason),
+      'admin-review-reports-hidden',
+      'admin-review-reports-hide-failed',
       () =>
         this.found.update((reviews) =>
           reviews.filter((review) => review.reviewId !== reviewId),

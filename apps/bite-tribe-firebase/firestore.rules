@@ -1406,6 +1406,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    /**
+     * The kept text of a review or reply an operator hid (GitHub issue #2118).
+     *
+     * ```text
+     * /hiddenReviews/{reviewId}
+     * ```
+     *
+     * `/reviews` is readable by every member, so hidden text cannot stay there
+     * behind a flag the app filters on. `hideReviewAsOperator` moves it here.
+     * An operator reads it to review the decision, and the item's own author
+     * reads it to see what was hidden; nobody else does, and nobody writes it
+     * outside the Admin SDK.
+     */
+    match /hiddenReviews/{reviewId} {
+      allow read: if isOperator() || owns(resource.data, 'authorId');
+      allow write: if false;
+    }
+
     // ------------------------------------------------------------------- rest
 
     /**

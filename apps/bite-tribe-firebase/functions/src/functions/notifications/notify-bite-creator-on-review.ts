@@ -120,6 +120,21 @@ export const notifyBiteCreatorOnReview = onDocumentCreated(
       return;
     }
 
+    // The reads above take time, and an operator can hide a review in it
+    // (issue #2118). A notification about a review nobody can read any more
+    // would quote nothing, so the review is read once more right before it.
+    const current = await db.doc(`reviews/${snap.id}`).get();
+    const currentData = current.data();
+
+    if (
+      !current.exists ||
+      currentData?.['hiddenAt'] !== undefined ||
+      currentData?.['deletedAt'] !== undefined
+    ) {
+      logger.info('--- Review is no longer visible, aborting notification');
+      return;
+    }
+
     await sendLocalizedNotification({
       uids: [biteCreatorUid],
       data: {

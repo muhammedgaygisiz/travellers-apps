@@ -22,6 +22,7 @@ import { ReviewReportsService } from './review-reports.service';
     (selectReview)="service.select($event)"
     (blockAuthor)="service.blockAuthor($event)"
     (dismissReports)="service.dismiss($event.reviewId, $event.reason)"
+    (hideReview)="service.hide($event.reviewId, $event.reason)"
     (logoutClick)="service.logout()"
   />`,
   changeDetection: ChangeDetectionStrategy.OnPush,

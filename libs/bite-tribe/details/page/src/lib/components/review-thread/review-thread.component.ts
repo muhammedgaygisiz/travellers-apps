@@ -210,7 +210,46 @@ export class ReviewThreadComponent {
   protected canEdit(review: Review): boolean {
     const userId = this.userId();
 
-    return !!userId && review.authorId === userId && !this.isDeleted(review);
+    return (
+      !!userId &&
+      review.authorId === userId &&
+      !this.isDeleted(review) &&
+      !this.isHidden(review)
+    );
+  }
+
+  /**
+   * Delete is offered wherever edit is, and also on the author's own hidden
+   * item (issue #2118): `deleteReview` removes it with its kept copy, under the
+   * same replies rule as any other item.
+   */
+  protected canDelete(review: Review): boolean {
+    return this.canEdit(review) || this.isOwnHidden(review);
+  }
+
+  /**
+   * An item an operator hid (issue #2118). Like a tombstone it keeps its place
+   * and its replies, and to everybody but its author shows only that it was
+   * hidden: no text, no name, no actions.
+   */
+  protected isHidden(review: Review): boolean {
+    return !!review.hiddenAt && !this.isDeleted(review);
+  }
+
+  /**
+   * The reader's own hidden item, whose kept text the loader read for them
+   * alone. They see it marked as hidden, so moderation is not mistaken for a
+   * bug and the text is not posted again.
+   */
+  protected isOwnHidden(review: Review): boolean {
+    const userId = this.userId();
+
+    return (
+      this.isHidden(review) &&
+      !!userId &&
+      review.authorId === userId &&
+      review.hiddenReview !== undefined
+    );
   }
 
   /**
@@ -235,7 +274,8 @@ export class ReviewThreadComponent {
       this.canReply() &&
       !!userId &&
       review.authorId !== userId &&
-      !this.isDeleted(review)
+      !this.isDeleted(review) &&
+      !this.isHidden(review)
     );
   }
 
@@ -250,7 +290,7 @@ export class ReviewThreadComponent {
   }
 
   protected canAnswer(review: Review): boolean {
-    return this.canReply() && !this.isDeleted(review);
+    return this.canReply() && !this.isDeleted(review) && !this.isHidden(review);
   }
 
   /**

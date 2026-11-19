@@ -177,8 +177,13 @@
               }
 
               <h4 class="review-reports__section">
-                {{ 'admin-review-reports-keep-title' | transloco }}
+                {{ 'admin-review-reports-decide-title' | transloco }}
               </h4>
+              @if (review.exists) {
+                <ion-note class="review-reports__hint">
+                  {{ 'admin-review-reports-hide-hint' | transloco }}
+                </ion-note>
+              }
               <ion-note class="review-reports__hint">
                 {{ 'admin-review-reports-dismiss-hint' | transloco }}
               </ion-note>
@@ -196,6 +201,21 @@
                   />
                 </ion-item>
               </ion-list>
+              @if (review.exists) {
+                <ion-button
+                  expand="block"
+                  color="danger"
+                  class="ion-margin-top"
+                  data-testid="admin-review-reports-hide"
+                  [disabled]="!canHide()"
+                  (click)="onHide()"
+                >
+                  @if (action() === 'hide') {
+                    <ion-spinner name="crescent" slot="start" />
+                  }
+                  {{ 'admin-review-reports-hide' | transloco }}
+                </ion-button>
+              }
               <ion-button
                 expand="block"
                 fill="outline"

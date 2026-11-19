@@ -35,6 +35,7 @@ import {
   downloadOutline,
   earthOutline,
   ellipsisVertical,
+  eyeOffOutline,
   filter,
   fastFoodOutline,
   globeOutline,
@@ -151,6 +152,8 @@ export const addNecessaryIcons = (): void => {
     flagOutline,
     // The reported-reviews queue in the admin app (issue #2117).
     chatbubblesOutline,
+    // An author's own hidden review or reply (issue #2118).
+    eyeOffOutline,
     heart,
     heartOutline,
     chevronExpandOutline,

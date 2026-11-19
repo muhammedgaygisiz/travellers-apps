@@ -5,7 +5,7 @@ import { expectIonDisabled, expectIonEnabled } from './floor-plan.page';
  * Page object for the business menu editor
  * (route: /restaurant/:restaurantId/menu/:menuId).
  *
- * The editor is reached from the restaurant page's Edit Menu button rather
+ * The editor is reached from the restaurant overview's Edit menu button rather
  * than by URL: the menu route resolves its restaurant from the store, which a
  * deep link has not loaded yet.
  *
@@ -32,9 +32,7 @@ export class EditMenuPage {
   }
 
   async open(restaurantId: string, menuId: string): Promise<void> {
-    await this.page
-      .getByRole('button', { name: 'Edit the menu for this restaurant' })
-      .click();
+    await this.page.getByTestId('restaurant-edit-menu').click();
     await this.expectOpen(restaurantId, menuId);
   }
 

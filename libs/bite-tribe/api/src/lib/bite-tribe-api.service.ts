@@ -228,6 +228,11 @@ export class BiteTribeApiService {
     return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
+  /** See {@link RestaurantApiService.uploadRestaurantImageForUrl} (#1504). */
+  uploadRestaurantImageForUrl(key: string, image: string): Promise<string> {
+    return this.restaurantApiService.uploadRestaurantImageForUrl(key, image);
+  }
+
   uploadRestaurantImage(
     restaurantId: string,
     photo: string,

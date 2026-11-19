@@ -50,6 +50,7 @@ describe(RestaurantsDataAccessService.name, () => {
     searchPlaces: jest.Mock;
     getPlaceDetails: jest.Mock;
     saveRestaurantImage: jest.Mock;
+    uploadRestaurantImageForUrl: jest.Mock;
   };
 
   beforeEach(() => {
@@ -66,6 +67,11 @@ describe(RestaurantsDataAccessService.name, () => {
       searchPlaces: jest.fn(),
       getPlaceDetails: jest.fn(),
       saveRestaurantImage: jest.fn().mockResolvedValue(undefined),
+      uploadRestaurantImageForUrl: jest
+        .fn()
+        .mockResolvedValue(
+          'https://storage.test/images/restaurants/candidate-1/p.jpg',
+        ),
       saveNewRestaurant: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -823,8 +829,8 @@ describe(RestaurantsDataAccessService.name, () => {
   });
 
   describe('verifyRestaurantCandidate', () => {
-    it('should call the verification callable with sanitized restaurant data', async () => {
-      const restaurant = {
+    const candidateRestaurant = (over: Partial<Restaurant> = {}): Restaurant =>
+      ({
         id: '',
         name: 'Pizza Palace',
         image: 'data:image/png;base64,abc',
@@ -833,50 +839,109 @@ describe(RestaurantsDataAccessService.name, () => {
         biteIds: ['bite-1'],
         bites: [{ id: 'bite-1' }],
         unsaved: true,
-      } as Restaurant;
+        ...over,
+      }) as Restaurant;
 
-      const result = await service.verifyRestaurantCandidate(restaurant);
+    // Issue #1504: the photo is uploaded first and its URL travels to the
+    // callable, which writes it inside the verification transaction.
+    it('should upload the photo first and pass its URL, not the base64, to the callable', async () => {
+      const order: string[] = [];
+      apiMock.uploadRestaurantImageForUrl.mockImplementation(async () => {
+        order.push('upload');
+        return 'https://storage.test/images/restaurants/candidate-1/p.jpg';
+      });
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockImplementation((async () => {
+          order.push('callable');
+          return {
+            data: {
+              restaurantId: 'restaurant-1',
+              menuId: 'menu-1',
+              candidateId: 'candidate-1',
+              status: 'created',
+            },
+          };
+        }) as never);
 
+      const result = await service.verifyRestaurantCandidate(
+        candidateRestaurant(),
+      );
+
+      expect(order).toEqual(['upload', 'callable']);
+      expect(apiMock.uploadRestaurantImageForUrl).toHaveBeenCalledWith(
+        'candidate-1',
+        'data:image/png;base64,abc',
+      );
       expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
         name: 'verifyRestaurantCandidate',
         data: {
           candidateId: 'candidate-1',
           restaurant: {
             name: 'Pizza Palace',
-            image: 'data:image/png;base64,abc',
             position: { latitude: 46.948, longitude: 7.4474 },
+            imagePath:
+              'https://storage.test/images/restaurants/candidate-1/p.jpg',
           },
         },
       });
-      expect(result).toEqual({
-        restaurantId: 'restaurant-1',
-        menuId: 'menu-1',
-        candidateId: 'candidate-1',
-        status: 'created',
-      });
-      expect(apiMock.saveRestaurantImage).toHaveBeenCalledWith(
-        'restaurant-1',
-        'data:image/png;base64,abc',
+      expect(result.status).toBe('created');
+    });
+
+    it('should make no client write to the restaurant after the callable', async () => {
+      await service.verifyRestaurantCandidate(candidateRestaurant());
+
+      expect(apiMock.saveRestaurantImage).not.toHaveBeenCalled();
+    });
+
+    it('should verify without a photo, uploading nothing', async () => {
+      await service.verifyRestaurantCandidate(
+        candidateRestaurant({ image: undefined }),
+      );
+
+      expect(apiMock.uploadRestaurantImageForUrl).not.toHaveBeenCalled();
+      const payload = jest.mocked(FirebaseFunctions.callByName).mock
+        .calls[0][0] as { data: { restaurant: Partial<Restaurant> } };
+      expect(payload.data.restaurant).not.toHaveProperty('imagePath');
+      expect(payload.data.restaurant).not.toHaveProperty('image');
+    });
+
+    it('should pass a photo that is already a URL through without uploading', async () => {
+      await service.verifyRestaurantCandidate(
+        candidateRestaurant({ image: 'https://storage.test/existing.jpg' }),
+      );
+
+      expect(apiMock.uploadRestaurantImageForUrl).not.toHaveBeenCalled();
+      const payload = jest.mocked(FirebaseFunctions.callByName).mock
+        .calls[0][0] as { data: { restaurant: Partial<Restaurant> } };
+      expect(payload.data.restaurant.imagePath).toBe(
+        'https://storage.test/existing.jpg',
       );
     });
 
-    it('should not upload the image again for already verified candidates', async () => {
-      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
-        data: {
-          restaurantId: 'restaurant-1',
-          candidateId: 'candidate-1',
-          status: 'already-verified',
-        },
-      });
+    it('should not call the callable when the upload fails, so the candidate stays pending', async () => {
+      apiMock.uploadRestaurantImageForUrl.mockRejectedValue(
+        new Error('storage offline'),
+      );
 
-      await service.verifyRestaurantCandidate({
-        id: '',
-        name: 'Pizza Palace',
-        image: 'data:image/png;base64,abc',
-        restaurantCandidateId: 'candidate-1',
-      } as Restaurant);
+      await expect(
+        service.verifyRestaurantCandidate(candidateRestaurant()),
+      ).rejects.toThrow('storage offline');
+      expect(FirebaseFunctions.callByName).not.toHaveBeenCalled();
+    });
 
-      expect(apiMock.saveRestaurantImage).not.toHaveBeenCalled();
+    it('should run the whole flow again on a resubmission after a failed upload', async () => {
+      apiMock.uploadRestaurantImageForUrl
+        .mockRejectedValueOnce(new Error('storage offline'))
+        .mockResolvedValueOnce('https://storage.test/second.jpg');
+
+      await expect(
+        service.verifyRestaurantCandidate(candidateRestaurant()),
+      ).rejects.toThrow();
+      await service.verifyRestaurantCandidate(candidateRestaurant());
+
+      expect(apiMock.uploadRestaurantImageForUrl).toHaveBeenCalledTimes(2);
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledTimes(1);
     });
 
     it('should require a candidate id', async () => {

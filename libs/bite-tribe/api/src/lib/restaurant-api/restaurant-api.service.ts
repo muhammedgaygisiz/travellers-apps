@@ -131,17 +131,44 @@ export class RestaurantApiService {
     });
   }
 
+  /**
+   * Uploads a restaurant photo under `images/restaurants/{key}/` and answers
+   * its download URL, without writing to Firestore (GitHub issue #1504).
+   *
+   * Candidate verification uploads with the candidate id as the key, before
+   * the restaurant exists, and hands the URL to `verifyRestaurantCandidate`,
+   * which writes it inside its transaction. The key only names the folder:
+   * what the restaurant stores is the URL.
+   */
+  async uploadRestaurantImageForUrl(
+    key: string,
+    image: string,
+  ): Promise<string> {
+    const storagePath = await uploadBase64ToFirebaseStorage({
+      base64: image,
+      docId: key,
+      collection: RESTAURANT_COLLECTION,
+    });
+
+    const downloadUrl = await getDownloadUrlFromFirebaseStorage(storagePath);
+
+    // A photo the restaurant cannot point at is a failed upload: the caller
+    // must not go on to create the restaurant without it (issue #1504).
+    if (!downloadUrl) {
+      throw new Error('The uploaded restaurant photo has no download URL.');
+    }
+
+    return downloadUrl;
+  }
+
   private async uploadAndSaveRestaurantImage(
     restaurantId: string,
     image: string,
   ): Promise<void> {
-    const storagePath = await uploadBase64ToFirebaseStorage({
-      base64: image,
-      docId: restaurantId,
-      collection: RESTAURANT_COLLECTION,
-    });
-
-    const imagePath = await getDownloadUrlFromFirebaseStorage(storagePath);
+    const imagePath = await this.uploadRestaurantImageForUrl(
+      restaurantId,
+      image,
+    );
 
     await FirebaseFirestore.updateDocument({
       reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,

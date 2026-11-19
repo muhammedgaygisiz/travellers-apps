@@ -633,6 +633,23 @@ export class RestaurantsDataAccessService {
     return this.api.getPlaceDetails(placeId);
   }
 
+  /**
+   * Verifies a candidate into a restaurant, photo included (GitHub issue
+   * #1504).
+   *
+   * A photo is uploaded **first**, keyed by the candidate id because the
+   * restaurant does not exist yet, and its download URL goes to the callable
+   * as `imagePath`, which writes it inside the verification transaction. It
+   * used to be uploaded after the transaction had committed, by a client write
+   * straight to `/restaurants`: a failed upload then left a verified candidate
+   * and a restaurant without the photo, and resubmitting got
+   * `already-verified`, so the upload was never retried.
+   *
+   * Now a failed upload rejects before the callable runs: nothing is created,
+   * the candidate stays `pending`, and the same form can be submitted again.
+   * The base64 photo never travels through the callable, and this path makes
+   * no client write to `/restaurants`.
+   */
   async verifyRestaurantCandidate(
     restaurant: Restaurant,
   ): Promise<VerifyRestaurantCandidateResult> {
@@ -648,6 +665,18 @@ export class RestaurantsDataAccessService {
     delete restaurantData.restaurantCandidateId;
     delete restaurantData.biteIds;
     delete restaurantData.bites;
+    delete restaurantData.image;
+
+    const image = restaurant.image;
+    if (image && isBase64String(image)) {
+      restaurantData.imagePath = await this.api.uploadRestaurantImageForUrl(
+        candidateId,
+        image,
+      );
+    } else if (image && !restaurantData.imagePath) {
+      // Already a URL - a photo the candidate came with. Passed through as is.
+      restaurantData.imagePath = image;
+    }
 
     const result = await FirebaseFunctions.callByName<
       VerifyRestaurantCandidateRequest,
@@ -660,22 +689,9 @@ export class RestaurantsDataAccessService {
       },
     });
 
-    const verification = result.data;
-
-    if (
-      verification.status === 'created' &&
-      restaurant.image &&
-      isBase64String(restaurant.image)
-    ) {
-      await this.api.saveRestaurantImage(
-        verification.restaurantId,
-        restaurant.image,
-      );
-    }
-
     this.showFirstCandidatePage();
 
-    return verification;
+    return result.data;
   }
 
   /**

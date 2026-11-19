@@ -256,6 +256,21 @@ describe('NewRestaurantPageComponent', () => {
       );
     });
 
+    // Issue #1504: a restaurant may be verified or created without a photo.
+    it('should emit a restaurant without a photo', () => {
+      const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
+      component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
+      component.restaurantFormGroup.controls['position'].setValue({
+        latitude: 10,
+        longitude: 20,
+      });
+
+      expect(component.restaurantFormGroup.valid).toBe(true);
+      component.saveNewRestaurant();
+
+      expect(emitSpy).toHaveBeenCalled();
+    });
+
     // Issue #1952: an undefined candidate id was emitted, and the web
     // Firestore SDK refused the whole restaurant for it.
     it('should not carry a candidate id at all without a candidate', () => {

@@ -128,6 +128,31 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
 - Does a member whose text is refused get a way to contest it? Today the only answer is to
   reword, and a model refusal says which surface failed but not which words.
 
+## Follow Request Questions
+
+These belong to epic [#2144], which turns a follow of a private profile into a request its
+owner accepts or declines. Today a follow is instant and one-sided on every profile, and
+following a private one gets nothing: `notifyFollowersOnNewBite` skips an author who is not
+public, and since [#1863] the profile itself is unreadable to other accounts. Each question
+gates the story named with it.
+
+- **What does an accepted follower of a private profile get that a stranger does not?**
+  **Decided on 19 November 2026: the new-Bite push, and nothing else in this epic** ([#2167]).
+  Updates and notifications about what followed users post are a later epic, not yet filed,
+  which [#2144] prepares by making a follow of a private profile something its owner granted.
+  Reading the private profile as an accepted follower belongs to that epic, if anywhere.
+- **Does a profile keep its followers when it turns private?** **Decided on 19 November 2026:
+  yes.** Each existing follower counts as accepted, as if the owner had approved them
+  ([#2168]). Dropping them, or turning each into a pending request, would make the switch to
+  private cost every follow.
+- **Are pending requests accepted when a private profile turns public, or dropped?**
+  **Decided on 19 November 2026: accepted** ([#2168]). The visibility switch warns the owner
+  first, and only when there is at least one pending request.
+- **How much of a requester does the owner see when the requester is private too?** The owner
+  cannot read a private requester's profile, so a request from one would show as `Anonymous`
+  and could not be judged. The leaning is the display name only, still under debate. Gates
+  the owner's list ([#2165]) and the owner's push ([#2166]).
+
 ## Analytics Questions
 
 - Which events define activation?
@@ -237,3 +262,8 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
+[#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
+[#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
+[#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
+[#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168

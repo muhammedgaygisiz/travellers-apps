@@ -534,6 +534,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
+- Epic [#2144] is planned and would turn a follow of a private profile into a request its owner accepts or declines. Nothing of it ships yet. Three of its questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
@@ -583,3 +584,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
+[#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144

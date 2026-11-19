@@ -389,8 +389,9 @@ export interface AnalyticsEventParamMap {
    * `moment` mirrors `CelebrationMoment` from `celebration`. It is inlined
    * because `celebration` emits this event and so depends on this library;
    * `analytics-events.spec.ts` compares the two as text. `count` is the Bite
-   * count of a `bite-milestone` and `rank` the place of a leaderboard moment
-   * (issue #2013); a suppressed moment logs nothing.
+   * count of a `bite-milestone` and the weeks of a `posting-streak` (issue
+   * #2149), and `rank` the place of a leaderboard moment (issue #2013); a
+   * suppressed moment logs nothing.
    */
   [AnalyticsEvent.CelebrationShown]: {
     moment:
@@ -402,6 +403,7 @@ export interface AnalyticsEventParamMap {
       | 'weekly-award-bites'
       | 'weekly-award-liked'
       | 'bite-milestone'
+      | 'posting-streak'
       | 'leaderboard-top-ten'
       | 'leaderboard-overtake';
     count?: number;

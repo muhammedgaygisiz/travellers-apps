@@ -46,6 +46,7 @@ import { CelebrationService } from 'celebration';
 import { TranslocoService } from '@jsverse/transloco';
 import { newCountryCode } from './utils/new-country-codes';
 import { reachedBiteMilestone } from './utils/bite-milestone';
+import { reachedPostingStreakMilestone } from './utils/posting-streak-milestone';
 import { weeklyAwardToCelebrate } from './utils/weekly-award-to-celebrate';
 import { claimTopTenWeek, enteredTopTen } from './utils/entered-top-ten';
 import { overtookInTopTen } from './utils/overtook-in-top-ten';
@@ -144,8 +145,8 @@ export class AppEffect {
 
   /**
    * Celebrates what a Bite earns once the backend has counted it, while the
-   * app runs: a first Bite in a new country (issue #1797) and a Bite-count
-   * milestone (issue #2014).
+   * app runs: a first Bite in a new country (issue #1797), a Bite-count
+   * milestone (issue #2014) and a posting streak milestone (issue #2149).
    *
    * The phone knows neither when the post succeeds: the backend derives the
    * country from the position a few seconds later and adds it to the user's
@@ -188,6 +189,20 @@ export class AppEffect {
           if (milestone) {
             void this.celebration.celebrate('bite-milestone', {
               count: milestone,
+            });
+          }
+
+          // Weeks of posting in a row (issue #2149). The streak is written by
+          // the same create trigger, seconds after the post, so it arrives in
+          // the same window as the Bite count and ranks below it.
+          const streakMilestone = reachedPostingStreakMilestone(
+            previous.postingStreak,
+            current.postingStreak,
+          );
+
+          if (streakMilestone) {
+            void this.celebration.celebrate('posting-streak', {
+              count: streakMilestone,
             });
           }
         }),

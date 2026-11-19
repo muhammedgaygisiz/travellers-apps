@@ -3,7 +3,7 @@ import { DashboardService } from '../dashboard.service';
 import { DashboardDataAccessService } from 'bite-tribe-business/dashboard-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { Restaurant } from 'model';
+import { Restaurant, SetupItem } from 'model';
 import { DashboardSection } from '../../component/page/dashboard.component';
 
 jest.mock('bite-tribe-business/dashboard-data-access');
@@ -119,14 +119,12 @@ describe('DashboardService', () => {
   });
 
   describe('setupItemClicked (issue #2126)', () => {
-    const item = (
-      target: 'edit-restaurant' | 'edit-menu',
-    ): {
-      key: 'menu-reviewed';
-      labelKey: string;
-      done: boolean;
-      target: 'edit-restaurant' | 'edit-menu';
-    } => ({ key: 'menu-reviewed', labelKey: 'x', done: false, target });
+    const item = (target: SetupItem['target']): SetupItem => ({
+      key: 'menu-reviewed',
+      labelKey: 'x',
+      done: false,
+      target,
+    });
 
     it('opens the menu editor by the menu id, stripped of its path', () => {
       service.setupItemClicked({
@@ -142,7 +140,7 @@ describe('DashboardService', () => {
       ]);
     });
 
-    it('opens the edit page, where a menu is created, when there is no menu yet', () => {
+    it('opens the overview, where a menu is created, when there is no menu yet', () => {
       service.setupItemClicked({
         restaurant: { id: 'r-1' } as Restaurant,
         item: item('edit-menu'),
@@ -154,15 +152,17 @@ describe('DashboardService', () => {
       ]);
     });
 
-    it('opens the edit page for every other item', () => {
+    it('opens the section that holds the field for every other item (#2183)', () => {
       service.setupItemClicked({
         restaurant: { id: 'r-1', menuId: 'm-1' } as Restaurant,
-        item: item('edit-restaurant'),
+        item: item('about'),
       });
 
       expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
         'restaurant',
         'r-1',
+        'edit',
+        'about',
       ]);
     });
   });

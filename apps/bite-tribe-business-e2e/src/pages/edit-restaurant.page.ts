@@ -8,11 +8,12 @@ export interface RestaurantAddress {
 }
 
 /**
- * Page object for the business edit-restaurant screen
- * (route: /restaurant/:restaurantId).
+ * Page object for the business restaurant screens: the overview at
+ * /restaurant/:restaurantId and one section at a time at
+ * /restaurant/:restaurantId/edit/:section (GitHub issue #2183).
  *
- * The page saves each block on its own — About and the address have separate
- * Save buttons — so the test ids distinguish them. Ionic renders the native
+ * Each section saves on its own and returns to the overview, so every action
+ * opens its section first. Ionic renders the native
  * `<input>`/`<textarea>` inside the shadow root of `ion-input`/`ion-textarea`,
  * so the test ids resolve to the host and we drill into the inner control.
  */
@@ -49,17 +50,40 @@ export class EditRestaurantPage {
     await expect(this.name).toHaveText(name);
   }
 
+  /**
+   * Opens one section from the overview, unless it is already open. Ionic
+   * keeps the overview in the DOM under the section, so the row is clicked
+   * only from the overview's own URL.
+   */
+  async openSection(section: string): Promise<void> {
+    if (this.page.url().endsWith(`/edit/${section}`)) {
+      return;
+    }
+
+    await this.page.getByTestId(`restaurant-section-${section}`).click();
+    await expect(this.page).toHaveURL(new RegExp(`/edit/${section}$`));
+  }
+
+  /** A saved section returns to the overview (GitHub issue #2183). */
+  async expectBackOnOverview(): Promise<void> {
+    await expect(this.page).toHaveURL(/\/restaurant\/[^/]+$/);
+  }
+
   async fillDescription(description: string): Promise<void> {
+    await this.openSection('about');
     await this.description.fill(description);
     await this.saveDescription.click();
+    await this.expectBackOnOverview();
   }
 
   async fillAddress(address: RestaurantAddress): Promise<void> {
+    await this.openSection('address');
     await this.street.fill(address.street);
     await this.postcode.fill(address.postcode);
     await this.city.fill(address.city);
     await this.country.fill(address.country);
     await this.saveAddress.click();
+    await this.expectBackOnOverview();
   }
 
   /**
@@ -70,17 +94,20 @@ export class EditRestaurantPage {
   async chooseGenderNeutralRestroom(
     answer: 'Yes' | 'No' | 'Not stated',
   ): Promise<void> {
+    await this.openSection('facilities');
     await this.genderNeutralRestroom.click();
     await this.page
       .locator('ion-select-popover')
       .getByText(answer, { exact: true })
       .click();
     await this.saveFacilities.click();
+    await this.expectBackOnOverview();
   }
 
   async expectGenderNeutralRestroom(
     value: 'yes' | 'no' | 'not-stated',
   ): Promise<void> {
+    await this.openSection('facilities');
     await expect(this.genderNeutralRestroom).toHaveJSProperty('value', value);
   }
 

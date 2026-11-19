@@ -1,5 +1,6 @@
-import type { Restaurant } from 'model';
+import type { Restaurant } from '../restaurant';
 import {
+  isRestaurantSection,
   isRestaurantSetUp,
   restaurantSetupChecklist,
 } from '../restaurant-setup-checklist';
@@ -51,13 +52,21 @@ describe('restaurantSetupChecklist', () => {
     expect(isRestaurantSetUp(BARE)).toBe(false);
   });
 
-  it('sends the menu item to the menu editor and the rest to the edit page', () => {
+  it('sends each item to the screen that completes it (#2183)', () => {
     const targets = Object.fromEntries(
       restaurantSetupChecklist(BARE).map((item) => [item.key, item.target]),
     );
 
-    expect(targets['menu-reviewed']).toBe('edit-menu');
-    expect(targets['image']).toBe('edit-restaurant');
+    expect(targets).toEqual({
+      image: 'photo',
+      categories: 'categories',
+      address: 'address',
+      'opening-hours': 'opening-hours',
+      description: 'about',
+      'social-links': 'links',
+      facilities: 'facilities',
+      'menu-reviewed': 'edit-menu',
+    });
   });
 
   it('counts a facility answered "no" as stated', () => {
@@ -107,5 +116,16 @@ describe('restaurantSetupChecklist', () => {
     expect(doneKeys({ ...BARE, menuReviewedAtTimestamp: 1 })).toEqual([
       'menu-reviewed',
     ]);
+  });
+});
+
+describe('isRestaurantSection', () => {
+  it.each([
+    ['about', true],
+    ['menu-code', true],
+    ['menu', false],
+    [undefined, false],
+  ])('knows whether %j is a section', (value, known) => {
+    expect(isRestaurantSection(value)).toBe(known);
   });
 });

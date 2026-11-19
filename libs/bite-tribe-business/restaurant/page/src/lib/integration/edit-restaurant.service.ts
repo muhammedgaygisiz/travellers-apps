@@ -9,6 +9,7 @@ import {
   Geopoint,
   Link,
   RestaurantCategory,
+  RestaurantSection,
   TableOrderingSettings,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
@@ -51,6 +52,29 @@ export class EditRestaurantService {
 
   retryPhoto(): void {
     this.photoUpload.retry();
+  }
+
+  /**
+   * Back to the restaurant's overview after a section is saved (GitHub issue
+   * #2183). The navigation reads the restaurant again, so the overview shows
+   * the value just saved.
+   */
+  backToOverview(restaurantId: string): void {
+    void this.navController.navigateBack(['restaurant', restaurantId]);
+  }
+
+  /** Opens one section of the restaurant (GitHub issue #2183). */
+  gotoSection(section: RestaurantSection): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurant.id,
+        'edit',
+        section,
+      ]);
+    }
   }
 
   gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
@@ -127,6 +151,7 @@ export class EditRestaurantService {
           messageKey: 'social-media-links-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -142,6 +167,7 @@ export class EditRestaurantService {
           messageKey: 'about-restaurant-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -157,6 +183,7 @@ export class EditRestaurantService {
           messageKey: 'opening-hours-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -185,6 +212,7 @@ export class EditRestaurantService {
           messageKey: 'table-ordering-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -209,6 +237,7 @@ export class EditRestaurantService {
           messageKey: 'facilities-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -225,6 +254,7 @@ export class EditRestaurantService {
           messageKey: 'categories-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -240,6 +270,7 @@ export class EditRestaurantService {
           messageKey: 'address-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }
@@ -255,6 +286,7 @@ export class EditRestaurantService {
           messageKey: 'location-saved',
           outcome: 'success',
         });
+        this.backToOverview(restaurant.id);
       } catch {
         await this.showFailureToast();
       }

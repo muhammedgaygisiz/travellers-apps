@@ -29,6 +29,7 @@ import {
   RESTAURANT_CATEGORIES,
   Restaurant,
   RestaurantCategory,
+  RestaurantSection,
   restaurantCategoriesOf,
   TableOrderingSettings,
 } from 'model';
@@ -105,6 +106,8 @@ export class EditRestaurantComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   restaurant = input<Restaurant>();
+  /** The one part of the restaurant this page edits (GitHub issue #2183). */
+  section = input<RestaurantSection>('about');
   /** The photo upload's status for this restaurant (GitHub issue #2126). */
   photoStatus = input<RestaurantPhotoStatus>();
   pendingPhoto = input<string>();
@@ -124,24 +127,11 @@ export class EditRestaurantComponent {
 
   readonly submitPosition = output<Geopoint>();
 
-  readonly createMenu = output<void>();
-  readonly editMenu = output<Restaurant>();
-
-  /**
-   * The way to the staff of this restaurant (issue #1537).
-   *
-   * A button on the restaurant rather than a dashboard section, because staff
-   * belongs to one restaurant: a top-level entry would have to ask which one
-   * first, and the answer is already on the screen.
-   */
-  readonly manageStaff = output<void>();
   readonly submitTableOrderingSettings = output<TableOrderingSettings>();
   /** An empty list is "not stated", which removes the field (issue #2131). */
   readonly submitCategories = output<RestaurantCategory[]>();
   /** `undefined` is "Not stated", which removes the field (issue #1830). */
   readonly submitGenderNeutralRestroom = output<boolean | undefined>();
-  readonly editFloorPlan = output<void>();
-  readonly openTablePlan = output<void>();
 
   readonly socialMediaForm = this.formBuilder.group({
     links: this.formBuilder.array([]),
@@ -204,8 +194,19 @@ export class EditRestaurantComponent {
     return supported.includes(detected) ? supported : [detected, ...supported];
   });
 
+  /**
+   * Each form is filled from the stored restaurant until the owner edits it,
+   * and not after (GitHub issue #2183). Opening a section is a navigation, and
+   * every navigation reads the restaurant again; an owner who starts typing
+   * before that read lands would otherwise see their edit replaced by the
+   * stored value, and save that instead.
+   */
   initTableOrdering = effect(() => {
     const tableOrdering = this.restaurant()?.tableOrdering;
+
+    if (this.tableOrderingForm.dirty) {
+      return;
+    }
 
     this.tableOrderingForm.patchValue({
       enabled: tableOrdering?.enabled ?? false,
@@ -251,9 +252,11 @@ export class EditRestaurantComponent {
   });
 
   initCategories = effect(() => {
-    this.categoriesForm.patchValue({
-      categories: restaurantCategoriesOf(this.restaurant()),
-    });
+    const categories = restaurantCategoriesOf(this.restaurant());
+
+    if (!this.categoriesForm.dirty) {
+      this.categoriesForm.patchValue({ categories });
+    }
   });
 
   saveCategories(): void {
@@ -276,6 +279,10 @@ export class EditRestaurantComponent {
   initFacilities = effect(() => {
     const facilities = this.restaurant()?.facilities;
 
+    if (this.facilitiesForm.dirty) {
+      return;
+    }
+
     this.facilitiesForm.patchValue({
       genderNeutralRestroom: toFacilityAnswer(
         facilities?.genderNeutralRestroom,
@@ -297,6 +304,11 @@ export class EditRestaurantComponent {
 
   initSocialMediaLinks = effect(() => {
     const socialMediaLinks = this.restaurant()?.socialMediaLinks;
+
+    if (this.socialMediaForm.dirty) {
+      return;
+    }
+
     this.links.clear();
 
     if (!socialMediaLinks?.length) {
@@ -315,11 +327,19 @@ export class EditRestaurantComponent {
 
   initDescription = effect(() => {
     const description = this.restaurant()?.description ?? '';
-    this.descriptionForm.patchValue({ description });
+
+    if (!this.descriptionForm.dirty) {
+      this.descriptionForm.patchValue({ description });
+    }
   });
 
   initAddress = effect(() => {
     const address = this.restaurant()?.address;
+
+    if (this.addressForm.dirty) {
+      return;
+    }
+
     this.addressForm.patchValue({
       street: address?.street ?? '',
       postcode: address?.postcode ?? '',
@@ -330,7 +350,10 @@ export class EditRestaurantComponent {
 
   initPosition = effect(() => {
     const position = this.restaurant()?.position ?? null;
-    this.positionForm.patchValue({ position });
+
+    if (!this.positionForm.dirty) {
+      this.positionForm.patchValue({ position });
+    }
   });
 
   isInvalid = toSignal(
@@ -385,13 +408,6 @@ export class EditRestaurantComponent {
     const position = this.positionForm.value.position;
     if (position) {
       this.submitPosition.emit(position);
-    }
-  }
-
-  protected gotoEditMenu(): void {
-    const restaurant = this.restaurant();
-    if (restaurant) {
-      this.editMenu.emit(restaurant);
     }
   }
 }

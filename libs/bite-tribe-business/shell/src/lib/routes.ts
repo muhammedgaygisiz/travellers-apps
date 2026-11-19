@@ -120,6 +120,24 @@ export const ROUTES: Routes = withAuthRoutes([
     title: 'Restaurant',
     loadComponent: () =>
       import('bite-tribe-business/restaurant').then(
+        (m) => m.RestaurantOverviewContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
+  },
+  /**
+   * One section of the restaurant at a time (GitHub issue #2183): the
+   * overview above lists them, and each setup checklist item opens its own.
+   * The same guards, because it edits the same restaurant.
+   */
+  {
+    path: 'restaurant/:restaurantId/edit/:section',
+    title: 'Restaurant',
+    loadComponent: () =>
+      import('bite-tribe-business/restaurant').then(
         (m) => m.EditRestaurantContainer,
       ),
     canActivate: [

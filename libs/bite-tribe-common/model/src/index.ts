@@ -3,6 +3,7 @@ export type * from './lib/bite-author-private';
 export type * from './lib/review';
 export type * from './lib/review-thread';
 export * from './lib/restaurant';
+export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';
 export type * from './lib/user';

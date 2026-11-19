@@ -80,18 +80,36 @@ export default {
 type Story = StoryObj<EditRestaurantComponent>;
 
 /**
- * A restaurant with everything filled in: photo, social links, address,
- * opening hours across two service windows, and a menu to edit.
+ * One section at a time (GitHub issue #2183). `Default` is the About text of
+ * a restaurant with everything filled in; the stories below each open one
+ * other section of it.
  */
-export const Default: Story = {};
+export const Default: Story = { args: { section: 'about' } };
+
+export const Photo: Story = { args: { section: 'photo' } };
+
+export const KindOfPlace: Story = { args: { section: 'categories' } };
+
+export const Links: Story = { args: { section: 'links' } };
+
+export const Address: Story = { args: { section: 'address' } };
+
+/** Opening hours across two service windows and two closed days. */
+export const OpeningHours: Story = { args: { section: 'opening-hours' } };
+
+export const Facilities: Story = { args: { section: 'facilities' } };
+
+export const TableOrdering: Story = { args: { section: 'table-ordering' } };
+
+export const MenuCode: Story = { args: { section: 'menu-code' } };
 
 /**
- * A restaurant an operator has just handed over. There is no photo, no social
- * link, no schedule and no menu, so every affordance is the empty one - which
- * is the state a new owner actually meets.
+ * The links of a restaurant an operator has just handed over: there are none
+ * yet, so the section shows its empty state.
  */
 export const Empty: Story = {
   args: {
+    section: 'links',
     restaurant: {
       id: 'restaurant-new',
       name: 'Osteria Vecchia',
@@ -100,9 +118,10 @@ export const Empty: Story = {
   },
 };
 
-/** A menu already exists, but the rest of the profile is still unfinished. */
+/** The menu code of a restaurant whose menu exists but nothing else does. */
 export const WithMenuOnly: Story = {
   args: {
+    section: 'menu-code',
     restaurant: {
       id: 'restaurant-new',
       name: 'Osteria Vecchia',
@@ -119,6 +138,7 @@ export const WithMenuOnly: Story = {
  */
 export const PhotoUploading: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'pending',
     pendingPhoto: RESTAURANT_IMAGE,
   },
@@ -130,6 +150,7 @@ export const PhotoUploading: Story = {
  */
 export const PhotoFailed: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'failed',
     canRetryPhoto: true,
   },
@@ -142,6 +163,7 @@ export const PhotoFailed: Story = {
  */
 export const PhotoFailedInAnEarlierSession: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'failed',
     canRetryPhoto: false,
   },

@@ -1,28 +1,28 @@
 @let restaurantData = restaurant();
 
 <!--
-  The same two-column shape as the admin app's Create Restaurant page
-  (GitHub issue #1572). `fullWidth` releases `PageComponent`'s 720 px cap, and
-  the page then constrains itself to 78 rem - the two surfaces edit
-  substantially the same fields and should not look like different products.
+  One part of the restaurant at a time (GitHub issue #2183). The restaurant's
+  overview lists every section with its current value, and each row opens this
+  page with only that section's fields and Save. A save returns to the
+  overview, which reads the restaurant again and shows the new value.
 -->
 <ta-page
   [chrome]="{
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
-    fullWidth: true,
   }"
 >
   <ion-content class="ion-padding">
-    <h1 data-testid="restaurant-name">{{ placeName() }}</h1>
+    <p class="restaurant-name" data-testid="section-restaurant-name">
+      {{ placeName() }}
+    </p>
+    <h1 data-testid="restaurant-section-title">
+      {{ 'restaurant-section-' + section() | transloco }}
+    </h1>
 
-    <div class="layout">
-      <!--
-        The left column is what the restaurant *is*: its picture, how it is
-        reached, what it says about itself and where it is.
-      -->
-      <div class="left-column">
+    @switch (section()) {
+      @case ('photo') {
         <bt-restaurant-photo-editor
           [restaurant]="restaurantData"
           [status]="photoStatus()"
@@ -32,84 +32,8 @@
           (savePhoto)="savePhoto.emit($event)"
           (retry)="retryPhoto.emit()"
         />
-
-        <div [formGroup]="socialMediaForm" class="ion-margin-top">
-          @if (links.length === 0) {
-            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
-          }
-
-          <ion-list lines="full" formArrayName="links">
-            @for (socialMedia of links.controls; track $index; let i = $index) {
-              <ion-item [formGroupName]="i">
-                <ion-select
-                  class="ion-margin-end"
-                  placeholder="Social Network"
-                  interface="popover"
-                  formControlName="network"
-                >
-                  <ion-select-option value="facebook"
-                    >Facebook
-                  </ion-select-option>
-                  <ion-select-option value="instagram"
-                    >Instagram
-                  </ion-select-option>
-                  <ion-select-option value="twitter">Twitter</ion-select-option>
-                  <ion-select-option value="linkedin"
-                    >LinkedIn
-                  </ion-select-option>
-                  <ion-select-option value="website">Website</ion-select-option>
-                </ion-select>
-                <ion-input placeholder="Link" formControlName="url"></ion-input>
-              </ion-item>
-            }
-          </ion-list>
-
-          <!--
-            Add and Save sit together under the list they belong to. The Save
-            used to be at the very bottom of the page, under the navigation
-            buttons; in two columns that put it beside the opening hours and
-            nowhere near the links it writes.
-          -->
-          <div class="section-actions">
-            <ion-button (click)="addSocialMedia()">Add Link</ion-button>
-
-            @if (links.length) {
-              <ion-button
-                data-testid="save-social-media"
-                [disabled]="isInvalid()"
-                (click)="saveSocialMediaLinks()"
-              >
-                {{ 'save' | transloco }}
-              </ion-button>
-            }
-          </div>
-        </div>
-
-        <div class="ion-margin-top" [formGroup]="descriptionForm">
-          <ion-textarea
-            label="{{ 'about-restaurant' | transloco }}"
-            formControlName="description"
-            fill="outline"
-            auto-grow="true"
-            [maxlength]="500"
-            [rows]="6"
-            mode="md"
-            data-testid="restaurant-description"
-          />
-          <ion-button
-            class="ion-margin-top"
-            data-testid="save-description"
-            (click)="saveDescription()"
-          >
-            {{ 'save' | transloco }}
-          </ion-button>
-        </div>
-
-        <!--
-          What kind of venue this is, as the restaurant states it (issue
-          #2131). Up to two, for a hybrid such as a café that is also a bakery.
-          Nothing chosen is "not stated" and removes the field.
-        -->
+      }
+      @case ('categories') {
         <div class="ion-margin-top" [formGroup]="categoriesForm">
           <ion-item>
             <ion-select
@@ -146,7 +70,82 @@
             {{ 'save' | transloco }}
           </ion-button>
         </div>
+      }
+      @case ('about') {
+        <div class="ion-margin-top" [formGroup]="descriptionForm">
+          <ion-textarea
+            label="{{ 'about-restaurant' | transloco }}"
+            formControlName="description"
+            fill="outline"
+            auto-grow="true"
+            [maxlength]="500"
+            [rows]="6"
+            mode="md"
+            data-testid="restaurant-description"
+          />
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-description"
+            (click)="saveDescription()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+      }
+      @case ('links') {
+        <div [formGroup]="socialMediaForm" class="ion-margin-top">
+          @if (links.length === 0) {
+            <ion-text>{{ 'no-social-media-links' | transloco }}</ion-text>
+          }
 
+          <ion-list lines="full" formArrayName="links">
+            @for (socialMedia of links.controls; track $index; let i = $index) {
+              <ion-item [formGroupName]="i">
+                <ion-select
+                  class="ion-margin-end"
+                  placeholder="Social Network"
+                  interface="popover"
+                  formControlName="network"
+                >
+                  <ion-select-option value="facebook"
+                    >Facebook
+                  </ion-select-option>
+                  <ion-select-option value="instagram"
+                    >Instagram
+                  </ion-select-option>
+                  <ion-select-option value="twitter">Twitter</ion-select-option>
+                  <ion-select-option value="linkedin"
+                    >LinkedIn
+                  </ion-select-option>
+                  <ion-select-option value="website">Website</ion-select-option>
+                </ion-select>
+                <ion-input placeholder="Link" formControlName="url"></ion-input>
+              </ion-item>
+            }
+          </ion-list>
+
+          <!--
+              Add and Save sit together under the list they belong to. The Save
+              used to be at the very bottom of the page, under the navigation
+              buttons; in two columns that put it beside the opening hours and
+              nowhere near the links it writes.
+            -->
+          <div class="section-actions">
+            <ion-button (click)="addSocialMedia()">Add Link</ion-button>
+
+            @if (links.length) {
+              <ion-button
+                data-testid="save-social-media"
+                [disabled]="isInvalid()"
+                (click)="saveSocialMediaLinks()"
+              >
+                {{ 'save' | transloco }}
+              </ion-button>
+            }
+          </div>
+        </div>
+      }
+      @case ('address') {
         <div class="ion-margin-top" [formGroup]="addressForm">
           <ion-input
             label="{{ 'street' | transloco }}"
@@ -190,17 +189,8 @@
             {{ 'save' | transloco }}
           </ion-button>
         </div>
-      </div>
-
-      <!--
-        The right column is the two blocks that want width and height rather
-        than a label and a field: the map, and the week. The admin page fills
-        this column with its Bite evidence, which this page has no equivalent
-        of - and the opening hours are the tallest thing here, so putting them
-        beside the map balances the columns instead of adding four hundred
-        pixels to the bottom of the form.
-      -->
-      <div class="right-column">
+      }
+      @case ('position') {
         <div [formGroup]="positionForm">
           <position formControlName="position" />
           <ion-button
@@ -211,88 +201,17 @@
             {{ 'save' | transloco }}
           </ion-button>
         </div>
-
-        <!--
-          The published menu code (issue #370). Above table ordering rather
-          than inside it, because it is the one thing on this page a restaurant
-          can use with no floor plan, no tables and no ordering configured at
-          all - and reading as part of the table settings would say otherwise.
-        -->
+      }
+      @case ('opening-hours') {
         <div class="ion-margin-top">
-          <bt-business-menu-qr
-            [restaurantId]="restaurant()?.id ?? ''"
-            [restaurantName]="placeName() ?? ''"
-            [hasMenu]="hasMenu()"
+          <bt-opening-hours
+            [openingHours]="restaurantData?.openingHours"
+            (submitOpeningHours)="submitOpeningHours.emit($event)"
           />
         </div>
-
-        <!--
-          How this restaurant uses its QR codes (issue #1102). Two modes, not
-          three: the flag is one boolean, and a scan with it off shows the menu
-          either way.
-        -->
-        <div class="ion-margin-top" [formGroup]="tableOrderingForm">
-          <ion-text
-            ><h2>{{ 'table-ordering' | transloco }}</h2></ion-text
-          >
-
-          <ion-item>
-            <ion-toggle
-              formControlName="enabled"
-              data-testid="table-ordering-enabled"
-            >
-              {{ 'table-ordering-enabled' | transloco }}
-            </ion-toggle>
-          </ion-item>
-
-          <ion-text>
-            <p class="note">
-              @if (tableOrderingForm.controls.enabled.value) {
-                {{ 'table-ordering-enabled-hint' | transloco }}
-              } @else {
-                {{ 'table-ordering-menu-only-hint' | transloco }}
-              }
-            </p>
-          </ion-text>
-
-          <!--
-            Required, and it is the restaurant's zone rather than the owner's.
-            The opening hours above are read in it, so a wrong one closes a
-            Jakarta restaurant at four in the afternoon (issue #1100).
-          -->
-          <ion-item>
-            <ion-select
-              formControlName="timeZone"
-              [label]="'table-ordering-time-zone' | transloco"
-              data-testid="table-ordering-time-zone"
-            >
-              @for (zone of timeZones(); track zone) {
-                <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
-              }
-            </ion-select>
-          </ion-item>
-
-          <ion-button
-            class="ion-margin-top"
-            data-testid="save-table-ordering"
-            [disabled]="tableOrderingForm.invalid"
-            (click)="submitTableOrdering()"
-          >
-            {{ 'save' | transloco }}
-          </ion-button>
-        </div>
-
-        <!--
-          What the restaurant says about its premises (issue #1830), next to
-          the opening hours because that is where a guest reads it. Three
-          answers, and "Not stated" removes the field rather than writing no:
-          the consumer page shows nothing for a restaurant that has not said.
-        -->
+      }
+      @case ('facilities') {
         <div class="ion-margin-top" [formGroup]="facilitiesForm">
-          <ion-text
-            ><h2>{{ 'facilities' | transloco }}</h2></ion-text
-          >
-
           <ion-item>
             <ion-select
               formControlName="genderNeutralRestroom"
@@ -320,70 +239,64 @@
             {{ 'save' | transloco }}
           </ion-button>
         </div>
+      }
+      @case ('table-ordering') {
+        <div class="ion-margin-top" [formGroup]="tableOrderingForm">
+          <ion-item>
+            <ion-toggle
+              formControlName="enabled"
+              data-testid="table-ordering-enabled"
+            >
+              {{ 'table-ordering-enabled' | transloco }}
+            </ion-toggle>
+          </ion-item>
 
-        <div class="ion-margin-top">
-          <bt-opening-hours
-            [openingHours]="restaurantData?.openingHours"
-            (submitOpeningHours)="submitOpeningHours.emit($event)"
+          <ion-text>
+            <p class="note">
+              @if (tableOrderingForm.controls.enabled.value) {
+                {{ 'table-ordering-enabled-hint' | transloco }}
+              } @else {
+                {{ 'table-ordering-menu-only-hint' | transloco }}
+              }
+            </p>
+          </ion-text>
+
+          <!--
+              Required, and it is the restaurant's zone rather than the owner's.
+              The opening hours above are read in it, so a wrong one closes a
+              Jakarta restaurant at four in the afternoon (issue #1100).
+            -->
+          <ion-item>
+            <ion-select
+              formControlName="timeZone"
+              [label]="'table-ordering-time-zone' | transloco"
+              data-testid="table-ordering-time-zone"
+            >
+              @for (zone of timeZones(); track zone) {
+                <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-table-ordering"
+            [disabled]="tableOrderingForm.invalid"
+            (click)="submitTableOrdering()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+      }
+      @case ('menu-code') {
+        <div>
+          <bt-business-menu-qr
+            [restaurantId]="restaurant()?.id ?? ''"
+            [restaurantName]="placeName() ?? ''"
+            [hasMenu]="hasMenu()"
           />
         </div>
-      </div>
-    </div>
-
-    <!--
-      Where the admin page puts its Save: under both columns, full width. These
-      are the ways *out* of this page rather than edits to it, so they belong to
-      neither column.
-    -->
-    <div class="page-actions">
-      @if (!hasMenu()) {
-        <ion-button
-          aria-label="Create a new menu for this restaurant"
-          (click)="createMenu.emit()"
-        >
-          Create Menu
-        </ion-button>
-      } @else {
-        <ion-button
-          aria-label="Edit the menu for this restaurant"
-          (click)="gotoEditMenu()"
-        >
-          Edit Menu
-        </ion-button>
       }
-
-      <ion-button
-        fill="outline"
-        data-testid="edit-restaurant-staff"
-        [attr.aria-label]="'staff-manage' | transloco"
-        (click)="manageStaff.emit()"
-      >
-        {{ 'staff-manage' | transloco }}
-      </ion-button>
-
-      <ion-button
-        fill="outline"
-        data-testid="edit-restaurant-floor-plan"
-        [attr.aria-label]="'floor-plan-manage' | transloco"
-        (click)="editFloorPlan.emit()"
-      >
-        {{ 'floor-plan-manage' | transloco }}
-      </ion-button>
-
-      <!--
-        The live room, which is the same plan read during service rather than
-        arranged (issue #1093). Beside the editor rather than inside it: the
-        two are opened by different people at different times of day, and a
-        staff account can open this one and not the other.
-      -->
-      <ion-button
-        fill="outline"
-        data-testid="edit-restaurant-table-plan"
-        [attr.aria-label]="'table-plan-open' | transloco"
-        (click)="openTablePlan.emit()"
-      >
-        {{ 'table-plan-open' | transloco }}
-      </ion-button>
-    </div>
+    }
   </ion-content>
 </ta-page>

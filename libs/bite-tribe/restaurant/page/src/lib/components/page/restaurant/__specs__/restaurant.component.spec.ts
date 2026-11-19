@@ -425,7 +425,7 @@ describe('RestaurantComponent', () => {
       expect(
         nativeEl.querySelector('[data-testid="restaurant-loading"]'),
       ).toBeTruthy();
-      expect(nativeEl.querySelector('h1')).toBeNull();
+      expect(nativeEl.querySelector('h1:not([aria-hidden])')).toBeNull();
     });
 
     it('should drop the skeleton once both the restaurant and the Bites have loaded', () => {

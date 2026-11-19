@@ -9,6 +9,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonCard,
   IonContent,
   IonIcon,
   IonLabel,
@@ -35,6 +36,7 @@ import { TagsInputComponent } from 'common/ui/tags';
     PageComponent,
     IonContent,
     IonButton,
+    IonCard,
     IonIcon,
     IonSkeletonText,
     MapComponent,

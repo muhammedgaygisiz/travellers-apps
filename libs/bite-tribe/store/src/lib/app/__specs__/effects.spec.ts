@@ -60,6 +60,8 @@ const BiteTribeApiServiceMock = {
   reloadGPSPosition: jest.fn(),
   followUser: jest.fn(),
   followsAnyone: jest.fn(),
+  requestFollow: jest.fn(),
+  withdrawFollowRequest: jest.fn(),
   getTotalNumberOfBites: jest.fn(),
   getTotalNumberOfUsers: jest.fn(),
   unfollowUser: jest.fn(),
@@ -969,7 +971,11 @@ describe(AppEffect.name, () => {
   });
 
   describe('followUser$', () => {
-    const user = { userId: 'user-id', displayName: 'leela' } as PublicUser;
+    const user = {
+      userId: 'user-id',
+      displayName: 'leela',
+      public: true,
+    } as PublicUser;
     let actions: Subject<Action>;
     let subscription: Subscription;
 
@@ -1053,6 +1059,134 @@ describe(AppEffect.name, () => {
       await settled();
 
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+    });
+
+    // GitHub issue #2164.
+    describe('on a private profile', () => {
+      const privateUser = {
+        userId: 'private-id',
+        public: false,
+        displayName: '',
+      } as PublicUser;
+
+      beforeEach(() => {
+        ToastServiceMock.present.mockClear();
+        BiteTribeApiServiceMock.followUser.mockClear();
+        BiteTribeApiServiceMock.followsAnyone.mockClear();
+        BiteTribeApiServiceMock.requestFollow.mockReset();
+        BiteTribeApiServiceMock.followsAnyone.mockResolvedValue(false);
+        BiteTribeApiServiceMock.requestFollow.mockResolvedValue({
+          requested: true,
+        });
+      });
+
+      it('sends a request instead of writing a follow', async () => {
+        actions.next(AppActions.followUser({ user: privateUser }));
+        await settled();
+
+        expect(BiteTribeApiServiceMock.requestFollow).toHaveBeenCalledWith(
+          'private-id',
+        );
+        expect(BiteTribeApiServiceMock.followUser).not.toHaveBeenCalled();
+        expect(dispatchSpy).toHaveBeenCalledWith(AppActions.requestedFollow());
+        expect(dispatchSpy).not.toHaveBeenCalledWith(AppActions.followedUser());
+        expect(ToastServiceMock.present).toHaveBeenCalledWith(
+          expect.objectContaining({
+            messageKey: 'follow-request-sent',
+            outcome: 'success',
+          }),
+        );
+      });
+
+      it('treats a profile without the flag as private, as the rules do', async () => {
+        const unflagged = { userId: 'private-id' } as PublicUser;
+
+        actions.next(AppActions.followUser({ user: unflagged }));
+        await settled();
+
+        expect(BiteTribeApiServiceMock.requestFollow).toHaveBeenCalledWith(
+          'private-id',
+        );
+        expect(BiteTribeApiServiceMock.followUser).not.toHaveBeenCalled();
+      });
+
+      it('raises no first-follow celebration', async () => {
+        actions.next(AppActions.followUser({ user: privateUser }));
+        await settled();
+
+        expect(BiteTribeApiServiceMock.followsAnyone).not.toHaveBeenCalled();
+        expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      });
+
+      it('says so and reloads the button when the request is refused', async () => {
+        BiteTribeApiServiceMock.requestFollow.mockRejectedValue(
+          new Error('failed-precondition'),
+        );
+
+        actions.next(AppActions.followUser({ user: privateUser }));
+        await settled();
+
+        expect(dispatchSpy).not.toHaveBeenCalledWith(
+          AppActions.requestedFollow(),
+        );
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          AppActions.reloadProfileMetadata(),
+        );
+        expect(ToastServiceMock.present).toHaveBeenCalledWith(
+          expect.objectContaining({
+            messageKey: 'follow-request-failed',
+            outcome: 'failure',
+          }),
+        );
+      });
+    });
+  });
+
+  // GitHub issue #2164.
+  describe('withdrawFollowRequest$', () => {
+    const user = { userId: 'private-id', public: false } as PublicUser;
+
+    beforeEach(() => ToastServiceMock.present.mockClear());
+
+    const run = async (): Promise<Action[]> => {
+      actions$ = of(AppActions.withdrawFollowRequest({ user }));
+      const emitted: Action[] = [];
+      await new Promise<void>((resolve) =>
+        effects.withdrawFollowRequest$.subscribe({
+          next: (action) => emitted.push(action),
+          complete: resolve,
+        }),
+      );
+
+      return emitted;
+    };
+
+    it('withdraws the request once the backend has deleted it', async () => {
+      BiteTribeApiServiceMock.withdrawFollowRequest.mockResolvedValue({
+        withdrawn: true,
+      });
+
+      expect(await run()).toEqual([AppActions.withdrewFollowRequest()]);
+      expect(
+        BiteTribeApiServiceMock.withdrawFollowRequest,
+      ).toHaveBeenCalledWith('private-id');
+      expect(ToastServiceMock.present).toHaveBeenCalledWith(
+        expect.objectContaining({ messageKey: 'follow-request-withdrawn' }),
+      );
+    });
+
+    it('keeps the request and says so when the withdrawal fails', async () => {
+      BiteTribeApiServiceMock.withdrawFollowRequest.mockRejectedValue(
+        new Error('nope'),
+      );
+
+      expect(await run()).toEqual([]);
+      expect(ToastServiceMock.present).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messageKey: 'follow-request-withdraw-failed',
+          outcome: 'failure',
+        }),
+      );
     });
   });
 

@@ -1254,15 +1254,29 @@ service cloud.firestore {
        * write to a document under somebody else's user document, which is why
        * the document is named by the follower's uid — that name is the whole
        * authorisation.
+       *
+       * A client writes an edge only onto a public profile (GitHub issue
+       * #2164). A private profile is followed by request: the
+       * `acceptFollowRequest` callable writes both edges through the Admin SDK
+       * once its owner accepts, so a client that could write one itself could
+       * skip the owner. Deleting stays open to the follower, so a private
+       * profile can still be unfollowed. Update is held to create's condition,
+       * because a `setDocument` onto an edge that exists is an update.
        */
+      function isPublicProfileOf(uid) {
+        return isPublicProfile(get(/databases/$(database)/documents/users/$(uid)).data);
+      }
+
       match /followers/{followerId} {
         allow read: if isMember();
-        allow write: if isSelf(followerId);
+        allow create, update: if isSelf(followerId) && isPublicProfileOf(userId);
+        allow delete: if isSelf(followerId);
       }
 
       match /following/{followedId} {
         allow read: if isMember();
-        allow write: if isSelf(userId);
+        allow create, update: if isSelf(userId) && isPublicProfileOf(followedId);
+        allow delete: if isSelf(userId);
       }
 
       /** One document per registered installation of this account. */

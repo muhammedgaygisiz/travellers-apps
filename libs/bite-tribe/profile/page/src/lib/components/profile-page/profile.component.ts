@@ -190,6 +190,8 @@ export class ProfileComponent {
   readonly likeButtonClick = output<LikeClick>();
   readonly followButtonClick = output<PublicUser>();
   readonly unfollowButtonClick = output<PublicUser>();
+  /** Requested was tapped on a private profile: withdraw the request (#2164). */
+  readonly withdrawFollowRequestClick = output<PublicUser>();
   readonly blockButtonClick = output<PublicUser>();
   readonly unblockButtonClick = output<PublicUser>();
   /** A report on this profile, with the reason picked (GitHub issue #1829). */
@@ -325,6 +327,13 @@ export class ProfileComponent {
     const user = this.user();
     if (user) {
       this.followButtonClick.emit(user);
+    }
+  }
+
+  withdrawFollowRequest(): void {
+    const user = this.user();
+    if (user) {
+      this.withdrawFollowRequestClick.emit(user);
     }
   }
 

@@ -216,16 +216,26 @@ export class ProfileService {
    * Counted on the tap, the same moment the button turns into Unfollow: the
    * profile follow is optimistic and its write reports no outcome to wait for
    * (GitHub issue #1708).
+   *
+   * On a private profile the tap sends a request instead (issue #2164), which
+   * is not a follow and is not counted as one.
    */
   followButtonClicked(user: PublicUser): void {
     this.dataAccess.submitFollowClick(user);
-    this.analytics.logEvent(AnalyticsEvent.UserFollowed, {
-      source: 'profile',
-    });
+
+    if (user.public === true) {
+      this.analytics.logEvent(AnalyticsEvent.UserFollowed, {
+        source: 'profile',
+      });
+    }
   }
 
   unfollowButtonClicked(user: PublicUser): void {
     this.dataAccess.submitUnfollowClick(user);
+  }
+
+  withdrawFollowRequestClicked(user: PublicUser): void {
+    this.dataAccess.submitWithdrawFollowRequestClick(user);
   }
 
   blockButtonClicked(user: PublicUser): void {

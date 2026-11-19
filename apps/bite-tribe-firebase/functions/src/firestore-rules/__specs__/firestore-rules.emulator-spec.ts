@@ -3392,6 +3392,8 @@ describe('users', () => {
   });
 
   it('lets an account follow another and refuses forging somebody else’s follow', async () => {
+    await updateDoc(doc(asStranger(), 'users', STRANGER), { public: true });
+
     await assertSucceeds(
       setDoc(doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER), {
         followerUid: CONSUMER,
@@ -3419,6 +3421,120 @@ describe('users', () => {
         followedUid: CONSUMER,
       }),
     );
+  });
+
+  /**
+   * A private profile is followed by request (issue #2164): only the
+   * `acceptFollowRequest` callable writes its edges, so a client may not. Both
+   * seeded profiles are private, as a new account is written.
+   */
+  describe('follow edges onto a private profile (issue #2164)', () => {
+    const EDGE = { followerUid: CONSUMER, followedUid: STRANGER };
+
+    it('refuses a client writing either edge onto a private profile', async () => {
+      await assertFails(
+        setDoc(
+          doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER),
+          EDGE,
+        ),
+      );
+      await assertFails(
+        setDoc(
+          doc(asConsumer(), 'users', CONSUMER, 'following', STRANGER),
+          EDGE,
+        ),
+      );
+    });
+
+    it('refuses it on a profile that is explicitly private', async () => {
+      await updateDoc(doc(asStranger(), 'users', STRANGER), { public: false });
+
+      await assertFails(
+        setDoc(
+          doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER),
+          EDGE,
+        ),
+      );
+      await assertFails(
+        setDoc(
+          doc(asConsumer(), 'users', CONSUMER, 'following', STRANGER),
+          EDGE,
+        ),
+      );
+    });
+
+    it('refuses rewriting an edge that already exists onto a private profile', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+
+        await setDoc(doc(db, 'users', STRANGER, 'followers', CONSUMER), EDGE);
+        await setDoc(doc(db, 'users', CONSUMER, 'following', STRANGER), EDGE);
+      });
+
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER), {
+          ...EDGE,
+          acceptedAt: '2026-11-19T10:00:00.000Z',
+        }),
+      );
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER, 'following', STRANGER), {
+          ...EDGE,
+          acceptedAt: '2026-11-19T10:00:00.000Z',
+        }),
+      );
+    });
+
+    it('lets the follower delete their own edges onto a private profile', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+
+        await setDoc(doc(db, 'users', STRANGER, 'followers', CONSUMER), EDGE);
+        await setDoc(doc(db, 'users', CONSUMER, 'following', STRANGER), EDGE);
+      });
+
+      await assertSucceeds(
+        deleteDoc(doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER)),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(asConsumer(), 'users', CONSUMER, 'following', STRANGER)),
+      );
+    });
+
+    it('lets the follower delete their own edges onto a public profile, and nobody else', async () => {
+      await updateDoc(doc(asStranger(), 'users', STRANGER), { public: true });
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+
+        await setDoc(doc(db, 'users', STRANGER, 'followers', CONSUMER), EDGE);
+        await setDoc(doc(db, 'users', CONSUMER, 'following', STRANGER), EDGE);
+      });
+
+      await assertFails(
+        deleteDoc(doc(asOwner(), 'users', STRANGER, 'followers', CONSUMER)),
+      );
+      await assertFails(
+        deleteDoc(doc(asOwner(), 'users', CONSUMER, 'following', STRANGER)),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(asConsumer(), 'users', STRANGER, 'followers', CONSUMER)),
+      );
+      await assertSucceeds(
+        deleteDoc(doc(asConsumer(), 'users', CONSUMER, 'following', STRANGER)),
+      );
+    });
+
+    it('refuses an edge onto an account that does not exist', async () => {
+      await assertFails(
+        setDoc(
+          doc(asConsumer(), 'users', CONSUMER, 'following', 'nobody-uid'),
+          {
+            followerUid: CONSUMER,
+            followedUid: 'nobody-uid',
+          },
+        ),
+      );
+    });
   });
 
   it('keeps push installations to the account that registered them', async () => {

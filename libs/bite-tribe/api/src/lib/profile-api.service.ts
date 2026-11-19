@@ -12,10 +12,16 @@ import type {
   CreateAndUploadImageCallbackParams,
   FollowSuggestion,
   PublicUser,
+  RequestFollowResult,
+  WithdrawFollowRequestResult,
   ReportUserResult,
   UserReportReason,
 } from 'model';
-import { normalizePronouns } from 'model';
+import {
+  FOLLOW_REQUESTS_COLLECTION,
+  followRequestId,
+  normalizePronouns,
+} from 'model';
 import { toPublicUser } from './utils/to-public-user';
 import { loadVisibleProfile } from './utils/load-visible-profile';
 import { Platform } from '@ionic/angular';
@@ -683,6 +689,70 @@ export class ProfileApiService {
       reference: `${USERS_COLLECTION}/${currentUser.uid}/following/${userId}`,
       data: followRelationship,
     });
+  }
+
+  /**
+   * Asks a private profile's owner to let the signed-in user follow them
+   * (GitHub issue #2164). A private profile is followed by request, and the
+   * rules refuse a client writing its follow edges, so this goes through the
+   * `requestFollow` callable rather than {@link follow}. Errors are left to the
+   * caller, which tells the user the request did not go out.
+   */
+  async requestFollow(userId: string): Promise<RequestFollowResult> {
+    const result = await FirebaseFunctions.callByName<
+      { userId: string },
+      RequestFollowResult
+    >({
+      name: 'requestFollow',
+      data: { userId },
+    });
+
+    return result.data;
+  }
+
+  /** Withdraws the signed-in user's pending request to `userId` (issue #2164). */
+  async withdrawFollowRequest(
+    userId: string,
+  ): Promise<WithdrawFollowRequestResult> {
+    const result = await FirebaseFunctions.callByName<
+      { userId: string },
+      WithdrawFollowRequestResult
+    >({
+      name: 'withdrawFollowRequest',
+      data: { userId },
+    });
+
+    return result.data;
+  }
+
+  /**
+   * Whether the signed-in user has a pending request to follow `userId`, read
+   * from `/followRequests/{ownerUid}_{viewerUid}` so the button still reads
+   * Requested after a reload (issue #2164). A read that fails is taken for no
+   * request: the button then offers Follow, and `requestFollow` answers a
+   * duplicate without a second request.
+   */
+  async followRequestPending(userId: string): Promise<boolean> {
+    const user = this.authService.getUser();
+
+    if (!user?.uid || user.uid === userId) {
+      return false;
+    }
+
+    try {
+      const result = await FirebaseFirestore.getDocument({
+        reference: `${FOLLOW_REQUESTS_COLLECTION}/${followRequestId(userId, user.uid)}`,
+      });
+
+      return Boolean(result.snapshot?.data);
+    } catch (error) {
+      console.warn(
+        'Could not tell whether a follow request is pending:',
+        error,
+      );
+
+      return false;
+    }
   }
 
   /**

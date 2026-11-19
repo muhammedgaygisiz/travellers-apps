@@ -752,6 +752,136 @@ describe(ProfileApiService.name, () => {
     ));
   });
 
+  // GitHub issue #2164.
+  describe('follow requests', () => {
+    it('sends a request through the requestFollow callable', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFirestore.setDocument).mockClear();
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { requested: true },
+        });
+
+        await expect(service.requestFollow('owner-uid')).resolves.toEqual({
+          requested: true,
+        });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'requestFollow',
+          data: { userId: 'owner-uid' },
+        });
+        expect(FirebaseFirestore.setDocument).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('lets a refused request through to the caller', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockRejectedValue(new Error('failed-precondition'));
+
+        await expect(service.requestFollow('owner-uid')).rejects.toThrow(
+          'failed-precondition',
+        );
+      },
+    ));
+
+    it('withdraws through the withdrawFollowRequest callable', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+          data: { withdrawn: true },
+        });
+
+        await expect(
+          service.withdrawFollowRequest('owner-uid'),
+        ).resolves.toEqual({ withdrawn: true });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'withdrawFollowRequest',
+          data: { userId: 'owner-uid' },
+        });
+      },
+    ));
+
+    it('reads the pending request by its owner-then-requester id', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFirestore.getDocument).mockResolvedValue({
+          snapshot: {
+            id: 'owner-uid_123',
+            path: '',
+            data: { ownerUid: 'owner-uid' },
+          },
+        } as any);
+
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          true,
+        );
+        expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+          reference: 'followRequests/owner-uid_123',
+        });
+      },
+    ));
+
+    it('answers no request when there is none, or it cannot be read', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFirestore.getDocument).mockResolvedValueOnce({
+          snapshot: { id: 'owner-uid_123', path: '', data: null },
+        } as any);
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+
+        jest
+          .mocked(FirebaseFirestore.getDocument)
+          .mockRejectedValueOnce(new Error('permission-denied'));
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+      },
+    ));
+
+    it('answers no request when the read returns no snapshot', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getDocument)
+          .mockResolvedValueOnce({} as any);
+
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+      },
+    ));
+
+    it('reads nothing while signed out', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const getUser = jest
+          .spyOn(MockedAuthService, 'getUser')
+          .mockReturnValue(undefined);
+        jest.mocked(FirebaseFirestore.getDocument).mockClear();
+
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+        expect(FirebaseFirestore.getDocument).not.toHaveBeenCalled();
+        getUser.mockRestore();
+      },
+    ));
+
+    it('reads nothing for the own profile', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest.mocked(FirebaseFirestore.getDocument).mockClear();
+
+        await expect(service.followRequestPending('123')).resolves.toBe(false);
+        expect(FirebaseFirestore.getDocument).not.toHaveBeenCalled();
+      },
+    ));
+  });
+
   describe('resendEmailVerification', () => {
     it('should call resendEmailVerification firebase function', inject(
       [ProfileApiService],

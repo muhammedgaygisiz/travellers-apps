@@ -71,6 +71,9 @@ class ProfileApiMock {
   fetchFollowing = jest.fn();
   isCurrentUserFollowing = jest.fn();
   isFollowedByCurrentUser = jest.fn();
+  followRequestPending = jest.fn();
+  requestFollow = jest.fn();
+  withdrawFollowRequest = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -774,6 +777,37 @@ describe(BiteTribeApiService.name, () => {
     ));
   });
 
+  // GitHub issue #2164.
+  describe('follow request passthroughs', () => {
+    it('should forward a request and its withdrawal to ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'requestFollow')
+          .mockResolvedValue({ requested: true });
+        jest
+          .spyOn(profileApiService, 'withdrawFollowRequest')
+          .mockResolvedValue({ withdrawn: true });
+
+        await expect(service.requestFollow('owner-uid')).resolves.toEqual({
+          requested: true,
+        });
+        await expect(
+          service.withdrawFollowRequest('owner-uid'),
+        ).resolves.toEqual({ withdrawn: true });
+        expect(profileApiService.requestFollow).toHaveBeenCalledWith(
+          'owner-uid',
+        );
+        expect(profileApiService.withdrawFollowRequest).toHaveBeenCalledWith(
+          'owner-uid',
+        );
+      },
+    ));
+  });
+
   describe('block passthroughs', () => {
     it('should forward block, unblock and the block list to ProfileApiService', inject(
       [BiteTribeApiService, ProfileApiService],
@@ -1050,6 +1084,9 @@ describe(BiteTribeApiService.name, () => {
         const isFollowedByCurrentUserSpy = jest
           .spyOn(profileApiService, 'isFollowedByCurrentUser')
           .mockResolvedValue(true);
+        const followRequestPendingSpy = jest
+          .spyOn(profileApiService, 'followRequestPending')
+          .mockResolvedValue(false);
         const fetchFollowersSpy = jest.spyOn(
           profileApiService,
           'fetchFollowers',
@@ -1066,9 +1103,11 @@ describe(BiteTribeApiService.name, () => {
           followers: 12,
           following: 4,
           isFollowedByMe: true,
+          isRequestedByMe: false,
         });
         expect(getUserByIdSpy).toHaveBeenCalledWith(userId);
         expect(isFollowedByCurrentUserSpy).toHaveBeenCalledWith(userId);
+        expect(followRequestPendingSpy).toHaveBeenCalledWith(userId);
         // The aggregate path must not load the whole subcollections.
         expect(fetchFollowersSpy).not.toHaveBeenCalled();
         expect(fetchFollowingSpy).not.toHaveBeenCalled();
@@ -1093,6 +1132,9 @@ describe(BiteTribeApiService.name, () => {
         const isCurrentUserFollowingSpy = jest
           .spyOn(profileApiService, 'isCurrentUserFollowing')
           .mockReturnValue(Promise.resolve(true));
+        jest
+          .spyOn(profileApiService, 'followRequestPending')
+          .mockResolvedValue(true);
 
         const userId = 'user-id';
         const metadata = await service.fetchFollowMetadata(userId);
@@ -1101,6 +1143,7 @@ describe(BiteTribeApiService.name, () => {
           followers: 2,
           following: 1,
           isFollowedByMe: true,
+          isRequestedByMe: true,
         });
         expect(fetchFollowersSpy).toHaveBeenCalledWith(userId);
         expect(fetchFollowingSpy).toHaveBeenCalledWith(userId);

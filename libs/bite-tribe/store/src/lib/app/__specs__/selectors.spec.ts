@@ -34,6 +34,7 @@ describe('App Selectors', () => {
       followers: 0,
       following: 0,
       isFollowedByMe: false,
+      isRequestedByMe: false,
     },
   };
 
@@ -259,6 +260,7 @@ describe('App Selectors', () => {
         followers: 0,
         following: 0,
         isFollowedByMe: false,
+        isRequestedByMe: false,
       });
     });
 

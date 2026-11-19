@@ -35,6 +35,12 @@ export const AppActions = createActionGroup({
     // the optimistic update is exact and reconciles on the next navigation.
     'Followed user': emptyProps(),
     'Unfollowed user': emptyProps(),
+    // A private profile is followed by request (GitHub issue #2164). The store
+    // learns of a request once the callable has written it, as it does of a
+    // block, and a request is not a follow, so no follower count moves.
+    'Withdraw follow request': props<{ user: PublicUser }>(),
+    'Requested follow': emptyProps(),
+    'Withdrew follow request': emptyProps(),
     'Loaded blocked users': props<{ userIds: string[] }>(),
     'Block user': props<{ user: PublicUser }>(),
     'Blocked user': props<{ userId: string }>(),

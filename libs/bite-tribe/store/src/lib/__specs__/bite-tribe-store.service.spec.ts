@@ -1,6 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BiteTribeStoreService } from '../bite-tribe-store.service';
+import { AppActions } from '../app/actions';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
 import { Like, LikeClick } from 'model';
@@ -475,6 +476,23 @@ describe(BiteTribeStoreService.name, () => {
           {} as unknown as Parameters<BiteTribeStoreService['unfollowUser']>[0],
         );
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  // GitHub issue #2164.
+  describe('withdrawFollowRequest', () => {
+    it('should dispatch withdrawFollowRequest', inject(
+      [BiteTribeStoreService],
+      (service: BiteTribeStoreService) => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+        const user = { userId: 'private-id' } as Parameters<
+          BiteTribeStoreService['withdrawFollowRequest']
+        >[0];
+        service.withdrawFollowRequest(user);
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          AppActions.withdrawFollowRequest({ user }),
+        );
       },
     ));
   });

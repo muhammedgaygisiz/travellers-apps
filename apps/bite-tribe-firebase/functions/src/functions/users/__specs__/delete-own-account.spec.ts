@@ -526,6 +526,90 @@ describe('deleteAccountForUser', () => {
     });
   });
 
+  /**
+   * Issue #1568: no restaurant goes on naming a uid that no longer exists, and
+   * the restaurant ends where an operator's revoke would leave it.
+   */
+  describe('restaurants the account owns', () => {
+    it('releases a restaurant it owns alone', async () => {
+      db.seed(`users/${UID}`, { displayName: 'Gone User' });
+      db.seed('restaurants/solo', {
+        name: 'Solo',
+        ownerUserIds: [UID],
+        claimStatus: 'claimed',
+        claimedAt: '2026-11-01T00:00:00.000Z',
+        claimedAtTimestamp: 1,
+      });
+
+      await deleteAccountForUser(UID, NOW);
+
+      const restaurant = db.read('restaurants/solo');
+
+      expect(restaurant).toMatchObject({
+        name: 'Solo',
+        claimStatus: 'revoked',
+      });
+      expect(restaurant).not.toHaveProperty('ownerUserIds');
+      expect(restaurant).not.toHaveProperty('claimedAt');
+      expect(restaurant).not.toHaveProperty('claimedAtTimestamp');
+      expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+        releasedRestaurants: 1,
+      });
+    });
+
+    it('leaves the other owners of a shared restaurant in place', async () => {
+      db.seed(`users/${UID}`, { displayName: 'Gone User' });
+      db.seed('restaurants/shared', {
+        ownerUserIds: ['partner', UID],
+        claimStatus: 'claimed',
+        claimedAt: '2026-11-01T00:00:00.000Z',
+      });
+
+      await deleteAccountForUser(UID, NOW);
+
+      expect(db.read('restaurants/shared')).toMatchObject({
+        ownerUserIds: ['partner'],
+        claimStatus: 'claimed',
+        claimedAt: '2026-11-01T00:00:00.000Z',
+      });
+    });
+
+    it('leaves restaurants it does not own alone', async () => {
+      db.seed(`users/${UID}`, { displayName: 'Gone User' });
+      db.seed('restaurants/other', {
+        ownerUserIds: ['partner'],
+        claimStatus: 'claimed',
+      });
+
+      await deleteAccountForUser(UID, NOW);
+
+      expect(db.read('restaurants/other')).toEqual({
+        ownerUserIds: ['partner'],
+        claimStatus: 'claimed',
+      });
+      expect(db.read(`accountDeletions/${UID}`)).toMatchObject({
+        releasedRestaurants: 0,
+      });
+    });
+
+    it('releases them before the Auth account is deleted', async () => {
+      db.seed(`users/${UID}`, { displayName: 'Gone User' });
+      db.seed('restaurants/solo', {
+        ownerUserIds: [UID],
+        claimStatus: 'claimed',
+      });
+      let ownersAtAuthDelete: unknown;
+      deleteUserMock.mockImplementationOnce(async () => {
+        ownersAtAuthDelete = db.read('restaurants/solo')?.['ownerUserIds'];
+      });
+
+      await deleteAccountForUser(UID, NOW);
+
+      expect(deleteUserMock).toHaveBeenCalledWith(UID);
+      expect(ownersAtAuthDelete).toBeUndefined();
+    });
+  });
+
   it('deletes the profile images and the auth account', async () => {
     seedFullAccount();
 

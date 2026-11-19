@@ -1,5 +1,6 @@
 import { getAuth } from 'firebase-admin/auth';
-import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, Firestore, getFirestore } from 'firebase-admin/firestore';
+import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
@@ -112,6 +113,102 @@ const requireBusinessAccount = async (ownerUserId: string): Promise<void> => {
       `Account ${ownerUserId} does not hold the ${OWNER_ROLE} role.`,
     );
   }
+};
+
+/**
+ * The write that takes one account off a restaurant's owners.
+ *
+ * Shared by the operator's revoke and by account deletion (issue #1568), so a
+ * restaurant released either way ends in the same state. Other owners keep
+ * the restaurant `claimed`. Removing the last owner deletes the set and the
+ * grant timestamps and sets `claimStatus: revoked`, which
+ * `assignRestaurantOwner` accepts like `unclaimed`.
+ */
+export const ownerRemovalOf = (
+  currentOwners: string[],
+  ownerUserId: string,
+  now: Date,
+): {
+  update: Record<string, unknown>;
+  ownerUserIds: string[];
+  claimStatus: 'claimed' | 'revoked';
+} => {
+  const ownerUserIds = currentOwners.filter((uid) => uid !== ownerUserId);
+  const timestamps = {
+    updatedAt: now.toISOString(),
+    updatedAtTimestamp: now.getTime(),
+  };
+
+  if (ownerUserIds.length > 0) {
+    return {
+      update: { ownerUserIds, ...timestamps },
+      ownerUserIds,
+      claimStatus: 'claimed',
+    };
+  }
+
+  return {
+    update: {
+      ownerUserIds: FieldValue.delete(),
+      claimedAt: FieldValue.delete(),
+      claimedAtTimestamp: FieldValue.delete(),
+      claimStatus: 'revoked',
+      ...timestamps,
+    },
+    ownerUserIds: [],
+    claimStatus: 'revoked',
+  };
+};
+
+/**
+ * Releases every restaurant a deleted account owns (issue #1568).
+ *
+ * Account deletion cannot be refused, so the restaurants are released rather
+ * than kept: no restaurant may go on naming a uid that no longer exists. Each
+ * one is its own transaction, so a restaurant an operator revoked in the
+ * meantime is skipped rather than written twice. No operator decided this,
+ * so it is logged as a deletion step with the restaurants it released,
+ * not through the operator log.
+ *
+ * Returns the number of restaurants released.
+ */
+export const releaseRestaurantsOwnedBy = async (
+  db: Firestore,
+  uid: string,
+): Promise<number> => {
+  const owned = await db
+    .collection(RESTAURANT_COLLECTION)
+    .where('ownerUserIds', 'array-contains', uid)
+    .get();
+
+  const released: { restaurantId: string; claimStatus: string }[] = [];
+
+  for (const doc of owned.docs) {
+    const claimStatus = await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(doc.ref);
+      const currentOwners = ownerUserIdsOf(snapshot.data());
+
+      if (!currentOwners.includes(uid)) {
+        return undefined;
+      }
+
+      const removal = ownerRemovalOf(currentOwners, uid, new Date());
+
+      transaction.update(doc.ref, removal.update);
+
+      return removal.claimStatus;
+    });
+
+    if (claimStatus) {
+      released.push({ restaurantId: doc.id, claimStatus });
+    }
+  }
+
+  if (released.length) {
+    logger.info('deleteOwnAccount: released restaurants', { uid, released });
+  }
+
+  return released.length;
 };
 
 /**
@@ -298,42 +395,15 @@ export const revokeRestaurantOwnerHandler = async (
         );
       }
 
-      const now = new Date();
-      const ownerUserIds = currentOwners.filter((uid) => uid !== ownerUserId);
-      const timestamps = {
-        updatedAt: now.toISOString(),
-        updatedAtTimestamp: now.getTime(),
-      };
+      const removal = ownerRemovalOf(currentOwners, ownerUserId, new Date());
 
-      if (ownerUserIds.length > 0) {
-        // Another owner remains, so the restaurant stays held.
-        transaction.update(restaurantRef, {
-          ownerUserIds,
-          ...timestamps,
-        });
-
-        return {
-          restaurantId,
-          previousOwnerUserId: ownerUserId,
-          ownerUserIds,
-          claimStatus: 'claimed',
-        };
-      }
-
-      // The last owner: the set goes, rather than being left empty.
-      transaction.update(restaurantRef, {
-        ownerUserIds: FieldValue.delete(),
-        claimedAt: FieldValue.delete(),
-        claimedAtTimestamp: FieldValue.delete(),
-        claimStatus: 'revoked',
-        ...timestamps,
-      });
+      transaction.update(restaurantRef, removal.update);
 
       return {
         restaurantId,
         previousOwnerUserId: ownerUserId,
-        ownerUserIds: [],
-        claimStatus: 'revoked',
+        ownerUserIds: removal.ownerUserIds,
+        claimStatus: removal.claimStatus,
       };
     },
   );

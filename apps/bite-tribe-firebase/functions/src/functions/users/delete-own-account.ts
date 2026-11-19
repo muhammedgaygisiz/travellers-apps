@@ -17,6 +17,7 @@ import { removeReviewsByAuthor } from '../reviews/delete-review';
 import { deleteReviewReportsForAccount } from '../reviews/review-report';
 import { deleteHiddenReviewsForAccount } from '../reviews/hidden-review';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
+import { releaseRestaurantsOwnedBy } from '../restaurants/restaurant-ownership';
 import { onAppCheck } from '../shared/callable-options';
 import {
   LEADERBOARD_DAILY_DOC,
@@ -601,6 +602,7 @@ export const deleteAccountForUser = async (
     const deletedFollowRequests = await deleteFollowRequestsForUser(db, uid);
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
+    const releasedRestaurants = await releaseRestaurantsOwnedBy(db, uid);
     const deletedBiteReports = await deleteBiteReportsByReporter(db, uid);
     const deletedUserReports = await deleteUserReportsForUser(db, uid);
     const deletedReviewReports = await deleteReviewReportsForAccount(db, uid);
@@ -634,6 +636,7 @@ export const deleteAccountForUser = async (
         deletedFollowRequests,
         deletedPushTokens,
         deletedRestaurantStaff,
+        releasedRestaurants,
         deletedBiteReports,
         deletedUserReports,
         deletedReviewReports,
@@ -657,6 +660,7 @@ export const deleteAccountForUser = async (
       deletedFollowRequests,
       deletedPushTokens,
       deletedRestaurantStaff,
+      releasedRestaurants,
       deletedBiteReports,
       deletedUserReports,
       deletedReviewReports,

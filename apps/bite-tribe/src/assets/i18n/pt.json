@@ -97,6 +97,8 @@
   "no-display-name": "Sem nome",
   "no-bites-yet": "Ainda não há Bites.",
   "no-description-available": "Nenhuma descrição disponível.",
+  "restaurant-not-found": "Não encontrámos este restaurante. Pode ter sido removido, ou a tua ligação falhou.",
+  "restaurant-not-found-back": "Voltar ao Bite",
   "confirm-password": "Confirmar senha",
   "yes-unfollow": "Sim, deixar de seguir",
   "bitetrail-saved-as-bucket-list": "BiteTrail guardado na tua lista!",

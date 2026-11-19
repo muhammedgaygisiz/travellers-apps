@@ -97,6 +97,8 @@
   "no-display-name": "ስም የለም",
   "no-bites-yet": "እስካሁን Bites የሉም።",
   "no-description-available": "መግለጫ የለም።",
+  "restaurant-not-found": "ይህን ምግብ ቤት ማግኘት አልቻልንም። ተወግዶ ሊሆን ይችላል ወይም ግንኙነትዎ ተቋርጦ ሊሆን ይችላል።",
+  "restaurant-not-found-back": "ወደ Bite ተመለስ",
   "confirm-password": "የምስጢር ቁጥር ያረጋግጡ",
   "yes-unfollow": "አዎ፣ መከታተልን ያቁሙ",
   "bitetrail-saved-as-bucket-list": "BiteTrail እንደ ዝርዝር ተቀምጧል!",

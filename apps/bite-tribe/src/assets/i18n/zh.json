@@ -97,6 +97,8 @@
   "no-display-name": "无名称",
   "no-bites-yet": "还没有Bite。",
   "no-description-available": "暂无描述。",
+  "restaurant-not-found": "找不到这家餐厅。它可能已被删除，或者你的网络连接已断开。",
+  "restaurant-not-found-back": "返回 Bite",
   "confirm-password": "确认密码",
   "yes-unfollow": "是，取消关注",
   "bitetrail-saved-as-bucket-list": "BiteTrail已保存为心愿清单！",

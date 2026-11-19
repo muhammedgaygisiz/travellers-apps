@@ -97,6 +97,8 @@
   "no-display-name": "이름 없음",
   "no-bites-yet": "아직 Bite가 없어요.",
   "no-description-available": "설명이 없어요.",
+  "restaurant-not-found": "이 레스토랑을 찾을 수 없어요. 삭제되었거나 연결이 끊겼을 수 있어요.",
+  "restaurant-not-found-back": "Bite로 돌아가기",
   "confirm-password": "비밀번호 확인",
   "yes-unfollow": "네, 팔로우 취소할게요",
   "bitetrail-saved-as-bucket-list": "BiteTrail을 버킷리스트로 저장했어요!",

@@ -97,6 +97,8 @@
   "no-display-name": "İsim yok",
   "no-bites-yet": "Henüz Bite yok.",
   "no-description-available": "Yorum yok.",
+  "restaurant-not-found": "Bu restoranı bulamadık. Kaldırılmış olabilir ya da bağlantın kesilmiş olabilir.",
+  "restaurant-not-found-back": "Bite'a geri dön",
   "confirm-password": "Şifreyi tekrarla",
   "yes-unfollow": "Evet, takipten çık",
   "bitetrail-saved-as-bucket-list": "BiteTrail, yapılacaklar listesine eklendi!",

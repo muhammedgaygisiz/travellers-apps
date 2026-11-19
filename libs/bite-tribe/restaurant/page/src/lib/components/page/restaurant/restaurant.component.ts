@@ -9,6 +9,7 @@ import {
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
+  IonCard,
   IonContent,
   IonIcon,
   IonLabel,
@@ -35,6 +36,7 @@ import { TagsInputComponent } from 'common/ui/tags';
     PageComponent,
     IonContent,
     IonButton,
+    IonCard,
     IonIcon,
     IonSkeletonText,
     MapComponent,
@@ -54,12 +56,17 @@ export class RestaurantComponent {
   userId = input<string>();
   restaurant = input<Restaurant>();
   menu = input<Menu>();
+  /** The route's Bites have not arrived yet (first load only). */
+  bitesLoading = input(false);
+  /** The route's restaurant id resolved to nothing, or could not be read. */
+  notFound = input(false);
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();
   readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();
+  readonly backClick = output<void>();
   readonly selectedSegment = signal<'bites' | 'menu'>('bites');
 
   /**
@@ -68,8 +75,16 @@ export class RestaurantComponent {
    * on screen before it was known whether the restaurant was loaded at all. It
    * now holds a skeleton until the document resolves, the same way Bite details
    * does. See GitHub issue #1381.
+   *
+   * It also waits for the Bites. The rating, the Bite count and the tags come
+   * from them, and they arrive separately, so those parts used to pop in after
+   * the skeleton had gone. A restaurant that cannot be found ends the wait in
+   * the not-found state instead of a skeleton that never resolves. See GitHub
+   * issue #2124.
    */
-  isLoading = computed(() => !this.restaurant());
+  isLoading = computed(
+    () => !this.notFound() && (!this.restaurant() || this.bitesLoading()),
+  );
 
   /**
    * Whether the loaded restaurant carries a menu to navigate to. Without one

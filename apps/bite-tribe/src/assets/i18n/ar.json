@@ -97,6 +97,8 @@
   "no-display-name": "لا يوجد اسم",
   "no-bites-yet": "لا توجد Bites بعد.",
   "no-description-available": "لا يوجد وصف متاح.",
+  "restaurant-not-found": "لم نتمكن من العثور على هذا المطعم. ربما تمت إزالته أو انقطع اتصالك.",
+  "restaurant-not-found-back": "العودة إلى الـ Bite",
   "confirm-password": "تأكيد كلمة المرور",
   "yes-unfollow": "نعم، إلغاء المتابعة",
   "bitetrail-saved-as-bucket-list": "تم حفظ BiteTrail كقائمة آمال!",

@@ -3,6 +3,7 @@ import { adapter, initialState } from './adapter';
 import {
   loadedRestaurantFromApi,
   loadedRestaurantsFromApi,
+  noRestaurantFound,
   setRestaurantToCreate,
 } from './actions';
 import { fromAuth } from 'ta-firestore';
@@ -16,8 +17,18 @@ export const reducer = createReducer(
     return adapter.setAll(restaurants, state);
   }),
   on(loadedRestaurantFromApi, (state, { restaurant }) => {
-    return adapter.upsertOne(restaurant, state);
+    return adapter.upsertOne(restaurant, {
+      ...state,
+      notFoundRestaurantId:
+        state.notFoundRestaurantId === restaurant.id
+          ? undefined
+          : state.notFoundRestaurantId,
+    });
   }),
+  on(noRestaurantFound, (state, { restaurantId }) => ({
+    ...state,
+    notFoundRestaurantId: restaurantId,
+  })),
   on(setRestaurantToCreate, (state, { restaurant }) => {
     return {
       ...state,

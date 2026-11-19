@@ -148,8 +148,29 @@ describe(RestaurantEffects.name, () => {
         });
 
         expectObservable(effects.loadRestaurantById$).toBe('a', {
-          a: noRestaurantFound(),
+          a: noRestaurantFound({ restaurantId: 'restaurant-1' }),
         });
+      });
+    });
+
+    it('should report a read that fails, instead of dispatching nothing', () => {
+      // A rejected read used to escape the stream, so the page held its
+      // skeleton for ever. See GitHub issue #2124.
+      BiteTribeApiServiceMock.loadRestaurant.mockReturnValue(
+        Promise.reject(new Error('offline')),
+      );
+      navigateTo({ restaurantId: 'restaurant-1' });
+      actions$ = of(navigationTo('/bite/bite-1/restaurant/restaurant-1'));
+
+      const dispatched: Action[] = [];
+      effects.loadRestaurantById$.subscribe((action) =>
+        dispatched.push(action),
+      );
+
+      return Promise.resolve().then(() => {
+        expect(dispatched).toEqual([
+          noRestaurantFound({ restaurantId: 'restaurant-1' }),
+        ]);
       });
     });
   });

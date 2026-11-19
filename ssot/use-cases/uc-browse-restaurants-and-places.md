@@ -37,17 +37,27 @@ selector that attaches a place to a Bite in the first place to
 
 Issue [#1381]
 gave the verified restaurant page the loading treatment issue [#1382] gave the
-menu page, without the failed state that issue also added there. Before it,
+menu page; issue [#2124] later added the terminal state it had left out. Before it,
 the page rendered its final layout immediately and filled in as the reads
 landed, so a restaurant that had not loaded yet was indistinguishable
 from one whose optional fields are genuinely empty, and its actions were on
 screen before the state backing them existed.
 
-- The page is either loading or loaded. While the restaurant document is
-  undefined it renders skeletons tracing its own shape - the header photo, the
-  name and distance, the rating line, the description and links, the tags, the
-  opening-hours rows, the address and the map - and the header runs the loading
-  bar with them, per [Implementation - Feature Patterns](../implementation/feature-patterns.md).
+- The page is loading, loaded, or not found. While the restaurant document or
+  the route's Bites have not arrived it renders skeletons tracing its own
+  shape (the header photo, the name and distance, the rating line, the
+  description and links, the tags, the opening-hours rows, the address and the
+  map), and the header runs the loading bar with them, per [Implementation - Feature Patterns](../implementation/feature-patterns.md).
+  It waits for the Bites too because the rating, the Bite count and the tags
+  are derived from them; waiting for the document alone let those parts appear
+  after the skeleton had gone (issue [#2124]). Only a first load of the Bites
+  counts: a reload from the Bites list keeps the page as it is.
+- A restaurant id that resolves to no document, or whose read fails, ends in a
+  not-found state with a "Back to the Bite" button, instead of a skeleton that
+  never resolves (issue [#2124]). The store records that id
+  (`notFoundRestaurantId`), so another restaurant's answer never ends this
+  page's wait, and the page reads only the route's own restaurant, so B's page
+  never shows A's data.
 - The empty states ("no description available", "no social media links", "no
   ratings yet") belong to a restaurant that loaded and really has those fields
   empty. They can no longer be reached while the read is in flight.
@@ -106,6 +116,8 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1696] made the Menu label readable in light mode, where it had been drawn in fixed white on a transparent button, moved the menu button above the tags, and replaced the Bites button on both pages with the rating count as a link.
 
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
+- Issue [#2124] made the page wait for its Bites as well as its document, and
+  gave it the not-found state. Part of [#2123].
 
 ## Related Domains
 
@@ -128,4 +140,6 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#1382]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1382
 [#1696]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1696
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
+[#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123
+[#2124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2124
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830

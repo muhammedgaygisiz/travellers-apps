@@ -20,6 +20,9 @@ export class RestaurantDataAccessService {
   bites = toSignal(this.storeService.bitesByRestaurant$);
   userId = toSignal(this.storeService.userId$);
   restaurant = toSignal(this.storeService.restaurant$);
+  restaurantNotFound = toSignal(this.storeService.restaurantNotFound$, {
+    initialValue: false,
+  });
 
   submitLikeClick(likeClick: LikeClick): void {
     this.storeService.submitLikeClick(likeClick);

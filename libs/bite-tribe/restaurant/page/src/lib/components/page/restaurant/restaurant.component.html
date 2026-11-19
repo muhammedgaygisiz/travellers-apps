@@ -14,32 +14,71 @@
   [loading]="loading"
 >
   <ion-content>
-    @if (loading) {
+    @if (notFound()) {
+      <!-- An id that resolves to nothing, or a read that failed, used to leave
+      the skeleton up for ever. See GitHub issue #2124. -->
+      <div
+        class="not-found ion-padding ion-text-center"
+        data-testid="restaurant-not-found"
+      >
+        <ion-icon
+          name="restaurant-outline"
+          class="not-found-icon"
+          aria-hidden="true"
+        />
+        <p class="text-secondary">{{ 'restaurant-not-found' | transloco }}</p>
+        <ion-button
+          fill="outline"
+          data-testid="restaurant-not-found-back"
+          (click)="backClick.emit()"
+        >
+          {{ 'restaurant-not-found-back' | transloco }}
+        </ion-button>
+      </div>
+    } @else if (loading) {
       <!-- The page used to build itself up as the reads landed, so its empty
       states and its menu button were on screen before it was known whether the
       restaurant was loaded at all. It now holds a skeleton until the document
       resolves, the same way Bite details does. See GitHub issue #1381. -->
       <div data-testid="restaurant-loading">
-        <ion-skeleton-text
-          [animated]="true"
-          style="width: 100%; height: 40vh; border-radius: 0; margin: 0"
-        />
+        <!-- Mirrors bt-restaurant-image (an ion-card, 200px tall) and the
+        h1 margins, so the content lands where its skeleton stood. -->
+        <ion-card>
+          <ion-skeleton-text
+            [animated]="true"
+            style="width: 100%; height: 200px; border-radius: 0; margin: 0"
+          />
+        </ion-card>
 
         <div class="ion-padding-horizontal">
           <div
             class="ion-display-flex ion-justify-content-between ion-align-items-center"
           >
-            <ion-skeleton-text
-              [animated]="true"
-              style="height: 32px; width: 172px"
-            />
+            <!-- The zero-width space gives the heading a text line, so it
+            takes the same line height as the restaurant name. -->
+            <h1 aria-hidden="true">
+              &#8203;<ion-skeleton-text
+                [animated]="true"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  height: 1em;
+                  width: 172px;
+                  margin: 0;
+                "
+              />
+            </h1>
             <ion-skeleton-text
               [animated]="true"
               style="height: 20px; width: 56px"
             />
           </div>
 
-          <div class="ion-margin-bottom">
+          <!-- 44px: the height of the rating link the loaded page shows. -->
+          <div
+            class="ion-display-flex ion-align-items-center ion-margin-bottom"
+            style="min-height: 44px"
+          >
             <ion-skeleton-text
               [animated]="true"
               style="height: 20px; width: 148px"

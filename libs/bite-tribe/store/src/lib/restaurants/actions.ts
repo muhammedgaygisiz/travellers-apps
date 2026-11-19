@@ -11,8 +11,15 @@ export const loadedRestaurantFromApi = createAction(
   props<{ restaurant: Restaurant }>(),
 );
 
+/**
+ * The route's restaurant id resolved to no document, or its read failed. Named
+ * by id so the page can tell its own restaurant's answer from a stale one, and
+ * end its skeleton in a not-found state instead of waiting for ever. See GitHub
+ * issue #2124.
+ */
 export const noRestaurantFound = createAction(
   '[RESTAURANTS] No restaurant found',
+  props<{ restaurantId: string }>(),
 );
 
 export const setRestaurantToCreate = createAction(

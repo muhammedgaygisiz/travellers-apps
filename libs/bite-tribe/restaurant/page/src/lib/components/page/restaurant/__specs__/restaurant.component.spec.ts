@@ -414,6 +414,53 @@ describe('RestaurantComponent', () => {
     });
   });
 
+  describe('Bites loading and not found (issue #2124)', () => {
+    it('should keep the skeleton while the Bites are loading, even with the restaurant loaded', () => {
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.setInput('bitesLoading', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.isLoading()).toBe(true);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-loading"]'),
+      ).toBeTruthy();
+      expect(nativeEl.querySelector('h1:not([aria-hidden])')).toBeNull();
+    });
+
+    it('should drop the skeleton once both the restaurant and the Bites have loaded', () => {
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.setInput('bitesLoading', false);
+      componentRef.changeDetectorRef.detectChanges();
+
+      expect(component.isLoading()).toBe(false);
+    });
+
+    it('should show the not-found state with a way back instead of the skeleton', () => {
+      componentRef.setInput('restaurant', undefined);
+      componentRef.setInput('notFound', true);
+      componentRef.changeDetectorRef.detectChanges();
+
+      const nativeEl = fixture.nativeElement as HTMLElement;
+      expect(component.isLoading()).toBe(false);
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-loading"]'),
+      ).toBeNull();
+      expect(
+        nativeEl.querySelector('[data-testid="restaurant-not-found"]'),
+      ).toBeTruthy();
+
+      const backClicks: unknown[] = [];
+      component.backClick.subscribe(() => backClicks.push(true));
+      (
+        nativeEl.querySelector(
+          '[data-testid="restaurant-not-found-back"]',
+        ) as HTMLElement
+      ).click();
+      expect(backClicks).toHaveLength(1);
+    });
+  });
+
   describe('menu button', () => {
     it('should render the menu button when the loaded restaurant has a menu id', () => {
       componentRef.setInput(

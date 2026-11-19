@@ -27,11 +27,6 @@ export const setRestaurantToCreate = createAction(
   props<{ restaurant: Restaurant }>(),
 );
 
-export const saveNewRestaurant = createAction(
-  '[RESTAURANTS] Save new restaurant',
-  props<{ restaurant: Restaurant }>(),
-);
-
 export const saveSocialMediaLinksForRestaurant = createAction(
   '[RESTAURANTS] Save social media links for restaurant',
   props<{ restaurantId: string; links: Link[] }>(),

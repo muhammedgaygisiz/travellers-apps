@@ -66,6 +66,7 @@ describe(RestaurantsDataAccessService.name, () => {
       searchPlaces: jest.fn(),
       getPlaceDetails: jest.fn(),
       saveRestaurantImage: jest.fn().mockResolvedValue(undefined),
+      saveNewRestaurant: jest.fn().mockResolvedValue(undefined),
     };
 
     jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
@@ -625,14 +626,22 @@ describe(RestaurantsDataAccessService.name, () => {
   });
 
   describe('submitNewRestaurant', () => {
-    it('should save a normal restaurant through the store', () => {
+    // Issue #1952: awaited through the api, so a refused write reaches the
+    // page instead of being dropped by a store effect.
+    it('should save a normal restaurant through the api and resolve with it', async () => {
       const restaurant = { id: '', name: 'Pizza Palace' } as Restaurant;
 
-      service.submitNewRestaurant(restaurant);
+      await service.submitNewRestaurant(restaurant);
 
-      expect(storeServiceMock.saveNewRestaurant).toHaveBeenCalledWith(
-        restaurant,
-      );
+      expect(apiMock.saveNewRestaurant).toHaveBeenCalledWith(restaurant);
+    });
+
+    it('should reject when the write is refused', async () => {
+      apiMock.saveNewRestaurant.mockRejectedValue(new Error('invalid data'));
+
+      await expect(
+        service.submitNewRestaurant({ id: '', name: 'x' } as Restaurant),
+      ).rejects.toThrow('invalid data');
     });
   });
 

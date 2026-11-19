@@ -321,7 +321,9 @@ export class NewRestaurantPageComponent {
         description: description as string,
         position: position as Geopoint,
         address,
-        restaurantCandidateId,
+        // Only from a candidate. An undefined field is rejected by the web
+        // Firestore SDK and the whole save with it (issue #1952).
+        ...(restaurantCandidateId ? { restaurantCandidateId } : {}),
         biteIds,
         socialMediaLinks,
         openingHours: this.openingHoursComponent()?.getOpeningHours() ?? [],

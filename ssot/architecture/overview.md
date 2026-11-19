@@ -27,6 +27,7 @@ library.
 | `apps/bite-tribe-android`      | The Capacitor Android wrapper of the consumer app                                                                | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-e2e`          | Playwright end-to-end tests of the consumer app                                                                  | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-business-e2e` | Playwright end-to-end tests of the business app                                                                  | `scope:bite-tribe-business`                          |
+| `apps/bite-tribe-admin-e2e`    | Playwright end-to-end tests of the admin app (issue [#1952])                                                     | `scope:bite-tribe-admin`                             |
 | `apps/storybook-host`          | Storybook for the shared and feature UI states, and the visual regression baseline                               | `scope:bite-tribe`                                   |
 
 ### Library Families
@@ -185,3 +186,4 @@ tools/check-ssot.mjs
 [#1464]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1464
 [#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
+[#1952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1952

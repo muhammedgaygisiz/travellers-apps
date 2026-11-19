@@ -8,7 +8,6 @@ import { menuId, restaurantId } from '../router/selectors';
 import {
   loadedRestaurantFromApi,
   noRestaurantFound,
-  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
 } from './actions';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -56,18 +55,6 @@ export class RestaurantEffects {
       ),
     );
   });
-
-  saveNewRestaurantToFirestore$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(saveNewRestaurant),
-        tap(({ restaurant }) => {
-          this.api.saveNewRestaurant(restaurant);
-        }),
-      );
-    },
-    { dispatch: false },
-  );
 
   saveSocialMediaLinksToFirestore$ = createEffect(
     () => {

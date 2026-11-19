@@ -106,6 +106,59 @@ describe(RestaurantApiService.name, () => {
       getDocumentSpy.mockReset();
     });
 
+    // Issue #1952: the web Firestore SDK rejects an undefined field, and the
+    // restaurant was never written.
+    it('never writes a candidate id or an undefined field', async () => {
+      addDocumentSpy
+        .mockResolvedValueOnce({ reference: { id: 'r-1' } } as any)
+        .mockResolvedValueOnce({ reference: { id: 'menu-1' } } as any);
+      updateDocumentSpy.mockResolvedValue({} as any);
+
+      await service.saveNewRestaurant({
+        name: 'Bistro',
+        restaurantCandidateId: undefined,
+        description: undefined,
+        position: { latitude: 1, longitude: 2 },
+      } as any);
+
+      const written = addDocumentSpy.mock.calls[0][0].data;
+      expect(written).not.toHaveProperty('restaurantCandidateId');
+      expect(written).not.toHaveProperty('description');
+      expect(Object.values(written).every((value) => value !== undefined)).toBe(
+        true,
+      );
+      expect(written).toEqual(
+        expect.objectContaining({
+          name: 'Bistro',
+          position: { latitude: 1, longitude: 2 },
+        }),
+      );
+    });
+
+    it('drops even a defined candidate id: a candidate is verified elsewhere', async () => {
+      addDocumentSpy
+        .mockResolvedValueOnce({ reference: { id: 'r-1' } } as any)
+        .mockResolvedValueOnce({ reference: { id: 'menu-1' } } as any);
+      updateDocumentSpy.mockResolvedValue({} as any);
+
+      await service.saveNewRestaurant({
+        name: 'Bistro',
+        restaurantCandidateId: 'c-1',
+      } as any);
+
+      expect(addDocumentSpy.mock.calls[0][0].data).not.toHaveProperty(
+        'restaurantCandidateId',
+      );
+    });
+
+    it('rejects when the restaurant write is refused', async () => {
+      addDocumentSpy.mockRejectedValueOnce(new Error('invalid data'));
+
+      await expect(
+        service.saveNewRestaurant({ name: 'Bistro' } as any),
+      ).rejects.toThrow('invalid data');
+    });
+
     describe('given biteIds', () => {
       it('should remove bite ids, save restaurant and add a new menu for it', async () => {
         const mockedNewRestaurant = {

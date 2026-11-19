@@ -256,6 +256,26 @@ describe('NewRestaurantPageComponent', () => {
       );
     });
 
+    // Issue #1952: an undefined candidate id was emitted, and the web
+    // Firestore SDK refused the whole restaurant for it.
+    it('should not carry a candidate id at all without a candidate', () => {
+      const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
+      component.restaurantFormGroup.controls['image'].setValue(
+        'data:image/png;base64,abc',
+      );
+      component.restaurantFormGroup.controls['name'].setValue('My Restaurant');
+      component.restaurantFormGroup.controls['position'].setValue({
+        latitude: 10,
+        longitude: 20,
+      });
+
+      component.saveNewRestaurant();
+
+      expect(emitSpy.mock.calls[0][0]).not.toHaveProperty(
+        'restaurantCandidateId',
+      );
+    });
+
     it('should emit restaurant with social media links when valid links are added', () => {
       const emitSpy = jest.spyOn(component.submitNewRestaurant, 'emit');
       const position: Geopoint = { latitude: 10, longitude: 20 };

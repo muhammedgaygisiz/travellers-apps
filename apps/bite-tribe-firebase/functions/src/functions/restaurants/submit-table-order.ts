@@ -489,6 +489,17 @@ const checkLine = (
     });
   }
 
+  // A dish whose variants are every version of it has no price of its own
+  // (issue #2182): it is ordered through a variant, and a plain line for it is
+  // refused rather than charged at nothing. A dish written before that keeps
+  // its own price and its plain line.
+  if (!line.variantId && dish.variants?.length && !((priceOf(dish) ?? 0) > 0)) {
+    return refuseOrder('itemUnavailable', {
+      menuItemId: line.menuItemId,
+      name: nameOf(dish),
+    });
+  }
+
   const named = {
     menuItemId: line.menuItemId,
     ...(line.variantId ? { variantId: line.variantId } : {}),

@@ -1,0 +1,62 @@
+<form class="category-editor" [formGroup]="form" (ngSubmit)="saveCategory()">
+  <header class="editor-header">
+    <h2 data-testid="category-editor-title">
+      {{
+        category()
+          ? form.controls.title.value || category()?.title
+          : ('menu-category-new' | transloco)
+      }}
+    </h2>
+    <ion-button
+      fill="clear"
+      [attr.aria-label]="'cancel' | transloco"
+      data-testid="close-category"
+      (click)="cancelEdit.emit()"
+    >
+      <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
+    </ion-button>
+  </header>
+
+  <ion-input
+    formControlName="title"
+    fill="outline"
+    mode="md"
+    labelPlacement="stacked"
+    [label]="'menu-category-title' | transloco"
+    data-testid="category-title"
+  />
+  <ion-input
+    formControlName="subtitle"
+    fill="outline"
+    mode="md"
+    labelPlacement="stacked"
+    [label]="'menu-category-subtitle' | transloco"
+    data-testid="category-subtitle"
+  />
+
+  <div class="actions">
+    <ion-button
+      fill="outline"
+      data-testid="cancel-category"
+      (click)="cancelEdit.emit()"
+    >
+      {{ 'cancel' | transloco }}
+    </ion-button>
+    <ion-button
+      type="submit"
+      data-testid="save-category"
+      [disabled]="form.invalid || (!form.dirty && !!category())"
+    >
+      {{ 'save' | transloco }}
+    </ion-button>
+  </div>
+</form>
+
+@if (category(); as existing) {
+  <business-category-extras
+    class="extras"
+    [extrasBlock]="existing.extrasBlock"
+    [currencySymbol]="currency() ?? ''"
+    (extrasBlockChanged)="saveExtras.emit($event)"
+  />
+}

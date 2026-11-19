@@ -1,0 +1,156 @@
+<form class="dish-editor" [formGroup]="form" (ngSubmit)="saveDish()">
+  <header class="editor-header">
+    <div>
+      @if (categoryTitle()) {
+        <p class="editor-context">{{ categoryTitle() }}</p>
+      }
+      <h2 data-testid="dish-editor-title">
+        {{
+          isNew()
+            ? ('menu-dish-new' | transloco)
+            : form.controls.name.value || dish()?.name
+        }}
+      </h2>
+    </div>
+    <ion-button
+      fill="clear"
+      [attr.aria-label]="'cancel' | transloco"
+      data-testid="close-dish"
+      (click)="cancelEdit.emit()"
+    >
+      <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
+    </ion-button>
+  </header>
+
+  <ion-input
+    formControlName="name"
+    fill="outline"
+    mode="md"
+    labelPlacement="stacked"
+    [label]="'menu-dish-name' | transloco"
+    data-testid="dish-name"
+  />
+
+  <ion-input
+    formControlName="description"
+    fill="outline"
+    mode="md"
+    labelPlacement="stacked"
+    [label]="'menu-dish-description' | transloco"
+    data-testid="dish-description"
+  />
+
+  @if (!hasVariants()) {
+    <ion-input
+      formControlName="price"
+      type="number"
+      inputmode="decimal"
+      fill="outline"
+      mode="md"
+      labelPlacement="stacked"
+      [label]="'menu-dish-price' | transloco"
+      data-testid="dish-price"
+    >
+      @if (currency()) {
+        <span slot="end">{{ currency() }}</span>
+      }
+    </ion-input>
+  }
+
+  <fieldset class="variants">
+    <legend>{{ 'menu-dish-variants' | transloco }}</legend>
+    @for (
+      variant of variants.controls;
+      track variant.value.id;
+      let i = $index
+    ) {
+      <div class="variant-row" [formGroup]="variant">
+        <ion-input
+          formControlName="name"
+          fill="outline"
+          mode="md"
+          [placeholder]="'menu-dish-variant-name-placeholder' | transloco"
+          [attr.aria-label]="'menu-dish-variant-name' | transloco"
+          [attr.data-testid]="'dish-variant-name-' + i"
+        />
+        <ion-input
+          formControlName="price"
+          type="number"
+          inputmode="decimal"
+          fill="outline"
+          mode="md"
+          class="variant-price"
+          [attr.aria-label]="'menu-dish-price' | transloco"
+          [attr.data-testid]="'dish-variant-price-' + i"
+        >
+          @if (currency()) {
+            <span slot="end">{{ currency() }}</span>
+          }
+        </ion-input>
+        <ion-button
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="'menu-dish-variant-remove' | transloco"
+          [attr.data-testid]="'remove-dish-variant-' + i"
+          (click)="removeVariant(i)"
+        >
+          <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
+        </ion-button>
+      </div>
+    }
+    <ion-button
+      fill="clear"
+      class="add-variant"
+      data-testid="add-dish-variant"
+      (click)="addVariant()"
+    >
+      {{ 'menu-dish-variant-add' | transloco }}
+    </ion-button>
+    <p class="hint">{{ 'menu-dish-variants-hint' | transloco }}</p>
+  </fieldset>
+
+  <details class="more">
+    <summary>{{ 'menu-dish-more' | transloco }}</summary>
+    <ion-input
+      formControlName="ingredients"
+      fill="outline"
+      mode="md"
+      labelPlacement="stacked"
+      [label]="'menu-dish-ingredients' | transloco"
+      data-testid="dish-ingredients"
+    />
+    <ion-input
+      formControlName="notes"
+      fill="outline"
+      mode="md"
+      labelPlacement="stacked"
+      [label]="'menu-dish-notes' | transloco"
+      data-testid="dish-notes"
+    />
+  </details>
+
+  <ion-list lines="none">
+    <ion-item>
+      <ion-toggle formControlName="isAvailable" data-testid="dish-available">
+        {{ 'menu-item-available' | transloco }}
+      </ion-toggle>
+    </ion-item>
+  </ion-list>
+
+  <div class="actions">
+    <ion-button
+      fill="outline"
+      data-testid="cancel-dish"
+      (click)="cancelEdit.emit()"
+    >
+      {{ 'cancel' | transloco }}
+    </ion-button>
+    <ion-button
+      type="submit"
+      data-testid="save-dish"
+      [disabled]="form.invalid || (!form.dirty && !isNew())"
+    >
+      {{ 'save' | transloco }}
+    </ion-button>
+  </div>
+</form>

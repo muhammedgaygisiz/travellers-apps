@@ -17,6 +17,17 @@ const trattoria: Restaurant = {
   menuId: 'menu-trattoria',
 } as Restaurant;
 
+/** Opens an editor the way an owner does, by tapping the list (#2182). */
+const tap = async (
+  canvasElement: HTMLElement,
+  selector: string,
+): Promise<void> => {
+  canvasElement.querySelector<HTMLElement>(selector)?.click();
+  // Two frames: one for the click's change detection, one for Ionic to paint.
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+};
+
 const menu: Menu = {
   id: 'menu-trattoria',
   restaurantId: trattoria.id,
@@ -51,15 +62,22 @@ const menu: Menu = {
           id: 'item-margherita',
           name: 'Margherita',
           description: 'San Marzano, fior di latte, basil.',
-          price: 9,
+          // Sold as its variants only, so it has no price of its own (#2182).
+          price: 0,
           isAvailable: true,
           variants: [
             {
+              id: 'variant-margherita-regular',
+              name: 'Regular, 32 cm',
+              description: '',
+              price: 9,
+            },
+            {
               id: 'variant-margherita-bufala',
-              name: 'Margherita con bufala',
-              description: 'Buffalo mozzarella instead of fior di latte.',
+              name: 'Con bufala',
+              description: '',
               price: 12,
-              isAvailable: true,
+              isAvailable: false,
             },
           ],
         },
@@ -100,10 +118,38 @@ export default {
 type Story = StoryObj<EditMenuPage>;
 
 /**
- * A populated menu: two categories, an item carrying a variant, an unavailable
- * item, and a category whose extras the owner can now author (issue #1598).
+ * The menu as a list (GitHub issue #2182): two categories, a dish sold as two
+ * variants with one of them off, a dish that is off, and a category's extras
+ * on one line.
  */
 export const Default: Story = {};
+
+/** A dish opened from the list: its fields, its variants and one Save. */
+export const DishEditor: Story = {
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-dish-item-margherita"] [data-testid="open-dish"]',
+    ),
+};
+
+/** A new dish, from a category's "Add dish". */
+export const NewDish: Story = {
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-category-category-antipasti"] [data-testid="add-dish"]',
+    ),
+};
+
+/** A category opened from its edit button, with its extras below. */
+export const CategoryEditor: Story = {
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-category-category-pizze"] [data-testid="edit-category"]',
+    ),
+};
 
 /**
  * A category with no extras yet (GitHub issue #1598).

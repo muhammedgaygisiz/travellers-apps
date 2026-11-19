@@ -133,4 +133,142 @@ describe(EditMenuPage.name, () => {
     expect(offered.length).toBeGreaterThan(1);
     expect(new Set(offered.map((c) => c.code)).size).toBe(offered.length);
   });
+
+  /** One editor at a time over the list (GitHub issue #2182). */
+  describe('editing', () => {
+    const FULL: Menu = {
+      id: 'menu-1',
+      currency: 'CHF',
+      categories: [
+        {
+          id: 'c1',
+          title: 'Pizza',
+          items: [{ id: 'd1', name: 'Margherita', description: '', price: 11 }],
+        },
+      ],
+    };
+
+    let saved: jest.Mock;
+
+    beforeEach(() => {
+      saved = jest.fn();
+      component.saveMenu.subscribe(saved);
+      withMenu(FULL);
+    });
+
+    it('opens the dish that was tapped, with its category', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      expect(component.editingDish()?.name).toBe('Margherita');
+      expect(component.editingCategory()?.title).toBe('Pizza');
+      expect(component.selectedId()).toBe('d1');
+    });
+
+    it('opens an empty dish editor to add one', () => {
+      component.addDish('c1');
+
+      expect(component.editing()).toEqual({ kind: 'dish', categoryId: 'c1' });
+      expect(component.editingDish()).toBeUndefined();
+    });
+
+    it('saves a dish into the whole menu and closes once it is read back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onSaveDish({
+        id: 'd1',
+        name: 'Marinara',
+        description: '',
+        price: 9,
+      });
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: [
+            expect.objectContaining({
+              items: [expect.objectContaining({ name: 'Marinara', price: 9 })],
+            }),
+          ],
+        }),
+      );
+      // Still open until the saved menu comes back...
+      expect(component.editing()).toBeTruthy();
+
+      withMenu({ ...FULL });
+
+      // ...and closed once it has.
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('keeps the editor open when the save is refused and nothing comes back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onSaveDish({
+        id: 'd1',
+        name: 'Marinara',
+        description: '',
+        price: 9,
+      });
+      fixture.detectChanges();
+
+      expect(component.editing()).toBeTruthy();
+    });
+
+    it('adds a category and saves its details', () => {
+      component.addCategory();
+      component.onSaveCategory({ title: 'Pasta', subtitle: '' });
+
+      expect(
+        saved.mock.calls[0][0].categories.map(
+          (c: { title: string }) => c.title,
+        ),
+      ).toEqual(['Pizza', 'Pasta']);
+    });
+
+    it('keeps the category editor open while extras are saved', () => {
+      component.openCategory('c1');
+      component.onSaveExtras({ description: 'Toppings', extras: [] });
+      withMenu({ ...FULL });
+
+      expect(component.editing()).toEqual({
+        kind: 'category',
+        categoryId: 'c1',
+      });
+      expect(saved).toHaveBeenCalled();
+    });
+
+    it('switches availability from the list without opening anything', () => {
+      component.onAvailabilityChange({
+        ref: { categoryId: 'c1', itemId: 'd1' },
+        available: false,
+      });
+
+      expect(saved.mock.calls[0][0].categories[0].items[0].isAvailable).toBe(
+        false,
+      );
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('saves a reordered menu', () => {
+      component.onMoveCategory({ from: 0, to: 0 });
+      component.onMoveDish({ categoryId: 'c1', from: 0, to: 0 });
+
+      expect(saved).toHaveBeenCalledTimes(2);
+    });
+
+    it('closes without saving', () => {
+      component.openCategory('c1');
+      component.closeEditor();
+
+      expect(component.editing()).toBeUndefined();
+      expect(saved).not.toHaveBeenCalled();
+    });
+
+    it('saves nothing while there is no menu', () => {
+      withMenu(undefined);
+      component.addDish('c1');
+      component.onSaveDish({ id: 'x', name: 'X', description: '', price: 1 });
+
+      expect(saved).not.toHaveBeenCalled();
+    });
+  });
 });

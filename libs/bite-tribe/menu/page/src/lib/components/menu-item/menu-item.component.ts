@@ -204,9 +204,26 @@ export class MenuItemComponent {
    * reading them. Nothing is offered on an unavailable dish - extras on
    * something the kitchen will not serve is a control that leads nowhere.
    */
+  /**
+   * Whether this row can be ordered as it stands (GitHub issue #2182).
+   *
+   * A dish whose variants are every version of it - Pad Thai vegetarian, with
+   * chicken - has no price of its own, so it is ordered through one of them
+   * and never plain. A dish written before that keeps its own price, and its
+   * plain line, until its owner saves it again.
+   */
+  readonly orderable = computed(() => {
+    const item = this.item();
+
+    return (
+      this.isVariant() || !item?.variants?.length || (item?.price ?? 0) > 0
+    );
+  });
+
   readonly showExtrasPicker = computed(
     () =>
       this.canAddToCart() &&
+      this.orderable() &&
       this.hasExtras() &&
       !this.isUnavailable(this.item()),
   );

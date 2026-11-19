@@ -209,6 +209,12 @@ the record stays. Every field is `readonly` - a line under construction is a
 cart line, and a correction is a staff-side cancellation with a reason, never a
 rewrite of what the guest agreed to.
 
+**A dish sold only as its variants is ordered through one of them.** A dish
+with variants and no price of its own (issue [#2182]) shows no Add on its own
+row, and `submitTableOrder` refuses a plain line for it as `itemUnavailable`
+rather than charging nothing. A dish written before that keeps its own price
+and its plain line until its owner saves it again.
+
 **Availability travels down.** `isMenuVariantAvailable` reads a variant against
 the dish it belongs to, because an owner who takes a dish off the menu has said
 the dish is off and its sizes are sizes of that dish. Availability does not
@@ -1005,3 +1011,4 @@ guest's phone is retrying.
 [#1110]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1110
 [#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
+[#2182]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2182

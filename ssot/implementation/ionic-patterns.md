@@ -192,7 +192,7 @@ and pressed, in light and dark.
 
 A few firsts and a completion in bite-tribe are celebrated (epic [#1741]), and
 since epic [#2012] a few round Bite counts and progress in the leaderboard's top
-ten: one short confetti burst from the bottom of the screen, the moment's own
+ten, and since issue [#2149] 4, 12, 26 and 52 weeks of posting in a row: one short confetti burst from the bottom of the screen, the moment's own
 success toast, the `success` haptic that toast already plays, and the
 `celebration` sound (epic [#1742], issue [#1846]) through the Sound Rule in
 [Architecture - Capacitor](../architecture/capacitor.md#sound-rule). The ceiling is that burst, with one
@@ -210,10 +210,11 @@ resets silently, and it cannot be frozen, repaired or bought back.
 
 **Every celebration goes through `CelebrationService` in
 `libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
-one of ten `CelebrationMoment`s - `first-bite`, `first-country`,
+one of eleven `CelebrationMoment`s - `first-bite`, `first-country`,
 `onboarding-finished`, `first-follow`, `bite-trail-completed`, from issue
-[#2031] `weekly-award-bites` and `weekly-award-liked`, and from issue [#2013]
-`bite-milestone`, `leaderboard-top-ten`, `leaderboard-overtake` - and
+[#2031] `weekly-award-bites` and `weekly-award-liked`, from issue [#2013]
+`bite-milestone`, `leaderboard-top-ten`, `leaderboard-overtake`, and from issue
+[#2149] `posting-streak` - and
 owns everything else:
 
 | Decision  | Value                                                                                                        |
@@ -249,12 +250,14 @@ Details worth knowing before changing it:
 - **One Bite, one celebration** ([#2013]). One post can earn several moments,
   and all but `first-bite` arrive from separate snapshots seconds after it:
   the `biteCount`, the leaderboard and, a few seconds later, the country. So
-  `first-country`, `bite-milestone`, `leaderboard-top-ten` and
+  `first-country`, `bite-milestone`, `posting-streak`, `leaderboard-top-ten` and
   `leaderboard-overtake` are _held_. The first held moment opens a settling
   window of `CELEBRATION_SETTLING_WINDOW_MS`; when it closes, only the highest
   moment raised in it plays, in the order of `CELEBRATION_PRECEDENCE`:
-  `first-bite`, `first-country`, `bite-milestone`, `leaderboard-top-ten`,
-  `leaderboard-overtake`. Of two raises of the same moment the later one wins.
+  `first-bite`, `first-country`, `bite-milestone`, `posting-streak`,
+  `leaderboard-top-ten`, `leaderboard-overtake`. A streak milestone ranks below
+  the round Bite counts and above the leaderboard, as decided on issue
+  [#2149]. Of two raises of the same moment the later one wins.
   A `first-bite` plays at once and opens - or takes over - a window of its own,
   so every held moment in it is suppressed. A suppressed moment presents no
   toast, draws no burst, plays no sound and logs no `celebration_shown`. A held
@@ -321,6 +324,7 @@ Where each moment is wired:
 | `first-follow`         | `followUser$` and `FollowSuggestionsService.follow`      | `followsAnyone()` before the write: one document of the user's own `following`                                        | [#1799] |
 | `bite-trail-completed` | `setBiteTriedOutStatusEffect$`                           | `completesBucketlist`: the tick that brings `bucketlistProgress` from below 1 to 1, celebrated once the save succeeds | [#1800] |
 | `bite-milestone`       | `celebrateProfileProgress$` in the store's `AppEffect`   | `reachedBiteMilestone`: a later snapshot whose `biteCount` crosses 5, 10, 50, 100 or a further hundred; the highest   | [#2014] |
+| `posting-streak`       | `celebrateProfileProgress$` in the store's `AppEffect`   | `reachedPostingStreakMilestone`: a later snapshot whose `postingStreak.weeks` crosses 4, 12, 26 or 52; the highest    | [#2149] |
 | `leaderboard-top-ten`  | `celebrateLeaderboardTopTen$` in the store's `AppEffect` | `enteredTopTen`: a later **This week** snapshot newly lists the user, above the most they had unlisted; once a week   | [#2015] |
 | `leaderboard-overtake` | `celebrateLeaderboardTopTen$` in the store's `AppEffect` | `overtookInTopTen`: a later **This week** snapshot ranks the user higher after their count rose, above the one passed | [#2016] |
 
@@ -464,3 +468,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2017
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
 [#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
+[#2149]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2149

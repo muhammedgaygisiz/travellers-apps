@@ -7,9 +7,10 @@ import { ToastService } from 'toast';
 /**
  * The moments bite-tribe celebrates. Epic #1741 brought the firsts and the
  * completion, each reached once in the normal course of use; epic #2012 added a
- * few round Bite counts and progress in the leaderboard's top ten, and issue
- * #2031 a weekly top-3 finish. Nothing else is celebrated, so a routine post
- * stays a routine post.
+ * few round Bite counts and progress in the leaderboard's top ten, issue
+ * #2031 a weekly top-3 finish, and issue #2149 4, 12, 26 and 52 weeks of
+ * posting in a row. Nothing else is celebrated, so a routine post stays a
+ * routine post.
  */
 export type CelebrationMoment =
   | 'first-bite'
@@ -20,6 +21,7 @@ export type CelebrationMoment =
   | 'weekly-award-bites'
   | 'weekly-award-liked'
   | 'bite-milestone'
+  | 'posting-streak'
   | 'leaderboard-top-ten'
   | 'leaderboard-overtake';
 
@@ -36,8 +38,22 @@ export const CELEBRATION_MESSAGE_KEYS: Record<CelebrationMoment, string> = {
   'weekly-award-bites': 'weekly-award-bites-earned',
   'weekly-award-liked': 'weekly-award-liked-earned',
   'bite-milestone': 'bite-milestone',
+  'posting-streak': 'posting-streak-milestone',
   'leaderboard-top-ten': 'leaderboard-top-ten',
   'leaderboard-overtake': 'leaderboard-overtake',
+};
+
+/**
+ * The weekly posting streak milestones (issue #2149), each with its own toast.
+ * `posting-streak` picks the toast from `params.count`; a count that is not
+ * one of these falls back to `posting-streak-milestone`. The copy says what
+ * the user did and never what they could lose (epic #2034).
+ */
+export const POSTING_STREAK_MESSAGE_KEYS: Readonly<Record<number, string>> = {
+  4: 'posting-streak-milestone-4',
+  12: 'posting-streak-milestone-12',
+  26: 'posting-streak-milestone-26',
+  52: 'posting-streak-milestone-52',
 };
 
 /**
@@ -57,6 +73,8 @@ export const CELEBRATION_PRECEDENCE: readonly CelebrationMoment[] = [
   'first-bite',
   'first-country',
   'bite-milestone',
+  // Below the round Bite counts, above the leaderboard (issue #2149).
+  'posting-streak',
   'leaderboard-top-ten',
   'leaderboard-overtake',
 ];
@@ -376,7 +394,7 @@ export class CelebrationService {
       this.toast.present({
         messageKey: thousand
           ? CELEBRATION_THOUSAND_MESSAGE_KEY
-          : CELEBRATION_MESSAGE_KEYS[moment],
+          : messageKey(moment, params),
         params: this.toastParams(params),
         outcome: 'success',
       }),
@@ -492,6 +510,25 @@ const formatCount = (count: number, document: Document): string => {
   }
 };
 
+/**
+ * The toast key for `moment`: a posting streak's own milestone where its
+ * count names one (issue #2149), otherwise the moment's key.
+ */
+const messageKey = (
+  moment: CelebrationMoment,
+  params?: Record<string, unknown>,
+): string => {
+  const count = params?.['count'];
+
+  if (moment === 'posting-streak' && typeof count === 'number') {
+    return (
+      POSTING_STREAK_MESSAGE_KEYS[count] ?? CELEBRATION_MESSAGE_KEYS[moment]
+    );
+  }
+
+  return CELEBRATION_MESSAGE_KEYS[moment];
+};
+
 /** The place of `moment` in {@link CELEBRATION_PRECEDENCE}; lower wins. */
 const rank = (moment: CelebrationMoment): number =>
   CELEBRATION_PRECEDENCE.indexOf(moment);
@@ -521,7 +558,10 @@ const shownParams = (
   const count = params?.['count'];
   const place = params?.['rank'];
 
-  if (moment === 'bite-milestone' && typeof count === 'number') {
+  if (
+    (moment === 'bite-milestone' || moment === 'posting-streak') &&
+    typeof count === 'number'
+  ) {
     shown.count = count;
   }
 

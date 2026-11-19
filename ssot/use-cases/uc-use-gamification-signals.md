@@ -63,6 +63,12 @@ computed from; what a notification about one of them says, and to whom, belongs 
   that broke since the Monday resync is never shown; at 0 or 1 there is no chip. The flame is
   the epic's amended Tone rule: static, never animated, and hidden from screen readers. See
   GitHub issue [#2148].
+- The post that takes the streak to 4, 12, 26 or 52 weeks is celebrated once, with that
+  milestone's own toast, read from the same listener as the Bite-count milestones a few seconds
+  after the post. An ordinary week is never celebrated, and a streak already past a milestone at
+  sign-in, or built from history on its first computation, is not replayed. A first Bite, a first
+  country and a Bite-count milestone of the same post play instead; a streak milestone outranks
+  the leaderboard moments. See GitHub issue [#2149].
 - Every tab shows its top 3 on a podium: #1 in the middle and highest with a trophy, #2 left,
   #3 right, each ringed gold, silver or bronze, with the avatar, name and Bite count (or on
   **Most liked** the Bite's photo, dish, creator and like count). The steps are an image,
@@ -191,6 +197,7 @@ them is collected in onboarding.
 - `awardWeeklyBadges`, `celebrateWeeklyAward$`, profile weekly badges
 - Profile country badges
 - `displayedPostingStreak`, the profile's posting-streak chip
+- `reachedPostingStreakMilestone` in `celebrateProfileProgress$`
 - `notifyOnNewCountryBadge`
 - `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
   `reachedBiteMilestone`
@@ -239,6 +246,7 @@ them is collected in onboarding.
   Monday to Sunday in `Europe/Zurich` for every user, as the weekly summary does.
 - Issue [#2146] computes and stores the weekly posting streak, story 1 of epic [#2034].
 - Issue [#2148] shows the streak on the user's own profile, story 2 of epic [#2034].
+- Issue [#2149] celebrates 4, 12, 26 and 52 weeks in a row, story 3 of epic [#2034].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -287,3 +295,4 @@ them is collected in onboarding.
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043
 [#2146]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2146
 [#2148]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2148
+[#2149]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2149

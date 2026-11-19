@@ -48,6 +48,7 @@ const shapeFromText = confetti.shapeFromText as jest.Mock;
 const HELD: ReadonlySet<string> = new Set([
   'first-country',
   'bite-milestone',
+  'posting-streak',
   'leaderboard-top-ten',
   'leaderboard-overtake',
 ]);
@@ -469,6 +470,86 @@ describe('CelebrationService', () => {
         messageKey: 'country-badge-earned',
         params: { country: 'Japan' },
         outcome: 'success',
+      });
+    });
+
+    /** GitHub issue #2149. */
+    describe('posting streak milestones', () => {
+      it.each([
+        [4, 'posting-streak-milestone-4'],
+        [12, 'posting-streak-milestone-12'],
+        [26, 'posting-streak-milestone-26'],
+        [52, 'posting-streak-milestone-52'],
+      ])('plays %i weeks with its own toast', async (count, messageKey) => {
+        reducedMotion = true;
+
+        await celebrateHeld('posting-streak', { count });
+
+        expect(present).toHaveBeenCalledWith({
+          messageKey,
+          params: { count: expect.any(String) },
+          outcome: 'success',
+        });
+        expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+          moment: 'posting-streak',
+          count,
+        });
+      });
+
+      it('falls back to the generic toast for a count that is no milestone', async () => {
+        reducedMotion = true;
+
+        await celebrateHeld('posting-streak', { count: 7 });
+
+        expect(present).toHaveBeenCalledWith(
+          expect.objectContaining({ messageKey: 'posting-streak-milestone' }),
+        );
+      });
+
+      it('gives way to a Bite milestone of the same post', async () => {
+        reducedMotion = true;
+
+        const streak = service.celebrate('posting-streak', { count: 4 });
+        const bites = service.celebrate('bite-milestone', { count: 10 });
+        await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+        await Promise.all([streak, bites]);
+
+        expect(present).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+          moment: 'bite-milestone',
+          count: 10,
+        });
+      });
+
+      it('outranks a leaderboard moment of the same post', async () => {
+        reducedMotion = true;
+
+        const top = service.celebrate('leaderboard-top-ten', { rank: 9 });
+        const streak = service.celebrate('posting-streak', { count: 12 });
+        await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+        await Promise.all([top, streak]);
+
+        expect(present).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+          moment: 'posting-streak',
+          count: 12,
+        });
+      });
+
+      it('gives way to a first country of the same post', async () => {
+        reducedMotion = true;
+
+        const streak = service.celebrate('posting-streak', { count: 4 });
+        const country = service.celebrate('first-country', {
+          country: 'Japan',
+        });
+        await jest.advanceTimersByTimeAsync(CELEBRATION_SETTLING_WINDOW_MS);
+        await Promise.all([streak, country]);
+
+        expect(present).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith(AnalyticsEvent.CelebrationShown, {
+          moment: 'first-country',
+        });
       });
     });
 

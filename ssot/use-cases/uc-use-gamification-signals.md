@@ -46,6 +46,16 @@ computed from; what a notification about one of them says, and to whom, belongs 
   last week" - that opens the leaderboard on **Last week** of that list. Each winner gets one
   push at the reset naming the better place, and the app plays the celebration once per won
   week on each device, the first time it opens after the reset. See GitHub issue [#2031].
+- The backend keeps a weekly posting streak, `postingStreak` on the user document
+  (backend-owned): `weeks`, the consecutive calendar weeks, Monday to Sunday in
+  `Europe/Zurich`, in which the user created a Bite that still exists, and `lastPostingWeek`,
+  that run's newest Monday as `YYYY-MM-DD`. The run ends with the current week, or with the
+  previous one while the current week has no Bite yet. A Bite's `createdAtTimestamp` decides
+  its week, so a Bite about an old meal counts for the week it was posted in. Each new Bite
+  updates it in `incrementBiteCountOnBiteCreate`; a Bite older than the stored week, and a
+  user with no value yet, are recomputed from all of their Bites. `resyncBiteCounts` recomputes
+  every user's on Monday at 03:00 Zurich, which is how a deleted Bite and a missed week reach
+  it. Nothing in the app shows it yet. See GitHub issue [#2146].
 - Every tab shows its top 3 on a podium: #1 in the middle and highest with a trophy, #2 left,
   #3 right, each ringed gold, silver or bronze, with the avatar, name and Bite count (or on
   **Most liked** the Bite's photo, dish, creator and like count). The steps are an image,
@@ -167,6 +177,7 @@ them is collected in onboarding.
 - `loadLeaderboard`
 - `incrementBiteCountOnBiteCreate`
 - `resyncBiteCounts`
+- `computePostingStreak`, `applyBiteToPostingStreak`, `recomputeUserPostingStreak`
 - `sendDailyLeaderboardNotification`
 - `resetWeeklyLeaderboard`, `rebuildWeeklyLeaderboard`, `freezeLastWeek`
 - `recordLike`, `removeLike`, `rebuildMostLiked`, `freezeMostLikedLastWeek`
@@ -214,6 +225,7 @@ them is collected in onboarding.
 - Issue [#2014] celebrates the Bite-count milestones, part of epic [#2012].
 - Issue [#2015] celebrates entering the weekly top ten, part of epic [#2012].
 - Issue [#2016] celebrates passing another user inside the weekly top ten, part of epic [#2012].
+- Issue [#2146] computes and stores the weekly posting streak, story 1 of epic [#2034].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -247,6 +259,7 @@ them is collected in onboarding.
 [#1212]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1212
 [#1611]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1611
 [#1741]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1741
+[#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
 [#1837]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1837
 [#1797]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1797
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
@@ -259,3 +272,4 @@ them is collected in onboarding.
 [#2015]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2015
 [#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043
+[#2146]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2146

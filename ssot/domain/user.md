@@ -64,6 +64,7 @@ Current profile model fields:
 - `photoStatus` (`pending`, `uploaded` or `failed`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953]).
 - `biteCount`
 - `countryCodes`
+- `postingStreak` - `{ weeks, lastPostingWeek }`, the weekly posting streak, backend-owned. What it counts is in [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md) ([#2146]).
 - `subscriptionTier`
 - `createdAt`
 - `createdAtTimestamp`
@@ -292,3 +293,4 @@ images/users/{userId}/{filename}
 [#1290]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1290
 [#2079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2079
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
+[#2146]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2146

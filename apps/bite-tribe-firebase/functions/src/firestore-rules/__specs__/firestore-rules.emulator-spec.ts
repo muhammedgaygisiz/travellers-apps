@@ -3254,6 +3254,14 @@ describe('users', () => {
     );
   });
 
+  it('refuses setting its own weekly posting streak (issue #2146)', async () => {
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+        postingStreak: { weeks: 52, lastPostingWeek: '2026-11-16' },
+      }),
+    );
+  });
+
   /**
    * The profile write paths send whole objects back. A backend-owned field
    * carried at the value it already has is not a change, and must not be

@@ -51,6 +51,7 @@ import {
   BLOCKED_BY_SUBCOLLECTION,
   BLOCKED_SUBCOLLECTION,
 } from '../shared/utils/user-blocks';
+import { FOLLOW_REQUESTS_COLLECTION } from './follow-request';
 
 const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
@@ -351,6 +352,30 @@ export const deleteBlockEdgesForUser = async (
   return refs.length;
 };
 
+/**
+ * Deletes every follow request the user sent or received (GitHub issue
+ * #2163). A request is one top-level document naming both parties, so the two
+ * sides are two single-field queries rather than a walk of mirrored edges.
+ */
+export const deleteFollowRequestsForUser = async (
+  db: Firestore,
+  uid: string,
+): Promise<number> => {
+  const requests = db.collection(FOLLOW_REQUESTS_COLLECTION);
+  const received = await applyToQuery(
+    db,
+    requests.where('ownerUid', '==', uid),
+    (batch, ref) => batch.delete(ref),
+  );
+  const sent = await applyToQuery(
+    db,
+    requests.where('requesterUid', '==', uid),
+    (batch, ref) => batch.delete(ref),
+  );
+
+  return received + sent;
+};
+
 export const deletePushTokensForUser = async (
   db: Firestore,
   uid: string,
@@ -573,6 +598,7 @@ export const deleteAccountForUser = async (
     const anonymizedSales = await anonymizeBiteTrailSalesByUser(db, uid);
     const deletedFollowEdges = await deleteFollowEdgesForUser(db, uid);
     const deletedBlockEdges = await deleteBlockEdgesForUser(db, uid);
+    const deletedFollowRequests = await deleteFollowRequestsForUser(db, uid);
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
     const deletedBiteReports = await deleteBiteReportsByReporter(db, uid);
@@ -605,6 +631,7 @@ export const deleteAccountForUser = async (
         anonymizedSales,
         deletedFollowEdges,
         deletedBlockEdges,
+        deletedFollowRequests,
         deletedPushTokens,
         deletedRestaurantStaff,
         deletedBiteReports,
@@ -627,6 +654,7 @@ export const deleteAccountForUser = async (
       anonymizedSales,
       deletedFollowEdges,
       deletedBlockEdges,
+      deletedFollowRequests,
       deletedPushTokens,
       deletedRestaurantStaff,
       deletedBiteReports,

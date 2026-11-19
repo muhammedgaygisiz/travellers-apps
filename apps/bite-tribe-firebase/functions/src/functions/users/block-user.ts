@@ -9,6 +9,7 @@ import {
   BLOCKED_SUBCOLLECTION,
   USERS_COLLECTION,
 } from '../shared/utils/user-blocks';
+import { FOLLOW_REQUESTS_COLLECTION, followRequestId } from './follow-request';
 
 const FOLLOWERS_SUBCOLLECTION = 'followers';
 const FOLLOWING_SUBCOLLECTION = 'following';
@@ -41,8 +42,8 @@ const targetUidOf = (request: CallableRequest<BlockUserRequest>): string => {
 };
 
 /**
- * Writes both sides of the block and removes the follow relation in both
- * directions, in one batch.
+ * Writes both sides of the block and removes the follow relation and any
+ * pending follow request in both directions, in one batch.
  *
  * The follow removal is why this is a callable rather than a client write: the
  * rules let each account delete only its own follow edges, and the blocked
@@ -89,6 +90,13 @@ export const blockUserForCaller = async (
   batch.delete(blocked.collection(FOLLOWERS_SUBCOLLECTION).doc(blockerUid));
   batch.delete(blocked.collection(FOLLOWING_SUBCOLLECTION).doc(blockerUid));
   batch.delete(blocker.collection(FOLLOWERS_SUBCOLLECTION).doc(blockedUid));
+
+  // A pending follow request goes with the follow it was asking for, in either
+  // direction (issue #2163).
+  const followRequests = db.collection(FOLLOW_REQUESTS_COLLECTION);
+
+  batch.delete(followRequests.doc(followRequestId(blockerUid, blockedUid)));
+  batch.delete(followRequests.doc(followRequestId(blockedUid, blockerUid)));
 
   await batch.commit();
 

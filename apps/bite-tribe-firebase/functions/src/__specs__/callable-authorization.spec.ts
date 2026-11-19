@@ -175,6 +175,12 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // every signed-in account may read, so requiring `admin` here would break
   // the consumer app.
   blockUser: 'member',
+  // The four follow-request callables (issue #2163). Each acts only on a
+  // request the caller is a party to, named by the caller's own uid.
+  requestFollow: 'member',
+  withdrawFollowRequest: 'member',
+  acceptFollowRequest: 'member',
+  declineFollowRequest: 'member',
   checkDisplayNameAvailability: 'member',
   // Spends billed Vertex AI quota for the caller's own Bite form (issue #2030),
   // so a table guest's anonymous session is not enough.

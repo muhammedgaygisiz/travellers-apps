@@ -335,7 +335,8 @@ account for everybody.
   stays, and reads as a review of its own.
 - The blocked account's profile, opened directly, shows who it is and the way to unblock,
   and none of its content.
-- Blocking removes the follow relation in both directions. Unblocking does not restore it.
+- Blocking removes the follow relation in both directions, and a pending follow request
+  in either direction ([#2163]). Unblocking does not restore either.
 - Blocking removes the tagged users between the two accounts in both directions: the
   blocked account comes off the blocker's Bites and the blocker off the blocked account's
   (issue [#1916]). Unblocking does not restore those either.
@@ -486,6 +487,11 @@ It changes no declaration: the data collected and its purpose are the same.
 - `profile/:userId`
 - `followers/:userId/:type`
 - `blockUser` and `unblockUser` callables.
+- Follow requests, backend only ([#2163]): the `requestFollow`, `withdrawFollowRequest`,
+  `acceptFollowRequest` and `declineFollowRequest` callables in `request-follow.ts` and
+  `answer-follow-request.ts` under `apps/bite-tribe-firebase/functions/src/functions/users`,
+  with `follow-requests.spec.ts`, and the `follow requests` cases in
+  `firestore-rules.emulator-spec.ts`.
 - Profile reports: the `reportUser` callable; the Report entry and reason dialog of
   `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.
@@ -534,7 +540,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
-- Epic [#2144] is planned and would turn a follow of a private profile into a request its owner accepts or declines. Nothing of it ships yet. Three of its questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance, and changes nothing a user sees: the app still follows every profile in one tap until the requester's story switches the button. Three of the epic's questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
@@ -585,3 +591,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
+[#2163]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2163

@@ -842,6 +842,35 @@ describe(ProfileApiService.name, () => {
       },
     ));
 
+    it('answers no request when the read returns no snapshot', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getDocument)
+          .mockResolvedValueOnce({} as any);
+
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+      },
+    ));
+
+    it('reads nothing while signed out', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const getUser = jest
+          .spyOn(MockedAuthService, 'getUser')
+          .mockReturnValue(undefined);
+        jest.mocked(FirebaseFirestore.getDocument).mockClear();
+
+        await expect(service.followRequestPending('owner-uid')).resolves.toBe(
+          false,
+        );
+        expect(FirebaseFirestore.getDocument).not.toHaveBeenCalled();
+        getUser.mockRestore();
+      },
+    ));
+
     it('reads nothing for the own profile', inject(
       [ProfileApiService],
       async (service: ProfileApiService) => {

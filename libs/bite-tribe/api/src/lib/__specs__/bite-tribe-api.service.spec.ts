@@ -72,6 +72,8 @@ class ProfileApiMock {
   isCurrentUserFollowing = jest.fn();
   isFollowedByCurrentUser = jest.fn();
   followRequestPending = jest.fn();
+  requestFollow = jest.fn();
+  withdrawFollowRequest = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -771,6 +773,37 @@ describe(BiteTribeApiService.name, () => {
         const user = { id: 'user-id', name: 'Test User' } as any;
         service.unfollowUser(user);
         expect(unfollowUserSpy).toHaveBeenCalledWith(user);
+      },
+    ));
+  });
+
+  // GitHub issue #2164.
+  describe('follow request passthroughs', () => {
+    it('should forward a request and its withdrawal to ProfileApiService', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'requestFollow')
+          .mockResolvedValue({ requested: true });
+        jest
+          .spyOn(profileApiService, 'withdrawFollowRequest')
+          .mockResolvedValue({ withdrawn: true });
+
+        await expect(service.requestFollow('owner-uid')).resolves.toEqual({
+          requested: true,
+        });
+        await expect(
+          service.withdrawFollowRequest('owner-uid'),
+        ).resolves.toEqual({ withdrawn: true });
+        expect(profileApiService.requestFollow).toHaveBeenCalledWith(
+          'owner-uid',
+        );
+        expect(profileApiService.withdrawFollowRequest).toHaveBeenCalledWith(
+          'owner-uid',
+        );
       },
     ));
   });

@@ -121,6 +121,19 @@ describe(`${ProfileComponent.name} follow request`, () => {
     expect(withdrawn).toEqual([PRIVATE_USER]);
   });
 
+  it('withdraws nothing while there is no profile', () => {
+    const withdrawn: PublicUser[] = [];
+    component.withdrawFollowRequestClick.subscribe((user) =>
+      withdrawn.push(user),
+    );
+    componentRef.setInput('user', undefined);
+    render(METADATA);
+
+    component.withdrawFollowRequest();
+
+    expect(withdrawn).toEqual([]);
+  });
+
   it('emits the follow click for the private profile, which the store turns into a request', () => {
     const followed: PublicUser[] = [];
     component.followButtonClick.subscribe((user) => followed.push(user));

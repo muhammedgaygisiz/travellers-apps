@@ -55,7 +55,14 @@ computed from; what a notification about one of them says, and to whom, belongs 
   updates it in `incrementBiteCountOnBiteCreate`; a Bite older than the stored week, and a
   user with no value yet, are recomputed from all of their Bites. `resyncBiteCounts` recomputes
   every user's on Monday at 03:00 Zurich, which is how a deleted Bite and a missed week reach
-  it. Nothing in the app shows it yet. See GitHub issue [#2146].
+  it. See GitHub issue [#2146].
+- The user's own profile shows the streak from 2 weeks up, as a chip beside **Show on globe**:
+  a small filled orange flame and "6 weeks in a row" on a light orange tint, as tall as the
+  button and not itself a button. Another account never sees it, public profile or not. The
+  stored value is read as 0 when its last posting week is older than last week, so a streak
+  that broke since the Monday resync is never shown; at 0 or 1 there is no chip. The flame is
+  the epic's amended Tone rule: static, never animated, and hidden from screen readers. See
+  GitHub issue [#2148].
 - Every tab shows its top 3 on a podium: #1 in the middle and highest with a trophy, #2 left,
   #3 right, each ringed gold, silver or bronze, with the avatar, name and Bite count (or on
   **Most liked** the Bite's photo, dish, creator and like count). The steps are an image,
@@ -183,6 +190,7 @@ them is collected in onboarding.
 - `recordLike`, `removeLike`, `rebuildMostLiked`, `freezeMostLikedLastWeek`
 - `awardWeeklyBadges`, `celebrateWeeklyAward$`, profile weekly badges
 - Profile country badges
+- `displayedPostingStreak`, the profile's posting-streak chip
 - `notifyOnNewCountryBadge`
 - `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
   `reachedBiteMilestone`
@@ -230,6 +238,7 @@ them is collected in onboarding.
   loss-framed streaks", the streak is shown on its owner's profile only, and its week runs
   Monday to Sunday in `Europe/Zurich` for every user, as the weekly summary does.
 - Issue [#2146] computes and stores the weekly posting streak, story 1 of epic [#2034].
+- Issue [#2148] shows the streak on the user's own profile, story 2 of epic [#2034].
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -277,3 +286,4 @@ them is collected in onboarding.
 [#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
 [#2043]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2043
 [#2146]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2146
+[#2148]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2148

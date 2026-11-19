@@ -67,8 +67,40 @@ $GOLD: #ffd700;
     overflow-wrap: anywhere;
   }
 
+  // Show on globe and the streak chip share one row (#2148). Stretching makes
+  // the chip exactly as tall as the small outline button, so both line up.
+  .profile-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
   .show-on-globe {
-    margin: 0.75rem 0 0;
+    margin: 0;
+  }
+
+  // The own weekly posting streak (#2148): a quiet chip, not a button. No
+  // theme token is orange; the brand amber is too pale at icon size.
+  .posting-streak {
+    --streak-flame: #f97316;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.625rem;
+    // The small outline button's own radius, so the two read as one row.
+    border-radius: 6px;
+    background: rgb(249 115 22 / 10%);
+    color: var(--ion-text-color);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+
+    ion-icon {
+      font-size: 1rem;
+      color: var(--streak-flame);
+    }
   }
 
   .weekly-badges {

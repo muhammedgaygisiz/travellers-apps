@@ -36,6 +36,7 @@ import {
 
 import { BiteComponent } from 'bite-tribe-common/bite';
 import { HapticsService } from 'haptics';
+import { displayedPostingStreak } from '../../utils/displayed-posting-streak';
 import { AlertButton, AlertInput, OverlayEventDetail } from '@ionic/core';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { ProfileHeader } from './components/profile-header';
@@ -303,6 +304,16 @@ export class ProfileComponent {
 
     return !!currentUserId && currentUserId === profileOwner;
   });
+
+  /**
+   * The weekly posting streak, on the own profile only (issue #2148). Another
+   * account never sees it, whether the profile is public or private.
+   */
+  postingStreak = computed((): number =>
+    this.isOwnProfile()
+      ? displayedPostingStreak(this.user()?.postingStreak, Date.now())
+      : 0,
+  );
 
   // The visibility status is a self-service privacy control, so it only belongs
   // on the signed-in user's own profile.

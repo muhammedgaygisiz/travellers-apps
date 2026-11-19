@@ -165,9 +165,9 @@ export class BiteDataAccessService {
     PublicUser[],
     string | undefined
   >({
-    // The signed-in account, not the store's profile: the profile is a
-    // one-off snapshot taken at login and can be missing, which left the
-    // picker telling a creator who follows people to go and follow some.
+    // The signed-in account, not the store's profile: the profile arrives
+    // after sign-in and can be missing, which left the picker telling a
+    // creator who follows people to go and follow some.
     params: () => this.storeService.user()?.uid,
     loader: ({ params }) =>
       params

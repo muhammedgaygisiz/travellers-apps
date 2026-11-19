@@ -11,6 +11,7 @@ import {
   map,
   of,
   pairwise,
+  share,
   switchMap,
   take,
   tap,
@@ -105,22 +106,38 @@ export class AppEffect {
   });
 
   /**
-   * Takes one snapshot of the signed-in user's document at login.
+   * The signed-in user's own document, live for the session: one inner
+   * observable per sign-in, and EMPTY on sign-out.
    *
-   * The `take(1)` is deliberate, and it is also what bounds the cost: the
-   * source is a Firestore snapshot listener that bills a read per change, so
-   * unsubscribing here removes it rather than leaving it to bill for updates
-   * this effect would never read. The profile the store holds is therefore a
-   * login-time snapshot, and server-maintained aggregates on it are kept
-   * current by the reducer instead. `celebrateProfileProgress$` holds its own
-   * subscription for the session, which feeds the celebration and not this
-   * slice. See [[Architecture - State Management]].
+   * Each sign-in's stream is shared, so `loadPublicProfile$` and
+   * `celebrateProfileProgress$` listen through one Firestore snapshot
+   * listener, which bills one read per change to the document. The
+   * celebrations held that listener for the session already, so keeping the
+   * store live costs no read it did not already pay (issue #2148). A new
+   * sign-in switches to a new stream, which is what gives the celebrations a
+   * fresh baseline; signing out removes the listener.
+   */
+  private readonly ownProfileSessions$ = this.actions$.pipe(
+    ofType(fromAuth.AuthActions.loadedUser),
+    map(({ user }) => (user ? this.api.publicProfile$.pipe(share()) : EMPTY)),
+    share(),
+  );
+
+  /**
+   * Keeps the store's copy of the signed-in user's document current for the
+   * session (issue #2148).
+   *
+   * It used to take one snapshot at login, so everything the backend wrote
+   * afterwards - `biteCount`, the follower counts, the posting streak - only
+   * reached the app at the next sign-in or cold start. The reducer's
+   * optimistic updates on `createdBite`, `deletedBite`, `followedUser` and
+   * `unfollowedUser` stay: they answer at once, and the snapshot that follows
+   * seconds later carries the server's value. See
+   * [[Architecture - State Management]].
    */
   loadPublicProfile$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(fromAuth.AuthActions.loadedUser),
-      stopIfUserIsUndefined(),
-      switchMap(() => this.api.publicProfile$.pipe(take(1))),
+    return this.ownProfileSessions$.pipe(
+      switchMap((profiles) => profiles),
       map((profile) => AppActions.setPublicProfile({ profile })),
     );
   });
@@ -133,9 +150,9 @@ export class AppEffect {
    * The phone knows neither when the post succeeds: the backend derives the
    * country from the position a few seconds later and adds it to the user's
    * `countryCodes`, and `incrementBiteCountOnBiteCreate` raises `biteCount`.
-   * So this keeps the user's own document listened to for the session - one
-   * listener, one read per change to it - and compares each snapshot with the
-   * one before. Each sign-in starts a new baseline, so a start-up never
+   * So this listens to the user's own document for the session, through the
+   * listener it shares with `loadPublicProfile$` (`ownProfileSessions$`), and
+   * compares each snapshot with the one before. Each sign-in starts a new baseline, so a start-up never
    * celebrates what was earned while the app was closed; see `newCountryCode`
    * and `reachedBiteMilestone` for what is and is not celebrated. When one
    * Bite earns both, `CelebrationService` plays only the higher one.
@@ -147,11 +164,8 @@ export class AppEffect {
    */
   celebrateProfileProgress$ = createEffect(
     () =>
-      this.actions$.pipe(
-        ofType(fromAuth.AuthActions.loadedUser),
-        switchMap(({ user }) =>
-          user ? this.api.publicProfile$.pipe(pairwise()) : EMPTY,
-        ),
+      this.ownProfileSessions$.pipe(
+        switchMap((profiles) => profiles.pipe(pairwise())),
         tap(([previous, current]) => {
           const countryCode = newCountryCode(
             previous.countryCodes,

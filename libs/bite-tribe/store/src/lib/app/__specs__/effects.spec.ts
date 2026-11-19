@@ -242,6 +242,95 @@ describe(AppEffect.name, () => {
         expectObservable(effects.loadPublicProfile$).toBe(expected, output);
       });
     });
+
+    /** GitHub issue #2148: the store follows the document for the session. */
+    describe('live for the session', () => {
+      const signedIn = fromAuth.AuthActions.loadedUser({
+        user: { uid: 'leela' } as unknown as Parameters<
+          typeof fromAuth.AuthActions.loadedUser
+        >[0]['user'],
+      });
+      const signedOut = fromAuth.AuthActions.loadedUser({
+        user: undefined as unknown as Parameters<
+          typeof fromAuth.AuthActions.loadedUser
+        >[0]['user'],
+      });
+
+      let actions: Subject<Action>;
+      let profiles: Subject<Partial<PublicUser>>;
+      const originalProfile$ = BiteTribeApiServiceMock.publicProfile$;
+
+      beforeEach(() => {
+        actions = new Subject<Action>();
+        profiles = new Subject<Partial<PublicUser>>();
+        actions$ = actions;
+        BiteTribeApiServiceMock.publicProfile$ =
+          profiles as unknown as Observable<PublicUser>;
+      });
+
+      afterEach(() => {
+        BiteTribeApiServiceMock.publicProfile$ = originalProfile$;
+      });
+
+      it('puts every snapshot of the document into the store', () => {
+        const dispatched: Action[] = [];
+        const subscription = effects.loadPublicProfile$.subscribe((action) =>
+          dispatched.push(action),
+        );
+
+        actions.next(signedIn);
+        profiles.next({ biteCount: 4 });
+        profiles.next({
+          biteCount: 5,
+          postingStreak: { weeks: 6, lastPostingWeek: '2026-11-16' },
+        });
+        subscription.unsubscribe();
+
+        expect(dispatched).toEqual([
+          AppActions.setPublicProfile({
+            profile: { biteCount: 4 } as PublicUser,
+          }),
+          AppActions.setPublicProfile({
+            profile: {
+              biteCount: 5,
+              postingStreak: { weeks: 6, lastPostingWeek: '2026-11-16' },
+            } as PublicUser,
+          }),
+        ]);
+      });
+
+      it('shares one listener with the celebrations', () => {
+        let listeners = 0;
+        BiteTribeApiServiceMock.publicProfile$ = defer(() => {
+          listeners += 1;
+          return profiles;
+        }) as unknown as Observable<PublicUser>;
+        const store = effects.loadPublicProfile$.subscribe();
+        const celebrations = effects.celebrateProfileProgress$.subscribe();
+
+        actions.next(signedIn);
+        profiles.next({ biteCount: 4 });
+        store.unsubscribe();
+        celebrations.unsubscribe();
+
+        expect(listeners).toBe(1);
+      });
+
+      it('stops listening once signed out', () => {
+        const dispatched: Action[] = [];
+        const subscription = effects.loadPublicProfile$.subscribe((action) =>
+          dispatched.push(action),
+        );
+
+        actions.next(signedIn);
+        actions.next(signedOut);
+        profiles.next({ biteCount: 4 });
+        subscription.unsubscribe();
+
+        expect(dispatched).toEqual([]);
+        expect(profiles.observed).toBe(false);
+      });
+    });
   });
 
   describe('celebrateProfileProgress$', () => {

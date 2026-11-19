@@ -36,6 +36,12 @@ export interface PublicUser {
    * Backend-owned, like `countryCodes`.
    */
   weeklyBadges?: WeeklyBadge[];
+  /**
+   * The weekly posting streak (issue #2146): consecutive Monday-to-Sunday
+   * weeks in Europe/Zurich with a Bite, written by the Bite create trigger and
+   * the Monday resync. Backend-owned. Shown on the own profile only (#2148).
+   */
+  postingStreak?: PostingStreak;
 
   createdAt?: string;
   createdAtTimestamp?: number;
@@ -70,4 +76,11 @@ export interface WeeklyBadge {
   board: WeeklyBadgeBoard;
   place: number;
   week: string;
+}
+
+/** A weekly posting streak as the backend stores it (issue #2146). */
+export interface PostingStreak {
+  weeks: number;
+  /** The Zurich Monday of the run's newest week, `YYYY-MM-DD`, or null. */
+  lastPostingWeek: string | null;
 }

@@ -249,7 +249,7 @@ describe(BiteDataAccessService.name, () => {
       ]);
     });
 
-    // The store's profile is a login-time snapshot that can be missing; the
+    // The store's profile arrives after sign-in and can be missing; the
     // signed-in account is what the list belongs to.
     it('loads the following list without waiting for the profile', async () => {
       profileApi.fetchFollowingWithDetails.mockResolvedValue([profile('anna')]);

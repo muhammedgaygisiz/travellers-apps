@@ -121,17 +121,31 @@
 
         <country-flags [countryCodes]="userData?.countryCodes" />
 
-        @if (hasCountries() && userData) {
-          <ion-button
-            class="show-on-globe"
-            fill="outline"
-            size="small"
-            data-testid="profile-show-on-globe"
-            (click)="worldClick.emit(userData.userId)"
-          >
-            <ion-icon slot="start" name="globe-outline" />
-            {{ 'show-on-globe' | transloco }}
-          </ion-button>
+        <!-- Show on globe, and beside it the own weekly posting streak
+        (#2148). Either can be there without the other. -->
+        @if ((hasCountries() && userData) || postingStreak() > 0) {
+          <div class="profile-highlights">
+            @if (hasCountries() && userData) {
+              <ion-button
+                class="show-on-globe"
+                fill="outline"
+                size="small"
+                data-testid="profile-show-on-globe"
+                (click)="worldClick.emit(userData.userId)"
+              >
+                <ion-icon slot="start" name="globe-outline" />
+                {{ 'show-on-globe' | transloco }}
+              </ion-button>
+            }
+            @if (postingStreak() > 0) {
+              <span class="posting-streak" data-testid="profile-posting-streak">
+                <ion-icon name="flame" aria-hidden="true" />
+                {{
+                  'posting-streak-weeks' | transloco: { weeks: postingStreak() }
+                }}
+              </span>
+            }
+          </div>
         }
 
         <!-- Weekly top-3 badges (#2031): held for the week after they were

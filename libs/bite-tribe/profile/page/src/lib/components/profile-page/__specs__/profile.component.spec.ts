@@ -299,6 +299,88 @@ describe('ProfileComponent', () => {
     });
   });
 
+  /** GitHub issue #2148. */
+  describe('posting streak', () => {
+    const streak = { weeks: 4, lastPostingWeek: '2026-11-16' };
+
+    beforeEach(() => {
+      jest
+        .spyOn(Date, 'now')
+        .mockReturnValue(Date.parse('2026-11-18T11:00:00Z'));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('shows the streak on the own profile', () => {
+      compRef.setInput('user', { userId: 'user1', postingStreak: streak });
+      compRef.setInput('userId', 'user1');
+
+      expect(component.postingStreak()).toBe(4);
+    });
+
+    it('never shows it on another public profile', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        public: true,
+        postingStreak: streak,
+      });
+      compRef.setInput('userId', 'user2');
+
+      expect(component.postingStreak()).toBe(0);
+    });
+
+    it('never shows it without a signed-in user', () => {
+      compRef.setInput('user', { userId: 'user1', postingStreak: streak });
+      compRef.setInput('userId', undefined);
+
+      expect(component.postingStreak()).toBe(0);
+    });
+
+    const chip = (): Element | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-testid="profile-posting-streak"]',
+      );
+
+    it('renders the chip beside Show on globe', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        countryCodes: ['CH'],
+        postingStreak: streak,
+      });
+      compRef.setInput('userId', 'user1');
+      fixture.detectChanges();
+
+      const row = chip()?.parentElement;
+      expect(row?.classList).toContain('profile-highlights');
+      expect(
+        row?.querySelector('[data-testid="profile-show-on-globe"]'),
+      ).not.toBeNull();
+    });
+
+    it('renders the chip without a globe button for a user with no country', () => {
+      compRef.setInput('user', { userId: 'user1', postingStreak: streak });
+      compRef.setInput('userId', 'user1');
+      fixture.detectChanges();
+
+      expect(chip()).not.toBeNull();
+    });
+
+    it('renders no chip on another profile', () => {
+      compRef.setInput('user', {
+        userId: 'user1',
+        public: true,
+        countryCodes: ['CH'],
+        postingStreak: streak,
+      });
+      compRef.setInput('userId', 'user2');
+      fixture.detectChanges();
+
+      expect(chip()).toBeNull();
+    });
+  });
+
   describe('profile visibility', () => {
     const queryVisibility = (): HTMLElement | null => {
       return fixture.nativeElement.querySelector('profile-visibility');

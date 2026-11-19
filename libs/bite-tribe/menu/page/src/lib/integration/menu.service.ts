@@ -100,9 +100,14 @@ export class MenuService {
   prepareBiteFromMenuItem(menuItem: MenuItem): void {
     const restaurant = this.restaurant();
 
-    // TODO: Take currency from menu item when available
+    // The menu's own currency (issue #1102), so a dish priced in Swiss francs
+    // is not recorded as euros (issue #2129). A menu that states none passes
+    // none, and the Bite form fills it the way it does for any new Bite -
+    // from the location or the user's preferred currency, where the user sees
+    // and can change it - instead of the euro this used to hardcode.
+    const currency = this.menu()?.currency;
     const biteToBeCreated: Partial<Bite> = {
-      currency: 'EUR',
+      ...(currency ? { currency } : {}),
       name: menuItem.name,
       place: restaurant?.name || '',
       position: restaurant?.position || { latitude: 0, longitude: 0 },

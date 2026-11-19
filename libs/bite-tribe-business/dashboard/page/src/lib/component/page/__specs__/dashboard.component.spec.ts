@@ -161,4 +161,75 @@ describe(DashboardComponent.name, () => {
       expect(fixture.nativeElement.querySelector('bt-map')).toBeNull();
     });
   });
+
+  describe('the setup checklist (issue #2126)', () => {
+    const COMPLETE: Partial<Restaurant> = {
+      imagePath: 'https://example.test/photo.jpg',
+      address: {
+        street: 'Via Roma 1',
+        city: 'Napoli',
+      } as Restaurant['address'],
+      openingHours: [
+        { day: 'monday', isOpen: true, timeRanges: [] },
+      ] as unknown as Restaurant['openingHours'],
+      description: 'Since 1952.',
+      socialMediaLinks: [{ network: 'website', url: 'https://x.test' }],
+      facilities: { genderNeutralRestroom: true },
+      menuReviewedAtTimestamp: 1,
+    };
+
+    const checklist = (id: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        `[data-testid="setup-checklist-${id}"]`,
+      );
+
+    it('shows a checklist for a restaurant that still lacks something, with its progress', () => {
+      compRef.setInput('restaurants', [
+        restaurant({ ...COMPLETE, description: undefined }),
+      ]);
+      fixture.detectChanges();
+
+      const card = checklist('restaurant-1');
+      expect(card).toBeTruthy();
+      expect(card?.textContent).toContain(
+        'setup-checklist-progress:{"done":6,"total":7}',
+      );
+      expect(
+        card
+          ?.querySelector('[data-testid="setup-item-description"]')
+          ?.getAttribute('data-done'),
+      ).toBe('false');
+      expect(
+        card
+          ?.querySelector('[data-testid="setup-item-image"]')
+          ?.getAttribute('data-done'),
+      ).toBe('true');
+    });
+
+    it('drops the checklist once every item is ticked', () => {
+      compRef.setInput('restaurants', [restaurant(COMPLETE)]);
+      fixture.detectChanges();
+
+      expect(checklist('restaurant-1')).toBeNull();
+    });
+
+    it('emits the restaurant and the item that was tapped', () => {
+      const bare = restaurant({});
+      compRef.setInput('restaurants', [bare]);
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.setupItemClick, 'emit');
+
+      checklist('restaurant-1')
+        ?.querySelector('[data-testid="setup-item-menu-reviewed"]')
+        ?.dispatchEvent(new Event('click'));
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        restaurant: bare,
+        item: expect.objectContaining({
+          key: 'menu-reviewed',
+          target: 'edit-menu',
+        }),
+      });
+    });
+  });
 });

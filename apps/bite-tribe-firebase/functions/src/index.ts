@@ -26,6 +26,7 @@ export { sendWeeklyBiteNotification } from './functions/notifications/send-weekl
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';
 export { setUserPhotoUrlOnUpload } from './functions/users/set-user-photo-url-on-upload';
+export { setRestaurantImagePathOnUpload } from './functions/restaurants/set-restaurant-image-path-on-upload';
 export {
   backfillBiteAddress,
   enrichBiteAddressOnWrite,

@@ -38,6 +38,8 @@ export class EditMenuService {
    *
    * A save can be refused: the ownership-scoped rules allow it only from the
    * account holding the restaurant (GitHub issue #1078).
+   *
+   * A save that lands also marks the menu reviewed (GitHub issue #2126).
    */
   async saveMenu(menu: Menu): Promise<void> {
     const loading = await this.loadingController.create({
@@ -60,6 +62,12 @@ export class EditMenuService {
 
     await loading.dismiss();
     this.dataAccess.retryMenuLoad();
+
+    // "Menu reviewed" on the dashboard checklist (GitHub issue #2126). Its own
+    // write after the save rather than part of it: the menu is saved either
+    // way, so a refused stamp is not a failed save and gets no failure toast.
+    // The next save stamps it again.
+    this.dataAccess.markMenuReviewed().catch(() => undefined);
 
     await this.toast.present({
       messageKey: 'menu-saved',

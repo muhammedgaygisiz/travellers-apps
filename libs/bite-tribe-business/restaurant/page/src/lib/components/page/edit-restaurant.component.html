@@ -23,7 +23,15 @@
         reached, what it says about itself and where it is.
       -->
       <div class="left-column">
-        <bt-restaurant-image [restaurant]="restaurantData" />
+        <bt-restaurant-photo-editor
+          [restaurant]="restaurantData"
+          [status]="photoStatus()"
+          [pendingPhoto]="pendingPhoto()"
+          [uploadedImagePath]="uploadedImagePath()"
+          [canRetry]="canRetryPhoto()"
+          (savePhoto)="savePhoto.emit($event)"
+          (retry)="retryPhoto.emit()"
+        />
 
         <div [formGroup]="socialMediaForm" class="ion-margin-top">
           @if (links.length === 0) {

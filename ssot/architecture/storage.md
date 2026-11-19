@@ -52,6 +52,8 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 `setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]).
 
+`setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`: it points the Restaurant's `imagePath` at the new object, writes `imageStatus: uploaded`, and deletes the older objects in that folder by the same older-only rule, which both triggers now share as `deleteReplacedObjects` ([#2126]). The business app uploads there in the background the way a profile photo is uploaded; the admin app's candidate verification uploads there too and writes the URL itself, which the trigger then writes again unchanged.
+
 ## Storage Rules
 
 `storage.rules` scopes every path by owner (issue [#1350], the Storage
@@ -172,3 +174,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#1328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1328
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
+[#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126

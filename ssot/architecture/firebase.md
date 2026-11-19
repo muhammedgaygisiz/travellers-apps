@@ -391,6 +391,7 @@ decrementBiteLikeCountOnLikeDelete
 updateBiteLikeCountOnLikeUpdate
 setBiteImagePathOnUpload
 setUserPhotoUrlOnUpload
+setRestaurantImagePathOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 notifyBiteCreatorOnReview

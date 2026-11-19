@@ -3,3 +3,19 @@
     width: 100%;
   }
 }
+
+.setup-title {
+  margin: 0;
+  // Ionic dims an h2 in card content; this is the card's call to action.
+  color: var(--ion-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.setup-progress {
+  margin: 4px 0 8px;
+}
+
+ion-item.is-done ion-label {
+  color: var(--ion-color-medium);
+}

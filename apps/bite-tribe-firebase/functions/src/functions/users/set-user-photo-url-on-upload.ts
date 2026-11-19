@@ -1,55 +1,14 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { storageDownloadUrl } from '../shared/utils/storage-download-url';
+import {
+  createdAtMs,
+  deleteReplacedObjects,
+} from '../shared/utils/delete-replaced-objects';
 
 // Matches: images/users/{uid}/{filename}
 const USER_PHOTO_PATH_REGEX = /^images\/users\/([^/]+)\/[^/]+$/;
-
-const createdAtMs = (timeCreated: unknown): number =>
-  typeof timeCreated === 'string' ? Date.parse(timeCreated) : NaN;
-
-/**
- * Deletes the photos in the user's folder that are older than the one just
- * finalized, so the folder holds only the current photo.
- *
- * Older only, never "every other one": two uploads finishing out of order must
- * not let the earlier one delete the later. A file whose age cannot be read is
- * kept, as a leftover costs storage while a wrong delete costs the photo.
- */
-const deleteReplacedPhotos = async (
-  bucketName: string,
-  uid: string,
-  objectPath: string,
-  finalizedAt: number,
-): Promise<void> => {
-  if (Number.isNaN(finalizedAt)) {
-    return;
-  }
-
-  const bucket = getStorage().bucket(bucketName);
-  const [files] = await bucket.getFiles({ prefix: `images/users/${uid}/` });
-
-  const replaced = files.filter(
-    (file) =>
-      file.name !== objectPath &&
-      createdAtMs(file.metadata?.timeCreated) < finalizedAt,
-  );
-
-  await Promise.all(
-    replaced.map(async (file) => {
-      try {
-        await file.delete();
-      } catch (error) {
-        logger.warn(
-          `setUserPhotoUrlOnUpload: could not delete replaced photo ${file.name}`,
-          error,
-        );
-      }
-    }),
-  );
-};
 
 /**
  * Points a profile at its new photo once the upload finalizes, and removes the
@@ -89,12 +48,13 @@ export const setUserPhotoUrlOnUpload = onObjectFinalized(async (event) => {
     photoStatus: 'uploaded',
   });
 
-  await deleteReplacedPhotos(
-    event.data.bucket,
-    uid,
+  await deleteReplacedObjects({
+    bucketName: event.data.bucket,
+    prefix: `images/users/${uid}/`,
     objectPath,
-    createdAtMs(event.data.timeCreated),
-  );
+    finalizedAt: createdAtMs(event.data.timeCreated),
+    caller: 'setUserPhotoUrlOnUpload',
+  });
 
   logger.info(`setUserPhotoUrlOnUpload: photoUrl set for user ${uid}`);
 });

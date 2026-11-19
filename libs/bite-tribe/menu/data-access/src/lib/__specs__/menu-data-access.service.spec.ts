@@ -167,7 +167,7 @@ describe(MenuDataAccessService.name, () => {
    * screen is not the same thing.
    */
   describe('menu item Bite stats', () => {
-    it('asks the api for one restaurant\'s aggregates', async () => {
+    it("asks the api for one restaurant's aggregates", async () => {
       const stats = {
         'item-margherita': {
           id: 'item-margherita',

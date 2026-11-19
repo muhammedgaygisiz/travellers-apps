@@ -24,6 +24,7 @@ describe('EditMenuService', () => {
       menu: signal(undefined),
       saveMenu: jest.fn().mockResolvedValue(undefined),
       retryMenuLoad: jest.fn(),
+      markMenuReviewed: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<MenuDataAccessService>;
 
     loading = {
@@ -104,9 +105,31 @@ describe('EditMenuService', () => {
 
       expect(loading.dismiss).toHaveBeenCalled();
       expect(dataAccessMock.retryMenuLoad).not.toHaveBeenCalled();
+      expect(dataAccessMock.markMenuReviewed).not.toHaveBeenCalled();
       expect(toastMock.present).toHaveBeenCalledWith({
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
+      });
+      expect(toastMock.present).toHaveBeenCalledTimes(1);
+    });
+
+    /** "Menu reviewed" on the dashboard checklist (GitHub issue #2126). */
+    it('should mark the menu reviewed once the save lands', async () => {
+      await service.saveMenu(menu);
+
+      expect(dataAccessMock.markMenuReviewed).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still confirm the save when marking it reviewed is refused', async () => {
+      dataAccessMock.markMenuReviewed = jest
+        .fn()
+        .mockRejectedValue(new Error('permission-denied'));
+
+      await service.saveMenu(menu);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'menu-saved',
+        outcome: 'success',
       });
       expect(toastMock.present).toHaveBeenCalledTimes(1);
     });

@@ -80,3 +80,44 @@ export const WithRestaurants: Story = {
 export const WithoutMap: Story = {
   args: { restaurants: [withoutPosition] },
 };
+
+/**
+ * A restaurant an operator has just handed over (GitHub issue #2126). Its
+ * photo and address came with it, so those are ticked; everything else is
+ * what the owner still has to do, and each item opens the screen that does
+ * it. The menu built from Bite evidence counts once an owner has saved it.
+ */
+export const NewOwnerChecklist: Story = {
+  args: {
+    restaurants: [
+      {
+        ...trattoria,
+        imagePath: 'assets/demo/bite-demo.png',
+        menuId: '/menus/menu-trattoria',
+      } as Restaurant,
+    ],
+  },
+};
+
+/**
+ * Every item is ticked, so the checklist no longer shows and the dashboard is
+ * the map and the sections again (GitHub issue #2126).
+ */
+export const SetUp: Story = {
+  args: {
+    restaurants: [
+      {
+        ...trattoria,
+        imagePath: 'assets/demo/bite-demo.png',
+        description: 'Wood-fired since 1974.',
+        openingHours: [{ day: 'monday', isOpen: true, timeRanges: [] }],
+        socialMediaLinks: [
+          { network: 'instagram', url: 'https://instagram.com/x' },
+        ],
+        facilities: { genderNeutralRestroom: true },
+        menuReviewedAtTimestamp: 1,
+      } as Restaurant,
+    ],
+    gpsPosition: { latitude: 40.8467, longitude: 14.2585 },
+  },
+};

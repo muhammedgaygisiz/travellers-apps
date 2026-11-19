@@ -24,6 +24,52 @@
       <div
         class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
       >
+        @for (setup of setups(); track setup.restaurant.id) {
+          <ion-card
+            [attr.data-testid]="'setup-checklist-' + setup.restaurant.id"
+          >
+            <ion-card-content>
+              <h2 class="setup-title">
+                {{
+                  'setup-checklist-title'
+                    | transloco: { name: setup.restaurant.name }
+                }}
+              </h2>
+              <p class="setup-progress text-secondary">
+                {{
+                  'setup-checklist-progress'
+                    | transloco
+                      : { done: setup.doneCount, total: setup.items.length }
+                }}
+              </p>
+              <ion-list lines="full">
+                @for (item of setup.items; track item.key) {
+                  <ion-item
+                    [button]="true"
+                    [class.is-done]="item.done"
+                    [attr.data-testid]="'setup-item-' + item.key"
+                    [attr.data-done]="item.done"
+                    (click)="
+                      setupItemClick.emit({
+                        restaurant: setup.restaurant,
+                        item: item,
+                      })
+                    "
+                  >
+                    <ion-icon
+                      slot="start"
+                      [name]="setupIcon(item)"
+                      [color]="item.done ? 'success' : 'medium'"
+                      aria-hidden="true"
+                    />
+                    <ion-label>{{ item.labelKey | transloco }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
+        }
+
         <ion-card>
           <ion-card-content>
             <ion-list lines="full" data-testid="dashboard-sections">

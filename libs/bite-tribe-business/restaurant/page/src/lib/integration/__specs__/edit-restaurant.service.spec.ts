@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { EditRestaurantService } from '../edit-restaurant.service';
-import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
+import {
+  RestaurantDataAccessService,
+  RestaurantImageUploadService,
+} from 'bite-tribe-business/restaurant-data-access';
 import { NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Address, Geopoint, Restaurant } from 'model';
@@ -15,6 +18,12 @@ describe('EditRestaurantService', () => {
   let dataAccessMock: jest.Mocked<RestaurantDataAccessService>;
   let navControllerMock: { navigateForward: jest.Mock };
   let toastMock: { present: jest.Mock };
+  let photoUploadMock: {
+    upload: ReturnType<typeof signal>;
+    statusFor: jest.Mock;
+    start: jest.Mock;
+    retry: jest.Mock;
+  };
 
   beforeEach(() => {
     dataAccessMock = {
@@ -30,6 +39,12 @@ describe('EditRestaurantService', () => {
 
     navControllerMock = { navigateForward: jest.fn() };
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
+    photoUploadMock = {
+      upload: signal(undefined),
+      statusFor: jest.fn().mockReturnValue(undefined),
+      start: jest.fn(),
+      retry: jest.fn().mockReturnValue(true),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -37,6 +52,7 @@ describe('EditRestaurantService', () => {
         { provide: RestaurantDataAccessService, useValue: dataAccessMock },
         { provide: NavController, useValue: navControllerMock },
         { provide: ToastService, useValue: toastMock },
+        { provide: RestaurantImageUploadService, useValue: photoUploadMock },
       ],
     });
 
@@ -364,6 +380,49 @@ describe('EditRestaurantService', () => {
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
       });
+    });
+  });
+
+  describe('the photo (issue #2126)', () => {
+    const restaurant = { id: 'r-1', name: 'x' } as Restaurant;
+
+    it('starts a background upload of the chosen photo for the restaurant on screen', () => {
+      dataAccessMock.restaurant = signal(restaurant) as never;
+      service = TestBed.inject(EditRestaurantService);
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+
+      service.savePhoto('data:image/jpeg;base64,AAAA');
+
+      expect(photoUploadMock.start).toHaveBeenCalledWith(
+        'r-1',
+        'data:image/jpeg;base64,AAAA',
+      );
+    });
+
+    it('does nothing without a restaurant', () => {
+      service.savePhoto('data:image/jpeg;base64,AAAA');
+
+      expect(photoUploadMock.start).not.toHaveBeenCalled();
+    });
+
+    it('shows only an upload for the restaurant on screen', () => {
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+      photoUploadMock.upload.set({
+        restaurantId: 'another',
+        status: 'pending',
+        photo: 'p',
+      });
+
+      expect(service.pendingPhoto()).toBeUndefined();
+      expect(service.canRetryPhoto()).toBe(false);
+    });
+
+    it('retries through the upload service', () => {
+      service.retryPhoto();
+
+      expect(photoUploadMock.retry).toHaveBeenCalled();
     });
   });
 });

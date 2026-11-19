@@ -28,6 +28,33 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 
 - The Restaurant Owner opens the dashboard, which shows the map and one entry per
   surface: **BiteTrails** and **Restaurants**.
+- While a Restaurant the account holds still lacks something guests see, the
+  dashboard shows it a checklist (issue [#2126]): photo, address, opening
+  hours, description, a link, facilities, and "menu reviewed". Each item opens
+  the screen that completes it - the menu editor for the menu, the edit page
+  for the rest, or the edit page to create a menu when there is none. Every
+  item is read from the stored Restaurant, never a local flag, so all owners
+  see the same state on every device; the dashboard re-reads the Restaurants
+  each time it is shown, so returning from an edit shows it ticked. A
+  Restaurant whose every item is ticked drops out, and the checklist goes
+  with it. "Menu reviewed" is ticked by the owner's first menu save, because
+  a menu built from Bite evidence is a draft only the owner can correct; an
+  operator's save from the admin app does not count. A category joins the list
+  once issue [#2131] adds one.
+- The Restaurant Owner sets the Restaurant's photo on the edit page (issue
+  [#2126]). The business app could not before: a photo came from candidate
+  verification or not at all. The photo is one box, the way Create Bite's is: the shared
+  image-upload shows the current photo with its edit and delete overlay, and
+  the upload box only once the photo is deleted; Cancel brings it back. A
+  Restaurant with no photo shows the upload box alone - never the consumer
+  app's "not verified" placeholder, because every Restaurant on this page is
+  verified and held by the account. It uploads the way a Bite or profile photo does:
+  Save marks the Restaurant `imageStatus: pending` and sends the photo in the
+  background, the old photo stays on show with the new one blurred under a
+  spinner, and `setRestaurantImagePathOnUpload` points the Restaurant at it
+  even if the page is gone. An error, or 30 s with no progress, ends in
+  `failed` and the shared retry button; an upload from an earlier session asks
+  for the photo again, because the web app keeps no copy on the device.
 - The Restaurant Owner opens Restaurants and edits one of them.
 - The Restaurant Owner maintains menu and Restaurant metadata.
 - Both the map and the list hold **only the Restaurants assigned to the
@@ -168,3 +195,5 @@ all be reviewed for the first time.
 [#1823]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1823
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830
 [#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377
+[#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
+[#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131

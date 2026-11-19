@@ -17,7 +17,24 @@ import {
 } from '@ionic/angular/standalone';
 import { Geopoint, Restaurant } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
+import {
+  restaurantSetupChecklist,
+  SetupItem,
+} from '../../utils/restaurant-setup-checklist';
 import { TranslocoPipe } from '@jsverse/transloco';
+
+/** A checklist item an owner tapped, with the restaurant it belongs to. */
+export interface SetupItemClick {
+  readonly restaurant: Restaurant;
+  readonly item: SetupItem;
+}
+
+/** One restaurant's checklist, while it still has something missing. */
+export interface RestaurantSetup {
+  readonly restaurant: Restaurant;
+  readonly items: readonly SetupItem[];
+  readonly doneCount: number;
+}
 
 /** One surface the business app offers a restaurant. */
 export interface DashboardSection {
@@ -65,6 +82,25 @@ export class DashboardComponent {
 
   readonly logoutClick = output();
   readonly sectionClick = output<DashboardSection>();
+  readonly setupItemClick = output<SetupItemClick>();
+
+  /**
+   * A checklist per restaurant the account holds that still lacks something
+   * guests see (GitHub issue #2126). An owner is assigned by an operator and
+   * used to land here with no guidance; the menu in particular usually arrives
+   * built from Bite evidence and is the owner's to correct. A restaurant whose
+   * every item is ticked drops out, so the list disappears once it is done.
+   */
+  readonly setups = computed<RestaurantSetup[]>(() =>
+    (this.restaurants() ?? [])
+      .map((restaurant) => {
+        const items = restaurantSetupChecklist(restaurant);
+        const doneCount = items.filter((item) => item.done).length;
+
+        return { restaurant, items, doneCount };
+      })
+      .filter((setup) => setup.doneCount < setup.items.length),
+  );
 
   /**
    * One marker per restaurant that has a usable position.
@@ -92,6 +128,9 @@ export class DashboardComponent {
    * position, a restaurant, or both. Without either it is an empty world map,
    * which is why it stays hidden rather than reserving the space.
    */
+  protected readonly setupIcon = (item: SetupItem): string =>
+    item.done ? 'checkmark-circle' : 'ellipse-outline';
+
   readonly showMap = computed(
     () => !!this.gpsPosition() || this.restaurantPositions().length > 0,
   );

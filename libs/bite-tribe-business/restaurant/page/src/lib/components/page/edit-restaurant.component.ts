@@ -36,7 +36,10 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { RestaurantImageComponent } from '../restaurant-image/restaurant-image.component';
+import {
+  RestaurantPhotoEditorComponent,
+  RestaurantPhotoStatus,
+} from '../restaurant-photo-editor/restaurant-photo-editor.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PositionComponent } from 'bite-tribe-common/map';
 import { OpeningHoursComponent } from 'opening-hours';
@@ -86,7 +89,7 @@ const fromFacilityAnswer = (answer: FacilityAnswer): boolean | undefined =>
     IonInput,
     IonText,
     IonTextarea,
-    RestaurantImageComponent,
+    RestaurantPhotoEditorComponent,
     TranslocoPipe,
     OpeningHoursComponent,
     PositionComponent,
@@ -98,6 +101,14 @@ export class EditRestaurantComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   restaurant = input<Restaurant>();
+  /** The photo upload's status for this restaurant (GitHub issue #2126). */
+  photoStatus = input<RestaurantPhotoStatus>();
+  pendingPhoto = input<string>();
+  uploadedImagePath = input<string>();
+  canRetryPhoto = input(false);
+
+  readonly savePhoto = output<string>();
+  readonly retryPhoto = output<void>();
 
   readonly submitSocialMediaLinks = output<Partial<{ links: Link[] }>>();
 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Address,
+  CreateAndUploadImageCallbackParams,
   DaySchedule,
   Geopoint,
   Link,
@@ -140,6 +141,86 @@ export class RestaurantApiService {
 
   saveRestaurantImage(restaurantId: string, image: string): Promise<void> {
     return this.uploadAndSaveRestaurantImage(restaurantId, image);
+  }
+
+  /**
+   * Sends a restaurant photo chosen in the business app (GitHub issue #2126).
+   * Started by the upload service and not awaited by the page: the outcome
+   * arrives through `callbackFn`, and the finalize trigger
+   * `setRestaurantImagePathOnUpload` points the restaurant at the object even
+   * if this device is gone by then - the way a profile photo is sent (#1953).
+   */
+  async uploadRestaurantImage(
+    restaurantId: string,
+    photo: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    await uploadBase64ToFirebaseStorage({
+      base64: photo,
+      docId: restaurantId,
+      collection: RESTAURANT_COLLECTION,
+      callbackFn,
+    });
+  }
+
+  /**
+   * Points the restaurant at a finished upload. The finalize trigger writes the
+   * same thing; the client does too so the page shows the photo at once.
+   */
+  async setUploadedRestaurantImage(
+    restaurantId: string,
+    storagePath: string,
+  ): Promise<string> {
+    const imagePath =
+      (await getDownloadUrlFromFirebaseStorage(storagePath)) || '';
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        imagePath,
+        imageStatus: 'uploaded',
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+
+    return imagePath;
+  }
+
+  /**
+   * Records a photo upload's status. Thrown errors are the caller's to swallow:
+   * offline the write lands in the local cache at once but only resolves once
+   * the server acknowledges it (see GitHub issue #1390).
+   */
+  async setRestaurantImageStatus(
+    restaurantId: string,
+    imageStatus: 'pending' | 'failed',
+    imageUploadStartedAt?: number,
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        imageStatus,
+        ...(imageUploadStartedAt === undefined
+          ? {}
+          : { imageUploadStartedAtTimestamp: imageUploadStartedAt }),
+      },
+    });
+  }
+
+  /**
+   * Records that an account holding the restaurant saved its menu (GitHub
+   * issue #2126). Its own write after the menu save, so an operator's save
+   * from the admin app, which never calls this, does not count.
+   */
+  async markMenuReviewed(restaurantId: string): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        menuReviewedAt: new Date().toISOString(),
+        menuReviewedAtTimestamp: Date.now(),
+      },
+    });
   }
 
   async createMenuForRestaurant(restaurantId: string): Promise<string> {

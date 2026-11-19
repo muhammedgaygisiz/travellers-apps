@@ -110,3 +110,38 @@ export const WithMenuOnly: Story = {
     } as Restaurant,
   },
 };
+
+/**
+ * A new photo is uploading in the background (GitHub issue #2126). The new
+ * photo shows blurred under a spinner while it is sent, the way a profile
+ * photo does (#1953).
+ */
+export const PhotoUploading: Story = {
+  args: {
+    photoStatus: 'pending',
+    pendingPhoto: RESTAURANT_IMAGE,
+  },
+};
+
+/**
+ * The upload failed and this session still holds the photo, so it offers the
+ * shared retry button (GitHub issue #2126).
+ */
+export const PhotoFailed: Story = {
+  args: {
+    photoStatus: 'failed',
+    canRetryPhoto: true,
+  },
+};
+
+/**
+ * An upload from an earlier session failed. The business app runs on the web
+ * and keeps no copy on the device, so it asks for the photo again (GitHub
+ * issue #2126).
+ */
+export const PhotoFailedInAnEarlierSession: Story = {
+  args: {
+    photoStatus: 'failed',
+    canRetryPhoto: false,
+  },
+};

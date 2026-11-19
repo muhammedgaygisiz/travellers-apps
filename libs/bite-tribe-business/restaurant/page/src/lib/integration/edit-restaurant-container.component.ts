@@ -8,6 +8,12 @@ import { EditRestaurantService } from './edit-restaurant.service';
     <edit-restaurant
       class="ion-page"
       [restaurant]="service.restaurant()"
+      [photoStatus]="service.photoStatus()"
+      [pendingPhoto]="service.pendingPhoto()"
+      [uploadedImagePath]="service.uploadedImagePath()"
+      [canRetryPhoto]="service.canRetryPhoto()"
+      (savePhoto)="service.savePhoto($event)"
+      (retryPhoto)="service.retryPhoto()"
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"
       (submitDescription)="service.submitDescription($event)"
       (submitOpeningHours)="service.submitOpeningHours($event)"

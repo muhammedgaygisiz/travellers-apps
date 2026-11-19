@@ -1,5 +1,8 @@
-import { inject, Injectable } from '@angular/core';
-import { RestaurantDataAccessService } from 'bite-tribe-business/restaurant-data-access';
+import { computed, inject, Injectable } from '@angular/core';
+import {
+  RestaurantDataAccessService,
+  RestaurantImageUploadService,
+} from 'bite-tribe-business/restaurant-data-access';
 import {
   Address,
   DaySchedule,
@@ -15,8 +18,39 @@ export class EditRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
   private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
+  private readonly photoUpload = inject(RestaurantImageUploadService);
 
   restaurant = this.dataAccess.restaurant;
+
+  /** This session's photo upload, when it is for the restaurant on screen. */
+  private readonly ownUpload = computed(() => {
+    const upload = this.photoUpload.upload();
+
+    return upload && upload.restaurantId === this.restaurant()?.id
+      ? upload
+      : undefined;
+  });
+
+  photoStatus = computed(() => this.photoUpload.statusFor(this.restaurant()));
+  pendingPhoto = computed(() => this.ownUpload()?.photo);
+  uploadedImagePath = computed(() => this.ownUpload()?.imagePath);
+  canRetryPhoto = computed(() => !!this.ownUpload()?.photo);
+
+  /**
+   * Starts the background upload of a newly chosen photo (GitHub issue
+   * #2126). Not awaited: the page shows its progress from the upload service.
+   */
+  savePhoto(photo: string): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      this.photoUpload.start(restaurant.id, photo);
+    }
+  }
+
+  retryPhoto(): void {
+    this.photoUpload.retry();
+  }
 
   gotoEditMenu(restaurantId: string, menuId: string | undefined): void {
     if (menuId) {

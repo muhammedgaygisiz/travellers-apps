@@ -133,10 +133,9 @@ account.
 
 ### Revoke The `business` Role
 
-On `User management`, remove `business`. **Revoke the ownerships first.**
-`setUserRoles` does not look at the restaurants the account holds, so an
-account that loses the role while it still owns a restaurant stays named as
-its owner while the business app refuses it ([#1539]).
+On `User management`, remove `business`. Revoke the ownerships first:
+`setUserRoles` refuses to remove `business` while the account still owns a
+restaurant, and the toast names the restaurants to revoke ([#1539]).
 
 ### Account Deletion
 

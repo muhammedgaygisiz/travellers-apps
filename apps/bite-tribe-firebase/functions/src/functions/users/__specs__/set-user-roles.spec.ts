@@ -14,6 +14,16 @@ jest.mock('firebase-admin/auth', () => ({
   }),
 }));
 
+const restaurantsGetMock = jest.fn();
+const whereMock = jest.fn(() => ({ get: restaurantsGetMock }));
+const collectionMock = jest.fn(() => ({ where: whereMock }));
+
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: (): { collection: jest.Mock } => ({
+    collection: collectionMock,
+  }),
+}));
+
 jest.mock('firebase-functions', () => ({
   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }));
@@ -23,6 +33,7 @@ jest.mock('firebase-functions/https', () => ({
     constructor(
       public code: string,
       message: string,
+      public details?: unknown,
     ) {
       super(message);
     }
@@ -83,6 +94,7 @@ beforeEach(() => {
   getUserMock.mockResolvedValue({ uid: TARGET_UID, customClaims: undefined });
   getUserByEmailMock.mockResolvedValue({ uid: TARGET_UID });
   setCustomUserClaimsMock.mockResolvedValue(undefined);
+  restaurantsGetMock.mockResolvedValue({ docs: [] });
 });
 
 describe('setUserRoles authorization', () => {
@@ -323,5 +335,136 @@ describe('setUserRoles mutually exclusive roles', () => {
     await expect(
       handle(request({ uid: TARGET_UID, roles: ['staff'] })),
     ).resolves.toEqual({ uid: TARGET_UID, roles: ['staff'] });
+  });
+});
+
+describe('setUserRoles and the restaurants an account owns', () => {
+  /** A restaurant document as the query returns it. */
+  const restaurantDoc = (id: string, name?: string): unknown => ({
+    id,
+    get: (field: string): unknown => (field === 'name' ? name : undefined),
+  });
+
+  const targetHolding = (roles: string[]): void => {
+    getUserMock.mockResolvedValue({
+      uid: TARGET_UID,
+      customClaims: { roles },
+    });
+  };
+
+  const messageOf = async (promise: Promise<unknown>): Promise<string> => {
+    try {
+      await promise;
+    } catch (error) {
+      return (error as Error).message;
+    }
+
+    throw new Error('Expected the handler to reject, but it resolved.');
+  };
+
+  it('refuses to drop business while the account owns a restaurant', async () => {
+    targetHolding(['business']);
+    restaurantsGetMock.mockResolvedValue({
+      docs: [restaurantDoc('resto-1', "Sam's")],
+    });
+
+    await expect(
+      codeOf(handle(request({ uid: TARGET_UID, roles: [] }))),
+    ).resolves.toBe('failed-precondition');
+    expect(collectionMock).toHaveBeenCalledWith('restaurants');
+    expect(whereMock).toHaveBeenCalledWith(
+      'ownerUserIds',
+      'array-contains',
+      TARGET_UID,
+    );
+    expect(setCustomUserClaimsMock).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  it('names every restaurant that blocks the revocation', async () => {
+    targetHolding(['business']);
+    restaurantsGetMock.mockResolvedValue({
+      docs: [restaurantDoc('resto-1', "Sam's"), restaurantDoc('resto-2')],
+    });
+
+    const message = await messageOf(
+      handle(request({ uid: TARGET_UID, roles: [] })),
+    );
+
+    expect(message).toContain("Sam's (resto-1)");
+    await expect(
+      handle(request({ uid: TARGET_UID, roles: [] })),
+    ).rejects.toMatchObject({
+      details: {
+        reason: 'role-holdings',
+        role: 'business',
+        holdings: ["Sam's (resto-1)", 'resto-2'],
+      },
+    });
+    expect(message).toContain('resto-2');
+    expect(message).toContain('Restaurant ownership');
+  });
+
+  it('removes business from an account that owns no restaurant', async () => {
+    targetHolding(['business']);
+
+    await expect(
+      handle(request({ uid: TARGET_UID, roles: [] })),
+    ).resolves.toEqual({ uid: TARGET_UID, roles: [] });
+    expect(setCustomUserClaimsMock).toHaveBeenCalledWith(TARGET_UID, {
+      roles: [],
+    });
+  });
+
+  it('reads nothing from Firestore when granting business', async () => {
+    targetHolding([]);
+
+    await handle(request({ uid: TARGET_UID, roles: ['business'] }));
+
+    expect(collectionMock).not.toHaveBeenCalled();
+  });
+
+  it('reads nothing from Firestore when the write keeps business', async () => {
+    targetHolding(['business']);
+
+    await handle(request({ uid: TARGET_UID, roles: ['business', 'admin'] }));
+
+    expect(collectionMock).not.toHaveBeenCalled();
+  });
+
+  it('reads nothing from Firestore when dropping a role other than business', async () => {
+    targetHolding(['admin', 'business']);
+
+    await handle(request({ uid: TARGET_UID, roles: ['business'] }));
+
+    expect(collectionMock).not.toHaveBeenCalled();
+  });
+
+  it('ignores claims that are not a role list', async () => {
+    getUserMock.mockResolvedValue({
+      uid: TARGET_UID,
+      customClaims: { roles: 'business' },
+    });
+
+    await handle(request({ uid: TARGET_UID, roles: [] }));
+
+    expect(collectionMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps the self-demotion refusal distinct from the ownership one', async () => {
+    const selfDemotion = await messageOf(
+      handle(request({ uid: ADMIN_UID, roles: [] })),
+    );
+
+    targetHolding(['business']);
+    restaurantsGetMock.mockResolvedValue({
+      docs: [restaurantDoc('resto-1', "Sam's")],
+    });
+    const ownership = await messageOf(
+      handle(request({ uid: TARGET_UID, roles: [] })),
+    );
+
+    expect(selfDemotion).toBe('You cannot remove your own admin role.');
+    expect(ownership).not.toBe(selfDemotion);
   });
 });

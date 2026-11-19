@@ -40,6 +40,7 @@
   "admin-users-roles-conflict-hint": "An account cannot be both business and staff. Business operates a restaurant; staff is the narrower set of what can be done on one.",
   "admin-users-saved": "Roles saved.",
   "admin-users-save-failed": "The roles could not be saved. Please try again.",
+  "admin-users-save-refused-owns-restaurants": "This account still owns {{restaurants}}. Revoke its ownership on Restaurant ownership first, then remove the business role.",
   "admin-users-tier": "Subscription tier",
   "admin-users-tier-current": "Current tier",
   "admin-users-tier-free": "Free",

@@ -189,6 +189,7 @@ This stops being true the moment a business or admin client is submitted to a st
 - [Architecture - Auth](../architecture/auth.md) - how the roles are carried, and what each app binds
 - [Architecture - Firebase](../architecture/firebase.md) - the Firestore security rules as a whole
 - [Implementation - Firebase Functions](../implementation/firebase-functions.md) - `logOperatorAction` and the operator callables
+- [Restaurant Owner Onboarding](../operations/restaurant-owner-onboarding.md) - the operator's step-by-step sequence for onboarding an owner and taking a restaurant back
 - [#1076] - self-service claiming, closed as not planned
 - [issue-1371](../history/records/issue-1371.md) - removed the organisation fields this was first specified against
 

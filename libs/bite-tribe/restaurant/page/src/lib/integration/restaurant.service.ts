@@ -150,6 +150,21 @@ export class RestaurantService {
     return this.bite()?.id ?? this.dataAccess.biteIdFromUrl();
   }
 
+  /**
+   * The unverified place page has nothing to show: its Bites have finished
+   * loading and neither they nor the store hold the Bite it was opened from,
+   * so there is no name, position or rating. See GitHub issue #2125.
+   */
+  placeNotFound = computed(() => !this.bitesLoading() && !this.bite());
+
+  /**
+   * The place's way out. Not back to the Bite: on this page the Bite is the
+   * thing that could not be found. See GitHub issue #2125.
+   */
+  navigateBackToFeed(): void {
+    void this.navController.navigateBack([PATH.HOME]);
+  }
+
   /** The not-found state's way out: back to the Bite the page was opened from. */
   navigateBackToBite(): void {
     const biteId = this.dataAccess.biteIdFromUrl();

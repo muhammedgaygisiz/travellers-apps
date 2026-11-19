@@ -79,3 +79,28 @@ export const WithoutRatedBites: Story = {
     ],
   },
 };
+
+/**
+ * The place's Bites have not arrived. The page holds a skeleton instead of the
+ * "not verified" banner next to an empty name and rating. See GitHub issue
+ * #2125.
+ */
+export const Loading: Story = {
+  args: {
+    bite: undefined,
+    bites: [],
+    bitesLoading: true,
+  },
+};
+
+/**
+ * The Bite this place was opened from is gone, so the place has nothing to
+ * show. The page says so and offers a way back. See GitHub issue #2125.
+ */
+export const NotFound: Story = {
+  args: {
+    bite: undefined,
+    bites: [],
+    notFound: true,
+  },
+};

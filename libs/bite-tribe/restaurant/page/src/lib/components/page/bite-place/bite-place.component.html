@@ -3,6 +3,7 @@
 @let biteCountData = bitesCount();
 @let ratedBiteCountData = ratedBiteCount();
 @let starIconPath = '/assets/custom-icons/star.svg';
+@let loading = isLoading();
 
 <ta-page
   [chrome]="{
@@ -10,59 +11,144 @@
     showHeaderMenu: false,
     showFooter: false,
   }"
+  [loading]="loading"
 >
   <ion-content>
-    <div class="unverified-restaurant-image">
-      <ion-icon name="pizza-outline" color="primary" />
-      <span>{{ 'not-verified-restaurant' | transloco }}</span>
-    </div>
-
-    <div class="ion-padding safe-padding-bottom">
+    @if (notFound()) {
+      <!-- The Bite this place was opened from is gone, so the place has no
+      name, no position and no Bites to show. See GitHub issue #2125. -->
       <div
-        class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
+        class="not-found ion-padding ion-text-center"
+        data-testid="place-not-found"
       >
-        <h1>{{ placeName() }}</h1>
+        <ion-icon
+          name="pizza-outline"
+          class="not-found-icon"
+          aria-hidden="true"
+        />
+        <p class="text-secondary">{{ 'place-not-found' | transloco }}</p>
+        <ion-button
+          fill="outline"
+          data-testid="place-not-found-back"
+          (click)="backClick.emit()"
+        >
+          {{ 'place-not-found-back' | transloco }}
+        </ion-button>
       </div>
+    } @else if (loading) {
+      <!-- Traces the loaded page: the banner, the name, the rating line, the
+      distance and the map. See GitHub issue #2125. -->
+      <div data-testid="place-loading">
+        <ion-skeleton-text
+          [animated]="true"
+          style="width: 100%; height: 200px; border-radius: 0; margin: 0"
+        />
 
-      <div
-        class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
-      >
-        <ion-icon [src]="starIconPath" class="rating-icon" />
-        @if (ratedBiteCountData) {
-          <span class="rating">{{ averageBiteRating() }}</span>
-        }
-        @let ratingLabel =
-          ratedBiteCountData
-            ? ('restaurant-rating'
-              | transloco: { biteCount: ratedBiteCountData })
-            : ('no-ratings-yet' | transloco);
-        <!-- The rating count is the way to the Bites recorded here, the same
-        as on the restaurant page. See GitHub issue #1696. -->
-        @if (biteCountData) {
-          <button
-            type="button"
-            class="bites-link text-small"
-            data-testid="place-bites-link"
-            (click)="showBitesClick.emit(biteData)"
+        <div class="ion-padding safe-padding-bottom">
+          <div
+            class="header-container ion-display-flex ion-align-items-center ion-margin-bottom"
           >
-            {{ ratingLabel }}
-          </button>
-        } @else {
-          <span class="text-small text-secondary">{{ ratingLabel }}</span>
-        }
-      </div>
+            <!-- The zero-width space gives the heading a text line, so it
+            takes the same line height as the place name. -->
+            <h1 aria-hidden="true">
+              &#8203;<ion-skeleton-text
+                [animated]="true"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  height: 1em;
+                  width: 172px;
+                  margin: 0;
+                "
+              />
+            </h1>
+          </div>
 
-      <bt-distance [distance]="placeDistance()" />
+          <!-- 44px: the height of the rating link the loaded page shows. -->
+          <div
+            class="ion-display-flex ion-align-items-center ion-margin-bottom"
+            style="min-height: 44px"
+          >
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 20px; width: 148px; margin: 0"
+            />
+          </div>
 
-      @if (uniqueTags().length) {
-        <div class="ion-margin-top">
-          <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
+          <ion-skeleton-text
+            [animated]="true"
+            style="height: 20px; width: 56px"
+          />
+
+          <div class="ion-margin-top">
+            <ion-skeleton-text
+              [animated]="true"
+              style="height: 300px; width: 100%; margin: 0"
+            />
+          </div>
         </div>
-      }
-
-      <div class="ion-margin-top">
-        <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
       </div>
-    </div>
+    } @else {
+      <div class="unverified-restaurant-image">
+        <ion-icon name="pizza-outline" color="primary" />
+        <span>{{ 'not-verified-restaurant' | transloco }}</span>
+        <!-- What "not verified" means for the guest, in one line. See
+          GitHub issue #2125. -->
+        <span
+          class="explainer text-small text-secondary"
+          data-testid="place-unverified-explainer"
+        >
+          {{ 'not-verified-restaurant-explainer' | transloco }}
+        </span>
+      </div>
+
+      <div class="ion-padding safe-padding-bottom">
+        <div
+          class="header-container ion-display-flex ion-justify-content-between ion-align-items-center ion-margin-bottom"
+        >
+          <h1>{{ placeName() }}</h1>
+        </div>
+
+        <div
+          class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
+        >
+          <ion-icon [src]="starIconPath" class="rating-icon" />
+          @if (ratedBiteCountData) {
+            <span class="rating">{{ averageBiteRating() }}</span>
+          }
+          @let ratingLabel =
+            ratedBiteCountData
+              ? ('restaurant-rating'
+                | transloco: { biteCount: ratedBiteCountData })
+              : ('no-ratings-yet' | transloco);
+          <!-- The rating count is the way to the Bites recorded here, the same
+            as on the restaurant page. See GitHub issue #1696. -->
+          @if (biteCountData) {
+            <button
+              type="button"
+              class="bites-link text-small"
+              data-testid="place-bites-link"
+              (click)="showBitesClick.emit(biteData)"
+            >
+              {{ ratingLabel }}
+            </button>
+          } @else {
+            <span class="text-small text-secondary">{{ ratingLabel }}</span>
+          }
+        </div>
+
+        <bt-distance [distance]="placeDistance()" />
+
+        @if (uniqueTags().length) {
+          <div class="ion-margin-top">
+            <bt-tags-input [readonly]="true" [tags]="uniqueTags()" />
+          </div>
+        }
+
+        <div class="ion-margin-top">
+          <bt-map [geopoints]="positionData ? [positionData] : []" readonly />
+        </div>
+      </div>
+    }
   </ion-content>
 </ta-page>

@@ -118,6 +118,7 @@ export const SetUp: Story = {
           { network: 'instagram', url: 'https://instagram.com/x' },
         ],
         facilities: { genderNeutralRestroom: true },
+        categories: ['restaurant'],
         menuReviewedAtTimestamp: 1,
       } as Restaurant,
     ],

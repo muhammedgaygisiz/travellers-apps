@@ -368,6 +368,64 @@ describe('RestaurantComponent', () => {
     );
   });
 
+  /**
+   * The kind of venue, as the restaurant states it (issue #2131). Absent is a
+   * restaurant that has not said, and shows nothing.
+   */
+  describe('categories', () => {
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TranslocoTestingModule.forRoot({
+            langs: {
+              en: {
+                'restaurant-category-cafe': 'Café',
+                'restaurant-category-bakery': 'Bakery',
+              },
+            },
+            translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+            preloadLangs: true,
+          }),
+        ],
+        providers: [provideIonicAngular(getIonicConfig())],
+      });
+
+      fixture = TestBed.createComponent(RestaurantComponent);
+      componentRef = fixture.componentRef;
+    });
+
+    const lineFor = (categories: unknown): HTMLElement | null => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        categories,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      return (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-testid="restaurant-categories"]',
+      );
+    };
+
+    it('shows the stated categories in their labels', () => {
+      expect(
+        lineFor(['cafe', 'bakery'])?.textContent?.replace(/\s+/g, ' ').trim(),
+      ).toBe('Café · Bakery');
+    });
+
+    it('shows one category without a separator', () => {
+      expect(lineFor(['cafe'])?.textContent?.trim()).toBe('Café');
+    });
+
+    it.each([undefined, [], ['nightclub']])(
+      'shows nothing when the restaurant has not stated a known one (%j)',
+      (categories) => {
+        expect(lineFor(categories)).toBeNull();
+      },
+    );
+  });
+
   describe('loading state', () => {
     it('should render skeletons and no page content while the restaurant is missing', () => {
       componentRef.setInput('restaurant', undefined);

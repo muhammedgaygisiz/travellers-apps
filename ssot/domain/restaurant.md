@@ -44,6 +44,23 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - **A Restaurant is "active" for ordering while a business account holds it.** There is no `active` field and adding one would be a third state nothing writes. An order placed at a Restaurant nobody holds lands in a queue no account can open, and `claimStatus: 'revoked'` is exactly a Restaurant that used to be able to take one. The scan resolution reads the owners and `claimStatus`, which the assignment callables already write.
 - **The time zone belongs to `tableOrdering` rather than to `openingHours`.** A `DaySchedule` is a weekday and a pair of `HH:mm` strings and says nothing about where in the world that is, which cost nothing while nothing evaluated it. The scan resolution is the first reader that has to turn "18:00 to 23:00 on Friday" into an instant, and it runs on a server in UTC.
 - **A Restaurant states its own facilities, and nobody else does.** `facilities` holds them (issue [#1830]), with `genderNeutralRestroom` as its first and only field. Every facility has three states: `true` is yes, `false` is no, and an absent field is a Restaurant that has not said - which is never shown as no. The account holding the Restaurant writes it in the business app; there is no way for a guest to suggest or correct a value, because a user-sourced flag would be unverifiable and could be used to target a venue. A nested object rather than a top-level key, so the next facility is a new field on it - the reasoning `tableOrdering` gives.
+- **A Restaurant states what kind of venue it is, and nobody else does.** `categories` holds one or two of a fixed list (issue [#2131]), on the same rule as `facilities`: the account holding the Restaurant writes it in the business app, and an operator may; a guest cannot suggest one. Up to two, so a hybrid such as a café that is also a bakery can say both. An absent or empty field is a Restaurant that has not said and shows nothing; an unknown value is dropped on read. Category is the kind of venue, not the cuisine: Italian or Thai stays derived from the tags on its Bites. The list, in the order the business app offers it:
+
+  | Value         | English label        |
+  | ------------- | -------------------- |
+  | `restaurant`  | Restaurant           |
+  | `fine-dining` | Fine dining          |
+  | `cafe`        | Café                 |
+  | `bar`         | Bar                  |
+  | `pub`         | Pub                  |
+  | `bakery`      | Bakery               |
+  | `dessert`     | Desserts & ice cream |
+  | `street-food` | Street food          |
+  | `fast-food`   | Fast food            |
+  | `food-hall`   | Food hall            |
+
+  A food truck is not on it: a venue that moves is [#2134]'s question, not a category. Filtering the map or search by category is not built.
+
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue [#1389] and [issue-1389](../history/records/issue-1389.md).
 
 ## Required Data
@@ -80,6 +97,7 @@ Current model fields:
 - `openingHours`
 - `tableOrdering`
 - `facilities`
+- `categories`
 - `createdAt`
 - `createdAtTimestamp`
 - `updatedAt`
@@ -295,3 +313,5 @@ images/restaurants/{restaurantId}/{filename}
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2129]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2129
+[#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
+[#2134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2134

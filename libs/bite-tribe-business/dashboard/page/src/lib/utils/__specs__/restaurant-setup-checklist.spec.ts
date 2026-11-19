@@ -20,6 +20,7 @@ const COMPLETE: Restaurant = {
   description: 'Neapolitan pizza since 1952.',
   socialMediaLinks: [{ network: 'instagram', url: 'https://instagram.com/x' }],
   facilities: { genderNeutralRestroom: false },
+  categories: ['cafe'],
   menuReviewedAtTimestamp: 1,
 };
 
@@ -30,9 +31,10 @@ const doneKeys = (restaurant: Restaurant): string[] =>
 
 /** See GitHub issue #2126. */
 describe('restaurantSetupChecklist', () => {
-  it('lists the seven items in a fixed order, none done on a bare restaurant', () => {
+  it('lists the eight items in a fixed order, none done on a bare restaurant', () => {
     expect(restaurantSetupChecklist(BARE).map((item) => item.key)).toEqual([
       'image',
+      'categories',
       'address',
       'opening-hours',
       'description',
@@ -44,7 +46,7 @@ describe('restaurantSetupChecklist', () => {
   });
 
   it('ticks every item on a complete restaurant, which is then set up', () => {
-    expect(doneKeys(COMPLETE)).toHaveLength(7);
+    expect(doneKeys(COMPLETE)).toHaveLength(8);
     expect(isRestaurantSetUp(COMPLETE)).toBe(true);
     expect(isRestaurantSetUp(BARE)).toBe(false);
   });
@@ -62,6 +64,20 @@ describe('restaurantSetupChecklist', () => {
     expect(
       doneKeys({ ...BARE, facilities: { genderNeutralRestroom: false } }),
     ).toEqual(['facilities']);
+  });
+
+  /** See GitHub issue #2131. */
+  it('ticks the category once the restaurant states a known one', () => {
+    expect(doneKeys({ ...BARE, categories: ['bar', 'pub'] })).toEqual([
+      'categories',
+    ]);
+    expect(doneKeys({ ...BARE, categories: [] })).toEqual([]);
+    expect(
+      doneKeys({
+        ...BARE,
+        categories: ['nightclub'] as unknown as Restaurant['categories'],
+      }),
+    ).toEqual([]);
   });
 
   it('does not count blanks: whitespace text, an empty link, a street without a city', () => {

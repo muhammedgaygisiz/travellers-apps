@@ -15,7 +15,14 @@ import {
   IonLabel,
   IonSkeletonText,
 } from '@ionic/angular/standalone';
-import { Bite, LikeClick, Menu, MenuItem, Restaurant } from 'model';
+import {
+  Bite,
+  LikeClick,
+  Menu,
+  MenuItem,
+  Restaurant,
+  restaurantCategoriesOf,
+} from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../../pipes/ensure-protocol.pipe';
@@ -138,6 +145,12 @@ export class RestaurantComponent {
   });
 
   uniqueTags = computed(() => uniqueTagsFromBites(this.bites() || []));
+
+  /**
+   * The kind of venue, as the restaurant states it (issue #2131). Empty for a
+   * restaurant that has not said, and then nothing is shown.
+   */
+  categories = computed(() => restaurantCategoriesOf(this.restaurant()));
 
   setSelectedSegment(selectedSegment: unknown): void {
     if (selectedSegment !== 'bites' && selectedSegment !== 'menu') {

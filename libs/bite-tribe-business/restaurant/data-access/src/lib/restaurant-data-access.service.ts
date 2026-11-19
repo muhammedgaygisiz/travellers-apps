@@ -6,6 +6,7 @@ import {
   DaySchedule,
   Geopoint,
   Link,
+  RestaurantCategory,
   TableOrderingSettings,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -60,6 +61,13 @@ export class RestaurantDataAccessService {
       restaurantId,
       genderNeutralRestroom,
     );
+  }
+
+  async submitCategories(
+    restaurantId: string,
+    categories: RestaurantCategory[],
+  ): Promise<void> {
+    await this.api.saveCategoriesForRestaurant(restaurantId, categories);
   }
 
   async submitAddress(restaurantId: string, address: Address): Promise<void> {

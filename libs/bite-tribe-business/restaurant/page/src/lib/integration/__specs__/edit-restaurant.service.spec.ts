@@ -33,6 +33,7 @@ describe('EditRestaurantService', () => {
       submitDescription: jest.fn(),
       submitOpeningHours: jest.fn(),
       submitGenderNeutralRestroom: jest.fn(),
+      submitCategories: jest.fn(),
       submitAddress: jest.fn(),
       submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
@@ -288,6 +289,49 @@ describe('EditRestaurantService', () => {
       ).mockRejectedValue(new Error('fail'));
 
       await service.submitGenderNeutralRestroom(true);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /** See GitHub issue #2131. */
+  describe('submitCategories', () => {
+    it('does nothing without a restaurant', async () => {
+      await service.submitCategories(['cafe']);
+      expect(dataAccessMock.submitCategories).not.toHaveBeenCalled();
+    });
+
+    it('saves the categories and confirms it', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+
+      await service.submitCategories(['cafe', 'bakery']);
+
+      expect(dataAccessMock.submitCategories).toHaveBeenCalledWith('rest1', [
+        'cafe',
+        'bakery',
+      ]);
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'categories-saved',
+        outcome: 'success',
+      });
+    });
+
+    it('says so when the save fails', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+      (dataAccessMock.submitCategories as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
+
+      await service.submitCategories(['cafe']);
 
       expect(toastMock.present).toHaveBeenCalledWith({
         messageKey: 'something-went-wrong-please-try-again',

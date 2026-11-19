@@ -8,6 +8,7 @@ import {
   DaySchedule,
   Geopoint,
   Link,
+  RestaurantCategory,
   TableOrderingSettings,
 } from 'model';
 import { NavController } from '@ionic/angular/standalone';
@@ -206,6 +207,22 @@ export class EditRestaurantService {
         );
         await this.toast.present({
           messageKey: 'facilities-saved',
+          outcome: 'success',
+        });
+      } catch {
+        await this.showFailureToast();
+      }
+    }
+  }
+
+  /** The kind of venue the restaurant states (GitHub issue #2131). */
+  async submitCategories(categories: RestaurantCategory[]): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitCategories(restaurant.id, categories);
+        await this.toast.present({
+          messageKey: 'categories-saved',
           outcome: 'success',
         });
       } catch {

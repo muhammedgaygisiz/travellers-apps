@@ -8,6 +8,7 @@ import type {
   Link,
   Restaurant,
   TableOrderingSettings,
+  RestaurantCategory,
 } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
@@ -422,6 +423,26 @@ export class RestaurantApiService {
       data: {
         'facilities.genderNeutralRestroom':
           genderNeutralRestroom ?? FieldValue.delete(),
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  /**
+   * The kind of venue the restaurant states (GitHub issue #2131).
+   *
+   * **An empty list removes the field**, so a restaurant that takes its answer
+   * back reads as "not stated" again rather than as a stored empty answer.
+   */
+  async saveCategoriesForRestaurant(
+    restaurantId: string,
+    categories: RestaurantCategory[],
+  ): Promise<void> {
+    await FirebaseFirestore.updateDocument({
+      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      data: {
+        categories: categories.length ? categories : FieldValue.delete(),
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

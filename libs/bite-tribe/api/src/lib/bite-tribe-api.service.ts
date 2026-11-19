@@ -25,6 +25,7 @@ import {
   ReportUserResult,
   RequestFollowResult,
   Restaurant,
+  RestaurantCategory,
   Review,
   SaveToBucketListParams,
   PublicMenuResult,
@@ -181,6 +182,17 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveGenderNeutralRestroomForRestaurant(
       restaurantId,
       genderNeutralRestroom,
+    );
+  }
+
+  /** The kind of venue the restaurant states (GitHub issue #2131). */
+  saveCategoriesForRestaurant(
+    restaurantId: string,
+    categories: RestaurantCategory[],
+  ): Promise<void> {
+    return this.restaurantApiService.saveCategoriesForRestaurant(
+      restaurantId,
+      categories,
     );
   }
 

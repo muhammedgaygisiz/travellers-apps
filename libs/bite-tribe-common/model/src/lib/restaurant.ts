@@ -38,6 +38,47 @@ export interface RestaurantFacilities {
   genderNeutralRestroom?: boolean;
 }
 
+/**
+ * The kind of venue a restaurant is, as the restaurant states it (GitHub issue
+ * #2131). Not its cuisine: Italian or Thai stays derived from the tags on its
+ * Bites. The list is fixed and recorded on the Restaurant domain page, and the
+ * order here is the order the business app offers them in.
+ */
+export const RESTAURANT_CATEGORIES = [
+  'restaurant',
+  'fine-dining',
+  'cafe',
+  'bar',
+  'pub',
+  'bakery',
+  'dessert',
+  'street-food',
+  'fast-food',
+  'food-hall',
+] as const;
+
+export type RestaurantCategory = (typeof RESTAURANT_CATEGORIES)[number];
+
+/** A hybrid such as a café that is also a bakery states both, and no more. */
+export const MAX_RESTAURANT_CATEGORIES = 2;
+
+export const isRestaurantCategory = (
+  value: unknown,
+): value is RestaurantCategory =>
+  (RESTAURANT_CATEGORIES as readonly unknown[]).includes(value);
+
+/**
+ * The categories a restaurant states, as every reader should see them: known
+ * values only, no repeats, at most `MAX_RESTAURANT_CATEGORIES`. An absent or
+ * empty field is a restaurant that has not said, and reads as an empty list.
+ */
+export const restaurantCategoriesOf = (
+  restaurant: Pick<Restaurant, 'categories'> | undefined,
+): RestaurantCategory[] =>
+  [
+    ...new Set((restaurant?.categories ?? []).filter(isRestaurantCategory)),
+  ].slice(0, MAX_RESTAURANT_CATEGORIES);
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -107,6 +148,14 @@ export interface Restaurant {
    * rather than a new top-level key - the reasoning `tableOrdering` gives.
    */
   facilities?: RestaurantFacilities;
+
+  /**
+   * What kind of venue this is, as the restaurant states it (GitHub issue
+   * #2131): one or two of `RESTAURANT_CATEGORIES`. Absent is a restaurant that
+   * has not said, and is never shown as a category. Read it through
+   * `restaurantCategoriesOf`, which drops anything the list does not know.
+   */
+  categories?: RestaurantCategory[];
 
   createdAt?: string;
   createdAtTimestamp?: number;

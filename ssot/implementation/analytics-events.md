@@ -133,9 +133,9 @@ one of `first-bite`, `first-country`, `onboarding-finished`, `first-follow`,
 `bite-trail-completed`, since issue [#2031] `weekly-award-bites` and
 `weekly-award-liked` (a weekly top-3 finish, celebrated once per won week), and
 since issue [#2013] of epic [#2012] `bite-milestone`, `leaderboard-top-ten` and
-`leaderboard-overtake`; it was added to `provision-ga4.mjs`. A
-`bite-milestone` also carries the `count` it reached and a leaderboard moment
-the `rank`; neither is a registered dimension, because they are read from the
+`leaderboard-overtake`, and since issue [#2149] `posting-streak`; it was added to `provision-ga4.mjs`. A
+`bite-milestone` also carries the `count` it reached, a `posting-streak` the
+weeks in a row it reached as `count`, and a leaderboard moment the `rank`; neither is a registered dimension, because they are read from the
 BigQuery export. It is logged even when reduced motion skips the confetti,
 because the toast still marks the moment, and never for a moment the settling
 window suppressed, because nothing was shown.
@@ -993,3 +993,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
 [#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
+[#2149]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2149

@@ -3,6 +3,7 @@ export {
   CELEBRATION_PRECEDENCE,
   CELEBRATION_SETTLING_WINDOW_MS,
   CELEBRATION_THOUSAND_MESSAGE_KEY,
+  POSTING_STREAK_MESSAGE_KEYS,
   CelebrationService,
   type CelebrationMoment,
 } from './lib/celebration.service';

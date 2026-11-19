@@ -478,6 +478,66 @@ describe(AppEffect.name, () => {
       expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
     });
 
+    /** GitHub issue #2149. */
+    describe('posting streak milestones', () => {
+      const streak = (
+        weeks: number,
+      ): { weeks: number; lastPostingWeek: string } => ({
+        weeks,
+        lastPostingWeek: '2026-11-16',
+      });
+
+      it('celebrates the post that completes 4 weeks in a row', () => {
+        actions.next(signedIn);
+        profiles.next({ postingStreak: streak(3) });
+        profiles.next({ postingStreak: streak(4) });
+
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledTimes(1);
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+          'posting-streak',
+          { count: 4 },
+        );
+      });
+
+      it('celebrates nothing for an ordinary week', () => {
+        actions.next(signedIn);
+        profiles.next({ postingStreak: streak(4) });
+        profiles.next({ postingStreak: streak(5) });
+
+        expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      });
+
+      it('celebrates nothing for a streak already past a milestone at sign-in', () => {
+        actions.next(signedIn);
+        profiles.next({ postingStreak: streak(12) });
+
+        expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      });
+
+      it('celebrates nothing when the first streak is computed from history', () => {
+        actions.next(signedIn);
+        profiles.next({ biteCount: 30 });
+        profiles.next({ biteCount: 31, postingStreak: streak(12) });
+
+        expect(CelebrationServiceMock.celebrate).not.toHaveBeenCalled();
+      });
+
+      it('raises the streak with the Bite milestone of the same post, for the service to rank', () => {
+        actions.next(signedIn);
+        profiles.next({ biteCount: 9, postingStreak: streak(3) });
+        profiles.next({ biteCount: 10, postingStreak: streak(4) });
+
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+          'bite-milestone',
+          { count: 10 },
+        );
+        expect(CelebrationServiceMock.celebrate).toHaveBeenCalledWith(
+          'posting-streak',
+          { count: 4 },
+        );
+      });
+    });
+
     it('raises both moments of one snapshot and leaves the choice to the service', () => {
       actions.next(signedIn);
       profiles.next({ countryCodes: ['DE'], biteCount: 9 });

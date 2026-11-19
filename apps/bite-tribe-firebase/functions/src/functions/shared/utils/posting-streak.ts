@@ -141,3 +141,32 @@ export const samePostingStreak = (
   b: PostingStreak,
 ): boolean =>
   !!a && a.weeks === b.weeks && a.lastPostingWeek === b.lastPostingWeek;
+
+/**
+ * The aggregates the daily analytics digest reports (issue #2150), counted over
+ * one resync run. Counts only: no user id, name or per-user value is kept.
+ */
+export type PostingStreakStats = {
+  /** Users whose recomputed streak is 2 weeks or more. */
+  usersWithStreakOfTwoOrMore: number;
+  /** Users whose stored streak was 1 or more and whose recomputed one is 0. */
+  streaksBroken: number;
+};
+
+export const NO_POSTING_STREAK_STATS: PostingStreakStats = {
+  usersWithStreakOfTwoOrMore: 0,
+  streaksBroken: 0,
+};
+
+/** Adds one user's stored and recomputed streak to the run's aggregates. */
+export const tallyPostingStreak = (
+  stats: PostingStreakStats,
+  stored: PostingStreak | null,
+  recomputed: PostingStreak,
+): PostingStreakStats => ({
+  usersWithStreakOfTwoOrMore:
+    stats.usersWithStreakOfTwoOrMore + (recomputed.weeks >= 2 ? 1 : 0),
+  streaksBroken:
+    stats.streaksBroken +
+    ((stored?.weeks ?? 0) >= 1 && recomputed.weeks === 0 ? 1 : 0),
+});

@@ -55,7 +55,10 @@ computed from; what a notification about one of them says, and to whom, belongs 
   updates it in `incrementBiteCountOnBiteCreate`; a Bite older than the stored week, and a
   user with no value yet, are recomputed from all of their Bites. `resyncBiteCounts` recomputes
   every user's on Monday at 03:00 Zurich, which is how a deleted Bite and a missed week reach
-  it. See GitHub issue [#2146].
+  it. See GitHub issue [#2146]. The same run writes its counts to `/meta/postingStreakStats`
+  for the daily analytics digest: users at 2 weeks or more, and streaks it took from 1 or more
+  to 0. The document holds no user id or per-user value, and no app can read it. See GitHub
+  issue [#2150].
 - The user's own profile shows the streak from 2 weeks up, as a chip beside **Show on globe**:
   a small filled orange flame and "6 weeks in a row" on a light orange tint, as tall as the
   button and not itself a button. Another account never sees it, public profile or not. The
@@ -198,6 +201,7 @@ them is collected in onboarding.
 - Profile country badges
 - `displayedPostingStreak`, the profile's posting-streak chip
 - `reachedPostingStreakMilestone` in `celebrateProfileProgress$`
+- `tallyPostingStreak`, `/meta/postingStreakStats`, `tools/analytics/streaks.mjs`
 - `notifyOnNewCountryBadge`
 - `celebrateProfileProgress$` in the bite-tribe store's `AppEffect`, with `newCountryCode` and
   `reachedBiteMilestone`
@@ -247,6 +251,9 @@ them is collected in onboarding.
 - Issue [#2146] computes and stores the weekly posting streak, story 1 of epic [#2034].
 - Issue [#2148] shows the streak on the user's own profile, story 2 of epic [#2034].
 - Issue [#2149] celebrates 4, 12, 26 and 52 weeks in a row, story 3 of epic [#2034].
+- Issue [#2150] reports the streak in the daily analytics digest, story 4 of epic [#2034]. On
+  19 November 2026 the maintainer chose the Firestore stats document over a GA4 or BigQuery
+  export as the source of the two weekly counts.
 - Issue [#1837] lets the sharer name a first Bite or a first country on that Bite's share
   image, part of epic [#1741]; the contract is `R-34` of
   [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md).
@@ -296,3 +303,4 @@ them is collected in onboarding.
 [#2146]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2146
 [#2148]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2148
 [#2149]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2149
+[#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150

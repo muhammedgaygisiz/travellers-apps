@@ -12,6 +12,8 @@
  *
  * Env (auto-loaded from tools/analytics/.env if present):
  *   GA4_PROPERTY_ID, GOOGLE_APPLICATION_CREDENTIALS  (see README.md)
+ *   FIREBASE_PROJECT_ID  optional; the Firestore project of the posting-streak
+ *                        section, by default the service account's own
  */
 
 import { collectCohortHeadlines } from './cohorts.mjs';
@@ -34,7 +36,14 @@ import {
   runTileValue,
   SURFACE_UNAVAILABLE_NOTE,
   surfaceFilterUnavailable,
+  tilePreviousWindow,
+  tileWindow,
 } from './ga4.mjs';
+import {
+  collectPostingStreakStats,
+  POSTING_STREAK_STATS_PATH,
+  postingStreakMarkdown,
+} from './streaks.mjs';
 
 loadEnv();
 
@@ -267,6 +276,7 @@ function toMarkdown({
   alerts,
   surfaceNote,
   cohorts,
+  streaks,
 }) {
   const lines = [];
   lines.push(`## Launch analytics digest — ${date}`);
@@ -293,6 +303,7 @@ function toMarkdown({
     lines.push('');
   }
   if (cohorts) lines.push(...cohortMarkdown(cohorts, days));
+  if (streaks) lines.push(...postingStreakMarkdown(streaks));
   for (const b of breakdowns) {
     lines.push(`### ${b.title}`);
     lines.push('');
@@ -350,6 +361,8 @@ function runDryRun({ days }) {
     `- ${RETENTION_COHORTS_QUERY} → last ${days + Math.max(...DIGEST_HORIZONS)} days, ` +
       `horizons ${DIGEST_HORIZONS.map((h) => `D${h}`).join(' / ')}`,
   );
+  console.log('\nFirestore section (issue #2150):');
+  console.log(`- posting streaks → ${POSTING_STREAK_STATS_PATH}`);
 }
 
 async function runLive({ days, json }) {
@@ -363,13 +376,13 @@ async function runLive({ days, json }) {
       client,
       tile,
       propertyId,
-      currentWindow(days),
+      tileWindow(tile, days),
     );
     const prev = await runTileValue(
       client,
       tile,
       propertyId,
-      previousWindow(days),
+      tilePreviousWindow(tile, days),
     );
     rows.push({
       id: tile.id,
@@ -400,6 +413,8 @@ async function runLive({ days, json }) {
   // Last, and never fatal: the tiles above are the digest's job, and a
   // BigQuery problem degrades to a line inside the section it belongs to.
   const cohorts = await collectCohortHeadlines({ days });
+  // Never fatal either, for the same reason (issue #2150).
+  const streaks = await collectPostingStreakStats();
 
   const date = new Date().toISOString().slice(0, 10);
   const payload = {
@@ -409,6 +424,7 @@ async function runLive({ days, json }) {
     rows,
     breakdowns,
     cohorts,
+    streaks,
     alerts,
     ...(surfaceFilterUnavailable()
       ? { surfaceNote: SURFACE_UNAVAILABLE_NOTE }

@@ -95,6 +95,22 @@ function eventNameFilter(events) {
 }
 
 /**
+ * GA4 dimension filter restricting a request to events whose registered
+ * parameters have the given values, as `customEvent:<name>` exact matches.
+ * Each parameter must be a registered custom dimension (`provision-ga4.mjs`).
+ */
+function eventParamsFilter(params) {
+  const expressions = Object.entries(params).map(([name, value]) => ({
+    filter: {
+      fieldName: `customEvent:${name}`,
+      stringFilter: { matchType: 'EXACT', value },
+    },
+  }));
+
+  return allOf(expressions);
+}
+
+/**
  * GA4 dimension filter restricting a request to one app's sessions.
  *
  * Written as "not the other apps" rather than "is this app", which is the
@@ -235,6 +251,7 @@ export function buildRequest(tile, propertyId, dateRange) {
   request.metrics = [{ name: 'eventCount' }];
   request.dimensionFilter = allOf([
     eventNameFilter(tile.events),
+    tile.eventParams ? eventParamsFilter(tile.eventParams) : undefined,
     surface,
     tile.crawlers ? crawlersFilter(tile.crawlers) : undefined,
   ]);
@@ -306,6 +323,23 @@ export function currentWindow(days) {
 /** The window of the `days` days immediately before the current one. */
 export function previousWindow(days) {
   return { startDate: `${days * 2}daysAgo`, endDate: `${days}daysAgo` };
+}
+
+/**
+ * The window a tile is counted over: the `--days` window, or yesterday alone
+ * for a tile declaring `window: 'yesterday'` (issue #2150).
+ */
+export function tileWindow(tile, days) {
+  return tile.window === 'yesterday'
+    ? { startDate: 'yesterday', endDate: 'yesterday' }
+    : currentWindow(days);
+}
+
+/** The window a tile is compared against: the one just before its own. */
+export function tilePreviousWindow(tile, days) {
+  return tile.window === 'yesterday'
+    ? { startDate: '2daysAgo', endDate: '2daysAgo' }
+    : previousWindow(days);
 }
 
 /**

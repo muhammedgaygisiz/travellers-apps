@@ -1,4 +1,11 @@
-import { restaurant, restaurants, restaurantToCreate } from '../selectors';
+import type { Restaurant } from 'model';
+import {
+  restaurant,
+  restaurantNotFound,
+  restaurants,
+  restaurantToCreate,
+} from '../selectors';
+import { initialState, RestaurantState } from '../adapter';
 
 describe('restaurant Selectors', () => {
   describe('restaurants', () => {
@@ -347,6 +354,39 @@ describe('restaurant Selectors', () => {
       );
 
       expect(result?.bites).toEqual([]);
+    });
+  });
+
+  describe('restaurantNotFound (issue #2124)', () => {
+    const sliceWith = (notFoundRestaurantId?: string): RestaurantState => ({
+      ...initialState,
+      notFoundRestaurantId,
+    });
+
+    it('is true for the route restaurant that resolved to nothing', () => {
+      expect(
+        restaurantNotFound.projector('r-1', sliceWith('r-1'), undefined),
+      ).toBe(true);
+    });
+
+    it('is false while another id is the one that was not found', () => {
+      expect(
+        restaurantNotFound.projector('r-2', sliceWith('r-1'), undefined),
+      ).toBe(false);
+    });
+
+    it('is false once the route restaurant is in the store after all', () => {
+      expect(
+        restaurantNotFound.projector('r-1', sliceWith('r-1'), {
+          id: 'r-1',
+        } as Restaurant),
+      ).toBe(false);
+    });
+
+    it('is false off a restaurant route', () => {
+      expect(
+        restaurantNotFound.projector(undefined, sliceWith('r-1'), undefined),
+      ).toBe(false);
     });
   });
 });

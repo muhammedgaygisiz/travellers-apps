@@ -20,6 +20,7 @@ import {
 import { bitesByBucketlist } from './bites/bites-by-bucketlist.selector';
 import {
   restaurant,
+  restaurantNotFound,
   restaurants,
   restaurantToCreate,
 } from './restaurants/selectors';
@@ -132,6 +133,7 @@ export class BiteTribeStoreService implements StoreService {
   allTags$ = this.store.select(allTags);
   bitesByRestaurant$ = this.store.select(bitesByRestaurant);
   restaurant$ = this.store.select(restaurant);
+  restaurantNotFound$ = this.store.select(restaurantNotFound);
   restaurants$ = this.store.select(restaurants);
   menu$ = this.store.select(menu);
   isMenuLoading$ = this.store.select(isMenuLoading);

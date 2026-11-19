@@ -14,6 +14,20 @@
     }
   }
 
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 8px;
+  }
+
+  .not-found-icon {
+    font-size: 48px;
+    color: var(--ion-color-medium);
+  }
+
   .seperator {
     background-color: var(--ion-color-tertiary-tint);
     height: 2px;

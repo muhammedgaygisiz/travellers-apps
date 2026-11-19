@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { filter, from, map, switchMap, tap } from 'rxjs';
+import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId, restaurantId } from '../router/selectors';
 import {
@@ -32,6 +32,10 @@ export class RestaurantEffects {
    * name merely contained the word "menu", so that Restaurant was never loaded
    * on its own page: it fell back to Bite-derived data, and its menu button
    * then went to the dynamic `menu/default` route rather than its real menu.
+   *
+   * A missing document and a failed read both end in `noRestaurantFound`. A
+   * rejected read used to escape the stream, so nothing was dispatched and the
+   * page held its skeleton for ever. See GitHub issue #2124.
    */
   loadRestaurantById$ = createEffect(() => {
     return this.actions$.pipe(
@@ -42,11 +46,12 @@ export class RestaurantEffects {
         from(this.api.loadRestaurant(id)).pipe(
           map((restaurant) => {
             if (!restaurant) {
-              return noRestaurantFound();
+              return noRestaurantFound({ restaurantId: id });
             }
 
             return loadedRestaurantFromApi({ restaurant });
           }),
+          catchError(() => of(noRestaurantFound({ restaurantId: id }))),
         ),
       ),
     );

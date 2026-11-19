@@ -76,6 +76,32 @@ export const Loading: Story = {
 };
 
 /**
+ * The restaurant has resolved but its Bites have not. The skeleton stays up,
+ * because the rating, the Bite count and the tags come from the Bites and used
+ * to pop in after it had gone. See GitHub issue #2124.
+ */
+export const LoadingBites: Story = {
+  args: {
+    bites: [],
+    restaurant: verifiedRestaurant,
+    bitesLoading: true,
+  },
+};
+
+/**
+ * The route's restaurant id resolved to nothing, or its read failed. The page
+ * says so and offers a way back, instead of a skeleton that never ends. See
+ * GitHub issue #2124.
+ */
+export const NotFound: Story = {
+  args: {
+    bites: [],
+    restaurant: undefined,
+    notFound: true,
+  },
+};
+
+/**
  * A loaded restaurant that carries no menu. The menu button stays away rather
  * than routing by place name onto the empty-menu page. See GitHub issue #1381.
  */

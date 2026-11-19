@@ -97,6 +97,8 @@
   "no-display-name": "Tidak ada nama",
   "no-bites-yet": "Belum ada Bites.",
   "no-description-available": "Tidak ada deskripsi.",
+  "restaurant-not-found": "Kami tidak dapat menemukan restoran ini. Mungkin sudah dihapus, atau koneksimu terputus.",
+  "restaurant-not-found-back": "Kembali ke Bite",
   "confirm-password": "Konfirmasi Kata Sandi",
   "yes-unfollow": "Ya, berhenti ikuti",
   "bitetrail-saved-as-bucket-list": "BiteTrail disimpan sebagai daftar keinginan!",

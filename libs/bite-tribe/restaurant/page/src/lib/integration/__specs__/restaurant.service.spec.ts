@@ -28,6 +28,7 @@ interface MockRestaurantDataAccess {
 
 interface MockHomeDataAccess {
   restaurantBites: WritableSignal<Bite[]>;
+  restaurantBitesResource: { status: WritableSignal<string> };
 }
 
 const createMockDataAccess = (
@@ -45,10 +46,12 @@ const createMockDataAccess = (
 
 const createNavControllerMock = (): Partial<NavController> => ({
   navigateForward: jest.fn().mockResolvedValue(true),
+  navigateBack: jest.fn().mockResolvedValue(true),
 });
 
 const createMockHomeDataAccess = (): MockHomeDataAccess => ({
   restaurantBites: signal([mockBite]),
+  restaurantBitesResource: { status: signal('resolved') },
 });
 
 describe('RestaurantService', () => {
@@ -306,6 +309,39 @@ describe('RestaurantService', () => {
       service.navigateToPlaceBites(undefined);
 
       expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bitesLoading (issue #2124)', () => {
+    it('is true while the Bites load for the first time', () => {
+      mockHomeDataAccessService.restaurantBitesResource.status.set('loading');
+      expect(service.bitesLoading()).toBe(true);
+    });
+
+    it('stays false through a reload, so the page keeps its content', () => {
+      mockHomeDataAccessService.restaurantBitesResource.status.set('reloading');
+      expect(service.bitesLoading()).toBe(false);
+    });
+
+    it('is false once the read has failed, so the page does not wait for ever', () => {
+      mockHomeDataAccessService.restaurantBitesResource.status.set('error');
+      expect(service.bitesLoading()).toBe(false);
+    });
+  });
+
+  describe('navigateBackToBite', () => {
+    it('goes back to the Bite the restaurant was opened from', () => {
+      service.navigateBackToBite();
+      expect(mockNavController.navigateBack).toHaveBeenCalledWith([
+        'bite',
+        'bite123',
+      ]);
+    });
+
+    it('goes home when the route names no Bite', () => {
+      mockDataAccessService.biteIdFromUrl.set(undefined);
+      service.navigateBackToBite();
+      expect(mockNavController.navigateBack).toHaveBeenCalledWith(['/']);
     });
   });
 

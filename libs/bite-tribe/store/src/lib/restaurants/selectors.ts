@@ -105,6 +105,19 @@ export const restaurant = createSelector(
   },
 );
 
+/**
+ * True once the route's restaurant id is known to resolve to nothing, so the
+ * page can say so instead of holding its skeleton. A restaurant already in the
+ * store for that id wins. See GitHub issue #2124.
+ */
+export const restaurantNotFound = createSelector(
+  restaurantId,
+  slice,
+  restaurant,
+  (id, slice, restaurant) =>
+    !!id && slice.notFoundRestaurantId === id && !restaurant,
+);
+
 const selectedRestaurantToCreate = createSelector(
   slice,
   (slice) => slice.restaurantToCreate,

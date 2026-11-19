@@ -19,6 +19,16 @@ export class RestaurantService {
   );
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
+  restaurantNotFound = this.dataAccess.restaurantNotFound;
+
+  /**
+   * The route's Bites have not arrived yet. Only a first load counts: a
+   * `reload()` from the Bites list keeps the old ones on screen, and must not
+   * put this page back on its skeleton. See GitHub issue #2124.
+   */
+  bitesLoading = computed(
+    () => this.homeDataAccess.restaurantBitesResource.status() === 'loading',
+  );
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
     const bite = this.bite();
@@ -138,6 +148,13 @@ export class RestaurantService {
 
   private currentBiteId(): string | undefined {
     return this.bite()?.id ?? this.dataAccess.biteIdFromUrl();
+  }
+
+  /** The not-found state's way out: back to the Bite the page was opened from. */
+  navigateBackToBite(): void {
+    const biteId = this.dataAccess.biteIdFromUrl();
+
+    void this.navController.navigateBack(biteId ? [PATH.BITE, biteId] : ['/']);
   }
 
   biteClicked(bite: Bite): void {

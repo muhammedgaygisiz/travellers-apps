@@ -14,7 +14,28 @@
   [loading]="loading"
 >
   <ion-content>
-    @if (loading) {
+    @if (notFound()) {
+      <!-- An id that resolves to nothing, or a read that failed, used to leave
+      the skeleton up for ever. See GitHub issue #2124. -->
+      <div
+        class="not-found ion-padding ion-text-center"
+        data-testid="restaurant-not-found"
+      >
+        <ion-icon
+          name="restaurant-outline"
+          class="not-found-icon"
+          aria-hidden="true"
+        />
+        <p class="text-secondary">{{ 'restaurant-not-found' | transloco }}</p>
+        <ion-button
+          fill="outline"
+          data-testid="restaurant-not-found-back"
+          (click)="backClick.emit()"
+        >
+          {{ 'restaurant-not-found-back' | transloco }}
+        </ion-button>
+      </div>
+    } @else if (loading) {
       <!-- The page used to build itself up as the reads landed, so its empty
       states and its menu button were on screen before it was known whether the
       restaurant was loaded at all. It now holds a skeleton until the document

@@ -7,6 +7,9 @@ import { getDownloadUrlFromFirebaseStorage } from 'utils';
 
 jest.mock('../utils/get-restaurant-by-id');
 
+// The restaurant id is chosen before anything is written (issue #2172).
+jest.mock('uuid', () => ({ v4: (): string => 'resto-new' }));
+
 /**
  * The automock, with `FieldValue` filled in: the automock leaves that class
  * export undefined, and `saveGenderNeutralRestroomForRestaurant` calls
@@ -80,11 +83,15 @@ describe(RestaurantApiService.name, () => {
 
   describe('saveNewRestaurant', () => {
     let addDocumentSpy: jest.SpyInstance;
+    let setDocumentSpy: jest.SpyInstance;
     let updateDocumentSpy: jest.SpyInstance;
     let getDocumentSpy: jest.SpyInstance;
 
     beforeEach(() => {
       addDocumentSpy = jest.spyOn(FirebaseFirestore, 'addDocument');
+      setDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'setDocument')
+        .mockResolvedValue(undefined);
       updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
       getDocumentSpy = jest
         .spyOn(FirebaseFirestore, 'getDocument')
@@ -102,6 +109,7 @@ describe(RestaurantApiService.name, () => {
 
     afterEach(() => {
       addDocumentSpy.mockReset();
+      setDocumentSpy.mockReset();
       updateDocumentSpy.mockReset();
       getDocumentSpy.mockReset();
     });
@@ -109,9 +117,9 @@ describe(RestaurantApiService.name, () => {
     // Issue #1952: the web Firestore SDK rejects an undefined field, and the
     // restaurant was never written.
     it('never writes a candidate id or an undefined field', async () => {
-      addDocumentSpy
-        .mockResolvedValueOnce({ reference: { id: 'r-1' } } as any)
-        .mockResolvedValueOnce({ reference: { id: 'menu-1' } } as any);
+      addDocumentSpy.mockResolvedValueOnce({
+        reference: { id: 'menu-1' },
+      } as any);
       updateDocumentSpy.mockResolvedValue({} as any);
 
       await service.saveNewRestaurant({
@@ -121,7 +129,7 @@ describe(RestaurantApiService.name, () => {
         position: { latitude: 1, longitude: 2 },
       } as any);
 
-      const written = addDocumentSpy.mock.calls[0][0].data;
+      const written = setDocumentSpy.mock.calls[0][0].data;
       expect(written).not.toHaveProperty('restaurantCandidateId');
       expect(written).not.toHaveProperty('description');
       expect(Object.values(written).every((value) => value !== undefined)).toBe(
@@ -136,9 +144,9 @@ describe(RestaurantApiService.name, () => {
     });
 
     it('drops even a defined candidate id: a candidate is verified elsewhere', async () => {
-      addDocumentSpy
-        .mockResolvedValueOnce({ reference: { id: 'r-1' } } as any)
-        .mockResolvedValueOnce({ reference: { id: 'menu-1' } } as any);
+      addDocumentSpy.mockResolvedValueOnce({
+        reference: { id: 'menu-1' },
+      } as any);
       updateDocumentSpy.mockResolvedValue({} as any);
 
       await service.saveNewRestaurant({
@@ -146,13 +154,13 @@ describe(RestaurantApiService.name, () => {
         restaurantCandidateId: 'c-1',
       } as any);
 
-      expect(addDocumentSpy.mock.calls[0][0].data).not.toHaveProperty(
+      expect(setDocumentSpy.mock.calls[0][0].data).not.toHaveProperty(
         'restaurantCandidateId',
       );
     });
 
     it('rejects when the restaurant write is refused', async () => {
-      addDocumentSpy.mockRejectedValueOnce(new Error('invalid data'));
+      setDocumentSpy.mockRejectedValueOnce(new Error('invalid data'));
 
       await expect(
         service.saveNewRestaurant({ name: 'Bistro' } as any),
@@ -166,9 +174,9 @@ describe(RestaurantApiService.name, () => {
           biteIds: ['bite1', 'bite2'],
         } as any;
 
-        addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+        addDocumentSpy.mockResolvedValueOnce({
+          reference: { id: 'menu-456' },
+        } as any);
 
         updateDocumentSpy
           .mockResolvedValueOnce({ reference: { id: 'menu-789' } } as any)
@@ -177,11 +185,11 @@ describe(RestaurantApiService.name, () => {
 
         await service.saveNewRestaurant(mockedNewRestaurant);
 
-        expect(addDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(addDocumentSpy).toHaveBeenCalledTimes(1);
         expect(updateDocumentSpy).toHaveBeenCalledTimes(3);
 
-        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
-          reference: 'restaurants',
+        expect(setDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-new',
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -191,10 +199,10 @@ describe(RestaurantApiService.name, () => {
 
         // The menu names the restaurant it belongs to, which is what the
         // ownership-scoped rules authorise a menu write from (issue #1078).
-        expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'menus',
           data: {
-            restaurantId: 'New Resto',
+            restaurantId: 'resto-new',
             categories: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -202,7 +210,7 @@ describe(RestaurantApiService.name, () => {
         });
 
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
-          reference: 'restaurants/New Resto',
+          reference: 'restaurants/resto-new',
           data: {
             menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
@@ -213,7 +221,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(2, {
           reference: 'bites/bite1',
           data: {
-            restaurantId: 'New Resto',
+            restaurantId: 'resto-new',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -222,7 +230,7 @@ describe(RestaurantApiService.name, () => {
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(3, {
           reference: 'bites/bite2',
           data: {
-            restaurantId: 'New Resto',
+            restaurantId: 'resto-new',
             updatedAt: '2024-03-15T12:00:00.000Z',
             updatedAtTimestamp: 1710504000000,
           },
@@ -248,9 +256,9 @@ describe(RestaurantApiService.name, () => {
               }) as any,
           );
 
-          addDocumentSpy
-            .mockResolvedValueOnce({ reference: { id: 'resto-new' } } as any)
-            .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+          addDocumentSpy.mockResolvedValueOnce({
+            reference: { id: 'menu-456' },
+          } as any);
           updateDocumentSpy.mockResolvedValue({} as any);
 
           await service.saveNewRestaurant({
@@ -278,9 +286,9 @@ describe(RestaurantApiService.name, () => {
       it('should skip a Bite deleted since the list was read', async () => {
         getDocumentSpy.mockResolvedValue({ snapshot: null } as any);
 
-        addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'resto-new' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+        addDocumentSpy.mockResolvedValueOnce({
+          reference: { id: 'menu-456' },
+        } as any);
         updateDocumentSpy.mockResolvedValue({} as any);
 
         await service.saveNewRestaurant({
@@ -302,9 +310,9 @@ describe(RestaurantApiService.name, () => {
           biteIds: [],
         } as any;
 
-        addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'New Resto' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
+        addDocumentSpy.mockResolvedValueOnce({
+          reference: { id: 'menu-456' },
+        } as any);
 
         updateDocumentSpy.mockResolvedValueOnce({
           reference: { id: 'menu-789' },
@@ -312,11 +320,11 @@ describe(RestaurantApiService.name, () => {
 
         await service.saveNewRestaurant(mockedNewRestaurant);
 
-        expect(addDocumentSpy).toHaveBeenCalledTimes(2);
+        expect(addDocumentSpy).toHaveBeenCalledTimes(1);
         expect(updateDocumentSpy).toHaveBeenCalledTimes(1);
 
-        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
-          reference: 'restaurants',
+        expect(setDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-new',
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -326,10 +334,10 @@ describe(RestaurantApiService.name, () => {
 
         // The menu names the restaurant it belongs to, which is what the
         // ownership-scoped rules authorise a menu write from (issue #1078).
-        expect(addDocumentSpy).toHaveBeenNthCalledWith(2, {
+        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
           reference: 'menus',
           data: {
-            restaurantId: 'New Resto',
+            restaurantId: 'resto-new',
             categories: [],
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
@@ -337,7 +345,7 @@ describe(RestaurantApiService.name, () => {
         });
 
         expect(updateDocumentSpy).toHaveBeenNthCalledWith(1, {
-          reference: 'restaurants/New Resto',
+          reference: 'restaurants/resto-new',
           data: {
             menuId: 'menu-456',
             updatedAt: '2024-03-15T12:00:00.000Z',
@@ -347,91 +355,154 @@ describe(RestaurantApiService.name, () => {
       });
     });
 
+    // Issue #2172: uploaded before anything is written, so a stalled upload
+    // cannot leave a restaurant behind without its photo.
     describe('given an image', () => {
-      it('should upload image to Firebase Storage and update restaurant with imagePath', async () => {
+      it('uploads first and writes imagePath with the restaurant document', async () => {
         const uploadBase64Spy = jest.spyOn(
           uploadBase64Utils,
           'uploadBase64ToFirebaseStorage',
         );
-        const mockedNewRestaurant = {
+        const order: string[] = [];
+        uploadBase64Spy.mockImplementationOnce(async () => {
+          order.push('upload');
+          return 'restaurants/new-key.jpg';
+        });
+        setDocumentSpy.mockImplementationOnce(async () => {
+          order.push('restaurant');
+        });
+        addDocumentSpy.mockResolvedValueOnce({
+          reference: { id: 'menu-456' },
+        } as any);
+        updateDocumentSpy.mockResolvedValue({} as any);
+
+        await service.saveNewRestaurant({
           name: 'New Resto',
           image: 'data:image/png;base64,abc',
           biteIds: [],
-        } as any;
+        } as any);
 
-        addDocumentSpy
-          .mockResolvedValueOnce({ reference: { id: 'resto-123' } } as any)
-          .mockResolvedValueOnce({ reference: { id: 'menu-456' } } as any);
-
-        updateDocumentSpy.mockResolvedValue({} as any);
-
-        await service.saveNewRestaurant(mockedNewRestaurant);
-
-        expect(addDocumentSpy).toHaveBeenNthCalledWith(1, {
-          reference: 'restaurants',
+        expect(order).toEqual(['upload', 'restaurant']);
+        // Under the restaurant's own folder, as #1952 asks: the id is known
+        // before the write.
+        expect(uploadBase64Spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            base64: 'data:image/png;base64,abc',
+            docId: 'resto-new',
+            collection: 'restaurants',
+          }),
+        );
+        expect(setDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-new',
           data: {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
             name: 'New Resto',
+            imagePath: 'https://storage.example.com/restaurants/resto-123.jpg',
           },
         });
+        // Only the menu id is written afterwards; no second write for the photo.
+        expect(updateDocumentSpy).toHaveBeenCalledTimes(1);
+      });
 
-        expect(uploadBase64Spy).toHaveBeenCalledWith({
-          base64: 'data:image/png;base64,abc',
-          docId: 'resto-123',
-          collection: 'restaurants',
-        });
+      it('writes nothing when the upload fails', async () => {
+        jest
+          .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+          .mockRejectedValueOnce(new Error('storage offline'));
 
-        expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
-          'restaurants/resto-123.jpg',
-        );
-
-        expect(updateDocumentSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            reference: 'restaurants/resto-123',
-            data: expect.objectContaining({
-              imagePath:
-                'https://storage.example.com/restaurants/resto-123.jpg',
-            }),
-          }),
-        );
+        await expect(
+          service.saveNewRestaurant({
+            name: 'New Resto',
+            image: 'data:image/png;base64,abc',
+          } as any),
+        ).rejects.toThrow('storage offline');
+        expect(setDocumentSpy).not.toHaveBeenCalled();
+        expect(addDocumentSpy).not.toHaveBeenCalled();
       });
     });
   });
 
-  describe('saveRestaurantImage', () => {
-    it('should upload image and update restaurant with imagePath', async () => {
-      const uploadBase64Spy = jest.spyOn(
-        uploadBase64Utils,
-        'uploadBase64ToFirebaseStorage',
-      );
-      const updateDocumentSpy = jest.spyOn(FirebaseFirestore, 'updateDocument');
+  // Issue #2172: an upload that reports no progress is a failed upload.
+  describe('uploadRestaurantImageForUrl stall window', () => {
+    type Progress = (p: {
+      uploadParams?: { evt?: { completed: boolean } };
+    }) => void;
+    let progress: Progress;
+    let finish: (path: string) => void;
 
-      updateDocumentSpy.mockResolvedValue({} as any);
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest
+        .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+        .mockImplementation(
+          ({ callbackFn }: { callbackFn?: Progress }) =>
+            new Promise<string>((resolve) => {
+              progress = callbackFn as Progress;
+              finish = resolve;
+            }) as never,
+        );
+    });
 
-      await service.saveRestaurantImage(
-        'resto-123',
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('rejects an upload that reports nothing within the window', async () => {
+      const upload = service.uploadRestaurantImageForUrl(
+        'key',
         'data:image/png;base64,abc',
+        1000,
+      );
+      const outcome = expect(upload).rejects.toThrow('stalled');
+
+      jest.advanceTimersByTime(1000);
+      await outcome;
+    });
+
+    it('keeps an upload going while it reports progress', async () => {
+      const upload = service.uploadRestaurantImageForUrl(
+        'key',
+        'data:image/png;base64,abc',
+        1000,
       );
 
-      expect(uploadBase64Spy).toHaveBeenCalledWith({
-        base64: 'data:image/png;base64,abc',
-        docId: 'resto-123',
-        collection: 'restaurants',
-      });
-      expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
-        'restaurants/resto-123.jpg',
-      );
-      expect(updateDocumentSpy).toHaveBeenCalledWith({
-        reference: 'restaurants/resto-123',
-        data: {
-          imagePath: 'https://storage.example.com/restaurants/resto-123.jpg',
-          updatedAt: '2024-03-15T12:00:00.000Z',
-          updatedAtTimestamp: 1710504000000,
-        },
-      });
+      jest.advanceTimersByTime(900);
+      progress({ uploadParams: { evt: { completed: false } } });
+      jest.advanceTimersByTime(900);
+      finish('restaurants/key/photo.jpg');
 
-      updateDocumentSpy.mockClear();
+      await expect(upload).resolves.toBe(
+        'https://storage.example.com/restaurants/resto-123.jpg',
+      );
+    });
+
+    it('ignores an upload that lands after it was written off', async () => {
+      const upload = service.uploadRestaurantImageForUrl(
+        'key',
+        'data:image/png;base64,abc',
+        1000,
+      );
+      const outcome = expect(upload).rejects.toThrow('stalled');
+      jest.advanceTimersByTime(1000);
+      await outcome;
+
+      finish('restaurants/key/late.jpg');
+      await Promise.resolve();
+
+      expect(getDownloadUrlFromFirebaseStorage).not.toHaveBeenCalledWith(
+        'restaurants/key/late.jpg',
+      );
+    });
+
+    it('passes an upload error through', async () => {
+      jest.useRealTimers();
+      jest
+        .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+        .mockRejectedValueOnce(new Error('denied'));
+
+      await expect(
+        service.uploadRestaurantImageForUrl('key', 'data:x', 1000),
+      ).rejects.toThrow('denied');
     });
   });
 

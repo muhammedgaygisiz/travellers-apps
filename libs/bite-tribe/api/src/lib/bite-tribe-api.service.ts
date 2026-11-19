@@ -207,10 +207,6 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
-  saveRestaurantImage(restaurantId: string, image: string): Promise<void> {
-    return this.restaurantApiService.saveRestaurantImage(restaurantId, image);
-  }
-
   createBiteTrail(
     trailData: Omit<
       BiteTrail,

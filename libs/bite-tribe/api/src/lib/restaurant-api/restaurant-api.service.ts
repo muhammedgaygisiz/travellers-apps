@@ -14,11 +14,20 @@ import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
 import { getRestaurantById } from './utils/get-restaurant-by-id';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Whether a Bite already names a restaurant, in any shape - the same test
  * `verifyRestaurantCandidate` applies before it links a Bite (`R-20`).
  */
+/**
+ * How long a restaurant photo upload may go without reporting progress before
+ * it counts as failed (GitHub issue #2172). The window a Bite photo and a
+ * profile photo use: offline, the Storage SDK retries quietly for minutes and
+ * never reaches its error branch, which left the save page looking idle.
+ */
+export const RESTAURANT_IMAGE_STALL_MS = 30 * 1000;
+
 const hasRestaurant = (data: Record<string, unknown>): boolean => {
   const restaurantId = data['restaurantId'];
 
@@ -52,17 +61,28 @@ export class RestaurantApiService {
       Object.entries(rest).filter(([, value]) => value !== undefined),
     );
 
-    // Add the new restaurant document without the base64 image
-    const addRestaurantResult = await FirebaseFirestore.addDocument({
-      reference: RESTAURANT_COLLECTION,
+    // The id is chosen here, the way a Bite's is (`createBite`), so the photo
+    // can be uploaded under the restaurant's own folder *before* anything is
+    // written (issue #2172): a stalled or failed upload stops the save here,
+    // and a retry cannot leave a first restaurant behind without its photo.
+    const newRestaurantId = uuidv4();
+
+    if (image) {
+      restaurantToBeSaved['imagePath'] = await this.uploadRestaurantImageForUrl(
+        newRestaurantId,
+        image,
+      );
+    }
+
+    // Create the restaurant document without the base64 image
+    await FirebaseFirestore.setDocument({
+      reference: `${RESTAURANT_COLLECTION}/${newRestaurantId}`,
       data: {
         ...restaurantToBeSaved,
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
-
-    const newRestaurantId = addRestaurantResult.reference.id;
 
     // Add a new menu for the restaurant. It names the restaurant it belongs
     // to, which is what the ownership-scoped rules authorise a menu write from
@@ -93,11 +113,6 @@ export class RestaurantApiService {
       await Promise.all(
         biteIds.map((biteId) => this.linkBite(biteId, newRestaurantId)),
       );
-    }
-
-    // Upload image to Firebase Storage and update the restaurant with the imagePath
-    if (image) {
-      await this.uploadAndSaveRestaurantImage(newRestaurantId, image);
     }
   }
 
@@ -143,12 +158,9 @@ export class RestaurantApiService {
   async uploadRestaurantImageForUrl(
     key: string,
     image: string,
+    stallMs: number = RESTAURANT_IMAGE_STALL_MS,
   ): Promise<string> {
-    const storagePath = await uploadBase64ToFirebaseStorage({
-      base64: image,
-      docId: key,
-      collection: RESTAURANT_COLLECTION,
-    });
+    const storagePath = await this.uploadWithStallWindow(key, image, stallMs);
 
     const downloadUrl = await getDownloadUrlFromFirebaseStorage(storagePath);
 
@@ -161,27 +173,59 @@ export class RestaurantApiService {
     return downloadUrl;
   }
 
-  private async uploadAndSaveRestaurantImage(
-    restaurantId: string,
+  /**
+   * Rejects an upload that reports no progress for `stallMs` (GitHub issue
+   * #2172). The plugin cannot cancel a transfer, so a stalled one is only
+   * abandoned: if it lands later, the object it leaves is referenced by
+   * nothing, because the flow that started it has already stopped.
+   */
+  private uploadWithStallWindow(
+    key: string,
     image: string,
-  ): Promise<void> {
-    const imagePath = await this.uploadRestaurantImageForUrl(
-      restaurantId,
-      image,
-    );
+    stallMs: number,
+  ): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      let settled = false;
+      let timer: ReturnType<typeof setTimeout>;
 
-    await FirebaseFirestore.updateDocument({
-      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
-      data: {
-        imagePath,
-        updatedAt: new Date().toISOString(),
-        updatedAtTimestamp: Date.now(),
-      },
+      const stall = (): void => {
+        settled = true;
+        reject(new Error('The restaurant photo upload stalled.'));
+      };
+      const restart = (): void => {
+        clearTimeout(timer);
+        timer = setTimeout(stall, stallMs);
+      };
+      restart();
+
+      uploadBase64ToFirebaseStorage({
+        base64: image,
+        docId: key,
+        collection: RESTAURANT_COLLECTION,
+        callbackFn: (progress) => {
+          if (!settled && progress.uploadParams?.evt?.completed === false) {
+            restart();
+          }
+        },
+      }).then(
+        (storagePath) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          clearTimeout(timer);
+          resolve(storagePath);
+        },
+        (error: unknown) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        },
+      );
     });
-  }
-
-  saveRestaurantImage(restaurantId: string, image: string): Promise<void> {
-    return this.uploadAndSaveRestaurantImage(restaurantId, image);
   }
 
   /**

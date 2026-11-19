@@ -414,31 +414,6 @@ describe(BiteTribeApiService.name, () => {
     ));
   });
 
-  describe('saveRestaurantImage', () => {
-    it('should call saveRestaurantImage on RestaurantApiService', inject(
-      [BiteTribeApiService, RestaurantApiService],
-      (
-        service: BiteTribeApiService,
-        restaurantApiService: RestaurantApiService,
-      ) => {
-        const saveRestaurantImageSpy = jest.spyOn(
-          restaurantApiService,
-          'saveRestaurantImage',
-        );
-
-        service.saveRestaurantImage(
-          'restaurant-id',
-          'data:image/png;base64,abc',
-        );
-
-        expect(saveRestaurantImageSpy).toHaveBeenCalledWith(
-          'restaurant-id',
-          'data:image/png;base64,abc',
-        );
-      },
-    ));
-  });
-
   describe('loadRestaurant', () => {
     it('should call loadRestaurant on RestaurantApiService', inject(
       [BiteTribeApiService, RestaurantApiService],

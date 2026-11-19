@@ -18,7 +18,10 @@ describe('DashboardService', () => {
   };
 
   beforeEach(() => {
-    const mockResource = { value: jest.fn().mockReturnValue(undefined) };
+    const mockResource = {
+      value: jest.fn().mockReturnValue(undefined),
+      reload: jest.fn(),
+    };
 
     dataAccessMock = {
       restaurants: mockResource,
@@ -112,5 +115,62 @@ describe('DashboardService', () => {
         '/restaurants',
       ]);
     });
+  });
+
+  describe('setupItemClicked (issue #2126)', () => {
+    const item = (
+      target: 'edit-restaurant' | 'edit-menu',
+    ): {
+      key: 'menu-reviewed';
+      labelKey: string;
+      done: boolean;
+      target: 'edit-restaurant' | 'edit-menu';
+    } => ({ key: 'menu-reviewed', labelKey: 'x', done: false, target });
+
+    it('opens the menu editor by the menu id, stripped of its path', () => {
+      service.setupItemClicked({
+        restaurant: { id: 'r-1', menuId: '/menus/m-1' } as Restaurant,
+        item: item('edit-menu'),
+      });
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'r-1',
+        'menu',
+        'm-1',
+      ]);
+    });
+
+    it('opens the edit page, where a menu is created, when there is no menu yet', () => {
+      service.setupItemClicked({
+        restaurant: { id: 'r-1' } as Restaurant,
+        item: item('edit-menu'),
+      });
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'r-1',
+      ]);
+    });
+
+    it('opens the edit page for every other item', () => {
+      service.setupItemClicked({
+        restaurant: { id: 'r-1', menuId: 'm-1' } as Restaurant,
+        item: item('edit-restaurant'),
+      });
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'r-1',
+      ]);
+    });
+  });
+
+  it('reads the restaurants again on refresh, so the checklist shows what was just completed', () => {
+    service.refreshRestaurants();
+
+    expect(
+      (dataAccessMock.restaurants as unknown as { reload: jest.Mock }).reload,
+    ).toHaveBeenCalled();
   });
 });

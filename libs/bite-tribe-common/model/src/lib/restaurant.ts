@@ -44,10 +44,28 @@ export interface Restaurant {
   distance?: string;
   image?: string;
   imagePath?: string;
+  /**
+   * Where a photo the business app is uploading has got to (GitHub issue
+   * #2126), the way `Bite.imageStatus` and `PublicUser.photoStatus` work.
+   * `imagePath` keeps the previous photo until the new one lands. Absent on
+   * every restaurant whose photo came from candidate verification or the
+   * admin app, and absent reads as settled.
+   */
+  imageStatus?: 'pending' | 'uploaded' | 'failed';
+  imageUploadStartedAtTimestamp?: number;
   position: Geopoint;
   address?: Address;
 
   menuId?: string;
+  /**
+   * When an account holding the restaurant last saved its menu in the
+   * business app (GitHub issue #2126). A menu verified from Bite evidence is a
+   * draft - one item per dish at the average reported price - and this is what
+   * says somebody who runs the restaurant has gone through it. Written only by
+   * the business menu editor, never by an operator's save.
+   */
+  menuReviewedAt?: string;
+  menuReviewedAtTimestamp?: number;
 
   unsaved?: boolean;
   restaurantCandidateId?: string;

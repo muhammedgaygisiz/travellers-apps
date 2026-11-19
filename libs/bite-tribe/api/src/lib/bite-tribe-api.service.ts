@@ -227,6 +227,44 @@ export class BiteTribeApiService {
     return this.restaurantApiService.loadRestaurantById(restaurantId);
   }
 
+  uploadRestaurantImage(
+    restaurantId: string,
+    photo: string,
+    callbackFn: (p: CreateAndUploadImageCallbackParams) => void,
+  ): Promise<void> {
+    return this.restaurantApiService.uploadRestaurantImage(
+      restaurantId,
+      photo,
+      callbackFn,
+    );
+  }
+
+  setUploadedRestaurantImage(
+    restaurantId: string,
+    storagePath: string,
+  ): Promise<string> {
+    return this.restaurantApiService.setUploadedRestaurantImage(
+      restaurantId,
+      storagePath,
+    );
+  }
+
+  setRestaurantImageStatus(
+    restaurantId: string,
+    imageStatus: 'pending' | 'failed',
+    imageUploadStartedAt?: number,
+  ): Promise<void> {
+    return this.restaurantApiService.setRestaurantImageStatus(
+      restaurantId,
+      imageStatus,
+      imageUploadStartedAt,
+    );
+  }
+
+  markMenuReviewed(restaurantId: string): Promise<void> {
+    return this.restaurantApiService.markMenuReviewed(restaurantId);
+  }
+
   createMenuForRestaurant(restaurantId: string): Promise<string> {
     return this.restaurantApiService.createMenuForRestaurant(restaurantId);
   }

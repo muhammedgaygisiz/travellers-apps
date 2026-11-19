@@ -1,0 +1,59 @@
+@let photoStatus = status();
+
+<div class="photo" [class.is-pending]="photoStatus === 'pending'">
+  <bt-restaurant-image [restaurant]="shownRestaurant()" />
+
+  @switch (photoStatus) {
+    @case ('pending') {
+      <div
+        class="photo-state"
+        role="status"
+        aria-live="polite"
+        data-testid="restaurant-photo-pending"
+      >
+        <ion-spinner name="crescent" />
+        <ion-text>{{ 'uploading-keep-app-open' | transloco }}</ion-text>
+      </div>
+    }
+    @case ('failed') {
+      <div
+        class="photo-state"
+        role="status"
+        data-testid="restaurant-photo-failed"
+      >
+        <ion-text>{{ 'image-upload-failed' | transloco }}</ion-text>
+        @if (canRetry()) {
+          <bt-retry-upload-button
+            data-testid="restaurant-photo-retry"
+            (retry)="retry.emit()"
+          />
+        } @else {
+          <!-- An upload from an earlier session: the business app runs on the
+          web, so there is no copy on the device to send again. -->
+          <ion-text class="text-small">
+            {{ 'restaurant-photo-choose-again' | transloco }}
+          </ion-text>
+        }
+      </div>
+    }
+  }
+</div>
+
+<div class="ion-margin-top" data-testid="restaurant-photo-picker">
+  <image-upload [formControl]="photoControl" />
+
+  @if (hasChosenPhoto()) {
+    <div class="photo-actions">
+      <ion-button
+        fill="outline"
+        data-testid="restaurant-photo-cancel"
+        (click)="cancel()"
+      >
+        {{ 'cancel' | transloco }}
+      </ion-button>
+      <ion-button data-testid="restaurant-photo-save" (click)="save()">
+        {{ 'save' | transloco }}
+      </ion-button>
+    </div>
+  }
+</div>

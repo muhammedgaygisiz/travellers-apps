@@ -75,6 +75,19 @@ export class MenuDataAccessService {
     );
   }
 
+  /**
+   * Records that the account holding the route's restaurant saved its menu
+   * (GitHub issue #2126), which ticks "Menu reviewed" on the business
+   * dashboard. Called by the business menu editor only.
+   */
+  async markMenuReviewed(): Promise<void> {
+    const restaurantId = this.storeService.restaurantIdFromUrl();
+
+    if (restaurantId) {
+      await this.api.markMenuReviewed(restaurantId);
+    }
+  }
+
   retryMenuLoad(): void {
     this.storeService.retryMenuLoad();
   }

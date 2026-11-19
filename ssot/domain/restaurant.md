@@ -61,8 +61,12 @@ Current model fields:
 - `distance`
 - `image`
 - `imagePath`
+- `imageStatus`, `imageUploadStartedAtTimestamp` - where a photo the business
+  app is uploading has got to, as on a Bite and a profile (issue [#2126])
 - `address`
 - `menuId`
+- `menuReviewedAt`, `menuReviewedAtTimestamp` - when an account holding the
+  Restaurant last saved its menu in the business app (issue [#2126])
 - `unsaved`
 - `restaurantCandidateId`
 - `biteIds`
@@ -289,3 +293,4 @@ images/restaurants/{restaurantId}/{filename}
 [#1754]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1754
 [#1753]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1753
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
+[#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126

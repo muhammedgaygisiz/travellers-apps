@@ -1,0 +1,31 @@
+:host {
+  display: block;
+
+  .photo {
+    position: relative;
+
+    &.is-pending bt-restaurant-image {
+      filter: blur(4px);
+    }
+  }
+
+  .photo-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    text-align: center;
+    background: rgb(var(--ion-background-color-rgb, 255, 255, 255), 0.7);
+  }
+
+  .photo-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}

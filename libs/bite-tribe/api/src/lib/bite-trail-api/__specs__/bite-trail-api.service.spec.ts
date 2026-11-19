@@ -174,8 +174,7 @@ describe('BiteTrailApiService', () => {
         expect.objectContaining({
           reference: `${BITE_TRAIL_COLLECTION}/trail-123`,
           data: expect.objectContaining({
-            imagePath:
-              'https://storage.example.com/biteTrails/trail-123.jpg',
+            imagePath: 'https://storage.example.com/biteTrails/trail-123.jpg',
           }),
         }),
       );

@@ -52,6 +52,8 @@ export default {
     isAuthenticated: true,
     gpsPosition: undefined,
     restaurants: [],
+    // Every story shows a finished read; the loading state is the bare page.
+    restaurantsLoaded: true,
   },
 } as Meta<DashboardComponent>;
 
@@ -74,8 +76,9 @@ export const WithRestaurants: Story = {
 };
 
 /**
- * No device position and no placeable restaurant, so the map is hidden rather
- * than reserving the space for an empty world map.
+ * No device position and no placeable restaurant. The map is not drawn as an
+ * empty world map; a placeholder says the restaurant shows once its position
+ * is set (GitHub issue #2127).
  */
 export const WithoutMap: Story = {
   args: { restaurants: [withoutPosition] },
@@ -119,5 +122,18 @@ export const SetUp: Story = {
       } as Restaurant,
     ],
     gpsPosition: { latitude: 40.8467, longitude: 14.2585 },
+  },
+};
+
+/**
+ * An account holding the business role but no restaurant yet (GitHub issue
+ * #2127). Assigning the restaurant is a second operator step, so the page
+ * says that is what happens next and offers support and "Check again",
+ * instead of a bare map that read as a broken app.
+ */
+export const NoRestaurantYet: Story = {
+  args: {
+    restaurants: [],
+    restaurantsLoaded: true,
   },
 };

@@ -155,10 +155,24 @@ describe(DashboardComponent.name, () => {
     it('stays hidden with neither', () => {
       compRef.setInput('gpsPosition', null);
       compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
       fixture.detectChanges();
 
       expect(component.showMap()).toBe(false);
       expect(fixture.nativeElement.querySelector('bt-map')).toBeNull();
+      // The column keeps a placeholder rather than an empty card or a gap
+      // (issue #2127).
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeTruthy();
+      // And not the empty map card, which read as a broken map.
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-card"]',
+        ),
+      ).toBeNull();
     });
   });
 
@@ -230,6 +244,101 @@ describe(DashboardComponent.name, () => {
           target: 'edit-menu',
         }),
       });
+    });
+  });
+
+  describe('an account with no restaurant yet (issue #2127)', () => {
+    const emptyState = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="dashboard-no-restaurant"]',
+      );
+
+    it('says what happens next, with a way to reach support', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+
+      expect(emptyState()?.textContent).toContain(
+        'dashboard-no-restaurant-next',
+      );
+      const contact = emptyState()?.querySelector(
+        '[data-testid="dashboard-no-restaurant-contact"]',
+      ) as (HTMLElement & { href?: string }) | null;
+      expect(contact?.href).toBe('mailto:support@bitetribe.app');
+    });
+
+    it('says the restaurant shows once its position is set, for restaurants without one', () => {
+      compRef.setInput('restaurants', [
+        restaurant({ position: {} as Restaurant['position'] }),
+      ]);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        )?.textContent,
+      ).toContain('dashboard-map-placeholder-no-position');
+    });
+
+    it('holds the map column with a placeholder', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        )?.textContent,
+      ).toContain('dashboard-map-placeholder');
+    });
+
+    it('shows the real map instead once there is a device position', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      compRef.setInput('gpsPosition', { latitude: 1, longitude: 1 });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeNull();
+      expect(fixture.nativeElement.querySelector('bt-map')).toBeTruthy();
+    });
+
+    it('waits for the read rather than flashing while it loads', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', false);
+      fixture.detectChanges();
+
+      expect(emptyState()).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(
+          '[data-testid="dashboard-map-placeholder"]',
+        ),
+      ).toBeNull();
+    });
+
+    it('goes away once a restaurant is assigned', () => {
+      compRef.setInput('restaurantsLoaded', true);
+      compRef.setInput('restaurants', [restaurant({})]);
+      fixture.detectChanges();
+
+      expect(emptyState()).toBeNull();
+    });
+
+    it('emits check again', () => {
+      compRef.setInput('restaurants', []);
+      compRef.setInput('restaurantsLoaded', true);
+      fixture.detectChanges();
+      const emitSpy = jest.spyOn(component.checkAgainClick, 'emit');
+
+      emptyState()
+        ?.querySelector('[data-testid="dashboard-no-restaurant-check-again"]')
+        ?.dispatchEvent(new Event('click'));
+
+      expect(emitSpy).toHaveBeenCalled();
     });
   });
 });

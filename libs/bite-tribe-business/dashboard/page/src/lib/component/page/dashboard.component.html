@@ -8,22 +8,65 @@
       <div
         class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
       >
-        <ion-card>
-          <ion-card-content>
-            @if (showMap()) {
+        <!-- The whole card, not only the map, waits for something to show: an
+        empty card read as a broken map (GitHub issue #2127). -->
+        @if (showMap()) {
+          <ion-card data-testid="dashboard-map-card">
+            <ion-card-content>
               <bt-map
                 [gpsPosition]="gpsPosition()"
                 [geopoints]="restaurantPositions()"
                 enableZoom
                 readonly
               />
-            }
-          </ion-card-content>
-        </ion-card>
+            </ion-card-content>
+          </ion-card>
+        } @else if (restaurantsLoaded()) {
+          <!-- The map column keeps its shape when there is nothing to put on
+          the map: no restaurant yet, or none with a usable position (GitHub
+          issue #2127). An empty column read as a broken page. It waits for
+          the read, so it never tells an owner "once assigned" mid-load. -->
+          <ion-card data-testid="dashboard-map-placeholder">
+            <ion-card-content>
+              <div class="map-placeholder">
+                <ion-icon name="map-outline" aria-hidden="true" />
+                <p>{{ mapPlaceholderKey() | transloco }}</p>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
       </div>
       <div
         class="ion-display-flex ion-flex-column column ion-flex-2 ion-padding"
       >
+        @if (showNoRestaurant()) {
+          <ion-card data-testid="dashboard-no-restaurant">
+            <ion-card-content>
+              <h2 class="setup-title">
+                {{ 'no-assigned-restaurants' | transloco }}
+              </h2>
+              <p class="setup-progress">
+                {{ 'dashboard-no-restaurant-next' | transloco }}
+              </p>
+              <div class="no-restaurant-actions">
+                <ion-button
+                  fill="outline"
+                  data-testid="dashboard-no-restaurant-contact"
+                  [href]="supportMailto"
+                >
+                  {{ 'dashboard-no-restaurant-contact' | transloco }}
+                </ion-button>
+                <ion-button
+                  data-testid="dashboard-no-restaurant-check-again"
+                  (click)="checkAgainClick.emit()"
+                >
+                  {{ 'dashboard-no-restaurant-check-again' | transloco }}
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+
         @for (setup of setups(); track setup.restaurant.id) {
           <ion-card
             [attr.data-testid]="'setup-checklist-' + setup.restaurant.id"

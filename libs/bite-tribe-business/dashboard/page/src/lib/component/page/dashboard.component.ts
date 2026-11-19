@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonContent,
@@ -64,6 +65,7 @@ export interface DashboardSection {
   imports: [
     PageComponent,
     IonContent,
+    IonButton,
     IonCard,
     IonCardContent,
     MapComponent,
@@ -79,10 +81,41 @@ export class DashboardComponent {
   isAuthenticated = input(false);
   gpsPosition = input<Geopoint | null | undefined>();
   restaurants = input<Restaurant[]>([]);
+  /**
+   * The restaurants read has finished. Until then an empty list means nothing,
+   * so the empty state waits for it rather than flashing on every sign-in.
+   */
+  restaurantsLoaded = input(false);
 
   readonly logoutClick = output();
   readonly sectionClick = output<DashboardSection>();
   readonly setupItemClick = output<SetupItemClick>();
+  readonly checkAgainClick = output<void>();
+
+  /** The support address the empty state offers (GitHub issue #2127). */
+  protected readonly supportMailto = 'mailto:support@bitetribe.app';
+
+  /**
+   * The account holds no restaurant (GitHub issue #2127). The `business` role
+   * and the assignment are two separate operator steps, and between them this
+   * page had nothing of the account's to show, which read as a broken app. A
+   * staff account with no restaurant record falls through `staffEntryGuard`
+   * to this same page and gets the same state.
+   */
+  /**
+   * What the map placeholder says (GitHub issue #2127): that the restaurant
+   * shows once assigned, or - for restaurants without a usable position -
+   * once its position is set on its page.
+   */
+  readonly mapPlaceholderKey = computed(() =>
+    (this.restaurants() ?? []).length === 0
+      ? 'dashboard-map-placeholder'
+      : 'dashboard-map-placeholder-no-position',
+  );
+
+  readonly showNoRestaurant = computed(
+    () => this.restaurantsLoaded() && (this.restaurants() ?? []).length === 0,
+  );
 
   /**
    * A checklist per restaurant the account holds that still lacks something

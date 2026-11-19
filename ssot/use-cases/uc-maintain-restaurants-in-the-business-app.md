@@ -28,6 +28,16 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 
 - The Restaurant Owner opens the dashboard, which shows the map and one entry per
   surface: **BiteTrails** and **Restaurants**.
+- An account that holds no Restaurant yet - the `business` role and the
+  assignment are two separate operator steps - sees on the dashboard what
+  happens next: BiteTribe assigns the Restaurant, it appears here without
+  signing out, with "Email BiteTribe support" and "Check again" (issue
+  [#2127]). The dashboard re-reads on entry and whenever the tab becomes
+  visible again, so an assignment made while the owner is on the phone with
+  the operator shows up when they come back. The state waits for the read to
+  resolve, and a failed read is not shown as "no restaurant". A staff account
+  with no restaurant record falls through `staffEntryGuard` to the same page
+  and the same state.
 - While a Restaurant the account holds still lacks something guests see, the
   dashboard shows it a checklist (issue [#2126]): photo, address, opening
   hours, description, a link, facilities, and "menu reviewed". Each item opens
@@ -197,3 +207,4 @@ all be reviewed for the first time.
 [#1377]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1377
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
+[#2127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2127

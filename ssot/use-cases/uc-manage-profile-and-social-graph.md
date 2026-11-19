@@ -299,7 +299,8 @@ list.
 - **Data.** One document, `meta/biteCountries`, holding `countryCodes`: the distinct
   alpha-2 codes, normalised as `user-country-codes.ts` normalises. Firestore cannot group
   Bites by country, so the backend keeps the list and the About page reads it once.
-  `meta` is readable by members and written only by Functions.
+  `meta` is readable by members and written only by Functions; its one exception,
+  `postingStreakStats`, is read only by the analytics digest ([#2150]).
 - **Kept by.** `enrichBiteAddressOnWrite`, when it resolves a Bite's country, adds it.
   A Bite that moves to another country, fails to resolve after a move, or is deleted
   (`decrementBiteCountOnBiteDelete`) takes its old country off the list only once no
@@ -581,3 +582,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
 [#2027]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2027
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
+[#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150

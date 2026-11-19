@@ -695,24 +695,34 @@ Build a daily-monitoring dashboard in the Firebase console (Analytics
 dashboard) or Looker Studio with these tiles. This is executed by the product
 owner against the logged-in console; the taxonomy above drives it.
 
-| Metric                      | Category          | Source                              |
-| --------------------------- | ----------------- | ----------------------------------- |
-| New activated users         | Activation        | `sign_up` count                     |
-| Bites created               | Creation          | `bite_created` count                |
-| Bucket lists created        | Creation          | `bucketlist_created` count          |
-| Ratings submitted           | Creation          | `bucketlist_rated` count            |
-| Searches                    | Discovery         | `search_performed` count            |
-| Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed` |
-| D1 / D7 retention           | Retention         | `queries/retention-cohorts.sql`     |
-| Active users                | Retention         | GA4 `activeUsers`                   |
-| Crash-free users            | Launch monitoring | `app_exception` users vs all users  |
-| Unhandled errors            | Launch monitoring | `exception` count                   |
-| Top unhandled errors        | Launch monitoring | `exception` by `description`        |
-| App Check throttle          | Launch monitoring | `app_check_throttled`, people only  |
-| App Check throttle crawlers | Launch monitoring | `app_check_throttled`, crawlers     |
-| Crash traces and non-fatals | Launch monitoring | Crashlytics console                 |
+| Metric                      | Category          | Source                                           |
+| --------------------------- | ----------------- | ------------------------------------------------ |
+| New activated users         | Activation        | `sign_up` count                                  |
+| Bites created               | Creation          | `bite_created` count                             |
+| Bucket lists created        | Creation          | `bucketlist_created` count                       |
+| Ratings submitted           | Creation          | `bucketlist_rated` count                         |
+| Searches                    | Discovery         | `search_performed` count                         |
+| Restaurant + Bite views     | Discovery         | `restaurant_viewed` + `bite_viewed`              |
+| D1 / D7 retention           | Retention         | `queries/retention-cohorts.sql`                  |
+| Active users                | Retention         | GA4 `activeUsers`                                |
+| Posting-streak milestones   | Retention         | `celebration_shown`, `posting-streak`, yesterday |
+| Posting streaks             | Retention         | Firestore `/meta/postingStreakStats`             |
+| Crash-free users            | Launch monitoring | `app_exception` users vs all users               |
+| Unhandled errors            | Launch monitoring | `exception` count                                |
+| Top unhandled errors        | Launch monitoring | `exception` by `description`                     |
+| App Check throttle          | Launch monitoring | `app_check_throttled`, people only               |
+| App Check throttle crawlers | Launch monitoring | `app_check_throttled`, crawlers                  |
+| Crash traces and non-fatals | Launch monitoring | Crashlytics console                              |
 
 Keep the dashboard scoped to launch signals; resist adding vanity metrics.
+
+The posting streak of epic [#2034] is three numbers, read against epic
+[#2000]'s retention goal (issue [#2150]). The milestones celebrated yesterday
+are a tile counted over yesterday alone, whatever the digest's window. The
+users at 2 weeks or more and the streaks broken are weekly and live only in
+Firestore, so `resyncBiteCounts` writes them as counts to
+`/meta/postingStreakStats` every Monday and the digest prints them in their own
+section; like the funnel, they are not a `dashboard.config.mjs` tile.
 
 The App Check throttle is two rows since [issue 1709](https://github.com/muhammedgaygisiz/travellers-apps/issues/1709). Meta's
 link-preview crawlers open every link posted to Instagram or Facebook, fail
@@ -994,3 +1004,6 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
 [#2149]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2149
+[#2000]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2000
+[#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
+[#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150

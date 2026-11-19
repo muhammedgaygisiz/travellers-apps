@@ -1316,13 +1316,16 @@ service cloud.firestore {
      * Read by the apps, written only by Functions through the Admin SDK.
      *
      * `meta` holds the leaderboard snapshots and the exchange-rate table;
+     * its `postingStreakStats` is the weekly resync's aggregates for the daily
+     * analytics digest (issue #2150), which reads it with the Admin SDK, so no
+     * app reads it either;
      * `displayNames` is the reservation index behind `claimDisplayName`;
      * `restaurantCandidates` is produced by the clustering trigger and consumed
      * by the admin app's verification surface, which acts through
      * `verifyRestaurantCandidate` rather than by writing the candidate.
      */
     match /meta/{documentId} {
-      allow read: if isMember();
+      allow read: if isMember() && documentId != 'postingStreakStats';
       allow write: if false;
     }
 

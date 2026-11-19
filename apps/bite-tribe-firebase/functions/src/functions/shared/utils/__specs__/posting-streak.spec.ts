@@ -5,6 +5,9 @@ import {
   readPostingStreak,
   samePostingStreak,
   shiftPostingWeek,
+  NO_POSTING_STREAK_STATS,
+  PostingStreak,
+  tallyPostingStreak,
 } from '../posting-streak';
 
 const at = (iso: string): number => Date.parse(iso);
@@ -178,5 +181,30 @@ describe('posting streak (issue #2146)', () => {
     expect(samePostingStreak({ ...value }, value)).toBe(true);
     expect(samePostingStreak(null, value)).toBe(false);
     expect(samePostingStreak({ ...value, weeks: 3 }, value)).toBe(false);
+  });
+});
+
+describe('tallyPostingStreak (issue #2150)', () => {
+  const week = (weeks: number): PostingStreak => ({
+    weeks,
+    lastPostingWeek: '2026-11-16',
+  });
+
+  it('counts a recomputed streak of 2 weeks or more', () => {
+    const stats = [week(1), week(2), week(5)].reduce(
+      (sum, value) => tallyPostingStreak(sum, value, value),
+      NO_POSTING_STREAK_STATS,
+    );
+
+    expect(stats).toEqual({ usersWithStreakOfTwoOrMore: 2, streaksBroken: 0 });
+  });
+
+  it('counts a streak broken only when it went from 1 or more to 0', () => {
+    let stats = tallyPostingStreak(NO_POSTING_STREAK_STATS, week(3), week(0));
+    stats = tallyPostingStreak(stats, week(0), week(0));
+    stats = tallyPostingStreak(stats, null, week(0));
+    stats = tallyPostingStreak(stats, week(1), week(0));
+
+    expect(stats).toEqual({ usersWithStreakOfTwoOrMore: 0, streaksBroken: 2 });
   });
 });

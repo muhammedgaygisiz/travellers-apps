@@ -657,6 +657,10 @@ beforeEach(async () => {
     });
 
     await setDoc(doc(db, 'meta', 'leaderboard'), { entries: [] });
+    await setDoc(doc(db, 'meta', 'postingStreakStats'), {
+      usersWithStreakOfTwoOrMore: 3,
+      streaksBroken: 1,
+    });
     await setDoc(doc(db, 'displayNames', 'consumer'), { userId: CONSUMER });
     await setDoc(doc(db, 'restaurantCandidates', 'candidate-1'), {
       status: 'pending',
@@ -3502,6 +3506,16 @@ describe('settings', () => {
 });
 
 describe('backend-owned collections', () => {
+  it('keep the digest-only posting-streak aggregates from every app (issue #2150)', async () => {
+    await assertFails(getDoc(doc(asConsumer(), 'meta', 'postingStreakStats')));
+    await assertFails(getDoc(doc(asOperator(), 'meta', 'postingStreakStats')));
+    await assertFails(
+      setDoc(doc(asOperator(), 'meta', 'postingStreakStats'), {
+        streaksBroken: 0,
+      }),
+    );
+  });
+
   it('stay readable and refuse every client write', async () => {
     await assertSucceeds(getDoc(doc(asConsumer(), 'meta', 'leaderboard')));
     await assertFails(

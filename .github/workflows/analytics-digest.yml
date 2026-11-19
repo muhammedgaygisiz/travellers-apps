@@ -2,7 +2,9 @@ name: Analytics digest
 
 # Posts the daily launch-analytics digest (tools/analytics/digest.mjs) as a
 # comment on a tracking GitHub issue. See tools/analytics/README.md for the
-# required secret/variable.
+# required secret/variable. The same key reads `/meta/postingStreakStats` from
+# Firestore for the posting-streak section (issue #2150), which needs
+# `roles/datastore.viewer` on the project; without it the section degrades.
 
 on:
   schedule:

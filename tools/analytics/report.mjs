@@ -29,6 +29,7 @@ import {
   runTileValue,
   SURFACE_UNAVAILABLE_NOTE,
   surfaceFilterUnavailable,
+  tileWindow,
 } from './ga4.mjs';
 
 loadEnv();
@@ -81,7 +82,7 @@ function runDryRun({ days, json }) {
     id: tile.id,
     title: tile.title,
     category: tile.category,
-    requests: buildRequests(tile, propertyId, currentWindow(days)),
+    requests: buildRequests(tile, propertyId, tileWindow(tile, days)),
   }));
 
   if (json) {
@@ -115,7 +116,7 @@ async function runLive({ days, json }) {
       client,
       tile,
       propertyId,
-      currentWindow(days),
+      tileWindow(tile, days),
     );
     results.push({
       id: tile.id,

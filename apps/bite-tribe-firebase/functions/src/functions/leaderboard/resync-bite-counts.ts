@@ -6,13 +6,19 @@ import {
 import { logger } from 'firebase-functions';
 import { onSchedule } from 'firebase-functions/scheduler';
 import {
+  NO_POSTING_STREAK_STATS,
+  PostingStreakStats,
   readPostingStreak,
   samePostingStreak,
+  tallyPostingStreak,
 } from '../shared/utils/posting-streak';
 import { recomputeUserPostingStreak } from '../shared/utils/user-posting-streak';
 
 const USERS_COLLECTION = 'users';
 const BITES_COLLECTION = 'bites';
+const META_COLLECTION = 'meta';
+/** Read by the daily analytics digest (issue #2150). */
+export const POSTING_STREAK_STATS_DOC = 'postingStreakStats';
 const WRITE_BATCH_LIMIT = 500;
 
 const ZURICH_TZ = 'Europe/Zurich';
@@ -50,6 +56,10 @@ const getActualBiteCount = async (userId: string): Promise<number> => {
  * The same pass recomputes the weekly posting streak, `postingStreak`, from the
  * user's Bites (issue #2146). Running on Monday, it zeroes every streak whose
  * last posting week is older than the week that has just ended.
+ *
+ * It ends by writing the run's aggregates to `/meta/postingStreakStats` for the
+ * daily analytics digest (issue #2150): users at 2 weeks or more, and streaks
+ * this run took from 1 or more to 0. Counts only, never a user id.
  */
 export const resyncBiteCounts = onSchedule(
   {
@@ -65,6 +75,7 @@ export const resyncBiteCounts = onSchedule(
     let batchSize = 0;
     let updatedUsers = 0;
     let updatedStreaks = 0;
+    let streakStats: PostingStreakStats = NO_POSTING_STREAK_STATS;
 
     const now = Date.now();
 
@@ -79,6 +90,12 @@ export const resyncBiteCounts = onSchedule(
         userDoc.id,
         now,
       );
+      const storedPostingStreak = readPostingStreak(user['postingStreak']);
+      streakStats = tallyPostingStreak(
+        streakStats,
+        storedPostingStreak,
+        postingStreak,
+      );
       const update: DocumentData = {};
 
       if (actualBiteCount !== storedBiteCount) {
@@ -90,12 +107,7 @@ export const resyncBiteCounts = onSchedule(
         update['biteCount'] = actualBiteCount;
       }
 
-      if (
-        !samePostingStreak(
-          readPostingStreak(user['postingStreak']),
-          postingStreak,
-        )
-      ) {
+      if (!samePostingStreak(storedPostingStreak, postingStreak)) {
         update['postingStreak'] = postingStreak;
         updatedStreaks++;
       }
@@ -122,10 +134,20 @@ export const resyncBiteCounts = onSchedule(
       await batch.commit();
     }
 
+    await db
+      .collection(META_COLLECTION)
+      .doc(POSTING_STREAK_STATS_DOC)
+      .set({
+        ...streakStats,
+        totalUsers: usersSnapshot.size,
+        computedAt: FieldValue.serverTimestamp(),
+      });
+
     logger.info('resyncBiteCounts: weekly biteCount resync complete', {
       totalUsers: usersSnapshot.size,
       updatedUsers,
       updatedStreaks,
+      ...streakStats,
     });
   },
 );

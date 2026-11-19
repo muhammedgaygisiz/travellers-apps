@@ -55,6 +55,14 @@
  *           Leave out, or keep only, link-preview crawler traffic: the web
  *           platform from a data-centre town listed in `crawlers.config.mjs`
  *           (issue #1709). Only `eventCount` tiles take it. Absent means both.
+ * @property {Record<string, string>} [eventParams]
+ *           Keep only events whose registered parameters have these values,
+ *           e.g. `{ moment: 'posting-streak' }`. Only `eventCount` tiles take
+ *           it, and each parameter must be a custom dimension in
+ *           `provision-ga4.mjs`.
+ * @property {'yesterday'} [window]
+ *           Count yesterday alone, against the day before, whatever `--days`
+ *           says. Absent means the `--days` window.
  * @property {'%'} [unit]         display unit; percentages format and compare
  *                                in percentage points
  * @property {string} [source]    human description for `console` tiles
@@ -125,6 +133,19 @@ export const DASHBOARD_TILES = [
     type: 'activeUsers',
     metric: 'activeUsers',
     surface: 'consumer',
+  },
+  // The posting-streak milestones of epic #2034 (issue #2150): the 4, 12, 26
+  // and 52 weeks in a row that issue #2149 celebrates. A day rather than the
+  // window, because the epic is read against the day's figure; the other two
+  // streak numbers are weekly and come from Firestore, in their own section.
+  {
+    id: 'posting-streak-milestones',
+    title: 'Posting-streak milestones (yesterday)',
+    category: 'Retention',
+    type: 'eventCount',
+    events: ['celebration_shown'],
+    eventParams: { moment: 'posting-streak' },
+    window: 'yesterday',
   },
   // D1/D7 retention was a `console` tile here until issue #987. It is now
   // computed from the BigQuery export by `queries/retention-cohorts.sql` and

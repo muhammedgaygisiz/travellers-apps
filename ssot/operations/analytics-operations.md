@@ -22,10 +22,16 @@ Tooling lives in `tools/analytics/` (setup: `tools/analytics/README.md`):
   the previous one, shows deltas, and raises threshold alerts defined per tile
   in `dashboard.config.mjs`. It carries **growth and stability in one artifact**:
   crash-free users, unhandled errors, and the top unhandled errors by message
-  sit alongside the activation, creation and discovery tiles.
+  sit alongside the activation, creation and discovery tiles. Since issue
+  [#2150] it also reports posting streaks (epic [#2034]): the milestones
+  celebrated yesterday from GA4, and from the Firestore document
+  `/meta/postingStreakStats`, which the Monday resync writes, the users at 2
+  weeks or more and the streaks broken in that run.
 - **Automation** — `.github/workflows/analytics-digest.yml` runs the digest
   daily and posts it to a **"Daily analytics digest"** GitHub issue (secret
-  `GA4_SA_KEY`, variable `GA4_PROPERTY_ID`).
+  `GA4_SA_KEY`, variable `GA4_PROPERTY_ID`). The key's service account also
+  needs `roles/datastore.viewer` for the posting-streak section, which
+  otherwise prints why it is unavailable.
 - **Config-as-code** — `npm run analytics:provision` registers GA4 key events
   and custom dimensions from the taxonomy (needs Editor on the property).
 
@@ -265,3 +271,5 @@ are met.
 
 [#907]: https://github.com/muhammedgaygisiz/travellers-apps/issues/907
 [#912]: https://github.com/muhammedgaygisiz/travellers-apps/issues/912
+[#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
+[#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150

@@ -157,6 +157,30 @@ from the BigQuery export (see below): the **activation funnel** and
 **retention**. Both degrade to a line naming the reason if BigQuery is
 unreachable, so a revoked role cannot take the daily artifact down with it.
 
+It ends with **posting streaks** (issue #2150, epic #2034), the two weekly
+numbers no analytics source holds: users with a streak of 2 weeks or more, and
+streaks broken in the last resync. `resyncBiteCounts` writes them every Monday
+to the Firestore document `/meta/postingStreakStats`, counts only, and the
+digest reads that one document (`streaks.mjs`). The third streak number,
+**Posting-streak milestones (yesterday)**, is an ordinary tile: GA4
+`celebration_shown` events with `moment` `posting-streak`, counted over
+yesterday alone whatever `--days` says. The section degrades to a line naming
+the reason, and flags a resync older than 8 days. Firestore rules keep the
+document from every app.
+
+The digest reads it with the same service account, which needs one more role
+on the Firebase project:
+
+```bash
+gcloud projects add-iam-policy-binding bite-tribe \
+  --member=serviceAccount:analytics-reporter@bite-tribe.iam.gserviceaccount.com \
+  --role=roles/datastore.viewer
+```
+
+The role reads all of Firestore, not only that document; the digest code is
+what keeps it to the two counts. `FIREBASE_PROJECT_ID` overrides the project,
+which is otherwise the service account's own.
+
 One tile stays console-only, because nothing has a read API for it:
 
 - **Crash stack traces and non-fatals** — Firebase Crashlytics → Issues. Counts

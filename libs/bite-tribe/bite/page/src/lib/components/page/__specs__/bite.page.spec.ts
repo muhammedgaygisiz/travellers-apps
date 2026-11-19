@@ -1151,6 +1151,18 @@ describe('BitePage', () => {
       expect(component.biteFormGroup.controls['currency'].value).toBe('CHF');
     });
 
+    // Issue #2129: a menu that states no currency gives a draft without one.
+    it('should keep a valid currency for a draft without one when no location currency arrives', () => {
+      fixture = TestBed.createComponent(BitePage);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+      componentRef.setInput('bite', { name: 'Margherita', price: 9 } as Bite);
+      fixture.detectChanges();
+
+      expect(component.biteFormGroup.controls['currency'].value).toBeTruthy();
+      expect(component.biteFormGroup.controls['currency'].valid).toBe(true);
+    });
+
     it('should set position when input is provided', () => {
       const testPosition = { latitude: 42, longitude: 24 };
 

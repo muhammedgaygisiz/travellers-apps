@@ -254,6 +254,52 @@ describe('MenuItemComponent', () => {
       });
     });
   });
+  /** A dish sold only as its variants (GitHub issue #2182). */
+  describe('ordering a dish with variants', () => {
+    const withItem = (item: MenuItem, isVariant = false): void => {
+      fixture.componentRef.setInput('item', item);
+      fixture.componentRef.setInput('canAddToCart', true);
+      fixture.componentRef.setInput('isVariant', isVariant);
+      fixture.componentRef.changeDetectorRef.detectChanges();
+    };
+
+    const variants = [
+      { id: 'v1', name: 'Vegetarian', description: '', price: 14 },
+    ];
+
+    it('offers no plain line for a dish without a price of its own', () => {
+      withItem({
+        id: 'd1',
+        name: 'Pad Thai',
+        description: '',
+        price: 0,
+        variants,
+      });
+
+      expect(component.orderable()).toBe(false);
+    });
+
+    it('keeps the plain line of a dish written with its own price', () => {
+      withItem({
+        id: 'd1',
+        name: 'Margherita',
+        description: '',
+        price: 11,
+        variants,
+      });
+
+      expect(component.orderable()).toBe(true);
+    });
+
+    it('orders a dish without variants and every variant row', () => {
+      withItem({ id: 'd2', name: 'Fried rice', description: '', price: 13 });
+      expect(component.orderable()).toBe(true);
+
+      withItem(variants[0], true);
+      expect(component.orderable()).toBe(true);
+    });
+  });
+
   describe('the Bite signal', () => {
     const DISH: MenuItem = {
       id: 'margherita',

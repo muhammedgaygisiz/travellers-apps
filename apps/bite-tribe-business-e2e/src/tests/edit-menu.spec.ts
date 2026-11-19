@@ -23,6 +23,10 @@ interface MenuFixture {
   restaurantId: string;
   restaurantName: string;
   menuId: string;
+  categoryId: string;
+  itemId: string;
+  variantId: string;
+  plainItemId: string;
 }
 
 /**
@@ -36,6 +40,10 @@ const seedMenu = async (page: Page, runId: number): Promise<MenuFixture> => {
     restaurantId: `menu-restaurant-${runId}`,
     restaurantName: `Menu Bistro ${runId}`,
     menuId: `menu-${runId}`,
+    categoryId: `category-${runId}`,
+    itemId: `item-${runId}`,
+    variantId: `variant-${runId}`,
+    plainItemId: `marinara-${runId}`,
   };
 
   await seedFirestoreDocument(page, `menus/${fixture.menuId}`, {
@@ -78,6 +86,16 @@ const seedMenu = async (page: Page, runId: number): Promise<MenuFixture> => {
                           },
                         },
                       },
+                      {
+                        mapValue: {
+                          fields: {
+                            id: { stringValue: `marinara-${runId}` },
+                            name: { stringValue: 'Marinara' },
+                            description: { stringValue: 'Tomato, garlic' },
+                            price: { doubleValue: 8 },
+                          },
+                        },
+                      },
                     ],
                   },
                 },
@@ -111,7 +129,12 @@ const seedMenu = async (page: Page, runId: number): Promise<MenuFixture> => {
   return fixture;
 };
 
-type StoredItem = { name: string; price: number; variants?: StoredItem[] };
+type StoredItem = {
+  name: string;
+  price: number;
+  isAvailable?: boolean;
+  variants?: StoredItem[];
+};
 type StoredCategory = { title: string; items: StoredItem[] };
 
 const storedCategory = async (
@@ -137,19 +160,15 @@ const openEditor = async (
 
   const editMenu = new EditMenuPage(page);
   await editMenu.open(fixture.restaurantId, fixture.menuId);
-  await expect(editMenu.categoryTitle).toHaveValue('Pizza');
+  await expect(page.getByTestId(`menu-dish-${fixture.itemId}`)).toBeVisible();
 
   return editMenu;
 };
 
 /**
- * Menu editing in the business app (issue #1377): the category title and the
- * item name save when the owner says so, and not on a pause in typing.
- *
- * Before the fix, a title saved itself 500 ms after the last keystroke and the
- * save took the owner out of the editor mid-word, a cleared title refilled
- * itself so `required` never showed, and a renamed item was never saved at all.
- * A save now keeps the owner in the editor and reports itself with a toast.
+ * Menu editing in the business app: the menu is a list, and a dish or a
+ * category opens its own editor that saves when the owner says so (issues
+ * #1377 and #2182).
  */
 test.describe('Edit a menu in the business app', () => {
   const seeded: string[] = [];
@@ -160,9 +179,12 @@ test.describe('Edit a menu in the business app', () => {
     await Promise.all(paths.map((path) => deleteFirestoreDocument(page, path)));
   });
 
-  test('renames a category only when the owner saves it', async ({ page }) => {
-    test.setTimeout(90_000);
-
+  const start = async (
+    page: Page,
+  ): Promise<{
+    fixture: MenuFixture;
+    editMenu: EditMenuPage;
+  }> => {
     const fixture = await seedMenu(page, Date.now());
     seeded.push(
       `restaurants/${fixture.restaurantId}`,
@@ -170,44 +192,32 @@ test.describe('Edit a menu in the business app', () => {
     );
 
     await loginAsBusinessUser(page);
-    const editMenu = await openEditor(page, fixture);
 
-    // Opening a category without a subtitle no longer saves and leaves.
-    await editMenu.expectStaysOpen(
-      fixture.restaurantId,
-      fixture.menuId,
-      LONGER_THAN_THE_OLD_AUTOSAVE,
-    );
+    return { fixture, editMenu: await openEditor(page, fixture) };
+  };
 
-    // Typing and pausing saves nothing and stays in the editor.
+  test('renames a category only when the owner saves it', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.openCategory(fixture.categoryId);
+    await expect(editMenu.categoryTitle).toHaveValue('Pizza');
+
+    // Typing and pausing saves nothing and keeps the editor open.
     await editMenu.categoryTitle.fill('Pizz');
-    await editMenu.expectStaysOpen(
-      fixture.restaurantId,
-      fixture.menuId,
-      LONGER_THAN_THE_OLD_AUTOSAVE,
-    );
+    await editMenu.expectStaysOpen(LONGER_THAN_THE_OLD_AUTOSAVE);
     expect((await storedCategory(page, fixture.menuId))?.title).toBe('Pizza');
 
     // A cleared title stays cleared, and cannot be saved.
     await editMenu.categoryTitle.fill('');
-    await editMenu.expectStaysOpen(
-      fixture.restaurantId,
-      fixture.menuId,
-      LONGER_THAN_THE_OLD_AUTOSAVE,
-    );
     await expect(editMenu.categoryTitle).toHaveValue('');
-    await editMenu.expectDisabled(editMenu.saveCategoryTitle);
+    await editMenu.expectDisabled(editMenu.saveCategory);
 
     await editMenu.categoryTitle.fill('Pizze napoletane');
-    await editMenu.expectEnabled(editMenu.saveCategoryTitle);
-    await editMenu.saveCategoryTitle.click();
+    await editMenu.expectEnabled(editMenu.saveCategory);
+    await editMenu.saveCategory.click();
 
-    await editMenu.expectSaved(
-      fixture.restaurantId,
-      fixture.menuId,
-      editMenu.saveCategoryTitle,
-    );
-    await expect(editMenu.categoryTitle).toHaveValue('Pizze napoletane');
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
     await expect
       .poll(async () => (await storedCategory(page, fixture.menuId))?.title, {
         timeout: 15_000,
@@ -215,79 +225,92 @@ test.describe('Edit a menu in the business app', () => {
       .toBe('Pizze napoletane');
   });
 
-  test('saves a renamed item, and its variant with it', async ({ page }) => {
+  /**
+   * A dish written before variants had names: its own price becomes a first
+   * variant the owner names, and its variant's description becomes its name.
+   */
+  test('names the variants of an older dish and saves them', async ({
+    page,
+  }) => {
     test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
 
-    const fixture = await seedMenu(page, Date.now());
-    seeded.push(
-      `restaurants/${fixture.restaurantId}`,
-      `menus/${fixture.menuId}`,
-    );
+    await editMenu.openDish(fixture.itemId);
+    await expect(editMenu.dishName).toHaveValue('Margherita');
+    await expect(editMenu.variantName(0)).toHaveValue('');
+    await expect(editMenu.variantPrice(0)).toHaveValue('9.5');
+    await expect(editMenu.variantName(1)).toHaveValue('Large');
+    await expect(editMenu.variantPrice(1)).toHaveValue('14');
+    await editMenu.expectDisabled(editMenu.saveDish);
 
-    await loginAsBusinessUser(page);
-    const editMenu = await openEditor(page, fixture);
-    await expect(editMenu.itemName).toHaveValue('Margherita');
+    await editMenu.variantName(0).fill('Regular');
+    await editMenu.expectEnabled(editMenu.saveDish);
+    await editMenu.saveDish.click();
 
-    await editMenu.itemName.fill('');
-    await editMenu.expectDisabled(editMenu.saveItemName);
-
-    await editMenu.itemName.fill('Pizza Margherita');
-    await editMenu.expectEnabled(editMenu.saveItemName);
-    await editMenu.saveItemName.click();
-
-    await editMenu.expectSaved(
-      fixture.restaurantId,
-      fixture.menuId,
-      editMenu.saveItemName,
-    );
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
     await expect
       .poll(
         async () => {
           const item = (await storedCategory(page, fixture.menuId))?.items[0];
 
-          return [item?.name, item?.variants?.[0]?.name];
+          return {
+            price: item?.price,
+            variants: item?.variants?.map(({ name, price }) => [name, price]),
+          };
         },
         { timeout: 15_000 },
       )
-      .toEqual(['Pizza Margherita', 'Pizza Margherita']);
+      .toEqual({
+        price: 0,
+        variants: [
+          ['Regular', 9.5],
+          ['Large', 14],
+        ],
+      });
   });
 
   test('refuses an empty or zero price and saves a real one', async ({
     page,
   }) => {
     test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
 
-    const fixture = await seedMenu(page, Date.now());
-    seeded.push(
-      `restaurants/${fixture.restaurantId}`,
-      `menus/${fixture.menuId}`,
-    );
+    await editMenu.openDish(fixture.plainItemId);
+    await expect(editMenu.dishPrice).toHaveValue('8');
 
-    await loginAsBusinessUser(page);
-    const editMenu = await openEditor(page, fixture);
-    const price = editMenu.itemPrice();
-    const save = editMenu.saveItemDetails();
+    await editMenu.dishPrice.fill('0');
+    await editMenu.expectDisabled(editMenu.saveDish);
 
-    await expect(price).toHaveValue('9.5');
+    await editMenu.dishPrice.fill('');
+    await editMenu.expectDisabled(editMenu.saveDish);
 
-    await price.fill('0');
-    await editMenu.expectDisabled(save);
+    await editMenu.dishPrice.fill('12.5');
+    await editMenu.expectEnabled(editMenu.saveDish);
+    await editMenu.saveDish.click();
 
-    await price.fill('');
-    await editMenu.expectDisabled(save);
-
-    await price.fill('12.5');
-    await editMenu.expectEnabled(save);
-    await save.click();
-
-    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId, save);
-    await expect(price).toHaveValue('12.5');
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
     await expect
       .poll(
         async () =>
-          (await storedCategory(page, fixture.menuId))?.items[0]?.price,
+          (await storedCategory(page, fixture.menuId))?.items[1]?.price,
         { timeout: 15_000 },
       )
       .toBe(12.5);
+  });
+
+  test('switches a variant off from the list', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.variantToggle(fixture.variantId).click();
+
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.items[0]?.variants?.[0]
+            ?.isAvailable,
+        { timeout: 15_000 },
+      )
+      .toBe(false);
   });
 });

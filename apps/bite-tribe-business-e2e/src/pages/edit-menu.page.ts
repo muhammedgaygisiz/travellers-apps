@@ -9,26 +9,28 @@ import { expectIonDisabled, expectIonEnabled } from './floor-plan.page';
  * than by URL: the menu route resolves its restaurant from the store, which a
  * deep link has not loaded yet.
  *
- * A save writes the whole menu under a loading overlay and keeps the owner in
- * the editor: a toast reports the outcome, and on success the field's Save and
- * Cancel go away again (issue #1377). Before that, every save left for the
- * restaurant page.
+ * The menu is a list; a dish or a category opens its own editor with one Save
+ * (GitHub issue #2182). A save writes the whole menu under a loading overlay,
+ * keeps the owner on the page with a toast, and closes the editor once the
+ * saved menu has been read back.
  */
 export class EditMenuPage {
   readonly page: Page;
+  readonly editorPanel: Locator;
   readonly categoryTitle: Locator;
-  readonly saveCategoryTitle: Locator;
-  readonly cancelCategoryTitle: Locator;
-  readonly itemName: Locator;
-  readonly saveItemName: Locator;
+  readonly saveCategory: Locator;
+  readonly dishName: Locator;
+  readonly dishPrice: Locator;
+  readonly saveDish: Locator;
 
   constructor(page: Page) {
     this.page = page;
+    this.editorPanel = page.getByTestId('menu-editor-panel');
     this.categoryTitle = page.getByTestId('category-title').locator('input');
-    this.saveCategoryTitle = page.getByTestId('save-category-title');
-    this.cancelCategoryTitle = page.getByTestId('cancel-category-title');
-    this.itemName = page.getByTestId('menu-item-name').locator('input');
-    this.saveItemName = page.getByTestId('save-menu-item-name');
+    this.saveCategory = page.getByTestId('save-category');
+    this.dishName = page.getByTestId('dish-name').locator('input');
+    this.dishPrice = page.getByTestId('dish-price').locator('input');
+    this.saveDish = page.getByTestId('save-dish');
   }
 
   async open(restaurantId: string, menuId: string): Promise<void> {
@@ -43,66 +45,67 @@ export class EditMenuPage {
     );
   }
 
+  /** Opens a category's editor from its edit button in the list. */
+  async openCategory(categoryId: string): Promise<void> {
+    await this.page
+      .getByTestId(`menu-category-${categoryId}`)
+      .getByTestId('edit-category')
+      .click();
+    await expect(this.editorPanel).toBeVisible();
+  }
+
+  /** Opens a dish's editor from its line in the list. */
+  async openDish(itemId: string): Promise<void> {
+    await this.page
+      .getByTestId(`menu-dish-${itemId}`)
+      .getByTestId('open-dish')
+      .click();
+    await expect(this.editorPanel).toBeVisible();
+  }
+
+  variantName(index: number): Locator {
+    return this.page.getByTestId(`dish-variant-name-${index}`).locator('input');
+  }
+
+  variantPrice(index: number): Locator {
+    return this.page
+      .getByTestId(`dish-variant-price-${index}`)
+      .locator('input');
+  }
+
+  variantToggle(variantId: string): Locator {
+    return this.page
+      .getByTestId(`menu-variant-${variantId}`)
+      .locator('ion-toggle');
+  }
+
   /**
-   * Asserts the editor is still open after `ms`, by waiting for a navigation
-   * away and requiring that none comes. Proving that something does *not*
-   * happen needs a window for it to happen in; an assertion on the current URL
-   * would pass at once. The editor used to save and leave on its own 500 ms
-   * after a keystroke, and on load for a category without a subtitle.
+   * Asserts the editor is still open after `ms`, by waiting for it to close
+   * and requiring that it does not. Proving that something does *not* happen
+   * needs a wait; the old editor saved and left on its own 500 ms after a
+   * keystroke.
    */
-  async expectStaysOpen(
-    restaurantId: string,
-    menuId: string,
-    ms: number,
-  ): Promise<void> {
-    const editor = new RegExp(`/restaurant/${restaurantId}/menu/${menuId}$`);
-    const left = await this.page
-      .waitForURL((url) => !editor.test(url.pathname), { timeout: ms })
+  async expectStaysOpen(ms: number): Promise<void> {
+    const closed = await this.editorPanel
+      .waitFor({ state: 'detached', timeout: ms })
       .then(
         () => true,
         () => false,
       );
 
-    expect(left, 'the editor saved and left on its own').toBe(false);
+    expect(closed, 'the editor saved and closed on its own').toBe(false);
   }
 
   /**
-   * A save that landed: the success toast, still in the editor, and the
-   * button that sent it gone because the stored menu now holds the edit.
+   * A save that landed: the success toast, still in the menu editor, and the
+   * editor closed because the stored menu now holds the edit.
    */
-  async expectSaved(
-    restaurantId: string,
-    menuId: string,
-    saveButton: Locator,
-  ): Promise<void> {
+  async expectSaved(restaurantId: string, menuId: string): Promise<void> {
     await expect(
       this.page.locator('ion-toast').getByText('Menu saved', { exact: true }),
     ).toBeVisible({ timeout: 20_000 });
     await this.expectOpen(restaurantId, menuId);
-    await expect(saveButton).toHaveCount(0);
-  }
-
-  /**
-   * The editor block of one item: its name, then its own details (description,
-   * price, ...) in the first variant editor, with their own Save button.
-   */
-  itemDetails(): Locator {
-    return this.page
-      .locator('business-menu-item')
-      .first()
-      .locator('business-menu-variant')
-      .first();
-  }
-
-  itemPrice(): Locator {
-    return this.itemDetails()
-      .locator('ion-input')
-      .filter({ hasText: 'Price' })
-      .locator('input');
-  }
-
-  saveItemDetails(): Locator {
-    return this.itemDetails().locator('ion-button', { hasText: 'Save' });
+    await expect(this.editorPanel).toHaveCount(0);
   }
 
   async expectDisabled(button: Locator): Promise<void> {

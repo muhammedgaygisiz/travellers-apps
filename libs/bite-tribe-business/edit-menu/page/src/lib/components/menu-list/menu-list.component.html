@@ -1,0 +1,134 @@
+<ion-reorder-group
+  class="categories"
+  [disabled]="false"
+  (ionItemReorder)="reorderCategories($any($event))"
+>
+  @for (category of categories(); track category.id) {
+    <section
+      class="category"
+      [class.selected]="selectedId() === category.id"
+      [attr.data-testid]="'menu-category-' + category.id"
+    >
+      <div class="category-header">
+        <ion-reorder
+          class="handle"
+          [attr.aria-label]="'menu-reorder' | transloco"
+        >
+          <ion-icon name="menu" aria-hidden="true" />
+        </ion-reorder>
+        <div class="category-text">
+          <h2>{{ category.title }}</h2>
+          @if (category.subtitle) {
+            <p>{{ category.subtitle }}</p>
+          }
+        </div>
+        <ion-button
+          fill="clear"
+          [attr.aria-label]="'menu-category-edit' | transloco"
+          data-testid="edit-category"
+          (click)="openCategory.emit(category.id)"
+        >
+          <ion-icon slot="icon-only" name="create-outline" aria-hidden="true" />
+        </ion-button>
+      </div>
+
+      <ion-reorder-group
+        class="dishes"
+        [disabled]="false"
+        (ionItemReorder)="reorderDishes(category.id, $any($event))"
+      >
+        @for (dish of category.dishes; track dish.ref.itemId) {
+          <div
+            class="dish"
+            [class.selected]="selectedId() === dish.ref.itemId"
+            [class.unavailable]="!dish.available"
+            [attr.data-testid]="'menu-dish-' + dish.ref.itemId"
+          >
+            <div class="dish-row">
+              <ion-reorder
+                class="handle"
+                [attr.aria-label]="'menu-reorder' | transloco"
+              >
+                <ion-icon name="menu" aria-hidden="true" />
+              </ion-reorder>
+              <button
+                type="button"
+                class="dish-open"
+                data-testid="open-dish"
+                (click)="openDish.emit(dish.ref)"
+              >
+                <span class="dish-name">{{ dish.name }}</span>
+                @if (dish.description) {
+                  <span class="dish-description">{{ dish.description }}</span>
+                }
+              </button>
+              @if (dish.price) {
+                <span class="price">{{ dish.price }}</span>
+              }
+              @if (!dish.available) {
+                <span class="sold-out">{{ 'menu-sold-out' | transloco }}</span>
+              }
+              <ion-toggle
+                [checked]="dish.available"
+                [attr.aria-label]="
+                  'menu-available-label' | transloco: { name: dish.name }
+                "
+                data-testid="dish-available-toggle"
+                (ionChange)="toggle(dish.ref, $any($event))"
+              />
+            </div>
+
+            @for (variant of dish.variants; track variant.ref.variantId) {
+              <div
+                class="variant-row"
+                [class.unavailable]="!variant.available"
+                [attr.data-testid]="'menu-variant-' + variant.ref.variantId"
+              >
+                <span class="variant-name">{{ variant.name }}</span>
+                <span class="price">{{ variant.price }}</span>
+                @if (!variant.available) {
+                  <span class="sold-out">{{
+                    'menu-sold-out' | transloco
+                  }}</span>
+                }
+                <ion-toggle
+                  [checked]="variant.available"
+                  [attr.aria-label]="
+                    'menu-available-label'
+                      | transloco: { name: dish.name + ' ' + variant.name }
+                  "
+                  data-testid="variant-available-toggle"
+                  (ionChange)="toggle(variant.ref, $any($event))"
+                />
+              </div>
+            }
+          </div>
+        }
+      </ion-reorder-group>
+
+      @if (!category.dishes.length) {
+        <p class="empty">{{ 'menu-category-empty' | transloco }}</p>
+      }
+
+      @if (category.extras) {
+        <button
+          type="button"
+          class="extras-row"
+          data-testid="open-extras"
+          (click)="openCategory.emit(category.id)"
+        >
+          <span>{{ 'menu-extras' | transloco }}: {{ category.extras }}</span>
+        </button>
+      }
+
+      <ion-button
+        fill="clear"
+        class="add-dish"
+        data-testid="add-dish"
+        (click)="addDish.emit(category.id)"
+      >
+        {{ 'menu-dish-add' | transloco: { category: category.title } }}
+      </ion-button>
+    </section>
+  }
+</ion-reorder-group>

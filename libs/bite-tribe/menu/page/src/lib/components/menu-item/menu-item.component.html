@@ -75,7 +75,7 @@
       taps before reading them - and the line it adds is then the plain dish
       they did not mean to order.
     -->
-    @if (canAddToCart() && !showExtrasPicker()) {
+    @if (canAddToCart() && orderable() && !showExtrasPicker()) {
       <ng-container [ngTemplateOutlet]="addButton" />
     }
   </div>

@@ -3,39 +3,86 @@
     enableBackButton: true,
     showHeaderMenu: false,
     showFooter: false,
+    fullWidth: true,
   }"
 >
-  <ion-content>
-    <ion-img
-      [src]="restaurant()?.imagePath || restaurant()?.image"
-      class="place-image"
-    />
+  <ion-content class="ion-padding">
+    <div class="page" [class.editing]="!!editing()">
+      <header class="page-header">
+        <div class="titles">
+          <p class="restaurant-name">{{ placeName() }}</p>
+          <h1>{{ 'menu' | transloco }}</h1>
+        </div>
+        <!--
+          Asked once, at the top: a menu is priced in one currency, and a
+          control per price would invite two (issue #1102).
+        -->
+        <ion-item class="currency" lines="none">
+          <ion-select
+            [label]="'menu-currency' | transloco"
+            [ngModel]="currency()"
+            (ngModelChange)="currency.set($event); saveCurrency()"
+            interface="popover"
+            data-testid="menu-currency"
+          >
+            <ion-select-option value="">
+              {{ 'menu-currency-none' | transloco }}
+            </ion-select-option>
+            @for (option of currencies(); track option.code) {
+              <ion-select-option [value]="option.code">
+                {{ option.code }} — {{ option.symbol }}
+              </ion-select-option>
+            }
+          </ion-select>
+        </ion-item>
+        <ion-button data-testid="add-category" (click)="addCategory()">
+          {{ 'add-category' | transloco }}
+        </ion-button>
+      </header>
 
-    <h1>{{ placeName() }}</h1>
+      <div class="layout">
+        <main class="list">
+          @if (menu()?.categories?.length) {
+            <bt-menu-list
+              [menu]="menu()"
+              [currency]="currency()"
+              [selectedId]="selectedId()"
+              (openDish)="openDish($event)"
+              (openCategory)="openCategory($event)"
+              (addDish)="addDish($event)"
+              (availabilityChange)="onAvailabilityChange($event)"
+              (moveCategory)="onMoveCategory($event)"
+              (moveDish)="onMoveDish($event)"
+            />
+          } @else {
+            <p class="empty" data-testid="menu-empty">
+              {{ 'no-menu-yet' | transloco }}
+            </p>
+          }
+        </main>
 
-    <!--
-      Asked once, at the top: a menu is priced in one currency, and a control
-      per price would invite two (issue #1102).
-    -->
-    <ion-item>
-      <ion-select
-        [label]="'menu-currency' | transloco"
-        [ngModel]="currency()"
-        (ngModelChange)="currency.set($event); saveCurrency()"
-        data-testid="menu-currency"
-      >
-        <ion-select-option value="">
-          {{ 'menu-currency-none' | transloco }}
-        </ion-select-option>
-        @for (option of currencies(); track option.code) {
-          <ion-select-option [value]="option.code">
-            {{ option.code }} — {{ option.symbol }}
-          </ion-select-option>
+        @if (editing(); as open) {
+          <aside class="editor" data-testid="menu-editor-panel">
+            @if (open.kind === 'dish') {
+              <bt-dish-editor
+                [dish]="editingDish()"
+                [categoryTitle]="editingCategory()?.title"
+                [currency]="currency()"
+                (save)="onSaveDish($event)"
+                (cancelEdit)="closeEditor()"
+              />
+            } @else {
+              <bt-category-editor
+                [category]="editingCategory()"
+                [currency]="currency()"
+                (save)="onSaveCategory($event)"
+                (saveExtras)="onSaveExtras($event)"
+                (cancelEdit)="closeEditor()"
+              />
+            }
+          </aside>
         }
-      </ion-select>
-    </ion-item>
-    <p class="note">{{ 'menu-currency-hint' | transloco }}</p>
-
-    <business-menu [menu]="menu()" (menuChange)="saveMenu.emit($event)" />
+      </div>
+    </div>
   </ion-content>
 </ta-page>

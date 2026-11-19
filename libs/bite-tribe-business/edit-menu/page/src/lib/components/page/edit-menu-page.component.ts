@@ -2,24 +2,63 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   linkedSignal,
   output,
+  signal,
+  untracked,
 } from '@angular/core';
-import { PageComponent } from 'common/ui/page';
+import { FormsModule } from '@angular/forms';
 import {
+  IonButton,
   IonContent,
-  IonImg,
   IonItem,
   IonSelect,
   IonSelectOption,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { FormsModule } from '@angular/forms';
+import { PageComponent } from 'common/ui/page';
+import type { Category, Menu, MenuItem, Restaurant } from 'model';
 import { currencyCodes, getCurrencyForDevice } from 'utils';
-import type { Menu, Restaurant } from 'model';
-import { BusinessMenuComponent } from '../business-menu/business-menu.component';
+import {
+  type CategoryDetails,
+  type DishRef,
+  moveCategory,
+  moveDish,
+  saveCategoryDetails,
+  saveDish,
+  saveExtras,
+  setAvailability,
+} from '../../utils/menu-edits';
+import { CategoryEditorComponent } from '../category-editor/category-editor.component';
+import { DishEditorComponent } from '../dish-editor/dish-editor.component';
+import {
+  AvailabilityChange,
+  DishMove,
+  MenuListComponent,
+} from '../menu-list/menu-list.component';
 
+/** What the editor panel holds: a dish, a category, or nothing. */
+export type MenuEditing =
+  | {
+      readonly kind: 'dish';
+      readonly categoryId: string;
+      readonly itemId?: string;
+    }
+  | { readonly kind: 'category'; readonly categoryId?: string };
+
+/**
+ * The business menu editor (GitHub issue #2182): the menu as a list that reads
+ * like the menu, and one editor at a time for a dish or a category.
+ *
+ * On a wide screen the editor opens beside the list; on a phone it takes the
+ * page, and closing it returns to the list.
+ *
+ * Every change is a whole-menu save made from the stored menu, through the
+ * pure functions in `menu-edits`. An open editor closes once the saved menu
+ * has been read back, so a refused save leaves the owner's edit where it was.
+ */
 @Component({
   selector: 'edit-menu-page',
   templateUrl: 'edit-menu-page.component.html',
@@ -27,13 +66,15 @@ import { BusinessMenuComponent } from '../business-menu/business-menu.component'
   imports: [
     PageComponent,
     IonContent,
-    IonImg,
     IonItem,
     IonSelect,
     IonSelectOption,
+    IonButton,
     TranslocoPipe,
     FormsModule,
-    BusinessMenuComponent,
+    MenuListComponent,
+    DishEditorComponent,
+    CategoryEditorComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -44,28 +85,12 @@ export class EditMenuPage {
 
   saveMenu = output<Menu>();
 
-  /** The currency the owner chose, or `''` for "Not set" (issue #1102). */
   saveCurrencyCode = output<string>();
 
   placeName = computed(() => this.restaurant()?.name);
 
-  /**
-   * The currency every price on this menu is stated in (GitHub issue #1102).
-   *
-   * Asked once, at the top, rather than per price: a menu is priced in one
-   * currency, and a per-item control would invite two.
-   */
   readonly currency = linkedSignal(() => this.menu()?.currency ?? '');
 
-  /**
-   * What to offer, with the owner's likely answer first.
-   *
-   * The device's own currency is a good guess and never an answer - a chain
-   * operator editing a Zurich menu from Berlin would be handed euros - so it is
-   * pre-selected and still has to be saved. `Not set` stays available, because
-   * a menu that has never stated its currency shows bare numbers, which a guest
-   * can ask about, rather than a symbol the product guessed and they believe.
-   */
   readonly currencies = computed(() => {
     const suggested = getCurrencyForDevice({
       locale: navigator.language,
@@ -76,24 +101,138 @@ export class EditMenuPage {
     return [...currencyCodes.filter(({ code }) => code === suggested), ...rest];
   });
 
+  readonly editing = signal<MenuEditing | undefined>(undefined);
+
+  /** Set by a save; the next menu read back closes the editor. */
+  private readonly awaitingSavedMenu = signal(false);
+
   /**
-   * The chosen currency, as an ISO 4217 code, or `''` for "Not set".
-   *
-   * Its own output rather than a {@link saveMenu} carrying the whole menu.
-   * Emitting a menu made choosing a currency a full menu save: it wrote back a
-   * categories array the owner might still have been editing, and at the time
-   * a menu save also left the editor (it no longer does since issue #1377) -
-   * so picking a currency routed the owner off the page. "Not set" is `''` rather than a
-   * menu with the key stripped, because the model reads a *missing field* as
-   * "not stated" and only the write can express that; a stripped key on the way
-   * to a merging update says nothing at all, which is what made unsetting a
-   * silent no-op.
+   * Reacts to the menu alone: reading the flag untracked keeps setting it
+   * from closing the editor before the saved menu has come back.
    */
+  readonly closeOnSavedMenu = effect(() => {
+    this.menu();
+
+    untracked(() => {
+      if (this.awaitingSavedMenu()) {
+        this.awaitingSavedMenu.set(false);
+        this.editing.set(undefined);
+      }
+    });
+  });
+
+  private categoryOf(categoryId: string | undefined): Category | undefined {
+    return this.menu()?.categories.find(({ id }) => id === categoryId);
+  }
+
+  readonly editingDish = computed<MenuItem | undefined>(() => {
+    const editing = this.editing();
+
+    if (editing?.kind !== 'dish' || !editing.itemId) {
+      return undefined;
+    }
+
+    return this.categoryOf(editing.categoryId)?.items?.find(
+      ({ id }) => id === editing.itemId,
+    );
+  });
+
+  readonly editingCategory = computed<Category | undefined>(() => {
+    const editing = this.editing();
+
+    return this.categoryOf(editing?.categoryId);
+  });
+
+  readonly selectedId = computed(() => {
+    const editing = this.editing();
+
+    if (!editing) {
+      return undefined;
+    }
+
+    return editing.kind === 'dish' ? editing.itemId : editing.categoryId;
+  });
+
   saveCurrency(): void {
     if (!this.menu()) {
       return;
     }
 
     this.saveCurrencyCode.emit(this.currency());
+  }
+
+  openDish(ref: DishRef): void {
+    this.editing.set({
+      kind: 'dish',
+      categoryId: ref.categoryId,
+      itemId: ref.itemId,
+    });
+  }
+
+  addDish(categoryId: string): void {
+    this.editing.set({ kind: 'dish', categoryId });
+  }
+
+  openCategory(categoryId: string): void {
+    this.editing.set({ kind: 'category', categoryId });
+  }
+
+  addCategory(): void {
+    this.editing.set({ kind: 'category' });
+  }
+
+  closeEditor(): void {
+    this.editing.set(undefined);
+  }
+
+  private write(change: (menu: Menu) => Menu, closesEditor = true): void {
+    const menu = this.menu();
+
+    if (!menu) {
+      return;
+    }
+
+    this.awaitingSavedMenu.set(closesEditor);
+    this.saveMenu.emit(change(menu));
+  }
+
+  onSaveDish(dish: MenuItem): void {
+    const editing = this.editing();
+
+    if (editing?.kind === 'dish') {
+      this.write((menu) => saveDish(menu, editing.categoryId, dish));
+    }
+  }
+
+  onSaveCategory(details: CategoryDetails): void {
+    const editing = this.editing();
+
+    if (editing?.kind === 'category') {
+      this.write((menu) =>
+        saveCategoryDetails(menu, editing.categoryId, details),
+      );
+    }
+  }
+
+  /** Extras keep the category editor open: they are added one at a time. */
+  onSaveExtras(extrasBlock: Category['extrasBlock']): void {
+    const editing = this.editing();
+
+    if (editing?.kind === 'category' && editing.categoryId) {
+      const categoryId = editing.categoryId;
+      this.write((menu) => saveExtras(menu, categoryId, extrasBlock), false);
+    }
+  }
+
+  onAvailabilityChange({ ref, available }: AvailabilityChange): void {
+    this.write((menu) => setAvailability(menu, ref, available), false);
+  }
+
+  onMoveCategory({ from, to }: { from: number; to: number }): void {
+    this.write((menu) => moveCategory(menu, from, to), false);
+  }
+
+  onMoveDish({ categoryId, from, to }: DishMove): void {
+    this.write((menu) => moveDish(menu, categoryId, from, to), false);
   }
 }

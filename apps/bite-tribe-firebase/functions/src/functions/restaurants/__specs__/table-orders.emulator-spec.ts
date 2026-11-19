@@ -711,6 +711,34 @@ describe('table cart and order submission', () => {
       ).toBe('itemUnavailable');
     });
 
+    /**
+     * A dish whose variants are every version of it has no price of its own
+     * (issue #2182): it is ordered through a variant, never plain at nothing.
+     */
+    it('refuses a plain line for a dish that is only sold as its variants', async () => {
+      await ordering();
+      await setMenu([
+        {
+          id: 'category-pizza',
+          title: 'Pizza',
+          items: [
+            {
+              id: MARGHERITA,
+              name: 'Margherita',
+              price: 0,
+              variants: [{ id: MARGHERITA_LARGE, name: 'Large', price: 16 }],
+            },
+          ],
+        },
+      ]);
+
+      expect(await refused([margherita({ price: 0 })])).toEqual({
+        ok: false,
+        reason: 'itemUnavailable',
+        item: { menuItemId: MARGHERITA, name: 'Margherita' },
+      });
+    });
+
     it('refuses a sold-out size of a dish that is still on', async () => {
       await ordering();
       await setMenu([

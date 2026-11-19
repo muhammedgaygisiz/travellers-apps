@@ -230,6 +230,15 @@ export const OwnPrivateProfile: Story = {
   },
 };
 
+// The own private profile with requests waiting: a Follow requests row with
+// the pending count sits under the visibility status (issue #2165).
+export const OwnPrivateProfileWithFollowRequests: Story = {
+  args: {
+    ...OwnPrivateProfile.args,
+    followRequestCount: 3,
+  },
+};
+
 // Another account's private profile. The rules refuse its document, so the
 // page receives a stand-in holding the uid alone, while the Bites still arrive
 // by the route and must not be shown (issue #1863).

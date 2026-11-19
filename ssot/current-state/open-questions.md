@@ -148,10 +148,12 @@ gates the story named with it.
 - **Are pending requests accepted when a private profile turns public, or dropped?**
   **Decided on 19 November 2026: accepted** ([#2168]). The visibility switch warns the owner
   first, and only when there is at least one pending request.
-- **How much of a requester does the owner see when the requester is private too?** The owner
-  cannot read a private requester's profile, so a request from one would show as `Anonymous`
-  and could not be judged. The leaning is the display name only, still under debate. Gates
-  the owner's list ([#2165]) and the owner's push ([#2166]).
+- **How much of a requester does the owner see when the requester is private too?**
+  **Decided on 19 November 2026: the display name only** ([#2165]). The owner cannot read a
+  private requester's profile, so a request from one would otherwise show as `Anonymous`
+  and could not be judged. The `listFollowRequests` callable returns the name, the list
+  shows it with the default avatar, and nothing else of the private profile leaves the
+  backend. The owner's push ([#2166]) names the requester by the same rule.
 
 ## Analytics Questions
 

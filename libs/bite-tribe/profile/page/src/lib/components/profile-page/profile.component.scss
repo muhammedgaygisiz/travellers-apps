@@ -132,6 +132,13 @@ $GOLD: #ffd700;
     }
   }
 
+  // Flush with the content edge, like the visibility status above it (#2165).
+  .follow-requests-row {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-top: 0.5rem;
+  }
+
   .profile-about {
     color: gray;
     font-style: italic;

@@ -87,6 +87,24 @@ export class ProfileDataAccessService {
     return !!profileOwner && this.blockedUserIds().includes(profileOwner);
   });
 
+  /**
+   * How many requests to follow the own profile are pending (GitHub issue
+   * #2165), counted only while the profile is private: a public profile is
+   * followed in one tap and has nothing to answer. Reloaded by the own profile
+   * each time it is entered, so coming back from the requests page shows what
+   * is left.
+   */
+  readonly pendingFollowRequests = resource({
+    params: () => {
+      const me = this.myUser();
+
+      return me?.userId && me.public !== true ? { uid: me.userId } : undefined;
+    },
+    loader: () => this.api.countPendingFollowRequests(),
+  });
+
+  pendingFollowRequestCount = resourceValue(this.pendingFollowRequests, 0);
+
   logout(): void {
     this.storeService.logout();
   }

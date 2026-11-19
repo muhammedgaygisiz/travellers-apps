@@ -13,6 +13,8 @@ export const PATH = {
   WORLD: 'world',
   ABOUT: 'about',
   FOLLOWERS: 'followers',
+  /** The own private profile's pending follow requests (GitHub issue #2165). */
+  FOLLOW_REQUESTS: 'follow-requests',
   MY_BUCKETLISTS: 'my-bucketlists',
   /**
    * The meals this account has finished (GitHub issue #1111).

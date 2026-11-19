@@ -1,0 +1,82 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+  [loading]="isLoading()"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <h1 class="ion-margin-bottom">{{ 'follow-requests' | transloco }}</h1>
+
+    @if (hasError()) {
+      <div class="empty-container">
+        <ion-label data-testid="follow-requests-error-message">
+          {{ 'something-went-wrong-please-try-again' | transloco }}
+        </ion-label>
+
+        <ion-button
+          fill="clear"
+          data-testid="follow-requests-error-retry"
+          (click)="retryClick.emit()"
+        >
+          {{ 'retry' | transloco }}
+        </ion-button>
+      </div>
+    } @else if (isEmpty() && listSettled()) {
+      <div class="empty-container">
+        <ion-label data-testid="follow-requests-empty">
+          {{ 'no-follow-requests' | transloco }}
+        </ion-label>
+      </div>
+    } @else {
+      <ion-list>
+        @for (request of requests(); track request.requesterUid) {
+          @let answering = answeringIds().has(request.requesterUid);
+          <ion-item
+            class="ion-margin-vertical"
+            [button]="true"
+            [detail]="false"
+            [attr.data-testid]="'follow-request-' + request.requesterUid"
+            (click)="requesterClick.emit(request)"
+          >
+            <ion-avatar slot="start">
+              @if (
+                request.photoUrl &&
+                !(request.requesterUid | imageErrored: imageErroredUserIds())
+              ) {
+                <img
+                  [src]="request.photoUrl"
+                  alt=""
+                  (error)="onImageError(request.requesterUid)"
+                />
+              } @else {
+                <ion-icon name="person-circle-outline" class="profile-image" />
+              }
+            </ion-avatar>
+            <ion-label>
+              <h2>{{ request.displayName || ('anonymous' | transloco) }}</h2>
+            </ion-label>
+            <div slot="end" class="follow-request-actions">
+              <ion-button
+                size="small"
+                data-testid="follow-request-accept"
+                [disabled]="answering"
+                (click)="onAccept($event, request)"
+                >{{ 'follow-request-accept' | transloco }}</ion-button
+              >
+              <ion-button
+                size="small"
+                fill="outline"
+                data-testid="follow-request-decline"
+                [disabled]="answering"
+                (click)="onDecline($event, request)"
+                >{{ 'follow-request-decline' | transloco }}</ion-button
+              >
+            </div>
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </ion-content>
+</ta-page>

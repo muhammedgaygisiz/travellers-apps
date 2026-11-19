@@ -11,6 +11,7 @@ import {
 import { PageComponent, PageMenuTarget } from 'common/ui/page';
 import {
   IonAlert,
+  IonBadge,
   IonButton,
   IonButtons,
   IonContent,
@@ -61,6 +62,7 @@ const PAGE_SIZE = 50;
   imports: [
     PageComponent,
     IonContent,
+    IonBadge,
     IonButton,
     IonButtons,
     IonIcon,
@@ -94,6 +96,25 @@ export class ProfileComponent {
    */
   isBlocked = input(false, { transform: booleanAttribute });
   userId = input<string>();
+  /**
+   * How many requests to follow the own profile are pending (GitHub issue
+   * #2165). Only the own profile's container passes it.
+   */
+  followRequestCount = input<number | undefined>(0);
+  /** The Follow requests row was tapped (issue #2165). */
+  readonly followRequestsClick = output<void>();
+
+  /**
+   * The Follow requests row: on the own profile, while it is private, and only
+   * when something waits for an answer. A public profile is followed in one
+   * tap, so it has no requests to show.
+   */
+  showFollowRequestsRow = computed(
+    (): boolean =>
+      this.isOwnProfile() &&
+      this.user()?.public !== true &&
+      (this.followRequestCount() ?? 0) > 0,
+  );
   displayName = computed((): string => {
     if (this.user() && !this.showsProfileContent()) {
       return this.transloco.translate('anonymous');

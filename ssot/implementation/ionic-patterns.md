@@ -202,6 +202,12 @@ only at the milestones, with growing gaps between them - so an ordinary post
 stays an ordinary post, and a rank is celebrated only for the user who
 climbed.
 
+Nothing that is celebrated is framed as something to lose. Epic [#1741] ruled
+out streaks with every other pressure mechanic; since 19 November 2026 (epic
+[#2034]) a streak is allowed, on the same terms: copy says what the user did
+and never what they could lose, nothing reminds them before it ends, it
+resets silently, and it cannot be frozen, repaired or bought back.
+
 **Every celebration goes through `CelebrationService` in
 `libs/common/celebration`** (issue [#1795]). `celebrate(moment, params?)` takes
 one of ten `CelebrationMoment`s - `first-bite`, `first-country`,
@@ -457,3 +463,4 @@ Check every visual change in **both** light and dark mode. Most theming defects 
 [#2016]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2016
 [#2017]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2017
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
+[#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034

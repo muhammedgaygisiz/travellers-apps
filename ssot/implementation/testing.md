@@ -69,25 +69,27 @@ npx jest --config libs/bite-tribe/search/data-access/jest.config.ts --runInBand
 | Storybook UI                     | `npm run build:storybook`; add direct `npx loki test` when visual output matters |
 | Consumer app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-e2e`                                      |
 | Business app E2E                 | `NX_DAEMON=false npx nx e2e bite-tribe-business-e2e`                             |
+| Admin app E2E                    | `NX_DAEMON=false npx nx e2e bite-tribe-admin-e2e`                                |
 | Capacitor native wrapper changes | `npx cap sync android` or the relevant Capacitor sync target                     |
 | Markdown/docs                    | `git diff --check`                                                               |
 
 ## Playwright E2E
 
-There are two Playwright projects, one per app:
+There are three Playwright projects, one per app:
 
 | Project                        | App                   | Dev server | Suite scope           |
 | ------------------------------ | --------------------- | ---------- | --------------------- |
 | `apps/bite-tribe-e2e`          | `bite-tribe`          | `:4200`    | Consumer app journeys |
 | `apps/bite-tribe-business-e2e` | `bite-tribe-business` | `:4300`    | Business app journeys |
+| `apps/bite-tribe-admin-e2e`    | `bite-tribe-admin`    | `:4600`    | Admin app journeys    |
 
-Playwright is the only supported E2E framework. Put new consumer and business-app E2E scenarios in Playwright. The legacy Cypress business project has been removed; do not reintroduce Cypress or `@nx/cypress` during later Nx migrations.
+Playwright is the only supported E2E framework. Put new consumer, business- and admin-app E2E scenarios in Playwright. The admin suite exists since issue [#1952]; it signs in as the seeded operator `admin@test.com` and starts with creating a restaurant from a blank form. It serves the admin app on `:4600`, not the admin `serve` target's `:4500`, which the emulator suite reserves for its logging port. The legacy Cypress business project has been removed; do not reintroduce Cypress or `@nx/cypress` during later Nx migrations.
 
-Both E2E targets start the Firebase emulators and their app's Angular dev server before running browser tests. Use them when validating launch-critical flows such as login, registration, creating a Bite, or maintaining a Restaurant through the real UI.
+All three E2E targets start the Firebase emulators and their app's Angular dev server before running browser tests. Use them when validating launch-critical flows such as login, registration, creating a Bite, or maintaining a Restaurant through the real UI.
 
-The two suites share **one** emulator stack (`bite-tribe-firebase`, same ports, same `.firebase-export` seed). They are kept as separate projects, and as separate CI jobs, so they never contend for those ports. The consumer suite is further split into three Playwright shards, each on its own runner with its own emulators; see [CI Pipeline](ci-pipeline.md#the-consumer-e2e-suite-runs-as-three-shards). Never run them at the same time.
+The three suites share **one** emulator stack (`bite-tribe-firebase`, same ports, same `.firebase-export` seed). They are kept as separate projects, and as separate CI jobs, so they never contend for those ports. The consumer suite is further split into three Playwright shards, each on its own runner with its own emulators; see [CI Pipeline](ci-pipeline.md#the-consumer-e2e-suite-runs-as-three-shards). Never run them at the same time.
 
-Each suite owns its own `src/support` helpers and page objects. That duplication is deliberate: a business journey must not be able to break the consumer suite, and vice versa.
+Each suite owns its own `src/support` helpers and page objects. That duplication is deliberate: a business or admin journey must not be able to break another app's suite.
 
 ### Run It Serially Locally
 
@@ -98,6 +100,7 @@ Run the suite serially when a local result has to be trustworthy:
 ```bash
 npx nx e2e bite-tribe-e2e --workers=1
 npx nx e2e bite-tribe-business-e2e --workers=1
+npx nx e2e bite-tribe-admin-e2e --workers=1
 ```
 
 To reproduce one CI shard of the consumer suite, add its `--shard`, for example `npx nx e2e bite-tribe-e2e --workers=1 --shard=2/3`.
@@ -112,7 +115,7 @@ An aborted run leaves the emulators holding their ports while the emulator UI on
 npx nx firebase-kill bite-tribe-firebase
 ```
 
-Never run two E2E suites at once — including `bite-tribe-e2e` alongside `bite-tribe-business-e2e`. They share the emulator ports, and the results of both become meaningless.
+Never run two E2E suites at once — including `bite-tribe-e2e` alongside `bite-tribe-business-e2e` or `bite-tribe-admin-e2e`. They share the emulator ports, and the results of both become meaningless.
 
 ### A Long-Lived Emulator Drifts
 
@@ -292,3 +295,4 @@ differs, compare the PNG sizes before calling it a regression.
 [#1814]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1814
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
+[#1952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1952

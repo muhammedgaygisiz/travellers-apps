@@ -44,6 +44,7 @@ setup
                 +-- loki-build -- loki-capture (x2) -- loki --+-- deploy-bite-tribe-storybook (develop only)
                 +-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
                 +-- business-e2e -----------------------------+
+                +-- admin-e2e --------------------------------+
                 |
                 +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
                 +-- functions-emulator
@@ -66,16 +67,16 @@ red unit test still keeps a commit out of production.
 Not every test in this repository runs on a pull request, and the difference is
 worth stating rather than inferring from a workflow file.
 
-| Suite                       | Command                 | Gates a merge                                  |
-| --------------------------- | ----------------------- | ---------------------------------------------- |
-| Unit tests                  | `nx run-many -t test`   | Yes, `tests` (4 shards), for the affected ones |
-| App and functions builds    | `nx run-many -t build`  | Yes, `build`, for the affected ones            |
-| Lint, Stylelint             | `nx affected -t lint`   | Yes                                            |
-| SSOT structure              | `npm run check:ssot`    | Yes, inside `lint`                             |
-| Visual regression           | `npm run loki:test`     | Yes, `loki`, when a story is affected          |
-| Consumer and business e2e   | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e`          |
-| Firestore rules             | `npm run test:rules`    | Yes, `firestore-rules`                         |
-| Firebase Functions emulator | `npm run test:emulator` | Yes, `functions-emulator`                      |
+| Suite                         | Command                 | Gates a merge                                      |
+| ----------------------------- | ----------------------- | -------------------------------------------------- |
+| Unit tests                    | `nx run-many -t test`   | Yes, `tests` (4 shards), for the affected ones     |
+| App and functions builds      | `nx run-many -t build`  | Yes, `build`, for the affected ones                |
+| Lint, Stylelint               | `nx affected -t lint`   | Yes                                                |
+| SSOT structure                | `npm run check:ssot`    | Yes, inside `lint`                                 |
+| Visual regression             | `npm run loki:test`     | Yes, `loki`, when a story is affected              |
+| Consumer, business, admin e2e | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e`, `admin-e2e` |
+| Firestore rules               | `npm run test:rules`    | Yes, `firestore-rules`                             |
+| Firebase Functions emulator   | `npm run test:emulator` | Yes, `functions-emulator`                          |
 
 **Coverage Is Informational.** `codecov/project` is reported on every pull
 request and never fails one: `codecov.yml` sets it `informational`. Each
@@ -265,7 +266,7 @@ Loki, which run to the end on that commit.
 | `.github/actions/install-if-missing`     | `build`                                                                                 | `npm ci` when the restored `node_modules` is unusable                                       |
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `test-shard`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `test-shard`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache; `key-suffix` separates the legs of a matrix   |
-| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`                                                             | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
+| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`, `admin-e2e`                                                | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 

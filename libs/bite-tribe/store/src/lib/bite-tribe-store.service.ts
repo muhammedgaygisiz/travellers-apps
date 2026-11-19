@@ -73,7 +73,6 @@ import {
 import { loadedLikesFromApi, removeLike, saveLike } from './likes/actions';
 import { likes } from './likes/selectors';
 import {
-  saveNewRestaurant,
   saveSocialMediaLinksForRestaurant,
   setRestaurantToCreate,
 } from './restaurants/actions';
@@ -218,10 +217,6 @@ export class BiteTribeStoreService implements StoreService {
    */
   retryMenuLoad(): void {
     this.store.dispatch(MenuActions.retryMenuLoad());
-  }
-
-  saveNewRestaurant(entity: Restaurant): void {
-    this.store.dispatch(saveNewRestaurant({ restaurant: entity }));
   }
 
   saveEditedBite(entity: Bite): void {

@@ -1,0 +1,19 @@
+{
+  "name": "bite-tribe-admin-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/bite-tribe-admin-e2e/src",
+  "tags": ["scope:bite-tribe-admin"],
+  "implicitDependencies": ["bite-tribe-admin", "bite-tribe-firebase"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/bite-tribe-admin-e2e"],
+      "options": {
+        "config": "apps/bite-tribe-admin-e2e/playwright.config.ts",
+        "skipInstall": true
+      },
+      "dependsOn": ["bite-tribe-firebase:firebase-build"]
+    }
+  }
+}

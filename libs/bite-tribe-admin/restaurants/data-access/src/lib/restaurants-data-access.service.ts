@@ -612,8 +612,14 @@ export class RestaurantsDataAccessService {
     this.storeService.selectRestaurantToCreate(restaurant);
   }
 
-  submitNewRestaurant(restaurant: Restaurant): void {
-    this.storeService.saveNewRestaurant(restaurant);
+  /**
+   * Creates a restaurant without a candidate, and resolves once it, its menu
+   * and its photo are written. It used to dispatch a store action whose effect
+   * dropped the promise, so a rejected write never reached the page, which
+   * navigated away as if it had worked (issue #1952).
+   */
+  submitNewRestaurant(restaurant: Restaurant): Promise<void> {
+    return this.api.saveNewRestaurant(restaurant);
   }
 
   async searchPlaces(

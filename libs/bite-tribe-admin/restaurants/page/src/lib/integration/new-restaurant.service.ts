@@ -20,11 +20,26 @@ export class NewRestaurantService {
   /** Candidate position used to bias the Google text search. */
   private prefillPosition?: Geopoint;
 
+  /**
+   * Leaves the page only once the restaurant is written. A failed save stays
+   * on the page with the operator's input and says so: it used to navigate
+   * back as if it had worked while nothing was written (issue #1952).
+   */
   async submitNewRestaurant(restaurant: Restaurant): Promise<void> {
-    if (restaurant.restaurantCandidateId) {
-      await this.dataAccess.verifyRestaurantCandidate(restaurant);
-    } else {
-      this.dataAccess.submitNewRestaurant(restaurant);
+    try {
+      if (restaurant.restaurantCandidateId) {
+        await this.dataAccess.verifyRestaurantCandidate(restaurant);
+      } else {
+        await this.dataAccess.submitNewRestaurant(restaurant);
+      }
+    } catch (error) {
+      console.error('Could not create the restaurant:', error);
+      await this.toast.present({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+
+      return;
     }
 
     this.navController.navigateBack(['dashboard']);

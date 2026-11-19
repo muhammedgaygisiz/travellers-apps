@@ -29,7 +29,7 @@ describe('NewRestaurantService', () => {
   beforeEach(() => {
     dataAccessMock = {
       restaurantToCreate: signal(undefined),
-      submitNewRestaurant: jest.fn(),
+      submitNewRestaurant: jest.fn().mockResolvedValue(undefined),
       verifyRestaurantCandidate: jest.fn().mockResolvedValue({
         restaurantId: 'restaurant-1',
         candidateId: 'candidate-1',
@@ -93,6 +93,39 @@ describe('NewRestaurantService', () => {
       expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
         'dashboard',
       ]);
+    });
+  });
+
+  // Issue #1952: a refused save used to navigate back as if it had worked.
+  describe('a save that fails', () => {
+    it('stays on the page and says so', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      dataAccessMock.submitNewRestaurant.mockRejectedValue(
+        new Error('invalid data'),
+      );
+
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+    });
+
+    it('stays on the page when a candidate verification fails', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      dataAccessMock.verifyRestaurantCandidate.mockRejectedValue(
+        new Error('already-exists'),
+      );
+
+      await service.submitNewRestaurant({
+        name: 'x',
+        restaurantCandidateId: 'c-1',
+      } as Restaurant);
+
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
+      expect(toastPresent).toHaveBeenCalled();
     });
   });
 

@@ -202,8 +202,9 @@ export class BiteTribeApiService {
     );
   }
 
-  saveNewRestaurant(restaurant: Restaurant): void {
-    this.restaurantApiService.saveNewRestaurant(restaurant);
+  /** A failure is thrown, so the page can say so (issue #1952). */
+  saveNewRestaurant(restaurant: Restaurant): Promise<void> {
+    return this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
   saveRestaurantImage(restaurantId: string, image: string): Promise<void> {

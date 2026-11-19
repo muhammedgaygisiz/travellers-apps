@@ -408,7 +408,7 @@ describe(BiteTribeApiService.name, () => {
           id: 'restaurant-id',
           name: 'Test Restaurant',
         } as any;
-        service.saveNewRestaurant(restaurant);
+        void service.saveNewRestaurant(restaurant);
         expect(saveNewRestaurantSpy).toHaveBeenCalledWith(restaurant);
       },
     ));

@@ -36,7 +36,21 @@ export class RestaurantApiService {
   async saveNewRestaurant(restaurant: Restaurant): Promise<void> {
     // Remove biteIds and image (base64) from the restaurant object before saving to Firestore.
     // The image will be uploaded to Firebase Storage separately and linked via imagePath.
-    const { biteIds, image, ...restaurantToBeSaved } = restaurant;
+    // A restaurant created here has no candidate - a candidate goes through
+    // `verifyRestaurantCandidate` - so its id is never written. It used to be
+    // passed through as `undefined`, which the web Firestore SDK rejects, and
+    // the restaurant was never created (issue #1952). Any other field left
+    // `undefined` is dropped for the same reason.
+    const {
+      biteIds,
+      image,
+      restaurantCandidateId: _candidateId,
+      ...rest
+    } = restaurant;
+    void _candidateId;
+    const restaurantToBeSaved = Object.fromEntries(
+      Object.entries(rest).filter(([, value]) => value !== undefined),
+    );
 
     // Add the new restaurant document without the base64 image
     const addRestaurantResult = await FirebaseFirestore.addDocument({

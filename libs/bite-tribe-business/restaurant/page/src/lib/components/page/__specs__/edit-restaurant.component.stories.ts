@@ -55,6 +55,7 @@ const trattoria: Restaurant = {
     country: 'Italy',
   },
   menuId: 'menu-trattoria',
+  categories: ['restaurant', 'fine-dining'],
   openingHours,
   socialMediaLinks: [
     { network: 'instagram', url: 'https://instagram.com/trattoria-roma' },

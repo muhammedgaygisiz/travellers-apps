@@ -1,7 +1,8 @@
-import type { Restaurant } from 'model';
+import { restaurantCategoriesOf, type Restaurant } from 'model';
 
 export type SetupItemKey =
   | 'image'
+  | 'categories'
   | 'address'
   | 'opening-hours'
   | 'description'
@@ -27,7 +28,8 @@ const hasText = (value: string | undefined): boolean => !!value?.trim();
  * restaurant sees the same list on every device. A photo that is still
  * uploading does not count: `imagePath` is only written once one has landed.
  *
- * Once #2131 adds a category to the restaurant, it joins this list.
+ * The category is second, after the photo, because it is the first thing a
+ * guest reads about the place after its name (#2131).
  */
 export const restaurantSetupChecklist = (
   restaurant: Restaurant,
@@ -42,6 +44,7 @@ export const restaurantSetupChecklist = (
 
   return [
     item('image', hasText(restaurant.imagePath) || hasText(restaurant.image)),
+    item('categories', restaurantCategoriesOf(restaurant).length > 0),
     item('address', hasText(address?.street) && hasText(address?.city)),
     item('opening-hours', (restaurant.openingHours?.length ?? 0) > 0),
     item('description', hasText(restaurant.description)),

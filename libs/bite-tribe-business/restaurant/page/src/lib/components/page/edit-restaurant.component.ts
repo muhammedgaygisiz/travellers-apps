@@ -25,7 +25,11 @@ import {
   DaySchedule,
   Geopoint,
   Link,
+  MAX_RESTAURANT_CATEGORIES,
+  RESTAURANT_CATEGORIES,
   Restaurant,
+  RestaurantCategory,
+  restaurantCategoriesOf,
   TableOrderingSettings,
 } from 'model';
 import {
@@ -132,6 +136,8 @@ export class EditRestaurantComponent {
    */
   readonly manageStaff = output<void>();
   readonly submitTableOrderingSettings = output<TableOrderingSettings>();
+  /** An empty list is "not stated", which removes the field (issue #2131). */
+  readonly submitCategories = output<RestaurantCategory[]>();
   /** `undefined` is "Not stated", which removes the field (issue #1830). */
   readonly submitGenderNeutralRestroom = output<boolean | undefined>();
   readonly editFloorPlan = output<void>();
@@ -227,6 +233,35 @@ export class EditRestaurantComponent {
       timeZone,
       ...(paused ? { pausedUntilTimestamp: paused } : {}),
     });
+  }
+
+  /**
+   * What kind of venue the restaurant is (issue #2131): up to
+   * `MAX_RESTAURANT_CATEGORIES` of a fixed list. Its own Save, like every
+   * other field group on the page.
+   */
+  readonly categoryOptions = RESTAURANT_CATEGORIES;
+  readonly maxCategories = MAX_RESTAURANT_CATEGORIES;
+
+  readonly categoriesForm = this.formBuilder.nonNullable.group({
+    categories: [
+      [] as RestaurantCategory[],
+      Validators.maxLength(MAX_RESTAURANT_CATEGORIES),
+    ],
+  });
+
+  initCategories = effect(() => {
+    this.categoriesForm.patchValue({
+      categories: restaurantCategoriesOf(this.restaurant()),
+    });
+  });
+
+  saveCategories(): void {
+    if (this.categoriesForm.invalid) {
+      return;
+    }
+
+    this.submitCategories.emit(this.categoriesForm.getRawValue().categories);
   }
 
   /**

@@ -77,3 +77,10 @@
     contain: none;
   }
 }
+
+/* The restaurant category picker (issue #2131). An overlay renders outside the
+ * page, so its width is set here. Ionic's default popover width cuts
+ * "Desserts & ice cream" short. */
+.restaurant-categories-popover {
+  --width: 260px;
+}

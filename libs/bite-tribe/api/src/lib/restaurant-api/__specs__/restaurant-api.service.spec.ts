@@ -576,6 +576,46 @@ describe(RestaurantApiService.name, () => {
     });
   });
 
+  /** See GitHub issue #2131. */
+  describe('saveCategoriesForRestaurant', () => {
+    it('writes the stated categories', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue({} as any);
+
+      await service.saveCategoriesForRestaurant('resto-123', [
+        'cafe',
+        'bakery',
+      ]);
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'restaurants/resto-123',
+        data: {
+          categories: ['cafe', 'bakery'],
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+
+    it('removes the field when none is stated rather than storing an empty list', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue({} as any);
+
+      await service.saveCategoriesForRestaurant('resto-123', []);
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'restaurants/resto-123',
+        data: {
+          categories: { __type__: 'delete' },
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+  });
+
   describe('saveGenderNeutralRestroomForRestaurant', () => {
     it.each([true, false])(
       'writes %s through the field path, leaving other facilities alone',

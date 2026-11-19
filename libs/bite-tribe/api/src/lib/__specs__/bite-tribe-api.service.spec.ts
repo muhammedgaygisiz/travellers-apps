@@ -28,6 +28,7 @@ class RestaurantApiMock {
   saveRestaurantImage = jest.fn();
   saveSocialMediaLinksForRestaurant = jest.fn();
   saveGenderNeutralRestroomForRestaurant = jest.fn();
+  saveCategoriesForRestaurant = jest.fn();
 }
 
 class MenuApiMock {
@@ -375,6 +376,19 @@ describe(BiteTribeApiService.name, () => {
         );
       },
     ));
+  });
+
+  describe('saveCategoriesForRestaurant', () => {
+    it('passes the categories on to RestaurantApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const restaurantApiService = TestBed.inject(RestaurantApiService);
+
+      service.saveCategoriesForRestaurant('restaurant-id', ['bar']);
+
+      expect(
+        restaurantApiService.saveCategoriesForRestaurant,
+      ).toHaveBeenCalledWith('restaurant-id', ['bar']);
+    });
   });
 
   describe('saveGenderNeutralRestroomForRestaurant', () => {

@@ -76,6 +76,9 @@ screen before the state backing them existed.
   rating. It is plain text only when there are no Bites.
 - The menu button sits under the description and links, above the tags, so it
   is reachable without scrolling past the opening hours and the map.
+- The kind of venue the restaurant has stated shows under its name, in a muted
+  line such as "Restaurant · Street food" (issue [#2131]). A restaurant that
+  has not said shows nothing, and an unknown value is dropped.
 - A facility the restaurant has stated shows as one line with an icon, under
   the opening hours (issue [#1830]): "Gender-neutral restroom" for yes, "No
   gender-neutral restroom" for no. A restaurant that has not said shows
@@ -135,6 +138,7 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1696] made the Menu label readable in light mode, where it had been drawn in fixed white on a transparent button, moved the menu button above the tags, and replaced the Bites button on both pages with the rating count as a link.
 
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
+- Issue [#2131] added the category line under the restaurant's name. Part of epic [#2123].
 - Issue [#2124] made the page wait for its Bites as well as its document, and
   gave it the not-found state. Part of [#2123].
 - Issue [#2125] gave the unverified place page its loading and not-found
@@ -165,3 +169,4 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#2124]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2124
 [#2125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2125
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830
+[#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131

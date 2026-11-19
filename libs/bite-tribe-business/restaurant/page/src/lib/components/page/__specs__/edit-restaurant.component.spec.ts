@@ -191,6 +191,70 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
+  /** The kind of venue, up to two of a fixed list (GitHub issue #2131). */
+  describe('categories', () => {
+    const withCategories = (categories: unknown): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        categories,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it('shows nothing chosen for a restaurant that has not said', () => {
+      withCategories(undefined);
+
+      expect(component.categoriesForm.value.categories).toEqual([]);
+    });
+
+    it('shows the stated categories, dropping any the list does not know', () => {
+      withCategories(['cafe', 'nightclub', 'bakery']);
+
+      expect(component.categoriesForm.value.categories).toEqual([
+        'cafe',
+        'bakery',
+      ]);
+    });
+
+    it('saves the chosen categories', () => {
+      withCategories(['cafe']);
+      component.categoriesForm.patchValue({ categories: ['bar', 'pub'] });
+
+      const emitted = jest.fn();
+      component.submitCategories.subscribe(emitted);
+      component.saveCategories();
+
+      expect(emitted).toHaveBeenCalledWith(['bar', 'pub']);
+    });
+
+    it('saves none as an empty list, which removes the field', () => {
+      withCategories(['cafe']);
+      component.categoriesForm.patchValue({ categories: [] });
+
+      const emitted = jest.fn();
+      component.submitCategories.subscribe(emitted);
+      component.saveCategories();
+
+      expect(emitted).toHaveBeenCalledWith([]);
+    });
+
+    it('refuses more than two and disables Save', () => {
+      withCategories(undefined);
+      component.categoriesForm.patchValue({
+        categories: ['bar', 'pub', 'cafe'],
+      });
+      fixture.detectChanges();
+
+      const emitted = jest.fn();
+      component.submitCategories.subscribe(emitted);
+      component.saveCategories();
+
+      expect(component.categoriesForm.invalid).toBe(true);
+      expect(emitted).not.toHaveBeenCalled();
+    });
+  });
+
   describe('links', () => {
     it('should return empty array if no links', () => {
       componentRef.setInput('restaurant', {

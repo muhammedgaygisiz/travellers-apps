@@ -39,8 +39,9 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   with no restaurant record falls through `staffEntryGuard` to the same page
   and the same state.
 - While a Restaurant the account holds still lacks something guests see, the
-  dashboard shows it a checklist (issue [#2126]): photo, address, opening
-  hours, description, a link, facilities, and "menu reviewed". Each item opens
+  dashboard shows it a checklist (issue [#2126]): photo, category (issue
+  [#2131]), address, opening hours, description, a link, facilities, and
+  "menu reviewed". Each item opens
   the screen that completes it - the menu editor for the menu, the edit page
   for the rest, or the edit page to create a menu when there is none. Every
   item is read from the stored Restaurant, never a local flag, so all owners
@@ -74,6 +75,7 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   to change it.
 - The Restaurant Owner publishes the menu, by taking the code on the restaurant's page (issue [#370]). It is a QR code and the same address as plain text, because publishing a menu should not require owning a printer - the text goes on a Google listing, an Instagram bio or the restaurant's own site, and the code goes in a window, on a menu card or on a table tent. A restaurant with no menu is shown what is missing instead of a code: one for a restaurant with no menu tells whoever scans it that there is nothing to read. What the reader then sees is [UC - View Restaurant Menus](uc-view-restaurant-menus.md); which restaurants may publish at all is `RD-PM-5`.
 - The Restaurant Owner states the Restaurant's facilities (issue [#1830]). Today that is one: whether it has a gender-neutral restroom, answered `Yes`, `No` or `Not stated`. `Not stated` removes the field rather than writing no, because the consumer page shows nothing for a Restaurant that has not said and would otherwise tell a guest "no" on the owner's behalf. Only the account holding the Restaurant states it; the rule is the Restaurant's, in [Restaurant](../domain/restaurant.md).
+- The Restaurant Owner states what kind of venue the Restaurant is (issue [#2131]): one or two categories from a fixed list, picked under the description and saved with their own Save. Choosing a third is refused and Save is disabled until one is removed. Choosing none removes the field, so the consumer page shows nothing rather than an empty answer. The list and the rule are in [Restaurant](../domain/restaurant.md).
 - The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
 - In the edit-menu page every change is saved by the Restaurant Owner's own Save, never by a pause in typing, and a save keeps the owner in the editor (issue [#1377]). It writes the whole menu under a loading overlay, the same feedback creating a Bite gives, and a toast reports the outcome. On success the menu is read again and the saved field's Save and Cancel go away; any other unsaved edit keeps them. On failure the edit stays for another try. A save used to return to the restaurant page, which together with the old autosave put the owner out of the editor mid-word. The category title and the item name each show Save and Cancel once edited; an empty title or name cannot be saved, and a price must be above zero. Renaming an item renames the variants that still carry its old name, because an order line prints both.
 
@@ -169,6 +171,7 @@ all be reviewed for the first time.
   copyable address and the print sheet. Closed as completed, delivering issue [#371].
 - Issue [#1830] added the facilities field group and its first facility, the gender-neutral
   restroom, which the consumer restaurant page shows. Part of epic [#1823].
+- Issue [#2131] added the category picker and its checklist item. Part of epic [#2123].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
@@ -208,3 +211,4 @@ all be reviewed for the first time.
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
 [#2127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2127
+[#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123

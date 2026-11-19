@@ -105,6 +105,48 @@
           </ion-button>
         </div>
 
+        <!--
+          What kind of venue this is, as the restaurant states it (issue
+          #2131). Up to two, for a hybrid such as a café that is also a bakery.
+          Nothing chosen is "not stated" and removes the field.
+        -->
+        <div class="ion-margin-top" [formGroup]="categoriesForm">
+          <ion-item>
+            <ion-select
+              formControlName="categories"
+              [multiple]="true"
+              interface="popover"
+              [interfaceOptions]="{ cssClass: 'restaurant-categories-popover' }"
+              [label]="'restaurant-categories' | transloco"
+              [placeholder]="'restaurant-categories-not-stated' | transloco"
+              data-testid="restaurant-categories"
+            >
+              @for (category of categoryOptions; track category) {
+                <ion-select-option [value]="category">{{
+                  'restaurant-category-' + category | transloco
+                }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-text
+            [color]="categoriesForm.invalid ? 'danger' : 'medium'"
+            data-testid="restaurant-categories-hint"
+          >
+            <p class="text-small">
+              {{
+                'restaurant-categories-hint' | transloco: { max: maxCategories }
+              }}
+            </p>
+          </ion-text>
+          <ion-button
+            data-testid="save-categories"
+            [disabled]="categoriesForm.invalid"
+            (click)="saveCategories()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+
         <div class="ion-margin-top" [formGroup]="addressForm">
           <ion-input
             label="{{ 'street' | transloco }}"

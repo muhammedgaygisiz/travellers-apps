@@ -190,6 +190,15 @@
           <bt-distance [distance]="placeDistance()" />
         </div>
 
+        @if (categories().length) {
+          <p class="categories text-small" data-testid="restaurant-categories">
+            @for (category of categories(); track category; let last = $last) {
+              {{ 'restaurant-category-' + category | transloco
+              }}{{ last ? '' : ' · ' }}
+            }
+          </p>
+        }
+
         <div
           class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
         >

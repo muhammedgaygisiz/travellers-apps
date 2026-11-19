@@ -145,6 +145,8 @@ export const FullMaintained: Story = {
     ] as Bite[],
     restaurant: {
       ...Registered.args?.restaurant,
+      // Stated by the restaurant, under its name (issue #2131).
+      categories: ['restaurant', 'street-food'],
       description:
         'China Wok is a cozy family-run restaurant serving authentic Cantonese and Sichuan dishes. From hand-pulled noodles to dim sum, every dish is prepared fresh daily with high-quality ingredients. Perfect for a relaxed lunch or a lively dinner with friends.',
       address: {

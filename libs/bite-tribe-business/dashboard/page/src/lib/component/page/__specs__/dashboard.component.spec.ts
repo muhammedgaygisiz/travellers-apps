@@ -189,6 +189,7 @@ describe(DashboardComponent.name, () => {
       description: 'Since 1952.',
       socialMediaLinks: [{ network: 'website', url: 'https://x.test' }],
       facilities: { genderNeutralRestroom: true },
+      categories: ['restaurant'],
       menuReviewedAtTimestamp: 1,
     };
 
@@ -206,7 +207,7 @@ describe(DashboardComponent.name, () => {
       const card = checklist('restaurant-1');
       expect(card).toBeTruthy();
       expect(card?.textContent).toContain(
-        'setup-checklist-progress:{"done":6,"total":7}',
+        'setup-checklist-progress:{"done":7,"total":8}',
       );
       expect(
         card

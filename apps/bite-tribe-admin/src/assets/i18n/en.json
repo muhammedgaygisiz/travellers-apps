@@ -16,6 +16,7 @@
   "password-reset-requested-check-your-email": "If an account exists for this email, we've sent a password reset link.",
   "send-password-reset-link": "Send reset link",
   "something-went-wrong-please-try-again": "Something went wrong. Please try again.",
+  "restaurant-saving": "Saving the restaurant…",
   "admin-start-title": "BiteTribe Admin",
   "admin-dashboard-title": "Operations",
   "admin-dashboard-message": "BiteTribe-internal tools.",

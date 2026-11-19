@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NewRestaurantService } from '../new-restaurant.service';
 import { RestaurantsDataAccessService } from 'bite-tribe-admin/restaurants-data-access';
-import { NavController } from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { Bite, GooglePlace, PlaceDetails, Restaurant } from 'model';
 import { TranslocoService } from '@jsverse/transloco';
@@ -25,6 +25,7 @@ describe('NewRestaurantService', () => {
     navigateBack: jest.Mock;
   };
   let toastPresent: jest.Mock;
+  let loading: { present: jest.Mock; dismiss: jest.Mock };
 
   beforeEach(() => {
     dataAccessMock = {
@@ -45,6 +46,10 @@ describe('NewRestaurantService', () => {
     };
 
     toastPresent = jest.fn().mockResolvedValue(undefined);
+    loading = {
+      present: jest.fn().mockResolvedValue(undefined),
+      dismiss: jest.fn().mockResolvedValue(true),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -52,6 +57,10 @@ describe('NewRestaurantService', () => {
         { provide: RestaurantsDataAccessService, useValue: dataAccessMock },
         { provide: NavController, useValue: navControllerMock },
         { provide: ToastService, useValue: { present: toastPresent } },
+        {
+          provide: LoadingController,
+          useValue: { create: jest.fn().mockResolvedValue(loading) },
+        },
         { provide: TranslocoService, useValue: MockTranslocoService },
       ],
     });
@@ -93,6 +102,54 @@ describe('NewRestaurantService', () => {
       expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
         'dashboard',
       ]);
+    });
+  });
+
+  // Issue #2172: the page looked idle during a slow upload, which invited a
+  // second submit and a second verification.
+  describe('while saving', () => {
+    it('shows a modal saving state, then removes it', async () => {
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+
+      expect(loading.present).toHaveBeenCalled();
+      expect(loading.dismiss).toHaveBeenCalled();
+    });
+
+    it('removes the saving state when the save fails', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      dataAccessMock.submitNewRestaurant.mockRejectedValue(new Error('x'));
+
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+
+      expect(loading.dismiss).toHaveBeenCalled();
+    });
+
+    it('ignores a second submit while the first is in flight', async () => {
+      let finish: () => void = () => undefined;
+      dataAccessMock.submitNewRestaurant.mockImplementation(
+        () => new Promise<void>((resolve) => (finish = resolve)),
+      );
+
+      const first = service.submitNewRestaurant({ name: 'x' } as Restaurant);
+      await Promise.resolve();
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+      finish();
+      await first;
+
+      expect(dataAccessMock.submitNewRestaurant).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts a new submit after a failed one', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      dataAccessMock.submitNewRestaurant
+        .mockRejectedValueOnce(new Error('stalled'))
+        .mockResolvedValueOnce(undefined);
+
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+      await service.submitNewRestaurant({ name: 'x' } as Restaurant);
+
+      expect(dataAccessMock.submitNewRestaurant).toHaveBeenCalledTimes(2);
+      expect(navControllerMock.navigateBack).toHaveBeenCalledTimes(1);
     });
   });
 

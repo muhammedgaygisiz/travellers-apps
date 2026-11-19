@@ -1,7 +1,8 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { RestaurantsDataAccessService } from 'bite-tribe-admin/restaurants-data-access';
 import { Bite, Geopoint, GooglePlace, PlaceDetails, Restaurant } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
@@ -9,6 +10,11 @@ export class NewRestaurantService {
   private readonly dataAccess = inject(RestaurantsDataAccessService);
   private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
+  private readonly loadingController = inject(LoadingController);
+  private readonly transloco = inject(TranslocoService);
+
+  /** One save at a time: a second submit started a second verification. */
+  private saving = false;
 
   restaurantToCreate = this.dataAccess.restaurantToCreate;
 
@@ -26,6 +32,20 @@ export class NewRestaurantService {
    * back as if it had worked while nothing was written (issue #1952).
    */
   async submitNewRestaurant(restaurant: Restaurant): Promise<void> {
+    if (this.saving) {
+      return;
+    }
+    this.saving = true;
+
+    // Modal, as on the business menu editor: a photo upload can take a while,
+    // and the page used to look idle while it ran, which invited a second
+    // submit and a second verification (issue #2172).
+    const loading = await this.loadingController.create({
+      message: this.transloco.translate('restaurant-saving'),
+      backdropDismiss: false,
+    });
+    await loading.present();
+
     try {
       if (restaurant.restaurantCandidateId) {
         await this.dataAccess.verifyRestaurantCandidate(restaurant);
@@ -34,6 +54,8 @@ export class NewRestaurantService {
       }
     } catch (error) {
       console.error('Could not create the restaurant:', error);
+      await loading.dismiss();
+      this.saving = false;
       await this.toast.present({
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
@@ -42,6 +64,8 @@ export class NewRestaurantService {
       return;
     }
 
+    await loading.dismiss();
+    this.saving = false;
     this.navController.navigateBack(['dashboard']);
   }
 

@@ -329,8 +329,10 @@ V11  OP   judges whether the draft is ready to submit                     [decis
 V11a UI   uploads the image and puts its download URL on the draft
                  [conditional: an image was supplied at V9]
           └─→ SYS  stores the image under the Candidate id and returns its URL
-          └─◁ OP   sees an error on the form where the upload fails, with the draft
-                   intact and the Candidate untouched
+          └─◁ OP   sees the page saving, modally, so the review cannot be submitted
+                   twice; sees an error on the form where the upload fails or reports
+                   no progress for 30 s, with the draft intact and the Candidate
+                   untouched ([#2172])
           INV:R-10
           ├─ the upload fails    ↺ V11   the loop is left when the Operator submits
           │                              successfully or abandons the review
@@ -662,3 +664,4 @@ discovered in review.
 [#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
 [#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630
 [#1631]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1631
+[#2172]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2172

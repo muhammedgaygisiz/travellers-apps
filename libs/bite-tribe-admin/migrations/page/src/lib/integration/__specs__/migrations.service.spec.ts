@@ -267,6 +267,24 @@ describe(MigrationsService.name, () => {
       });
     });
 
+    it('should call the follower acceptance backfill for its own name', async () => {
+      const result = { processed: 10, private: 3, stamped: 7 };
+      const backfillFollowerAcceptance = jest.fn().mockResolvedValue(result);
+      const service = configure(
+        aDataAccess({
+          backfillFollowerAcceptance,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('follower-acceptance');
+
+      expect(backfillFollowerAcceptance).toHaveBeenCalledTimes(1);
+      expect(service.collectionMigrationState('follower-acceptance')).toEqual({
+        status: 'done',
+        result,
+      });
+    });
+
     it('should call the Bite countries rebuild for its own name', async () => {
       const result = { countries: 12 };
       const rebuildBiteCountries = jest.fn().mockResolvedValue(result);

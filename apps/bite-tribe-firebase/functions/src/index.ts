@@ -11,6 +11,7 @@ export { backfillMenuItemIdsCallable } from './functions/menus/backfill-menu-ite
 export { migrateRestaurantOwnerIdsCallable } from './functions/restaurants/migrate-restaurant-owner-ids';
 export { backfillBiteImageStatusCallable } from './functions/bites/backfill-bite-image-status';
 export { rebuildBiteCountriesCallable } from './functions/bites/rebuild-bite-countries';
+export { backfillFollowerAcceptanceCallable } from './functions/users/backfill-follower-acceptance';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
 export { notifyOwnerOnFollowRequest } from './functions/notifications/notify-on-follow-request';
 export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
@@ -148,6 +149,7 @@ export {
   declineFollowRequest,
 } from './functions/users/answer-follow-request';
 export { listFollowRequests } from './functions/users/list-follow-requests';
+export { applyFollowVisibilityOnUserUpdate } from './functions/users/follow-visibility';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
 export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';

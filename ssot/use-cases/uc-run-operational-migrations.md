@@ -4,9 +4,9 @@
 
 **Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
-`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Six collection-wide
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Seven collection-wide
 migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats`,
-`bite-image-status`, `bite-countries` and `restaurant-owner-ids` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
+`bite-image-status`, `bite-countries`, `restaurant-owner-ids` and `follower-acceptance` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
 removed rather than carried over, for the reasons below.
 
 ## Goal
@@ -40,6 +40,9 @@ means, and what an operator is shown when a run succeeds or fails.
 - **Restaurant owner ids migration** moves each restaurant's owner from
   `ownerUserId` into the `ownerUserIds` set, and reports how many it migrated,
   skipped and found conflicting.
+- **Follower acceptance** marks every follower of every private profile as
+  accepted, and reports how many users it looked at, how many were private and
+  how many followers it stamped.
 - **Bite image status backfill** marks every Bite that predates the upload
   states `uploaded` or `failed` from what Storage holds, and reports how many it
   inspected, set each way and skipped.
@@ -81,7 +84,21 @@ collection itself.
 
 Registered today: `review-timestamps` ([issue-1283](../history/records/issue-1283.md)), `menu-item-ids`
 (issue [#1099]), `menu-item-stats` (issue [#1113]), `bite-image-status` (issue [#1717]),
-`bite-countries` (issue [#1893]) and `restaurant-owner-ids` (issue [#1752]).
+`bite-countries` (issue [#1893]), `restaurant-owner-ids` (issue [#1752]) and
+`follower-acceptance` (issue [#2168]).
+
+`follower-acceptance` stamps `acceptedAt` on both follow edges of every
+follower of every private profile that lacks it (epic [#2144]). A private
+author's new Bite is pushed only to followers whose edge carries it, and the
+followers a profile had before follow requests existed followed in one tap and
+were never approved. A profile that turns private now gets the same stamping
+from `applyFollowVisibilityOnUserUpdate`, so this covers the profiles that were
+private before it, and is **run once after that trigger deploys**. A profile
+without the `public` flag is private, as everywhere else. An edge that already
+carries `acceptedAt` is never touched, which is what makes a second press write
+nothing, and a missing `following` edge is not created, because the
+follow-count triggers would count it as a new follow. See `Follow Request
+Contract` in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
 
 `restaurant-owner-ids` moves restaurant ownership from the single `ownerUserId`
 field to the `ownerUserIds` set (epic [#1614]). For each restaurant that still
@@ -225,6 +242,8 @@ reaches a device is the new version announcement, whose store considerations bel
 - `rebuildBiteCountriesCallable`, started from the Bite countries surface.
 - `migrateRestaurantOwnerIdsCallable`, started from the restaurant owner ids
   migration surface.
+- `backfillFollowerAcceptanceCallable`, started from the follower acceptance
+  backfill surface.
 - `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
   surface. It leaves an operator-log entry on both sides of the work - `started` and `succeeded` - because it reads every linked
   Bite and can time out halfway, and a `started` with no `succeeded` is exactly
@@ -255,6 +274,8 @@ reaches a device is the new version announcement, whose store considerations bel
   About page's country list.
 - Issue [#1752], part of epic [#1614], added `migrateRestaurantOwnerIdsCallable`, which moves
   restaurant ownership into the `ownerUserIds` set.
+- Issue [#2168], part of epic [#2144], added `backfillFollowerAcceptanceCallable`, which marks
+  the followers of profiles that were private before follow requests as accepted.
 - Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005].
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
   delivered by pull request [#948].
@@ -299,3 +320,5 @@ reaches a device is the new version announcement, whose store considerations bel
 [#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593
 [#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
 [#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
+[#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
+[#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168

@@ -47,6 +47,7 @@ export const OPERATOR_ACTIONS = [
   'assignRestaurantOwner',
   'backfillBiteAddress',
   'backfillBiteImageStatus',
+  'backfillFollowerAcceptance',
   'backfillMenuItemIds',
   'backfillReviewTimestamps',
   'clusterRestaurantCandidateForBite',

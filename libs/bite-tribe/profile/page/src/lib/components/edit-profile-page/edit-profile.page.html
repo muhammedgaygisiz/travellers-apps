@@ -169,3 +169,19 @@ issue #1343. -->
   (didDismiss)="handleGoPrivateConfirmation($event)"
 />
 }
+
+<!-- Making a private profile public accepts every pending follow request at
+once, so the switch asks first while at least one is pending. See GitHub issue
+#2168. -->
+@if (isGoPublicOpen()) {
+<ion-alert
+  [isOpen]="true"
+  header="{{ 'accept-follow-requests-header' | transloco }}"
+  message="{{ 'make-public-accepts-follow-requests' | transloco: { count: pendingFollowRequestCount() } }}"
+  [buttons]="[
+    { text: 'keep-private' | transloco, role: keepPrivateRole },
+    { text: 'yes-make-public' | transloco, role: goPublicRole }
+  ]"
+  (didDismiss)="handleGoPublicConfirmation($event)"
+/>
+}

@@ -250,9 +250,11 @@ Contract` in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social
   follower edge cannot tell an accepted request from a public follow. A push that fails is
   logged and the acceptance still succeeds, because the follow stands either way.
 - **A new Bite.** `notifyFollowersOnNewBite` sends `NEW_BITE` to a private author's
-  followers whose edge carries `acceptedAt`, which only `acceptFollowRequest` writes
-  ([#2167]). A follower from before epic [#2144] followed in one tap and was never approved,
-  so their edge has no `acceptedAt` and they get nothing. A public author's Bite still goes
+  followers whose edge carries `acceptedAt` ([#2167]). `acceptFollowRequest` writes it, and
+  so does the switch to private, which stamps every follower the profile had ([#2168]); the
+  followers of a profile that was already private are stamped by the `follower-acceptance`
+  migration. A follow edge without it was never approved, and that follower gets nothing.
+  The acceptances the switch to public makes send no `FOLLOW_REQUEST_ACCEPTED`. A public author's Bite still goes
   to every follower. Either way an account that blocks the author, or that the author
   blocks, is left out, and a private author is named by display name only, as below. The
   copy is the existing `newBite` keys. This push is all an accepted follower gets in epic
@@ -358,6 +360,7 @@ Relevant.
 - Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915].
 - Issue [#2166] is the Follow Request Contract above - a push for a new follow request and for its acceptance, part of epic [#2144].
 - Issue [#2167] sends a private author's new-Bite push to their accepted followers, in the Follow Request Contract above, part of epic [#2144].
+- Issue [#2168] marks a profile's followers accepted when it turns private and accepts its requests without a push when it turns public, part of epic [#2144].
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
@@ -392,3 +395,4 @@ Relevant.
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
 [#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
+[#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168

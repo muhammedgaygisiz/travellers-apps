@@ -137,6 +137,15 @@ export interface RebuildBiteCountriesResult extends CollectionMigrationResult {
   countries: number;
 }
 
+export interface BackfillFollowerAcceptanceResult extends CollectionMigrationResult {
+  /** Every user document the migration looked at (issue #2168). */
+  processed: number;
+  /** Of those, the private profiles whose followers it walked. */
+  private: number;
+  /** Followers that gained `acceptedAt`, across every private profile. */
+  stamped: number;
+}
+
 export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
   /** Dishes that now carry an aggregate. */
   dishes: number;
@@ -395,6 +404,22 @@ export class MigrationsDataAccessService {
       void,
       RebuildBiteCountriesResult
     >({ name: 'rebuildBiteCountriesCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Stamps `acceptedAt` on every follower of every private profile (issue
+   * #2168), so the followers a profile had before follow requests existed
+   * count as accepted. An edge that already carries it is left alone.
+   *
+   * No resource is reloaded: nothing in this app reads follow edges.
+   */
+  async backfillFollowerAcceptance(): Promise<BackfillFollowerAcceptanceResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillFollowerAcceptanceResult
+    >({ name: 'backfillFollowerAcceptanceCallable' });
 
     return result.data;
   }

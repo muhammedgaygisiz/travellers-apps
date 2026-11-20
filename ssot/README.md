@@ -108,6 +108,7 @@ to find the pages it touches; `AGENTS.md` routes every other kind of task.
 - [UC - Dismiss Restaurant Candidate](use-cases/uc-dismiss-restaurant-candidate.md)
 - [UC - Resolve Candidate Against An Existing Restaurant](use-cases/uc-resolve-candidate-against-an-existing-restaurant.md)
 - [UC - Share A Bite To Social Media](use-cases/uc-share-a-bite-to-social-media.md)
+- [UC - Find Dishes That Fit A Dietary Choice](use-cases/uc-find-dishes-that-fit-a-dietary-choice.md)
 
 ### Obsolete - pending deletion
 

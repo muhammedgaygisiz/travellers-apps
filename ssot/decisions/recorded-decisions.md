@@ -17,15 +17,16 @@ A decision is cited as **`RD-<REGISTER>-<n>`**.
 - **Numbers are historical.** They need not be contiguous within a register, and a
   number is not reused after its decision is removed.
 
-| Register   | Subject                                                                                                                                                     | Binds                                                                              |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `RD-UR-*`  | Roles, the capability matrix, and their relationship to the personas                                                                                        | [User Roles](../product/user-roles.md)                                             |
-| `RD-VRC-*` | Restaurant-candidate verification                                                                                                                           | [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md) |
-| `RD-DRC-*` | Restaurant-candidate detection                                                                                                                              | [UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md) |
-| `RD-GL-*`  | The glossary's terms and the naming rule                                                                                                                    | [Glossary](../product/glossary.md)                                                 |
-| `RD-TS-*`  | Guest table sessions and table orders: occupancy, sharing, identity, expiry, the staff queue, QR abuse protection, and how a meal is settled and summarised | [Table Visit](../domain/table-visit.md)                                            |
-| `RD-PM-*`  | Published restaurant menus: who may publish one, what a printed menu code names, and who is shown which page                                                | [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md)             |
-| `RD-QG-*`  | The architecture's quality goals: which qualities they are, their order, and how each is measured                                                           | [Architecture - Quality](../architecture/quality.md)                               |
+| Register   | Subject                                                                                                                                                     | Binds                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `RD-UR-*`  | Roles, the capability matrix, and their relationship to the personas                                                                                        | [User Roles](../product/user-roles.md)                                                                 |
+| `RD-VRC-*` | Restaurant-candidate verification                                                                                                                           | [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md)                     |
+| `RD-DRC-*` | Restaurant-candidate detection                                                                                                                              | [UC - Detect Restaurant Candidate](../use-cases/uc-detect-restaurant-candidate.md)                     |
+| `RD-GL-*`  | The glossary's terms and the naming rule                                                                                                                    | [Glossary](../product/glossary.md)                                                                     |
+| `RD-TS-*`  | Guest table sessions and table orders: occupancy, sharing, identity, expiry, the staff queue, QR abuse protection, and how a meal is settled and summarised | [Table Visit](../domain/table-visit.md)                                                                |
+| `RD-PM-*`  | Published restaurant menus: who may publish one, what a printed menu code names, and who is shown which page                                                | [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md)                                 |
+| `RD-QG-*`  | The architecture's quality goals: which qualities they are, their order, and how each is measured                                                           | [Architecture - Quality](../architecture/quality.md)                                                   |
+| `RD-DC-*`  | Dietary claims and choices: who may claim a dish fits a diet, how a claim is shown and removed, and what a member's dietary choices may be used for         | [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) |
 
 Decisions about **how the specification work is written and tracked** are not system
 decisions and are deliberately not here: they are `RD-PD-*`, in
@@ -185,6 +186,19 @@ asked.
 | `RD-QG-8` | **Test coverage stays informational and measures no goal.** Goals are evidenced by named tests, CI checks and build budgets, for the reason `Coverage Is Informational` in [Implementation - CI Pipeline](../implementation/ci-pipeline.md) gives                                                                                        |
 | `RD-QG-9` | **Backend cost and availability get no target.** Cost stays bounded by [Implementation - Performance Guidelines](../implementation/performance-guidelines.md) and watched by the budget alert on [Architecture - AI](../architecture/ai.md); availability is what Firebase provides                                                      |
 
+## `RD-DC-*` - Dietary claims and choices
+
+Taken 20 November 2026 by the team, on epic [#2193]. The thresholds they leave open are
+`Dietary Choice Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+
+| #         | Decision                                                                                                                                                                                                                                                                                                                                                        |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RD-DC-1` | **No dietary label is shown as plain fact.** Every label names its source: declared by the restaurant, reported by diners, or said by the creator of that Bite. The AI makes no dietary claim, which leaves `R-2` of [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) as it is                                                              |
+| `RD-DC-2` | **Ads and promoted content never conflict with a member's dietary or lifestyle choices.** A vegan or vegetarian member sees no meat ad, and a member who avoids pork, alcohol or another category for religious reasons sees none of it either. This settles which ad categories are excluded: those the member's own choices rule out, by a fixed mapping      |
+| `RD-DC-3` | **A member's dietary choices are only what the member sets.** They are never inferred from what a member searches, saves or posts, are readable by no other account, and are never sent to an ad network or to analytics as an attribute of the member, because religion and health are special-category data under GDPR Art. 9                                 |
+| `RD-DC-4` | **Diners disputing a restaurant's label removes it.** At a threshold of eligible disputes the label is removed automatically, not flagged, and it stays removed until an Operator restores it; the owner cannot set it again. A flag that only notified the owner was rejected, because it leaves a wrong label on screen for as long as the owner takes to act |
+| `RD-DC-5` | **High-risk labels are stricter.** Gluten-free, lactose-free, nut-free, halal and kosher are shown from diners or the creator only with a notice to confirm with the restaurant, never as a clean badge, and a restaurant's high-risk label is removed at a lower threshold than a lifestyle one                                                                |
+
 ## Provenance
 
 Created 8 September 2026, when the register was centralised.
@@ -271,3 +285,4 @@ treating them as verified.
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193

@@ -146,6 +146,38 @@ export interface BackfillFollowerAcceptanceResult extends CollectionMigrationRes
   stamped: number;
 }
 
+/**
+ * The two passes of the stored-photo backfill (issue #2143): `report`
+ * changes nothing, and `apply` takes down what the report found refused.
+ * The callable refuses `apply` until a report run has finished.
+ */
+export type ImageModerationBackfillMode = 'report' | 'apply';
+
+export interface ImageModerationBackfillResult extends CollectionMigrationResult {
+  /** Published photos the check answered for or could not answer for. */
+  checked: number;
+  passed: number;
+  /** Refused photos: listed by a report, taken down by an apply. */
+  refused: number;
+  /** Photos the check could not answer for, left for a later run. */
+  unavailable: number;
+  /** Stored objects that are not their document's published photo. */
+  skipped: number;
+}
+
+/**
+ * One call's answer: the run's counts so far, and whether it is done. Not a
+ * {@link CollectionMigrationResult}, which holds counts only.
+ */
+interface ImageModerationBackfillCall {
+  checked: number;
+  passed: number;
+  refused: number;
+  unavailable: number;
+  skipped: number;
+  complete: boolean;
+}
+
 export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
   /** Dishes that now carry an aggregate. */
   dishes: number;
@@ -422,6 +454,35 @@ export class MigrationsDataAccessService {
     >({ name: 'backfillFollowerAcceptanceCallable' });
 
     return result.data;
+  }
+
+  /**
+   * Checks every photo stored before the image check existed (issue #2143),
+   * in one of its two passes.
+   *
+   * One call works for a few minutes and keeps where it got to, so this calls
+   * again until the run is complete and returns the run's counts. A run that
+   * stops halfway - a closed tab, a failed call - is continued by the next
+   * press rather than started over. Each photo's verdict is kept, so the
+   * apply pass, and any run after it, asks the model about nothing judged.
+   *
+   * No resource is reloaded: nothing in this app shows the photos.
+   */
+  async runImageModerationBackfill(
+    mode: ImageModerationBackfillMode,
+  ): Promise<ImageModerationBackfillResult> {
+    for (;;) {
+      const result = await FirebaseFunctions.callByName<
+        { mode: ImageModerationBackfillMode },
+        ImageModerationBackfillCall
+      >({ name: 'imageModerationBackfillCallable', data: { mode } });
+      const { complete, checked, passed, refused, unavailable, skipped } =
+        result.data;
+
+      if (complete) {
+        return { checked, passed, refused, unavailable, skipped };
+      }
+    }
   }
 
   /**

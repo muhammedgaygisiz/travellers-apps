@@ -24,8 +24,12 @@ export interface RefusalVerdict {
   reason: string;
 }
 
-/** How the refusal was reached: a callable refused it, or a trigger undid it. */
-export type ContentRefusalStage = 'precheck' | 'callable' | 'trigger';
+/**
+ * How the refusal was reached: a callable refused it, a trigger undid it, or
+ * the backfill of stored photos (issue #2143) took down one already published.
+ */
+export type ContentRefusalStage =
+  'precheck' | 'callable' | 'trigger' | 'backfill';
 
 export interface ContentRefusal {
   uid: string;

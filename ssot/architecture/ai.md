@@ -142,8 +142,9 @@ pushes judge the text themselves, so neither sends it out in that window.
   account brings from its identity provider, and
   `setRestaurantImagePathOnUpload` and `setBiteTrailImagePathOnUpload` since
   [#2141]. A photo whose check could not run stays unpublished and is checked
-  again since [#2142]. One gap remains under epic [#2137]: photos stored before
-  the check existed are unchecked until [#2143]. A restaurant photo chosen during
+  again since [#2142]. Photos stored before the check existed are checked once
+  by the `image-moderation-backfill` migration since [#2143], below, and stay
+  unchecked until an operator has run it in production. A restaurant photo chosen during
   candidate verification is an operator's and is handed to
   `verifyRestaurantCandidate` without the check. The earlier decision and its
   reopening are in
@@ -206,9 +207,28 @@ photo `pending` and schedules it to be checked again ([#2142]), below.
   counts as one more attempt that could not answer. The rules refuse the three
   fields from every client but an operator's; the apps read `imageCheckNextAt`
   as a photo still being checked, not as an upload that stalled.
+- **Photos stored before the check are checked once** ([#2143]).
+  `imageModerationBackfillCallable` in `shared/moderation/image-moderation-backfill.ts`
+  lists `images/bites/`, `images/users/`, `images/restaurants/` and
+  `images/biteTrails/` and checks each object its document publishes - the one
+  `imagePath` or `photoUrl` names; any other object in a folder is counted as
+  `skipped`. It runs in two passes, settled in
+  [Current State - Open Questions](../current-state/open-questions.md): `report`
+  changes nothing and logs no refusal, and `apply`, refused until a report has
+  finished, deletes each refused object and writes the subject's
+  `storedRefusedUpdate` - `refused` with the category, and no published URL,
+  since the refused photo was the one shown. A document whose newer upload is
+  still `pending` loses only the URL. Both passes answer from `contentChecks`,
+  so the apply pass asks the model about nothing the report judged. An
+  `unavailable` verdict is left for a later run and never marks a stored photo
+  `failed`. One call works for at most five minutes and keeps its place - the
+  prefix and the Storage page token - in the server-only `migrationRuns`, and
+  the next call carries on from there; the admin app calls until the run is
+  complete. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
 - **A refusal is recorded** under `content refused` with the account, the
-  surface, the stage `trigger`, the field `image`, the category as `reason` and
-  the `storagePath`. No image data and no text go in the log.
+  surface, the stage - `trigger`, or `backfill` for the apply pass above - the
+  field `image`, the category as `reason` and the `storagePath`. No image data
+  and no text go in the log.
 
 The rules a member meets are on each use case:
 [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) for reviews,

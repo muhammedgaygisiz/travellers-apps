@@ -394,6 +394,8 @@
   "choose-different-photo": "別の写真を選ぶ",
   "profile-photo-refused": "新しい写真は BiteTribe では許可されていません",
   "profile-photo-refused-not-shown": "ほかの人には表示されません。プロフィール写真は以前のままです。",
+  "profile-photo-refused-removed": "プロフィール写真は BiteTribe では許可されていません",
+  "profile-photo-refused-removed-not-shown": "ほかの人には表示されません。別の写真を選ぶまで、プロフィールには写真がありません。",
   "choose-photo": "写真を選択",
   "image-upload-retry-failed": "アップロードを開始できませんでした。もう一度お試しください。",
   "bite-updated-successfully": "Biteを更新しました！",

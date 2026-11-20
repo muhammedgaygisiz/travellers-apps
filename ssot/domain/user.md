@@ -61,7 +61,7 @@ Current profile model fields:
 - `city`
 - `about`
 - `public`
-- `photoStatus` (`pending`, `uploaded`, `failed` or `refused`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. `refused` means the image check refused the new photo, which was deleted; `photoRefusalCategory` then names why. Only the finalize trigger writes `uploaded`, `refused` and the category; the device writes `pending` and `failed`. A photo whose check could not run stays `pending` with `imageCheckAttempts`, `imageCheckNextAt` and `imageCheckPath`, written by the backend alone, until `recheckPendingImages` publishes it, refuses it, or writes `failed` after the last attempt ([#2142]). See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953], [#2140]).
+- `photoStatus` (`pending`, `uploaded`, `failed` or `refused`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. `refused` means the image check refused the new photo, which was deleted; `photoRefusalCategory` then names why. Only the finalize trigger writes `uploaded`, `refused` and the category; the device writes `pending` and `failed`. A photo whose check could not run stays `pending` with `imageCheckAttempts`, `imageCheckNextAt` and `imageCheckPath`, written by the backend alone, until `recheckPendingImages` publishes it, refuses it, or writes `failed` after the last attempt ([#2142]). A photo stored before the image check and refused by the `image-moderation-backfill` migration is `refused` too, with `photoUrl` emptied, since it was the one shown ([#2143]). See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953], [#2140]).
 - `biteCount`
 - `countryCodes`
 - `postingStreak` - `{ weeks, lastPostingWeek }`, the weekly posting streak, backend-owned. What it counts, and that only its owner sees it, is in [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md) ([#2146], [#2148]).
@@ -311,3 +311,4 @@ images/users/{userId}/{filename}
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

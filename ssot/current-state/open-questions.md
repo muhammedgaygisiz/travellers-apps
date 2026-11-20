@@ -126,7 +126,9 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
   Its image check exists since [#2138], Bite photos go through it since [#2139], profile
   photos since [#2140], and restaurant and Bite Trail photos since [#2141], so every upload
-  path is checked. Photos stored before the check are unchecked until [#2143].
+  path is checked. Photos stored before the check are checked once by the
+  `image-moderation-backfill` migration ([#2143]), which an operator runs from the admin app;
+  until it has run in production, they stay unchecked.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
   a change is a pull request; nothing records why a term is on it beyond the review.
 - Does a member whose text is refused get a way to contest it? Today the only answer is to
@@ -154,8 +156,18 @@ can see it. The check is described in [Architecture - AI](../architecture/ai.md)
   any outage longer than an hour; a longer one keeps a Bite hidden for days. While the photo
   waits, the apps show it as still being checked rather than reading it as a stalled upload,
   and only the backend's `failed` after the last attempt brings the retry.
-- What happens to a refused photo found by the migration of stored photos: hidden the same
-  way as a new upload, or put in front of an operator first? Gates the migration story.
+- **What happens to a refused photo found by the migration of stored photos? Settled 20
+  November 2026 by the maintainer, on [#2143]: report first, then apply.** The migration runs
+  in two passes. The report pass changes nothing: it counts what the check passes and refuses
+  and lists the refused documents in the operator log entry of the run. Only once a report has
+  finished does the apply pass run, and it takes each refused photo down the way a refused
+  upload is: the object is deleted, the document's published URL is removed, and its status
+  becomes `refused` with the category, so the uploader is told and can choose another.
+  The report guards against a bulk run turning one miscalibrated category into many false
+  refusals at once, without the screen for reviewing each refusal that epic [#2137] keeps out
+  of scope. The verdicts are kept, so the apply pass asks the model about nothing the
+  report judged. Unlike a refused upload, a refused stored photo was the one shown, so a
+  profile, restaurant or Bite Trail is left without a photo until its owner chooses one.
 
 ## Follow Request Questions
 

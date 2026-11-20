@@ -394,6 +394,8 @@
   "choose-different-photo": "اختيار صورة أخرى",
   "profile-photo-refused": "صورتك الجديدة غير مسموح بها على BiteTribe",
   "profile-photo-refused-not-shown": "لا يراها أحد غيرك. تبقى صورة ملفك الشخصي كما كانت.",
+  "profile-photo-refused-removed": "صورة ملفك الشخصي غير مسموح بها على BiteTribe",
+  "profile-photo-refused-removed-not-shown": "لا يراها أحد غيرك. لن يكون لملفك الشخصي صورة إلى أن تختار صورة أخرى.",
   "choose-photo": "اختيار صورة",
   "image-upload-retry-failed": "تعذّر بدء الرفع. يرجى المحاولة مرة أخرى.",
   "bite-updated-successfully": "تم تحديث الوجبة بنجاح!",

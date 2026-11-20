@@ -4,9 +4,10 @@
 
 **Level:** L1
 Supported today. Every migration runs from its own surface in the admin app behind
-`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Seven collection-wide
+`roleGuard('admin')`, and every callable behind one calls `requireAdmin`. Eight collection-wide
 migrations are registered - `review-timestamps`, `menu-item-ids`, `menu-item-stats`,
-`bite-image-status`, `bite-countries`, `restaurant-owner-ids` and `follower-acceptance` - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
+`bite-image-status`, `bite-countries`, `restaurant-owner-ids`, `follower-acceptance` and
+`image-moderation-backfill`, the last run in two passes - alongside the four per-Bite migrations and the new version announcement. The display-name claim backfill was
 removed rather than carried over, for the reasons below.
 
 ## Goal
@@ -46,6 +47,11 @@ means, and what an operator is shown when a run succeeds or fails.
 - **Bite image status backfill** marks every Bite that predates the upload
   states `uploaded` or `failed` from what Storage holds, and reports how many it
   inspected, set each way and skipped.
+- **Stored photo check** checks once every photo published before the image
+  check existed, in two passes on one surface: a report that changes nothing
+  and lists the refused documents in the operator log, then an apply pass that
+  takes those photos down. It reports how many it checked, passed, refused,
+  could not get an answer for, and skipped.
 - **Bite address backfill**, **Restaurant clustering**, **Image migration** and
   **Geohash migration** each act on one Bite the operator picks from a table.
 
@@ -84,8 +90,48 @@ collection itself.
 
 Registered today: `review-timestamps` ([issue-1283](../history/records/issue-1283.md)), `menu-item-ids`
 (issue [#1099]), `menu-item-stats` (issue [#1113]), `bite-image-status` (issue [#1717]),
-`bite-countries` (issue [#1893]), `restaurant-owner-ids` (issue [#1752]) and
-`follower-acceptance` (issue [#2168]).
+`bite-countries` (issue [#1893]), `restaurant-owner-ids` (issue [#1752]),
+`follower-acceptance` (issue [#2168]) and `image-moderation-backfill` (issue [#2143]),
+registered as two names, `image-moderation-report` and `image-moderation-backfill`, one per
+pass.
+
+`image-moderation-backfill` checks once every Bite, profile, restaurant and Bite Trail
+photo published before the image check existed (epic [#2137]). It lists `images/bites/`,
+`images/users/`, `images/restaurants/` and `images/biteTrails/`, and checks each object
+its document publishes - the one `imagePath`, or `photoUrl` on a profile, names. Any other
+object there, an earlier photo of an edited Bite or an upload still waiting for its own
+check, is counted as skipped and not sent. The check is [Architecture - AI](../architecture/ai.md)'s.
+
+It is the one migration that **looks before it writes**, by the maintainer's decision in
+[Current State - Open Questions](../current-state/open-questions.md):
+
+- The **report** pass writes nothing to any photo or document. Its counts are on the page,
+  and its operator log entry lists the refused documents as `{collection}/{id}`, up to 500.
+- The **apply** pass is refused until a report has finished. It deletes each refused
+  object, removes the document's published URL and writes `refused` with the category - the
+  state a refused upload leaves, so the uploader is told and can choose another photo. A
+  refused stored photo was the one shown, so unlike a refused upload there is no earlier
+  photo to keep: the Bite is shown to its creator alone, and a profile, restaurant or Bite
+  Trail has no photo until its owner chooses one. A Bite's `updatedAt` is not touched. A
+  document whose newer upload still waits for its check loses only the URL, and keeps the
+  status that upload will settle.
+- Both passes answer from the kept verdicts, so the apply pass and every later run ask the
+  model about nothing already judged. A photo the check could not answer for is left as it
+  is, counted, and checked again by the next run; a stored photo is never marked `failed`.
+
+It is also the one migration that **spans several calls**. A run is one model call per
+photo, so one call works for at most five minutes and keeps its place - the prefix and the
+Storage page token - in the server-only `migrationRuns`, and the next call carries on from
+there. The admin app calls until the run is complete, so one press is one run; a press after
+a failed call or a closed tab continues the run rather than starting it again. A run logs
+one operator action, `started` when it begins and `succeeded` with its counts when it
+completes, however many calls it took.
+
+Idempotence holds as the contract asks: a second apply press takes down nothing the first
+did not, since a photo it took down is gone and the photos it passed answer from their kept
+verdicts. The exception is a photo the first could not get an answer for, which the second
+checks again. Nothing runs it on deploy; until both passes have run in production, the stored
+photos stay unchecked, as [Current State - Known Issues](../current-state/known-issues.md) records.
 
 `follower-acceptance` stamps `acceptedAt` on both follow edges of every
 follower of every private profile that lacks it (epic [#2144]). A private
@@ -223,8 +269,11 @@ a convenience over the stores' own update prompts rather than a release gate.
 
 ## App Store Review Area
 
-Not relevant, because nothing here reaches a store surface. Every migration runs from the admin
-app, which is a web surface, and each callable is operator-only. The one thing on this page that
+Not relevant to the store surfaces, because nothing here reaches one. Every migration runs from
+the admin app, which is a web surface, and each callable is operator-only. The stored photo
+check is part of the filtering App Store Review Guideline 1.2 asks for: it extends the image
+check to photos stored before it ([#2143]), with no new permission, plugin capability or store
+listing change. The one thing on this page that
 reaches a device is the new version announcement, whose store considerations belong to
 [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
 
@@ -244,6 +293,9 @@ reaches a device is the new version announcement, whose store considerations bel
   migration surface.
 - `backfillFollowerAcceptanceCallable`, started from the follower acceptance
   backfill surface.
+- `imageModerationBackfillCallable`, started in either pass from the stored photo
+  check surface (`ImageModerationBackfill`), and its emulator spec
+  `image-moderation-backfill.emulator-spec.ts`.
 - `recomputeMenuItemStatsAsOperator`, started from the menu item Bite stats
   surface. It leaves an operator-log entry on both sides of the work - `started` and `succeeded` - because it reads every linked
   Bite and can time out halfway, and a `started` with no `succeeded` is exactly
@@ -276,6 +328,9 @@ reaches a device is the new version announcement, whose store considerations bel
   restaurant ownership into the `ownerUserIds` set.
 - Issue [#2168], part of epic [#2144], added `backfillFollowerAcceptanceCallable`, which marks
   the followers of profiles that were private before follow requests as accepted.
+- Issue [#2143], part of epic [#2137], added `imageModerationBackfillCallable`, which checks
+  once every photo stored before the image check and takes down the refused ones after a
+  report.
 - Issue [#945] added `backfillBiteAddress`, delivered by pull request [#1005].
 - Issue [#939] added `clusterRestaurantCandidateForBite`, the restaurant-clustering migration,
   delivered by pull request [#948].
@@ -289,10 +344,12 @@ reaches a device is the new version announcement, whose store considerations bel
 - [User](../domain/user.md)
 - [Restaurant](../domain/restaurant.md)
 - [Bite](../domain/bite.md)
+- [Bite Trail](../domain/bite-trail.md)
 
 ## Related Pages
 
 - [User Roles](../product/user-roles.md) - the `admin` role every route and callable here checks
+- [Architecture - AI](../architecture/ai.md) - the image check the stored photo check runs
 - [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md) - the Release Announcement Contract,
   which owns what the announcement says and to which installations
 - [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) - the order lines that point at the menu item
@@ -322,3 +379,5 @@ reaches a device is the new version announcement, whose store considerations bel
 [#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

@@ -121,6 +121,26 @@ describe('checkImage', () => {
     );
   });
 
+  // The stored-photo backfill (issue #2143): its apply pass names itself in
+  // the refusal log, and its report pass, which takes nothing down, logs none.
+  it('names the stage it ran in, and logs nothing when told not to', async () => {
+    gemini.mockResolvedValue({ json: { category: 'hate' } });
+
+    await checkImage(asDb(), { ...request(), stage: 'backfill' });
+
+    expect(refusalLogs()).toHaveLength(1);
+    expect(refusalLogs()[0][1]).toEqual(
+      expect.objectContaining({ stage: 'backfill', reason: 'hate' }),
+    );
+
+    warn.mockClear();
+
+    await expect(
+      checkImage(asDb(), { ...request(), recordRefusal: false }),
+    ).resolves.toEqual({ verdict: 'refused', category: 'hate' });
+    expect(refusalLogs()).toHaveLength(0);
+  });
+
   it('passes an image the model judges acceptable, and logs no refusal', async () => {
     gemini.mockResolvedValue({ json: { category: 'none' } });
 

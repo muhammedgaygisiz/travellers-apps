@@ -54,6 +54,10 @@ export class MigrationsService {
     'bite-countries': () => this.dataAccess.rebuildBiteCountries(),
     'restaurant-owner-ids': () => this.dataAccess.migrateRestaurantOwnerIds(),
     'follower-acceptance': () => this.dataAccess.backfillFollowerAcceptance(),
+    'image-moderation-report': () =>
+      this.dataAccess.runImageModerationBackfill('report'),
+    'image-moderation-backfill': () =>
+      this.dataAccess.runImageModerationBackfill('apply'),
   };
 
   /** What the last run of one migration did, or nothing if it never ran here. */

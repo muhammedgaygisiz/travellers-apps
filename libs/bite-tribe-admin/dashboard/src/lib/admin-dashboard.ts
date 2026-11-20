@@ -336,6 +336,14 @@ export class AdminDashboard {
       group: 'secondary',
     },
     {
+      titleKey: 'admin-tool-image-moderation-backfill',
+      descriptionKey: 'admin-tool-image-moderation-backfill-description',
+      icon: 'eye-off-outline',
+      path: '/image-moderation-backfill',
+      testId: 'admin-tool-image-moderation-backfill',
+      group: 'secondary',
+    },
+    {
       titleKey: 'admin-tool-menu-item-stats-recompute',
       descriptionKey: 'admin-tool-menu-item-stats-recompute-description',
       icon: 'stats-chart-outline',

@@ -78,4 +78,12 @@ export class ProfilePhotoStatus {
   }
 
   protected readonly canRetry = computed((): boolean => !this.isOffline());
+
+  /**
+   * Whether a photo is still shown while one is refused: not when the check
+   * of stored photos (GitHub issue #2143) refused the one that was shown.
+   */
+  protected readonly refusedPhotoKept = computed(
+    (): boolean => !!this.user()?.photoUrl,
+  );
 }

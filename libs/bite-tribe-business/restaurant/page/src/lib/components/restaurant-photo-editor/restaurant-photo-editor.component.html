@@ -60,7 +60,8 @@ and the upload box once it is deleted (GitHub issue #2126). -->
 
 <!-- Below the box rather than over it: the photo shown is the restaurant's
 previous one, which is still current, and the box stays usable to choose a
-different photo (GitHub issue #2141). -->
+different photo (GitHub issue #2141). A photo refused by the check of stored
+photos (GitHub issue #2143) was the current one, so none is left to show. -->
 @if (photoStatus === 'refused' && !isEditing()) {
   <div
     class="photo-refused"
@@ -72,7 +73,12 @@ different photo (GitHub issue #2141). -->
     </ion-text>
     <ion-text>{{ refusalReasonKey() | transloco }}</ion-text>
     <ion-text class="text-small">
-      {{ 'restaurant-photo-refused-kept' | transloco }}
+      {{
+        (currentImageUrl()
+          ? 'restaurant-photo-refused-kept'
+          : 'restaurant-photo-refused-removed'
+        ) | transloco
+      }}
     </ion-text>
   </div>
 }

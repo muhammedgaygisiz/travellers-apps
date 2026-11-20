@@ -394,6 +394,8 @@
   "choose-different-photo": "选择其他照片",
   "profile-photo-refused": "你的新照片不符合 BiteTribe 的规定",
   "profile-photo-refused-not-shown": "其他人看不到它。你的头像保持不变。",
+  "profile-photo-refused-removed": "你的头像不符合 BiteTribe 的规定",
+  "profile-photo-refused-removed-not-shown": "其他人看不到它。在你选择其他照片之前，你的个人资料没有头像。",
   "choose-photo": "选择照片",
   "image-upload-retry-failed": "无法开始上传，请重试。",
   "bite-updated-successfully": "Bite更新成功！",

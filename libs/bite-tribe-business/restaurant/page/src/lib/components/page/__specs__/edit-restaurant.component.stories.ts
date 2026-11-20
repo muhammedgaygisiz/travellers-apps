@@ -195,3 +195,17 @@ export const PhotoRefused: Story = {
     photoRefusalCategory: 'violence',
   },
 };
+
+/**
+ * The check of stored photos refused the photo the restaurant showed (GitHub
+ * issue #2143). It was taken down with `imagePath`, so the restaurant has no
+ * photo until a different one is chosen, and the line below the box says so.
+ */
+export const StoredPhotoRefused: Story = {
+  args: {
+    section: 'photo',
+    restaurant: { ...trattoria, imagePath: undefined },
+    photoStatus: 'refused',
+    photoRefusalCategory: 'violence',
+  },
+};

@@ -394,6 +394,8 @@
   "choose-different-photo": "ሌላ ፎቶ ይምረጡ",
   "profile-photo-refused": "አዲሱ ፎቶዎ በBiteTribe ላይ አይፈቀድም",
   "profile-photo-refused-not-shown": "ሌላ ማንም አያየውም። የመገለጫ ፎቶዎ እንደነበረ ይቆያል።",
+  "profile-photo-refused-removed": "የመገለጫ ፎቶዎ በBiteTribe ላይ አይፈቀድም",
+  "profile-photo-refused-removed-not-shown": "ሌላ ማንም አያየውም። ሌላ ፎቶ እስኪመርጡ ድረስ መገለጫዎ ፎቶ የለውም።",
   "choose-photo": "ፎቶ ይምረጡ",
   "image-upload-retry-failed": "ጭነቱን መጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",

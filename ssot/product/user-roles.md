@@ -131,8 +131,10 @@ profile text, and a Bite's name, tags and description - is checked before anothe
 can read it and refused with a message when it fails, per `RD-UR-11` and
 [Architecture - AI](../architecture/ai.md). A Bite photo is checked before it is published
 ([#2139]), and so are a profile photo ([#2140]) and a restaurant or Bite Trail
-photo ([#2141]); photos stored before the check are not yet, as
-[Current State - Open Questions](../current-state/open-questions.md) records. Reporting a Review was the
+photo ([#2141]). Photos stored before the check are checked once by the
+`image-moderation-backfill` migration ([#2143]), which an operator runs from the admin app;
+until it has run in production they are not, as
+[Current State - Known Issues](../current-state/known-issues.md) records. Reporting a Review was the
 last piece of the user-facing half, under epic [#1284]. Store requirement rather than product
 polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category
@@ -389,3 +391,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

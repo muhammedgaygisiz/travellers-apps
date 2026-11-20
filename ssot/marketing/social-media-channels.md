@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026) and Amman (17 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026) and Bangkok (19 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1681,6 +1681,21 @@ photo is Amman's hillside houses from above. Leela's cover line is "Amman runs
 on mansaf and kunafa – here's where I eat mine". The city page `/eat/amman`
 went up the same evening, with no aliases, and its Instagram and Facebook
 post links were added once both posts were live.
+
+**Bangkok** (19 November 2026, scheduled for 22:00) tags two of five dish
+slides: `@phedmarkbkk` (phat kaphrao with wagyu shank; the Maps listing links
+it, and its bio names the Ekkamai dine-in) and `@koongtung.original` (King of
+Sea, boiled seafood in a spicy sauce; the Maps website is a bit.ly link to
+linktr.ee/koongtung, which links the account, and its bio lists the Banthat
+Thong branch). Khaosan Thai Food (pad see ew) has no Maps listing, Aheesah
+roddee Halal (beef noodle soup) has no account that could be found, and for
+Mae Sri Ruen Thai Dessert (khanom krok) there are only namesakes, a chicken
+noodle place and a shop. Thailand had 198 Bites, 30 of them in Bangkok. Leela
+wears a chut thai with a sabai and a jasmine garland and holds pad see ew; the
+cover photo is Wat Arun at dusk. Leela's cover line is "Bangkok's best bites
+are on the street, not in the mall". The city page `/eat/bangkok` went up the
+same evening, with no aliases, and its Instagram and Facebook post links were
+added once both posts were live.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

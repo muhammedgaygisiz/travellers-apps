@@ -107,6 +107,71 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  /** GitHub issue #2140. */
+  describe('a refused photo', () => {
+    const refused = {
+      userId: 'me',
+      displayName: 'Me',
+      email: 'me@test.com',
+      photoUrl: 'https://example.com/previous.jpg',
+      photoStatus: 'refused',
+      photoRefusalCategory: 'violence',
+    } as PublicUser;
+
+    const query = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('says the photo was not allowed, and why', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).not.toBeNull();
+      expect(component.refusalReasonKey()).toBe(
+        'photo-refused-reason-violence',
+      );
+    });
+
+    it('keeps the photo everybody else sees in the form', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      TestBed.tick();
+
+      expect(component.profileForm.value.photoUrl).toBe(
+        'https://example.com/previous.jpg',
+      );
+    });
+
+    it('opens the photo picker to choose a different one', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      const open = jest.spyOn(component, 'openPhotoPicker');
+
+      query('edit-profile-choose-different-photo')?.click();
+
+      expect(open).toHaveBeenCalled();
+    });
+
+    it('goes away once a different photo is picked', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      component.profileForm.patchValue({
+        photoUrl: 'data:image/png;base64,iVBORw0KGgo=',
+      });
+      fixture.detectChanges();
+
+      expect(component.photoRefused()).toBe(false);
+      expect(query('edit-profile-photo-refused')).toBeNull();
+    });
+
+    it('is not shown for a photo that was published', () => {
+      compRef.setInput('publicUser', { ...refused, photoStatus: 'uploaded' });
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).toBeNull();
+    });
+  });
+
   describe('setDisplayNameEffect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
       compRef.setInput('publicUser', undefined);

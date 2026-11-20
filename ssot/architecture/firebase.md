@@ -397,6 +397,7 @@ decrementBiteLikeCountOnLikeDelete
 updateBiteLikeCountOnLikeUpdate
 setBiteImagePathOnUpload
 setUserPhotoUrlOnUpload
+mirrorIdentityAvatarOnCreate
 setRestaurantImagePathOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike

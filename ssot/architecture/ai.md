@@ -136,9 +136,11 @@ pushes judge the text themselves, so neither sends it out in that window.
   Cloud Logging rather than a collection by the same decision that made it the
   operator audit trail (epic [#1471]): the query is
   `jsonPayload.message="content refused"`, and the logs expire on their own.
-- **Bite photos are checked; other photos are not yet.** `setBiteImagePathOnUpload`
-  calls `The Image Check` below since [#2139]. Profile, restaurant and Bite Trail
-  photos are published unchecked until their stories of epic [#2137] land. The
+- **Bite and profile photos are checked; other photos are not yet.**
+  `setBiteImagePathOnUpload` calls `The Image Check` below since [#2139], and
+  `setUserPhotoUrlOnUpload` since [#2140], which also covers the avatar a new
+  account brings from its identity provider. Restaurant and Bite Trail photos
+  are published unchecked until their stories of epic [#2137] land. The
   earlier decision and its reopening are in
   [Current State - Open Questions](../current-state/open-questions.md).
 
@@ -152,7 +154,10 @@ the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
 `refused` with a category, or `unavailable`. What a verdict does to the image
 is the caller's; each upload path is its own story in the epic. The Bite photo
 path ([#2139]) deletes a refused photo and marks the Bite `refused`, and leaves
-it `pending` on `unavailable`; see [Bite](../domain/bite.md).
+it `pending` on `unavailable`; see [Bite](../domain/bite.md). The profile photo
+path ([#2140]) deletes a refused photo and marks the profile `photoStatus:
+refused` while `photoUrl` keeps the previous photo, and leaves it `pending` on
+`unavailable`; see [User](../domain/user.md).
 
 - **What the model is asked.** The image goes to the same Gemini model as
   inline data, with `imageModerationInstructions`, which names the categories
@@ -327,3 +332,4 @@ function:
 [#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

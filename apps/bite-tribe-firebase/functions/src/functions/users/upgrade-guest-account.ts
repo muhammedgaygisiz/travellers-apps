@@ -2,7 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
 import { onAppCheck } from '../shared/callable-options';
-import { buildNewUserProfile } from './new-user-profile';
+import { writeNewUserProfile } from './new-user-profile';
 
 const USERS_COLLECTION = 'users';
 
@@ -62,7 +62,7 @@ export const upgradeGuestAccountForUser = async (
     return { created: false };
   }
 
-  await profileRef.set(buildNewUserProfile(user, new Date()));
+  await writeNewUserProfile(getFirestore(), user, new Date());
 
   return { created: true };
 };

@@ -46,12 +46,12 @@ A Bite without creator context is weaker because BiteTribe depends on human food
 
 Current profile model fields:
 
-| Field        | Current name in code | Description                                    |
-| ------------ | -------------------- | ---------------------------------------------- |
-| User id      | `userId`             | Auth/user identifier and profile document id.  |
-| Display name | `displayName`        | Public display identity.                       |
-| Email        | `email`              | Account email, also used in search.            |
-| Photo        | `photoUrl`           | Profile image URL or uploaded image reference. |
+| Field        | Current name in code | Description                                                                                                              |
+| ------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| User id      | `userId`             | Auth/user identifier and profile document id.                                                                            |
+| Display name | `displayName`        | Public display identity.                                                                                                 |
+| Email        | `email`              | Account email, also used in search.                                                                                      |
+| Photo        | `photoUrl`           | Profile image URL, written only by `setUserPhotoUrlOnUpload` once the image check passed it ([#2140]); empty until then. |
 
 ## Optional Data
 
@@ -61,7 +61,7 @@ Current profile model fields:
 - `city`
 - `about`
 - `public`
-- `photoStatus` (`pending`, `uploaded` or `failed`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953]).
+- `photoStatus` (`pending`, `uploaded`, `failed` or `refused`) and `photoUploadStartedAtTimestamp` - where a newly chosen profile photo stands while `photoUrl` still holds the previous one. `refused` means the image check refused the new photo, which was deleted; `photoRefusalCategory` then names why. Only the finalize trigger writes `uploaded`, `refused` and the category; the device writes `pending` and `failed`. See the Profile Photo Upload Contract in [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) ([#1953], [#2140]).
 - `biteCount`
 - `countryCodes`
 - `postingStreak` - `{ weeks, lastPostingWeek }`, the weekly posting streak, backend-owned. What it counts, and that only its owner sees it, is in [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md) ([#2146], [#2148]).
@@ -309,3 +309,4 @@ images/users/{userId}/{filename}
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
 [#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

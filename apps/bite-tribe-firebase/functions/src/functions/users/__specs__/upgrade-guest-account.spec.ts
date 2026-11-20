@@ -130,7 +130,11 @@ describe('upgradeGuestAccount', () => {
     });
   });
 
-  it('takes the photo a provider carries when the account has none', async () => {
+  /**
+   * The provider's avatar is queued for the image check rather than published
+   * on the profile (GitHub issue #2140).
+   */
+  it('queues the photo a provider carries for the check instead of publishing it', async () => {
     getUserMock.mockResolvedValue(
       authRecord([
         { providerId: 'google.com', photoURL: 'https://photos/guest.jpg' },
@@ -139,8 +143,11 @@ describe('upgradeGuestAccount', () => {
 
     await handle(guest());
 
+    expect(db.read(`identityAvatars/${GUEST_UID}`)).toMatchObject({
+      sourceUrl: 'https://photos/guest.jpg',
+    });
     expect(profile()).toMatchObject({
-      photoUrl: 'https://photos/guest.jpg',
+      photoUrl: '',
       // Google and Apple are trusted providers: the address is theirs to
       // verify, so the guest is not asked to verify it again.
       emailVerificationRequired: false,

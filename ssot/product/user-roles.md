@@ -130,7 +130,7 @@ filtering ships** ([#1610]): text a member publishes - reviews and replies, disp
 profile text, and a Bite's name, tags and description - is checked before another account
 can read it and refused with a message when it fails, per `RD-UR-11` and
 [Architecture - AI](../architecture/ai.md). A Bite photo is checked before it is published
-([#2139]); other photos are not yet, as
+([#2139]), and so is a profile photo ([#2140]); other photos are not yet, as
 [Current State - Open Questions](../current-state/open-questions.md) records. Reporting a Review was the
 last piece of the user-facing half, under epic [#1284]. Store requirement rather than product
 polish:
@@ -386,3 +386,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

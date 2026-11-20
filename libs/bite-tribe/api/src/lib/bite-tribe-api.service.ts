@@ -408,8 +408,11 @@ export class BiteTribeApiService {
     );
   }
 
-  updateUser(publicUser: PublicUser): Promise<PublicUser> {
-    return this.profileApiService.updateUser(publicUser);
+  updateUser(
+    publicUser: PublicUser,
+    currentPhotoUrl?: string,
+  ): Promise<PublicUser> {
+    return this.profileApiService.updateUser(publicUser, currentPhotoUrl);
   }
 
   /** See {@link ProfileApiService.saveProfile}: a failure is thrown. */
@@ -430,10 +433,6 @@ export class BiteTribeApiService {
 
   findLocalProfilePhoto(userId: string): Promise<string | undefined> {
     return this.profileApiService.findLocalProfilePhoto(userId);
-  }
-
-  setUploadedProfilePhoto(userId: string, imagePath: string): Promise<string> {
-    return this.profileApiService.setUploadedProfilePhoto(userId, imagePath);
   }
 
   setProfilePhotoStatus(

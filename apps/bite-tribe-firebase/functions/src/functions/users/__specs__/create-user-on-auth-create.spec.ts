@@ -41,7 +41,6 @@ jest.mock('firebase-functions/v2/identity', () => ({
  * The last case below is the one that would have caught it.
  */
 
- 
 require('../create-user-on-auth-create');
 
 interface EventOptions {
@@ -145,6 +144,33 @@ describe('createUserOnAuthCreate', () => {
     await handler({ data: { uid: 'new-uid', providerData: [] } });
 
     expect(profileOf()).toBeDefined();
+  });
+
+  /**
+   * The provider's avatar is never published straight onto the profile: it
+   * waits in the server-only queue for the mirror, and only a photo the image
+   * check passed becomes `photoUrl` (GitHub issue #2140).
+   */
+  it('queues the provider avatar for the image check and publishes no photo', async () => {
+    await handler({
+      data: {
+        uid: 'new-uid',
+        email: 'member@test.com',
+        photoURL: 'https://lh3.googleusercontent.com/a/avatar',
+        providerData: [],
+      },
+    });
+
+    expect(profileOf()).toMatchObject({ photoUrl: '' });
+    expect(db.read('identityAvatars/new-uid')).toMatchObject({
+      sourceUrl: 'https://lh3.googleusercontent.com/a/avatar',
+    });
+  });
+
+  it('queues nothing for an account without an avatar', async () => {
+    await handler(signUp());
+
+    expect(db.exists('identityAvatars/new-uid')).toBe(false);
   });
 
   it('writes nothing when the event carries no account at all', async () => {

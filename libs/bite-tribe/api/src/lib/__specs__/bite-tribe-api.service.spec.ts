@@ -653,7 +653,7 @@ describe(BiteTribeApiService.name, () => {
         const updateUserSpy = jest.spyOn(profileApiService, 'updateUser');
         const publicUser = { id: 'user-id', name: 'Updated Name' } as any;
         service.updateUser(publicUser);
-        expect(updateUserSpy).toHaveBeenCalledWith(publicUser);
+        expect(updateUserSpy).toHaveBeenCalledWith(publicUser, undefined);
       },
     ));
   });

@@ -17,11 +17,12 @@ export const STALLED_PROFILE_PHOTO_UPLOAD_MS = 30 * 1000;
  * is uploaded (GitHub issue #1953).
  *
  * The profile document is marked `pending` before the transfer starts and
- * keeps showing the previous photo. When the transfer finishes, the document
- * is pointed at the new object - by this device for an immediate update, and
- * by the storage finalize trigger `setUserPhotoUrlOnUpload` in case this
- * device is gone by then. A transfer that errors or stalls is written off as
- * `failed`, which the own profile offers to retry.
+ * keeps showing the previous photo. When the transfer finishes, the storage
+ * finalize trigger `setUserPhotoUrlOnUpload` runs the image check, and alone
+ * points the document at the new object or marks it `refused` (GitHub issue
+ * #2140): this device writes neither, so nothing is published unchecked. A
+ * transfer that errors or stalls is written off as `failed`, which the own
+ * profile offers to retry.
  */
 @Injectable({ providedIn: 'root' })
 export class ProfilePhotoUploadService {
@@ -38,7 +39,8 @@ export class ProfilePhotoUploadService {
    * The photo waiting to land: the one sent from this session, or after a
    * reload the copy the upload left on this device. A retry sends it again,
    * and the own profile shows it blurred under the upload status (GitHub
-   * issue #1953). `undefined` once it landed, or when this device has none.
+   * issue #1953). `undefined` once the check published or refused it, or
+   * when this device has none.
    */
   readonly pendingPhoto = signal<string | undefined>(undefined);
 
@@ -59,6 +61,12 @@ export class ProfilePhotoUploadService {
 
       const waiting =
         profile?.photoStatus === 'pending' || profile?.photoStatus === 'failed';
+
+      // The check answered: the photo is published, or refused and never to
+      // be shown or sent again (GitHub issue #2140).
+      if (profile && !waiting && !this.inFlight) {
+        untracked(() => this.pendingPhoto.set(undefined));
+      }
 
       if (
         profile &&
@@ -105,12 +113,18 @@ export class ProfilePhotoUploadService {
   /**
    * Sends the photo of a failed upload again. Answers `false` when there is
    * no photo left to send, so the caller can have the user choose one again.
+   * A refused photo is never sent again: the answer is always `false`
+   * (GitHub issue #2140).
    */
   async retry(): Promise<boolean> {
     const profile = this.myUser();
 
     if (!profile) {
       return true;
+    }
+
+    if (profile.photoStatus === 'refused') {
+      return false;
     }
 
     if (this.inFlight) {
@@ -149,34 +163,21 @@ export class ProfilePhotoUploadService {
     } else if (p.uploadParams?.evt?.completed === false) {
       this.restartStallTimer(profile);
     } else if (p.uploadParams?.evt?.completed === true) {
-      void this.finish(profile, p.imagePath);
+      this.finish();
     }
   }
 
-  private async finish(profile: PublicUser, imagePath: string): Promise<void> {
+  /**
+   * The transfer is done. The document stays `pending`, with the new photo
+   * kept for the own avatar, until the finalize trigger's verdict arrives
+   * through the store.
+   */
+  private finish(): void {
     if (!this.inFlight) {
       return;
     }
 
     this.end();
-    this.pendingPhoto.set(undefined);
-
-    try {
-      const photoUrl = await this.api.setUploadedProfilePhoto(
-        profile.userId,
-        imagePath,
-      );
-
-      this.storeService.notifySavedProfile({
-        ...(this.myUser() ?? profile),
-        photoUrl,
-        photoStatus: 'uploaded',
-      });
-    } catch (error) {
-      // The object is in Storage, so the finalize trigger still points the
-      // document at it; only this device's immediate update is lost.
-      console.warn('Could not point the profile at the new photo:', error);
-    }
   }
 
   /**

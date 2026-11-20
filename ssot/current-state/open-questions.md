@@ -124,9 +124,9 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   handled after the fact: any member reports the Bite ([#1608]) and an operator removes it
   ([#1475]). The question reopens if reports show objectionable photos arriving.
   **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
-  Its image check exists since [#2138], and Bite photos go through it since [#2139]. Profile,
-  restaurant and Bite Trail photos are still published unchecked until the epic's other path
-  stories land.
+  Its image check exists since [#2138], Bite photos go through it since [#2139], and profile
+  photos since [#2140]. Restaurant and Bite Trail photos are still published unchecked until
+  the epic's other path stories land.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
   a change is a pull request; nothing records why a term is on it beyond the review.
 - Does a member whose text is refused get a way to contest it? Today the only answer is to
@@ -324,3 +324,4 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
 [#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
 [#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201
 [#1134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1134
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

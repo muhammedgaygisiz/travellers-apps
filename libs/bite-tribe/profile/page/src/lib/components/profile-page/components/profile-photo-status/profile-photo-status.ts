@@ -21,9 +21,10 @@ import { getEffectivePhotoStatus } from '../../../../utils/effective-photo-statu
 /**
  * Laid over the own avatar while a newly chosen photo is on its way (GitHub
  * issue #1953): a spinner while it uploads, the Bite photo's retry button
- * once it failed, and an offline mark while a retry could not work. The
- * words are the Bite photo's, read out rather than shown, since the avatar
- * has no room for them.
+ * once it failed, and an offline mark while a retry could not work. A photo
+ * the image check refused gets a warning mark, and the avatar then opens the
+ * photo picker rather than retrying (GitHub issue #2140). The words are read
+ * out rather than shown, since the avatar has no room for them.
  */
 @Component({
   selector: 'profile-photo-status',
@@ -37,7 +38,10 @@ export class ProfilePhotoStatus {
 
   user = input<PublicUser | undefined>();
 
-  /** Asks the page to send the photo again. */
+  /**
+   * Asks the page to send the photo again, or, for a refused photo, to have
+   * a different one chosen.
+   */
   readonly retryPhotoUpload = output<void>();
 
   /**

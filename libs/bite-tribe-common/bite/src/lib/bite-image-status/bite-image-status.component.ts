@@ -23,19 +23,7 @@ import {
   getEffectiveImageStatus,
   PENDING_UPLOAD_RECHECK_MS,
 } from '../utils/image-status';
-
-/**
- * The refusal categories the image check names (issue #2138), each with its
- * own line of copy. Anything else - the `sample` verdict outside production,
- * or a category added later - reads as the generic line.
- */
-const REFUSAL_REASONS = [
-  'sexual',
-  'violence',
-  'hate',
-  'self_harm',
-  'illegal',
-] as const;
+import { photoRefusalReasonKey } from '../utils/photo-refusal-reason';
 
 /**
  * Stands in for a Bite photo that is not there yet, never arrived, or was
@@ -154,12 +142,9 @@ export class BiteImageStatusComponent {
    * Why the image check refused the photo, as a line of copy (issue #2139).
    * Only the creator is shown it.
    */
-  protected readonly refusalReasonKey = computed((): string => {
-    const category = this.bite().imageRefusalCategory;
-    const known = REFUSAL_REASONS.find((reason) => reason === category);
-
-    return `photo-refused-reason-${known ?? 'other'}`;
-  });
+  protected readonly refusalReasonKey = computed((): string =>
+    photoRefusalReasonKey(this.bite().imageRefusalCategory),
+  );
 
   /**
    * Offline only when the device has said so. The status is `undefined` until

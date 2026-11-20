@@ -392,6 +392,8 @@
   "photo-refused-reason-illegal": "照片似乎包含非法毒品或出售武器的内容。",
   "photo-refused-reason-other": "照片未通过我们的审核。",
   "choose-different-photo": "选择其他照片",
+  "profile-photo-refused": "你的新照片不符合 BiteTribe 的规定",
+  "profile-photo-refused-not-shown": "其他人看不到它。你的头像保持不变。",
   "choose-photo": "选择照片",
   "image-upload-retry-failed": "无法开始上传，请重试。",
   "bite-updated-successfully": "Bite更新成功！",

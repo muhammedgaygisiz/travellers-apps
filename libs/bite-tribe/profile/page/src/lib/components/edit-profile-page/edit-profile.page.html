@@ -22,6 +22,33 @@
         <ion-button fill="clear">{{ 'edit' | transloco }}</ion-button>
       </div>
 
+      <!-- The image check refused the new photo (GitHub issue #2140). It is
+      not shown: the photo above is the one everybody else still sees. -->
+      @if (photoRefused()) {
+      <div
+        class="photo-refused-notice"
+        role="status"
+        data-testid="edit-profile-photo-refused"
+      >
+        <ion-icon name="alert-circle-outline" aria-hidden="true" />
+        <div class="photo-refused-text">
+          <strong>{{ 'profile-photo-refused' | transloco }}</strong>
+          <ion-text>{{ refusalReasonKey() | transloco }}</ion-text>
+          <ion-text color="medium">
+            {{ 'profile-photo-refused-not-shown' | transloco }}
+          </ion-text>
+        </div>
+        <ion-button
+          fill="outline"
+          size="small"
+          data-testid="edit-profile-choose-different-photo"
+          (click)="openPhotoPicker()"
+        >
+          {{ 'choose-different-photo' | transloco }}
+        </ion-button>
+      </div>
+      }
+
       <ion-modal
         #profileImageSelectionModal
         trigger="select-image"

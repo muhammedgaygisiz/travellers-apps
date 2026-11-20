@@ -88,6 +88,7 @@ ssot/overview/feature-delivery-workflow.md
 ssot/overview/release-workflow.md
 skills/travellers-apps/SKILL.md
 skills/instagram-city-top5/SKILL.md
+skills/release-story/SKILL.md
 CLAUDE.md
 apps/bite-tribe
 apps/bite-tribe-business

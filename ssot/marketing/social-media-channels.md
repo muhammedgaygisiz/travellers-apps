@@ -1723,6 +1723,23 @@ once completed the last hashtag on its own (Granada's `#andalucia` became
 `#andaluciaorienta`), and Publish did nothing until the caption was put back,
 so the skill reads every caption back before publishing.
 
+## The Release Stories
+
+**A marketing version gets one Instagram Story: "New in vX.Y.Z".** It
+is 1080x1920 and shows the mascot between two brand characters, a version badge,
+a two-line headline, five highlight cards of what is new since the previous
+version, and the **Update now** call to action with `bitetribe.app/download`
+and `@bitetribeapp`. The 1.1.0 story, made on 30 October 2026, set the layout:
+
+![Release story for 1.1.0](../../skills/release-story/reference-1.1.0.png)
+
+The layout is fixed and only the words change between versions. The
+[`release-story`](../../skills/release-story/SKILL.md) skill is how an agent
+makes one. It takes a version, defaulting to the one in `package.json`, and
+finds what shipped from the release tags. The user approves the headline and the
+five highlights before it renders them, and its renderer is
+[`skills/release-story/scripts/render.mjs`](../../skills/release-story/scripts/render.mjs).
+
 ## Facebook Groups
 
 **Local groups are a second way to reach people in a city, posted as a person,

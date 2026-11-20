@@ -7,7 +7,11 @@
     margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 12px;
-    background: var(--ion-color-light);
+    /*
+     * A background step rather than the light colour, which stays light in
+     * dark mode and left the white text unreadable on it.
+     */
+    background: var(--ion-background-color-step-50);
   }
 
   .progress-count,
@@ -21,14 +25,14 @@
 
   .progress-next {
     margin-top: 0.5rem;
-    color: var(--ion-color-medium-shade);
+    color: var(--ion-text-color-step-300);
   }
 
   .progress-track {
     height: 6px;
     margin-top: 0.5rem;
     border-radius: 999px;
-    background: var(--ion-color-light-shade);
+    background: var(--ion-background-color-step-100);
   }
 
   .progress-bar {

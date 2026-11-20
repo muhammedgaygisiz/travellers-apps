@@ -700,6 +700,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics (etkinse)",
   "privacy-policy-services-ai": "Google Gemini (Vertex AI), yalnızca bir Bite’ta Oluştur’a dokunduğunuzda: açıklama önermek için fotoğrafı, yemek adını, restoranı ve konumu alır",
   "privacy-policy-services-ai-explain": "Google Gemini (Vertex AI), bir Bite’ta Bana açıkla’ya dokunduğunuzda: yemeği açıklamak için Bite’ın herkese açık yemek adını, restoranını, şehrini, ülkesini ve fotoğrafını alır. Açıklama saklanır ve diğer kullanıcılara gösterilir",
+  "privacy-policy-services-ai-moderation": "Google Gemini (Vertex AI), yayınladıklarınız için otomatik olarak: yorumların, yanıtların, görünen adların, profilinizin ve Bite’larınızın metni ile yüklediğiniz her Bite, profil, restoran ve Bite Trail fotoğrafı yayınlanırken uygunsuz içerik açısından denetlenir. Bu denetim başlamadan önce saklanan fotoğraflar bir kez denetlenir. Yalnızca sonuç, metnin veya fotoğrafın bir özeti (hash) altında saklanır; metnin veya fotoğrafın kendisi asla saklanmaz",
   "privacy-policy-services-note": "Bu hizmetler Google tarafından sağlanır ve Google’ın gizlilik politikalarına tabidir.",
   "privacy-policy-rights-title": "6. Hakların",
   "privacy-policy-rights-intro": "Bulunduğun yere bağlı olarak kişisel verilerine erişme, düzeltilmesini veya silinmesini talep etme ve geçerli olduğu durumlarda onayını geri çekme hakkına sahip olabilirsin.",

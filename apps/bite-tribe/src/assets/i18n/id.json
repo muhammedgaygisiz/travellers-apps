@@ -700,6 +700,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics (jika diaktifkan)",
   "privacy-policy-services-ai": "Google Gemini di Vertex AI, hanya saat Anda mengetuk Buat pada sebuah Bite: menerima foto, nama hidangan, restoran, dan posisi untuk menyarankan deskripsi",
   "privacy-policy-services-ai-explain": "Google Gemini di Vertex AI, saat Anda mengetuk Jelaskan pada sebuah Bite: menerima nama hidangan publik, restoran, kota, negara, dan foto Bite untuk menjelaskan hidangannya. Penjelasan disimpan dan ditampilkan kepada pengguna lain",
+  "privacy-policy-services-ai-moderation": "Google Gemini di Vertex AI, otomatis untuk apa yang Anda publikasikan: teks ulasan, balasan, nama tampilan, profil Anda, dan Bite Anda, serta setiap foto Bite, profil, restoran, dan Bite Trail yang Anda unggah, diperiksa dari konten yang tidak pantas saat dipublikasikan. Foto yang tersimpan sebelum pemeriksaan ini ada diperiksa satu kali. Hanya hasilnya yang disimpan, di bawah hash teks atau foto, tidak pernah teks atau foto itu sendiri",
   "privacy-policy-services-note": "Layanan ini disediakan oleh Google dan tunduk pada kebijakan privasi Google.",
   "privacy-policy-rights-title": "6. Hak-Hakmu",
   "privacy-policy-rights-intro": "Bergantung pada lokasimu, kamu mungkin berhak mengakses data pribadimu, meminta koreksi atau penghapusan data, dan menarik persetujuan jika berlaku.",

@@ -699,6 +699,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics (if enabled)",
   "privacy-policy-services-ai": "Google Gemini on Vertex AI, only when you tap Generate on a Bite: it receives the photo, dish name, restaurant and position to suggest a description",
   "privacy-policy-services-ai-explain": "Google Gemini on Vertex AI, when you tap Explain me on a Bite: it receives the Bite's public dish name, restaurant, city, country and photo to explain the dish. The explanation is stored and shown to other users",
+  "privacy-policy-services-ai-moderation": "Google Gemini on Vertex AI, automatically for what you publish: the text of reviews, replies, display names, your profile and your Bites, and every Bite, profile, restaurant and Bite Trail photo you upload, are checked for objectionable content as they are published. Photos stored before this check existed are checked once. Only the verdict is kept, filed under a hash of the text or photo, never the text or photo itself",
   "privacy-policy-services-note": "These services are provided by Google and are subject to Google’s privacy policies.",
   "privacy-policy-rights-title": "6. Your Rights",
   "privacy-policy-rights-intro": "Depending on your location, you may have the right to access your personal data, request correction or deletion of your data, and withdraw consent where applicable.",

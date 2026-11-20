@@ -700,6 +700,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics (ከነቃ)",
   "privacy-policy-services-ai": "Google Gemini በVertex AI ላይ፣ በBite ላይ ፍጠርን ሲነኩ ብቻ፦ መግለጫ ለመጠቆም ፎቶውን፣ የምግቡን ስም፣ ምግብ ቤቱን እና ቦታውን ይቀበላል",
   "privacy-policy-services-ai-explain": "Google Gemini በVertex AI ላይ፣ በአንድ Bite ላይ አብራራልኝን ሲነኩ፡ ምግቡን ለማብራራት የBiteን ይፋዊ የምግብ ስም፣ ምግብ ቤት፣ ከተማ፣ ሀገር እና ፎቶ ይቀበላል። ማብራሪያው ይቀመጣል እና ለሌሎች ተጠቃሚዎች ይታያል",
+  "privacy-policy-services-ai-moderation": "Google Gemini በVertex AI ላይ፣ የሚያትሙትን በራስ-ሰር፦ የግምገማዎች፣ የምላሾች፣ የማሳያ ስሞች፣ የመገለጫዎ እና የBiteዎችዎ ጽሑፍ፣ እንዲሁም የሚሰቅሉት እያንዳንዱ የBite፣ የመገለጫ፣ የምግብ ቤት እና የBite Trail ፎቶ ሲታተሙ አጸያፊ ይዘት እንዳላቸው ይፈተሻሉ። ይህ ፍተሻ ከመጀመሩ በፊት የተቀመጡ ፎቶዎች አንድ ጊዜ ይፈተሻሉ። የሚቀመጠው ውጤቱ ብቻ ነው፣ በጽሑፉ ወይም በፎቶው hash ስር፤ ጽሑፉ ወይም ፎቶው ራሱ በጭራሽ አይቀመጥም",
   "privacy-policy-services-note": "እነዚህ አገልግሎቶች በGoogle የሚቀርቡ ሲሆን በGoogle የግላዊነት መመሪያዎች ሥር ናቸው።",
   "privacy-policy-rights-title": "6. መብቶችዎ",
   "privacy-policy-rights-intro": "እንደ አካባቢዎ ሁኔታ የግል መረጃዎን የማየት፣ እንዲታረም ወይም እንዲሰረዝ የመጠየቅና ተገቢ በሆነበት ጊዜ ፈቃድዎን የመሰረዝ መብት ሊኖርዎ ይችላል።",

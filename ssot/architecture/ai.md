@@ -230,6 +230,11 @@ photo `pending` and schedules it to be checked again ([#2142]), below.
   field `image`, the category as `reason` and the `storagePath`. No image data
   and no text go in the log.
 
+Both checks send the content to Google Cloud as a processor, so the store
+declarations do not change; the privacy policy names them in its own Gemini
+entry. See [Implementation - Store Declarations](../implementation/store-declarations.md),
+`The Automatic Content Check Changes No Declaration`.
+
 The rules a member meets are on each use case:
 [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) for reviews,
 [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md) for profiles and

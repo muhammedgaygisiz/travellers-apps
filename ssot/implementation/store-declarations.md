@@ -304,6 +304,33 @@ than assumed:
 - **The privacy policy names it.** Its third-party services list gained a
   Gemini entry saying what is sent and when.
 
+### The Automatic Content Check Changes No Declaration
+
+The text check (issue [#1610]) and the image check (epic [#2137], [Architecture - AI](../architecture/ai.md)
+`The Content Check` and `The Image Check`) send what a member publishes to
+Gemini on Vertex AI before or as it is published: the text of a review, reply,
+display name, profile or Bite, and every Bite, profile, restaurant and Bite
+Trail photo, plus a one-off check of the photos stored before the check
+existed ([#2143]). Checked against the table rather than assumed:
+
+- **Not shared.** The same processor as the AI description above: Google Cloud
+  judges the content on BiteTribe's behalf, so it is neither Play's "shared"
+  nor a third-party collection for Apple.
+- **Nothing new collected.** Photos and Other User Content are already
+  declared under App Functionality, and every item checked is one the member
+  is publishing anyway. The record kept is a verdict in the server-only
+  `contentChecks/{sha256}`, filed under a hash of the text or image rather
+  than the content, and a refusal's Cloud Logging entry, which carries a text
+  cut to 300 characters but no image data. Both serve the app's own
+  moderation, which is App Functionality, and neither is used for analytics,
+  personalization or advertising.
+- **The privacy policy names it.** The third-party services list gained a
+  third Gemini entry, `privacy-policy-services-ai-moderation`, saying what is
+  checked, when, and that only the verdict is kept under a hash. Naming the
+  other systems the policy still leaves out stays with [#2086]; this entry
+  only brings the Gemini line, which the policy already named one use at a
+  time, up to the uses the code has.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -376,6 +403,7 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#1433]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1433
+[#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#1730]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1730
 [#1732]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1732
 [#1733]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1733
@@ -383,3 +411,6 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#1864]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1864
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
 [#2070]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2070
+[#2086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2086
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

@@ -22,6 +22,11 @@ export interface GeminiRequest {
   /** The JSON schema the answer must follow (Vertex `responseSchema`). */
   responseSchema: Record<string, unknown>;
   maxOutputTokens: number;
+  /**
+   * How long the call may take before it is abandoned as unavailable. Unset,
+   * the call waits as long as the function does.
+   */
+  timeoutMs?: number;
 }
 
 export interface GeminiResponse {
@@ -72,6 +77,10 @@ export const generateWithGemini = async (
 
   const response = await fetch(url, {
     method: 'POST',
+    signal:
+      request.timeoutMs === undefined
+        ? undefined
+        : AbortSignal.timeout(request.timeoutMs),
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',

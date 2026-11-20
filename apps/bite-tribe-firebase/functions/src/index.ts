@@ -12,6 +12,7 @@ export { migrateRestaurantOwnerIdsCallable } from './functions/restaurants/migra
 export { backfillBiteImageStatusCallable } from './functions/bites/backfill-bite-image-status';
 export { rebuildBiteCountriesCallable } from './functions/bites/rebuild-bite-countries';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
+export { notifyOwnerOnFollowRequest } from './functions/notifications/notify-on-follow-request';
 export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { handleDownloadLink } from './functions/web/handle-download-link';

@@ -7,6 +7,7 @@ jest.mock('utils', () => ({
     MY_PROFILE: 'my-profile',
     LEADERBOARD: 'leaderboard',
     WEEKLY_BITES: 'weekly-bites',
+    FOLLOW_REQUESTS: 'follow-requests',
   },
 }));
 
@@ -83,6 +84,24 @@ describe(toNotificationTarget.name, () => {
         RECIPIENT,
       ),
     ).toEqual({ commands: ['profile', 'user-2'] });
+  });
+
+  it('opens the follow-requests page for a follow request', () => {
+    expect(
+      toNotificationTarget(
+        { type: 'FOLLOW_REQUEST', requesterUid: 'user-2' },
+        RECIPIENT,
+      ),
+    ).toEqual({ commands: ['follow-requests'] });
+  });
+
+  it("opens the owner's profile for an accepted follow request", () => {
+    expect(
+      toNotificationTarget(
+        { type: 'FOLLOW_REQUEST_ACCEPTED', ownerUid: 'owner-1' },
+        RECIPIENT,
+      ),
+    ).toEqual({ commands: ['profile', 'owner-1'] });
   });
 
   it('targets the leaderboard for a rank change', () => {
@@ -175,6 +194,10 @@ describe(toNotificationTarget.name, () => {
       { type: 'NEW_FOLLOWER' },
     ],
     ['a country badge without an achiever', { type: 'NEW_COUNTRY_BADGE' }],
+    [
+      'an accepted follow request without an owner',
+      { type: 'FOLLOW_REQUEST_ACCEPTED' },
+    ],
   ])('has no target for %s', (_, data) => {
     // A malformed payload must not navigate to a half-built route.
     expect(toNotificationTarget(data, RECIPIENT)).toBeUndefined();

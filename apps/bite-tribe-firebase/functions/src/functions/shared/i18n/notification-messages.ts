@@ -35,6 +35,12 @@ export type NotificationMessageKey =
   | 'newBite.bodyWithName'
   | 'newFollower.title'
   | 'newFollower.body'
+  // A follow request to a private profile and its acceptance (GitHub issue
+  // #2166). Each names the other party by display name only.
+  | 'followRequest.title'
+  | 'followRequest.body'
+  | 'followRequestAccepted.title'
+  | 'followRequestAccepted.body'
   | 'biteTagged.title'
   | 'biteTagged.body'
   | 'newLike.title'

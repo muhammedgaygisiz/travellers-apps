@@ -52,6 +52,23 @@ describe('buildCollapseKey', () => {
     ).toBe('NEW_FOLLOWER:follower1');
   });
 
+  it('should collapse a follow request per requester on the requests page', () => {
+    // A request withdrawn and sent again replaces the first (issue #2166).
+    const key = buildCollapseKey({
+      type: 'FOLLOW_REQUEST',
+      requesterUid: 'requester1',
+    });
+
+    expect(key).toBe('FOLLOW_REQUEST:FOLLOW_REQUEST:requester1');
+    expect(toSurfaceKey(key as string)).toBe('FOLLOW_REQUEST');
+  });
+
+  it("should collapse an accepted follow request on the owner's profile", () => {
+    expect(
+      buildCollapseKey({ type: 'FOLLOW_REQUEST_ACCEPTED', ownerUid: 'owner1' }),
+    ).toBe('FOLLOW_REQUEST_ACCEPTED:owner1');
+  });
+
   it('should keep two countries earned by the same person apart', () => {
     expect(
       buildCollapseKey({
@@ -93,6 +110,10 @@ describe('buildCollapseKey', () => {
       buildCollapseKey({ type: 'NEW_REVIEW_REPLY', biteId: 'bite1' }),
     ).toBeUndefined();
     expect(buildCollapseKey({ type: 'NEW_FOLLOWER' })).toBeUndefined();
+    expect(buildCollapseKey({ type: 'FOLLOW_REQUEST' })).toBeUndefined();
+    expect(
+      buildCollapseKey({ type: 'FOLLOW_REQUEST_ACCEPTED' }),
+    ).toBeUndefined();
   });
 
   it('should not collapse an unknown or absent type', () => {

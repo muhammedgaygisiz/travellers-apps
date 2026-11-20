@@ -24,6 +24,11 @@ export const ja: NotificationMessages = {
   'newBite.bodyWithName': '{{author}}さんが新しいBiteを作成しました: {{bite}}',
   'newFollower.title': '新しいフォロワー！',
   'newFollower.body': '{{follower}}さんがあなたをフォローしました。',
+  'followRequest.title': '新しいフォローリクエスト',
+  'followRequest.body': '{{requester}}さんからフォローリクエストが届きました。',
+  'followRequestAccepted.title': 'フォローリクエストが承認されました',
+  'followRequestAccepted.body':
+    '{{owner}}さんがフォローリクエストを承認しました。',
   'biteTagged.title': 'Biteでタグ付けされました',
   'biteTagged.body':
     '{{creator}}さんがBiteであなたをタグ付けしました: {{bite}}',

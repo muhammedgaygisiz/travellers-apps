@@ -27,6 +27,13 @@ jest.mock('firebase-functions/https', () => ({
   onCall: jest.fn((_options, handler) => handler),
 }));
 
+const sendLocalizedNotification = jest.fn();
+
+jest.mock('../../shared/utils/send-localized-notification', () => ({
+  sendLocalizedNotification: (...args: unknown[]): unknown =>
+    sendLocalizedNotification(...args),
+}));
+
 import {
   requestFollowHandler,
   withdrawFollowRequestHandler,
@@ -37,6 +44,7 @@ import {
 } from '../answer-follow-request';
 import { blockUserHandler } from '../block-user';
 import { followRequestId } from '../follow-request';
+import { createTranslate } from '../../shared/i18n/translate';
 
 /** The private profile being asked to be followed. */
 const OWNER = 'owner-1';
@@ -76,7 +84,12 @@ const followEdges = (): string[] =>
 
 beforeEach(() => {
   db = createFakeFirestore();
-  db.seed(`users/${OWNER}`, { userId: OWNER, public: false });
+  sendLocalizedNotification.mockReset().mockResolvedValue(1);
+  db.seed(`users/${OWNER}`, {
+    userId: OWNER,
+    public: false,
+    displayName: 'Owner',
+  });
   db.seed(`users/${REQUESTER}`, { userId: REQUESTER, public: true });
   db.seed(`users/${BYSTANDER}`, { userId: BYSTANDER, public: true });
   db.seed(`users/${PUBLIC_OWNER}`, { userId: PUBLIC_OWNER, public: true });
@@ -222,6 +235,50 @@ describe('acceptFollowRequestHandler', () => {
     ]);
   });
 
+  it('pushes the acceptance to the requester once, naming the owner', async () => {
+    // The callable sends it rather than a trigger: the follower edge cannot
+    // tell an accepted request from a public follow (issue #2166).
+    await acceptFollowRequestHandler(as(OWNER, REQUESTER));
+
+    expect(sendLocalizedNotification).toHaveBeenCalledTimes(1);
+
+    const [push] = sendLocalizedNotification.mock.calls[0] as [
+      {
+        uids: string[];
+        data: Record<string, string>;
+        buildMessage: (translate: ReturnType<typeof createTranslate>) => {
+          body: string;
+        };
+      },
+    ];
+
+    expect(push.uids).toEqual([REQUESTER]);
+    expect(push.data).toEqual({
+      type: 'FOLLOW_REQUEST_ACCEPTED',
+      ownerUid: OWNER,
+    });
+    expect(push.buildMessage(createTranslate('en')).body).toBe(
+      'Owner accepted your follow request.',
+    );
+  });
+
+  it('still accepts when the push fails', async () => {
+    sendLocalizedNotification.mockRejectedValue(new Error('FCM is down'));
+
+    await expect(
+      acceptFollowRequestHandler(as(OWNER, REQUESTER)),
+    ).resolves.toEqual({ accepted: true });
+    expect(db.exists(`users/${OWNER}/followers/${REQUESTER}`)).toBe(true);
+  });
+
+  it('pushes nothing for a refused acceptance', async () => {
+    await expect(
+      acceptFollowRequestHandler(as(BYSTANDER, REQUESTER)),
+    ).rejects.toMatchObject({ code: 'not-found' });
+
+    expect(sendLocalizedNotification).not.toHaveBeenCalled();
+  });
+
   it('refuses the requester accepting their own request', async () => {
     await expect(
       acceptFollowRequestHandler(as(REQUESTER, OWNER)),
@@ -262,6 +319,8 @@ describe('declineFollowRequestHandler', () => {
 
     expect(db.exists(REQUEST_PATH)).toBe(false);
     expect(followEdges()).toEqual([]);
+    // Nobody is told about a decline (issue #2166).
+    expect(sendLocalizedNotification).not.toHaveBeenCalled();
   });
 
   it('leaves the request alone for anybody but its owner', async () => {
@@ -288,6 +347,8 @@ describe('withdrawFollowRequestHandler', () => {
 
     expect(db.exists(REQUEST_PATH)).toBe(false);
     expect(followEdges()).toEqual([]);
+    // Nobody is told about a withdrawal (issue #2166).
+    expect(sendLocalizedNotification).not.toHaveBeenCalled();
   });
 
   it('leaves the request alone for anybody but its requester', async () => {

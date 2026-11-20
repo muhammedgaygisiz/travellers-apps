@@ -699,6 +699,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics（如已启用）",
   "privacy-policy-services-ai": "Google Gemini（Vertex AI）：仅在你于 Bite 中点按“生成”时使用，它会接收照片、菜名、餐厅和位置以建议一段描述",
   "privacy-policy-services-ai-explain": "Vertex AI 上的 Google Gemini：当你在 Bite 上点按“给我讲讲”时，它会接收该 Bite 公开的菜名、餐厅、城市、国家和照片来解说这道菜。解说会被保存并展示给其他用户",
+  "privacy-policy-services-ai-moderation": "Vertex AI 上的 Google Gemini：自动用于你发布的内容。评价、回复、显示名称、你的个人资料和 Bite 的文字，以及你上传的每张 Bite、个人资料、餐厅和 Bite Trail 照片，都会在发布时接受不当内容检查。在此检查推出之前已存储的照片会被检查一次。只保存检查结果，并以文字或照片的哈希值记录，从不保存文字或照片本身",
   "privacy-policy-services-note": "这些服务由Google提供，受Google隐私政策的约束。",
   "privacy-policy-rights-title": "6. 你的权利",
   "privacy-policy-rights-intro": "根据你所在的地区，你可能有权访问你的个人数据、要求更正或删除你的数据，并在适用情况下撤回同意。",

@@ -699,6 +699,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics (sofern aktiviert)",
   "privacy-policy-services-ai": "Google Gemini auf Vertex AI, nur wenn du bei einem Bite auf Generieren tippst: Es erhält Foto, Gerichtname, Restaurant und Position, um eine Beschreibung vorzuschlagen",
   "privacy-policy-services-ai-explain": "Google Gemini auf Vertex AI, wenn du bei einem Bite auf Erklär mir das tippst: Es erhält den öffentlichen Gerichtnamen, das Restaurant, die Stadt, das Land und das Foto des Bites, um das Gericht zu erklären. Die Erklärung wird gespeichert und ist auch für andere sichtbar",
+  "privacy-policy-services-ai-moderation": "Google Gemini auf Vertex AI, automatisch für alles, was du veröffentlichst: Der Text von Bewertungen, Antworten, Anzeigenamen, deinem Profil und deinen Bites sowie jedes Bite-, Profil-, Restaurant- und Bite-Trail-Foto, das du hochlädst, wird beim Veröffentlichen auf anstößige Inhalte geprüft. Fotos, die vor Einführung dieser Prüfung gespeichert wurden, werden einmal geprüft. Gespeichert wird nur das Ergebnis, unter einem Hash des Textes oder Fotos, nie der Text oder das Foto selbst",
   "privacy-policy-services-note": "Diese Dienste werden von Google bereitgestellt und unterliegen den Datenschutzbestimmungen von Google.",
   "privacy-policy-rights-title": "6. Deine Rechte",
   "privacy-policy-rights-intro": "Je nach deinem Standort hast du möglicherweise das Recht, auf deine personenbezogenen Daten zuzugreifen, deren Berichtigung oder Löschung zu verlangen und eine erteilte Einwilligung zu widerrufen.",

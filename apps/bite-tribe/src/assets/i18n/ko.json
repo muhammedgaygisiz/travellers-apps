@@ -699,6 +699,7 @@
   "privacy-policy-services-analytics": "Firebase Analytics(사용 설정된 경우)",
   "privacy-policy-services-ai": "Google Gemini(Vertex AI): Bite에서 생성을 탭할 때만 사용되며, 설명을 제안하기 위해 사진, 요리 이름, 레스토랑, 위치를 받습니다",
   "privacy-policy-services-ai-explain": "Vertex AI의 Google Gemini: Bite에서 설명해 줘를 탭하면 음식을 설명하기 위해 Bite의 공개된 음식 이름, 식당, 도시, 국가, 사진을 받습니다. 설명은 저장되어 다른 사용자에게도 표시됩니다",
+  "privacy-policy-services-ai-moderation": "Vertex AI의 Google Gemini: 게시하는 내용에 자동으로 사용됩니다. 리뷰, 답글, 표시 이름, 프로필, Bite의 텍스트와 업로드하는 모든 Bite, 프로필, 레스토랑, Bite Trail 사진은 게시될 때 부적절한 콘텐츠인지 검사됩니다. 이 검사가 도입되기 전에 저장된 사진은 한 번 검사됩니다. 텍스트나 사진의 해시 아래 검사 결과만 보관하며, 텍스트나 사진 자체는 보관하지 않습니다",
   "privacy-policy-services-note": "이 서비스는 Google이 제공하며 Google의 개인정보 처리방침이 적용됩니다.",
   "privacy-policy-rights-title": "6. 이용자의 권리",
   "privacy-policy-rights-intro": "이용자는 거주 지역에 따라 개인정보에 접근하고, 데이터의 정정 또는 삭제를 요청하고, 해당되는 경우 동의를 철회할 권리를 가질 수 있습니다.",

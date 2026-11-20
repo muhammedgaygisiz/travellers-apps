@@ -321,6 +321,20 @@ describe(RestaurantImageUploadService.name, () => {
       ).toBe('failed');
     });
 
+    it('keeps a photo the backend will check again pending (issue #2142)', () => {
+      expect(
+        service.statusFor(
+          stored({
+            imageStatus: 'pending',
+            imageUploadStartedAtTimestamp:
+              NOW - 8 * STALE_PENDING_RESTAURANT_IMAGE_MS,
+            imageCheckNextAt: NOW + 1000,
+          }),
+          NOW,
+        ),
+      ).toBe('pending');
+    });
+
     it('keeps a recent pending, and one with no start time, pending', () => {
       expect(
         service.statusFor(

@@ -139,6 +139,17 @@ service cloud.firestore {
     }
 
     /**
+     * The wait on an image whose check could not run (GitHub issue #2142):
+     * written by the upload triggers and `recheckPendingImages` alone. A
+     * client that set `imageCheckPath` could have the recheck publish another
+     * object as its photo, and one that moved `imageCheckNextAt` could hold or
+     * hurry the queue.
+     */
+    function imageCheckFields() {
+      return ['imageCheckAttempts', 'imageCheckNextAt', 'imageCheckPath'];
+    }
+
+    /**
      * The photo of a restaurant or a Bite Trail (GitHub issue #2141), kept in
      * the document's own folder and published by its finalize trigger -
      * `setRestaurantImagePathOnUpload` or `setBiteTrailImagePathOnUpload` -
@@ -152,6 +163,7 @@ service cloud.firestore {
       let data = request.resource.data;
 
       return absentAll(['imagePath', 'imageRefusalCategory'])
+        && absentAll(imageCheckFields())
         && data.get('imageStatus', 'pending') in ['pending', 'failed']
         && data.get('image', '') == '';
     }
@@ -160,6 +172,7 @@ service cloud.firestore {
       let data = request.resource.data;
 
       return unchangedAll(['imagePath', 'imageRefusalCategory'])
+        && unchangedAll(imageCheckFields())
         && (unchangedAll(['imageStatus'])
           || data.get('imageStatus', null) in ['pending', 'failed'])
         && (unchangedAll(['image']) || data.get('image', '') == '');
@@ -1069,6 +1082,7 @@ service cloud.firestore {
         let data = request.resource.data;
 
         return absentAll(['imagePath', 'imageRefusalCategory'])
+          && absentAll(imageCheckFields())
           && data.get('imageStatus', 'pending') == 'pending'
           && data.get('image', '') == '';
       }
@@ -1077,6 +1091,7 @@ service cloud.firestore {
         let data = request.resource.data;
 
         return unchangedAll(['imagePath', 'imageRefusalCategory'])
+          && unchangedAll(imageCheckFields())
           && (unchangedAll(['imageStatus'])
             || data.get('imageStatus', null) in ['pending', 'failed'])
           && (unchangedAll(['image']) || data.get('image', '') == '');
@@ -1278,11 +1293,13 @@ service cloud.firestore {
     function createsUnpublishedProfilePhoto(data) {
       return data.get('photoUrl', '') == ''
         && !('photoRefusalCategory' in data)
+        && !data.keys().hasAny(imageCheckFields())
         && data.get('photoStatus', 'pending') in ['pending', 'failed'];
     }
 
     function keepsPublishedProfilePhoto() {
       return unchangedAll(['photoUrl', 'photoRefusalCategory'])
+        && unchangedAll(imageCheckFields())
         && (unchangedAll(['photoStatus'])
           || request.resource.data.get('photoStatus', null) in ['pending', 'failed']);
     }

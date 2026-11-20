@@ -400,6 +400,7 @@ setUserPhotoUrlOnUpload
 mirrorIdentityAvatarOnCreate
 setRestaurantImagePathOnUpload
 setBiteTrailImagePathOnUpload
+recheckPendingImages
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 notifyBiteCreatorOnReview

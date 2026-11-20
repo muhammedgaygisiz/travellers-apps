@@ -39,6 +39,16 @@ jest.mock('firebase-functions/v2/storage', () => ({
 
 import { setUserPhotoUrlOnUpload } from '../set-user-photo-url-on-upload';
 
+/** The wait on a recheck (issue #2142), cleared by every final verdict. */
+const CLEARED_CHECK = {
+  imageCheckAttempts: 'DELETE',
+  imageCheckNextAt: 'DELETE',
+  imageCheckPath: 'DELETE',
+};
+
+const NOW = Date.parse('2026-11-20T12:00:00.000Z');
+const FIRST_RECHECK_DELAY_MS = 15 * 60 * 1000;
+
 const handler = setUserPhotoUrlOnUpload as unknown as (event: {
   data: { name?: string; bucket: string; timeCreated?: string };
 }) => Promise<void>;
@@ -64,6 +74,10 @@ const storedFile = (
 });
 
 describe('setUserPhotoUrlOnUpload', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     getMock.mockResolvedValue({ exists: true });
@@ -90,6 +104,7 @@ describe('setUserPhotoUrlOnUpload', () => {
       photoUrl: `url:bucket/${NEW_PATH}`,
       photoStatus: 'uploaded',
       photoRefusalCategory: 'DELETE',
+      ...CLEARED_CHECK,
     });
   });
 
@@ -128,6 +143,7 @@ describe('setUserPhotoUrlOnUpload', () => {
     expect(updateMock).toHaveBeenCalledWith({
       photoStatus: 'refused',
       photoRefusalCategory: 'hate',
+      ...CLEARED_CHECK,
     });
     expect(updateMock.mock.calls[0][0]).not.toHaveProperty('photoUrl');
   });
@@ -146,12 +162,19 @@ describe('setUserPhotoUrlOnUpload', () => {
     expect(older.delete).not.toHaveBeenCalled();
   });
 
-  it('writes nothing while the check is unavailable, so the photo stays pending', async () => {
+  it('keeps the photo pending and schedules a recheck when the check is unavailable', async () => {
+    jest.useFakeTimers({ now: NOW });
     checkImageMock.mockResolvedValue({ verdict: 'unavailable' });
 
     await upload();
 
-    expect(updateMock).not.toHaveBeenCalled();
+    expect(updateMock).toHaveBeenCalledWith({
+      photoStatus: 'pending',
+      imageCheckAttempts: 1,
+      imageCheckNextAt: NOW + FIRST_RECHECK_DELAY_MS,
+      imageCheckPath: NEW_PATH,
+    });
+    expect(updateMock.mock.calls[0][0]).not.toHaveProperty('photoUrl');
     expect(deleteFileMock).not.toHaveBeenCalled();
     expect(getFilesMock).not.toHaveBeenCalled();
   });

@@ -854,6 +854,10 @@ describe('restaurants', () => {
         { imageStatus: 'refused' },
         { imageRefusalCategory: 'violence' },
         { image: 'data:image/jpeg;base64,AAAA' },
+        // The wait on a check that could not run (issue #2142).
+        { imageCheckPath: 'images/restaurants/other/photo.jpg' },
+        { imageCheckNextAt: 0 },
+        { imageCheckAttempts: 7 },
       ]) {
         await assertFails(
           updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), fields),
@@ -3037,6 +3041,8 @@ describe('bites', () => {
         ['refused-bite', { imageStatus: 'refused' }],
         ['category-bite', { imageRefusalCategory: 'violence' }],
         ['base64-bite', { image: 'data:image/jpeg;base64,AAAA' }],
+        ['check-bite', { imageCheckPath: 'images/bites/other/photo.jpg' }],
+        ['next-check-bite', { imageCheckNextAt: 0 }],
       ] as const) {
         await assertFails(
           setDoc(doc(asConsumer(), 'bites', id), {
@@ -3065,6 +3071,35 @@ describe('bites', () => {
       await assertFails(
         updateDoc(photoBite(), { image: 'data:image/jpeg;base64,AAAA' }),
       );
+    });
+
+    describe('while its photo waits for a check that could not run (issue #2142)', () => {
+      beforeEach(async () => {
+        await testEnv.withSecurityRulesDisabled(async (context) => {
+          await updateDoc(doc(context.firestore(), 'bites', 'consumer-bite'), {
+            imageStatus: 'pending',
+            imageCheckAttempts: 2,
+            imageCheckNextAt: 1_000,
+            imageCheckPath: 'images/bites/consumer-bite/photo.jpg',
+          });
+        });
+      });
+
+      it('refuses the creator moving, ending or redirecting the wait', async () => {
+        for (const fields of [
+          { imageCheckPath: 'images/bites/other-bite/photo.jpg' },
+          { imageCheckNextAt: 0 },
+          { imageCheckAttempts: 1 },
+          { imageCheckNextAt: deleteField() },
+        ]) {
+          await assertFails(updateDoc(photoBite(), fields));
+        }
+      });
+
+      it('lets the creator edit the Bite and give up on the upload', async () => {
+        await assertSucceeds(updateDoc(photoBite(), { price: 12 }));
+        await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'failed' }));
+      });
     });
 
     it('lets an edit send the published photo back unchanged', async () => {
@@ -3338,6 +3373,7 @@ describe('bite trails', () => {
         ['refused-trail', { imageStatus: 'refused' }],
         ['category-trail', { imageRefusalCategory: 'violence' }],
         ['base64-trail', { image: 'data:image/jpeg;base64,AAAA' }],
+        ['check-trail', { imageCheckPath: 'images/biteTrails/x/photo.jpg' }],
       ] as const) {
         await assertFails(
           setDoc(doc(asConsumer(), 'biteTrails', id), {
@@ -3365,6 +3401,8 @@ describe('bite trails', () => {
         { imageStatus: 'refused' },
         { imageRefusalCategory: 'violence' },
         { image: 'data:image/jpeg;base64,AAAA' },
+        { imageCheckPath: 'images/biteTrails/other/photo.jpg' },
+        { imageCheckNextAt: 0 },
       ]) {
         await assertFails(
           updateDoc(doc(asConsumer(), 'biteTrails', 'consumer-trail'), fields),
@@ -3449,6 +3487,12 @@ describe('users', () => {
       ['photoStatus uploaded', { photoStatus: 'uploaded' }],
       ['photoStatus refused', { photoStatus: 'refused' }],
       ['photoRefusalCategory', { photoRefusalCategory: 'hate' }],
+      [
+        'imageCheckPath',
+        { imageCheckPath: 'images/users/someone-else/photo.jpg' },
+      ],
+      ['imageCheckNextAt', { imageCheckNextAt: 0 }],
+      ['imageCheckAttempts', { imageCheckAttempts: 7 }],
     ])(
       'refuses a client writing %s',
       async (_field, change: Record<string, unknown>) => {
@@ -3509,6 +3553,13 @@ describe('users', () => {
           userId: CONSUMER,
           email: 'consumer@test.com',
           photoStatus: 'uploaded',
+        }),
+      );
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          imageCheckPath: 'images/users/someone-else/photo.jpg',
         }),
       );
       await assertSucceeds(

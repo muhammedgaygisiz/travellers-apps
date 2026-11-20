@@ -106,7 +106,11 @@ describe('OnboardingDataAccessService', () => {
         { provide: BiteTribeApiService, useValue: apiMock },
         {
           provide: BiteTribeStoreService,
-          useValue: { notifySavedSettings, notifySavedProfile },
+          useValue: {
+            notifySavedSettings,
+            notifySavedProfile,
+            publicUser$: of({ photoUrl: 'current-photo' }),
+          },
         },
         { provide: TranslocoService, useValue: { setActiveLang, load } },
         { provide: Platform, useValue: platformMock },
@@ -432,7 +436,24 @@ describe('OnboardingDataAccessService', () => {
     };
 
     await expect(service.saveProfile(profile)).resolves.toBe(profile);
-    expect(apiMock.updateUser).toHaveBeenCalledWith(profile);
+    // The photo on show stays until the backend publishes a checked one
+    // (GitHub issue #2140).
+    expect(apiMock.updateUser).toHaveBeenCalledWith(profile, 'current-photo');
+  });
+
+  it('keeps no photo on show when the store holds no profile yet', async () => {
+    setup();
+    TestBed.inject(BiteTribeStoreService).publicUser$ = of(undefined);
+    const profile = {
+      userId: 'user-1',
+      displayName: 'Foodie',
+      email: 'foodie@example.com',
+      photoUrl: '',
+    } as PublicUser;
+
+    await service.saveProfile(profile);
+
+    expect(apiMock.updateUser).toHaveBeenCalledWith(profile, '');
   });
 
   it('syncs the saved profile into the store', async () => {
@@ -443,9 +464,14 @@ describe('OnboardingDataAccessService', () => {
       email: 'foodie@example.com',
       photoUrl: 'data:image/png;base64,AAAA',
     };
-    // The API resolves the uploaded photo to its storage URL, and that is what
-    // the rest of the app has to read — not the base64 the step held.
-    const persisted = { ...profile, photoUrl: 'https://storage/photo.jpg' };
+    // The API keeps the photo on show while the new one waits for the image
+    // check, and that is what the rest of the app has to read — not the
+    // base64 the step held (GitHub issue #2140).
+    const persisted = {
+      ...profile,
+      photoUrl: 'current-photo',
+      photoStatus: 'pending' as const,
+    };
     apiMock.updateUser.mockResolvedValue(persisted);
 
     await service.saveProfile(profile);

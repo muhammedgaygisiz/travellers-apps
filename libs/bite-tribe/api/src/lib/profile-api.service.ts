@@ -33,7 +33,6 @@ import { checkUserProfileImageAndMirrorToFirebase } from './utils/check-user-pro
 import { USERS_COLLECTION } from './utils/user-collection-key';
 import {
   ContentRefusedError,
-  getDownloadUrlFromFirebaseStorage,
   isBase64String,
   isContentRefused,
   loadAppRelease,
@@ -165,10 +164,8 @@ export class ProfileApiService {
     try {
       const user = this.authService.getUser();
 
-      const photoUrl = user?.providerData.find(
-        (data) => data.photoUrl?.length,
-      )?.photoUrl;
-
+      // No photo: the provider's avatar is mirrored and checked on the
+      // backend before it becomes `photoUrl` (GitHub issue #2140).
       await FirebaseFirestore.setDocument({
         reference: `${USERS_COLLECTION}/${user?.uid}`,
         data: {
@@ -179,7 +176,7 @@ export class ProfileApiService {
           // is only ever set by the user, in the edit-profile form.
           fullName: '',
           email: user?.email || '',
-          photoUrl: photoUrl || '',
+          photoUrl: '',
           public: isPublic,
           createdAt: new Date().toISOString(),
           createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
@@ -193,35 +190,48 @@ export class ProfileApiService {
   }
 
   /**
-   * Writes the profile, uploading a newly chosen photo first, and swallows a
+   * Writes the profile, then uploads a newly chosen photo, and swallows a
    * failure: the caller's copy comes back unchanged. A refused text is the
    * exception, and is thrown (issue #1610).
    *
-   * Onboarding's path, which waits for the photo. Edit Profile uploads in the
-   * background instead, through {@link saveProfile} and
-   * {@link uploadProfilePhoto}. The replaced object is removed by the storage
-   * finalize trigger in either case.
+   * Onboarding's path, which waits for the upload. Edit Profile uploads in
+   * the background instead, through {@link saveProfile} and
+   * {@link uploadProfilePhoto}. Either way the document is marked `pending`
+   * before the transfer starts, and only the storage finalize trigger
+   * publishes the photo, once the image check passed it (GitHub issue #2140).
+   * So the profile that comes back still carries its previous photo.
    */
-  async updateUser(publicUser: PublicUser): Promise<PublicUser> {
+  async updateUser(
+    publicUser: PublicUser,
+    currentPhotoUrl = '',
+  ): Promise<PublicUser> {
     try {
-      const photoUrl = publicUser.photoUrl;
+      const photo = publicUser.photoUrl;
 
-      if (!isBase64String(photoUrl)) {
+      if (!isBase64String(photo)) {
         return await this.saveProfile(publicUser);
       }
 
-      const newPhotoRef = await uploadBase64ToFirebaseStorage({
-        base64: photoUrl,
-        docId: publicUser.userId,
-        collection: USERS_COLLECTION,
-      });
+      // Pending first: a status written after the upload could land after
+      // the trigger's verdict and hide it.
+      const saved = await this.saveProfile(
+        { ...publicUser, photoUrl: currentPhotoUrl },
+        Date.now(),
+      );
 
-      const newPhotoUrl = await getDownloadUrlFromFirebaseStorage(newPhotoRef);
+      try {
+        await uploadBase64ToFirebaseStorage({
+          base64: photo,
+          docId: publicUser.userId,
+          collection: USERS_COLLECTION,
+        });
+      } catch (error) {
+        await this.setProfilePhotoStatus(publicUser.userId, 'failed');
 
-      return await this.saveProfile({
-        ...publicUser,
-        photoUrl: newPhotoUrl || '',
-      });
+        throw error;
+      }
+
+      return saved;
     } catch (error) {
       // A refusal is the user's to act on, so it reaches the step that
       // asked (issue #1610); any other failure is swallowed as before.
@@ -247,16 +257,18 @@ export class ProfileApiService {
    * here. The display name is neither: `claimDisplayName` writes it, and the
    * rules refuse a client changing any of these fields.
    *
-   * With `photoUploadStartedAt`, the document is marked as waiting for a new
-   * photo: `photoUrl` must then still be the current one, which stays on show
-   * until the upload lands (GitHub issue #1953).
+   * `photoUrl` is never written: only the storage finalize trigger publishes
+   * a photo, once the image check passed it (GitHub issue #2140). The caller's
+   * `photoUrl` is what comes back. With `photoUploadStartedAt`, the document
+   * is marked as waiting for a new photo, and the current one stays on show
+   * until the trigger replaces it (GitHub issue #1953).
    */
   async saveProfile(
     publicUser: PublicUser,
     photoUploadStartedAt?: number,
   ): Promise<PublicUser> {
     const updatedUser = {
-      ...this.toProfileUpdate(publicUser, publicUser.photoUrl),
+      ...this.toProfileUpdate(publicUser),
       ...(photoUploadStartedAt === undefined
         ? {}
         : {
@@ -323,25 +335,6 @@ export class ProfileApiService {
     } catch {
       return undefined;
     }
-  }
-
-  /**
-   * Points the profile at a finished upload. The finalize trigger writes the
-   * same thing; the client does too so its own profile shows the photo at
-   * once, without waiting for the trigger or a reload.
-   */
-  async setUploadedProfilePhoto(
-    userId: string,
-    imagePath: string,
-  ): Promise<string> {
-    const photoUrl = (await getDownloadUrlFromFirebaseStorage(imagePath)) || '';
-
-    await FirebaseFirestore.updateDocument({
-      reference: `${USERS_COLLECTION}/${userId}`,
-      data: { photoUrl, photoStatus: 'uploaded' },
-    });
-
-    return photoUrl;
   }
 
   /**
@@ -418,8 +411,7 @@ export class ProfileApiService {
    */
   private toProfileUpdate(
     publicUser: PublicUser,
-    photoUrl: string,
-  ): Omit<PublicUser, 'userId' | 'followers'> {
+  ): Omit<PublicUser, 'userId' | 'followers' | 'photoUrl'> {
     const pronouns = normalizePronouns(publicUser.pronouns);
 
     return {
@@ -427,7 +419,6 @@ export class ProfileApiService {
       fullName: publicUser.fullName || '',
       ...(pronouns ? { pronouns } : {}),
       email: publicUser.email,
-      photoUrl,
       city: publicUser.city || '',
       about: publicUser.about || '',
       public: publicUser.public || false,
@@ -443,7 +434,7 @@ export class ProfileApiService {
    */
   private toUpdatedUser(
     publicUser: PublicUser,
-    updatedUser: Omit<PublicUser, 'userId' | 'followers'>,
+    updatedUser: Omit<PublicUser, 'userId' | 'followers' | 'photoUrl'>,
   ): PublicUser {
     const { pronouns: previousPronouns, ...rest } = publicUser;
     void previousPronouns;

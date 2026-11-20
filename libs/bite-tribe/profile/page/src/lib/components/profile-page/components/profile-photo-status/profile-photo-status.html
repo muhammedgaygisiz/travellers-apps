@@ -36,4 +36,15 @@
     data-testid="profile-photo-retry-offline"
   />
 </div>
-} } }
+} } @case ('refused') {
+<!-- The whole avatar opens the picker: the refused photo is never sent again. -->
+<div
+  class="photo-state"
+  role="button"
+  data-testid="profile-photo-refused"
+  [attr.aria-label]="('profile-photo-refused' | transloco) + ' ' + ('choose-different-photo' | transloco)"
+  (click)="retryPhotoUpload.emit()"
+>
+  <ion-icon name="alert-circle-outline" aria-hidden="true" />
+</div>
+} }

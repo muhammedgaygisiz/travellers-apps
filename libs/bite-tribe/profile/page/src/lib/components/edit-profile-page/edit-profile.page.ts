@@ -2,6 +2,7 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -37,6 +38,8 @@ import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
 import { ImageUploadComponent } from 'image-upload';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { photoRefusalReasonKey } from 'bite-tribe-common/bite';
+import { isBase64String } from 'utils';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
@@ -158,6 +161,32 @@ export class EditProfilePage {
     this.profileForm.valueChanges.pipe(map(() => !this.profileForm.valid)),
     { initialValue: !this.profileForm.valid },
   );
+
+  private readonly photoValue = toSignal(
+    this.profileForm.controls.photoUrl.valueChanges,
+    { initialValue: this.profileForm.controls.photoUrl.value },
+  );
+
+  /**
+   * The image check refused the last photo, and no other has been picked
+   * since (GitHub issue #2140). Picking one replaces the notice; saving it
+   * starts a new upload.
+   */
+  readonly photoRefused = computed(
+    (): boolean =>
+      this.publicUser()?.photoStatus === 'refused' &&
+      !isBase64String(this.photoValue() ?? ''),
+  );
+
+  /** Why the image check refused the photo, as a line of copy. */
+  readonly refusalReasonKey = computed((): string =>
+    photoRefusalReasonKey(this.publicUser()?.photoRefusalCategory),
+  );
+
+  /** Opens the photo picker, as tapping the photo does. */
+  openPhotoPicker(): void {
+    void this.profileImageSelectionModal()?.present();
+  }
 
   isFormPristine = toSignal(
     this.profileForm.valueChanges.pipe(map(() => this.profileForm.pristine)),

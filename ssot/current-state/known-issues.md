@@ -41,7 +41,7 @@ Firebase enforces `disabled` when a session is created or a token is refreshed, 
 **Why it matters:** the check of [#1610] is the store's filtering safeguard, and three of its edges are open by decision rather than by oversight.
 
 - **A Bite saved offline, or by a client that skips the form, is readable for seconds.** `moderateBiteOnWrite` undoes it once the write reaches the server; until then other members can read the text. The pushes do not carry it. The bound is the price of saving a Bite offline (`RD-QG-1`), and the alternative - a hidden state every Bite read filters on - is the one the Bite photo question in [Current State - Open Questions](open-questions.md) declined.
-- **Only Bite photos are checked.** A Bite photo is checked before it is published since [#2139]; profile, restaurant and Bite Trail photos are not yet, until the remaining stories of epic [#2137] land. The decision and its reopening are on the same page.
+- **Only Bite and profile photos are checked.** A Bite photo is checked before it is published since [#2139], and a profile photo since [#2140]; restaurant and Bite Trail photos are not yet, until the remaining stories of epic [#2137] land. The decision and its reopening are on the same page.
 - **Vertex down means the wordlist alone.** A model outage publishes what the short wordlist passes, logged as `checkContent: model unavailable`, rather than refusing every post.
 
 How the check works is in [Architecture - AI](../architecture/ai.md).
@@ -264,3 +264,4 @@ a one-off step. It is the filter, not traffic, and it does not recur.
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

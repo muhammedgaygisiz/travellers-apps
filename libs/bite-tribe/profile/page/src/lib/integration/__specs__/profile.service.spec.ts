@@ -418,6 +418,28 @@ describe(ProfileService.name, () => {
 
       expect(navigateSpy).toHaveBeenCalledWith(['edit-profile']);
     });
+
+    /** GitHub issue #2140. */
+    it('opens the photo picker for a photo the check refused', async () => {
+      // The service holds the mock's `myUser` itself, so it is stubbed in
+      // place rather than replaced.
+      jest.mocked(profileDataAccessService.myUser).mockReturnValueOnce({
+        userId: 'me',
+        photoStatus: 'refused',
+      } as PublicUser);
+      jest
+        .spyOn(profileDataAccessService, 'retryProfilePhotoUpload')
+        .mockResolvedValueOnce(false);
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+
+      await service.retryProfilePhotoUpload();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['edit-profile'], {
+        queryParams: { choosePhoto: 'true' },
+      });
+    });
   });
 
   describe('followButtonClicked', () => {

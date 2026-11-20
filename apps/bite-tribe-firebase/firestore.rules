@@ -1231,6 +1231,27 @@ service cloud.firestore {
     }
 
     /**
+     * The profile photo is published only by `setUserPhotoUrlOnUpload`, once
+     * the image check has passed it (GitHub issue #2140): it alone writes
+     * `photoUrl`, `photoRefusalCategory`, and the `uploaded` and `refused`
+     * photo statuses. A client may write the two statuses its upload owns,
+     * `pending` and `failed`, and nothing else of the photo. A first write
+     * carries no photo at all, so a client cannot publish one through a
+     * create either.
+     */
+    function createsUnpublishedProfilePhoto(data) {
+      return data.get('photoUrl', '') == ''
+        && !('photoRefusalCategory' in data)
+        && data.get('photoStatus', 'pending') in ['pending', 'failed'];
+    }
+
+    function keepsPublishedProfilePhoto() {
+      return unchangedAll(['photoUrl', 'photoRefusalCategory'])
+        && (unchangedAll(['photoStatus'])
+          || request.resource.data.get('photoStatus', null) in ['pending', 'failed']);
+    }
+
+    /**
      * Whether another member may read this profile at all (GitHub issue #1863).
      *
      * A read returns the whole document or none of it, so a private profile
@@ -1269,11 +1290,13 @@ service cloud.firestore {
        */
       allow create: if isSelf(userId)
         && absentAll(backendOwnedUserFields())
-        && noProfileText(request.resource.data);
+        && noProfileText(request.resource.data)
+        && createsUnpublishedProfilePhoto(request.resource.data);
 
       allow update: if isSelf(userId)
         && unchangedAll(backendOwnedUserFields())
-        && unchangedAll(checkedProfileTextFields());
+        && unchangedAll(checkedProfileTextFields())
+        && keepsPublishedProfilePhoto();
 
       /** Account deletion runs in `deleteOwnAccount` with the Admin SDK. */
       allow delete: if false;
@@ -1403,6 +1426,15 @@ service cloud.firestore {
     match /meta/{documentId} {
       allow read: if isMember() && documentId != 'postingStreakStats';
       allow write: if false;
+    }
+
+    /**
+     * Identity-provider avatars waiting to be mirrored into Storage and checked
+     * (GitHub issue #2140). Written by `writeNewUserProfile`, consumed by
+     * `mirrorIdentityAvatarOnCreate`; no client reads or writes it.
+     */
+    match /identityAvatars/{uid} {
+      allow read, write: if false;
     }
 
     match /displayNames/{normalizedDisplayName} {

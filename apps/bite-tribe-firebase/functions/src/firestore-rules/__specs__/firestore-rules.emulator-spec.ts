@@ -2705,6 +2705,23 @@ describe('content-check verdicts', () => {
   });
 });
 
+describe('identity-provider avatars waiting for the check', () => {
+  /**
+   * Server-only (issue #2140): a client that could queue an avatar would point
+   * the mirror at an image of its choosing.
+   */
+  it('refuses every reader and writer there is', async () => {
+    for (const db of [signedOut(), asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(getDoc(doc(db, 'identityAvatars', CONSUMER)));
+    }
+    await assertFails(
+      setDoc(doc(asConsumer(), 'identityAvatars', CONSUMER), {
+        sourceUrl: 'https://lh3.googleusercontent.com/a/avatar',
+      }),
+    );
+  });
+});
+
 describe('scan rate limits', () => {
   const counter = (db: Firestore): DocumentReference =>
     doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000');
@@ -3314,9 +3331,93 @@ describe('users', () => {
     await assertSucceeds(
       updateDoc(doc(asConsumer(), 'users', CONSUMER), {
         public: true,
-        photoUrl: 'https://example.com/me.jpg',
+        photoUrl: '',
       }),
     );
+  });
+
+  /**
+   * Only `setUserPhotoUrlOnUpload` publishes a profile photo, once the image
+   * check passed it (GitHub issue #2140). The device writes the statuses its
+   * upload owns, and nothing else of the photo.
+   */
+  describe('the published profile photo (issue #2140)', () => {
+    it.each([
+      ['photoUrl', { photoUrl: 'https://example.com/me.jpg' }],
+      ['photoUrl removed', { photoUrl: deleteField() }],
+      ['photoStatus uploaded', { photoStatus: 'uploaded' }],
+      ['photoStatus refused', { photoStatus: 'refused' }],
+      ['photoRefusalCategory', { photoRefusalCategory: 'hate' }],
+    ])(
+      'refuses a client writing %s',
+      async (_field, change: Record<string, unknown>) => {
+        await assertFails(
+          updateDoc(doc(asConsumer(), 'users', CONSUMER), change),
+        );
+      },
+    );
+
+    it.each(['pending', 'failed'])(
+      'lets the device write the %s status of its upload',
+      async (photoStatus) => {
+        await assertSucceeds(
+          updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+            photoStatus,
+            photoUploadStartedAtTimestamp: 1,
+          }),
+        );
+      },
+    );
+
+    it('lets the device start a new upload after a refusal, keeping the refusal fields it may not touch', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(doc(context.firestore(), 'users', CONSUMER), {
+          photoUrl: 'https://example.com/previous.jpg',
+          photoStatus: 'refused',
+          photoRefusalCategory: 'hate',
+        });
+      });
+
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          photoStatus: 'pending',
+          photoUrl: 'https://example.com/previous.jpg',
+        }),
+      );
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          photoRefusalCategory: deleteField(),
+        }),
+      );
+    });
+
+    it('refuses a first write that carries a photo', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), 'users', CONSUMER));
+      });
+
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoUrl: 'https://lh3.googleusercontent.com/a/avatar',
+        }),
+      );
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoStatus: 'uploaded',
+        }),
+      );
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoUrl: '',
+        }),
+      );
+    });
   });
 
   it("refuses editing another account's profile", async () => {

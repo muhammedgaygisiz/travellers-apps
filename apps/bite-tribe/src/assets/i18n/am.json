@@ -392,6 +392,8 @@
   "photo-refused-reason-illegal": "ሕገወጥ አደንዛዥ ዕፆችን ወይም ለሽያጭ የቀረቡ መሣሪያዎችን የሚያሳይ ይመስላል።",
   "photo-refused-reason-other": "የፎቶ ፍተሻችንን አላለፈም።",
   "choose-different-photo": "ሌላ ፎቶ ይምረጡ",
+  "profile-photo-refused": "አዲሱ ፎቶዎ በBiteTribe ላይ አይፈቀድም",
+  "profile-photo-refused-not-shown": "ሌላ ማንም አያየውም። የመገለጫ ፎቶዎ እንደነበረ ይቆያል።",
   "choose-photo": "ፎቶ ይምረጡ",
   "image-upload-retry-failed": "ጭነቱን መጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
   "bite-updated-successfully": "ባይቱ በተሳካ ሁኔታ ተዘምኗል!",

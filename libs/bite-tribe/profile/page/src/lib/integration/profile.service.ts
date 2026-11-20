@@ -27,6 +27,12 @@ import {
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { countBitesByCountry } from './utils/count-bites-by-country';
 
+/**
+ * The query parameter that has Edit Profile open its photo picker on arrival
+ * (GitHub issue #2140).
+ */
+export const CHOOSE_PHOTO_QUERY_PARAM = 'choosePhoto';
+
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly dataAccess = inject(ProfileDataAccessService);
@@ -82,7 +88,19 @@ export class ProfileService {
     this.navController.navigateForward(['my-bites']);
   }
 
-  gotoEditProfile(): void {
+  /**
+   * With `choosePhoto`, Edit Profile opens its photo picker on arrival, for a
+   * photo the image check refused (GitHub issue #2140).
+   */
+  gotoEditProfile(choosePhoto = false): void {
+    if (choosePhoto) {
+      this.navController.navigateForward([PATH.EDIT_PROFILE], {
+        queryParams: { [CHOOSE_PHOTO_QUERY_PARAM]: 'true' },
+      });
+
+      return;
+    }
+
     this.navController.navigateForward([PATH.EDIT_PROFILE]);
   }
 
@@ -192,11 +210,16 @@ export class ProfileService {
 
   /**
    * Sends a profile photo whose upload failed again, or has the user choose
-   * it again when this device no longer holds it (GitHub issue #1953).
+   * it again when this device no longer holds it (GitHub issue #1953). A
+   * photo the image check refused is never sent again: the user is taken
+   * straight to the photo picker to choose a different one (GitHub issue
+   * #2140).
    */
   async retryProfilePhotoUpload(): Promise<void> {
+    const refused = this.myUser()?.photoStatus === 'refused';
+
     if (!(await this.dataAccess.retryProfilePhotoUpload())) {
-      this.gotoEditProfile();
+      this.gotoEditProfile(refused);
     }
   }
 

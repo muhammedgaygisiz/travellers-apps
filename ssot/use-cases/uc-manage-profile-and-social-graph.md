@@ -509,7 +509,10 @@ A new photo chosen on `Edit Profile` uploads in the background, the way a Bite p
 - `Save Changes` writes the other fields at once, marks the user document `photoStatus: pending` with `photoUploadStartedAtTimestamp`, and goes back. A write that fails keeps the user on the form with a `profile-could-not-be-saved` toast.
 - The previous photo stays in `photoUrl` until the new one lands, so nobody else ever sees a missing photo. The status is shown to the owner alone, on the own avatar: the new photo blurred, with a spinner while it uploads, the retry button once it failed, or an offline mark while a retry could not work. The whole avatar retries, and the wording is read out to a screen reader rather than shown. Where the device no longer holds the new photo, the previous one is blurred instead.
 - The retry button is `bt-retry-upload-button`, shared with the Bite photo status so both read as the same action: outline, with a refresh icon and the card background. The avatar uses its short label (`retry-upload-short`, "Retry"), the Bite card the full one.
-- The storage finalize trigger `setUserPhotoUrlOnUpload` points `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the older objects in `images/users/{uid}/`. The device writes the same URL itself for an immediate update; the trigger is what makes the save independent of that device staying open.
+- The storage finalize trigger `setUserPhotoUrlOnUpload` runs the image check of [Architecture - AI](../architecture/ai.md) on the new object first ([#2140]). A passed photo becomes `photoUrl`, with `photoStatus: uploaded`, and the older objects in `images/users/{uid}/` are deleted. A refused photo is deleted from Storage, `photoUrl` keeps the previous photo, and the document gets `photoStatus: refused` with `photoRefusalCategory`; nobody else sees any change to the profile. A check that cannot answer writes nothing, and the status stays `pending`.
+- The trigger is the only writer of `photoUrl`. The device never writes it, not even after its own upload finishes, and the rules refuse a client write of `photoUrl`, of `photoRefusalCategory`, and of the `uploaded` and `refused` statuses. The new photo stays blurred on the own avatar until the trigger's verdict arrives.
+- A refused photo is shown to its owner alone, as a mark on the own avatar and a notice on `Edit Profile`: the photo was not allowed, why, and that nobody else sees it. Neither shows the refused photo. The avatar opens `Edit Profile` with its photo picker open, and the notice's `Choose a different photo` opens the picker; a refused photo is never sent again.
+- The avatar a new account brings from its identity provider goes through the same check. The account starts with an empty `photoUrl`, `mirrorIdentityAvatarOnCreate` uploads the avatar to `images/users/{uid}/`, and the trigger publishes or refuses it like a chosen photo. A refused or unreachable avatar leaves the account on the placeholder.
 - The device writes `failed` when the transfer errors, or reports nothing for 30 seconds. A `pending` status older than 10 minutes reads as failed, as on a Bite.
 - A retry sends the photo kept from this session, else the device's local copy (`users_{uid}.*`). With neither, it opens `Edit Profile` to choose the photo again. While the device reports no connection, the retry is replaced by the offline hint.
 - `Edit Profile` fills its form from the profile only while the form is untouched. A new copy of the profile (the email verification sync writes one while the page is open) used to overwrite a photo the user had just picked.
@@ -562,7 +565,10 @@ The user block contract is the blocking half of Apple's user-generated-content g
 reporting of abusive users; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
 Reporting adds no permission and no data declaration: a report is user content already
 declared as `Other User Content` in [Implementation - Store Declarations](../implementation/store-declarations.md).
-The `Profile Text Check` is the filtering half of the same guideline, for a profile's text.
+The `Profile Text Check` is the filtering half of the same guideline, for a profile's text, and
+the image check in the `Profile Photo Upload Contract` is that half for its photo ([#2140]),
+which other members see on profiles, follower lists and the leaderboard. It adds no
+permission and no store listing change.
 
 The profile visibility contract is what makes the public/private switch do what it says,
 which Apple guideline 5.1.1 and Google Play's User Data policy expect of a privacy control.
@@ -651,6 +657,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
 - Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Its story [#2167] sends a private author's new-Bite push to the followers they accepted. Its story [#2168] keeps the followers when a profile turns private and accepts the pending requests when it turns public. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
+- Issue [#2140] checks the profile photo before it is published, including the identity-provider avatar, part of epic [#2137].
 
 ## Related Domains
 
@@ -706,3 +713,5 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

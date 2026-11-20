@@ -392,6 +392,8 @@
   "photo-refused-reason-illegal": "Foto ini tampaknya menampilkan narkoba ilegal atau senjata yang dijual.",
   "photo-refused-reason-other": "Foto ini tidak lolos pemeriksaan foto kami.",
   "choose-different-photo": "Pilih foto lain",
+  "profile-photo-refused": "Foto barumu tidak diizinkan di BiteTribe",
+  "profile-photo-refused-not-shown": "Tidak ada orang lain yang melihatnya. Foto profilmu tetap seperti sebelumnya.",
   "choose-photo": "Pilih foto",
   "image-upload-retry-failed": "Unggahan tidak dapat dimulai. Silakan coba lagi.",
   "bite-updated-successfully": "Bite berhasil diperbarui!",

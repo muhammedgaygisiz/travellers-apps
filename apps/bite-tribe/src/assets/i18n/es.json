@@ -392,6 +392,8 @@
   "photo-refused-reason-illegal": "Parece mostrar drogas ilegales o armas a la venta.",
   "photo-refused-reason-other": "No ha superado nuestra revisión de fotos.",
   "choose-different-photo": "Elegir otra foto",
+  "profile-photo-refused": "Tu nueva foto no está permitida en BiteTribe",
+  "profile-photo-refused-not-shown": "Nadie más la ve. Tu foto de perfil sigue como estaba.",
   "choose-photo": "Elegir una foto",
   "image-upload-retry-failed": "No pudimos iniciar la subida. Inténtalo de nuevo.",
   "bite-updated-successfully": "¡Bite actualizado con éxito!",

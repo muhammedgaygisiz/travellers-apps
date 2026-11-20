@@ -50,7 +50,9 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 `setBiteImagePathOnUpload` listens to finalized storage objects for Bite images, runs the image check of [Architecture - AI](ai.md) on the object, and only then writes the matching Bite document's `imagePath`. A refused object is deleted and never gets a URL on any document. It is the only writer of a Bite's `imagePath`: the app uploads the photo and no longer resolves or writes the download URL itself, and the Firestore rules refuse a client write of it ([#2139]).
 
-`setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]).
+`setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it runs the image check, then points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]). A refused object is deleted, `photoUrl` keeps the previous photo, and the document gets `photoStatus: refused`. It is the only writer of `photoUrl`: the app uploads the photo and never writes the URL, and the Firestore rules refuse a client write of it ([#2140]).
+
+`mirrorIdentityAvatarOnCreate` puts the avatar a new account brings from its identity provider through the same path. The account is created with an empty `photoUrl`, and the avatar's URL waits in the server-only `identityAvatars` collection; the trigger fetches it (Google's avatar host only, over HTTPS), uploads it to `images/users/{uid}/`, and removes the entry. The finalize trigger then checks it like any other profile photo, so a refused avatar leaves the account with no photo ([#2140]).
 
 `setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`: it points the Restaurant's `imagePath` at the new object, writes `imageStatus: uploaded`, and deletes the older objects in that folder by the same older-only rule, which both triggers now share as `deleteReplacedObjects` ([#2126]). The business app uploads there in the background the way a profile photo is uploaded; the admin app's candidate verification uploads there too and writes the URL itself, which the trigger then writes again unchanged.
 
@@ -176,3 +178,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

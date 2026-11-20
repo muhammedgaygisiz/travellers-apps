@@ -18,7 +18,8 @@
     }
   }
 
-  [data-testid='profile-photo-failed'] {
+  [data-testid='profile-photo-failed'],
+  [data-testid='profile-photo-refused'] {
     cursor: pointer;
   }
 }

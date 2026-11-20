@@ -72,6 +72,16 @@ export class ProfileHeader {
   });
 
   /**
+   * The image check refused the new photo (GitHub issue #2140). The photo
+   * on show is the one everybody else sees, unblurred: the refused one is
+   * never shown, not even to its owner.
+   */
+  photoRefused = computed(
+    (): boolean =>
+      this.showPhotoStatus() && this.user()?.photoStatus === 'refused',
+  );
+
+  /**
    * The photo under the status: the new one where this device still holds
    * it, otherwise the previous one - blurred either way.
    */

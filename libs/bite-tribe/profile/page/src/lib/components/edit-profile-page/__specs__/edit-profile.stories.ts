@@ -86,6 +86,22 @@ export const EmailVerificationResendRunning: Story = {
   },
 };
 
+/**
+ * The image check refused the new photo (GitHub issue #2140): the form keeps
+ * the photo everybody else sees, says why the new one was not allowed, and
+ * offers to choose a different one.
+ */
+export const PhotoRefused: Story = {
+  args: {
+    publicUser: {
+      ...unverifiedUser,
+      emailVerified: true,
+      photoStatus: 'refused',
+      photoRefusalCategory: 'violence',
+    },
+  },
+};
+
 /** A profile that states its pronouns, next to the display name (#1826). */
 export const WithPronouns: Story = {
   args: {

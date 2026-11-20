@@ -37,6 +37,10 @@ export class EditRestaurantService {
   pendingPhoto = computed(() => this.ownUpload()?.photo);
   uploadedImagePath = computed(() => this.ownUpload()?.imagePath);
   canRetryPhoto = computed(() => !!this.ownUpload()?.photo);
+  photoChecking = computed(() => !!this.ownUpload()?.checking);
+  photoRefusalCategory = computed(() =>
+    this.photoUpload.refusalCategoryFor(this.restaurant()),
+  );
 
   /**
    * Starts the background upload of a newly chosen photo (GitHub issue

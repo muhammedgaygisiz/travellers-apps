@@ -62,10 +62,16 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   verified and held by the account. It uploads the way a Bite or profile photo does:
   Save marks the Restaurant `imageStatus: pending` and sends the photo in the
   background, the old photo stays on show with the new one blurred under a
-  spinner, and `setRestaurantImagePathOnUpload` points the Restaurant at it
-  even if the page is gone. An error, or 30 s with no progress, ends in
+  spinner, and `setRestaurantImagePathOnUpload` publishes it even if the page
+  is gone. An error, or 30 s with no progress, ends in
   `failed` and the shared retry button; an upload from an earlier session asks
   for the photo again, because the web app keeps no copy on the device.
+- The photo is published only once the image check passed it (issue
+  [#2141]). The page writes no download URL; once the transfer is done the box
+  says the photo is being checked, and the page listens for the verdict. A
+  refused photo is deleted, the Restaurant keeps the photo it had, and the
+  page says why below the box, where a different photo can be chosen at once;
+  the refused one is never sent again.
 - The Restaurant Owner opens Restaurants and edits one of them.
 - The Restaurant Owner maintains menu and Restaurant metadata.
 - Both the map and the list hold **only the Restaurants assigned to the
@@ -170,6 +176,7 @@ all be reviewed for the first time.
   restroom, which the consumer restaurant page shows. Part of epic [#1823].
 - Issue [#2131] added the category picker and its checklist item. Part of epic [#2123].
 - Issue [#2183] split the page into an overview and one view per section, and pointed every checklist item at its own section. Part of epic [#2123].
+- Issue [#2141] publishes the photo only once the image check passed it, and shows a refusal with its reason. Part of epic [#2137].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
@@ -213,3 +220,5 @@ all be reviewed for the first time.
 [#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123
 [#2183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2183
 [#2182]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2182
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137

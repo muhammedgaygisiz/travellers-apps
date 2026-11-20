@@ -51,6 +51,7 @@ describe(RestaurantsDataAccessService.name, () => {
     getPlaceDetails: jest.Mock;
     saveRestaurantImage: jest.Mock;
     uploadRestaurantImageForUrl: jest.Mock;
+    restaurantPhotoVerdict$: jest.Mock;
   };
 
   beforeEach(() => {
@@ -72,7 +73,13 @@ describe(RestaurantsDataAccessService.name, () => {
         .mockResolvedValue(
           'https://storage.test/images/restaurants/candidate-1/p.jpg',
         ),
-      saveNewRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveNewRestaurant: jest.fn().mockResolvedValue('restaurant-new'),
+      restaurantPhotoVerdict$: jest.fn(() =>
+        of({
+          imageStatus: 'uploaded',
+          imagePath: 'https://storage.test/p.jpg',
+        }),
+      ),
     };
 
     jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
@@ -640,6 +647,25 @@ describe(RestaurantsDataAccessService.name, () => {
       await service.submitNewRestaurant(restaurant);
 
       expect(apiMock.saveNewRestaurant).toHaveBeenCalledWith(restaurant);
+      expect(apiMock.restaurantPhotoVerdict$).not.toHaveBeenCalled();
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    it('waits for the image check on a restaurant with a photo', async () => {
+      const verdict = await service.submitNewRestaurant({
+        id: '',
+        name: 'Pizza Palace',
+        image: 'data:image/png;base64,abc',
+      } as Restaurant);
+
+      expect(apiMock.restaurantPhotoVerdict$).toHaveBeenCalledWith(
+        'restaurant-new',
+        false,
+      );
+      expect(verdict).toEqual({
+        imageStatus: 'uploaded',
+        imagePath: 'https://storage.test/p.jpg',
+      });
     });
 
     it('should reject when the write is refused', async () => {

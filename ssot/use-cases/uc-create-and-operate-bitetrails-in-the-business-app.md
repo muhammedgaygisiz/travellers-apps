@@ -40,6 +40,7 @@ actually sell is [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale
 
 - A Restaurant Owner opens the dashboard and sees the BiteTrails they own.
 - The Restaurant Owner opens Create BiteTrail, picks from their own Bites, and creates the trail.
+- A photo chosen for the trail is published only once the image check passed it (issue [#2141]). The page saves under a modal, writes the trail `pending`, uploads the photo and waits for the verdict; it then says the trail was created, that its photo is still being checked, or that the photo was refused and why. A refused photo is deleted and the trail stays without it, and the dashboard's trail list shows each trail's photo as being checked, failed, or refused with its reason.
 - The same form sets the trail's price and currency. Any non-negative amount in any offered currency is accepted; there are no price bands, and `0` means free.
 - BiteTrail becomes available as a marketplace-related journey. There is no publish step: creation is what makes it visible.
 
@@ -81,6 +82,7 @@ owner is the signed-in user.
   describes the organisation mechanism [issue-1371](../history/records/issue-1371.md) removed and no longer exists
 - Issue [#1519] moves creating a BiteTrail into the consumer app and removes this surface, under `RD-UR-4`
 - Issue [#1615] decides whether a BiteTrail curator is a role or a persona.
+- Issue [#2141] publishes a trail's photo only once the image check passed it. Part of epic [#2137].
 
 ## Related Domains
 
@@ -102,3 +104,5 @@ owner is the signed-in user.
 [#266]: https://github.com/muhammedgaygisiz/travellers-apps/issues/266
 [#1519]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1519
 [#1615]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1615
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137

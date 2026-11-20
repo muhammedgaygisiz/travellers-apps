@@ -54,7 +54,7 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 `mirrorIdentityAvatarOnCreate` puts the avatar a new account brings from its identity provider through the same path. The account is created with an empty `photoUrl`, and the avatar's URL waits in the server-only `identityAvatars` collection; the trigger fetches it (Google's avatar host only, over HTTPS), uploads it to `images/users/{uid}/`, and removes the entry. The finalize trigger then checks it like any other profile photo, so a refused avatar leaves the account with no photo ([#2140]).
 
-`setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`: it points the Restaurant's `imagePath` at the new object, writes `imageStatus: uploaded`, and deletes the older objects in that folder by the same older-only rule, which both triggers now share as `deleteReplacedObjects` ([#2126]). The business app uploads there in the background the way a profile photo is uploaded; the admin app's candidate verification uploads there too and writes the URL itself, which the trigger then writes again unchanged.
+`setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`, and `setBiteTrailImagePathOnUpload` for Bite Trail photos under `images/biteTrails/{biteTrailId}/` ([#2141]). Both run the image check, then point the document's `imagePath` at the new object, write `imageStatus: uploaded`, and delete the older objects in that folder by the same older-only rule, which the profile, restaurant and trail triggers share as `deleteReplacedObjects` ([#2126]). A refused object is deleted, `imagePath` keeps the previous photo, and the document gets `imageStatus: refused` with `imageRefusalCategory`; a check that could not run leaves it `pending`. They are the only writers of `imagePath` after an upload: the business app's photo editor, its Create BiteTrail page and the admin app's new-restaurant page upload and never write the URL, and the Firestore rules refuse a client write of it outside an operator. The admin app's candidate verification is the exception: it uploads under the candidate id, which names no restaurant, and hands the URL to `verifyRestaurantCandidate`, so that photo is not checked here.
 
 ## Storage Rules
 
@@ -179,3 +179,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141

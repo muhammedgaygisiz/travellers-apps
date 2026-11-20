@@ -30,6 +30,7 @@ export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-
 export { setUserPhotoUrlOnUpload } from './functions/users/set-user-photo-url-on-upload';
 export { mirrorIdentityAvatarOnCreate } from './functions/users/mirror-identity-avatar';
 export { setRestaurantImagePathOnUpload } from './functions/restaurants/set-restaurant-image-path-on-upload';
+export { setBiteTrailImagePathOnUpload } from './functions/bite-trails/set-bite-trail-image-path-on-upload';
 export {
   backfillBiteAddress,
   enrichBiteAddressOnWrite,

@@ -47,7 +47,7 @@ Only the roles, the subscription tier and the account's access are editable. The
 
 Blocking sits below both editable sections, separated by a rule and behind a confirmation that names the account. It is the one action on the form that takes something away, and it would otherwise be a misclick away from the role checkboxes.
 
-6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue [#1473].
+6. **Restaurant candidates** lists the pending candidates with the Bite evidence behind each, and **Bite places** lists place names Bites carry that no verified restaurant answers to yet. Both open the new-restaurant form, which creates the verified restaurant. Both moved out of the business dashboard with issue [#1473]. A restaurant created without a candidate is written before its photo uploads, and the photo is published only once the image check passed it (issue [#2141]); the form waits for the verdict and says when the photo was refused, and why, or is still being checked. A photo chosen while verifying a candidate goes to `verifyRestaurantCandidate` as before.
 7. **Restaurant ownership** assigns a verified restaurant to up to ten accounts holding `business`, and revokes any one of them ([#1753]). Both go through admin-only callables that write the fields on the restaurant document (issue [#1077]). The surface reuses the account list user management already loads rather than adding a second way to find an account, and offers only accounts holding the role.
 
 A held restaurant lists every owner and offers "add owner", without the accounts that already hold it, until it has ten. Replacing an owner is revoke and then assign, so the operator log carries a reason for the removal and a reason for the grant. Each owner has its own revoke action, behind a confirmation naming the restaurant and the account, on the same terms as blocking. The confirmation says when other owners keep the restaurant.
@@ -162,6 +162,7 @@ where the queues the reports arrive in live.
 - Issue [#1472] - require the `admin` role on every operator callable, which moving the UI does not do; done, and the classification of every endpoint is now a test
 - Issue [#1474] - block and unblock an account, the first operator action that takes something away
 - Issue [#1475] - delete an improper Bite, and the cascade that keeps the derived state correct
+- Issue [#2141] - publish a new restaurant's photo only once the image check passed it; part of epic [#2137]
 - Issue [#1485] - see and change an account's subscription tier for a support case
 - Issue [#1608] - a user reports a Bite, and the report queue an operator works it from
 - Issue [#1829] - a user reports a profile, and the reported-profiles queue an operator works it from, part of epic [#1823]
@@ -221,3 +222,5 @@ where the queues the reports arrive in live.
 [#1974]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1974
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137

@@ -29,6 +29,8 @@ import { EditRestaurantService } from './edit-restaurant.service';
       [pendingPhoto]="service.pendingPhoto()"
       [uploadedImagePath]="service.uploadedImagePath()"
       [canRetryPhoto]="service.canRetryPhoto()"
+      [photoChecking]="service.photoChecking()"
+      [photoRefusalCategory]="service.photoRefusalCategory()"
       (savePhoto)="service.savePhoto($event)"
       (retryPhoto)="service.retryPhoto()"
       (submitSocialMediaLinks)="service.submitSocialMediaLinks($event)"

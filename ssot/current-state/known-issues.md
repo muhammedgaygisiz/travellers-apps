@@ -41,7 +41,7 @@ Firebase enforces `disabled` when a session is created or a token is refreshed, 
 **Why it matters:** the check of [#1610] is the store's filtering safeguard, and three of its edges are open by decision rather than by oversight.
 
 - **A Bite saved offline, or by a client that skips the form, is readable for seconds.** `moderateBiteOnWrite` undoes it once the write reaches the server; until then other members can read the text. The pushes do not carry it. The bound is the price of saving a Bite offline (`RD-QG-1`), and the alternative - a hidden state every Bite read filters on - is the one the Bite photo question in [Current State - Open Questions](open-questions.md) declined.
-- **Only Bite and profile photos are checked.** A Bite photo is checked before it is published since [#2139], and a profile photo since [#2140]; restaurant and Bite Trail photos are not yet, until the remaining stories of epic [#2137] land. The decision and its reopening are on the same page.
+- **Photos stored before the image check are unchecked.** Every upload path is checked before it publishes: Bite photos since [#2139], profile photos since [#2140], and restaurant and Bite Trail photos since [#2141], which closed the last of them. What was published before is checked only once [#2143] lands, and a photo whose check could not run stays unpublished until [#2142] checks it again. The decision and its reopening are on the same page.
 - **Vertex down means the wordlist alone.** A model outage publishes what the short wordlist passes, logged as `checkContent: model unavailable`, rather than refusing every post.
 
 How the check works is in [Architecture - AI](../architecture/ai.md).
@@ -265,3 +265,6 @@ a one-off step. It is the filter, not traffic, and it does not recur.
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

@@ -29,6 +29,7 @@ class RestaurantApiMock {
   saveSocialMediaLinksForRestaurant = jest.fn();
   saveGenderNeutralRestroomForRestaurant = jest.fn();
   saveCategoriesForRestaurant = jest.fn();
+  photoVerdict$ = jest.fn();
 }
 
 class MenuApiMock {
@@ -112,6 +113,7 @@ class ExchangeRatesApiMock {
 
 class BiteTrailApiMock {
   createBiteTrail = jest.fn().mockResolvedValue(undefined);
+  photoVerdict$ = jest.fn();
 }
 
 describe(BiteTribeApiService.name, () => {
@@ -376,6 +378,36 @@ describe(BiteTribeApiService.name, () => {
         );
       },
     ));
+  });
+
+  // GitHub issue #2141: the image check's verdict on a folder photo.
+  describe('photo verdicts', () => {
+    it('passes a restaurant on to RestaurantApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const restaurantApiService = TestBed.inject(RestaurantApiService);
+      const verdict$ = of({ imageStatus: 'refused' as const });
+      jest.mocked(restaurantApiService.photoVerdict$).mockReturnValue(verdict$);
+
+      expect(service.restaurantPhotoVerdict$('restaurant-id', true)).toBe(
+        verdict$,
+      );
+      expect(restaurantApiService.photoVerdict$).toHaveBeenCalledWith(
+        'restaurant-id',
+        true,
+      );
+    });
+
+    it('passes a trail on to BiteTrailApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const biteTrailApiService = TestBed.inject(BiteTrailApiService);
+      const verdict$ = of({ imageStatus: 'uploaded' as const, imagePath: 'p' });
+      jest.mocked(biteTrailApiService.photoVerdict$).mockReturnValue(verdict$);
+
+      expect(service.biteTrailPhotoVerdict$('trail-id')).toBe(verdict$);
+      expect(biteTrailApiService.photoVerdict$).toHaveBeenCalledWith(
+        'trail-id',
+      );
+    });
   });
 
   describe('saveCategoriesForRestaurant', () => {

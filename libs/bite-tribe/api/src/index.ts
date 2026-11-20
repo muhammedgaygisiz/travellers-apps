@@ -11,3 +11,7 @@ export * from './lib/table-visit-bill-api/table-visit-bill-api.service';
 export * from './lib/visit-summary-api/visit-summary-api.service';
 export { toBase64 } from './lib/utils/to-base-64';
 export * from './lib/utils/load-visible-profile';
+export {
+  awaitFolderPhotoVerdict,
+  FOLDER_PHOTO_VERDICT_WAIT_MS,
+} from './lib/utils/folder-photo-verdict';

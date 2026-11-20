@@ -17,6 +17,8 @@
   "send-password-reset-link": "Send reset link",
   "something-went-wrong-please-try-again": "Something went wrong. Please try again.",
   "restaurant-saving": "Saving the restaurant…",
+  "restaurant-saved-photo-checking": "Restaurant saved. Its photo appears once it has been checked.",
+  "restaurant-saved-photo-refused": "Restaurant saved, but its photo isn’t allowed on BiteTribe.",
   "admin-start-title": "BiteTribe Admin",
   "admin-dashboard-title": "Operations",
   "admin-dashboard-message": "BiteTribe-internal tools.",

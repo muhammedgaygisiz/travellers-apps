@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { CreateBiteTrailService } from '../create-bite-trail.service';
 import { CreateBiteTrailDataAccessService } from 'bite-tribe-business/create-bite-trail-data-access';
-import { NavController } from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import { BiteTrail } from 'model';
 import { ToastService } from 'toast';
 
@@ -13,6 +14,7 @@ describe('CreateBiteTrailService', () => {
   let dataAccessMock: jest.Mocked<CreateBiteTrailDataAccessService>;
   let navControllerMock: { navigateBack: jest.Mock };
   let toastMock: { present: jest.Mock };
+  let loading: { present: jest.Mock; dismiss: jest.Mock };
 
   beforeEach(() => {
     const mockResource = { value: jest.fn().mockReturnValue(undefined) };
@@ -26,6 +28,10 @@ describe('CreateBiteTrailService', () => {
     navControllerMock = { navigateBack: jest.fn() };
 
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
+    loading = {
+      present: jest.fn().mockResolvedValue(undefined),
+      dismiss: jest.fn().mockResolvedValue(true),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -41,6 +47,14 @@ describe('CreateBiteTrailService', () => {
         {
           provide: ToastService,
           useValue: toastMock,
+        },
+        {
+          provide: LoadingController,
+          useValue: { create: jest.fn().mockResolvedValue(loading) },
+        },
+        {
+          provide: TranslocoService,
+          useValue: { translate: (key: string): string => `[${key}]` },
         },
       ],
     });
@@ -106,6 +120,75 @@ describe('CreateBiteTrailService', () => {
       });
     });
 
+    it('holds a modal while it saves, and lets go of it afterwards', async () => {
+      await service.submitBiteTrail(trailData);
+
+      expect(loading.present).toHaveBeenCalled();
+      expect(loading.dismiss).toHaveBeenCalled();
+    });
+
+    it('ignores a second submit while the first is saving', async () => {
+      let finish: (value: undefined) => void = () => undefined;
+      dataAccessMock.createBiteTrail.mockImplementation(
+        () => new Promise((resolve) => (finish = resolve)),
+      );
+
+      const first = service.submitBiteTrail(trailData);
+      await service.submitBiteTrail(trailData);
+      await Promise.resolve();
+      await Promise.resolve();
+      finish(undefined);
+      await first;
+
+      expect(dataAccessMock.createBiteTrail).toHaveBeenCalledTimes(1);
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    describe('with a photo', () => {
+      const withPhoto = { ...trailData, image: 'data:image/png;base64,abc' };
+
+      it('says the photo is still being checked when the check has not answered', async () => {
+        dataAccessMock.createBiteTrail = jest.fn().mockResolvedValue(undefined);
+
+        await service.submitBiteTrail(withPhoto);
+
+        expect(toastMock.present).toHaveBeenCalledWith({
+          messageKey: 'bite-trail-created-photo-checking',
+          outcome: 'success',
+        });
+      });
+
+      it('says the trail was created when the check passed its photo', async () => {
+        dataAccessMock.createBiteTrail = jest.fn().mockResolvedValue({
+          imageStatus: 'uploaded',
+          imagePath: 'https://example.test/trail.jpg',
+        });
+
+        await service.submitBiteTrail(withPhoto);
+
+        expect(toastMock.present).toHaveBeenCalledWith({
+          messageKey: 'bite-trail-created',
+          outcome: 'success',
+        });
+      });
+
+      it('says why the check refused the photo', async () => {
+        dataAccessMock.createBiteTrail = jest.fn().mockResolvedValue({
+          imageStatus: 'refused',
+          imageRefusalCategory: 'violence',
+        });
+
+        await service.submitBiteTrail(withPhoto);
+
+        expect(toastMock.present).toHaveBeenCalledWith({
+          message:
+            '[bite-trail-created-photo-refused] [photo-refused-reason-violence]',
+          outcome: 'failure',
+        });
+        expect(navControllerMock.navigateBack).toHaveBeenCalled();
+      });
+    });
+
     it('should show error toast and not navigate when createBiteTrail fails', async () => {
       dataAccessMock.createBiteTrail = jest
         .fn()
@@ -118,6 +201,7 @@ describe('CreateBiteTrailService', () => {
         outcome: 'failure',
       });
       expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
+      expect(loading.dismiss).toHaveBeenCalled();
     });
   });
 });

@@ -23,7 +23,14 @@ and the upload box once it is deleted (GitHub issue #2126). -->
           data-testid="restaurant-photo-pending"
         >
           <ion-spinner name="crescent" />
-          <ion-text>{{ 'uploading-keep-app-open' | transloco }}</ion-text>
+          <ion-text>
+            {{
+              (checking()
+                ? 'restaurant-photo-checking'
+                : 'uploading-keep-app-open'
+              ) | transloco
+            }}
+          </ion-text>
         </div>
       }
       @case ('failed') {
@@ -50,6 +57,25 @@ and the upload box once it is deleted (GitHub issue #2126). -->
     }
   }
 </div>
+
+<!-- Below the box rather than over it: the photo shown is the restaurant's
+previous one, which is still current, and the box stays usable to choose a
+different photo (GitHub issue #2141). -->
+@if (photoStatus === 'refused' && !isEditing()) {
+  <div
+    class="photo-refused"
+    role="status"
+    data-testid="restaurant-photo-refused"
+  >
+    <ion-text color="danger">
+      <strong>{{ 'photo-refused' | transloco }}</strong>
+    </ion-text>
+    <ion-text>{{ refusalReasonKey() | transloco }}</ion-text>
+    <ion-text class="text-small">
+      {{ 'restaurant-photo-refused-kept' | transloco }}
+    </ion-text>
+  </div>
+}
 
 @if (isEditing()) {
   <div class="photo-actions">

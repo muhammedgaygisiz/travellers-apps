@@ -113,6 +113,9 @@ export class EditRestaurantComponent {
   pendingPhoto = input<string>();
   uploadedImagePath = input<string>();
   canRetryPhoto = input(false);
+  /** The image check has the photo and has not answered (GitHub issue #2141). */
+  photoChecking = input(false);
+  photoRefusalCategory = input<string>();
 
   readonly savePhoto = output<string>();
   readonly retryPhoto = output<void>();

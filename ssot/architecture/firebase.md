@@ -399,6 +399,7 @@ setBiteImagePathOnUpload
 setUserPhotoUrlOnUpload
 mirrorIdentityAvatarOnCreate
 setRestaurantImagePathOnUpload
+setBiteTrailImagePathOnUpload
 notifyFollowersOnNewBite
 notifyBiteCreatorOnLike
 notifyBiteCreatorOnReview

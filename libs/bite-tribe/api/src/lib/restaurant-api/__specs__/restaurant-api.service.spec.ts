@@ -1,5 +1,6 @@
 import { RestaurantApiService } from '../restaurant-api.service';
 import { TestBed } from '@angular/core/testing';
+import { ErrorHandler } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
 import * as uploadBase64Utils from '../../utils/upload-base64-to-firebase-storage';
@@ -355,10 +356,12 @@ describe(RestaurantApiService.name, () => {
       });
     });
 
-    // Issue #2172: uploaded before anything is written, so a stalled upload
-    // cannot leave a restaurant behind without its photo.
+    // Issue #2141: the photo is published by the finalize trigger once the
+    // image check passed it, so the restaurant is written `pending` first and
+    // never carries the download URL. Issue #2172 still holds: a failed
+    // upload leaves nothing behind.
     describe('given an image', () => {
-      it('uploads first and writes imagePath with the restaurant document', async () => {
+      it('writes the restaurant pending, then uploads into its folder', async () => {
         const uploadBase64Spy = jest.spyOn(
           uploadBase64Utils,
           'uploadBase64ToFirebaseStorage',
@@ -376,15 +379,15 @@ describe(RestaurantApiService.name, () => {
         } as any);
         updateDocumentSpy.mockResolvedValue({} as any);
 
-        await service.saveNewRestaurant({
+        const id = await service.saveNewRestaurant({
           name: 'New Resto',
           image: 'data:image/png;base64,abc',
+          imagePath: 'https://example.com/forged.jpg',
           biteIds: [],
         } as any);
 
-        expect(order).toEqual(['upload', 'restaurant']);
-        // Under the restaurant's own folder, as #1952 asks: the id is known
-        // before the write.
+        expect(id).toBe('resto-new');
+        expect(order).toEqual(['restaurant', 'upload']);
         expect(uploadBase64Spy).toHaveBeenCalledWith(
           expect.objectContaining({
             base64: 'data:image/png;base64,abc',
@@ -398,17 +401,22 @@ describe(RestaurantApiService.name, () => {
             createdAt: '2024-03-15T12:00:00.000Z',
             createdAtTimestamp: 1710504000000,
             name: 'New Resto',
-            imagePath: 'https://storage.example.com/restaurants/resto-123.jpg',
+            imageStatus: 'pending',
+            imageUploadStartedAtTimestamp: 1710504000000,
           },
         });
-        // Only the menu id is written afterwards; no second write for the photo.
+        expect(getDownloadUrlFromFirebaseStorage).not.toHaveBeenCalled();
+        // Only the menu id is written afterwards; nothing for the photo.
         expect(updateDocumentSpy).toHaveBeenCalledTimes(1);
       });
 
-      it('writes nothing when the upload fails', async () => {
+      it('removes the restaurant again when the upload fails', async () => {
         jest
           .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
           .mockRejectedValueOnce(new Error('storage offline'));
+        const deleteDocumentSpy = jest
+          .spyOn(FirebaseFirestore, 'deleteDocument')
+          .mockResolvedValue(undefined);
 
         await expect(
           service.saveNewRestaurant({
@@ -416,9 +424,120 @@ describe(RestaurantApiService.name, () => {
             image: 'data:image/png;base64,abc',
           } as any),
         ).rejects.toThrow('storage offline');
-        expect(setDocumentSpy).not.toHaveBeenCalled();
+        expect(deleteDocumentSpy).toHaveBeenCalledWith({
+          reference: 'restaurants/resto-new',
+        });
         expect(addDocumentSpy).not.toHaveBeenCalled();
       });
+
+      it('still reports the failed upload when removing the restaurant fails too', async () => {
+        jest
+          .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+          .mockRejectedValueOnce(new Error('storage offline'));
+        jest
+          .spyOn(FirebaseFirestore, 'deleteDocument')
+          .mockRejectedValue(new Error('offline'));
+
+        await expect(
+          service.saveNewRestaurant({
+            name: 'New Resto',
+            image: 'data:image/png;base64,abc',
+          } as any),
+        ).rejects.toThrow('storage offline');
+      });
+    });
+  });
+
+  // Issue #2141: the verdict the finalize trigger writes.
+  describe('photoVerdict$', () => {
+    let listener: (event: unknown, error?: unknown) => void;
+
+    beforeEach(() => {
+      Object.assign(FirebaseFirestore, {
+        addDocumentSnapshotListener: jest.fn(
+          async (_options: unknown, callback: unknown) => {
+            listener = callback as typeof listener;
+            return 'listener-1';
+          },
+        ),
+        removeSnapshotListener: jest.fn().mockResolvedValue(undefined),
+      });
+    });
+
+    const deliver = async (data: Record<string, unknown>): Promise<void> => {
+      await Promise.resolve();
+      listener({
+        snapshot: { id: 'resto-1', path: 'restaurants/resto-1', data },
+      });
+    };
+
+    it('ignores the previous verdict until the new upload is pending', async () => {
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', true)
+        .subscribe((verdict) => verdicts.push(verdict));
+
+      await deliver({ imageStatus: 'uploaded', imagePath: 'old.jpg' });
+      // A snapshot of a restaurant not yet written carries no data.
+      listener({ snapshot: { id: 'resto-1', path: 'restaurants/resto-1' } });
+      await deliver({ imageStatus: 'pending', imagePath: 'old.jpg' });
+      await deliver({
+        imageStatus: 'refused',
+        imagePath: 'old.jpg',
+        imageRefusalCategory: 'violence',
+      });
+
+      expect(
+        FirebaseFirestore.addDocumentSnapshotListener,
+      ).toHaveBeenCalledWith(
+        { reference: 'restaurants/resto-1' },
+        expect.any(Function),
+      );
+      expect(verdicts).toEqual([
+        { imageStatus: 'refused', imageRefusalCategory: 'violence' },
+      ]);
+    });
+
+    it('reports a listener error and keeps waiting for the verdict', async () => {
+      const handleError = jest
+        .spyOn(TestBed.inject(ErrorHandler), 'handleError')
+        .mockImplementation(() => undefined);
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', false)
+        .subscribe((verdict) => verdicts.push(verdict));
+      await Promise.resolve();
+
+      const error = new Error('permission-denied');
+      listener(null, error);
+      listener({ snapshot: { id: 'resto-1', path: 'restaurants/resto-1' } });
+
+      expect(handleError).toHaveBeenCalledWith(error);
+      expect(verdicts).toEqual([]);
+    });
+
+    it('reads a published photo without a URL as an empty one', async () => {
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', false)
+        .subscribe((verdict) => verdicts.push(verdict));
+
+      await deliver({ imageStatus: 'uploaded' });
+
+      expect(verdicts).toEqual([{ imageStatus: 'uploaded', imagePath: '' }]);
+    });
+
+    it('takes the first verdict on a restaurant created for this photo', async () => {
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', false)
+        .subscribe((verdict) => verdicts.push(verdict));
+
+      await deliver({ imageStatus: 'uploaded', imagePath: 'new.jpg' });
+
+      expect(verdicts).toEqual([
+        { imageStatus: 'uploaded', imagePath: 'new.jpg' },
+      ]);
     });
   });
 

@@ -34,19 +34,21 @@ BiteTrails turn isolated food discoveries into a guided sequence or collection w
 
 Current model fields:
 
-| Field        | Current name in code | Description                              |
-| ------------ | -------------------- | ---------------------------------------- |
-| BiteTrail id | `id`                 | Unique BiteTrail identifier.             |
-| Owner        | `ownerId`            | User or creator that owns the BiteTrail. |
-| Name         | `name`               | User-visible BiteTrail title.            |
-| Bites        | `biteIds`            | Bites included in the journey.           |
-| Image        | `imagePath`          | Display image for the BiteTrail.         |
-| Owner image  | `ownerImagePath`     | Display image for the owner.             |
-| Owner name   | `ownerName`          | Owner's display name, kept current.      |
-| Location     | `location`           | Human-readable location context.         |
-| Description  | `description`        | Explanation of the journey.              |
-| Price        | `price`              | Price of the BiteTrail.                  |
-| Currency     | `currency`           | Currency of the price.                   |
+| Field        | Current name in code   | Description                                 |
+| ------------ | ---------------------- | ------------------------------------------- |
+| BiteTrail id | `id`                   | Unique BiteTrail identifier.                |
+| Owner        | `ownerId`              | User or creator that owns the BiteTrail.    |
+| Name         | `name`                 | User-visible BiteTrail title.               |
+| Bites        | `biteIds`              | Bites included in the journey.              |
+| Image        | `imagePath`            | Display image for the BiteTrail.            |
+| Image status | `imageStatus`          | `pending`, `failed`, `uploaded`, `refused`. |
+| Refusal      | `imageRefusalCategory` | Why the image check refused the photo.      |
+| Owner image  | `ownerImagePath`       | Display image for the owner.                |
+| Owner name   | `ownerName`            | Owner's display name, kept current.         |
+| Location     | `location`             | Human-readable location context.            |
+| Description  | `description`          | Explanation of the journey.                 |
+| Price        | `price`                | Price of the BiteTrail.                     |
+| Currency     | `currency`             | Currency of the price.                      |
 
 ## Optional Data
 
@@ -97,7 +99,7 @@ Rated or counted as sold
 Current implementation notes:
 
 - BiteTrails are stored in `/biteTrails/{biteTrailId}`.
-- Creating a BiteTrail uploads an image and writes `imagePath`.
+- Creating a BiteTrail with a photo writes it `pending` and uploads the photo into `images/biteTrails/{biteTrailId}/`. `setBiteTrailImagePathOnUpload` alone writes `imagePath`, once the image check passed the photo; a refused photo is deleted and the trail gets `imageStatus: refused` with `imageRefusalCategory` (issue [#2141]). `firestore.rules` refuses an owner's create or update that writes `imagePath`, `imageRefusalCategory`, `image`, or any `imageStatus` but `pending` and `failed`.
 - The marketplace loads BiteTrails from the `biteTrails` collection.
 - `soldCount` is derived by counting `/biteTrails/{biteTrailId}/sells`.
 - Saving a BiteTrail as Bucket List writes a sell record.
@@ -212,3 +214,4 @@ images/biteTrails/{biteTrailId}/{filename}
 - [Bucket List](bucket-list.md)
 
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141

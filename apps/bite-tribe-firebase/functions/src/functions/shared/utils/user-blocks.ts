@@ -67,6 +67,25 @@ export const blocksEitherWay = async (
   return ownBlock.exists || otherBlock.exists;
 };
 
+/**
+ * Every account that `uid` blocks or that blocks `uid`, read from the two
+ * sides of the account's own block edges. Like {@link blocksEitherWay} a read
+ * failure is not swallowed: this guards a send to those accounts, and a push
+ * that reaches a blocked account is the worse outcome.
+ */
+export const loadBlockedEitherWayUids = async (
+  db: Firestore,
+  uid: string,
+): Promise<Set<string>> => {
+  const user = db.collection(USERS_COLLECTION).doc(uid);
+  const [blocked, blockedBy] = await Promise.all([
+    user.collection(BLOCKED_SUBCOLLECTION).get(),
+    user.collection(BLOCKED_BY_SUBCOLLECTION).get(),
+  ]);
+
+  return new Set([...blocked.docs, ...blockedBy.docs].map((doc) => doc.id));
+};
+
 /** Whether `uid` names an account in `blockedUids`. */
 export const isBlockedUid = (
   uid: unknown,

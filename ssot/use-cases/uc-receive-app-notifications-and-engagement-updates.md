@@ -4,9 +4,9 @@
 
 **Level:** L1
 Supported today. Every notification named in `Supported Evidence` ships, together with the
-seven contracts below: how a tap resolves to a surface, how notifications collapse and clear,
+eight contracts below: how a tap resolves to a surface, how notifications collapse and clear,
 the language they arrive in, how a release is announced, the country badge, the review-thread
-fan-out, and per-installation delivery. The release announcement is the only one a person
+fan-out, the follow request pushes, and per-installation delivery. The release announcement is the only one a person
 fires; everything else runs from a backend trigger or a schedule.
 
 ## Goal
@@ -29,7 +29,7 @@ clear, and which installations they are delivered to.
 - Backend functions react to new Bites, likes, reviews, followers, and weekly activity.
 - Backend functions can notify users about meaningful leaderboard ranking changes.
 - Notifications or shared-link behavior keep users connected to activity.
-- Tapping a notification opens the surface it talks about: the Bite, the follower profile, the leaderboard (on the **Most liked** tab when the notification is about a Bite's move there, [#2028]; on **Last week** of the list a weekly top-3 award was won on, [#2031]), or the weekly bites page.
+- Tapping a notification opens the surface it talks about: the Bite, the follower profile, the follow-requests page, the profile of an owner who accepted a request, the leaderboard (on the **Most liked** tab when the notification is about a Bite's move there, [#2028]; on **Last week** of the list a weekly top-3 award was won on, [#2031]), or the weekly bites page.
 - Notifications about the same thing replace one another instead of stacking, and
   the ones about a surface are cleared once the user opens it.
 - The weekly summary counts one calendar week (Monday to Sunday, Europe/Zurich) and carries those bounds, so its landing page lists the Bites of exactly that week even when the user opens it days later.
@@ -37,6 +37,7 @@ clear, and which installations they are delivered to.
 - Users learn that a new app version is live from a notification, instead of waiting for TestFlight or Google Play to auto-update them.
 - A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
 - A user the creator tags in a Bite is told so with `BITE_TAGGED`, and tapping it opens the Bite. See the Tagged User Contract below.
+- A private profile's owner is told of a new follow request, and its requester is told when the owner accepts it. See the Follow Request Contract below.
 
 ## Notification Navigation Contract
 
@@ -227,6 +228,35 @@ Bite, so they know and can take themselves off it:
 - The copy is `biteTagged` and follows the Localization Contract. It names the
   creator only when the creator's profile is public, and says "Someone" otherwise.
 
+## Follow Request Contract
+
+Issue [#2166], part of epic [#2144], tells both parties of a follow request what they would
+otherwise have to keep checking for. The request itself is owned by `Follow Request
+Contract` in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social-graph.md).
+
+- **A new request.** `notifyOwnerOnFollowRequest`, on the create of
+  `/followRequests/{ownerUid}_{requesterUid}`, sends the owner `FOLLOW_REQUEST`, carrying
+  `requesterUid`. It opens the `follow-requests` page, and its collapse key is
+  `FOLLOW_REQUEST:FOLLOW_REQUEST:<requesterUid>`: the page is its surface, so opening it
+  clears every request push, and a request withdrawn and sent again replaces the first
+  instead of stacking. A document whose id does not name its own pair, or whose requester
+  has no user document, sends nothing.
+- **An accepted request.** `acceptFollowRequest` sends the requester
+  `FOLLOW_REQUEST_ACCEPTED`, carrying `ownerUid`, once its transaction has committed. It opens
+  the owner's profile, which is also its surface: the key is
+  `FOLLOW_REQUEST_ACCEPTED:<ownerUid>`. It is the callable rather than a trigger because the
+  follower edge cannot tell an accepted request from a public follow. A push that fails is
+  logged and the acceptance still succeeds, because the follow stands either way.
+- **No second push.** The follower edge an acceptance writes still fires
+  `notifyUserOnNewFollower`, which stays silent because the owner is private, so the owner who
+  accepted gets no `New Follower!`. A decline and a withdrawal send nothing to anybody.
+- **Who is named.** Each push names the other party by display name only, a private account
+  too, and says "Someone" for an account without one. A real name is never read ([#1308]).
+  This is the rule the owner's list follows, decided under `Follow Request Questions` in
+  [Current State - Open Questions](../current-state/open-questions.md).
+- The copy is `followRequest` and `followRequestAccepted` and follows the Localization
+  Contract.
+
 ## Installation Contract
 
 Issue [#1184]
@@ -259,9 +289,9 @@ notification ships at all, an account has to be able to stop delivery to one ins
 a tap has to open the surface it names rather than landing on Home.
 
 **[Secondary]** - which notifications exist: followers on a new Bite, likes, reviews and
-replies, the weekly summary, the daily leaderboard, the country badge, and the release
-announcement. Each drives engagement and none is required for the app to work. The Collapse,
-Localization, Release Announcement, Country Badge and Review Thread contracts are secondary
+replies, the weekly summary, the daily leaderboard, the country badge, the follow request
+pushes, and the release announcement. Each drives engagement and none is required for the app to work. The Collapse,
+Localization, Release Announcement, Country Badge, Review Thread and Follow Request contracts are secondary
 with the notifications they shape.
 
 Not on this page: the settings surface that lists installations and switches them. That is
@@ -287,6 +317,8 @@ Relevant.
 - `notifyBiteCreatorOnReview`, which returns early for a reply
 - `notifyThreadParticipantsOnReviewReply`
 - `notifyUserOnNewFollower`
+- `notifyOwnerOnFollowRequest`, and `notifyRequesterOfAcceptedFollowRequest` called by
+  `acceptFollowRequest`
 - `sendWeeklyBiteNotification`
 - `sendDailyLeaderboardNotification`
 - `sendNewVersionNotification`, guarded by `requireAdmin` and triggered from its own
@@ -313,6 +345,7 @@ Relevant.
 - Issue [#1212] is the Country Badge Contract above - a profile's first Bite in a new country becomes an engagement signal.
 - Issue [#1283] is the Review Thread Contract above - a reply fans out to every thread participant, not just the Bite creator. Closed. Shared with [UC - Inspect Bite Details](uc-inspect-bite-details.md), which owns the thread UI this fan-out targets.
 - Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915].
+- Issue [#2166] is the Follow Request Contract above - a push for a new follow request and for its acceptance, part of epic [#2144].
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
@@ -343,3 +376,6 @@ Relevant.
 [#2028]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2028
 [#2031]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2031
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
+[#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
+[#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166

@@ -1,6 +1,7 @@
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { CallableRequest, HttpsError } from 'firebase-functions/https';
+import { notifyRequesterOfAcceptedFollowRequest } from '../notifications/notify-on-follow-request';
 import { onAppCheck } from '../shared/callable-options';
 import { requireMember } from '../shared/roles';
 import { USERS_COLLECTION } from '../shared/utils/user-blocks';
@@ -108,8 +109,9 @@ export const acceptFollowRequestHandler = async (
   requireMember(request, 'You must be signed in to accept a follow request.');
 
   const requesterUid = counterpartUidOf(request.data, request.auth.uid);
+  const db = getFirestore();
   const result = await acceptFollowRequestForCaller(
-    getFirestore(),
+    db,
     request.auth.uid,
     requesterUid,
   );
@@ -118,6 +120,23 @@ export const acceptFollowRequestHandler = async (
     ownerUid: request.auth.uid,
     requesterUid,
   });
+
+  // After the commit, so a request that was not accepted is never announced.
+  // The follow stands either way, so a push that fails is logged and the
+  // owner's answer is still a success (GitHub issue #2166).
+  try {
+    await notifyRequesterOfAcceptedFollowRequest(
+      db,
+      request.auth.uid,
+      requesterUid,
+    );
+  } catch (error) {
+    logger.error('acceptFollowRequest: acceptance push failed', {
+      ownerUid: request.auth.uid,
+      requesterUid,
+      error,
+    });
+  }
 
   return result;
 };

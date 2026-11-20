@@ -10,6 +10,7 @@ jest.mock('utils', () => ({
     MY_PROFILE: 'my-profile',
     LEADERBOARD: 'leaderboard',
     WEEKLY_BITES: 'weekly-bites',
+    FOLLOW_REQUESTS: 'follow-requests',
   },
 }));
 
@@ -89,6 +90,18 @@ describe('toNotificationSurface', () => {
     expect(
       toNotificationSurface('/weekly-bites?weekStart=1&weekEnd=2', 'me'),
     ).toBe('WEEKLY_BITE_SUMMARY');
+    expect(toNotificationSurface('/follow-requests', 'me')).toBe(
+      'FOLLOW_REQUEST',
+    );
+  });
+
+  it('matches every follow request on the follow-requests page', () => {
+    expect(
+      isNotificationForSurface(
+        'FOLLOW_REQUEST:FOLLOW_REQUEST:user-2',
+        'FOLLOW_REQUEST',
+      ),
+    ).toBe(true);
   });
 
   it('has no surface for a route no notification talks about', () => {

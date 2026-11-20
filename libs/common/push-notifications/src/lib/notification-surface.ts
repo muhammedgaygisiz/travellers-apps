@@ -26,6 +26,7 @@ const SEPARATOR = ':';
  */
 const LEADERBOARD_SURFACE = 'LEADERBOARD_RANK_CHANGE';
 const WEEKLY_BITES_SURFACE = 'WEEKLY_BITE_SUMMARY';
+const FOLLOW_REQUESTS_SURFACE = 'FOLLOW_REQUEST';
 
 /**
  * Reads the surface out of a delivered notification's collapse key.
@@ -86,6 +87,9 @@ export const toNotificationSurface = (
 
     case PATH.WEEKLY_BITES:
       return WEEKLY_BITES_SURFACE;
+
+    case PATH.FOLLOW_REQUESTS:
+      return FOLLOW_REQUESTS_SURFACE;
 
     default:
       return undefined;

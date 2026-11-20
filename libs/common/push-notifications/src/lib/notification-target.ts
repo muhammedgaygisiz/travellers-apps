@@ -87,6 +87,19 @@ export const toNotificationTarget = (
         ? { commands: [PATH.PROFILE, data['followerUid']] }
         : undefined;
 
+    case 'FOLLOW_REQUEST':
+      // The owner answers the request on their follow-requests page, which
+      // lists every pending one, so the requester is not needed to get there
+      // (issue #2166).
+      return { commands: [PATH.FOLLOW_REQUESTS] };
+
+    case 'FOLLOW_REQUEST_ACCEPTED':
+      // The requester now follows the owner, so the owner's profile is open
+      // to them (issue #2166).
+      return data['ownerUid']
+        ? { commands: [PATH.PROFILE, data['ownerUid']] }
+        : undefined;
+
     case 'LEADERBOARD_RANK_CHANGE':
       // A Bite's move on the Most liked board opens that tab (issue #2028).
       return data['board'] === 'mostLiked'

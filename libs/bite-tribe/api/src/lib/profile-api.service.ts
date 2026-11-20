@@ -8,9 +8,13 @@ import {
 } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
+  AcceptFollowRequestResult,
   Bite,
   CreateAndUploadImageCallbackParams,
+  DeclineFollowRequestResult,
   FollowSuggestion,
+  ListFollowRequestsResult,
+  PendingFollowRequest,
   PublicUser,
   RequestFollowResult,
   WithdrawFollowRequestResult,
@@ -753,6 +757,88 @@ export class ProfileApiService {
 
       return false;
     }
+  }
+
+  /**
+   * How many requests to follow the signed-in user's profile are pending
+   * (GitHub issue #2165), for the row on the own profile. A count query over
+   * `/followRequests` rather than the `listFollowRequests` callable, so the
+   * profile does not wait on a function each time it is opened; the rules let
+   * the owner list what is addressed to them. A read that fails counts none,
+   * which hides the row rather than the profile.
+   */
+  async countPendingFollowRequests(): Promise<number> {
+    const uid = this.authService.getUser()?.uid;
+
+    if (!uid) {
+      return 0;
+    }
+
+    try {
+      const { count } = await FirebaseFirestore.getCountFromServer({
+        reference: FOLLOW_REQUESTS_COLLECTION,
+        compositeFilter: {
+          type: 'and',
+          queryConstraints: [
+            { type: 'where', fieldPath: 'ownerUid', opStr: '==', value: uid },
+          ],
+        },
+      });
+
+      return count;
+    } catch (error) {
+      console.warn('Could not count the pending follow requests:', error);
+
+      return 0;
+    }
+  }
+
+  /**
+   * The signed-in user's pending follow requests, newest first, from the
+   * `listFollowRequests` callable (issue #2165). A callable, because the owner
+   * may not read a private requester's user document. Errors are left to the
+   * caller, which says the list could not be read.
+   */
+  async listFollowRequests(): Promise<PendingFollowRequest[]> {
+    const result = await FirebaseFunctions.callByName<
+      Record<string, never>,
+      ListFollowRequestsResult
+    >({
+      name: 'listFollowRequests',
+      data: {},
+    });
+
+    return result.data.requests;
+  }
+
+  /** Lets `userId` follow the signed-in user's private profile (issue #2165). */
+  async acceptFollowRequest(
+    userId: string,
+  ): Promise<AcceptFollowRequestResult> {
+    const result = await FirebaseFunctions.callByName<
+      { userId: string },
+      AcceptFollowRequestResult
+    >({
+      name: 'acceptFollowRequest',
+      data: { userId },
+    });
+
+    return result.data;
+  }
+
+  /** Turns down the request `userId` sent (issue #2165); no follow is written. */
+  async declineFollowRequest(
+    userId: string,
+  ): Promise<DeclineFollowRequestResult> {
+    const result = await FirebaseFunctions.callByName<
+      { userId: string },
+      DeclineFollowRequestResult
+    >({
+      name: 'declineFollowRequest',
+      data: { userId },
+    });
+
+    return result.data;
   }
 
   /**

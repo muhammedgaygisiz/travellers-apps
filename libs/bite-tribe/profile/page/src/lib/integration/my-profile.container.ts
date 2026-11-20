@@ -25,6 +25,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (likeButtonClick)="service.likeButtonClicked($event)"
       (followersClick)="service.gotoFollowers($event)"
       (followingClick)="service.gotoFollowing($event)"
+      [followRequestCount]="service.pendingFollowRequestCount()"
+      (followRequestsClick)="service.gotoFollowRequests()"
       (worldClick)="service.gotoWorld($event)"
       (weeklyBadgeClick)="service.gotoWeeklyStandings($event)"
     />
@@ -34,6 +36,14 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 })
 export class MyProfileContainer {
   service = inject(ProfileService);
+
+  /**
+   * Counts the pending follow requests on every entry, so coming back from
+   * the requests page drops the row once they are all answered (#2165).
+   */
+  ionViewWillEnter(): void {
+    this.service.refreshPendingFollowRequests();
+  }
 
   ionViewDidEnter(): void {
     FirebaseAnalytics.setCurrentScreen({

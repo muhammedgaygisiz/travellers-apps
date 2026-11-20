@@ -42,6 +42,8 @@ class Mock {
   });
   myUser = jest.fn((): PublicUser | undefined => undefined);
   isAuthenticated = jest.fn(() => false);
+  pendingFollowRequests = { reload: jest.fn() };
+  pendingFollowRequestCount = jest.fn(() => 0);
 }
 
 const mockBiteDataAccessService = {
@@ -161,6 +163,24 @@ describe(ProfileService.name, () => {
         .mockImplementation();
       service.gotoMyBites();
       expect(navigateSpy).toHaveBeenCalledWith(['my-bites']);
+    });
+  });
+
+  // GitHub issue #2165.
+  describe('follow requests', () => {
+    it('opens the follow requests page', () => {
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+      service.gotoFollowRequests();
+      expect(navigateSpy).toHaveBeenCalledWith(['follow-requests']);
+    });
+
+    it('counts the pending requests again', () => {
+      service.refreshPendingFollowRequests();
+      expect(
+        profileDataAccessService.pendingFollowRequests.reload,
+      ).toHaveBeenCalled();
     });
   });
 

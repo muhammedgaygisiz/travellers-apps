@@ -882,6 +882,95 @@ describe(ProfileApiService.name, () => {
     ));
   });
 
+  describe('the owner side of a follow request (#2165)', () => {
+    it('counts the requests addressed to the signed-in user', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getCountFromServer)
+          .mockResolvedValueOnce({ count: 3 });
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(3);
+        expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
+          reference: 'followRequests',
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'ownerUid',
+                opStr: '==',
+                value: '123',
+              },
+            ],
+          },
+        });
+      },
+    ));
+
+    it('counts none when the count fails or nobody is signed in', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getCountFromServer)
+          .mockRejectedValueOnce(new Error('permission-denied'));
+        await expect(service.countPendingFollowRequests()).resolves.toBe(0);
+
+        const getUser = jest
+          .spyOn(MockedAuthService, 'getUser')
+          .mockReturnValue(undefined);
+        jest.mocked(FirebaseFirestore.getCountFromServer).mockClear();
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(0);
+        expect(FirebaseFirestore.getCountFromServer).not.toHaveBeenCalled();
+        getUser.mockRestore();
+      },
+    ));
+
+    it('lists the pending requests through listFollowRequests', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const requests = [
+          { requesterUid: 'r-1', displayName: 'Pia', createdAt: '2026-11-19' },
+        ];
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockResolvedValueOnce({ data: { requests } });
+
+        await expect(service.listFollowRequests()).resolves.toEqual(requests);
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'listFollowRequests',
+          data: {},
+        });
+      },
+    ));
+
+    it('accepts and declines through their callables', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockResolvedValueOnce({ data: { accepted: true } })
+          .mockResolvedValueOnce({ data: { declined: true } });
+
+        await expect(service.acceptFollowRequest('r-1')).resolves.toEqual({
+          accepted: true,
+        });
+        await expect(service.declineFollowRequest('r-2')).resolves.toEqual({
+          declined: true,
+        });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'acceptFollowRequest',
+          data: { userId: 'r-1' },
+        });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'declineFollowRequest',
+          data: { userId: 'r-2' },
+        });
+      },
+    ));
+  });
+
   describe('resendEmailVerification', () => {
     it('should call resendEmailVerification firebase function', inject(
       [ProfileApiService],

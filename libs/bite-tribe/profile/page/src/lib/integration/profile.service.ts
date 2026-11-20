@@ -53,6 +53,7 @@ export class ProfileService {
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
   isBlockedByMe = this.dataAccess.isBlockedByMe;
+  pendingFollowRequestCount = this.dataAccess.pendingFollowRequestCount;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
   emailVerificationResendRunning = this.emailVerification.resendRunning;
 
@@ -330,6 +331,16 @@ export class ProfileService {
 
   gotoFollowing(userId: string): void {
     this.navController.navigateForward([PATH.FOLLOWERS, userId, 'following']);
+  }
+
+  /** Opens the own private profile's pending follow requests (issue #2165). */
+  gotoFollowRequests(): void {
+    this.navController.navigateForward([PATH.FOLLOW_REQUESTS]);
+  }
+
+  /** Counts the pending follow requests again, when the own profile is entered. */
+  refreshPendingFollowRequests(): void {
+    this.dataAccess.pendingFollowRequests.reload();
   }
 
   trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {

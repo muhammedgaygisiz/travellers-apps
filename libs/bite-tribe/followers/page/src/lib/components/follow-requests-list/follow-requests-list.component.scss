@@ -1,0 +1,60 @@
+@use 'globals';
+
+// The followers list's rows, so both lists of people read alike (#2165).
+:host {
+  .empty-container {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+
+    ion-label {
+      text-align: center;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+
+    ion-avatar {
+      width: 48px;
+      height: 48px;
+
+      .profile-image {
+        @include globals.profile-image;
+      }
+    }
+
+    // The two answers keep their width on a phone, so a long name is cut
+    // with an ellipsis rather than broken mid-word.
+    ion-label {
+      min-width: 0;
+    }
+
+    h2 {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    img {
+      background-color: white;
+    }
+  }
+
+  .follow-request-actions {
+    display: flex;
+    gap: 0.25rem;
+
+    ion-button {
+      margin: 0;
+      white-space: nowrap;
+    }
+  }
+}

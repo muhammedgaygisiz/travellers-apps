@@ -181,6 +181,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   withdrawFollowRequest: 'member',
   acceptFollowRequest: 'member',
   declineFollowRequest: 'member',
+  // The caller's own pending requests (issue #2165), read by the caller's uid.
+  listFollowRequests: 'member',
   checkDisplayNameAvailability: 'member',
   // Spends billed Vertex AI quota for the caller's own Bite form (issue #2030),
   // so a table guest's anonymous session is not enough.

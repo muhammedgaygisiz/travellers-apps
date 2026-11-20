@@ -45,3 +45,23 @@ export interface AcceptFollowRequestResult {
 export interface DeclineFollowRequestResult {
   declined: boolean;
 }
+
+/**
+ * One pending request to follow the caller's private profile, as
+ * `listFollowRequests` answers it (GitHub issue #2165). A private requester
+ * carries their display name and no photo.
+ */
+export interface PendingFollowRequest {
+  requesterUid: string;
+  /** Absent when the requester has not set one; the list then says Anonymous. */
+  displayName?: string;
+  /** Only for a public requester. */
+  photoUrl?: string;
+  /** ISO 8601, when the request was made. */
+  createdAt: string;
+}
+
+/** What `listFollowRequests` answers: the pending requests, newest first. */
+export interface ListFollowRequestsResult {
+  requests: PendingFollowRequest[];
+}

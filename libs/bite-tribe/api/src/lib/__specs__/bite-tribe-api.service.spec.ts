@@ -75,6 +75,7 @@ class ProfileApiMock {
   followRequestPending = jest.fn();
   requestFollow = jest.fn();
   withdrawFollowRequest = jest.fn();
+  countPendingFollowRequests = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -793,6 +794,20 @@ describe(BiteTribeApiService.name, () => {
         expect(profileApiService.withdrawFollowRequest).toHaveBeenCalledWith(
           'owner-uid',
         );
+      },
+    ));
+
+    it('should forward the pending request count (#2165)', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'countPendingFollowRequests')
+          .mockResolvedValue(2);
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(2);
       },
     ));
   });

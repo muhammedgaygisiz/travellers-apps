@@ -520,6 +520,11 @@ export class BiteTribeApiService {
     return this.profileApiService.withdrawFollowRequest(userId);
   }
 
+  /** Pending requests to follow the signed-in user's profile (#2165). */
+  countPendingFollowRequests(): Promise<number> {
+    return this.profileApiService.countPendingFollowRequests();
+  }
+
   async followsAnyone(): Promise<boolean | undefined> {
     return this.profileApiService.followsAnyone();
   }

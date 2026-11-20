@@ -327,6 +327,22 @@ describe(MigrationsDataAccessService.name, () => {
     });
   });
 
+  describe('backfillFollowerAcceptance', () => {
+    it('calls the follower acceptance migration and returns its counts', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { processed: 10, private: 3, stamped: 7 },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.backfillFollowerAcceptance();
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'backfillFollowerAcceptanceCallable',
+      });
+      expect(result).toEqual({ processed: 10, private: 3, stamped: 7 });
+    });
+  });
+
   describe('migrateRestaurantOwnerIds', () => {
     it('calls the migration and keeps only the counts the page renders', async () => {
       jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({

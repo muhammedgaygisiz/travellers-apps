@@ -79,6 +79,12 @@ describe(ProfileHeader.name, () => {
       expect(component.statusPhoto()).toBeUndefined();
     });
 
+    it('shows no refusal before the profile is loaded', () => {
+      compRef.setInput('showPhotoStatus', true);
+
+      expect(component.photoRefused()).toBe(false);
+    });
+
     it("shows no refusal on somebody else's profile", () => {
       compRef.setInput('user', owner('refused'));
 

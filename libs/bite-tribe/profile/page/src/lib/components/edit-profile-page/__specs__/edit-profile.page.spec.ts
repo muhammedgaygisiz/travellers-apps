@@ -164,6 +164,30 @@ describe(EditProfilePage.name, () => {
       expect(query('edit-profile-photo-refused')).toBeNull();
     });
 
+    it('presents the picker modal itself', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      const present = jest
+        .spyOn(component.profileImageSelectionModal()!, 'present')
+        .mockResolvedValue();
+
+      component.openPhotoPicker();
+
+      expect(present).toHaveBeenCalled();
+    });
+
+    it('reads a cleared photo field as no new photo picked', () => {
+      compRef.setInput('publicUser', refused);
+      component.profileForm.controls.photoUrl.setValue(null);
+
+      expect(component.photoRefused()).toBe(true);
+    });
+
+    it('falls back to the generic reason without a profile', () => {
+      expect(component.refusalReasonKey()).toBe('photo-refused-reason-other');
+      expect(component.photoRefused()).toBe(false);
+    });
+
     it('is not shown for a photo that was published', () => {
       compRef.setInput('publicUser', { ...refused, photoStatus: 'uploaded' });
       fixture.detectChanges();

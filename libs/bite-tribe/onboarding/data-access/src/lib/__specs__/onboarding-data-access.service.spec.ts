@@ -441,6 +441,21 @@ describe('OnboardingDataAccessService', () => {
     expect(apiMock.updateUser).toHaveBeenCalledWith(profile, 'current-photo');
   });
 
+  it('keeps no photo on show when the store holds no profile yet', async () => {
+    setup();
+    TestBed.inject(BiteTribeStoreService).publicUser$ = of(undefined);
+    const profile = {
+      userId: 'user-1',
+      displayName: 'Foodie',
+      email: 'foodie@example.com',
+      photoUrl: '',
+    } as PublicUser;
+
+    await service.saveProfile(profile);
+
+    expect(apiMock.updateUser).toHaveBeenCalledWith(profile, '');
+  });
+
   it('syncs the saved profile into the store', async () => {
     setup();
     const profile: PublicUser = {

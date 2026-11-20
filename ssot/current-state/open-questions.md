@@ -146,8 +146,14 @@ can see it. The check is described in [Architecture - AI](../architecture/ai.md)
   ordinary upload, and a Bite photo that is not food stays with the report's `notFood` reason
   ([#1608]). Food in any form - raw meat, blood, whole animals - is not `violence`, and alcohol
   or tobacco is not `illegal`; the prompt says so.
-- How long does an image whose check answered `unavailable` wait, and how many attempts are
-  made, before it is marked `failed`? Gates the epic's waiting and retrying story.
+- **How long does an image whose check answered `unavailable` wait, and how many attempts
+  are made, before it is marked `failed`? Settled 20 November 2026 by the maintainer, on
+  [#2142].** Seven checks over about 16 hours: the upload's own, then one recheck after each
+  of 15 minutes, 30 minutes, 1, 2, 4 and 8 hours, run by `recheckPendingImages` every 15
+  minutes at most 50 images a run. A shorter bound sends an uploader to a manual retry for
+  any outage longer than an hour; a longer one keeps a Bite hidden for days. While the photo
+  waits, the apps show it as still being checked rather than reading it as a stalled upload,
+  and only the backend's `failed` after the last attempt brings the retry.
 - What happens to a refused photo found by the migration of stored photos: hidden the same
   way as a new upload, or put in front of an operator first? Gates the migration story.
 
@@ -326,4 +332,5 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
 [#1134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1134
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

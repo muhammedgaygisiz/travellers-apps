@@ -1,4 +1,5 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
+import { BITE_TRAIL_PHOTO } from '../shared/moderation/checked-image-subjects';
 import { publishCheckedFolderPhoto } from '../shared/moderation/publish-checked-folder-photo';
 
 // Matches: images/biteTrails/{biteTrailId}/{filename}
@@ -17,9 +18,7 @@ export const setBiteTrailImagePathOnUpload = onObjectFinalized((event) =>
   publishCheckedFolderPhoto({
     object: event.data,
     pathPattern: BITE_TRAIL_IMAGE_PATH_REGEX,
-    collection: 'biteTrails',
-    surface: 'biteTrailPhoto',
-    uploaderOf: (data) => String(data['ownerId'] ?? ''),
+    subject: BITE_TRAIL_PHOTO,
     caller: 'setBiteTrailImagePathOnUpload',
   }),
 );

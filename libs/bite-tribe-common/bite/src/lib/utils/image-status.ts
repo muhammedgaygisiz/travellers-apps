@@ -6,7 +6,9 @@ import type { Bite } from 'model';
  *
  * A `pending` document is only ever cleared by something else happening: the
  * storage finalize trigger writes `uploaded`, and the client writes `failed`
- * from the upload error branch. Neither is guaranteed — the upload promise does
+ * from the upload error branch. A photo that arrived but whose check could not
+ * run is the exception: it carries `imageCheckNextAt`, and the backend's recheck
+ * settles it (GitHub issue #2142). Neither of the first two is guaranteed — the upload promise does
  * not resolve when the device goes offline mid-transfer (the same reason
  * `createBite` cannot await its own write), so a Bite can sit on `pending`
  * forever with nobody left to correct it.
@@ -49,6 +51,10 @@ const getCreatedAtMs = (bite: Bite): number | undefined => {
  * A Bite with no usable creation timestamp keeps its stored status: there is no
  * way to tell an abandoned upload from a fresh one, and claiming failure for a
  * photo that may still arrive is worse than waiting.
+ *
+ * Nor is a photo that arrived but whose image check could not run abandoned:
+ * while `imageCheckNextAt` is set the backend will check it again, and it
+ * writes `failed` itself after the last attempt (GitHub issue #2142).
  */
 export const getEffectiveImageStatus = (
   bite: Bite,
@@ -56,6 +62,10 @@ export const getEffectiveImageStatus = (
 ): Bite['imageStatus'] => {
   if (bite.imageStatus !== 'pending') {
     return bite.imageStatus;
+  }
+
+  if (typeof bite.imageCheckNextAt === 'number') {
+    return 'pending';
   }
 
   const createdAt = getCreatedAtMs(bite);

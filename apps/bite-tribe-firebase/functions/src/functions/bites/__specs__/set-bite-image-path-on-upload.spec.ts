@@ -40,6 +40,16 @@ jest.mock('firebase-functions/v2/storage', () => ({
 
 import { setBiteImagePathOnUpload } from '../set-bite-image-path-on-upload';
 
+/** The wait on a recheck (issue #2142), cleared by every final verdict. */
+const CLEARED_CHECK = {
+  imageCheckAttempts: 'DELETE',
+  imageCheckNextAt: 'DELETE',
+  imageCheckPath: 'DELETE',
+};
+
+const NOW = Date.parse('2026-11-20T12:00:00.000Z');
+const FIRST_RECHECK_DELAY_MS = 15 * 60 * 1000;
+
 const handler = setBiteImagePathOnUpload as unknown as (event: {
   data: { name?: string; bucket: string };
 }) => Promise<void>;
@@ -50,6 +60,10 @@ const upload = (name: string | undefined = PATH): Promise<void> =>
   handler({ data: { name, bucket: 'bucket' } });
 
 describe('setBiteImagePathOnUpload', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     getMock.mockResolvedValue({
@@ -80,6 +94,7 @@ describe('setBiteImagePathOnUpload', () => {
       imageStatus: 'uploaded',
       imageRefusalCategory: 'DELETE',
       updatedAt: 'NOW',
+      ...CLEARED_CHECK,
     });
     expect(deleteFileMock).not.toHaveBeenCalled();
   });
@@ -100,15 +115,23 @@ describe('setBiteImagePathOnUpload', () => {
       imageStatus: 'refused',
       imageRefusalCategory: 'violence',
       updatedAt: 'NOW',
+      ...CLEARED_CHECK,
     });
   });
 
-  it('leaves the Bite pending when the check is unavailable', async () => {
+  it('keeps the Bite pending and schedules a recheck when the check is unavailable', async () => {
+    jest.useFakeTimers({ now: NOW });
     checkImageMock.mockResolvedValue({ verdict: 'unavailable' });
 
     await upload();
 
-    expect(updateMock).not.toHaveBeenCalled();
+    expect(updateMock).toHaveBeenCalledWith({
+      imageStatus: 'pending',
+      imageCheckAttempts: 1,
+      imageCheckNextAt: NOW + FIRST_RECHECK_DELAY_MS,
+      imageCheckPath: PATH,
+    });
+    expect(updateMock.mock.calls[0][0]).not.toHaveProperty('imagePath');
     expect(deleteFileMock).not.toHaveBeenCalled();
   });
 

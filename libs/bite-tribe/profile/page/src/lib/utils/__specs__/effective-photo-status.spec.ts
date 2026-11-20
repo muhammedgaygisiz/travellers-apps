@@ -33,6 +33,19 @@ describe(getEffectivePhotoStatus.name, () => {
     ).toBe('failed');
   });
 
+  it('keeps a photo the backend will check again pending (issue #2142)', () => {
+    expect(
+      getEffectivePhotoStatus(
+        user({
+          photoStatus: 'pending',
+          photoUploadStartedAtTimestamp: now - 8 * STALE_PENDING_UPLOAD_MS,
+          imageCheckNextAt: now + 1000,
+        }),
+        now,
+      ),
+    ).toBe('pending');
+  });
+
   it('keeps a pending upload without a start time pending', () => {
     expect(getEffectivePhotoStatus(user({ photoStatus: 'pending' }), now)).toBe(
       'pending',

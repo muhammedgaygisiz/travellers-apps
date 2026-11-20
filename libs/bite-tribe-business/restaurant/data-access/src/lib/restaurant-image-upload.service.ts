@@ -98,6 +98,12 @@ export class RestaurantImageUploadService {
       return restaurant?.imageStatus;
     }
 
+    // The backend checks a photo again while its check could not run, and
+    // writes `failed` itself after the last attempt (GitHub issue #2142).
+    if (typeof restaurant.imageCheckNextAt === 'number') {
+      return 'pending';
+    }
+
     const startedAt = restaurant.imageUploadStartedAtTimestamp;
 
     if (typeof startedAt !== 'number') {

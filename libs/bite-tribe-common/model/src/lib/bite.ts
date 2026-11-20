@@ -19,6 +19,13 @@ export interface Bite {
    * is `refused`. Written by `setBiteImagePathOnUpload` alone (issue #2139).
    */
   imageRefusalCategory?: string;
+  /**
+   * When the backend checks the photo again, in milliseconds since the epoch,
+   * while its last image check could not run (GitHub issue #2142). Present
+   * only while the photo waits; the client reads it as a photo still being
+   * checked rather than an upload that stalled. Written by the backend alone.
+   */
+  imageCheckNextAt?: number;
   place: string;
   price: number;
   currency?: string;

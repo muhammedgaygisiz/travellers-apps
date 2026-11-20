@@ -72,6 +72,10 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   refused photo is deleted, the Restaurant keeps the photo it had, and the
   page says why below the box, where a different photo can be chosen at once;
   the refused one is never sent again.
+- A photo whose check could not run stays `pending`, and the box keeps saying
+  it is being checked, while the backend checks it again over about sixteen
+  hours (issue [#2142]). It ends published or refused as above, or, when the
+  last attempt still cannot answer, `failed` with the shared retry.
 - The Restaurant Owner opens Restaurants and edits one of them.
 - The Restaurant Owner maintains menu and Restaurant metadata.
 - Both the map and the list hold **only the Restaurants assigned to the
@@ -177,6 +181,7 @@ all be reviewed for the first time.
 - Issue [#2131] added the category picker and its checklist item. Part of epic [#2123].
 - Issue [#2183] split the page into an overview and one view per section, and pointed every checklist item at its own section. Part of epic [#2123].
 - Issue [#2141] publishes the photo only once the image check passed it, and shows a refusal with its reason. Part of epic [#2137].
+- Issue [#2142] checks again a photo whose check could not run. Part of epic [#2137].
 - Issue [#1653] keeps every field on this page, the menu code included, rendered when the
   device reports no GPS position; the restaurant is read without a `distance` instead of
   being withheld.
@@ -221,4 +226,5 @@ all be reviewed for the first time.
 [#2183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2183
 [#2182]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2182
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137

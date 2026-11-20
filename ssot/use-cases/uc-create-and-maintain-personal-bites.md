@@ -74,6 +74,12 @@ rest of the product reads.
   the photo. Only `setBiteImagePathOnUpload` writes `imagePath`, `uploaded` and
   `refused`; the app writes `pending` and `failed`, and the Firestore rules
   refuse any other client write of the photo's fields. See issue [#2139].
+- A photo that arrived but whose image check could not run stays `pending` and
+  is checked again by the backend, over about sixteen hours, without the poster
+  doing anything: a pass publishes it and makes the Bite listable, a refusal
+  ends in `refused` as above, and when the last attempt still cannot answer the
+  backend writes `failed` and the poster gets the retry below. Until then the
+  Bite is listed to nobody else. See issue [#2142].
 - Only an `uploaded` Bite is listed to anybody but its poster. Until then the
   feed, the searches, the weekly page, bucket lists and the share link leave it
   out for everyone else, and the poster sees it on every surface as usual. See
@@ -116,7 +122,9 @@ rest of the product reads.
   the Bite that lost its photo is exactly the Bite that stops changing and would
   otherwise never be re-rendered. A Bite with no usable creation timestamp keeps
   its stored status, because an abandoned upload cannot be told apart from a
-  fresh one.
+  fresh one. Nor does the rule apply to a photo the backend will check again
+  (`imageCheckNextAt` set): it keeps reading `pending` until the backend's
+  verdict or `failed` (issue [#2142]).
   The client writes `failed` itself, because `setBiteImagePathOnUpload` only ever
   runs on a finalized object — without it the card kept telling every viewer
   "uploading, keep the app open" forever. A failed upload shows that state even
@@ -250,6 +258,7 @@ user-generated-content guideline names, for a Bite's text (issue [#1610]) and, s
 - Issue [#1846] plays the `celebration` sound with every celebration, the first Bite's included, part of epic [#1742].
 - Issue [#1610] is the Bite Content Check above.
 - Issue [#2139] checks the photo before it is published, part of epic [#2137]: the `refused` state, the poster's different-photo action, and the trigger as the only writer of `imagePath`.
+- Issue [#2142] checks again a photo whose check could not run, and keeps it `pending` meanwhile, part of epic [#2137].
 - Issue [#2014] celebrates the user's 5th, 10th, 50th, 100th and every later hundredth Bite, part of epic [#2012].
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#2018] added `Copy Bite` on another member's Bite, the copied-price date, and the automatic Bucket List tick on posting a copy.
@@ -301,3 +310,4 @@ user-generated-content guideline names, for a Bite's text (issue [#1610]) and, s
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142

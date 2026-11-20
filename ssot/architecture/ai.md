@@ -141,9 +141,9 @@ pushes judge the text themselves, so neither sends it out in that window.
   `setUserPhotoUrlOnUpload` since [#2140], which also covers the avatar a new
   account brings from its identity provider, and
   `setRestaurantImagePathOnUpload` and `setBiteTrailImagePathOnUpload` since
-  [#2141]. Two gaps remain under epic [#2137]: a photo whose check could not run
-  stays unpublished until [#2142] checks it again, and photos stored before the
-  check existed are unchecked until [#2143]. A restaurant photo chosen during
+  [#2141]. A photo whose check could not run stays unpublished and is checked
+  again since [#2142]. One gap remains under epic [#2137]: photos stored before
+  the check existed are unchecked until [#2143]. A restaurant photo chosen during
   candidate verification is an operator's and is handed to
   `verifyRestaurantCandidate` without the check. The earlier decision and its
   reopening are in
@@ -157,16 +157,17 @@ image before it is published. It takes the Storage object (bucket and path),
 the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
 `biteTrailPhoto` - and the uploading account, and answers `passed`,
 `refused` with a category, or `unavailable`. What a verdict does to the image
-is the caller's; each upload path is its own story in the epic. The Bite photo
-path ([#2139]) deletes a refused photo and marks the Bite `refused`, and leaves
-it `pending` on `unavailable`; see [Bite](../domain/bite.md). The profile photo
-path ([#2140]) deletes a refused photo and marks the profile `photoStatus:
-refused` while `photoUrl` keeps the previous photo, and leaves it `pending` on
-`unavailable`; see [User](../domain/user.md). The restaurant and Bite Trail
-photo paths ([#2141]) share `publishCheckedFolderPhoto`: a refused photo is
-deleted and the document gets `imageStatus: refused` while `imagePath` keeps
-the previous photo, and `unavailable` writes `imageStatus: pending`; see
-[Restaurant](../domain/restaurant.md) and [Bite Trail](../domain/bite-trail.md).
+is the caller's; each upload path is its own story in the epic, and all four
+apply it through `applyImageVerdict` in `shared/moderation/checked-image-subjects.ts`.
+The Bite photo path ([#2139]) deletes a refused photo and marks the Bite
+`refused`; see [Bite](../domain/bite.md). The profile photo path ([#2140])
+deletes a refused photo and marks the profile `photoStatus: refused` while
+`photoUrl` keeps the previous photo; see [User](../domain/user.md). The
+restaurant and Bite Trail photo paths ([#2141]) share `publishCheckedFolderPhoto`:
+a refused photo is deleted and the document gets `imageStatus: refused` while
+`imagePath` keeps the previous photo; see [Restaurant](../domain/restaurant.md)
+and [Bite Trail](../domain/bite-trail.md). On `unavailable` every path keeps the
+photo `pending` and schedules it to be checked again ([#2142]), below.
 
 - **What the model is asked.** The image goes to the same Gemini model as
   inline data, with `imageModerationInstructions`, which names the categories
@@ -186,6 +187,25 @@ the previous photo, and `unavailable` writes `imageStatus: pending`; see
   outage must not publish unchecked images (epic [#2137]'s decision). An image
   over the 10 MB the Storage rules allow is never sent and answers
   `unavailable` too.
+- **What it could not judge is checked again** ([#2142]). On `unavailable` the
+  caller writes the `pending` status and three fields onto the document:
+  `imageCheckAttempts`, the checks made so far; `imageCheckNextAt`, when the
+  next is due in epoch milliseconds; and `imageCheckPath`, the object. The
+  scheduled `recheckPendingImages` runs every 15 minutes, reads each of the four
+  collections for documents whose `imageCheckNextAt` has passed, takes the 50
+  oldest across them, checks them five at a time, and applies each verdict
+  through the same `applyImageVerdict`, so a recheck publishes or refuses
+  exactly as the upload would have. It writes in a transaction that first
+  confirms the document still waits on the same object and attempt, so a newer
+  upload's verdict is never overwritten. The waits between attempts are 15
+  minutes, 30 minutes, 1, 2, 4 and 8 hours (`IMAGE_RECHECK_DELAYS_MS`), seven
+  checks in all over about 16 hours, settled in
+  [Current State - Open Questions](../current-state/open-questions.md). After the last, the unchecked object is
+  deleted and the document gets `failed`, the state its uploader's retry
+  starts from. An object that is gone fails at once, and a recheck that throws
+  counts as one more attempt that could not answer. The rules refuse the three
+  fields from every client but an operator's; the apps read `imageCheckNextAt`
+  as a photo still being checked, not as an upload that stalled.
 - **A refusal is recorded** under `content refused` with the account, the
   surface, the stage `trigger`, the field `image`, the category as `reason` and
   the `storagePath`. No image data and no text go in the log.

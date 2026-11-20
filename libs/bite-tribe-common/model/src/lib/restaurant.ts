@@ -100,6 +100,13 @@ export interface Restaurant {
    */
   imageRefusalCategory?: string;
   imageUploadStartedAtTimestamp?: number;
+  /**
+   * When the backend checks the photo again, in milliseconds since the epoch,
+   * while its last image check could not run (GitHub issue #2142). Present
+   * only while the photo waits; the client reads it as a photo still being
+   * checked rather than an upload that stalled. Written by the backend alone.
+   */
+  imageCheckNextAt?: number;
   position: Geopoint;
   address?: Address;
 

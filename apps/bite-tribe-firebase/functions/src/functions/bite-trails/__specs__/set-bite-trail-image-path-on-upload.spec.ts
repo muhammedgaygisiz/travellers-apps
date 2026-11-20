@@ -39,6 +39,16 @@ jest.mock('firebase-functions/v2/storage', () => ({
 
 import { setBiteTrailImagePathOnUpload } from '../set-bite-trail-image-path-on-upload';
 
+/** The wait on a recheck (issue #2142), cleared by every final verdict. */
+const CLEARED_CHECK = {
+  imageCheckAttempts: 'DELETE',
+  imageCheckNextAt: 'DELETE',
+  imageCheckPath: 'DELETE',
+};
+
+const NOW = Date.parse('2026-11-20T12:00:00.000Z');
+const FIRST_RECHECK_DELAY_MS = 15 * 60 * 1000;
+
 const handler = setBiteTrailImagePathOnUpload as unknown as (event: {
   data: { name?: string; bucket: string; timeCreated?: string };
 }) => Promise<void>;
@@ -52,6 +62,10 @@ const upload = (name: string = PATH): Promise<void> =>
 
 /** GitHub issue #2141. */
 describe('setBiteTrailImagePathOnUpload', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     getMock.mockResolvedValue({
@@ -81,6 +95,7 @@ describe('setBiteTrailImagePathOnUpload', () => {
       imagePath: `url:bucket/${PATH}`,
       imageStatus: 'uploaded',
       imageRefusalCategory: 'DELETE',
+      ...CLEARED_CHECK,
     });
     expect(getFilesMock).toHaveBeenCalledWith({
       prefix: 'images/biteTrails/trail-1/',
@@ -97,15 +112,22 @@ describe('setBiteTrailImagePathOnUpload', () => {
     expect(updateMock).toHaveBeenCalledWith({
       imageStatus: 'refused',
       imageRefusalCategory: 'hate',
+      ...CLEARED_CHECK,
     });
   });
 
-  it('leaves the photo pending when the check is unavailable', async () => {
+  it('leaves the photo pending and schedules a recheck when the check is unavailable', async () => {
+    jest.useFakeTimers({ now: NOW });
     checkImageMock.mockResolvedValue({ verdict: 'unavailable' });
 
     await upload();
 
-    expect(updateMock).toHaveBeenCalledWith({ imageStatus: 'pending' });
+    expect(updateMock).toHaveBeenCalledWith({
+      imageStatus: 'pending',
+      imageCheckAttempts: 1,
+      imageCheckNextAt: NOW + FIRST_RECHECK_DELAY_MS,
+      imageCheckPath: PATH,
+    });
   });
 
   it('names no uploader for a trail without an owner', async () => {

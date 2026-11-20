@@ -84,7 +84,7 @@ Advertising, stage 1, issue [#1123]:
 
 - What ad frequency? Issue [#542] proposes every 5 bites, the epic proposes every 8th card.
 - One consent prompt covering analytics and ads, or two? This has to be settled with issue [#989].
-- Which ad content categories must be excluded for a food product with dietary, religious and health sensitivities?
+- ~~Which ad content categories must be excluded for a food product with dietary, religious and health sensitivities?~~ **Settled 20 November 2026 by `RD-DC-2`:** every category the member's own dietary choices rule out, by a fixed mapping, owned by [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) and built by issue [#2201]. Whether the ad network can apply that per request is open under `Dietary Choice Questions`.
 
 Subscriptions, stage 2, issue [#1124]:
 
@@ -234,6 +234,29 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 - **Do the store declarations change?** [Implementation - Store Declarations](../implementation/store-declarations.md) owns the App Store privacy nutrition labels and the Play data safety form. A flow named in the policy may need a matching declaration, or may already be covered by one.
 - **Should [Architecture - Context](../architecture/context.md) mark which systems receive user data?** A marker on the page would make the policy checkable against it. Since [#2066], `npm run check:ssot` (rule `CONTEXT`) fails when the code gains a signal no system on the page claims, so a new system reaches the page when it arrives; with a marker, the same check could also fail until the new system is classified for the policy.
 
+## Dietary Choice Questions
+
+These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it gates.
+
+- **How many disputes remove a restaurant's label, over what window, and is it a count or a
+  ratio?** The proposal is 3 eligible disputes within 90 days for a lifestyle label, 2 for a
+  high-risk one, and one "I got sick" dispute for a high-risk one, each only while disputes
+  outnumber confirmations. Gates [#2198].
+- **Who is eligible to vote?** Having a Bite at that restaurant, a minimum account age and
+  activity, or both. Without a bar, throwaway accounts can remove a competitor's labels.
+  Gates [#2197].
+- **How many confirmations turn a creator's label into "reported by diners"?** The proposal
+  is 3, with no open dispute. Gates [#2197].
+- **Are halal and kosher shown from diner reports at all**, or only once the restaurant has
+  declared them? Both carry the high-risk notice either way (`RD-DC-5`). Gates [#2195] and
+  [#2197].
+- **How many confirmed removals, over what period, cost a restaurant self-declaration?** The
+  proposal is 3 in 12 months. Gates [#2198].
+- **Can the ad network exclude categories per request, without the member's choices leaving
+  BiteTribe?** If not, the options are to block the sensitive categories for every member,
+  to show members with dietary choices only house or direct-sold ads, or to show them none.
+  Gates [#2201], and is settled together with [#1134].
+
 ## Related Pages
 
 - [Current State - Roadmap](roadmap.md)
@@ -295,3 +318,9 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
+[#2195]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2195
+[#2197]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2197
+[#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
+[#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201
+[#1134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1134

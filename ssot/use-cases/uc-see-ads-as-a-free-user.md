@@ -47,6 +47,7 @@ given away is [Monetization](../product/monetization.md); the subscription that 
 - Ads appear in the home feed only. Not on Bite detail, not in the create-Bite flow, and never positioned so they read as an endorsement of a specific restaurant.
 - The PWA shows no ads and no empty ad slots, because AdMob has no web SDK.
 - Subscribing removes ads within the session, without a restart.
+- No ad conflicts with the member's dietary or lifestyle choices: a request excludes every category those choices rule out, and never carries the choices as an attribute of the member (`RD-DC-2`, `RD-DC-3`). The mapping and the choices are [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)'s, and issue [#2201] applies them.
 
 ## MVP Classification
 
@@ -103,6 +104,7 @@ Not implemented. There is no ad dependency in the workspace. The surfaces this w
 - [epic-1123][#1123] - this page's stage epic
 - [UC - Subscribe To BiteTribe Pro](uc-subscribe-to-bitetribe-pro.md) - the purchase that switches this off
 - [UC - Discover Bites](uc-discover-bites.md) - the feed the ad card is inserted into
+- [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md) - the dietary choices that exclude ad categories
 - [Implementation - Store Declarations](../implementation/store-declarations.md) - the advertising and tracking answers this page
   makes false
 - [Current State - Roadmap](../current-state/roadmap.md) - where Monetization sits relative to launch
@@ -112,3 +114,4 @@ Not implemented. There is no ad dependency in the workspace. The surfaces this w
 [#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121
 [#1123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1123
 [#1126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1126
+[#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201

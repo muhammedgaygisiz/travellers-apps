@@ -2746,6 +2746,23 @@ describe('content-check verdicts', () => {
   });
 });
 
+describe('migration progress', () => {
+  const run = (db: Firestore): DocumentReference =>
+    doc(db, 'migrationRuns', 'image-moderation-report');
+
+  /**
+   * Server-only (issue #2143): the stored-photo backfill keeps where it got
+   * to here, and the documents it found refused. A client that could write
+   * it could mark a report finished, or skip the photos it holds.
+   */
+  it('refuses every reader and writer there is', async () => {
+    for (const db of [signedOut(), asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(getDoc(run(db)));
+      await assertFails(setDoc(run(db), { completedAt: 1 }));
+    }
+  });
+});
+
 describe('identity-provider avatars waiting for the check', () => {
   /**
    * Server-only (issue #2140): a client that could queue an avatar would point

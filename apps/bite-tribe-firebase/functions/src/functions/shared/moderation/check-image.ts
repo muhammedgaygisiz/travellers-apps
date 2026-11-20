@@ -5,7 +5,11 @@ import { logger } from 'firebase-functions';
 import { resolveDeploymentStage } from '../utils/deployment-stage';
 import { GEMINI_MODEL, generateWithGemini } from '../utils/gemini';
 import { CONTENT_CHECKS_COLLECTION } from './check-content';
-import { ImageSurface, recordContentRefusal } from './content-refusal';
+import {
+  ContentRefusalStage,
+  ImageSurface,
+  recordContentRefusal,
+} from './content-refusal';
 
 /**
  * The image check that runs before an uploaded image is published to another
@@ -72,6 +76,15 @@ export interface ImageCheckRequest {
   surface: ImageSurface;
   /** The account that uploaded it, for the refusal log. */
   uid: string;
+  /** Where the check ran, for the refusal log; `trigger` unless given. */
+  stage?: ContentRefusalStage;
+  /**
+   * Whether a refusal goes to the `content refused` log; it does unless this
+   * is `false`. The report pass of the stored-photo backfill (issue #2143)
+   * passes `false`, because it refuses nothing: it only says what the apply
+   * pass would take down, and that pass logs the refusal when it does.
+   */
+  recordRefusal?: boolean;
 }
 
 export const imageModerationInstructions = `You moderate photos that members of BiteTribe upload. BiteTribe is an app where people share and review the dishes they ate while travelling; a photo is of a dish, a member's profile, a restaurant or a food tour.
@@ -190,11 +203,11 @@ export const checkImage = async (
     }
   }
 
-  if (verdict.verdict === 'refused') {
+  if (verdict.verdict === 'refused' && request.recordRefusal !== false) {
     recordContentRefusal({
       uid: request.uid,
       surface: request.surface,
-      stage: 'trigger',
+      stage: request.stage ?? 'trigger',
       verdict: {
         field: 'image',
         source:

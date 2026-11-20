@@ -394,6 +394,8 @@
   "choose-different-photo": "Başka bir fotoğraf seç",
   "profile-photo-refused": "Yeni fotoğrafına BiteTribe’da izin verilmiyor",
   "profile-photo-refused-not-shown": "Başka kimse onu görmüyor. Profil fotoğrafın olduğu gibi kalıyor.",
+  "profile-photo-refused-removed": "Profil fotoğrafına BiteTribe’da izin verilmiyor",
+  "profile-photo-refused-removed-not-shown": "Başka kimse onu görmüyor. Başka bir fotoğraf seçene kadar profilinde fotoğraf olmayacak.",
   "choose-photo": "Fotoğraf seç",
   "image-upload-retry-failed": "Yükleme başlatılamadı. Lütfen tekrar deneyin.",
   "bite-updated-successfully": "Bite başarıyla güncellendi!",

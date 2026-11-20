@@ -42,7 +42,7 @@
   class="photo-state"
   role="button"
   data-testid="profile-photo-refused"
-  [attr.aria-label]="('profile-photo-refused' | transloco) + ' ' + ('choose-different-photo' | transloco)"
+  [attr.aria-label]="((refusedPhotoKept() ? 'profile-photo-refused' : 'profile-photo-refused-removed') | transloco) + ' ' + ('choose-different-photo' | transloco)"
   (click)="retryPhotoUpload.emit()"
 >
   <ion-icon name="alert-circle-outline" aria-hidden="true" />

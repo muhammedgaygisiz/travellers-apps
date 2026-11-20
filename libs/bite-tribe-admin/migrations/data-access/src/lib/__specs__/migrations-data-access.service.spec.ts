@@ -343,6 +343,49 @@ describe(MigrationsDataAccessService.name, () => {
     });
   });
 
+  describe('runImageModerationBackfill', () => {
+    // One call stops after a few minutes and keeps where it got to (issue
+    // #2143), so one press calls until the run is complete.
+    it('calls until the run is complete and returns the run counts', async () => {
+      const counts = {
+        checked: 40,
+        passed: 38,
+        refused: 1,
+        unavailable: 1,
+        skipped: 4,
+      };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValueOnce({
+          data: { ...counts, checked: 20, mode: 'report', complete: false },
+        })
+        .mockResolvedValueOnce({
+          data: { ...counts, mode: 'report', complete: true },
+        });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.runImageModerationBackfill('report');
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledTimes(2);
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'imageModerationBackfillCallable',
+        data: { mode: 'report' },
+      });
+      expect(result).toEqual(counts);
+    });
+
+    it('rejects when a call fails, so the next press continues the run', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('failed-precondition'));
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      await expect(service.runImageModerationBackfill('apply')).rejects.toThrow(
+        'failed-precondition',
+      );
+    });
+  });
+
   describe('migrateRestaurantOwnerIds', () => {
     it('calls the migration and keeps only the counts the page renders', async () => {
       jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({

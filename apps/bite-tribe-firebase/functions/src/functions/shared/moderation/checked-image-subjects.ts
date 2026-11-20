@@ -70,6 +70,18 @@ export interface CheckedImageSubject {
   /** What a refused photo writes. */
   refusedUpdate: (category: string) => Record<string, unknown>;
   /**
+   * The field that publishes the photo: the download URL other accounts
+   * read. The backfill of stored photos (issue #2143) checks only the object
+   * this names.
+   */
+  publishedUrlField: 'imagePath' | 'photoUrl';
+  /**
+   * What a refused photo that was already published writes (issue #2143).
+   * Unlike {@link refusedUpdate}, there is no earlier photo to keep, so the
+   * published URL goes too.
+   */
+  storedRefusedUpdate: (category: string) => Record<string, unknown>;
+  /**
    * Whether a passed photo removes the older objects in the document's
    * folder, so the folder holds only the current photo.
    */
@@ -99,6 +111,15 @@ export const BITE_PHOTO: CheckedImageSubject = {
     imageRefusalCategory: category,
     updatedAt: FieldValue.serverTimestamp(),
   }),
+  publishedUrlField: 'imagePath',
+  // Not `updatedAt`: the creator did not edit the Bite, an operator ran a
+  // migration over it.
+  storedRefusedUpdate: (category) => ({
+    imagePath: FieldValue.delete(),
+    image: '',
+    imageStatus: 'refused',
+    imageRefusalCategory: category,
+  }),
   deletesReplacedObjects: false,
 };
 
@@ -120,6 +141,13 @@ export const PROFILE_PHOTO: CheckedImageSubject = {
     photoStatus: 'refused',
     photoRefusalCategory: category,
   }),
+  publishedUrlField: 'photoUrl',
+  // Empty rather than absent: an account without a photo has `photoUrl: ''`.
+  storedRefusedUpdate: (category) => ({
+    photoUrl: '',
+    photoStatus: 'refused',
+    photoRefusalCategory: category,
+  }),
   deletesReplacedObjects: true,
 };
 
@@ -131,6 +159,12 @@ const folderPhotoUpdates = {
     imageRefusalCategory: FieldValue.delete(),
   }),
   refusedUpdate: (category: string) => ({
+    imageStatus: 'refused',
+    imageRefusalCategory: category,
+  }),
+  publishedUrlField: 'imagePath',
+  storedRefusedUpdate: (category: string) => ({
+    imagePath: FieldValue.delete(),
     imageStatus: 'refused',
     imageRefusalCategory: category,
   }),

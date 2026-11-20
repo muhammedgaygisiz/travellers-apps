@@ -96,6 +96,24 @@ export const PhotoRefused: Story = {
     publicUser: {
       ...unverifiedUser,
       emailVerified: true,
+      photoUrl: 'assets/demo/bite-demo.png',
+      photoStatus: 'refused',
+      photoRefusalCategory: 'violence',
+    },
+  },
+};
+
+/**
+ * The check of stored photos refused the photo the profile showed (GitHub
+ * issue #2143). It was taken down with `photoUrl`, so there is no previous
+ * photo to keep: the notice says the profile has none until another is
+ * chosen. A first photo refused on an account that had none reads the same.
+ */
+export const StoredPhotoRefused: Story = {
+  args: {
+    publicUser: {
+      ...unverifiedUser,
+      emailVerified: true,
       photoStatus: 'refused',
       photoRefusalCategory: 'violence',
     },

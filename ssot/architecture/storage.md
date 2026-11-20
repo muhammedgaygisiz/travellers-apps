@@ -58,6 +58,8 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 `recheckPendingImages` is the one writer here that no upload starts ([#2142]). When the image check could not run, the trigger records the object on its document as `imageCheckPath`, with `imageCheckAttempts` and `imageCheckNextAt`, and this scheduled function checks it again every 15 minutes, applying each verdict exactly as the trigger would: a passed object is published and the older objects in its folder deleted, a refused one is deleted. After the last attempt, about 16 hours after the upload, it deletes the unchecked object and writes `failed`, so no photo that was never checked stays in a folder with nothing to clean it up. It checks only an object inside its own document's folder.
 
+`imageModerationBackfillCallable` is the other writer no upload starts ([#2143]). An operator runs it from the admin app to check once every photo stored before the image check existed: it lists the four `images/` prefixes above and checks the object each document's `imagePath` or `photoUrl` names. Its report pass writes nothing; its apply pass deletes a refused object and removes the URL from its document. It never deletes an object the check passed, nor the older objects it skips.
+
 ## Storage Rules
 
 `storage.rules` scopes every path by owner (issue [#1350], the Storage
@@ -183,3 +185,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

@@ -190,6 +190,15 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'image-moderation-backfill',
+      title: 'Stored photo check',
+      loadComponent: () =>
+        import('bite-tribe-admin/migrations').then(
+          (m) => m.ImageModerationBackfillContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'menu-item-stats-recompute',
       title: 'Menu item Bite stats',
       loadComponent: () =>

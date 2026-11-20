@@ -100,7 +100,7 @@ Rated or counted as sold
 Current implementation notes:
 
 - BiteTrails are stored in `/biteTrails/{biteTrailId}`.
-- Creating a BiteTrail with a photo writes it `pending` and uploads the photo into `images/biteTrails/{biteTrailId}/`. `setBiteTrailImagePathOnUpload` alone writes `imagePath`, once the image check passed the photo; a refused photo is deleted and the trail gets `imageStatus: refused` with `imageRefusalCategory` (issue [#2141]). A photo the check could not judge stays `pending`, with `imageCheckAttempts`, `imageCheckNextAt` and `imageCheckPath`, until `recheckPendingImages` publishes it, refuses it, or marks it `failed` after about 16 hours (issue [#2142]). `firestore.rules` refuses an owner's create or update that writes `imagePath`, `imageRefusalCategory`, `image`, the `imageCheck*` fields, or any `imageStatus` but `pending` and `failed`.
+- Creating a BiteTrail with a photo writes it `pending` and uploads the photo into `images/biteTrails/{biteTrailId}/`. `setBiteTrailImagePathOnUpload` alone writes `imagePath`, once the image check passed the photo; a refused photo is deleted and the trail gets `imageStatus: refused` with `imageRefusalCategory` (issue [#2141]). A photo the check could not judge stays `pending`, with `imageCheckAttempts`, `imageCheckNextAt` and `imageCheckPath`, until `recheckPendingImages` publishes it, refuses it, or marks it `failed` after about 16 hours (issue [#2142]). A photo stored before the image check is checked once by the `image-moderation-backfill` migration, which takes a refused one down with its `imagePath` (issue [#2143]). `firestore.rules` refuses an owner's create or update that writes `imagePath`, `imageRefusalCategory`, `image`, the `imageCheck*` fields, or any `imageStatus` but `pending` and `failed`.
 - The marketplace loads BiteTrails from the `biteTrails` collection.
 - `soldCount` is derived by counting `/biteTrails/{biteTrailId}/sells`.
 - Saving a BiteTrail as Bucket List writes a sell record.
@@ -217,3 +217,4 @@ images/biteTrails/{biteTrailId}/{filename}
 [#1125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1125
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

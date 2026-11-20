@@ -285,6 +285,38 @@ describe(MigrationsService.name, () => {
       });
     });
 
+    // The stored-photo backfill's two passes are two names on one callable
+    // (issue #2143), each with its own state.
+    it('should run the stored-photo backfill in the pass its name stands for', async () => {
+      const result = {
+        checked: 4,
+        passed: 3,
+        refused: 1,
+        unavailable: 0,
+        skipped: 2,
+      };
+      const runImageModerationBackfill = jest.fn().mockResolvedValue(result);
+      const service = configure(
+        aDataAccess({
+          runImageModerationBackfill,
+        } as Partial<MigrationsDataAccessService>),
+      );
+
+      await service.runCollectionMigration('image-moderation-report');
+      await service.runCollectionMigration('image-moderation-backfill');
+
+      expect(runImageModerationBackfill.mock.calls).toEqual([
+        ['report'],
+        ['apply'],
+      ]);
+      expect(
+        service.collectionMigrationState('image-moderation-report'),
+      ).toEqual({ status: 'done', result });
+      expect(
+        service.collectionMigrationState('image-moderation-backfill'),
+      ).toEqual({ status: 'done', result });
+    });
+
     it('should call the Bite countries rebuild for its own name', async () => {
       const result = { countries: 12 };
       const rebuildBiteCountries = jest.fn().mockResolvedValue(result);

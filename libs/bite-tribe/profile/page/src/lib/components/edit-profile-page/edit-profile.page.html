@@ -23,7 +23,9 @@
       </div>
 
       <!-- The image check refused the new photo (GitHub issue #2140). It is
-      not shown: the photo above is the one everybody else still sees. -->
+      not shown: the photo above is the one everybody else still sees. A photo
+      refused by the check of stored photos (GitHub issue #2143) was that
+      photo, so the profile has none until another is chosen. -->
       @if (photoRefused()) {
       <div
         class="photo-refused-notice"
@@ -32,10 +34,10 @@
       >
         <ion-icon name="alert-circle-outline" aria-hidden="true" />
         <div class="photo-refused-text">
-          <strong>{{ 'profile-photo-refused' | transloco }}</strong>
+          <strong>{{ refusalNoticeKeys().title | transloco }}</strong>
           <ion-text>{{ refusalReasonKey() | transloco }}</ion-text>
           <ion-text color="medium">
-            {{ 'profile-photo-refused-not-shown' | transloco }}
+            {{ refusalNoticeKeys().note | transloco }}
           </ion-text>
         </div>
         <ion-button

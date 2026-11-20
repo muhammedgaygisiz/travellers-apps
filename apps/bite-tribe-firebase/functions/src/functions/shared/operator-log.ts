@@ -56,6 +56,7 @@ export const OPERATOR_ACTIONS = [
   'dismissReviewReports',
   'dismissUserReports',
   'hideReviewAsOperator',
+  'imageModerationBackfill',
   'issueTableQrTokens',
   'migrateRestaurantOwnerIds',
   'rebuildBiteCountries',
@@ -85,6 +86,11 @@ export type OperatorAction = (typeof OPERATOR_ACTIONS)[number];
 export type OperatorTargetType =
   | 'appInstallation'
   | 'bite'
+  /**
+   * Stored photos across Bites, profiles, restaurants and Bite Trails, walked
+   * by the image moderation backfill (issue #2143).
+   */
+  | 'image'
   | 'landingPage'
   | 'menu'
   | 'restaurant'

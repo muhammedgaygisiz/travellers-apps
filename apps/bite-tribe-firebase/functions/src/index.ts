@@ -32,6 +32,7 @@ export { mirrorIdentityAvatarOnCreate } from './functions/users/mirror-identity-
 export { setRestaurantImagePathOnUpload } from './functions/restaurants/set-restaurant-image-path-on-upload';
 export { setBiteTrailImagePathOnUpload } from './functions/bite-trails/set-bite-trail-image-path-on-upload';
 export { recheckPendingImages } from './functions/shared/moderation/recheck-pending-images';
+export { imageModerationBackfillCallable } from './functions/shared/moderation/image-moderation-backfill';
 export {
   backfillBiteAddress,
   enrichBiteAddressOnWrite,

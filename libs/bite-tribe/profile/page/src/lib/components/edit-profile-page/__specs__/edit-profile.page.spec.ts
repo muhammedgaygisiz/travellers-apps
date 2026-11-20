@@ -131,6 +131,29 @@ describe(EditProfilePage.name, () => {
       );
     });
 
+    it('says the previous photo stays while there is one', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      expect(component.refusalNoticeKeys()).toEqual({
+        title: 'profile-photo-refused',
+        note: 'profile-photo-refused-not-shown',
+      });
+    });
+
+    // GitHub issue #2143: the check of stored photos refuses the photo that
+    // was shown, so the profile is left without one.
+    it('says the profile has no photo when the refused one was shown', () => {
+      compRef.setInput('publicUser', { ...refused, photoUrl: '' });
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).not.toBeNull();
+      expect(component.refusalNoticeKeys()).toEqual({
+        title: 'profile-photo-refused-removed',
+        note: 'profile-photo-refused-removed-not-shown',
+      });
+    });
+
     it('keeps the photo everybody else sees in the form', () => {
       compRef.setInput('publicUser', refused);
       fixture.detectChanges();

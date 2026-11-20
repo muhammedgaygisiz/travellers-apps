@@ -178,6 +178,28 @@ export class EditProfilePage {
       !isBase64String(this.photoValue() ?? ''),
   );
 
+  /**
+   * Whether the profile still shows a photo while one is refused. A refused
+   * upload leaves the previous photo in place; a photo refused by the check
+   * of stored photos (GitHub issue #2143) was the one shown, so none is left.
+   */
+  private readonly refusedPhotoKept = computed(
+    (): boolean => !!this.publicUser()?.photoUrl,
+  );
+
+  /** What the refusal notice says, depending on whether a photo is kept. */
+  readonly refusalNoticeKeys = computed(() =>
+    this.refusedPhotoKept()
+      ? {
+          title: 'profile-photo-refused',
+          note: 'profile-photo-refused-not-shown',
+        }
+      : {
+          title: 'profile-photo-refused-removed',
+          note: 'profile-photo-refused-removed-not-shown',
+        },
+  );
+
   /** Why the image check refused the photo, as a line of copy. */
   readonly refusalReasonKey = computed((): string =>
     photoRefusalReasonKey(this.publicUser()?.photoRefusalCategory),

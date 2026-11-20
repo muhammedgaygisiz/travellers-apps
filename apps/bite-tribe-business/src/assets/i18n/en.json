@@ -219,6 +219,7 @@
   "photo-refused": "This photo isn’t allowed on BiteTribe",
   "restaurant-photo-checking": "Checking the photo…",
   "restaurant-photo-refused-kept": "The restaurant keeps its previous photo. Choose a different one to replace it.",
+  "restaurant-photo-refused-removed": "The restaurant has no photo until you choose a different one.",
   "bite-trail-photo-checking": "Photo being checked",
   "choose-different-photo": "Choose a different photo",
   "retry-upload": "Retry upload",

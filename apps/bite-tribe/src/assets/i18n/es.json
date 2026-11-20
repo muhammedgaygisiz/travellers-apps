@@ -394,6 +394,8 @@
   "choose-different-photo": "Elegir otra foto",
   "profile-photo-refused": "Tu nueva foto no está permitida en BiteTribe",
   "profile-photo-refused-not-shown": "Nadie más la ve. Tu foto de perfil sigue como estaba.",
+  "profile-photo-refused-removed": "Tu foto de perfil no está permitida en BiteTribe",
+  "profile-photo-refused-removed-not-shown": "Nadie más la ve. Tu perfil no tendrá foto hasta que elijas otra.",
   "choose-photo": "Elegir una foto",
   "image-upload-retry-failed": "No pudimos iniciar la subida. Inténtalo de nuevo.",
   "bite-updated-successfully": "¡Bite actualizado con éxito!",

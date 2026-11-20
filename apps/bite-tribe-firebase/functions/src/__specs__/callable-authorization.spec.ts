@@ -74,6 +74,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // Stamps acceptedAt on every private profile's followers (issue #2168).
   backfillFollowerAcceptanceCallable: 'operator',
   backfillMenuItemIdsCallable: 'operator',
+  // Checks every photo stored before the image check (issue #2143).
+  imageModerationBackfillCallable: 'operator',
   migrateRestaurantOwnerIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',

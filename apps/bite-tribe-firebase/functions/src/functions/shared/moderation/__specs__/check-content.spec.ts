@@ -10,6 +10,7 @@ jest.mock('../../utils/gemini', () => {
 
   return {
     GEMINI_MODEL: 'test-model',
+    VERDICT_MAX_OUTPUT_TOKENS: 256,
     GeminiUnavailableError,
     generateWithGemini: jest.fn(),
   };
@@ -78,6 +79,8 @@ describe('checkContent', () => {
     });
     expect(gemini).toHaveBeenCalledTimes(1);
     expect(gemini.mock.calls[0][0].text).toBe(describeFields(fields));
+    // 20 left the model no room to finish the verdict (issue #2143).
+    expect(gemini.mock.calls[0][0].maxOutputTokens).toBe(256);
 
     await checkContent(asDb(), fields);
 

@@ -166,6 +166,16 @@ export interface ImageModerationBackfillResult extends CollectionMigrationResult
 }
 
 /**
+ * How long the page waits for one backfill call.
+ *
+ * A call works for up to five minutes and its function may run for 540
+ * seconds. The callable SDK gives up after 70 seconds by default, which left
+ * the page reporting a failure while the run went on (issue #2143), so this
+ * outwaits the function instead.
+ */
+export const IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS = 600_000;
+
+/**
  * One call's answer: the run's counts so far, and whether it is done. Not a
  * {@link CollectionMigrationResult}, which holds counts only.
  */
@@ -475,7 +485,11 @@ export class MigrationsDataAccessService {
       const result = await FirebaseFunctions.callByName<
         { mode: ImageModerationBackfillMode },
         ImageModerationBackfillCall
-      >({ name: 'imageModerationBackfillCallable', data: { mode } });
+      >({
+        name: 'imageModerationBackfillCallable',
+        data: { mode },
+        timeout: IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
+      });
       const { complete, checked, passed, refused, unavailable, skipped } =
         result.data;
 

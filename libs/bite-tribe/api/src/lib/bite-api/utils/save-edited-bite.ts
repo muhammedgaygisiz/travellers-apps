@@ -4,7 +4,14 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BITE_COLLECTION } from '../../utils/constants';
 import { toBite } from '../../utils/to-bite';
 import { uploadImageAndUpdateBite } from './upload-image-and-update-bite';
+import { withoutPublishedImageFields } from './without-published-image-fields';
 
+/**
+ * Saves an edit of a Bite. The photo's own fields - `imagePath`,
+ * `imageStatus` and `imageRefusalCategory` - are never part of the write:
+ * `setBiteImagePathOnUpload` alone writes them (GitHub issue #2139), and an
+ * edit holding a stale copy must not overwrite what it decided.
+ */
 export const saveEditedBite = async (
   isWeb: boolean,
   bite: Bite,
@@ -31,7 +38,7 @@ export const saveEditedBite = async (
     await FirebaseFirestore.updateDocument({
       reference: `${BITE_COLLECTION}/${bite.id}`,
       data: {
-        ...biteWithoutImage,
+        ...withoutPublishedImageFields(biteWithoutImage),
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
@@ -74,7 +81,7 @@ export const saveEditedBite = async (
   await FirebaseFirestore.updateDocument({
     reference: `${BITE_COLLECTION}/${bite.id}`,
     data: {
-      ...bite,
+      ...withoutPublishedImageFields(bite),
       updatedAt: new Date().toISOString(),
       updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
     },

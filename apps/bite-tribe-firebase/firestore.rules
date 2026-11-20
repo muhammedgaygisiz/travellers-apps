@@ -1022,10 +1022,39 @@ service cloud.firestore {
             && !(data.get('userId', null) in data.taggedUserIds));
       }
 
+      /**
+       * The photo is published only by `setBiteImagePathOnUpload`, once the
+       * image check has passed it (GitHub issue #2139): it alone writes
+       * `imagePath`, `imageRefusalCategory`, and the `uploaded` and `refused`
+       * image statuses. A client may write the two statuses its upload owns,
+       * `pending` and `failed`, and nothing else of the photo. `image`, the
+       * base64 photo of Bites written before Storage uploads, may only be
+       * cleared, or a client could publish an unchecked photo through it.
+       *
+       * The admin app's image migration is an operator write and stays open.
+       */
+      function createsUnpublishedPhoto() {
+        let data = request.resource.data;
+
+        return absentAll(['imagePath', 'imageRefusalCategory'])
+          && data.get('imageStatus', 'pending') == 'pending'
+          && data.get('image', '') == '';
+      }
+
+      function keepsPublishedPhoto() {
+        let data = request.resource.data;
+
+        return unchangedAll(['imagePath', 'imageRefusalCategory'])
+          && (unchangedAll(['imageStatus'])
+            || data.get('imageStatus', null) in ['pending', 'failed'])
+          && (unchangedAll(['image']) || data.get('image', '') == '');
+      }
+
       allow read: if isMember();
 
       allow create: if owns(request.resource.data, 'userId')
-        && hasValidTaggedUsers();
+        && hasValidTaggedUsers()
+        && createsUnpublishedPhoto();
 
       /**
        * The operator clause is the admin app's Bite migrations — geohash,
@@ -1039,7 +1068,8 @@ service cloud.firestore {
        * save. They are cosmetic, they feed no entitlement, and the Bite's own
        * owner is the only account that can touch them.
        */
-      allow update: if (isOperator() || owns(resource.data, 'userId'))
+      allow update: if (isOperator()
+          || (owns(resource.data, 'userId') && keepsPublishedPhoto()))
         && hasValidTaggedUsers();
 
       allow delete: if isOperator() || owns(resource.data, 'userId');

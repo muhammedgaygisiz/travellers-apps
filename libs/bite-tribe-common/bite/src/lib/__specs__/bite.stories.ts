@@ -430,6 +430,32 @@ export const FailedUploadForOwnerOffline: Story = {
   }),
 };
 
+/**
+ * A photo the image check refused, as its creator sees it: the photo is not
+ * shown, the reason is, and the action opens the photo picker for a different
+ * one. The Bite is visible to its creator alone until then (GitHub issue
+ * #2139).
+ */
+export const RefusedPhotoForOwner: Story = {
+  args: {
+    ...Bite.args,
+    bite: {
+      ...demoBiteBase,
+      imagePath: undefined,
+      image: '',
+      imageStatus: 'refused',
+      imageRefusalCategory: 'violence',
+      userId: OWNER_ID,
+    },
+    userId: OWNER_ID,
+    enableImageRetry: true,
+  },
+  render: (args) => ({
+    props: { ...args },
+    template,
+  }),
+};
+
 export const UploadedState: Story = {
   args: {
     ...Bite.args,

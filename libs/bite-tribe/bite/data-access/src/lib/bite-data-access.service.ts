@@ -372,9 +372,17 @@ export class BiteDataAccessService {
    * Finds the photo this device kept for a Bite, so a retry can tell the two
    * flows apart: re-send that copy, or ask the user to pick a photo because the
    * copy is gone (an older Bite, or one posted from another device).
+   *
+   * A Bite whose photo the image check refused has nothing to re-send: its
+   * local copy is the refused photo itself, so the creator always picks a
+   * different one (GitHub issue #2139).
    */
-  findLocalImageForBite(biteId: string): Promise<LocalImageFile | undefined> {
-    return this.api.findLocalBiteImage(biteId);
+  async findLocalImageForBite(bite: Bite): Promise<LocalImageFile | undefined> {
+    if (bite.imageStatus === 'refused') {
+      return undefined;
+    }
+
+    return this.api.findLocalBiteImage(bite.id);
   }
 
   /**

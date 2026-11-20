@@ -408,10 +408,6 @@ export class BiteTribeApiService {
     );
   }
 
-  updateImagePathInBite(bite: Bite, imagePath: string): Promise<Bite> {
-    return this.biteApiService.updateImagePathInBite(bite, imagePath);
-  }
-
   updateUser(publicUser: PublicUser): Promise<PublicUser> {
     return this.profileApiService.updateUser(publicUser);
   }

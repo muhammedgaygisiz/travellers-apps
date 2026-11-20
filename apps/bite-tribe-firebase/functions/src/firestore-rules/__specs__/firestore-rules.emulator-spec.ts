@@ -2956,6 +2956,93 @@ describe('bites', () => {
     );
   });
 
+  /**
+   * The photo is published only by `setBiteImagePathOnUpload`, after the image
+   * check (GitHub issue #2139). The client keeps the two statuses its upload
+   * owns.
+   */
+  describe('the published photo', () => {
+    const photoBite = (): ReturnType<typeof doc> =>
+      doc(asConsumer(), 'bites', 'consumer-bite');
+
+    it('lets the creator start a Bite whose photo is on its way', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'bites', 'pending-bite'), {
+          userId: CONSUMER,
+          name: 'Pho',
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
+    it('refuses a new Bite that carries its own photo', async () => {
+      for (const [id, fields] of [
+        ['url-bite', { imagePath: 'https://example.com/photo.jpg' }],
+        ['empty-url-bite', { imagePath: '' }],
+        ['uploaded-bite', { imageStatus: 'uploaded' }],
+        ['refused-bite', { imageStatus: 'refused' }],
+        ['category-bite', { imageRefusalCategory: 'violence' }],
+        ['base64-bite', { image: 'data:image/jpeg;base64,AAAA' }],
+      ] as const) {
+        await assertFails(
+          setDoc(doc(asConsumer(), 'bites', id), {
+            userId: CONSUMER,
+            name: 'Pho',
+            ...fields,
+          }),
+        );
+      }
+    });
+
+    it('lets the creator mark its own upload pending or failed', async () => {
+      await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'pending' }));
+      await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'failed' }));
+    });
+
+    it('refuses a client write that publishes or changes the photo', async () => {
+      await assertFails(
+        updateDoc(photoBite(), { imagePath: 'https://example.com/photo.jpg' }),
+      );
+      await assertFails(updateDoc(photoBite(), { imageStatus: 'uploaded' }));
+      await assertFails(updateDoc(photoBite(), { imageStatus: 'refused' }));
+      await assertFails(
+        updateDoc(photoBite(), { imageRefusalCategory: 'violence' }),
+      );
+      await assertFails(
+        updateDoc(photoBite(), { image: 'data:image/jpeg;base64,AAAA' }),
+      );
+    });
+
+    it('lets an edit send the published photo back unchanged', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(doc(context.firestore(), 'bites', 'consumer-bite'), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        });
+      });
+
+      await assertSucceeds(
+        updateDoc(photoBite(), {
+          price: 12,
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+      await assertFails(
+        updateDoc(photoBite(), { imagePath: 'https://example.com/other.jpg' }),
+      );
+    });
+
+    it('lets the image migration rewrite a photo as an operator', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'bites', 'consumer-bite'), {
+          imagePath: 'https://example.com/migrated.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
+  });
+
   /** The admin app's Bite migrations rewrite Bites belonging to every account. */
   it('lets an operator edit any Bite', async () => {
     await assertSucceeds(

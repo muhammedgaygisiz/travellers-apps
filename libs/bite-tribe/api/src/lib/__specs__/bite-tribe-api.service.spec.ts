@@ -92,7 +92,6 @@ class BiteApiMock {
   startlatestBitesListener = jest.fn();
   getTotalNumberOfBites = jest.fn();
   uploadImage = jest.fn();
-  updateImagePathInBite = jest.fn();
   setImageStatus = jest.fn();
   reportBite = jest.fn();
   removeSelfFromBiteTags = jest.fn();
@@ -643,22 +642,6 @@ describe(BiteTribeApiService.name, () => {
         const callbackFn = jest.fn();
         service.uploadImage(bite, callbackFn);
         expect(uploadImageSpy).toHaveBeenCalledWith(bite, callbackFn);
-      },
-    ));
-  });
-
-  describe('updateImagePathInBite', () => {
-    it('should call updateImagePathInBite on BiteApiService', inject(
-      [BiteTribeApiService, BiteApiService],
-      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
-        const updateImagePathInBiteSpy = jest.spyOn(
-          biteApiService,
-          'updateImagePathInBite',
-        );
-        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
-        const imagePath = 'path/to/image.jpg';
-        service.updateImagePathInBite(bite, imagePath);
-        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(bite, imagePath);
       },
     ));
   });

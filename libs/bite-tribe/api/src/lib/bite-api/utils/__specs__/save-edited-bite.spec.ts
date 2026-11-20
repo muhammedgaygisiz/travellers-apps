@@ -134,7 +134,6 @@ describe('saveEditedBite', () => {
         data: {
           id: 'bite2',
           name: 'Burger',
-          imagePath: 'bites/bite2/image.jpg',
           place: 'Restaurant B',
           price: 12.5,
           currency: 'USD',
@@ -156,7 +155,6 @@ describe('saveEditedBite', () => {
         data: {
           id: 'bite2',
           name: 'Burger',
-          imagePath: 'bites/bite2/image.jpg',
           place: 'Restaurant B',
           price: 12.5,
           currency: 'USD',
@@ -394,7 +392,6 @@ describe('saveEditedBite', () => {
           id: 'bite6',
           userId: 'user123',
           name: 'Complete Bite',
-          imagePath: 'bites/bite6/image.jpg',
           place: 'Restaurant F',
           price: 30.0,
           currency: 'EUR',
@@ -457,7 +454,6 @@ describe('saveEditedBite', () => {
         data: {
           id: 'bite8',
           name: 'Test Bite',
-          imagePath: 'bites/bite8/image.jpg',
           place: 'Test Place',
           price: 5.0,
           position: { latitude: 40.7134, longitude: -74.012 },

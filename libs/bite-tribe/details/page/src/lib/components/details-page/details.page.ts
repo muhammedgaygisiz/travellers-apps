@@ -594,8 +594,8 @@ export class DetailsPage {
    * Whether the AI explanation is offered (issue #2106, `UC-IBD` `R-1`): to a
    * signed-in member - never an anonymous table guest, whom `isAuthenticated`
    * leaves out - on every Bite, their own included, once its photo is up. A
-   * pending or failed upload hides it, because `explainBite` refuses to
-   * explain a Bite without its photo.
+   * pending, failed or refused upload hides it, because `explainBite` refuses
+   * to explain a Bite without its photo.
    */
   protected readonly canExplain = computed(() => {
     const status = this.imageStatus();
@@ -604,7 +604,8 @@ export class DetailsPage {
       this.isAuthenticated() &&
       !!this.bite()?.id &&
       status !== 'pending' &&
-      status !== 'failed'
+      status !== 'failed' &&
+      status !== 'refused'
     );
   });
 

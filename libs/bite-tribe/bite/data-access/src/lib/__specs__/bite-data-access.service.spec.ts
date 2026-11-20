@@ -636,7 +636,9 @@ describe(BiteDataAccessService.name, () => {
         name: 'bites_x.jpg',
       });
 
-      await expect(service.findLocalImageForBite('x')).resolves.toEqual({
+      await expect(
+        service.findLocalImageForBite({ id: 'x' } as Bite),
+      ).resolves.toEqual({
         uri: 'file:///bites_x.jpg',
         name: 'bites_x.jpg',
       });
@@ -645,7 +647,25 @@ describe(BiteDataAccessService.name, () => {
     it('should report nothing when the copy is gone', async () => {
       api.findLocalBiteImage.mockResolvedValue(undefined);
 
-      await expect(service.findLocalImageForBite('x')).resolves.toBeUndefined();
+      await expect(
+        service.findLocalImageForBite({ id: 'x' } as Bite),
+      ).resolves.toBeUndefined();
+    });
+
+    /** The local copy of a refused photo is the refused photo, issue #2139. */
+    it('should report nothing for a refused photo, so a different one is picked', async () => {
+      api.findLocalBiteImage.mockResolvedValue({
+        uri: 'file:///bites_x.jpg',
+        name: 'bites_x.jpg',
+      });
+
+      await expect(
+        service.findLocalImageForBite({
+          id: 'x',
+          imageStatus: 'refused',
+        } as Bite),
+      ).resolves.toBeUndefined();
+      expect(api.findLocalBiteImage).not.toHaveBeenCalled();
     });
   });
 

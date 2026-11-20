@@ -41,4 +41,49 @@
       }
     </div>
   }
+  @case ('refused') {
+    <!-- The photo is never shown: a refused photo has no URL, and the poster's
+    local base64 copy is the refused photo itself. Only the creator is told
+    why, and only they can choose another photo. See GitHub issue #2139. -->
+    <div class="image-state" role="status" data-testid="bite-image-refused">
+      <ion-icon name="image-outline" aria-hidden="true" />
+
+      @if (isOwnBite()) {
+        <ion-text class="image-state-text smalltext">
+          {{ 'bite-photo-refused' | transloco }}
+        </ion-text>
+        <ion-text
+          class="image-state-text smalltext"
+          data-testid="bite-image-refused-reason"
+        >
+          {{ refusalReasonKey() | transloco }}
+        </ion-text>
+        <ion-text
+          class="image-state-text smalltext"
+          data-testid="bite-not-visible-until-replaced"
+        >
+          {{ 'bite-photo-refused-not-visible' | transloco }}
+        </ion-text>
+
+        @if (canRetry()) {
+          <ion-button
+            fill="outline"
+            size="small"
+            data-testid="bite-image-choose-different"
+            (click)="chooseDifferentPhoto($event)"
+          >
+            <ion-icon slot="start" name="image-outline" aria-hidden="true" />
+            {{ 'choose-different-photo' | transloco }}
+          </ion-button>
+        } @else if (showOfflineHint()) {
+          <ion-text
+            class="image-state-text smalltext"
+            data-testid="bite-image-retry-offline"
+          >
+            {{ 'retry-upload-offline' | transloco }}
+          </ion-text>
+        }
+      }
+    </div>
+  }
 }

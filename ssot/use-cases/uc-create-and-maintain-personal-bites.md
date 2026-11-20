@@ -3,8 +3,8 @@
 ## Status
 
 **Level:** L1
-Supported today. The create and edit flows, the photo upload states and their retry, and
-the five-source position picker are all shipped, including the photo's position offered
+Supported today. The create and edit flows, the photo upload states and their retry, the
+photo check with its refused state, and the five-source position picker are all shipped, including the photo's position offered
 again when a Bite is edited, [#1290].
 
 ## Goal
@@ -16,7 +16,8 @@ rest of the product reads.
 ## Actors
 
 - **Bite Creator** — creates a Bite, edits it later, and is the only account offered the
-  retry on a failed photo upload, because the photo is on their device.
+  retry on a failed photo upload, because the photo is on their device, and the only one
+  told that a photo was refused and offered a different one.
 
 ## Flow
 
@@ -66,9 +67,13 @@ rest of the product reads.
   run. Picking a photo is a local operation, and the upload states now cover a
   transfer that cannot start, so the restriction is gone. See GitHub issue
   [#1229].
-- The image upload has three states on the Bite document: `pending` while it
-  uploads, `uploaded` once the storage trigger has the download URL, and
-  `failed` when the upload errored.
+- The image upload has four states on the Bite document: `pending` while it
+  uploads and while the image check has not answered, `uploaded` once the
+  storage trigger has checked the photo and written the download URL,
+  `failed` when the upload errored, and `refused` when the image check refused
+  the photo. Only `setBiteImagePathOnUpload` writes `imagePath`, `uploaded` and
+  `refused`; the app writes `pending` and `failed`, and the Firestore rules
+  refuse any other client write of the photo's fields. See issue [#2139].
 - Only an `uploaded` Bite is listed to anybody but its poster. Until then the
   feed, the searches, the weekly page, bucket lists and the share link leave it
   out for everyone else, and the poster sees it on every surface as usual. See
@@ -83,6 +88,16 @@ rest of the product reads.
   is the one place the app says a Bite is unlisted, and it rides on
   `BiteImageStatusComponent`, so the feed card, the details page and the
   profile all carry it. It never shows while the upload is still `pending`.
+- On a `refused` Bite the photo is never shown, not even the poster's local
+  copy. The poster is told the photo is not allowed, why - the check's category
+  as a sentence, or a generic line for any other category - and that the Bite is
+  visible only to them until they choose a different photo. **Choose a different
+  photo** always opens the local photo picker, because the Bite's own local copy
+  is the refused photo; the picked photo goes through the same retry and the same
+  check, and a photo that passes makes the Bite listable. Nobody else is told the
+  reason or offered anything. It rides on `BiteImageStatusComponent`, like the
+  failed state, and the retry is offered only while the device reports a
+  connection. See issue [#2139].
 - The posting device gives up on an upload that reports neither progress, nor
   completion, nor an error for thirty seconds, and records `failed`. A transfer
   that loses connectivity mid-flight is silently retried by the Storage SDK for
@@ -151,7 +166,10 @@ them, by the content check in [Architecture - AI](../architecture/ai.md).
   that skips the form, is readable by other members for the seconds before the trigger
   runs. The new-Bite and tagged-user pushes judge the text themselves and are not sent
   for a refused Bite.
-- **The photo is not checked**; see [Current State - Open Questions](../current-state/open-questions.md).
+- **The photo is checked by the upload trigger**, before its URL is written: a refused
+  photo is deleted from Storage and the Bite becomes `refused`, and a photo the check
+  could not judge leaves the Bite `pending` and unlisted. The check itself is in
+  [Architecture - AI](../architecture/ai.md); what the poster sees is under `Flow`.
 
 ## MVP Classification
 
@@ -172,8 +190,8 @@ collected by the onboarding photos step rather than here - see [Architecture - C
 and GitHub issue [#1409]. Both data types this flow writes are already declared in
 [Implementation - Store Declarations](../implementation/store-declarations.md): **Photos or Videos** and **Precise Location**,
 each under App Functionality. The Bite Content Check is the filtering Apple's
-user-generated-content guideline names, for a Bite's text; its photo is not filtered
-(issue [#1610]).
+user-generated-content guideline names, for a Bite's text (issue [#1610]) and, since issue
+[#2139], for its photo.
 
 ## Supported Evidence
 
@@ -186,7 +204,12 @@ user-generated-content guideline names, for a Bite's text; its photo is not filt
 - Playwright "add another" E2E coverage: three Bites posted in one session
   started from Home, and a session started from a menu item whose Restaurant is
   kept for the Bites typed after it.
-- Bite API create, edit, upload, and image-path utilities.
+- Bite API create, edit and upload utilities, which never write the photo's published
+  fields (`without-published-image-fields.ts`).
+- Bite photo check: `set-bite-image-path-on-upload.ts` and its spec (passed, refused and
+  unavailable), the refused state in `bite-image-status.component.spec.ts`, and the deny
+  cases for a client write of `imagePath`, `imageStatus`, `imageRefusalCategory` and a
+  base64 `image` in `firestore-rules.emulator-spec.ts`.
 - `getCurrencyByPosition`
 - `searchNearbyPlaces`
 - Shared restaurant selector.
@@ -226,6 +249,7 @@ user-generated-content guideline names, for a Bite's text; its photo is not filt
 - Issue [#1845] plays the `posted` sound with the creation toast, part of epic [#1742].
 - Issue [#1846] plays the `celebration` sound with every celebration, the first Bite's included, part of epic [#1742].
 - Issue [#1610] is the Bite Content Check above.
+- Issue [#2139] checks the photo before it is published, part of epic [#2137]: the `refused` state, the poster's different-photo action, and the trigger as the only writer of `imagePath`.
 - Issue [#2014] celebrates the user's 5th, 10th, 50th, 100th and every later hundredth Bite, part of epic [#2012].
 - Issue [#1917] added the `Ate with` picker, part of epic [#1915] (tag the people you ate with).
 - Issue [#2018] added `Copy Bite` on another member's Bite, the copied-price date, and the automatic Bucket List tick on posting a copy.
@@ -275,3 +299,5 @@ user-generated-content guideline names, for a Bite's text; its photo is not filt
 [#2012]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2012
 [#2014]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2014
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139

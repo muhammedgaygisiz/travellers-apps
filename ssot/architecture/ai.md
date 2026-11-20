@@ -136,9 +136,10 @@ pushes judge the text themselves, so neither sends it out in that window.
   Cloud Logging rather than a collection by the same decision that made it the
   operator audit trail (epic [#1471]): the query is
   `jsonPayload.message="content refused"`, and the logs expire on their own.
-- **Photos are not checked yet.** `The Image Check` below exists, and no
-  upload path calls it until the stories of epic [#2137] land. The earlier
-  decision and its reopening are in
+- **Bite photos are checked; other photos are not yet.** `setBiteImagePathOnUpload`
+  calls `The Image Check` below since [#2139]. Profile, restaurant and Bite Trail
+  photos are published unchecked until their stories of epic [#2137] land. The
+  earlier decision and its reopening are in
   [Current State - Open Questions](../current-state/open-questions.md).
 
 ## The Image Check
@@ -149,7 +150,9 @@ image before it is published. It takes the Storage object (bucket and path),
 the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
 `biteTrailPhoto` - and the uploading account, and answers `passed`,
 `refused` with a category, or `unavailable`. What a verdict does to the image
-is the caller's; each upload path is its own story in the epic.
+is the caller's; each upload path is its own story in the epic. The Bite photo
+path ([#2139]) deletes a refused photo and marks the Bite `refused`, and leaves
+it `pending` on `unavailable`; see [Bite](../domain/bite.md).
 
 - **What the model is asked.** The image goes to the same Gemini model as
   inline data, with `imageModerationInstructions`, which names the categories
@@ -323,3 +326,4 @@ function:
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139

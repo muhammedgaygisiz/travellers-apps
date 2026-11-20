@@ -129,8 +129,9 @@ reported-reviews queue, where they block the author, hide the review from its th
 filtering ships** ([#1610]): text a member publishes - reviews and replies, display names,
 profile text, and a Bite's name, tags and description - is checked before another account
 can read it and refused with a message when it fails, per `RD-UR-11` and
-[Architecture - AI](../architecture/ai.md). Photos are not checked; why is in
-[Current State - Open Questions](../current-state/open-questions.md). Reporting a Review was the
+[Architecture - AI](../architecture/ai.md). A Bite photo is checked before it is published
+([#2139]); other photos are not yet, as
+[Current State - Open Questions](../current-state/open-questions.md) records. Reporting a Review was the
 last piece of the user-facing half, under epic [#1284]. Store requirement rather than product
 polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category
@@ -384,3 +385,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139

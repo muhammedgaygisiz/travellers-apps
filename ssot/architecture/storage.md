@@ -48,7 +48,7 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 ## Image Triggers
 
-`setBiteImagePathOnUpload` listens to finalized storage objects for Bite images and updates the matching Bite document with `imagePath`.
+`setBiteImagePathOnUpload` listens to finalized storage objects for Bite images, runs the image check of [Architecture - AI](ai.md) on the object, and only then writes the matching Bite document's `imagePath`. A refused object is deleted and never gets a URL on any document. It is the only writer of a Bite's `imagePath`: the app uploads the photo and no longer resolves or writes the download URL itself, and the Firestore rules refuse a client write of it ([#2139]).
 
 `setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]).
 
@@ -175,3 +175,4 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139

@@ -3,7 +3,11 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { logger } from 'firebase-functions';
 import { resolveDeploymentStage } from '../utils/deployment-stage';
-import { GEMINI_MODEL, generateWithGemini } from '../utils/gemini';
+import {
+  GEMINI_MODEL,
+  generateWithGemini,
+  VERDICT_MAX_OUTPUT_TOKENS,
+} from '../utils/gemini';
 import { CONTENT_CHECKS_COLLECTION } from './check-content';
 import {
   ContentRefusalStage,
@@ -160,7 +164,7 @@ const askModel = async (
       },
       required: ['category'],
     },
-    maxOutputTokens: 20,
+    maxOutputTokens: VERDICT_MAX_OUTPUT_TOKENS,
     timeoutMs: IMAGE_CHECK_TIMEOUT_MS,
   });
   const category = categoryOf(answer.json['category']) ?? 'none';

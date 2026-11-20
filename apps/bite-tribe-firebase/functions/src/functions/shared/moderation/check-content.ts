@@ -6,6 +6,7 @@ import {
   GEMINI_MODEL,
   generateWithGemini,
   GeminiUnavailableError,
+  VERDICT_MAX_OUTPUT_TOKENS,
 } from '../utils/gemini';
 import { findObjectionableTerm } from './objectionable-terms';
 
@@ -129,7 +130,7 @@ const askModel = async (
       },
       required: ['category'],
     },
-    maxOutputTokens: 20,
+    maxOutputTokens: VERDICT_MAX_OUTPUT_TOKENS,
   });
   const category = categoryOf(answer.json['category']);
   const now = new Date();

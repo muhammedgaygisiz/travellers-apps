@@ -9,6 +9,7 @@ import {
   BITE_COLLECTION,
   getBitesNeedingAddressBackfill,
   getRestaurantClusteringEligibleBites,
+  IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
   MigrationsDataAccessService,
   RESTAURANT_CANDIDATES_COLLECTION,
   RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT,
@@ -370,6 +371,8 @@ describe(MigrationsDataAccessService.name, () => {
       expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
         name: 'imageModerationBackfillCallable',
         data: { mode: 'report' },
+        // Outwaits the function: the SDK's 70-second default failed every run.
+        timeout: IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
       });
       expect(result).toEqual(counts);
     });

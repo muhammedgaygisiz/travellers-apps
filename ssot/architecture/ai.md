@@ -136,8 +136,42 @@ pushes judge the text themselves, so neither sends it out in that window.
   Cloud Logging rather than a collection by the same decision that made it the
   operator audit trail (epic [#1471]): the query is
   `jsonPayload.message="content refused"`, and the logs expire on their own.
-- **Photos are not checked.** The decision and its reason are in
+- **Photos are not checked yet.** `The Image Check` below exists, and no
+  upload path calls it until the stories of epic [#2137] land. The earlier
+  decision and its reopening are in
   [Current State - Open Questions](../current-state/open-questions.md).
+
+## The Image Check
+
+Issue [#2138], the first story of epic [#2137]: `checkImage` in
+`shared/moderation/check-image.ts`, next to `checkContent`, judges one uploaded
+image before it is published. It takes the Storage object (bucket and path),
+the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
+`biteTrailPhoto` - and the uploading account, and answers `passed`,
+`refused` with a category, or `unavailable`. What a verdict does to the image
+is the caller's; each upload path is its own story in the epic.
+
+- **What the model is asked.** The image goes to the same Gemini model as
+  inline data, with `imageModerationInstructions`, which names the categories
+  it may answer - `sexual`, `violence`, `hate`, `self_harm`, `illegal` - or
+  `none`. The list was settled for the story in
+  [Current State - Open Questions](../current-state/open-questions.md), `Image Moderation Questions`.
+  The prompt says food in any form, alcohol, tobacco and a photo with no food
+  are not objectionable. An answer outside the list reads as `none`.
+- **One verdict per image.** A `passed` or `refused` verdict is kept in
+  `contentChecks/{sha256}` by a hash of the image bytes, with
+  `subject: image`, so the same image is judged once. `unavailable` is never
+  kept.
+- **It fails closed.** When the model errors, the image cannot be read, or
+  the call passes `IMAGE_CHECK_TIMEOUT_MS` (20 seconds, inside a Storage
+  trigger's 60), the check answers `unavailable` and the caller keeps the
+  image unpublished. Unlike text, there is no wordlist to fall back on, so an
+  outage must not publish unchecked images (epic [#2137]'s decision). An image
+  over the 10 MB the Storage rules allow is never sent and answers
+  `unavailable` too.
+- **A refusal is recorded** under `content refused` with the account, the
+  surface, the stage `trigger`, the field `image`, the category as `reason` and
+  the `storagePath`. No image data and no text go in the log.
 
 The rules a member meets are on each use case:
 [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) for reviews,
@@ -155,7 +189,9 @@ outside production.` (`[DEV]` in the emulator). Neither needs the Vertex AI
 API, credentials or billing, and a test run spends nothing. The daily limit
 still counts, so the limit message can be tested there. The content check
 runs its wordlist there and no model, so a refusal can be tested with a listed
-term. What the model writes is seen only in production.
+term. The image check reads no image there: it answers `passed`, except for a
+file whose name contains `refuse-sample`, which answers `refused` with
+category `sample` (source `sample` in the log), so QA can drive a refusal. What the model writes is seen only in production.
 
 ## The Model
 
@@ -284,4 +320,6 @@ function:
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106

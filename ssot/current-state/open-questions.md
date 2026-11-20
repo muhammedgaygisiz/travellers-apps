@@ -123,10 +123,32 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   on every Bite, where text that was already judged costs nothing. Until then a photo is
   handled after the fact: any member reports the Bite ([#1608]) and an operator removes it
   ([#1475]). The question reopens if reports show objectionable photos arriving.
+  **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
+  Its image check exists since [#2138], and no upload path calls it yet, so photos are still
+  published unchecked until the epic's path stories land.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
   a change is a pull request; nothing records why a term is on it beyond the review.
 - Does a member whose text is refused get a way to contest it? Today the only answer is to
   reword, and a model refusal says which surface failed but not which words.
+
+## Image Moderation Questions
+
+These belong to epic [#2137], the check every uploaded image passes before another account
+can see it. The check is described in [Architecture - AI](../architecture/ai.md).
+
+- **What does the image check refuse? Settled 20 November 2026 by the maintainer, on
+  [#2138].** Five categories: `sexual` (nudity and sexually explicit content), `violence`
+  (graphic violence, gore, serious injury), `hate` (hate symbols and attacks on a group),
+  `self_harm` and `illegal` (illegal drugs, and drugs or weapons offered for sale). This is
+  the text check's list without `harassment`, which a photo rarely carries on its own. A photo
+  that shows no food is **not** refused: a selfie at the table, a menu or a street front is an
+  ordinary upload, and a Bite photo that is not food stays with the report's `notFood` reason
+  ([#1608]). Food in any form - raw meat, blood, whole animals - is not `violence`, and alcohol
+  or tobacco is not `illegal`; the prompt says so.
+- How long does an image whose check answered `unavailable` wait, and how many attempts are
+  made, before it is marked `failed`? Gates the epic's waiting and retrying story.
+- What happens to a refused photo found by the migration of stored photos: hidden the same
+  way as a new upload, or put in front of an operator first? Gates the migration story.
 
 ## Follow Request Questions
 
@@ -264,6 +286,8 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166

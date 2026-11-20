@@ -328,6 +328,14 @@ export class AdminDashboard {
       group: 'secondary',
     },
     {
+      titleKey: 'admin-tool-follower-acceptance-backfill',
+      descriptionKey: 'admin-tool-follower-acceptance-backfill-description',
+      icon: 'person-add-outline',
+      path: '/follower-acceptance-backfill',
+      testId: 'admin-tool-follower-acceptance-backfill',
+      group: 'secondary',
+    },
+    {
       titleKey: 'admin-tool-menu-item-stats-recompute',
       descriptionKey: 'admin-tool-menu-item-stats-recompute-description',
       icon: 'stats-chart-outline',

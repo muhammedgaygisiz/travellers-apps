@@ -491,6 +491,93 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  // Making a private profile public accepts every pending follow request at
+  // once, so the switch asks first while one is pending (GitHub issue #2168).
+  describe('the go-public confirmation', () => {
+    const privateUser = {
+      displayName: 'Owner',
+      email: 'owner@example.com',
+      userId: 'owner-1',
+      public: false,
+    } as PublicUser;
+
+    const togglePublic = (checked: boolean): void =>
+      component.handlePubicChange({
+        detail: { checked },
+      } as unknown as Parameters<EditProfilePage['handlePubicChange']>[0]);
+
+    const queryAlerts = (): HTMLElement[] => [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('ion-alert'),
+    ];
+
+    it('asks before a private profile with pending requests turns public', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+
+      togglePublic(true);
+      fixture.detectChanges();
+
+      expect(component.isGoPublicOpen()).toBe(true);
+      expect(queryAlerts()).toHaveLength(1);
+    });
+
+    it('keeps the profile private when cancelled', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+      togglePublic(true);
+
+      component.handleGoPublicConfirmation({
+        detail: { role: 'keep-private' },
+      } as CustomEvent<OverlayEventDetail>);
+
+      expect(component.profileForm.value.public).toBe(false);
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('keeps the switch to public when confirmed', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+      togglePublic(true);
+
+      component.handleGoPublicConfirmation({
+        detail: { role: 'go-public' },
+      } as CustomEvent<OverlayEventDetail>);
+
+      expect(component.profileForm.value.public).toBe(true);
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing when no request is pending', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 0);
+
+      togglePublic(true);
+
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing when the saved profile is already public', () => {
+      compRef.setInput('publicUser', { ...privateUser, public: true });
+      compRef.setInput('pendingFollowRequestCount', 3);
+
+      togglePublic(true);
+
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing about requests when switching to private', () => {
+      compRef.setInput('publicUser', { ...privateUser, public: true });
+      compRef.setInput('pendingFollowRequestCount', 3);
+
+      togglePublic(false);
+
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+  });
+
   describe('cancel', () => {
     describe('given modal is defined', () => {
       it('should dismiss profile image selection modal with cancel role', () => {

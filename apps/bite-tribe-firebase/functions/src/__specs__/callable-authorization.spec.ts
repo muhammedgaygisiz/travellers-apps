@@ -71,6 +71,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   assignRestaurantOwner: 'operator',
   backfillBiteAddress: 'operator',
   backfillBiteImageStatusCallable: 'operator',
+  // Stamps acceptedAt on every private profile's followers (issue #2168).
+  backfillFollowerAcceptanceCallable: 'operator',
   backfillMenuItemIdsCallable: 'operator',
   migrateRestaurantOwnerIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',

@@ -40,6 +40,8 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
+const KEEP_PRIVATE = 'keep-private';
+const GO_PUBLIC = 'go-public';
 
 @Component({
   selector: 'edit-profile-page',
@@ -82,6 +84,12 @@ export class EditProfilePage {
   publicUser = input<PublicUser>();
   /** A save is being written; Save Changes waits for it (issue #1953). */
   saving = input(false);
+  /**
+   * How many requests to follow the profile are pending (GitHub issue #2168).
+   * Making a private profile public accepts every one of them, so the switch
+   * asks first when there is at least one.
+   */
+  pendingFollowRequestCount = input(0);
   showEmailVerificationPrompt = input(false);
   emailVerificationResendRunning = input(false);
 
@@ -114,6 +122,8 @@ export class EditProfilePage {
   });
 
   isOpen = signal(false);
+  /** The switch to public is waiting on the owner's go-ahead (issue #2168). */
+  isGoPublicOpen = signal(false);
   failedProfileImageUrl = signal<string | null>(null);
   readonly pronounsMaxLength = PRONOUNS_MAX_LENGTH;
   profileForm = this.formBuilder.group({
@@ -165,6 +175,17 @@ export class EditProfilePage {
     },
   ];
 
+  goPublicButtons = [
+    {
+      text: this.transloco.translate('keep-private'),
+      role: KEEP_PRIVATE,
+    },
+    {
+      text: this.transloco.translate('yes-make-public'),
+      role: GO_PUBLIC,
+    },
+  ];
+
   openConfirmationDialog(): void {
     this.isOpen.set(true);
   }
@@ -177,6 +198,18 @@ export class EditProfilePage {
     }
 
     this.isOpen.set(false);
+  }
+
+  /**
+   * Cancelling, or dismissing the alert any other way, puts the switch back to
+   * private, so the requests stay pending (GitHub issue #2168).
+   */
+  handleGoPublicConfirmation(event: CustomEvent<OverlayEventDetail>): void {
+    if (event.detail.role !== GO_PUBLIC) {
+      this.profileForm.patchValue({ public: false });
+    }
+
+    this.isGoPublicOpen.set(false);
   }
 
   saveProfile(): void {
@@ -214,6 +247,16 @@ export class EditProfilePage {
   ): void {
     if (!$event.detail.checked) {
       this.openConfirmationDialog();
+
+      return;
+    }
+
+    // Only a profile that is private now has requests the switch would accept.
+    if (
+      this.publicUser()?.public !== true &&
+      this.pendingFollowRequestCount() > 0
+    ) {
+      this.isGoPublicOpen.set(true);
     }
   }
 

@@ -14,9 +14,9 @@ const db = getFirestore();
  * The followers a new Bite is pushed to (issue #2167).
  *
  * Every follower of a public author. A private author's followers only when
- * the edge carries `acceptedAt`, which `acceptFollowRequest` writes and a
- * client never does: a follower from before epic #2144 followed in one tap and
- * was never approved by the owner. Either way an account that blocks the
+ * the edge carries `acceptedAt`, which `acceptFollowRequest` writes, the
+ * switch to private writes on every follower (issue #2168), and a client never
+ * does: an edge without it was never approved by the owner. Either way an account that blocks the
  * author, or that the author blocks, is left out.
  */
 const getRecipientUids = (

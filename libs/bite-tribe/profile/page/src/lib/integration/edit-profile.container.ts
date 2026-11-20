@@ -18,6 +18,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isAuthenticated]="service.isAuthenticated()"
       [publicUser]="service.myUser()"
       [saving]="service.profileSaving()"
+      [pendingFollowRequestCount]="service.pendingFollowRequestCount()"
       [showEmailVerificationPrompt]="service.emailVerificationPromptVisible()"
       [emailVerificationResendRunning]="
         service.emailVerificationResendRunning()
@@ -41,6 +42,11 @@ export class EditProfileContainer {
   });
 
   ionViewDidEnter(): void {
+    // Counted again on entry, so the warning on the switch to public names
+    // the requests pending now rather than when the own profile was last
+    // opened (GitHub issue #2168).
+    this.service.refreshPendingFollowRequests();
+
     void FirebaseAnalytics.setCurrentScreen({
       screenName: 'Edit Profile',
     });

@@ -207,6 +207,27 @@ Request Contract` in [UC - Receive App Notifications And Engagement Updates](uc-
   one pushes to the requester and opens the owner's profile. Each names the other party by
   display name only. They are owned by `Follow Request Contract` in
   [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- **Switching visibility** ([#2168]). Neither direction costs a follower or leaves anyone
+  waiting (decided on 19 November 2026, under `Follow Request Questions` in
+  [Current State - Open Questions](../current-state/open-questions.md)).
+  - Turning private keeps every follower: each counts as accepted, as if the owner had
+    approved them, so the private profile's new Bites still reach them.
+  - Turning public accepts every pending request: each becomes a follow on both sides, both
+    follow counts rise by one per request, and no request addressed to the profile is left.
+    The requesters get no acceptance push, because the owner did not answer them one by one
+    and following a public profile tells the follower nothing either.
+  - Because the switch to public lets every requester in at once, profile edit asks first
+    when at least one request is pending, naming the count. Cancelling puts the switch back
+    to private and leaves the requests pending. Without a pending request, and on the switch
+    to private, the switch saves as before. The count is taken again each time profile edit
+    is entered.
+  - Both happen in `applyFollowVisibilityOnUserUpdate`, a trigger on the user document that
+    acts only when `public` changes, because the flag is a plain client write and the edges
+    and requests it touches are not the owner's to write. A save that keeps the flag touches
+    no edge and no request.
+  - The followers a profile had while private before this trigger existed are stamped once
+    by the `follower-acceptance` migration in
+    [UC - Run Operational Migrations](uc-run-operational-migrations.md).
 - **Not in this contract.** Removing an accepted follower without blocking them, which the
   epic leaves out.
 
@@ -573,6 +594,12 @@ It changes no declaration: the data collected and its purpose are the same.
   the `Pages/Follow Requests` stories; and the `Follow requests` row of `profile-page`,
   `profile-follow-requests-row.spec.ts` and the
   `Own Private Profile With Follow Requests` story.
+- Switching visibility ([#2168]): `applyFollowVisibilityOnUserUpdate`,
+  `stampFollowersAsAccepted` and `acceptAllFollowRequests` in `follow-visibility.ts`, and
+  `backfillFollowerAcceptanceCallable` in `backfill-follower-acceptance.ts`, under
+  `apps/bite-tribe-firebase/functions/src/functions/users`, with `follow-visibility.spec.ts`;
+  the go-public confirmation of `edit-profile-page` and its `the go-public confirmation`
+  cases in `edit-profile.page.spec.ts`.
 - Profile reports: the `reportUser` callable; the Report entry and reason dialog of
   `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.
@@ -621,7 +648,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
-- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Its story [#2167] sends a private author's new-Bite push to the followers they accepted. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Its story [#2167] sends a private author's new-Bite push to the followers they accepted. Its story [#2168] keeps the followers when a profile turns private and accepts the pending requests when it turns public. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
@@ -677,3 +704,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
+[#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168

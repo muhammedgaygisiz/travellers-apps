@@ -31,7 +31,8 @@ export interface DeclineFollowRequestResult {
  * Each edge carries `acceptedAt` beside the fields `ProfileApiService.follow`
  * writes. It is the marker that a private owner approved this follower, which
  * a client-written edge never has, and which the new-Bite push reads to tell an
- * approved follower from one who followed before epic #2144.
+ * approved follower from one who followed in one tap. The switch to private
+ * stamps it on every existing follower (issue #2168).
  *
  * The request is looked up under the caller's own uid as its owner, so the
  * caller can only ever accept a request addressed to them. The follow-count

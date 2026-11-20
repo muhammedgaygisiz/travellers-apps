@@ -3,6 +3,7 @@ export { ReviewTimestampsBackfillContainer } from './lib/integration/review-time
 export { MenuItemIdsBackfillContainer } from './lib/integration/menu-item-ids-backfill-container';
 export { RestaurantOwnerIdsMigrationContainer } from './lib/integration/restaurant-owner-ids-migration-container';
 export { BiteImageStatusBackfillContainer } from './lib/integration/bite-image-status-backfill-container';
+export { FollowerAcceptanceBackfillContainer } from './lib/integration/follower-acceptance-backfill-container';
 export { BiteCountriesRebuildContainer } from './lib/integration/bite-countries-rebuild-container';
 export { MenuItemStatsRecomputeContainer } from './lib/integration/menu-item-stats-recompute-container';
 export { BiteAddressBackfillContainer } from './lib/integration/bite-address-backfill-container';

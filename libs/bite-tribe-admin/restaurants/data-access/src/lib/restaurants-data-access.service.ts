@@ -15,11 +15,11 @@ import {
   RestaurantCandidate,
 } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitFolderPhotoVerdict, BiteTribeApiService } from 'bite-tribe/api';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { TABLE_SESSIONS_COLLECTION } from 'model';
-import type { TableSession } from 'model';
+import type { FolderPhotoVerdict, TableSession } from 'model';
 import { isBase64String, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -613,13 +613,27 @@ export class RestaurantsDataAccessService {
   }
 
   /**
-   * Creates a restaurant without a candidate, and resolves once it, its menu
-   * and its photo are written. It used to dispatch a store action whose effect
-   * dropped the promise, so a rejected write never reached the page, which
-   * navigated away as if it had worked (issue #1952).
+   * Creates a restaurant without a candidate, and resolves once it and its
+   * menu are written and its photo uploaded. It used to dispatch a store
+   * action whose effect dropped the promise, so a rejected write never reached
+   * the page, which navigated away as if it had worked (issue #1952).
+   *
+   * With a photo it then waits for the image check (GitHub issue #2141), so
+   * the page can say whether the photo was published: the verdict, or
+   * `undefined` when there was no photo or the check has not answered yet.
    */
-  submitNewRestaurant(restaurant: Restaurant): Promise<void> {
-    return this.api.saveNewRestaurant(restaurant);
+  async submitNewRestaurant(
+    restaurant: Restaurant,
+  ): Promise<FolderPhotoVerdict | undefined> {
+    const restaurantId = await this.api.saveNewRestaurant(restaurant);
+
+    if (!restaurant.image) {
+      return undefined;
+    }
+
+    return awaitFolderPhotoVerdict(
+      this.api.restaurantPhotoVerdict$(restaurantId, false),
+    );
   }
 
   async searchPlaces(

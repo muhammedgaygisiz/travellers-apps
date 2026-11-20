@@ -78,8 +78,11 @@ Current model fields:
 - `distance`
 - `image`
 - `imagePath`
-- `imageStatus`, `imageUploadStartedAtTimestamp` - where a photo the business
-  app is uploading has got to, as on a Bite and a profile (issue [#2126])
+- `imageStatus`, `imageUploadStartedAtTimestamp` - where a photo being
+  uploaded has got to, as on a Bite and a profile (issue [#2126]): `pending`,
+  `failed`, or the image check's `uploaded` or `refused` (issue [#2141])
+- `imageRefusalCategory` - why the image check refused the latest photo,
+  while `imageStatus` is `refused` (issue [#2141])
 - `address`
 - `menuId`
 - `menuReviewedAt`, `menuReviewedAtTimestamp` - when an account holding the
@@ -154,7 +157,7 @@ Current implementation notes:
 - If `biteIds` are provided during creation, those Bites are updated with the new `restaurantId`.
 - Candidate-backed creation uses `verifyRestaurantCandidate` so restaurant creation, menu creation, Bite linking, and candidate status changes happen in one backend transaction.
 - Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.
-- Restaurant image upload stores an `imagePath`.
+- A Restaurant's `imagePath` after an upload is written only by `setRestaurantImagePathOnUpload`, once the image check passed the photo (issue [#2141]). A refused photo is deleted and the Restaurant keeps the photo it had. `firestore.rules` refuses a holder's write of `imagePath`, `imageRefusalCategory`, `image`, and any `imageStatus` but `pending` and `failed`; an operator's write stays open. The admin app's new-restaurant page writes the Restaurant `pending` before it uploads, so the trigger has a document to publish on, and removes it again if the upload fails.
 - Ownership is assigned and revoked through `assignRestaurantOwner` and `revokeRestaurantOwner`, both admin-only, both transactional, and both logging through `logOperatorAction`. The operator surface is `restaurant-ownership` in the admin app, which reuses the account list issue [#1476] built rather than adding a second way to find an account.
 - Staff is `addRestaurantStaff`, `removeRestaurantStaff` and `listRestaurantStaff`, admitting `business` or `admin` and then reading `ownerUserIds` to decide which Restaurant the caller reaches. They write `/restaurantStaff/{uid}` and the `staff` claim together, and log through `logOperatorAction` like the ownership pair. The surfaces are `restaurant/:restaurantId/staff` in the business app and the staff card on `restaurant-ownership` in the admin app.
 - Live table state is `transitionTableState`, admitting `staff`, `business` or `admin` and then reaching its Restaurant through `/restaurantStaff/{uid}` for a staff account and through `ownerUserIds` for the other two. It writes `/restaurants/{id}/tableStates/{tableId}` and one append-only entry under `/restaurants/{id}/tableStateTransitions` in a single transaction, and is the only writer of either - `firestore.rules` refuses every client write to both. It is deliberately outside `logOperatorAction`: a seating happens hundreds of times a service and its record belongs to the restaurant, not to the operator trail. No surface calls it yet ([#1092]).
@@ -315,3 +318,4 @@ images/restaurants/{restaurantId}/{filename}
 [#2129]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2129
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
 [#2134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2134
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141

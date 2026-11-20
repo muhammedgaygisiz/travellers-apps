@@ -168,3 +168,30 @@ export const PhotoFailedInAnEarlierSession: Story = {
     canRetryPhoto: false,
   },
 };
+
+/**
+ * The transfer is done and the image check has not answered yet (GitHub
+ * issue #2141): the new photo stays blurred, and the box says it is being
+ * checked rather than uploaded.
+ */
+export const PhotoChecking: Story = {
+  args: {
+    section: 'photo',
+    photoStatus: 'pending',
+    pendingPhoto: RESTAURANT_IMAGE,
+    photoChecking: true,
+  },
+};
+
+/**
+ * The image check refused the new photo (GitHub issue #2141). The restaurant
+ * keeps its previous photo, the reason is said below the box, and a different
+ * photo can be chosen at once.
+ */
+export const PhotoRefused: Story = {
+  args: {
+    section: 'photo',
+    photoStatus: 'refused',
+    photoRefusalCategory: 'violence',
+  },
+};

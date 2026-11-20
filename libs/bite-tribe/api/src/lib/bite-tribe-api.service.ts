@@ -12,6 +12,7 @@ import {
   CreateAndUploadImageCallbackParams,
   CreateBucketListFromBiteTrailParams,
   DaySchedule,
+  FolderPhotoVerdict,
   Geopoint,
   GooglePlace,
   Like,
@@ -217,7 +218,7 @@ export class BiteTribeApiService {
   }
 
   /** A failure is thrown, so the page can say so (issue #1952). */
-  saveNewRestaurant(restaurant: Restaurant): Promise<void> {
+  saveNewRestaurant(restaurant: Restaurant): Promise<string> {
     return this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
@@ -230,7 +231,7 @@ export class BiteTribeApiService {
       | 'updatedAt'
       | 'updatedAtTimestamp'
     >,
-  ): Promise<void> {
+  ): Promise<string> {
     return this.biteTrailApiService.createBiteTrail(trailData);
   }
 
@@ -255,14 +256,17 @@ export class BiteTribeApiService {
     );
   }
 
-  setUploadedRestaurantImage(
+  /** See {@link RestaurantApiService.photoVerdict$} (GitHub issue #2141). */
+  restaurantPhotoVerdict$(
     restaurantId: string,
-    storagePath: string,
-  ): Promise<string> {
-    return this.restaurantApiService.setUploadedRestaurantImage(
-      restaurantId,
-      storagePath,
-    );
+    afterPending: boolean,
+  ): Observable<FolderPhotoVerdict> {
+    return this.restaurantApiService.photoVerdict$(restaurantId, afterPending);
+  }
+
+  /** See {@link BiteTrailApiService.photoVerdict$} (GitHub issue #2141). */
+  biteTrailPhotoVerdict$(biteTrailId: string): Observable<FolderPhotoVerdict> {
+    return this.biteTrailApiService.photoVerdict$(biteTrailId);
   }
 
   setRestaurantImageStatus(

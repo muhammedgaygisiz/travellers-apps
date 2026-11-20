@@ -105,6 +105,65 @@ describe('NewRestaurantService', () => {
     });
   });
 
+  // GitHub issue #2141: only the image check publishes the photo.
+  describe('the photo verdict', () => {
+    const withPhoto = {
+      name: 'x',
+      image: 'data:image/png;base64,abc',
+    } as Restaurant;
+
+    it('says nothing more of a photo the check passed', async () => {
+      dataAccessMock.submitNewRestaurant.mockResolvedValue({
+        imageStatus: 'uploaded',
+        imagePath: 'https://example.test/p.jpg',
+      });
+
+      await service.submitNewRestaurant(withPhoto);
+
+      expect(toastPresent).not.toHaveBeenCalled();
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'dashboard',
+      ]);
+    });
+
+    it('says why the check refused the photo', async () => {
+      dataAccessMock.submitNewRestaurant.mockResolvedValue({
+        imageStatus: 'refused',
+        imageRefusalCategory: 'sexual',
+      });
+
+      await service.submitNewRestaurant(withPhoto);
+
+      expect(toastPresent).toHaveBeenCalledWith({
+        message: 'restaurant-saved-photo-refused photo-refused-reason-sexual',
+        outcome: 'failure',
+      });
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'dashboard',
+      ]);
+    });
+
+    it('says the photo is still being checked when the check has not answered', async () => {
+      dataAccessMock.submitNewRestaurant.mockResolvedValue(undefined);
+
+      await service.submitNewRestaurant(withPhoto);
+
+      expect(toastPresent).toHaveBeenCalledWith({
+        messageKey: 'restaurant-saved-photo-checking',
+        outcome: 'success',
+      });
+    });
+
+    it('says nothing of a photo on a verified candidate', async () => {
+      await service.submitNewRestaurant({
+        ...withPhoto,
+        restaurantCandidateId: 'candidate-1',
+      } as Restaurant);
+
+      expect(toastPresent).not.toHaveBeenCalled();
+    });
+  });
+
   // Issue #2172: the page looked idle during a slow upload, which invited a
   // second submit and a second verification.
   describe('while saving', () => {
@@ -127,7 +186,10 @@ describe('NewRestaurantService', () => {
     it('ignores a second submit while the first is in flight', async () => {
       let finish: () => void = () => undefined;
       dataAccessMock.submitNewRestaurant.mockImplementation(
-        () => new Promise<void>((resolve) => (finish = resolve)),
+        () =>
+          new Promise<undefined>(
+            (resolve) => (finish = (): void => resolve(undefined)),
+          ),
       );
 
       const first = service.submitNewRestaurant({ name: 'x' } as Restaurant);

@@ -8,7 +8,8 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { ResourceLoaderParams, signal } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Bite, BiteTrail, PublicUser } from 'model';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitFolderPhotoVerdict, BiteTribeApiService } from 'bite-tribe/api';
+import { of } from 'rxjs';
 
 jest.mock('@capacitor-firebase/firestore');
 jest.mock('bite-tribe/api');
@@ -179,10 +180,31 @@ describe('CreateBiteTrailDataAccessService', () => {
       expect(apiMock.createBiteTrail).toHaveBeenCalledWith(trailData);
     });
 
-    it('should return the promise from the api', async () => {
+    it('should return a promise', async () => {
       const result = service.createBiteTrail(trailData);
 
       expect(result).toBeInstanceOf(Promise);
+      await expect(result).resolves.toBeUndefined();
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    it('waits for the image check on a trail with a photo', async () => {
+      const verdict$ = of({ imageStatus: 'refused' as const });
+      apiMock.createBiteTrail.mockResolvedValue('trail-1');
+      (
+        apiMock as unknown as { biteTrailPhotoVerdict$: jest.Mock }
+      ).biteTrailPhotoVerdict$ = jest.fn(() => verdict$);
+      jest
+        .mocked(awaitFolderPhotoVerdict)
+        .mockResolvedValue({ imageStatus: 'refused' });
+
+      const result = await service.createBiteTrail({
+        ...trailData,
+        image: 'data:image/png;base64,abc',
+      });
+
+      expect(awaitFolderPhotoVerdict).toHaveBeenCalledWith(verdict$);
+      expect(result).toEqual({ imageStatus: 'refused' });
     });
   });
 });

@@ -136,12 +136,17 @@ pushes judge the text themselves, so neither sends it out in that window.
   Cloud Logging rather than a collection by the same decision that made it the
   operator audit trail (epic [#1471]): the query is
   `jsonPayload.message="content refused"`, and the logs expire on their own.
-- **Bite and profile photos are checked; other photos are not yet.**
-  `setBiteImagePathOnUpload` calls `The Image Check` below since [#2139], and
+- **Every uploaded photo is checked before it is published.**
+  `setBiteImagePathOnUpload` calls `The Image Check` below since [#2139],
   `setUserPhotoUrlOnUpload` since [#2140], which also covers the avatar a new
-  account brings from its identity provider. Restaurant and Bite Trail photos
-  are published unchecked until their stories of epic [#2137] land. The
-  earlier decision and its reopening are in
+  account brings from its identity provider, and
+  `setRestaurantImagePathOnUpload` and `setBiteTrailImagePathOnUpload` since
+  [#2141]. Two gaps remain under epic [#2137]: a photo whose check could not run
+  stays unpublished until [#2142] checks it again, and photos stored before the
+  check existed are unchecked until [#2143]. A restaurant photo chosen during
+  candidate verification is an operator's and is handed to
+  `verifyRestaurantCandidate` without the check. The earlier decision and its
+  reopening are in
   [Current State - Open Questions](../current-state/open-questions.md).
 
 ## The Image Check
@@ -157,7 +162,11 @@ path ([#2139]) deletes a refused photo and marks the Bite `refused`, and leaves
 it `pending` on `unavailable`; see [Bite](../domain/bite.md). The profile photo
 path ([#2140]) deletes a refused photo and marks the profile `photoStatus:
 refused` while `photoUrl` keeps the previous photo, and leaves it `pending` on
-`unavailable`; see [User](../domain/user.md).
+`unavailable`; see [User](../domain/user.md). The restaurant and Bite Trail
+photo paths ([#2141]) share `publishCheckedFolderPhoto`: a refused photo is
+deleted and the document gets `imageStatus: refused` while `imagePath` keeps
+the previous photo, and `unavailable` writes `imageStatus: pending`; see
+[Restaurant](../domain/restaurant.md) and [Bite Trail](../domain/bite-trail.md).
 
 - **What the model is asked.** The image goes to the same Gemini model as
   inline data, with `imageModerationInstructions`, which names the categories
@@ -333,3 +342,6 @@ function:
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

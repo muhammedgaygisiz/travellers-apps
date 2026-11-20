@@ -24,6 +24,7 @@ describe('EditRestaurantService', () => {
   let photoUploadMock: {
     upload: ReturnType<typeof signal>;
     statusFor: jest.Mock;
+    refusalCategoryFor: jest.Mock;
     start: jest.Mock;
     retry: jest.Mock;
   };
@@ -46,6 +47,7 @@ describe('EditRestaurantService', () => {
     photoUploadMock = {
       upload: signal(undefined),
       statusFor: jest.fn().mockReturnValue(undefined),
+      refusalCategoryFor: jest.fn().mockReturnValue(undefined),
       start: jest.fn(),
       retry: jest.fn().mockReturnValue(true),
     };
@@ -520,6 +522,37 @@ describe('EditRestaurantService', () => {
 
       expect(service.pendingPhoto()).toBeUndefined();
       expect(service.canRetryPhoto()).toBe(false);
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    it('says the photo is being checked, for the restaurant on screen only', () => {
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+      photoUploadMock.upload.set({
+        restaurantId: 'r-1',
+        status: 'pending',
+        photo: 'p',
+        checking: true,
+      });
+      expect(service.photoChecking()).toBe(true);
+
+      photoUploadMock.upload.set({
+        restaurantId: 'another',
+        status: 'pending',
+        checking: true,
+      });
+      expect(service.photoChecking()).toBe(false);
+    });
+
+    it('reads why the photo was refused from the upload service', () => {
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+      photoUploadMock.refusalCategoryFor.mockReturnValue('hate');
+
+      expect(service.photoRefusalCategory()).toBe('hate');
+      expect(photoUploadMock.refusalCategoryFor).toHaveBeenCalledWith(
+        restaurant,
+      );
     });
 
     it('retries through the upload service', () => {

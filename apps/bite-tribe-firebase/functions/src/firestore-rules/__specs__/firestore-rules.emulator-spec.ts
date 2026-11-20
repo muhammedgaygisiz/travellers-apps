@@ -834,6 +834,43 @@ describe('restaurants', () => {
    * to an operator, and these pin that it covers this one, both ways it is
    * written - a value through the field path, and "Not stated" as a delete.
    */
+  describe('the published photo (issue #2141)', () => {
+    it('lets the owner mark a photo upload pending or failed', async () => {
+      for (const imageStatus of ['pending', 'failed']) {
+        await assertSucceeds(
+          updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+            imageStatus,
+            imageUploadStartedAtTimestamp: Date.now(),
+          }),
+        );
+      }
+    });
+
+    it('refuses the owner publishing a photo itself', async () => {
+      for (const fields of [
+        { imagePath: 'https://example.com/photo.jpg' },
+        { imagePath: '' },
+        { imageStatus: 'uploaded' },
+        { imageStatus: 'refused' },
+        { imageRefusalCategory: 'violence' },
+        { image: 'data:image/jpeg;base64,AAAA' },
+      ]) {
+        await assertFails(
+          updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), fields),
+        );
+      }
+    });
+
+    it('lets an operator write the photo from the admin app', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'restaurants', OWNED_RESTAURANT), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
+  });
+
   describe('the gender-neutral restroom (issue #1830)', () => {
     it.each([true, false])('lets the owner state %s', async (value) => {
       await assertSucceeds(
@@ -3279,6 +3316,70 @@ describe('bite trails', () => {
         price: 5,
       }),
     );
+  });
+
+  describe('the published photo (issue #2141)', () => {
+    it('lets the owner start a trail whose photo is on its way', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'biteTrails', 'pending-trail'), {
+          ownerId: CONSUMER,
+          name: 'Pending Trail',
+          biteIds: [],
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
+    it('refuses a new trail that carries its own photo', async () => {
+      for (const [id, fields] of [
+        ['url-trail', { imagePath: 'https://example.com/photo.jpg' }],
+        ['empty-url-trail', { imagePath: '' }],
+        ['uploaded-trail', { imageStatus: 'uploaded' }],
+        ['refused-trail', { imageStatus: 'refused' }],
+        ['category-trail', { imageRefusalCategory: 'violence' }],
+        ['base64-trail', { image: 'data:image/jpeg;base64,AAAA' }],
+      ] as const) {
+        await assertFails(
+          setDoc(doc(asConsumer(), 'biteTrails', id), {
+            ownerId: CONSUMER,
+            name: 'Trail',
+            biteIds: [],
+            ...fields,
+          }),
+        );
+      }
+    });
+
+    it('lets the owner mark the upload failed', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'biteTrails', 'consumer-trail'), {
+          imageStatus: 'failed',
+        }),
+      );
+    });
+
+    it('refuses the owner publishing a photo on its trail', async () => {
+      for (const fields of [
+        { imagePath: 'https://example.com/photo.jpg' },
+        { imageStatus: 'uploaded' },
+        { imageStatus: 'refused' },
+        { imageRefusalCategory: 'violence' },
+        { image: 'data:image/jpeg;base64,AAAA' },
+      ]) {
+        await assertFails(
+          updateDoc(doc(asConsumer(), 'biteTrails', 'consumer-trail'), fields),
+        );
+      }
+    });
+
+    it('lets an operator write the photo', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'biteTrails', 'consumer-trail'), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
   });
 
   it("refuses editing another account's trail", async () => {

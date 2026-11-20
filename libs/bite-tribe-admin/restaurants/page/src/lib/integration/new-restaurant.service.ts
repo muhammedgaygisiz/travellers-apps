@@ -1,5 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { RestaurantsDataAccessService } from 'bite-tribe-admin/restaurants-data-access';
+import { photoRefusalReasonKey } from 'bite-tribe-common/bite';
+import type { FolderPhotoVerdict } from 'model';
 import { Bite, Geopoint, GooglePlace, PlaceDetails, Restaurant } from 'model';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
@@ -46,11 +48,13 @@ export class NewRestaurantService {
     });
     await loading.present();
 
+    let photoVerdict: FolderPhotoVerdict | undefined;
+
     try {
       if (restaurant.restaurantCandidateId) {
         await this.dataAccess.verifyRestaurantCandidate(restaurant);
       } else {
-        await this.dataAccess.submitNewRestaurant(restaurant);
+        photoVerdict = await this.dataAccess.submitNewRestaurant(restaurant);
       }
     } catch (error) {
       console.error('Could not create the restaurant:', error);
@@ -66,7 +70,39 @@ export class NewRestaurantService {
 
     await loading.dismiss();
     this.saving = false;
+
+    if (!restaurant.restaurantCandidateId && restaurant.image) {
+      await this.reportPhotoVerdict(photoVerdict);
+    }
+
     this.navController.navigateBack(['dashboard']);
+  }
+
+  /**
+   * Says what became of the photo, which only the image check publishes
+   * (GitHub issue #2141). A passed photo needs no word: it is on the
+   * restaurant, as it always was.
+   */
+  private async reportPhotoVerdict(
+    verdict: FolderPhotoVerdict | undefined,
+  ): Promise<void> {
+    if (verdict?.imageStatus === 'uploaded') {
+      return;
+    }
+
+    if (verdict?.imageStatus === 'refused') {
+      await this.toast.present({
+        message: `${this.transloco.translate('restaurant-saved-photo-refused')} ${this.transloco.translate(photoRefusalReasonKey(verdict.imageRefusalCategory))}`,
+        outcome: 'failure',
+      });
+
+      return;
+    }
+
+    await this.toast.present({
+      messageKey: 'restaurant-saved-photo-checking',
+      outcome: 'success',
+    });
   }
 
   biteClicked(bite: Bite): void {

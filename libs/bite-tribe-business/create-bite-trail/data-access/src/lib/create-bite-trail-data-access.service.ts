@@ -1,9 +1,9 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
-import { Bite, BiteTrail, PublicUser } from 'model';
+import { Bite, BiteTrail, FolderPhotoVerdict, PublicUser } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { resourceValue } from 'utils';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitFolderPhotoVerdict, BiteTribeApiService } from 'bite-tribe/api';
 
 export const USERS_COLLECTION = 'users';
 export const BITE_COLLECTION = 'bites';
@@ -96,7 +96,12 @@ export class CreateBiteTrailDataAccessService {
   ownerValue = resourceValue(this.owner);
   bitesValue = resourceValue(this.bites, [] as Bite[]);
 
-  createBiteTrail(
+  /**
+   * Creates the trail and, with a photo, waits for the image check (GitHub
+   * issue #2141): the verdict, or `undefined` when there was no photo or the
+   * check has not answered yet.
+   */
+  async createBiteTrail(
     trailData: Omit<
       BiteTrail,
       | 'id'
@@ -105,7 +110,15 @@ export class CreateBiteTrailDataAccessService {
       | 'updatedAt'
       | 'updatedAtTimestamp'
     >,
-  ): Promise<void> {
-    return this.api.createBiteTrail(trailData);
+  ): Promise<FolderPhotoVerdict | undefined> {
+    const biteTrailId = await this.api.createBiteTrail(trailData);
+
+    if (!trailData.image) {
+      return undefined;
+    }
+
+    return awaitFolderPhotoVerdict(
+      this.api.biteTrailPhotoVerdict$(biteTrailId),
+    );
   }
 }

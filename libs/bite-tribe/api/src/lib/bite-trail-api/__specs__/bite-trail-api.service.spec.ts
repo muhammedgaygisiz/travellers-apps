@@ -131,12 +131,13 @@ describe('BiteTrailApiService', () => {
       );
     });
 
-    it('should upload image and update document with imagePath when image is provided', async () => {
+    // Issue #2141: the trail is written `pending` and never carries its
+    // photo; the finalize trigger publishes it once the image check passed it.
+    it('writes the trail pending, without a photo, and uploads into its folder', async () => {
       const uploadBase64Spy = jest.spyOn(
         uploadBase64Utils,
         'uploadBase64ToFirebaseStorage',
       );
-
       const trailData: Omit<
         BiteTrail,
         | 'id'
@@ -151,32 +152,91 @@ describe('BiteTrailApiService', () => {
         name: 'My Trail',
         biteIds: [],
         image: 'data:image/png;base64,abc',
-        imagePath: '',
+        imagePath: 'https://example.com/forged.jpg',
         location: 'Berlin',
         description: 'A trail',
         price: 0,
         currency: 'EUR',
       };
 
-      await service.createBiteTrail(trailData);
+      const id = await service.createBiteTrail(trailData);
 
+      expect(id).toBe('trail-123');
+      const written = addDocumentSpy.mock.calls[0][0].data;
+      expect(written.imageStatus).toBe('pending');
+      expect(written).not.toHaveProperty('imagePath');
+      expect(written).not.toHaveProperty('image');
       expect(uploadBase64Spy).toHaveBeenCalledWith({
         base64: 'data:image/png;base64,abc',
         docId: 'trail-123',
         collection: BITE_TRAIL_COLLECTION,
       });
+      expect(getDownloadUrlFromFirebaseStorage).not.toHaveBeenCalled();
+      expect(updateDocumentSpy).not.toHaveBeenCalled();
+    });
 
-      expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
-        'biteTrails/trail-123.jpg',
+    it('marks the trail failed and rethrows when the upload fails', async () => {
+      jest
+        .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+        .mockRejectedValueOnce(new Error('storage offline'));
+      const trailData: Omit<
+        BiteTrail,
+        | 'id'
+        | 'createdAt'
+        | 'createdAtTimestamp'
+        | 'updatedAt'
+        | 'updatedAtTimestamp'
+      > = {
+        ownerId: 'org-1',
+        ownerName: 'My Org',
+        ownerImagePath: 'photo.jpg',
+        name: 'My Trail',
+        biteIds: [],
+        image: 'data:image/png;base64,abc',
+        imagePath: 'https://example.com/forged.jpg',
+        location: 'Berlin',
+        description: 'A trail',
+        price: 0,
+        currency: 'EUR',
+      };
+
+      await expect(service.createBiteTrail(trailData)).rejects.toThrow(
+        'storage offline',
       );
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: `${BITE_TRAIL_COLLECTION}/trail-123`,
+        data: { imageStatus: 'failed' },
+      });
+    });
 
-      expect(updateDocumentSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          reference: `${BITE_TRAIL_COLLECTION}/trail-123`,
-          data: expect.objectContaining({
-            imagePath: 'https://storage.example.com/biteTrails/trail-123.jpg',
-          }),
-        }),
+    it('still rethrows the upload error when marking it failed is refused', async () => {
+      jest
+        .spyOn(uploadBase64Utils, 'uploadBase64ToFirebaseStorage')
+        .mockRejectedValueOnce(new Error('storage offline'));
+      updateDocumentSpy.mockRejectedValueOnce(new Error('offline'));
+      const trailData: Omit<
+        BiteTrail,
+        | 'id'
+        | 'createdAt'
+        | 'createdAtTimestamp'
+        | 'updatedAt'
+        | 'updatedAtTimestamp'
+      > = {
+        ownerId: 'org-1',
+        ownerName: 'My Org',
+        ownerImagePath: 'photo.jpg',
+        name: 'My Trail',
+        biteIds: [],
+        image: 'data:image/png;base64,abc',
+        imagePath: 'https://example.com/forged.jpg',
+        location: 'Berlin',
+        description: 'A trail',
+        price: 0,
+        currency: 'EUR',
+      };
+
+      await expect(service.createBiteTrail(trailData)).rejects.toThrow(
+        'storage offline',
       );
     });
 
@@ -210,6 +270,40 @@ describe('BiteTrailApiService', () => {
 
       expect(uploadBase64Spy).not.toHaveBeenCalled();
       expect(updateDocumentSpy).not.toHaveBeenCalled();
+      expect(addDocumentSpy.mock.calls[0][0].data).not.toHaveProperty(
+        'imageStatus',
+      );
+    });
+  });
+
+  describe('photoVerdict$', () => {
+    it('listens to the trail and takes its first verdict', async () => {
+      let listener: (event: unknown) => void = () => undefined;
+      Object.assign(FirebaseFirestore, {
+        addDocumentSnapshotListener: jest.fn(
+          async (_options: unknown, callback: unknown) => {
+            listener = callback as typeof listener;
+            return 'listener-1';
+          },
+        ),
+        removeSnapshotListener: jest.fn().mockResolvedValue(undefined),
+      });
+      const verdicts: unknown[] = [];
+
+      service.photoVerdict$('trail-123').subscribe((v) => verdicts.push(v));
+      await Promise.resolve();
+      listener({ snapshot: { data: { imageStatus: 'pending' } } });
+      listener({
+        snapshot: { data: { imageStatus: 'refused' } },
+      });
+
+      expect(
+        FirebaseFirestore.addDocumentSnapshotListener,
+      ).toHaveBeenCalledWith(
+        { reference: `${BITE_TRAIL_COLLECTION}/trail-123` },
+        expect.any(Function),
+      );
+      expect(verdicts).toEqual([{ imageStatus: 'refused' }]);
     });
   });
 });

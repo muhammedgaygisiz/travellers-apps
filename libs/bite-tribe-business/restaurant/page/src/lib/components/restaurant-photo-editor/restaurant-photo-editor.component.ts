@@ -12,10 +12,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { IonButton, IonSpinner, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ImageUploadComponent } from 'image-upload';
-import { RetryUploadButtonComponent } from 'bite-tribe-common/bite';
+import {
+  photoRefusalReasonKey,
+  RetryUploadButtonComponent,
+} from 'bite-tribe-common/bite';
 import type { Restaurant } from 'model';
 
-export type RestaurantPhotoStatus = 'pending' | 'uploaded' | 'failed';
+export type RestaurantPhotoStatus =
+  'pending' | 'uploaded' | 'failed' | 'refused';
 
 /**
  * The restaurant's photo, and the way to change it (GitHub issue #2126).
@@ -27,6 +31,11 @@ export type RestaurantPhotoStatus = 'pending' | 'uploaded' | 'failed';
  * uploads the way a Bite or profile photo does (#1953): in the background,
  * with the new photo blurred under a spinner while it is sent and the shared
  * retry button if it fails.
+ *
+ * The image check decides whether the photo is published (GitHub issue
+ * #2141). Once the transfer is done the box says the photo is being checked;
+ * a refused photo leaves the previous one in place, says why below the box,
+ * and a different photo can be chosen at once.
  */
 @Component({
   selector: 'bt-restaurant-photo-editor',
@@ -53,6 +62,14 @@ export class RestaurantPhotoEditorComponent {
   uploadedImagePath = input<string>();
   /** Whether a failed upload can be sent again without choosing the photo again. */
   canRetry = input(false);
+  /** The transfer is done and the image check has not answered yet. */
+  checking = input(false);
+  /** Why the image check refused the photo, while `status` is `refused`. */
+  refusalCategory = input<string>();
+
+  readonly refusalReasonKey = computed(() =>
+    photoRefusalReasonKey(this.refusalCategory()),
+  );
 
   readonly savePhoto = output<string>();
   readonly retry = output<void>();

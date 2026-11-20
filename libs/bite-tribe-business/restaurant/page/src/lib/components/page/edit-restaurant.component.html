@@ -29,6 +29,8 @@
           [pendingPhoto]="pendingPhoto()"
           [uploadedImagePath]="uploadedImagePath()"
           [canRetry]="canRetryPhoto()"
+          [checking]="photoChecking()"
+          [refusalCategory]="photoRefusalCategory()"
           (savePhoto)="savePhoto.emit($event)"
           (retry)="retryPhoto.emit()"
         />

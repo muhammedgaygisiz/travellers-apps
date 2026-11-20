@@ -1748,4 +1748,62 @@ describe('DetailsService', () => {
       });
     });
   });
+
+  /** GitHub issues #1168 and #2139. */
+  describe('retryBiteImageUpload', () => {
+    const failedBite = { id: 'bite1', name: 'Pizza' } as Bite;
+
+    beforeEach(() => {
+      mockBiteDataAccessService.findLocalImageForBite.mockReset();
+      mockBiteDataAccessService.retryImageUpload.mockReset();
+      mockLocalImagePicker.pick.mockReset();
+    });
+
+    it('re-sends the local copy without asking when the bite still has one', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue({
+        uri: 'file:///bites_bite1.jpg',
+        name: 'bites_bite1.jpg',
+      });
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(
+        mockBiteDataAccessService.findLocalImageForBite,
+      ).toHaveBeenCalledWith(failedBite);
+      expect(mockLocalImagePicker.pick).not.toHaveBeenCalled();
+      expect(mockBiteDataAccessService.retryImageUpload).toHaveBeenCalledWith(
+        failedBite,
+        'file:///bites_bite1.jpg',
+      );
+    });
+
+    it('asks the user to pick a photo when there is no local copy to re-send', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue(
+        undefined,
+      );
+      mockLocalImagePicker.pick.mockResolvedValue({
+        uri: 'file:///picked.jpg',
+        name: 'picked.jpg',
+        src: 'picked',
+      });
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(mockBiteDataAccessService.retryImageUpload).toHaveBeenCalledWith(
+        failedBite,
+        'file:///picked.jpg',
+      );
+    });
+
+    it('uploads nothing when the user backs out of the picker', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue(
+        undefined,
+      );
+      mockLocalImagePicker.pick.mockResolvedValue(undefined);
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(mockBiteDataAccessService.retryImageUpload).not.toHaveBeenCalled();
+    });
+  });
 });

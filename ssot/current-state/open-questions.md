@@ -131,9 +131,9 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
 ## Follow Request Questions
 
 These belong to epic [#2144], which turns a follow of a private profile into a request its
-owner accepts or declines. Today a follow is instant and one-sided on every profile, and
-following a private one gets nothing: `notifyFollowersOnNewBite` skips an author who is not
-public, and since [#1863] the profile itself is unreadable to other accounts. Each question
+owner accepts or declines. Before it a follow was instant and one-sided on every profile, and
+following a private one got nothing: `notifyFollowersOnNewBite` skipped an author who was not
+public until [#2167], and since [#1863] the profile itself is unreadable to other accounts. Each question
 gates the story named with it.
 
 - **What does an accepted follower of a private profile get that a stranger does not?**

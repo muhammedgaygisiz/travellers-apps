@@ -621,7 +621,7 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
-- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Its story [#2167] sends a private author's new-Bite push to the followers they accepted. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
 
 ## Related Domains
@@ -673,6 +673,7 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2163]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2163
+[#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
 [#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166

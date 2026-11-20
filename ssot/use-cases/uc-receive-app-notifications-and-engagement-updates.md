@@ -38,6 +38,7 @@ clear, and which installations they are delivered to.
 - A Bite in a country the user has never covered congratulates them on the new country badge, and tells their followers when the profile is public.
 - A user the creator tags in a Bite is told so with `BITE_TAGGED`, and tapping it opens the Bite. See the Tagged User Contract below.
 - A private profile's owner is told of a new follow request, and its requester is told when the owner accepts it. See the Follow Request Contract below.
+- A new Bite by a private author reaches the followers its owner accepted, and nobody else. See the Follow Request Contract below.
 
 ## Notification Navigation Contract
 
@@ -152,10 +153,11 @@ turned the profile's country badges into an engagement signal:
 - Followers of a public profile are told about the achievement, so a badge is
   recognition in front of an audience rather than a private counter. That is
   what the feature is for on the follower side: the same motivation, borrowed.
-- A private profile is congratulated but never announced. Followers of a
-  private account see none of its activity anywhere else in the app, and a
-  badge notification must not become the one place that leaks where someone has
-  been.
+- A private profile is congratulated but never announced. A private account's
+  only activity that reaches anyone else is the new-Bite push to the followers
+  its owner accepted ([#2167]), which names the Bite and not where it was eaten,
+  and a badge notification must not become the place that leaks where someone
+  has been.
 - A tap opens the profile that carries the badge - their own for the achiever,
   the achiever's for a follower.
 - The country is named in the recipient's language, following the Localization
@@ -247,6 +249,15 @@ Contract` in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social
   `FOLLOW_REQUEST_ACCEPTED:<ownerUid>`. It is the callable rather than a trigger because the
   follower edge cannot tell an accepted request from a public follow. A push that fails is
   logged and the acceptance still succeeds, because the follow stands either way.
+- **A new Bite.** `notifyFollowersOnNewBite` sends `NEW_BITE` to a private author's
+  followers whose edge carries `acceptedAt`, which only `acceptFollowRequest` writes
+  ([#2167]). A follower from before epic [#2144] followed in one tap and was never approved,
+  so their edge has no `acceptedAt` and they get nothing. A public author's Bite still goes
+  to every follower. Either way an account that blocks the author, or that the author
+  blocks, is left out, and a private author is named by display name only, as below. The
+  copy is the existing `newBite` keys. This push is all an accepted follower gets in epic
+  [#2144]; reading the private profile, and other updates from followed users, are a later
+  epic.
 - **No second push.** The follower edge an acceptance writes still fires
   `notifyUserOnNewFollower`, which stays silent because the owner is private, so the owner who
   accepted gets no `New Follower!`. A decline and a withdrawal send nothing to anybody.
@@ -346,6 +357,7 @@ Relevant.
 - Issue [#1283] is the Review Thread Contract above - a reply fans out to every thread participant, not just the Bite creator. Closed. Shared with [UC - Inspect Bite Details](uc-inspect-bite-details.md), which owns the thread UI this fan-out targets.
 - Issue [#1919] is the Tagged User Contract above - `BITE_TAGGED` for a user tagged in a Bite, part of epic [#1915].
 - Issue [#2166] is the Follow Request Contract above - a push for a new follow request and for its acceptance, part of epic [#2144].
+- Issue [#2167] sends a private author's new-Bite push to their accepted followers, in the Follow Request Contract above, part of epic [#2144].
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
@@ -379,3 +391,4 @@ Relevant.
 [#1308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1308
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
+[#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167

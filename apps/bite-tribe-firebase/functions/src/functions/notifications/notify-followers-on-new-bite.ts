@@ -6,15 +6,31 @@ import { Bite } from '../shared/model/bite';
 import { Translate } from '../shared/i18n/translate';
 import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 import { judgeBiteContent } from '../bites/bite-content';
+import { loadBlockedEitherWayUids } from '../shared/utils/user-blocks';
 
 const db = getFirestore();
 
-const getFollowerUids = (
+/**
+ * The followers a new Bite is pushed to (issue #2167).
+ *
+ * Every follower of a public author. A private author's followers only when
+ * the edge carries `acceptedAt`, which `acceptFollowRequest` writes and a
+ * client never does: a follower from before epic #2144 followed in one tap and
+ * was never approved by the owner. Either way an account that blocks the
+ * author, or that the author blocks, is left out.
+ */
+const getRecipientUids = (
   followersSnap: FirebaseFirestore.QuerySnapshot<
     FirebaseFirestore.DocumentData,
     FirebaseFirestore.DocumentData
   >,
-): string[] => followersSnap.docs.map((d) => d.id);
+  isAuthorPublic: boolean,
+  blockedUids: ReadonlySet<string>,
+): string[] =>
+  followersSnap.docs
+    .filter((d) => isAuthorPublic || d.data().acceptedAt !== undefined)
+    .map((d) => d.id)
+    .filter((uid) => !blockedUids.has(uid));
 
 const buildNotificationBody = (
   translate: Translate,
@@ -64,10 +80,8 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
     const authorData = authorSnap.data() as User;
 
     logger.info('--- Author:', authorData);
-    if (!authorData || !authorData.public) {
-      logger.warn(
-        '--- Author with no data or not public, aborting notification',
-      );
+    if (!authorData) {
+      logger.warn('--- Author with no data, aborting notification');
       return;
     }
 
@@ -81,6 +95,18 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
       return;
     }
 
+    const followerUids = getRecipientUids(
+      followersSnap,
+      authorData.public === true,
+      await loadBlockedEitherWayUids(db, authorUid),
+    );
+
+    logger.info(`--- Number of recipients: ${followerUids.length}`);
+    if (followerUids.length === 0) {
+      logger.warn('--- No follower may be notified, aborting notification');
+      return;
+    }
+
     // The push carries the Bite's name, and it goes out before
     // `moderateBiteOnWrite` may remove the Bite, so it judges the text itself
     // (issue #1610). The verdict is shared through `contentChecks`.
@@ -88,8 +114,6 @@ export const notifyFollowersOnNewBite = onDocumentCreated(
       logger.info('--- Bite content refused, no follower notification');
       return;
     }
-
-    const followerUids = getFollowerUids(followersSnap);
 
     await sendLocalizedNotification({
       uids: followerUids,

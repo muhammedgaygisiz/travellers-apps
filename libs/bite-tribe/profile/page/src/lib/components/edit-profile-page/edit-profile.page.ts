@@ -175,16 +175,13 @@ export class EditProfilePage {
     },
   ];
 
-  goPublicButtons = [
-    {
-      text: this.transloco.translate('keep-private'),
-      role: KEEP_PRIVATE,
-    },
-    {
-      text: this.transloco.translate('yes-make-public'),
-      role: GO_PUBLIC,
-    },
-  ];
+  /**
+   * The roles of the go-public alert's buttons. Their text is translated in
+   * the template through the pipe, so it follows the translations when they
+   * load after the page was created.
+   */
+  readonly keepPrivateRole = KEEP_PRIVATE;
+  readonly goPublicRole = GO_PUBLIC;
 
   openConfirmationDialog(): void {
     this.isOpen.set(true);

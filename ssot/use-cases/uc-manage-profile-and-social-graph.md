@@ -599,7 +599,8 @@ It changes no declaration: the data collected and its purpose are the same.
   `backfillFollowerAcceptanceCallable` in `backfill-follower-acceptance.ts`, under
   `apps/bite-tribe-firebase/functions/src/functions/users`, with `follow-visibility.spec.ts`;
   the go-public confirmation of `edit-profile-page` and its `the go-public confirmation`
-  cases in `edit-profile.page.spec.ts`.
+  cases in `edit-profile.page.spec.ts`, and the `Pages/Edit Profile`
+  `Go Public With Pending Requests` story.
 - Profile reports: the `reportUser` callable; the Report entry and reason dialog of
   `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.

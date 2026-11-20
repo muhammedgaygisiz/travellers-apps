@@ -520,6 +520,11 @@ describe(EditProfilePage.name, () => {
 
       expect(component.isGoPublicOpen()).toBe(true);
       expect(queryAlerts()).toHaveLength(1);
+      expect(
+        (
+          queryAlerts()[0] as unknown as { buttons: { role: string }[] }
+        ).buttons.map((button) => button.role),
+      ).toEqual(['keep-private', 'go-public']);
     });
 
     it('keeps the profile private when cancelled', () => {

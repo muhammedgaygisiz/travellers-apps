@@ -141,6 +141,27 @@ describe(RestaurantImageUploadService.name, () => {
     expect(apiMock.uploadRestaurantImage).toHaveBeenCalledTimes(1);
   });
 
+  it('ignores a progress report that says nothing', () => {
+    service.start('r-1', PHOTO);
+    progress({ imagePath: '' } as CreateAndUploadImageCallbackParams);
+
+    expect(service.upload()?.status).toBe('pending');
+    expect(service.upload()?.checking).toBeUndefined();
+  });
+
+  it('listens afresh for the verdict on a retry, and not on the old upload', () => {
+    service.start('r-1', PHOTO);
+    jest.advanceTimersByTime(STALLED_RESTAURANT_IMAGE_UPLOAD_MS);
+    const firstVerdict = verdict;
+    verdict = new Subject<FolderPhotoVerdict>();
+
+    service.retry();
+
+    expect(firstVerdict.observed).toBe(false);
+    expect(verdict.observed).toBe(true);
+    expect(apiMock.restaurantPhotoVerdict$).toHaveBeenCalledTimes(2);
+  });
+
   it('stops listening for a verdict once the transfer is written off', () => {
     service.start('r-1', PHOTO);
     jest.advanceTimersByTime(STALLED_RESTAURANT_IMAGE_UPLOAD_MS);
@@ -334,6 +355,10 @@ describe(RestaurantImageUploadService.name, () => {
           stored({ imageStatus: 'refused', imageRefusalCategory: 'hate' }),
         ),
       ).toBe('illegal');
+    });
+
+    it('has no refusal reason without a restaurant', () => {
+      expect(service.refusalCategoryFor(undefined)).toBeUndefined();
     });
 
     it('has no refusal reason for a restaurant that was not refused', () => {

@@ -1,5 +1,6 @@
 import { RestaurantApiService } from '../restaurant-api.service';
 import { TestBed } from '@angular/core/testing';
+import { ErrorHandler } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
 import * as uploadBase64Utils from '../../utils/upload-base64-to-firebase-storage';
@@ -477,6 +478,8 @@ describe(RestaurantApiService.name, () => {
         .subscribe((verdict) => verdicts.push(verdict));
 
       await deliver({ imageStatus: 'uploaded', imagePath: 'old.jpg' });
+      // A snapshot of a restaurant not yet written carries no data.
+      listener({ snapshot: { id: 'resto-1', path: 'restaurants/resto-1' } });
       await deliver({ imageStatus: 'pending', imagePath: 'old.jpg' });
       await deliver({
         imageStatus: 'refused',
@@ -493,6 +496,35 @@ describe(RestaurantApiService.name, () => {
       expect(verdicts).toEqual([
         { imageStatus: 'refused', imageRefusalCategory: 'violence' },
       ]);
+    });
+
+    it('reports a listener error and keeps waiting for the verdict', async () => {
+      const handleError = jest
+        .spyOn(TestBed.inject(ErrorHandler), 'handleError')
+        .mockImplementation(() => undefined);
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', false)
+        .subscribe((verdict) => verdicts.push(verdict));
+      await Promise.resolve();
+
+      const error = new Error('permission-denied');
+      listener(null, error);
+      listener({ snapshot: { id: 'resto-1', path: 'restaurants/resto-1' } });
+
+      expect(handleError).toHaveBeenCalledWith(error);
+      expect(verdicts).toEqual([]);
+    });
+
+    it('reads a published photo without a URL as an empty one', async () => {
+      const verdicts: unknown[] = [];
+      service
+        .photoVerdict$('resto-1', false)
+        .subscribe((verdict) => verdicts.push(verdict));
+
+      await deliver({ imageStatus: 'uploaded' });
+
+      expect(verdicts).toEqual([{ imageStatus: 'uploaded', imagePath: '' }]);
     });
 
     it('takes the first verdict on a restaurant created for this photo', async () => {

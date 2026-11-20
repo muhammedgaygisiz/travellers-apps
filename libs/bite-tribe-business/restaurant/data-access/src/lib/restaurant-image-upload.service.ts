@@ -206,9 +206,7 @@ export class RestaurantImageUploadService {
     }
 
     this.end();
-    this.state.update((upload) =>
-      upload?.status === 'pending' ? { ...upload, checking: true } : upload,
-    );
+    this.updateUpload((upload) => ({ ...upload, checking: true }));
   }
 
   /**
@@ -216,15 +214,29 @@ export class RestaurantImageUploadService {
    * `pending` this upload wrote, so the previous photo's does not count.
    */
   private watchVerdict(restaurantId: string): void {
-    this.verdictWatch?.unsubscribe();
+    this.stopWatchingVerdict();
     this.verdictWatch = this.api
       .restaurantPhotoVerdict$(restaurantId, true)
       .subscribe((verdict) => this.settle(restaurantId, verdict));
   }
 
+  private stopWatchingVerdict(): void {
+    this.verdictWatch?.unsubscribe();
+    this.verdictWatch = undefined;
+  }
+
+  /**
+   * Changes this session's upload. `start()` sets it before the transfer and
+   * the verdict listener begin, so every callback that ends an upload finds
+   * it, and nothing ever clears it.
+   */
+  private updateUpload(change: (upload: UploadState) => UploadState): void {
+    this.state.update((upload) => change(upload as UploadState));
+  }
+
   private settle(restaurantId: string, verdict: FolderPhotoVerdict): void {
     this.end();
-    this.verdictWatch = undefined;
+    this.stopWatchingVerdict();
 
     if (verdict.imageStatus === 'uploaded') {
       this.state.set({
@@ -238,10 +250,10 @@ export class RestaurantImageUploadService {
 
     // Keeps a photo published earlier this session; the refused one is
     // dropped, so it can be neither shown nor sent again.
-    this.state.update((upload) => ({
+    this.updateUpload((upload) => ({
       restaurantId,
       status: 'refused',
-      imagePath: upload?.imagePath,
+      imagePath: upload.imagePath,
       refusalCategory: verdict.imageRefusalCategory,
     }));
   }
@@ -257,11 +269,12 @@ export class RestaurantImageUploadService {
     }
 
     this.end();
-    this.verdictWatch?.unsubscribe();
-    this.verdictWatch = undefined;
-    this.state.update((upload) =>
-      upload ? { ...upload, status: 'failed', checking: false } : upload,
-    );
+    this.stopWatchingVerdict();
+    this.updateUpload((upload) => ({
+      ...upload,
+      status: 'failed',
+      checking: false,
+    }));
     this.api
       .setRestaurantImageStatus(restaurantId, 'failed')
       .catch(() => undefined);

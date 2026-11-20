@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ErrorHandler } from '@angular/core';
 import { BiteTrailApiService } from '../bite-trail-api.service';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BiteTrail } from 'model';
@@ -304,6 +305,29 @@ describe('BiteTrailApiService', () => {
         expect.any(Function),
       );
       expect(verdicts).toEqual([{ imageStatus: 'refused' }]);
+    });
+
+    it('reports a listener error', async () => {
+      let listener: (event: unknown, error?: unknown) => void = () => undefined;
+      Object.assign(FirebaseFirestore, {
+        addDocumentSnapshotListener: jest.fn(
+          async (_options: unknown, callback: unknown) => {
+            listener = callback as typeof listener;
+            return 'listener-1';
+          },
+        ),
+        removeSnapshotListener: jest.fn().mockResolvedValue(undefined),
+      });
+      const handleError = jest
+        .spyOn(TestBed.inject(ErrorHandler), 'handleError')
+        .mockImplementation(() => undefined);
+
+      service.photoVerdict$('trail-123').subscribe();
+      await Promise.resolve();
+      const error = new Error('permission-denied');
+      listener(null, error);
+
+      expect(handleError).toHaveBeenCalledWith(error);
     });
   });
 });

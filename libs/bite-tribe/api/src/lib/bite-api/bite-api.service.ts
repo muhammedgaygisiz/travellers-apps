@@ -44,7 +44,6 @@ import {
   type LocalImageFile,
 } from '../utils/local-image-file';
 import { readLocalImageAsDataUrl } from '../utils/read-local-image-as-data-url';
-import { updateBiteWithImagePathFromFirestorage } from './utils/update-bite-with-image-path-from-firestorage';
 
 @Injectable({ providedIn: 'root' })
 export class BiteApiService {
@@ -199,23 +198,6 @@ export class BiteApiService {
       collection: BITE_COLLECTION,
       callbackFn,
     });
-  }
-
-  public async updateImagePathInBite(
-    bite: Bite,
-    imagePath: string,
-  ): Promise<Bite> {
-    const { image, ...biteWithoutImage } = bite;
-    void image;
-
-    await updateBiteWithImagePathFromFirestorage(
-      imagePath,
-      biteWithoutImage,
-      true,
-      bite.id,
-    );
-
-    return await loadBiteById(bite.id);
   }
 
   public async saveEditedBite(bite: Bite): Promise<Bite> {

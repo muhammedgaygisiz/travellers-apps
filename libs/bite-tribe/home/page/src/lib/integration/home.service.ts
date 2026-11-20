@@ -296,13 +296,14 @@ export class HomeService {
    * depending on whether this device still holds the Bite's own copy: a recent
    * Bite posted from here is re-sent straight away, while an older one — or one
    * posted from another device — asks the user to pick from the photos saved
-   * locally, the same set the gallery shows. Picking nothing cancels.
+   * locally, the same set the gallery shows. Picking nothing cancels. A photo
+   * the image check refused always asks for a different one (issue #2139).
    *
    * Presenting the picker is a workflow decision, so it lives here rather than
    * in the card that raised the request. See GitHub issue #1168.
    */
   async retryBiteImageUpload(bite: Bite): Promise<void> {
-    const localCopy = await this.biteDataAccess.findLocalImageForBite(bite.id);
+    const localCopy = await this.biteDataAccess.findLocalImageForBite(bite);
     const fileUri = localCopy?.uri ?? (await this.localImagePicker.pick())?.uri;
 
     if (fileUri) {

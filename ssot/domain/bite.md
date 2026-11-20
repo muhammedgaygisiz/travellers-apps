@@ -90,8 +90,8 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite should have an image because the image is a core trust signal.
 - **A Bite is listable once its photo is uploaded**, and only then: exactly
   when `imageStatus` is `uploaded`, which `setBiteImagePathOnUpload` writes
-  from a finalized Storage object. `pending`, `failed` and an absent status are
-  not listable. A non-listable Bite is shown to its creator and to nobody else:
+  from a finalized Storage object once the image check has passed the photo.
+  `pending`, `failed`, `refused` and an absent status are not listable. A non-listable Bite is shown to its creator and to nobody else:
   not in the nearby feed, the three searches, the weekly page or a bucket list,
   and its share link answers exactly like a Bite id that does not exist.
   Its creator still finds it on every surface, with the failed-upload tile
@@ -252,7 +252,8 @@ Current implementation notes:
 - During Bite creation, the user selects the Bite place through the restaurant selector before saving. The selector can use nearby verified restaurants, unverified restaurants, nearby Google Places, or the explicit custom-place fallback.
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
-- `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized, and writes `imageStatus = uploaded` - the only write that makes a Bite listable. A `pending` Bite becomes listable with no client action once it lands.
+- `setBiteImagePathOnUpload` runs the image check on a matching finalized upload before it writes anything (issue [#2139]). A photo the check passes gets `imagePath` and `imageStatus = uploaded` - the only write that makes a Bite listable - so a `pending` Bite becomes listable with no client action once it lands. A refused photo is deleted from Storage, `imagePath` is removed, and the Bite gets `imageStatus = refused` and `imageRefusalCategory`; the Bite is kept, and its creator can choose a different photo. A check that cannot answer writes nothing, and the Bite stays `pending`.
+- The trigger is the only writer of `imagePath`, `imageRefusalCategory`, and the `uploaded` and `refused` statuses. The Firestore rules refuse a client create or update that sets or changes them, or that writes a base64 `image`; the client writes only `pending` and `failed`. The admin app's operator writes are exempt.
 - Bites written before the upload states of issue [#1168] have no `imageStatus`. The admin `bite-image-status` collection migration gives each one `uploaded` where Storage holds an object under `images/bites/{biteId}/` or at the path `imagePath` names, and `failed` otherwise. It has to run before the listing rule is deployed, or every such Bite disappears for everybody but its poster. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
 - A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../history/records/issue-1390.md).
 - The current delete flow removes the Bite document and attempts to remove the image file.
@@ -449,3 +450,4 @@ images/bites/{biteId}/{filename}
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139

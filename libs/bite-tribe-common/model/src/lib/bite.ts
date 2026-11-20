@@ -8,7 +8,17 @@ export interface Bite {
   name: string;
   image: string;
   imagePath?: string;
-  imageStatus?: 'pending' | 'uploaded' | 'failed';
+  /**
+   * Where the Bite's photo stands (GitHub issues #1168, #1717, #2139). Only
+   * `uploaded` is listable. `uploaded` and `refused` are written only by
+   * `setBiteImagePathOnUpload`; the client writes `pending` and `failed`.
+   */
+  imageStatus?: 'pending' | 'uploaded' | 'failed' | 'refused';
+  /**
+   * Why the image check refused the photo, present only while `imageStatus`
+   * is `refused`. Written by `setBiteImagePathOnUpload` alone (issue #2139).
+   */
+  imageRefusalCategory?: string;
   place: string;
   price: number;
   currency?: string;

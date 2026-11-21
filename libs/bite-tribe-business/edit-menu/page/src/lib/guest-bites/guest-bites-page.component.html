@@ -8,7 +8,9 @@
   <ion-content class="ion-padding">
     <div class="page">
       <header>
-        <p class="restaurant-name">{{ restaurant()?.name }}</p>
+        <p class="restaurant-name" data-testid="menu-restaurant-name">
+          {{ restaurant()?.name }}
+        </p>
         <h1>{{ 'guest-bites' | transloco }}</h1>
         <p class="intro">{{ 'guest-bites-intro' | transloco }}</p>
       </header>

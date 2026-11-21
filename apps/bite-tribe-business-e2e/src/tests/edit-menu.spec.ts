@@ -343,6 +343,30 @@ test.describe('Edit a menu in the business app', () => {
   });
 
   /** See GitHub issue #2181. */
+  /**
+   * The restaurant's name above the menu, opened by URL (issue #2231): a
+   * reload of the editor and Guest Bites opened directly both used to lose it,
+   * because only navigating from the overview had put the restaurant in the
+   * store.
+   */
+  test('shows the restaurant name on the menu pages after a reload', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const { fixture } = await start(page);
+    const name = page.getByTestId('menu-restaurant-name');
+
+    await expect(name).toHaveText(fixture.restaurantName);
+
+    await page.reload();
+    await expect(name).toHaveText(fixture.restaurantName, { timeout: 20_000 });
+
+    await page.goto(
+      `/restaurant/${fixture.restaurantId}/menu/${fixture.menuId}/guest-bites`,
+    );
+    await expect(name).toHaveText(fixture.restaurantName, { timeout: 20_000 });
+  });
+
   test('deletes a dish after asking, and it stays deleted after a reload', async ({
     page,
   }) => {

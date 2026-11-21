@@ -10,6 +10,7 @@ import type { Restaurant } from 'model';
 import { RestaurantEffects } from '../effects';
 import { loadedRestaurantFromApi, noRestaurantFound } from '../actions';
 import { menuId, restaurantId } from '../../router/selectors';
+import { restaurant } from '../selectors';
 
 const assertDeepEqual = (actual: unknown, expected: unknown): void => {
   expect(actual).toEqual(expected);
@@ -43,9 +44,11 @@ describe(RestaurantEffects.name, () => {
   const navigateTo = (route: {
     restaurantId?: string;
     menuId?: string;
+    inStore?: Restaurant;
   }): void => {
     store.overrideSelector(restaurantId, route.restaurantId);
     store.overrideSelector(menuId, route.menuId);
+    store.overrideSelector(restaurant, route.inStore);
     store.refreshState();
   };
 
@@ -110,18 +113,49 @@ describe(RestaurantEffects.name, () => {
       );
     });
 
-    it('should leave the menu route alone', () => {
-      navigateTo({ restaurantId: 'restaurant-1', menuId: 'menu-1' });
+    it('should reuse the restaurant a menu route finds in the store', () => {
+      navigateTo({
+        restaurantId: 'restaurant-1',
+        menuId: 'menu-1',
+        inStore: RESTAURANT,
+      });
 
       scheduler.run(({ cold, expectObservable }) => {
         actions$ = cold('a', {
-          a: navigationTo('/bite/bite-1/restaurant/restaurant-1/menu/menu-1'),
+          a: navigationTo('/restaurant/restaurant-1/menu/menu-1'),
         });
 
         expectObservable(effects.loadRestaurantById$).toBe('');
       });
-
       expect(BiteTribeApiServiceMock.loadRestaurant).not.toHaveBeenCalled();
+    });
+
+    /** A menu route opened by URL (GitHub issue #2231). */
+    it('should load the restaurant of a menu route opened by URL', () => {
+      navigateTo({ restaurantId: 'restaurant-1', menuId: 'menu-1' });
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: navigationTo('/restaurant/restaurant-1/menu/menu-1'),
+        });
+
+        expectObservable(effects.loadRestaurantById$).toBe('a', {
+          a: loadedRestaurantFromApi({ restaurant: RESTAURANT }),
+        });
+      });
+    });
+
+    it('should report nothing when a menu route cannot read its restaurant', () => {
+      navigateTo({ restaurantId: 'restaurant-1', menuId: 'menu-1' });
+      BiteTribeApiServiceMock.loadRestaurant.mockReturnValue(of(undefined));
+
+      scheduler.run(({ cold, expectObservable }) => {
+        actions$ = cold('a', {
+          a: navigationTo('/restaurant/restaurant-1/menu/menu-1'),
+        });
+
+        expectObservable(effects.loadRestaurantById$).toBe('');
+      });
     });
 
     it('should ignore a route that identifies no restaurant', () => {

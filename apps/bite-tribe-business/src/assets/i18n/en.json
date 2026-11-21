@@ -165,6 +165,7 @@
   "open": "Open",
   "times": "Times",
   "add-time-range": "Add",
+  "opening-hours-times-needed": "Add the times you are open, or untick the day. Guests see a day without times as closed.",
   "day-monday": "Monday",
   "day-tuesday": "Tuesday",
   "day-wednesday": "Wednesday",

@@ -9,13 +9,14 @@ import {
 } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { DaySchedule } from 'model';
+import { DaySchedule, needsOpeningTimes } from 'model';
 import {
   IonButton,
   IonCheckbox,
   IonIcon,
   IonInput,
   IonLabel,
+  IonText,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -49,6 +50,7 @@ type RawDayEntry = {
     IonButton,
     IonIcon,
     IonInput,
+    IonText,
     TranslocoPipe,
   ],
 })
@@ -139,6 +141,33 @@ export class OpeningHoursComponent {
     return JSON.stringify(this.getOpeningHours()) === JSON.stringify(asStored);
   });
 
+  /**
+   * The days marked open without a complete time range (GitHub issue #2227).
+   * Guests are shown such a day as closed, so the editor asks for its times
+   * and will not save until it has them or is unticked.
+   */
+  protected readonly daysNeedingTimes = computed(() => {
+    this.formChanges();
+
+    return new Set(
+      this.getOpeningHours()
+        .filter(needsOpeningTimes)
+        .map(({ day }) => day),
+    );
+  });
+
+  /** Whether every open day has its times; the create page reads it too. */
+  readonly complete = computed(() => this.daysNeedingTimes().size === 0);
+
+  /** Ticking a day open starts it with an empty range to fill in (#2227). */
+  protected openChanged(dayIndex: number): void {
+    const isOpen = !!this.schedule.at(dayIndex).get('isOpen')?.value;
+
+    if (isOpen && this.getTimeRanges(dayIndex).length === 0) {
+      this.addTimeRange(dayIndex);
+    }
+  }
+
   getTimeRanges(dayIndex: number): FormArray {
     return this.schedule.at(dayIndex).get('timeRanges') as FormArray;
   }
@@ -170,6 +199,10 @@ export class OpeningHoursComponent {
   }
 
   save(): void {
+    if (!this.complete()) {
+      return;
+    }
+
     this.submitOpeningHours.emit(this.getOpeningHours());
   }
 }

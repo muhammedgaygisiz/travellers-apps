@@ -38,8 +38,18 @@ const COMPLETE: Restaurant = {
   position: { latitude: 40.85, longitude: 14.27 },
   openingHours: [
     { day: 'monday', isOpen: false, timeRanges: [] },
-    { day: 'tuesday', isOpen: true, timeRanges: [] },
-    { day: 'wednesday', isOpen: true, timeRanges: [] },
+    {
+      day: 'tuesday',
+      isOpen: true,
+      timeRanges: [{ from: '11:00', to: '22:00' }],
+    },
+    {
+      day: 'wednesday',
+      isOpen: true,
+      timeRanges: [{ from: '22:00', to: '02:00' }],
+    },
+    // Marked open without times: guests see it closed, so it is not counted (#2227).
+    { day: 'thursday', isOpen: true, timeRanges: [] },
   ] as unknown as Restaurant['openingHours'],
   facilities: { genderNeutralRestroom: false },
   tableOrdering: { enabled: true, timeZone: 'Europe/Rome' },

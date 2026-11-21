@@ -22,6 +22,7 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have one menu.
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
+- A day of the opening hours is open only when it is marked open **and** has at least one complete time range (`isOpenDay` in the model, issue [#2227]). The business overview counts open days by that rule and the consumer page shows a day as closed otherwise, so the two cannot disagree; the editor will not save a day marked open without its times. A range may cross midnight (22:00–02:00) and is shown as written.
 - A social media link names its `network` from a fixed list, `LINK_NETWORKS` in the model: website, instagram, facebook, tiktok, x and linkedin (issue [#2224]). X replaced Twitter: a link stored as `twitter` is read as `x` everywhere it is shown, and becomes `x` the next time its Restaurant's links are saved. The consumer page shows each network's logo, a globe for a website, and the network's own spelling.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
 - Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates every candidate Bite that does not already name a Restaurant with the new `restaurantId`, and records the verification on the candidate. A candidate Bite that already names one - picked by its Bite Creator after clustering - is left untouched, kept out of the initial Menu and listed in the candidate's `skippedBiteIds` (issue [#1498]). The full flow, its rules and its failure modes are in [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md).
@@ -328,3 +329,4 @@ images/restaurants/{restaurantId}/{filename}
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
+[#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227

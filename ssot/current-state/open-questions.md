@@ -126,9 +126,9 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
   Its image check exists since [#2138], Bite photos go through it since [#2139], profile
   photos since [#2140], and restaurant and Bite Trail photos since [#2141], so every upload
-  path is checked. Photos stored before the check are checked once by the
-  `image-moderation-backfill` migration ([#2143]), which an operator runs from the admin app;
-  until it has run in production, they stay unchecked.
+  path is checked. Photos stored before the check were checked once by the
+  `image-moderation-backfill` migration ([#2143]), whose two passes ran in production on 21
+  November 2026.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
   a change is a pull request; nothing records why a term is on it beyond the review.
 - Does a member whose text is refused get a way to contest it? Today the only answer is to

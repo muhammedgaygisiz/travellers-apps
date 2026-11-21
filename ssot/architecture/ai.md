@@ -42,6 +42,16 @@ for `responseMimeType: application/json` with a `responseSchema`, so the answer
 is parsed rather than scraped, and any failure - quota, network, a non-JSON or
 empty answer - is a `GeminiUnavailableError`.
 
+**A one-word verdict still needs room.** The image and text checks answer a
+single category, about a dozen tokens, yet `gemini-3.5-flash-lite` spends part
+of `maxOutputTokens` before it writes any. At 20 it stopped at `{"` with
+`finishReason: MAX_TOKENS` on every call, so until the fix of 20 November 2026
+both checks answered `unavailable` in production: the text check fell back to
+the wordlist, and the stored photo check judged nothing ([#2143]). Both
+now pass `VERDICT_MAX_OUTPUT_TOKENS` (256), and a `MAX_TOKENS` stop is reported as
+the output limit rather than as text that is not JSON. A new structured call sets
+its limit from a sampled answer, not from the size of the JSON it expects.
+
 ## The Dish Explanation
 
 Issue [#2106]: **Explain me** on the Bite details page explains the dish to a

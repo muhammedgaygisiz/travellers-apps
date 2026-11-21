@@ -305,17 +305,101 @@
               The opening hours above are read in it, so a wrong one closes a
               Jakarta restaurant at four in the afternoon (issue #1100).
             -->
-          <ion-item>
-            <ion-select
-              formControlName="timeZone"
-              [label]="'table-ordering-time-zone' | transloco"
-              data-testid="table-ordering-time-zone"
-            >
-              @for (zone of timeZones(); track zone) {
-                <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
-              }
-            </ion-select>
+          @let zone = tableOrderingForm.controls.timeZone.value;
+          <!--
+              A row that opens a searchable list (#2228): several hundred zones
+              in one alert took four scrolls to get from Zurich to Berlin.
+            -->
+          <ion-item
+            button
+            detail
+            data-testid="table-ordering-time-zone"
+            (click)="openTimeZonePicker()"
+          >
+            <ion-label>{{ 'table-ordering-time-zone' | transloco }}</ion-label>
+            <ion-note slot="end" data-testid="table-ordering-time-zone-value">{{
+              zone
+            }}</ion-note>
           </ion-item>
+          @if (!restaurantData?.tableOrdering?.timeZone) {
+            <!-- What will be saved, and where it came from (#2228). -->
+            <ion-text color="medium">
+              <p class="note" data-testid="table-ordering-time-zone-source">
+                @if (suggestedTimeZone().source === 'position') {
+                  {{
+                    'table-ordering-time-zone-from-position'
+                      | transloco: { zone: suggestedTimeZone().zone }
+                  }}
+                  @if (suggestedTimeZone().zone !== deviceTimeZone) {
+                    {{
+                      'table-ordering-time-zone-device-differs'
+                        | transloco: { zone: deviceTimeZone }
+                    }}
+                  }
+                } @else {
+                  {{
+                    'table-ordering-time-zone-from-device'
+                      | transloco: { zone: suggestedTimeZone().zone }
+                  }}
+                }
+              </p>
+            </ion-text>
+          }
+
+          <ion-modal
+            [isOpen]="timeZonePickerOpen()"
+            (didDismiss)="timeZonePickerOpen.set(false)"
+          >
+            <ng-template>
+              <ion-header>
+                <ion-toolbar>
+                  <ion-title>{{
+                    'table-ordering-time-zone' | transloco
+                  }}</ion-title>
+                </ion-toolbar>
+                <ion-toolbar>
+                  <ion-searchbar
+                    data-testid="time-zone-search"
+                    [placeholder]="
+                      'table-ordering-time-zone-search' | transloco
+                    "
+                    [value]="timeZoneQuery()"
+                    [debounce]="0"
+                    (ionInput)="
+                      timeZoneQuery.set($any($event).detail.value ?? '')
+                    "
+                  />
+                </ion-toolbar>
+              </ion-header>
+              <ion-content>
+                <ion-list lines="full">
+                  @for (option of matchingTimeZones(); track option) {
+                    <ion-item
+                      button
+                      [attr.data-testid]="'time-zone-' + option"
+                      (click)="chooseTimeZone(option)"
+                    >
+                      <ion-label>{{ option }}</ion-label>
+                      @if (option === zone) {
+                        <ion-icon
+                          slot="end"
+                          name="checkmark"
+                          color="primary"
+                          aria-hidden="true"
+                        />
+                      }
+                    </ion-item>
+                  } @empty {
+                    <ion-item lines="none">
+                      <ion-label color="medium">{{
+                        'table-ordering-time-zone-none' | transloco
+                      }}</ion-label>
+                    </ion-item>
+                  }
+                </ion-list>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
 
           <ion-button
             class="ion-margin-top"

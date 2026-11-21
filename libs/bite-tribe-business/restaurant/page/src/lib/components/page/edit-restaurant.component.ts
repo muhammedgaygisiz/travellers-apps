@@ -7,7 +7,9 @@ import {
   input,
   output,
   Signal,
+  signal,
 } from '@angular/core';
+import tzlookup from '@photostructure/tz-lookup';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
@@ -15,10 +17,17 @@ import {
   IonIcon,
   IonInput,
   IonItem,
+  IonLabel,
   IonList,
+  IonNote,
+  IonHeader,
+  IonModal,
+  IonSearchbar,
   IonSelect,
   IonSelectOption,
   IonText,
+  IonTitle,
+  IonToolbar,
   IonToggle,
   IonTextarea,
 } from '@ionic/angular/standalone';
@@ -68,6 +77,30 @@ import { MenuQrComponent } from '../menu-qr/menu-qr.component';
  */
 const detectedTimeZone = (): string =>
   Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+/**
+ * The zone a restaurant's own position lies in (GitHub issue #2228), looked
+ * up offline. `undefined` without a position: `0, 0` is where a restaurant
+ * without one starts, not a place in the Gulf of Guinea.
+ */
+const positionTimeZone = (
+  position: Geopoint | undefined,
+): string | undefined => {
+  if (!position || (!position.latitude && !position.longitude)) {
+    return undefined;
+  }
+
+  try {
+    return tzlookup(position.latitude, position.longitude);
+  } catch {
+    return undefined;
+  }
+};
+
+/** A zone as typed into the search: "new york" finds America/New_York. */
+const zoneMatches = (zone: string, query: string): boolean =>
+  zone.toLowerCase().replace(/_/g, ' ').includes(query) ||
+  zone.toLowerCase().includes(query);
 
 /**
  * The three answers a restaurant can give about a facility (issue #1830).
@@ -138,12 +171,19 @@ const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
     IonContent,
     IonButton,
     IonIcon,
+    IonLabel,
+    IonNote,
     IonList,
     ReactiveFormsModule,
     IonItem,
     IonSelect,
     IonSelectOption,
     IonToggle,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonSearchbar,
     IonInput,
     IonText,
     IonTextarea,
@@ -240,7 +280,7 @@ export class EditRestaurantComponent {
    * rather than leaving an empty select.
    */
   readonly timeZones = computed(() => {
-    const detected = detectedTimeZone();
+    const detected = this.suggestedTimeZone().zone;
     // Reached through a local type rather than `Intl.supportedValuesOf`: the
     // method is newer than the `lib` some of this workspace's tsconfigs target,
     // and the Storybook build is one of them. The guard is needed at runtime
@@ -250,10 +290,52 @@ export class EditRestaurantComponent {
         Intl as { supportedValuesOf?: (key: string) => string[] }
       ).supportedValuesOf?.('timeZone') ?? [];
 
-    // The detected zone is guaranteed to be offered even when the runtime has a
-    // list, because a list that somehow omits it would strand the pre-fill.
+    // The suggested zone is guaranteed to be offered even when the runtime has
+    // a list, because a list that somehow omits it would strand the pre-fill.
     return supported.includes(detected) ? supported : [detected, ...supported];
   });
+
+  /**
+   * The zone offered to a restaurant that has not chosen one (GitHub issue
+   * #2228): its own position's, and the device's only when it has no
+   * position. A chain operator setting up a Munich restaurant from Zurich is
+   * offered Munich's zone.
+   */
+  readonly suggestedTimeZone = computed(() => {
+    const fromPosition = positionTimeZone(this.restaurant()?.position);
+
+    return fromPosition
+      ? { zone: fromPosition, source: 'position' as const }
+      : { zone: detectedTimeZone(), source: 'device' as const };
+  });
+
+  /** The device's zone, named when the suggestion differs from it. */
+  readonly deviceTimeZone = detectedTimeZone();
+
+  /** The searchable zone picker (#2228): open, and what is typed into it. */
+  readonly timeZonePickerOpen = signal(false);
+  readonly timeZoneQuery = signal('');
+
+  readonly matchingTimeZones = computed(() => {
+    const query = this.timeZoneQuery().trim().toLowerCase();
+
+    return query
+      ? this.timeZones().filter((zone) => zoneMatches(zone, query))
+      : this.timeZones();
+  });
+
+  openTimeZonePicker(): void {
+    this.timeZoneQuery.set('');
+    this.timeZonePickerOpen.set(true);
+  }
+
+  chooseTimeZone(zone: string): void {
+    const control = this.tableOrderingForm.controls.timeZone;
+
+    control.setValue(zone);
+    control.markAsDirty();
+    this.timeZonePickerOpen.set(false);
+  }
 
   /**
    * Each form is filled from the stored restaurant until the owner edits it,
@@ -271,10 +353,10 @@ export class EditRestaurantComponent {
 
     this.tableOrderingForm.patchValue({
       enabled: tableOrdering?.enabled ?? false,
-      // An unconfigured restaurant is offered the zone its owner is sitting in,
-      // which is right far more often than it is wrong - and wrong is visible,
-      // because the opening hours below are read in it.
-      timeZone: tableOrdering?.timeZone || detectedTimeZone(),
+      // An unconfigured restaurant is offered its own position's zone, or the
+      // one its owner is sitting in without a position (#2228); the note
+      // under the picker says which.
+      timeZone: tableOrdering?.timeZone || this.suggestedTimeZone().zone,
     });
   });
 
@@ -497,12 +579,12 @@ export class EditRestaurantComponent {
         this.facilitiesValue().genderNeutralRestroom ===
         toFacilityAnswer(restaurant?.facilities?.genderNeutralRestroom),
       // Against what the form shows: an unconfigured restaurant is offered
-      // the detected zone, which is not a change the owner made.
+      // the suggested zone, which is not a change the owner made.
       tableOrdering:
         !!this.tableOrderingValue().enabled ===
           (tableOrdering?.enabled ?? false) &&
         this.tableOrderingValue().timeZone ===
-          (tableOrdering?.timeZone || detectedTimeZone()),
+          (tableOrdering?.timeZone || this.suggestedTimeZone().zone),
     };
   });
 

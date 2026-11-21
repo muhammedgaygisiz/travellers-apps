@@ -116,7 +116,7 @@ Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
 section's fields and its one Save. While a save runs, the section is covered by the same "Saving…" overlay as the menu editor's save, so Save cannot be pressed twice (issue [#2225]). The position section says how the pin moves (a tap places it, nothing changes until Save) and opens at street level on the stored position, or on the device's position for a Restaurant that has none (`0, 0` counts as none), before the world view (issue [#2226]). Save stays disabled while the fields still
 hold what is stored, as in the menu editor, and enables again only when they
 differ (issue [#2222]); the order of the chosen categories does not count, and
-the time zone pre-filled for a restaurant that never set one is not a change. A successful save returns to the overview,
+the time zone pre-filled for a restaurant that never set one is not a change. That pre-filled zone is the one the Restaurant's own position lies in, looked up offline (`@photostructure/tz-lookup`), and the device's only for a Restaurant without a position; a note under the picker names where it came from, and the device's zone when the two differ, before anything is saved. The picker opens a searchable list, by any part of the zone's name (issue [#2228]). A successful save returns to the overview,
 which reads the Restaurant again and shows the new value; a failed save stays on
 the section with the edit kept, so it can be tried again. The photo is the
 exception that stays: its upload reports its own progress in place. Every item
@@ -209,6 +209,8 @@ all be reviewed for the first time.
 - Issue [#2225] put every section save under a "Saving…" overlay and ignored a second press while one runs. Part of epic [#2123].
 - Issue [#2226] opened the position map at street level instead of the world, said how to move the pin, and opened a Restaurant without a position on the device's position. The fix is in the shared map, so the consumer app's Bite position picker opens the same way. Part of epic [#2123].
 - Issue [#2227] made an open day need its times: the editor asks for them and will not save without, and the overview counts only the days guests are shown as open. Part of epic [#2123].
+- Issue [#2228] offered a Restaurant its own position's time zone instead of the device's, said which before saving, and made the zone picker searchable. Part of epic [#2123].
+- Issue [#2229] dropped the menu code card's own heading, which repeated the section's title. Part of epic [#2123].
 
 ## Related Domains
 
@@ -258,3 +260,5 @@ all be reviewed for the first time.
 [#2225]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2225
 [#2226]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2226
 [#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227
+[#2228]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2228
+[#2229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2229

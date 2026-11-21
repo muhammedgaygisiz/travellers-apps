@@ -973,6 +973,7 @@
   "remove-bite-from-bucket-list-title": "移除Bite",
   "remove-bite-from-bucket-list-message": "确定要从心愿清单中移除这个Bite吗？",
   "menu-category-empty": "此分类下还没有菜品。",
+  "menu-derived-from-bites-notice": "此菜单由顾客的 Bite 整理而成，并非餐厅提供。价格为顾客支付金额的平均值。",
   "report-bite": "举报此Bite",
   "report-bite-title": "举报此Bite",
   "report-bite-message": "为什么需要我们查看此Bite？作者不会知道是谁举报的。",

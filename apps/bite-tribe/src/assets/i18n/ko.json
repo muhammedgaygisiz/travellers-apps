@@ -973,6 +973,7 @@
   "remove-bite-from-bucket-list-title": "Bite 삭제",
   "remove-bite-from-bucket-list-message": "이 Bite를 버킷리스트에서 삭제할까요?",
   "menu-category-empty": "이 카테고리에는 아직 항목이 없어요.",
+  "menu-derived-from-bites-notice": "레스토랑이 아닌 손님들의 Bite로 만든 메뉴예요. 가격은 손님들이 낸 금액의 평균이에요.",
   "report-bite": "이 Bite 신고",
   "report-bite-title": "이 Bite 신고",
   "report-bite-message": "이 Bite를 확인해야 하는 이유는 무엇인가요? 작성자에게 신고한 사람을 알리지 않아요.",

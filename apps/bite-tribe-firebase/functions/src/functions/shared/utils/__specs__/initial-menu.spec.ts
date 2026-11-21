@@ -1,6 +1,7 @@
 import {
-  buildInitialMenuCategories,
+  buildInitialMenu,
   buildInitialMenuItems,
+  chooseInitialMenuCurrency,
   INITIAL_MENU_CATEGORY_TITLE,
 } from '../initial-menu';
 
@@ -117,7 +118,7 @@ describe('initial menu helpers', () => {
   });
 
   it('puts every dish into one category', () => {
-    const categories = buildInitialMenuCategories([
+    const { categories } = buildInitialMenu([
       { name: 'Margherita', price: 12 },
       { name: 'Tiramisu', price: 7 },
     ]);
@@ -132,7 +133,9 @@ describe('initial menu helpers', () => {
    * moments later by the admin backfill (issue #1099).
    */
   it('gives the category and every dish an id of its own', () => {
-    const [category] = buildInitialMenuCategories([
+    const {
+      categories: [category],
+    } = buildInitialMenu([
       { name: 'Margherita', price: 12 },
       { name: 'Tiramisu', price: 7 },
     ]);
@@ -144,7 +147,115 @@ describe('initial menu helpers', () => {
   });
 
   it('keeps the menu empty when no Bite evidence is usable', () => {
-    expect(buildInitialMenuCategories([])).toEqual([]);
-    expect(buildInitialMenuCategories([{ price: 12 }])).toEqual([]);
+    expect(buildInitialMenu([]).categories).toEqual([]);
+    expect(buildInitialMenu([{ price: 12 }]).categories).toEqual([]);
+  });
+});
+
+/**
+ * The derived menu states the currency its prices are in (GitHub issue #1511):
+ * the Bites first, their country when the Bites leave it open, else none.
+ */
+describe('initial menu currency', () => {
+  const prices = (bites: Parameters<typeof buildInitialMenu>[0]): number[] =>
+    buildInitialMenu(bites).categories[0].items.map((item) => item.price);
+
+  it('takes the currency most priced Bites were paid in', () => {
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, currency: 'CHF' },
+        { name: 'Margherita', price: 13, currency: 'chf ' },
+        { name: 'Tiramisu', price: 7, currency: 'EUR' },
+      ]),
+    ).toBe('CHF');
+  });
+
+  it('ignores the currency of a Bite that gives no usable price or dish', () => {
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, currency: 'CHF' },
+        { name: 'Tiramisu', price: 0, currency: 'EUR' },
+        { price: 9, currency: 'EUR' },
+      ]),
+    ).toBe('CHF');
+  });
+
+  it('settles a tie with the country the Bites were taken in', () => {
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, currency: 'USD', countryCode: 'ch' },
+        { name: 'Tiramisu', price: 7, currency: 'GBP', countryCode: 'CH' },
+      ]),
+    ).toBe('CHF');
+  });
+
+  it('takes the country when no priced Bite records a currency', () => {
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, countryCode: 'JP' },
+      ]),
+    ).toBe('JPY');
+  });
+
+  it('states none when the Bites tie and the country is unknown or split', () => {
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, currency: 'USD' },
+        { name: 'Tiramisu', price: 7, currency: 'GBP' },
+      ]),
+    ).toBeUndefined();
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, countryCode: 'CH' },
+        { name: 'Tiramisu', price: 7, countryCode: 'DE' },
+      ]),
+    ).toBeUndefined();
+    expect(
+      chooseInitialMenuCurrency([
+        { name: 'Margherita', price: 12, countryCode: 'XX' },
+      ]),
+    ).toBeUndefined();
+  });
+
+  it('averages only the prices paid in the menu currency', () => {
+    const menu = buildInitialMenu([
+      { name: 'Margherita', price: 12, currency: 'CHF' },
+      { name: 'Margherita', price: 14, currency: 'CHF' },
+      { name: 'Margherita', price: 40, currency: 'EUR' },
+      { name: 'Margherita', price: 99 },
+    ]);
+
+    expect(menu.currency).toBe('CHF');
+    expect(menu.categories[0].items[0].price).toBe(13);
+  });
+
+  it('keeps a dish no Bite priced in the menu currency, at 0', () => {
+    expect(
+      prices([
+        { name: 'Margherita', price: 12, currency: 'CHF' },
+        { name: 'Margherita', price: 14, currency: 'CHF' },
+        { name: 'Tiramisu', price: 7, currency: 'EUR' },
+      ]),
+    ).toEqual([13, 0]);
+  });
+
+  it('prices currency-less Bites in the country currency when none states one', () => {
+    const menu = buildInitialMenu([
+      { name: 'Margherita', price: 12, countryCode: 'CH' },
+      { name: 'Margherita', price: 14, countryCode: 'CH' },
+    ]);
+
+    expect(menu).toMatchObject({ currency: 'CHF' });
+    expect(menu.categories[0].items[0].price).toBe(13);
+  });
+
+  it('averages every price, as before, when the menu states no currency', () => {
+    const menu = buildInitialMenu([
+      { name: 'Margherita', price: 12 },
+      { name: 'Margherita', price: 14 },
+    ]);
+
+    expect(menu).not.toHaveProperty('currency');
+    expect(menu.categories[0].items[0].price).toBe(13);
   });
 });

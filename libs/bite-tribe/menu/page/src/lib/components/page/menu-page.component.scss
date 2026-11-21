@@ -1,6 +1,22 @@
 @use 'globals';
 
 :host {
+  // One sentence about the whole menu, between the place name and the
+  // categories (issue #1511).
+  .derived-menu-notice {
+    align-items: flex-start;
+    display: flex;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+
+    ion-icon {
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+  }
+
   .place-image {
     height: 300px;
     object-fit: cover;

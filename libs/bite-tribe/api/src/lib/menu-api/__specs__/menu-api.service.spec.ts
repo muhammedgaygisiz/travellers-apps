@@ -137,6 +137,33 @@ describe(MenuApiService.name, () => {
     });
 
     /**
+     * A menu derived from Bites keeps saying so after its owner edits it: only
+     * an explicit owner confirmation may retract `derivedFromBites`, and that
+     * does not exist yet (issue #1511). `updateDocument` merges, so the save
+     * keeps the flag - and the menu's currency - by not naming them.
+     */
+    it('leaves derivedFromBites and currency out of the write', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      const menuData: Menu = {
+        id: 'menuId',
+        categories: [],
+        derivedFromBites: true,
+        currency: 'CHF',
+      };
+
+      await service.saveMenu(menuData, 'restaurantId');
+
+      const [{ data }] = updateDocumentSpy.mock.calls[0];
+
+      expect(data).not.toHaveProperty('derivedFromBites');
+      expect(data).not.toHaveProperty('currency');
+    });
+
+    /**
      * The restaurant is what the ownership-scoped rules read the write's
      * authority from (issue #1078), so a save without one cannot succeed. It is
      * refused here rather than at Firestore, where it would come back as a

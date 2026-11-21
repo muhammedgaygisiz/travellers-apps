@@ -973,6 +973,7 @@
   "remove-bite-from-bucket-list-title": "Biteを削除",
   "remove-bite-from-bucket-list-message": "このBiteをバケットリストから削除しますか？",
   "menu-category-empty": "このカテゴリにはまだ項目がありません。",
+  "menu-derived-from-bites-notice": "レストランではなく、ゲストのBiteをもとに作られたメニューです。価格はゲストが支払った金額の平均です。",
   "report-bite": "このBiteを報告",
   "report-bite-title": "このBiteを報告",
   "report-bite-message": "このBiteを確認すべき理由を教えてください。誰が報告したかは投稿者に伝えられません。",

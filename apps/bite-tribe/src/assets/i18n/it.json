@@ -973,6 +973,7 @@
   "remove-bite-from-bucket-list-title": "Togli Bite",
   "remove-bite-from-bucket-list-message": "Vuoi davvero togliere questo Bite dalla lista di preferiti?",
   "menu-category-empty": "Non ci sono ancora piatti in questa categoria.",
+  "menu-derived-from-bites-notice": "Composto dai Bites degli ospiti, non dal ristorante. I prezzi sono medie di quanto hanno pagato gli ospiti.",
   "report-bite": "Segnala questo Bite",
   "report-bite-title": "Segnala questo Bite",
   "report-bite-message": "Perché dovremmo controllare questo Bite? Chi l'ha pubblicato non saprà chi l'ha segnalato.",

@@ -973,6 +973,7 @@
   "remove-bite-from-bucket-list-title": "Bite'ı Çıkar",
   "remove-bite-from-bucket-list-message": "Bu Bite'ı yapılacaklar listesinden çıkarmak istediğinden emin misin?",
   "menu-category-empty": "Bu kategoride henüz yemek yok.",
+  "menu-derived-from-bites-notice": "Restoran tarafından değil, misafirlerin Bite'larından derlendi. Fiyatlar, misafirlerin ödediklerinin ortalamasıdır.",
   "report-bite": "Bu Bite'ı bildir",
   "report-bite-title": "Bu Bite'ı bildir",
   "report-bite-message": "Bu Bite'ı neden incelemeliyiz? Paylaşan kişiye onu kimin bildirdiği söylenmez.",

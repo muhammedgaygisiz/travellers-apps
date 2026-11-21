@@ -2,6 +2,9 @@ import type { Geopoint } from './geopoint';
 import type { Like } from './like';
 import type { PositionSource } from './position-source';
 
+/** Who linked a Bite to a menu item (GitHub issue #2216). */
+export type MenuItemLinkSource = 'guest' | 'verification' | 'owner';
+
 export interface Bite {
   userId?: string;
   id: string;
@@ -87,6 +90,27 @@ export interface Bite {
    * every Bite - the field is cheap now and unrecoverable later.
    */
   variantId?: string;
+  /**
+   * Who set {@link menuItemId} (GitHub issue #2216):
+   *
+   * - `guest` - the Bite's author, from a table order or from a dish's
+   *   "Create Bite" button. Absent on Bites linked that way before the field.
+   * - `verification` - candidate verification, from the dish name the Bite
+   *   gave, when it built the restaurant's Initial Menu from those Bites.
+   * - `owner` - the restaurant's owner, on the business app's Guest Bites
+   *   page, through `linkBiteToMenuItem`.
+   *
+   * Guests see no difference between them. It is kept so a label, or a check
+   * for owners who link selectively, can be added later from evidence. Only
+   * `verification` and `owner` links can be changed by the owner.
+   */
+  menuItemLinkedBy?: MenuItemLinkSource;
+  /**
+   * The restaurant's owner said this Bite is about nothing on their menu
+   * (GitHub issue #2216), so the Guest Bites page stops offering it. The Bite
+   * itself is unchanged and shows everywhere it did.
+   */
+  menuLinkDismissed?: boolean;
   tags?: string[];
   /**
    * The BiteTribe users the creator ate with (GitHub issue #1915), by uid.

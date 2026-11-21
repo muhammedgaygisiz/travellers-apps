@@ -178,10 +178,13 @@ export const overviewRow = (
 })
 export class RestaurantOverviewComponent {
   readonly restaurant = input<Restaurant>();
+  /** Bites waiting for a link to a dish (GitHub issue #2216). */
+  readonly guestBitesToLink = input(0);
 
   readonly openSection = output<RestaurantSection>();
   readonly createMenu = output<void>();
   readonly editMenu = output<Restaurant>();
+  readonly openGuestBites = output<Restaurant>();
   readonly manageStaff = output<void>();
   readonly editFloorPlan = output<void>();
   readonly openTablePlan = output<void>();
@@ -220,6 +223,14 @@ export class RestaurantOverviewComponent {
   });
 
   protected readonly hasMenu = computed(() => !!this.restaurant()?.menuId);
+
+  protected gotoGuestBites(): void {
+    const restaurant = this.restaurant();
+
+    if (restaurant) {
+      this.openGuestBites.emit(restaurant);
+    }
+  }
 
   protected gotoEditMenu(): void {
     const restaurant = this.restaurant();

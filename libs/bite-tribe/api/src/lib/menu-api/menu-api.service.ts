@@ -5,6 +5,8 @@ import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import {
   MENU_ITEM_STATS_COLLECTION,
   type Bite,
+  type LinkBiteToMenuItemRequest,
+  type LinkBiteToMenuItemResult,
   type LoadPublicMenuRequest,
   type Menu,
   type MenuItemStats,
@@ -106,6 +108,68 @@ export class MenuApiService {
 
       return [];
     }
+  }
+
+  /**
+   * Every Bite about one restaurant, newest first (GitHub issue #2216), for
+   * the business app's Guest Bites page.
+   *
+   * One equality filter and no `orderBy`, so it needs no composite index; the
+   * order is applied here. Bounded by `limit`, which is far above the Bites
+   * any restaurant has today.
+   */
+  async loadBitesForRestaurant(
+    restaurantId: string,
+    limit = 300,
+  ): Promise<Bite[]> {
+    if (!restaurantId) {
+      return [];
+    }
+
+    const { snapshots } = await FirebaseFirestore.getCollection({
+      reference: 'bites',
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'restaurantId',
+            opStr: '==',
+            value: restaurantId,
+          },
+        ],
+      },
+      queryConstraints: [{ type: 'limit', limit }],
+    });
+
+    return snapshots
+      .map((snapshot) =>
+        snapshot.data
+          ? ({ ...snapshot.data, id: snapshot.id } as Bite)
+          : undefined,
+      )
+      .filter((bite): bite is Bite => !!bite)
+      .sort(
+        (left, right) =>
+          (right.createdAtTimestamp ?? 0) - (left.createdAtTimestamp ?? 0),
+      );
+  }
+
+  /**
+   * Links a guest's Bite to a dish, or marks it as not on the menu (GitHub
+   * issue #2216). A callable, because an owner may not write a guest's Bite
+   * directly: the backend checks the restaurant, the dish and who linked it
+   * before.
+   */
+  async linkBiteToMenuItem(
+    request: LinkBiteToMenuItemRequest,
+  ): Promise<LinkBiteToMenuItemResult> {
+    const result = await FirebaseFunctions.callByName<
+      LinkBiteToMenuItemRequest,
+      LinkBiteToMenuItemResult
+    >({ name: 'linkBiteToMenuItem', data: request });
+
+    return result.data;
   }
 
   handleError(err: unknown): typeof EMPTY {

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, resource } from '@angular/core';
 import {
   RestaurantDataAccessService,
   RestaurantImageUploadService,
@@ -23,6 +23,18 @@ export class EditRestaurantService {
   private readonly photoUpload = inject(RestaurantImageUploadService);
 
   restaurant = this.dataAccess.restaurant;
+
+  /**
+   * The Bites waiting for a link to a dish (GitHub issue #2216). Read again
+   * whenever the restaurant changes, so coming back from Guest Bites shows
+   * what is left. A failed read shows no count rather than an error: the
+   * button still works.
+   */
+  readonly guestBitesToLink = resource({
+    params: () => this.restaurant()?.id,
+    loader: ({ params }) =>
+      this.dataAccess.countBitesAwaitingMenuLink(params).catch(() => 0),
+  });
 
   /** This session's photo upload, when it is for the restaurant on screen. */
   private readonly ownUpload = computed(() => {
@@ -88,6 +100,18 @@ export class EditRestaurantService {
         restaurantId,
         'menu',
         menuId,
+      ]);
+    }
+  }
+
+  gotoGuestBites(restaurantId: string, menuId: string | undefined): void {
+    if (menuId) {
+      void this.navController.navigateForward([
+        'restaurant',
+        restaurantId,
+        'menu',
+        menuId,
+        'guest-bites',
       ]);
     }
   }

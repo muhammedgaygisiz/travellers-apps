@@ -16,6 +16,8 @@ export type * from './lib/settings';
 export * from './lib/menu';
 /** A value export: the dish-name key a Bite is matched to a menu item by (#2216). */
 export * from './lib/dish-name-key';
+/** A value export: whether a Bite still waits for its owner's link (#2216). */
+export * from './lib/link-bite-to-menu-item';
 export type * from './lib/geopoint';
 export type * from './lib/position-source';
 export type * from './lib/link';

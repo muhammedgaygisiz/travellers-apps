@@ -69,6 +69,22 @@
         <ion-button data-testid="restaurant-edit-menu" (click)="gotoEditMenu()">
           {{ 'restaurant-overview-edit-menu' | transloco }}
         </ion-button>
+        <!-- Bites guests wrote that are linked to no dish yet (#2216). -->
+        <ion-button
+          fill="outline"
+          data-testid="restaurant-guest-bites"
+          (click)="gotoGuestBites()"
+        >
+          {{ 'restaurant-overview-guest-bites' | transloco }}
+          @if (guestBitesToLink()) {
+            <span class="count" data-testid="restaurant-guest-bites-count">
+              {{
+                'restaurant-overview-guest-bites-count'
+                  | transloco: { count: guestBitesToLink() }
+              }}
+            </span>
+          }
+        </ion-button>
       } @else {
         <ion-button
           data-testid="restaurant-create-menu"

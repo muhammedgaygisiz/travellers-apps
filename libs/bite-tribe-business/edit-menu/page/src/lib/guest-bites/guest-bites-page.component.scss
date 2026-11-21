@@ -1,0 +1,58 @@
+:host {
+  .page {
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin: 0;
+  }
+
+  .restaurant-name,
+  .hint {
+    margin: 0;
+    color: var(--ion-color-medium-shade);
+  }
+
+  .intro {
+    margin: 0.25rem 0 1rem;
+  }
+
+  ion-thumbnail {
+    --border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ion-background-color-step-50, #f2f2f2);
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .rating {
+    margin-inline-start: 0.5rem;
+    font-weight: normal;
+    color: var(--ion-color-medium-shade);
+  }
+
+  .suggestion {
+    color: var(--ion-color-success-shade);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+}
+
+.picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

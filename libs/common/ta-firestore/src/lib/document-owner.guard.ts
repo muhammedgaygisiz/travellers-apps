@@ -21,6 +21,20 @@ export interface DocumentOwnerGuardOptions {
   refusalMessageKey: string;
   /** Where a refused visitor is sent instead. */
   redirectTo: string;
+  /**
+   * Asked only once the account has been refused: where this particular
+   * account goes instead, and what it is told. `undefined` keeps
+   * `redirectTo` and `refusalMessageKey`. The business app uses it to send a
+   * staff account back to its own restaurant's tables rather than to the
+   * owner's empty list (GitHub issue #2232).
+   */
+  refusalFor?: (uid: string) => Promise<RefusalDestination | undefined>;
+}
+
+/** Where a refused account is sent, and the toast it is shown. */
+export interface RefusalDestination {
+  redirectTo: string;
+  refusalMessageKey: string;
 }
 
 /**
@@ -58,6 +72,7 @@ export const documentOwnerGuard =
     ownerSetField,
     refusalMessageKey,
     redirectTo,
+    refusalFor,
   }: DocumentOwnerGuardOptions): CanActivateFn =>
   async (route): Promise<GuardResult> => {
     const authService = inject(AuthService);
@@ -101,10 +116,15 @@ export const documentOwnerGuard =
       return true;
     }
 
+    const refusal = (await refusalFor?.(uid).catch(() => undefined)) ?? {
+      redirectTo,
+      refusalMessageKey,
+    };
+
     await toast.present({
-      messageKey: refusalMessageKey,
+      messageKey: refusal.refusalMessageKey,
       outcome: 'failure',
     });
 
-    return router.parseUrl(redirectTo);
+    return router.parseUrl(refusal.redirectTo);
   };

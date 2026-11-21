@@ -424,14 +424,40 @@ describe('business ROUTES', () => {
         });
       });
 
-      /** And the editor stays the owner's, however the live view is gated. */
-      it('still refuses the floor-plan editor to that staff account', async () => {
+      /**
+       * And the editor stays the owner's, however the live view is gated. The
+       * refusal sends the staff member back to their own tables, told the
+       * page is the owner's, rather than to the owner's empty restaurant list
+       * (issue #2232).
+       */
+      it('still refuses the floor-plan editor to that staff account, back to its tables', async () => {
         worksAt('restaurant-1');
 
         await expect(
           run('restaurant/:restaurantId/floor-plan'),
-        ).resolves.toEqual({ url: '/restaurants' });
+        ).resolves.toEqual({ url: '/restaurant/restaurant-1/tables' });
+        expect(present).toHaveBeenCalledWith({
+          messageKey: 'owner-only-page',
+          outcome: 'failure',
+        });
       });
+
+      it.each([
+        'restaurant/:restaurantId',
+        'restaurant/:restaurantId/edit/:section',
+        'restaurant/:restaurantId/menu/:menuId',
+        'restaurant/:restaurantId/menu/:menuId/guest-bites',
+        'restaurant/:restaurantId/staff',
+      ])(
+        'sends that staff account from %s back to its tables',
+        async (path) => {
+          worksAt('restaurant-1');
+
+          await expect(run(path)).resolves.toEqual({
+            url: '/restaurant/restaurant-1/tables',
+          });
+        },
+      );
 
       /**
        * No session is `authGuard`'s answer to give, and it is on the same

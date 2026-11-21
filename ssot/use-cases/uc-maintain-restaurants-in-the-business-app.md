@@ -213,6 +213,9 @@ all be reviewed for the first time.
 - Issue [#2229] dropped the menu code card's own heading, which repeated the section's title. Part of epic [#2123].
 - Issue [#2230] fixed printing the menu code, which came out as one blank page once the code moved into its own section view ([#2183]), and added print-media Loki stories for it and the table sticker sheet so a blank printout fails the visual suite. Part of epic [#2123].
 - Issue [#2231] loaded the Restaurant on the menu editor and Guest Bites when they are opened by URL, so a reload or a shared link keeps the Restaurant's name above the menu. Part of epic [#2123].
+- Issue [#2232] sent a staff account refused by an owner route back to its own tables, told the page is the owner's, instead of to the owner's empty restaurant list. Part of epic [#2123].
+- Issue [#2233] made the shared header show the whole logo and app name at phone width: the title's button reserve fits the buttons, and a long name is sized to the space it has. Part of epic [#2123].
+- Issue [#2234] laid the opening hours out as a list at phone width, one line per day and its ranges under it, so both times and the remove button are on screen; phone-width stories guard it. Part of epic [#2123].
 
 ## Related Domains
 
@@ -266,3 +269,6 @@ all be reviewed for the first time.
 [#2229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2229
 [#2230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2230
 [#2231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2231
+[#2232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2232
+[#2233]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2233
+[#2234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2234

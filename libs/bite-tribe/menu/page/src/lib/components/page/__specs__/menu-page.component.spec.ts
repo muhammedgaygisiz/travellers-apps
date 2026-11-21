@@ -403,7 +403,7 @@ describe(MenuPage.name, () => {
       categories: [
         {
           id: 'category-bites',
-          title: 'Bites',
+          title: 'Dishes',
           items: [{ id: 'item-1', name: 'Margherita', price: 12 }],
         },
       ],
@@ -422,7 +422,7 @@ describe(MenuPage.name, () => {
     it('should show no notice when the derived menu has no items', () => {
       componentRef.setInput('menu', {
         ...DERIVED,
-        categories: [{ id: 'category-bites', title: 'Bites', items: [] }],
+        categories: [{ id: 'category-bites', title: 'Dishes', items: [] }],
       } as unknown as Menu);
       fixture.detectChanges();
 

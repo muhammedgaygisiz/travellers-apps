@@ -21,10 +21,11 @@ describe('EditMenuService', () => {
   beforeEach(() => {
     dataAccessMock = {
       restaurant: signal(undefined),
-      menu: signal(undefined),
+      menu: signal({ id: 'menu1', categories: [] }),
       saveMenu: jest.fn().mockResolvedValue(undefined),
       retryMenuLoad: jest.fn(),
       markMenuReviewed: jest.fn().mockResolvedValue(undefined),
+      confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<MenuDataAccessService>;
 
     loading = {
@@ -132,6 +133,34 @@ describe('EditMenuService', () => {
         outcome: 'success',
       });
       expect(toastMock.present).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  /** See GitHub issue #2214. */
+  describe('confirmMenuAsOwn', () => {
+    it('confirms the menu, re-reads it and says so', async () => {
+      await service.confirmMenuAsOwn();
+
+      expect(dataAccessMock.confirmMenuAsOwn).toHaveBeenCalledWith('menu1');
+      expect(dataAccessMock.retryMenuLoad).toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'menu-confirmed-as-own',
+        outcome: 'success',
+      });
+    });
+
+    it('reports a refused confirmation and re-reads nothing', async () => {
+      dataAccessMock.confirmMenuAsOwn = jest
+        .fn()
+        .mockRejectedValue(new Error('permission-denied'));
+
+      await service.confirmMenuAsOwn();
+
+      expect(dataAccessMock.retryMenuLoad).not.toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
     });
   });
 });

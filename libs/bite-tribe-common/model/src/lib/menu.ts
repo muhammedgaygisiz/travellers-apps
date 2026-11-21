@@ -202,8 +202,9 @@ export interface Menu {
    * `true` and the menu has items.
    *
    * Written only by the verification transaction. Menu saves write named fields
-   * and leave this one alone, so an owner's edits do not clear it; retracting
-   * it is an explicit owner confirmation that does not exist yet. Absent on
+   * and leave this one alone, so an owner's edits do not clear it; it is
+   * removed only when the owner confirms the menu as their own in the business
+   * menu editor (GitHub issue #2214). Absent on
    * every menu written before the field, which cannot be told apart afterwards.
    */
   derivedFromBites?: boolean;

@@ -40,6 +40,25 @@
         </ion-button>
       </header>
 
+      @if (derivedFromBites()) {
+        <!--
+          Verification built this menu from guests' Bites, and the consumer
+          menu says so until the owner confirms it here (issue #2214).
+        -->
+        <section class="derived-notice" data-testid="menu-derived-notice">
+          <ion-icon name="information-circle-outline" aria-hidden="true" />
+          <p>{{ 'menu-derived-owner-notice' | transloco }}</p>
+          <ion-button
+            fill="outline"
+            size="small"
+            data-testid="confirm-menu-own"
+            (click)="confirmMenuAsOwn()"
+          >
+            {{ 'menu-confirm-own' | transloco }}
+          </ion-button>
+        </section>
+      }
+
       <div class="layout">
         <main class="list">
           @if (menu()?.categories?.length) {

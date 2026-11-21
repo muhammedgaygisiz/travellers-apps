@@ -76,6 +76,17 @@ export class MenuDataAccessService {
   }
 
   /**
+   * The owner takes a menu built from guests' Bites as their own (GitHub
+   * issue #2214). The restaurant comes off the route, as for {@link saveMenu}.
+   */
+  confirmMenuAsOwn(menuId: string): Promise<void> {
+    return this.api.confirmMenuAsOwn(
+      menuId,
+      this.storeService.restaurantIdFromUrl(),
+    );
+  }
+
+  /**
    * Records that the account holding the route's restaurant saved its menu
    * (GitHub issue #2126), which ticks "Menu reviewed" on the business
    * dashboard. Called by the business menu editor only.

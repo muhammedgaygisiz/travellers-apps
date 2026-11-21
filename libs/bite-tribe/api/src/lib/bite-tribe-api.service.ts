@@ -321,6 +321,14 @@ export class BiteTribeApiService {
     return this.menuApiService.saveMenuCurrency(menuId, restaurantId, currency);
   }
 
+  /** The owner takes a menu built from Bites as their own (issue #2214). */
+  confirmMenuAsOwn(
+    menuId: string,
+    restaurantId: string | undefined,
+  ): Promise<void> {
+    return this.menuApiService.confirmMenuAsOwn(menuId, restaurantId);
+  }
+
   loadMenu(menuId: string): Promise<Menu | undefined> {
     return this.menuApiService.loadMenu(menuId);
   }

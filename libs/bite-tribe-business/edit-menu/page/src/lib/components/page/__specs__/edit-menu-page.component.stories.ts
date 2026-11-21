@@ -176,3 +176,11 @@ export const EmptyMenu: Story = {
     menu: { id: 'menu-osteria', restaurantId: trattoria.id, categories: [] },
   },
 };
+
+/**
+ * A menu verification built from guests' Bites (GitHub issue #2214): the
+ * notice above the list, and the button that takes it as the restaurant's.
+ */
+export const DerivedFromBites: Story = {
+  args: { menu: { ...menu, currency: 'EUR', derivedFromBites: true } },
+};

@@ -189,6 +189,37 @@ export class MenuApiService {
   }
 
   /**
+   * The owner says a menu built from guests' Bites is now their own (GitHub
+   * issue #2214), which removes `derivedFromBites` and with it the consumer
+   * notice that the prices are guest averages.
+   *
+   * A write of its own for the reason {@link saveMenuCurrency} gives, and the
+   * one place the flag is ever removed: an edit is not this confirmation, so
+   * {@link saveMenu} never touches the field. `restaurantId` travels for the
+   * ownership-scoped rules (issue #1078).
+   */
+  async confirmMenuAsOwn(
+    menuId: string,
+    restaurantId: string | undefined,
+  ): Promise<void> {
+    if (!restaurantId) {
+      throw new Error(
+        'Cannot save a menu without the restaurant it belongs to',
+      );
+    }
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${MENU_COLLECTION}/${menuId}`,
+      data: {
+        restaurantId,
+        derivedFromBites: FieldValue.delete(),
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  /**
    * A restaurant's menu, read without an account (GitHub issue #1102).
    *
    * A callable rather than a Firestore read, because a public menu page needs

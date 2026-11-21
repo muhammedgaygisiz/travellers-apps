@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   linkedSignal,
   output,
@@ -11,13 +12,15 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
+  AlertController,
   IonButton,
   IonContent,
+  IonIcon,
   IonItem,
   IonSelect,
   IonSelectOption,
 } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import type { Category, Menu, MenuItem, Restaurant } from 'model';
 import { currencyCodes, getCurrencyForDevice } from 'utils';
@@ -72,6 +75,7 @@ export type MenuEditing =
     IonSelect,
     IonSelectOption,
     IonButton,
+    IonIcon,
     TranslocoPipe,
     FormsModule,
     MenuListComponent,
@@ -81,6 +85,9 @@ export type MenuEditing =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditMenuPage {
+  private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
+
   restaurant = input<Restaurant>();
 
   menu = input<Menu>();
@@ -88,6 +95,16 @@ export class EditMenuPage {
   saveMenu = output<Menu>();
 
   saveCurrencyCode = output<string>();
+
+  /** The owner confirmed a menu built from Bites as their own (#2214). */
+  confirmAsOwn = output<void>();
+
+  /**
+   * Whether the menu still carries the mark verification gave it (GitHub
+   * issue #2214). Shown whether or not the menu has items, unlike the
+   * consumer notice: the owner may want to confirm before guests see any.
+   */
+  readonly derivedFromBites = computed(() => !!this.menu()?.derivedFromBites);
 
   placeName = computed(() => this.restaurant()?.name);
 
@@ -161,6 +178,32 @@ export class EditMenuPage {
     }
 
     this.saveCurrencyCode.emit(this.currency());
+  }
+
+  /**
+   * Asks once before the owner takes the menu as their own (GitHub issue
+   * #2214): it cannot be undone here, and it is the owner's word that every
+   * price on it is theirs, not only the ones they have edited.
+   */
+  async confirmMenuAsOwn(): Promise<void> {
+    if (!this.derivedFromBites()) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('menu-confirm-own-title'),
+      message: this.transloco.translate('menu-confirm-own-message'),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('menu-confirm-own'),
+          role: 'confirm',
+          handler: (): void => this.confirmAsOwn.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   openDish(ref: DishRef): void {

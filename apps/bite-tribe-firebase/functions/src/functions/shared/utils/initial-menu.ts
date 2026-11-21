@@ -6,8 +6,13 @@ import { normalizePlaceName } from './restaurant-candidates';
  * Title of the single category that candidate verification derives from Bites.
  * Menu content is operator-owned free text, so the title is stored as data and
  * can be renamed in the business edit-menu page.
+ *
+ * Not "Bites": a Bite is a guest's experience of a dish, and what this
+ * category holds are menu items, the dishes the restaurant offers. The
+ * glossary keeps the two apart, and a category called "Bites" told owners and
+ * guests that the menu's dishes were Bites (GitHub issue #2214).
  */
-export const INITIAL_MENU_CATEGORY_TITLE = 'Bites';
+export const INITIAL_MENU_CATEGORY_TITLE = 'Dishes';
 
 export interface InitialMenuBite {
   name?: string;

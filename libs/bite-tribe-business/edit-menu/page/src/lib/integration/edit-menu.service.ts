@@ -115,4 +115,35 @@ export class EditMenuService {
       outcome: 'success',
     });
   }
+
+  /**
+   * The owner says a menu built from guests' Bites is now their own (GitHub
+   * issue #2214). Re-read afterwards, so the editor's notice goes away with
+   * the flag it reads.
+   */
+  async confirmMenuAsOwn(): Promise<void> {
+    const menuId = this.menu()?.id;
+
+    if (!menuId) {
+      return;
+    }
+
+    try {
+      await this.dataAccess.confirmMenuAsOwn(menuId);
+    } catch {
+      await this.toast.present({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+
+      return;
+    }
+
+    this.dataAccess.retryMenuLoad();
+
+    await this.toast.present({
+      messageKey: 'menu-confirmed-as-own',
+      outcome: 'success',
+    });
+  }
 }

@@ -1,10 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Menu } from 'model';
 import { EditMenuPage } from '../edit-menu-page.component';
+
+addNecessaryIcons();
 
 /**
  * The currency a menu states (GitHub issue #1102).
@@ -306,6 +311,93 @@ describe(EditMenuPage.name, () => {
       component.onSaveDish({ id: 'x', name: 'X', description: '', price: 1 });
 
       expect(saved).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * A menu verification built from Bites (GitHub issue #2214). The owner takes
+   * it as their own on purpose, once; an edit is not that.
+   */
+  describe('menu built from Bites', () => {
+    type AlertOptions = Parameters<AlertController['create']>[0];
+    let alertOptions: AlertOptions | undefined;
+    let present: jest.Mock;
+    let confirmed: jest.Mock;
+
+    const notice = (): Element | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="menu-derived-notice"]',
+      );
+
+    beforeEach(() => {
+      alertOptions = undefined;
+      present = jest.fn();
+      jest
+        .spyOn(TestBed.inject(AlertController), 'create')
+        .mockImplementation(async (options) => {
+          alertOptions = options;
+
+          return { present } as unknown as HTMLIonAlertElement;
+        });
+      confirmed = jest.fn();
+      component.confirmAsOwn.subscribe(confirmed);
+    });
+
+    it('shows the notice and its button on a menu built from Bites', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      expect(notice()).not.toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="confirm-menu-own"]'),
+      ).not.toBeNull();
+    });
+
+    it('shows nothing on a menu the restaurant wrote', () => {
+      withMenu(MENU);
+
+      expect(notice()).toBeNull();
+    });
+
+    it('asks before confirming, and confirms only on the confirm button', async () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
+
+      const buttons = alertOptions?.buttons as {
+        role?: string;
+        handler?: () => void;
+      }[];
+      expect(buttons.find(({ role }) => role === 'cancel')?.handler).toBe(
+        undefined,
+      );
+      buttons.find(({ role }) => role === 'confirm')?.handler?.();
+
+      expect(confirmed).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks nothing on a menu that is already the restaurant’s', async () => {
+      withMenu(MENU);
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).not.toHaveBeenCalled();
+    });
+
+    it('never confirms through a menu save', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+      const saved = jest.fn();
+      component.saveMenu.subscribe(saved);
+
+      component.openCategory('c1');
+      component.onSaveCategory({ title: 'Pizze', subtitle: '' });
+      component.currency.set('CHF');
+      component.saveCurrency();
+
+      expect(saved).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
     });
   });
 });

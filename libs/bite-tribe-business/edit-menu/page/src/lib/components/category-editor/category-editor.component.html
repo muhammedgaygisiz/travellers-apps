@@ -35,6 +35,17 @@
   />
 
   <div class="actions">
+    @if (category()) {
+      <ion-button
+        class="delete"
+        fill="clear"
+        color="danger"
+        data-testid="delete-category"
+        (click)="confirmDelete()"
+      >
+        {{ 'menu-category-delete' | transloco }}
+      </ion-button>
+    }
     <ion-button
       fill="outline"
       data-testid="cancel-category"

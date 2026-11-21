@@ -4,6 +4,8 @@ import {
   moveCategory,
   moveDish,
   priceLabel,
+  removeCategory,
+  removeDish,
   saveCategoryDetails,
   saveDish,
   saveExtras,
@@ -141,6 +143,42 @@ describe('menu edits', () => {
     expect(saveExtras(MENU, 'c1', extrasBlock).categories[0].extrasBlock).toBe(
       extrasBlock,
     );
+  });
+
+  /** See GitHub issue #2181. */
+  describe('removeDish', () => {
+    it('takes the dish and its variants off its category', () => {
+      const next = removeDish(MENU, 'c1', 'd1');
+
+      expect(next.categories[0].items?.map((item) => item.id)).toEqual(['d2']);
+      expect(next.categories[1]).toBe(MENU.categories[1]);
+    });
+
+    it('leaves the menu as it was when no dish has that id', () => {
+      expect(removeDish(MENU, 'c1', 'missing').categories[0].items).toEqual(
+        MENU.categories[0].items,
+      );
+    });
+
+    it('does not touch the stored menu', () => {
+      removeDish(MENU, 'c1', 'd1');
+
+      expect(MENU.categories[0].items).toHaveLength(2);
+    });
+  });
+
+  describe('removeCategory', () => {
+    it('takes the category off with everything in it', () => {
+      const next = removeCategory(MENU, 'c1');
+
+      expect(next.categories.map((category) => category.id)).toEqual(['c2']);
+    });
+
+    it('does not touch the stored menu', () => {
+      removeCategory(MENU, 'c1');
+
+      expect(MENU.categories).toHaveLength(2);
+    });
   });
 
   it('moves a category', () => {

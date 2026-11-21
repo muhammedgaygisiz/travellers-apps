@@ -80,4 +80,10 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+
+  // Delete sits apart from Cancel and Save, at the start of the row, so it is
+  // never the button a hurried tap lands on (issue #2181).
+  .delete {
+    margin-inline-end: auto;
+  }
 }

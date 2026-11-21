@@ -10,7 +10,9 @@
     <div class="page" [class.editing]="!!editing()">
       <header class="page-header">
         <div class="titles">
-          <p class="restaurant-name">{{ placeName() }}</p>
+          <p class="restaurant-name" data-testid="menu-restaurant-name">
+            {{ placeName() }}
+          </p>
           <h1>{{ 'menu' | transloco }}</h1>
         </div>
         <!--

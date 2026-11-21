@@ -130,8 +130,25 @@ completes, however many calls it took.
 Idempotence holds as the contract asks: a second apply press takes down nothing the first
 did not, since a photo it took down is gone and the photos it passed answer from their kept
 verdicts. The exception is a photo the first could not get an answer for, which the second
-checks again. Nothing runs it on deploy; until both passes have run in production, the stored
-photos stay unchecked, as [Current State - Known Issues](../current-state/known-issues.md) records.
+checks again. Nothing runs it on deploy. Both passes ran in production on 21 November 2026;
+the three profile photos it could not reach are in
+[Current State - Known Issues](../current-state/known-issues.md).
+
+How an operator runs it, as learnt on that first run:
+
+- **Keep the device awake.** One call works for up to five minutes, and the page waits up to
+  600 seconds for it, past the function's 540. A machine that locks or sleeps drops the call
+  it is waiting on, and the page shows the run as failed while the function finishes that
+  call. Nothing is lost: the next press continues the run.
+- **Review the refusals before apply.** The report's operator log entry and its
+  `migrationRuns/image-moderation-report` document list the refused documents. Apply
+  follows the verdict kept in `contentChecks` for each photo's hash, not the report's list,
+  so a refusal the operator overrules is set to category `none` there before apply, and
+  apply then passes it. On the first run the model refused four photos and the operator
+  kept three of them that way.
+- **Settle what the report could not answer.** A photo the check could not answer for has
+  no kept verdict, so apply asks the model about it and takes it down at once if refused,
+  without a review. Run the report again, or settle each such photo's verdict, before apply.
 
 `follower-acceptance` stamps `acceptedAt` on both follow edges of every
 follower of every private profile that lacks it (epic [#2144]). A private

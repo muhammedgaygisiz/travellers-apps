@@ -66,7 +66,7 @@
           </ion-text>
           <ion-button
             data-testid="save-categories"
-            [disabled]="categoriesForm.invalid"
+            [disabled]="categoriesForm.invalid || unchanged().categories"
             (click)="saveCategories()"
           >
             {{ 'save' | transloco }}
@@ -88,6 +88,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-description"
+            [disabled]="unchanged().about"
             (click)="saveDescription()"
           >
             {{ 'save' | transloco }}
@@ -138,7 +139,7 @@
             @if (links.length) {
               <ion-button
                 data-testid="save-social-media"
-                [disabled]="isInvalid()"
+                [disabled]="isInvalid() || unchanged().links"
                 (click)="saveSocialMediaLinks()"
               >
                 {{ 'save' | transloco }}
@@ -186,6 +187,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-address"
+            [disabled]="unchanged().address"
             (click)="saveAddress()"
           >
             {{ 'save' | transloco }}
@@ -198,6 +200,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-position"
+            [disabled]="unchanged().position"
             (click)="savePosition()"
           >
             {{ 'save' | transloco }}
@@ -236,6 +239,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-facilities"
+            [disabled]="unchanged().facilities"
             (click)="saveFacilities()"
           >
             {{ 'save' | transloco }}
@@ -283,7 +287,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-table-ordering"
-            [disabled]="tableOrderingForm.invalid"
+            [disabled]="tableOrderingForm.invalid || unchanged().tableOrdering"
             (click)="submitTableOrdering()"
           >
             {{ 'save' | transloco }}

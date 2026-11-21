@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  Signal,
 } from '@angular/core';
 import { PageComponent } from 'common/ui/page';
 import {
@@ -34,13 +35,14 @@ import {
   TableOrderingSettings,
 } from 'model';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { map, startWith } from 'rxjs';
 import {
   RestaurantPhotoEditorComponent,
   RestaurantPhotoStatus,
@@ -76,6 +78,22 @@ const toFacilityAnswer = (value: boolean | undefined): FacilityAnswer =>
 
 const fromFacilityAnswer = (answer: FacilityAnswer): boolean | undefined =>
   answer === 'not-stated' ? undefined : answer === 'yes';
+
+/**
+ * A form's whole value as a signal, so a `computed` can compare it with the
+ * stored restaurant. Raw, so a disabled control still counts.
+ */
+const valueOf = <T>(form: AbstractControl<unknown, T>): Signal<T> =>
+  toSignal(
+    form.valueChanges.pipe(
+      startWith(null),
+      map(() => form.getRawValue()),
+    ),
+    { initialValue: form.getRawValue() },
+  );
+
+const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
+  a.length === b.length && a.every((value) => b.includes(value));
 
 @Component({
   selector: 'edit-restaurant',
@@ -371,6 +389,63 @@ export class EditRestaurantComponent {
     ),
     { initialValue: !this.socialMediaForm.valid },
   );
+
+  private readonly categoriesValue = valueOf(this.categoriesForm);
+  private readonly descriptionValue = valueOf(this.descriptionForm);
+  private readonly socialMediaValue = valueOf(this.socialMediaForm);
+  private readonly addressValue = valueOf(this.addressForm);
+  private readonly positionValue = valueOf(this.positionForm);
+  private readonly facilitiesValue = valueOf(this.facilitiesForm);
+  private readonly tableOrderingValue = valueOf(this.tableOrderingForm);
+
+  /**
+   * Whether each section's form still holds what is stored (GitHub issue
+   * #2222). Its Save stays disabled until it does not, like the menu editor's:
+   * saving what is already stored writes nothing new and would still say it
+   * saved.
+   */
+  readonly unchanged = computed(() => {
+    const restaurant = this.restaurant();
+    const address = restaurant?.address;
+    const position = this.positionValue().position;
+    const tableOrdering = restaurant?.tableOrdering;
+    const storedLinks = restaurant?.socialMediaLinks ?? [];
+    const links = (this.socialMediaValue().links ?? []) as Partial<Link>[];
+
+    return {
+      categories: sameSet(
+        this.categoriesValue().categories,
+        restaurantCategoriesOf(restaurant),
+      ),
+      about:
+        (this.descriptionValue().description ?? '') ===
+        (restaurant?.description ?? ''),
+      links:
+        links.length === storedLinks.length &&
+        links.every(
+          (link, index) =>
+            (link.network ?? '') === (storedLinks[index].network ?? '') &&
+            (link.url ?? '') === (storedLinks[index].url ?? ''),
+        ),
+      address: (['street', 'postcode', 'city', 'country'] as const).every(
+        (field) =>
+          (this.addressValue()[field] ?? '') === (address?.[field] ?? ''),
+      ),
+      position:
+        position?.latitude === restaurant?.position?.latitude &&
+        position?.longitude === restaurant?.position?.longitude,
+      facilities:
+        this.facilitiesValue().genderNeutralRestroom ===
+        toFacilityAnswer(restaurant?.facilities?.genderNeutralRestroom),
+      // Against what the form shows: an unconfigured restaurant is offered
+      // the detected zone, which is not a change the owner made.
+      tableOrdering:
+        !!this.tableOrderingValue().enabled ===
+          (tableOrdering?.enabled ?? false) &&
+        this.tableOrderingValue().timeZone ===
+          (tableOrdering?.timeZone || detectedTimeZone()),
+    };
+  });
 
   placeName = computed(() => this.restaurant()?.name);
 

@@ -1,12 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
   output,
 } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DaySchedule } from 'model';
 import {
   IonButton,
@@ -107,6 +109,34 @@ export class OpeningHoursComponent {
         dayGroup.patchValue({ isOpen: false });
       }
     });
+  });
+
+  private readonly formChanges = toSignal(this.form.valueChanges, {
+    initialValue: null,
+  });
+
+  /**
+   * Whether the form still holds the stored schedule, read the way it is
+   * filled: a day the restaurant has no entry for is closed with no times.
+   * Its Save stays disabled until it does not (GitHub issue #2222).
+   */
+  protected readonly unchanged = computed(() => {
+    this.formChanges();
+    const stored = this.openingHours() ?? [];
+    const asStored = DAYS.map((day) => {
+      const entry = stored.find((hours) => hours.day === day);
+
+      return {
+        day,
+        isOpen: entry?.isOpen ?? false,
+        timeRanges: (entry?.timeRanges ?? []).map(({ from, to }) => ({
+          from,
+          to,
+        })),
+      };
+    });
+
+    return JSON.stringify(this.getOpeningHours()) === JSON.stringify(asStored);
   });
 
   getTimeRanges(dayIndex: number): FormArray {

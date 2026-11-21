@@ -66,7 +66,12 @@
   </table>
 
   @if (showSubmit()) {
-    <ion-button class="ion-margin-top" (click)="save()">
+    <ion-button
+      class="ion-margin-top"
+      data-testid="save-opening-hours"
+      [disabled]="unchanged()"
+      (click)="save()"
+    >
       {{ 'save' | transloco }}
     </ion-button>
   }

@@ -29,6 +29,7 @@ export class EditRestaurantService {
   private saving = false;
 
   restaurant = this.dataAccess.restaurant;
+  gpsPosition = this.dataAccess.gpsPosition;
 
   /**
    * The Bites waiting for a link to a dish (GitHub issue #2216). Read again

@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
-import { ComponentRef } from '@angular/core';
+import { Component, ComponentRef, forwardRef, input } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { PositionComponent } from 'bite-tribe-common/map';
 import { EditRestaurantComponent } from '../edit-restaurant.component';
 import { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
@@ -654,6 +656,86 @@ describe('EditRestaurantComponent', () => {
         'x',
         'linkedin',
       ]);
+    });
+  });
+
+  /** The position section (GitHub issue #2226). */
+  describe('position section', () => {
+    /** The map cannot render on the mocked Leaflet; a stub stands in. */
+    @Component({
+      selector: 'position',
+      template: '',
+      providers: [
+        {
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => PositionStubComponent),
+          multi: true,
+        },
+      ],
+    })
+    class PositionStubComponent implements ControlValueAccessor {
+      readonly gpsPosition = input<Geopoint | null | undefined>();
+      writeValue(): void {
+        return;
+      }
+      registerOnChange(): void {
+        return;
+      }
+      registerOnTouched(): void {
+        return;
+      }
+    }
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideIonicAngular(getIonicConfig()),
+          { provide: TranslocoService, useValue: MockTranslocoService },
+        ],
+      });
+      TestBed.overrideComponent(EditRestaurantComponent, {
+        remove: { imports: [PositionComponent] },
+        add: { imports: [PositionStubComponent] },
+      });
+      fixture = TestBed.createComponent(EditRestaurantComponent);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+    });
+
+    const open = (position: Geopoint | undefined): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        position,
+      } as Restaurant);
+      componentRef.setInput('section', 'position');
+      fixture.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('says how to move the pin', () => {
+      expect(
+        open({ latitude: 48.137, longitude: 11.575 }).querySelector(
+          '[data-testid="position-hint"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('treats the 0, 0 a new restaurant starts on as no position', () => {
+      open({ latitude: 0, longitude: 0 });
+
+      expect(component.positionForm.value.position).toBeNull();
+    });
+
+    it('keeps a real position', () => {
+      open({ latitude: 48.137, longitude: 11.575 });
+
+      expect(component.positionForm.value.position).toEqual({
+        latitude: 48.137,
+        longitude: 11.575,
+      });
     });
   });
 

@@ -36,4 +36,16 @@ describe('zoomToGeopoint', () => {
     expect(getZoomSpy).toHaveBeenCalled();
     expect(setViewSpy).toHaveBeenCalledWith([34.0522, -118.2437], DEFAULT_ZOOM);
   });
+
+  /** GitHub issue #2226: a position arriving after the world view. */
+  it.each([2, 1, 0])(
+    'goes to street level from the world view (zoom %s)',
+    (zoom) => {
+      getZoomSpy.mockReturnValue(zoom);
+
+      zoomToGeopoint({ latitude: 48.137, longitude: 11.575 }, map);
+
+      expect(setViewSpy).toHaveBeenCalledWith([48.137, 11.575], DEFAULT_ZOOM);
+    },
+  );
 });

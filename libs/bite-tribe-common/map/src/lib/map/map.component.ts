@@ -19,7 +19,7 @@ import { zoomToGpsOrDefault } from './utils/zoom-to-gps-or-default';
 import { fitMapToMarkers } from './utils/fit-map-to-markers';
 import { clearMarkers } from './utils/clear-markers';
 import { geopointsToMarkers } from './utils/geopoints-to-markers';
-import { zoomToGeopoint } from './utils/zoom-to-geopoint';
+import { WORLD_ZOOM, zoomToGeopoint } from './utils/zoom-to-geopoint';
 import { createMap } from './utils/create-map';
 import { TILE_LAYER_FACTORY } from './tile-layer.token';
 import { zoomToMarkers } from './utils/zoom-to-markers';
@@ -158,6 +158,16 @@ export class MapComponent implements OnDestroy {
     }
 
     addGpsMarker(gpsPosition, this.map);
+
+    // A map still on the world view with nothing to show moves to the device
+    // once its position arrives (GitHub issue #2226): the position picker of
+    // a restaurant without a position, opened before the GPS answered.
+    if (
+      !this.cleanUpPoints().length &&
+      (this.map.getZoom() ?? 0) <= WORLD_ZOOM
+    ) {
+      zoomToGeopoint(gpsPosition, this.map);
+    }
   });
 
   /**

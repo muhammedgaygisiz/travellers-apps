@@ -21,6 +21,7 @@ describe('RestaurantDataAccessService', () => {
 
     storeServiceMock = {
       restaurant$: of(undefined),
+      position$: of(undefined),
     } as unknown as jest.Mocked<BiteTribeStoreService>;
     apiMock = {
       createMenuForRestaurant: jest.fn().mockResolvedValue('menu-1'),

@@ -204,6 +204,7 @@ all be reviewed for the first time.
 - Issue [#2216] added Guest Bites, where the owner links guests' Bites to the dishes they are about. Part of epic [#2123].
 - Issue [#2221] made the overview's ticks agree with the setup progress: the menu got a row, and the rows the checklist does not count lost their tick. Part of epic [#2123].
 - Issue [#2222] disabled every section's Save until something changed, and made the Kind of place toast read "Kind of place saved". Part of epic [#2123].
+- Issue [#2223] stacked the address and link labels above their fields, as in the menu editor, and left the About field to its section heading. Part of epic [#2123].
 
 ## Related Domains
 
@@ -248,3 +249,4 @@ all be reviewed for the first time.
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
 [#2221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2221
 [#2222]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2222
+[#2223]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2223

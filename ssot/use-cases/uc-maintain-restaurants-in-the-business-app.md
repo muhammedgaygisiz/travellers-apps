@@ -211,6 +211,7 @@ all be reviewed for the first time.
 - Issue [#2227] made an open day need its times: the editor asks for them and will not save without, and the overview counts only the days guests are shown as open. Part of epic [#2123].
 - Issue [#2228] offered a Restaurant its own position's time zone instead of the device's, said which before saving, and made the zone picker searchable. Part of epic [#2123].
 - Issue [#2229] dropped the menu code card's own heading, which repeated the section's title. Part of epic [#2123].
+- Issue [#2230] fixed printing the menu code, which came out as one blank page once the code moved into its own section view ([#2183]), and added print-media Loki stories for it and the table sticker sheet so a blank printout fails the visual suite. Part of epic [#2123].
 - Issue [#2231] loaded the Restaurant on the menu editor and Guest Bites when they are opened by URL, so a reload or a shared link keeps the Restaurant's name above the menu. Part of epic [#2123].
 
 ## Related Domains
@@ -263,4 +264,5 @@ all be reviewed for the first time.
 [#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227
 [#2228]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2228
 [#2229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2229
+[#2230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2230
 [#2231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2231

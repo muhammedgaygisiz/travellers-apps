@@ -45,21 +45,13 @@
  * Printing one code and nothing else.
  *
  * The document-level releases that make an Ionic page printable at all are in
- * `apps/bite-tribe-business/src/global.scss`; without them the job is one
- * blank page. What is left here is the choosing: everything on the restaurant
- * page is hidden, this block is shown, and the code is sized in millimetres
- * because a scanner cares about the printed size and nothing else.
+ * `apps/bite-tribe-business/src/global.scss`, and the section view drops its
+ * own title and header (`edit-restaurant.component.scss`). What is left here
+ * is the card: its hint, link and buttons go, and the code is sized in
+ * millimetres because a scanner cares about the printed size and nothing else.
  */
 @media print {
-  :host {
-    /* Hidden by the page around it, shown again here: `visibility` rather than
-     * `display`, so the ancestors this block is nested in can stay hidden
-     * without taking it down with them. */
-    visibility: visible;
-  }
-
   .menu-qr-print {
-    visibility: visible;
     max-width: none;
     width: 60mm;
     margin: 0 auto;

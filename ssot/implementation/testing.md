@@ -168,7 +168,7 @@ Two boundary details keep direct Loki working against the Angular Storybook 10 h
 
 ### Operating Loki
 
-Six behaviours that have each cost a wrong conclusion at least once.
+Seven behaviours that have each cost a wrong conclusion at least once.
 
 **Build Storybook with `--skip-nx-cache` before every Loki run.** A build that
 reports `Cache: 1/1 hit` can hand Loki the previous UI. Loki then validates a
@@ -186,6 +186,16 @@ files changed, so it cannot be shown that the gap explains it. Delete the
 directory, build with `npm run build:storybook -- --skip-nx-cache`, and confirm a
 token from the change is actually in `dist/storybook/storybook-host` before
 trusting a Loki result.
+
+**A story is captured in print media with `parameters: { loki: { media: 'print' } }`.**
+The story's `loki` parameters are merged over Loki's tab options, where the key is
+`media`; `chromeEmulatedMedia` is only the name of the command-line option, and as
+a story parameter it is ignored without a warning, so the reference is an ordinary
+screen capture. Look at a new print reference before trusting it: it should show
+no app header and no buttons. Print-media captures guard a printout against
+going blank (issue [#2230]): a print-media capture of the menu code view came out
+empty exactly when Chrome printed a blank page. They do not paginate; checking page
+breaks still needs a headless print-to-PDF of the story.
 
 **Use `loki:approve`, not `loki:update`, to accept a diff.** `tools/loki.mjs`
 forwards its command straight to the upstream CLI with no story filter, so
@@ -296,3 +306,4 @@ differs, compare the PNG sizes before calling it a regression.
 [#1815]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1815
 [#1893]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1893
 [#1952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1952
+[#2230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2230

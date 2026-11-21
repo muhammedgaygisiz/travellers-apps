@@ -58,6 +58,7 @@ export const OPERATOR_ACTIONS = [
   'hideReviewAsOperator',
   'imageModerationBackfill',
   'issueTableQrTokens',
+  'linkBiteToMenuItem',
   'migrateRestaurantOwnerIds',
   'rebuildBiteCountries',
   'recomputeMenuItemStats',

@@ -2,11 +2,15 @@ import { MenuApiService } from '../menu-api.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { of } from 'rxjs';
 import type { Menu } from 'model';
 import * as getMenuByIdUtil from '../utils/get-menu-by-id';
 
 jest.mock('../utils/get-menu-by-id');
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
 
 /**
  * Named rather than automocked, because the automock leaves `FieldValue`
@@ -19,6 +23,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     getDocument: jest.fn(),
     updateDocument: jest.fn(),
+    getCollection: jest.fn(),
   },
   FieldValue: { delete: jest.fn(() => ({ __type__: 'delete' })) },
 }));
@@ -284,6 +289,62 @@ describe(MenuApiService.name, () => {
         'Cannot save a menu without the restaurant it belongs to',
       );
       expect(updateDocumentSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  /** The business app's Guest Bites page (GitHub issue #2216). */
+  describe('loadBitesForRestaurant', () => {
+    it("reads the restaurant's Bites by one filter and orders them newest first", async () => {
+      (FirebaseFirestore.getCollection as jest.Mock).mockResolvedValue({
+        snapshots: [
+          { id: 'old', data: { name: 'Old', createdAtTimestamp: 1 } },
+          { id: 'gone', data: undefined },
+          { id: 'new', data: { name: 'New', createdAtTimestamp: 2 } },
+        ],
+      });
+
+      const bites = await service.loadBitesForRestaurant('restaurant-1');
+
+      expect(bites.map(({ id }) => id)).toEqual(['new', 'old']);
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reference: 'bites',
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'restaurantId',
+                opStr: '==',
+                value: 'restaurant-1',
+              },
+            ],
+          },
+        }),
+      );
+    });
+
+    it('reads nothing without a restaurant', async () => {
+      (FirebaseFirestore.getCollection as jest.Mock).mockClear();
+
+      await expect(service.loadBitesForRestaurant('')).resolves.toEqual([]);
+      expect(FirebaseFirestore.getCollection).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('linkBiteToMenuItem', () => {
+    it('calls the callable and returns its answer', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { biteId: 'b1', menuItemId: 'm1' },
+      });
+
+      await expect(
+        service.linkBiteToMenuItem({ biteId: 'b1', menuItemId: 'm1' }),
+      ).resolves.toEqual({ biteId: 'b1', menuItemId: 'm1' });
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'linkBiteToMenuItem',
+        data: { biteId: 'b1', menuItemId: 'm1' },
+      });
     });
   });
 });

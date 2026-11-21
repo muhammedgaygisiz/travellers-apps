@@ -638,5 +638,21 @@
   "menu-confirm-own": "This is our menu",
   "menu-confirm-own-title": "Confirm this is your menu?",
   "menu-confirm-own-message": "Guests will no longer be told the menu comes from other guests’ Bites. Check every dish and price first: confirming says they are all yours, including the ones you haven’t edited. This can’t be undone.",
-  "menu-confirmed-as-own": "Menu confirmed as yours"
+  "menu-confirmed-as-own": "Menu confirmed as yours",
+  "restaurant-overview-guest-bites": "Guest Bites",
+  "restaurant-overview-guest-bites-count": "{{count}} to link",
+  "guest-bites": "Guest Bites",
+  "guest-bites-intro": "Bites guests wrote about your restaurant that aren't linked to a dish yet. Link each one to the dish it's about, so it counts for that dish on your menu.",
+  "guest-bites-empty": "Every Bite is linked to a dish or marked as not on the menu.",
+  "guest-bites-suggested": "Suggested: {{dish}}",
+  "guest-bites-no-match": "No dish with this name",
+  "guest-bites-link": "Link",
+  "guest-bites-choose-dish": "Choose dish",
+  "guest-bites-not-on-menu": "Not on the menu",
+  "guest-bites-not-on-menu-confirm-title": "Not on the menu?",
+  "guest-bites-not-on-menu-confirm-message": "“{{name}}” leaves this list and won't count for any dish. The Bite itself stays as the guest wrote it.",
+  "guest-bites-choose-title": "Which dish is this?",
+  "guest-bites-choose-variant": "Variant",
+  "guest-bites-choose-variant-unsure": "Not sure",
+  "guest-bites-saved": "Saved"
 }

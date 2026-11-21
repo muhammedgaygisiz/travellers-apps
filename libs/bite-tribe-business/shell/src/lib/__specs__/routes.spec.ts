@@ -182,6 +182,8 @@ describe('business ROUTES', () => {
       'restaurant/:restaurantId',
       'restaurant/:restaurantId/edit/:section',
       'restaurant/:restaurantId/menu/:menuId',
+      // Guest Bites (issue #2216): the owner's, like the menu editor.
+      'restaurant/:restaurantId/menu/:menuId/guest-bites',
       'restaurant/:restaurantId/staff',
       'restaurant/:restaurantId/floor-plan',
       'restaurant/:restaurantId/floor-plan/qr-codes',

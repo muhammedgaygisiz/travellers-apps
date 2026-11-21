@@ -259,3 +259,40 @@ describe('initial menu currency', () => {
     expect(menu.categories[0].items[0].price).toBe(13);
   });
 });
+
+/** See GitHub issue #2216. */
+describe('initial menu links to its Bites', () => {
+  it('names the item each Bite was grouped into', () => {
+    const menu = buildInitialMenu([
+      { id: 'b1', name: 'Margherita', price: 12 },
+      { id: 'b2', name: 'margherita ', price: 14 },
+      { id: 'b3', name: 'Tiramisu', price: 7 },
+    ]);
+    const [margherita, tiramisu] = menu.categories[0].items;
+
+    expect(menu.menuItemIdByBiteId).toEqual({
+      b1: margherita.id,
+      b2: margherita.id,
+      b3: tiramisu.id,
+    });
+  });
+
+  it('links a Bite whose price did not count, because the dish is the same', () => {
+    const menu = buildInitialMenu([
+      { id: 'b1', name: 'Margherita', price: 12, currency: 'CHF' },
+      { id: 'b2', name: 'Margherita', price: 14, currency: 'CHF' },
+      { id: 'b3', name: 'Margherita', price: 40, currency: 'EUR' },
+    ]);
+
+    expect(menu.menuItemIdByBiteId['b3']).toBe(menu.categories[0].items[0].id);
+  });
+
+  it('links nothing for a Bite without a usable name or without an id', () => {
+    const menu = buildInitialMenu([
+      { id: 'b1', name: '  ', price: 12 },
+      { name: 'Margherita', price: 12 },
+    ]);
+
+    expect(menu.menuItemIdByBiteId).toEqual({});
+  });
+});

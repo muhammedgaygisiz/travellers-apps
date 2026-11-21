@@ -15,6 +15,8 @@ describe(MenuDataAccessService.name, () => {
     confirmMenuAsOwn: jest.Mock;
     loadMenuItemStats: jest.Mock;
     loadBitesForMenuItem: jest.Mock;
+    loadBitesForRestaurant: jest.Mock;
+    linkBiteToMenuItem: jest.Mock;
   };
   let storeMock: {
     bite$: Observable<unknown>;
@@ -33,6 +35,8 @@ describe(MenuDataAccessService.name, () => {
       confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
       loadMenuItemStats: jest.fn().mockResolvedValue({}),
       loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
+      loadBitesForRestaurant: jest.fn().mockResolvedValue([]),
+      linkBiteToMenuItem: jest.fn().mockResolvedValue({}),
     };
     storeMock = {
       bite$: of(),
@@ -210,6 +214,26 @@ describe(MenuDataAccessService.name, () => {
       expect(apiMock.loadBitesForMenuItem).toHaveBeenCalledWith(
         'item-margherita',
       );
+    });
+  });
+
+  /** The business app's Guest Bites page (GitHub issue #2216). */
+  describe('guest Bites', () => {
+    it('reads the Bites of the restaurant on the route', async () => {
+      await service.loadBitesForRestaurant();
+
+      expect(apiMock.loadBitesForRestaurant).toHaveBeenCalledWith(
+        'restaurant-1',
+      );
+    });
+
+    it('passes a link through to the api', async () => {
+      await service.linkBiteToMenuItem({ biteId: 'b1', notOnMenu: true });
+
+      expect(apiMock.linkBiteToMenuItem).toHaveBeenCalledWith({
+        biteId: 'b1',
+        notOnMenu: true,
+      });
     });
   });
 });

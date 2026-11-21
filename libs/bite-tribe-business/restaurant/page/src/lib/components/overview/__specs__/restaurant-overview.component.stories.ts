@@ -74,3 +74,11 @@ export const NewRestaurant: Story = {
     } as Restaurant,
   },
 };
+
+/**
+ * Guests' Bites waiting for a link to a dish (GitHub issue #2216): the count
+ * on the Guest Bites button.
+ */
+export const GuestBitesToLink: Story = {
+  args: { guestBitesToLink: 4 },
+};

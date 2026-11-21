@@ -17,6 +17,8 @@ import {
   GooglePlace,
   Like,
   Link,
+  LinkBiteToMenuItemRequest,
+  LinkBiteToMenuItemResult,
   Menu,
   PlaceDetails,
   PublicUser,
@@ -306,6 +308,18 @@ export class BiteTribeApiService {
   /** The Bites written about one dish, newest first. */
   loadBitesForMenuItem(menuItemId: string): Promise<Bite[]> {
     return this.menuApiService.loadBitesForMenuItem(menuItemId);
+  }
+
+  /** Every Bite about one restaurant, newest first (issue #2216). */
+  loadBitesForRestaurant(restaurantId: string): Promise<Bite[]> {
+    return this.menuApiService.loadBitesForRestaurant(restaurantId);
+  }
+
+  /** An owner's link between a guest's Bite and a dish (issue #2216). */
+  linkBiteToMenuItem(
+    request: LinkBiteToMenuItemRequest,
+  ): Promise<LinkBiteToMenuItemResult> {
+    return this.menuApiService.linkBiteToMenuItem(request);
   }
 
   saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {

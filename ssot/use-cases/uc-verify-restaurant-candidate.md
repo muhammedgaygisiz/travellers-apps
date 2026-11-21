@@ -421,6 +421,9 @@ V22  SYS  creates the Menu
 V23  SYS  links the unassigned evidence Bites to the Restaurant
           └─→ DB   bite.restaurantId = restaurantId, for every surviving Bite that
                    carries none
+          └─→ DB   bite.menuItemId = the Initial Menu item built from the Bite's
+                   dish name, with menuItemLinkedBy: 'verification', unless the
+                   Bite is already linked to a menu item ([#2216])
           └─→ DB   skippedBiteIds on the Candidate, naming every Bite left untouched
           REF:UC-MBR   must define managing a Bite's Restaurant assignment outside this flow;
                        the conflict behaviour inside it is decided by R-20
@@ -671,3 +674,4 @@ discovered in review.
 [#1631]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1631
 [#2172]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2172
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

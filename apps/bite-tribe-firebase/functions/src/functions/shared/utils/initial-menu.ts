@@ -1,6 +1,6 @@
 import { currencyForRegion } from './currency-by-region';
 import { createMenuEntityId } from './menu-ids';
-import { normalizePlaceName } from './restaurant-candidates';
+import { dishNameKey } from './dish-name-key';
 
 /**
  * Title of the single category that candidate verification derives from Bites.
@@ -15,6 +15,8 @@ import { normalizePlaceName } from './restaurant-candidates';
 export const INITIAL_MENU_CATEGORY_TITLE = 'Dishes';
 
 export interface InitialMenuBite {
+  /** The Bite's document id, so its menu item can be written back to it. */
+  id?: string;
   name?: string;
   price?: number;
   /** The currency the Bite's author paid in, as an ISO 4217 code. */
@@ -49,6 +51,13 @@ export interface InitialMenu {
   categories: InitialMenuCategory[];
   /** Absent when neither the Bites nor their country state one. */
   currency?: string;
+  /**
+   * The menu item each Bite was grouped into, by Bite id (GitHub issue #2216),
+   * so verification can link every Bite to the dish it is about. Every Bite
+   * with an id and a name is here, including those whose price did not count
+   * toward the item: the dish is the same, only the price evidence differs.
+   */
+  menuItemIdByBiteId: Record<string, string>;
 }
 
 interface InitialMenuItemDraft {
@@ -56,17 +65,14 @@ interface InitialMenuItemDraft {
   biteCount: number;
   priceSum: number;
   pricedBiteCount: number;
+  biteIds: string[];
 }
 
 /**
- * Groups Bites that describe the same dish. Place-name normalization already
- * implements the matching rules the candidate workflow uses, so dish names
- * reuse it instead of duplicating a second normalizer. Names that normalize to
- * nothing, such as non-latin scripts, fall back to the lowercased raw name so
- * they are not all grouped into one item.
+ * Groups Bites that describe the same dish, by {@link dishNameKey}: the key
+ * the business app also suggests a dish by (GitHub issue #2216).
  */
-const getMenuItemKey = (name: string): string =>
-  normalizePlaceName(name) || name.toLocaleLowerCase();
+export const getMenuItemKey = dishNameKey;
 
 const isUsablePrice = (price: unknown): price is number =>
   typeof price === 'number' && Number.isFinite(price) && price > 0;
@@ -120,7 +126,13 @@ const toInitialMenuItem = (draft: InitialMenuItemDraft): InitialMenuItem => ({
 export const buildInitialMenuItems = (
   bites: InitialMenuBite[],
   countsPrice: (bite: InitialMenuBite) => boolean = () => true,
-): InitialMenuItem[] => {
+): InitialMenuItem[] =>
+  draftInitialMenuItems(bites, countsPrice).map(({ item }) => item);
+
+const draftInitialMenuItems = (
+  bites: InitialMenuBite[],
+  countsPrice: (bite: InitialMenuBite) => boolean,
+): { item: InitialMenuItem; biteIds: string[] }[] => {
   const drafts = new Map<string, InitialMenuItemDraft>();
 
   bites.forEach((bite) => {
@@ -136,9 +148,14 @@ export const buildInitialMenuItems = (
       biteCount: 0,
       priceSum: 0,
       pricedBiteCount: 0,
+      biteIds: [],
     };
 
     draft.biteCount += 1;
+
+    if (bite.id) {
+      draft.biteIds.push(bite.id);
+    }
 
     if (isUsablePrice(bite.price) && countsPrice(bite)) {
       draft.priceSum += bite.price;
@@ -153,7 +170,10 @@ export const buildInitialMenuItems = (
       (left, right) =>
         right.biteCount - left.biteCount || left.name.localeCompare(right.name),
     )
-    .map(toInitialMenuItem);
+    .map((draft) => ({
+      item: toInitialMenuItem(draft),
+      biteIds: draft.biteIds,
+    }));
 };
 
 /**
@@ -212,10 +232,18 @@ export const buildInitialMenu = (bites: InitialMenuBite[]): InitialMenu => {
     return biteCurrency ? biteCurrency === currency : !anyPricedBiteHasCurrency;
   };
 
-  const items = buildInitialMenuItems(bites, countsPrice);
+  const drafts = draftInitialMenuItems(bites, countsPrice);
+  const items = drafts.map(({ item }) => item);
   const categories = items.length
     ? [{ id: createMenuEntityId(), title: INITIAL_MENU_CATEGORY_TITLE, items }]
     : [];
+  const menuItemIdByBiteId = Object.fromEntries(
+    drafts.flatMap(({ item, biteIds }) =>
+      biteIds.map((biteId) => [biteId, item.id]),
+    ),
+  );
 
-  return currency ? { categories, currency } : { categories };
+  return currency
+    ? { categories, currency, menuItemIdByBiteId }
+    : { categories, menuItemIdByBiteId };
 };

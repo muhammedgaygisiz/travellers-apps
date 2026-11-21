@@ -61,4 +61,13 @@
     gap: 0.5rem;
     margin-top: 1rem;
   }
+
+  .count {
+    margin-inline-start: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    background: var(--ion-color-success);
+    color: var(--ion-color-success-contrast);
+  }
 }

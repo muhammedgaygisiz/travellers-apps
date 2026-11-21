@@ -275,6 +275,25 @@ export const ROUTES: Routes = withAuthRoutes([
       ownedRestaurantGuard,
     ],
   },
+  /**
+   * Guest Bites (GitHub issue #2216): the restaurant's Bites that are linked
+   * to no dish yet. Under the menu, because linking is about the menu's
+   * dishes and the route's `menuId` is what loads them. The owner's route,
+   * like the menu editor; `linkBiteToMenuItem` checks the ownership again.
+   */
+  {
+    path: 'restaurant/:restaurantId/menu/:menuId/guest-bites',
+    title: 'Guest Bites',
+    loadComponent: () =>
+      import('bite-tribe-business/edit-menu').then(
+        (m) => m.GuestBitesContainer,
+      ),
+    canActivate: [
+      authGuard,
+      roleGuard('business', 'staff'),
+      ownedRestaurantGuard,
+    ],
+  },
   {
     path: 'restaurant/:restaurantId/menu/:menuId',
     title: 'Menu',

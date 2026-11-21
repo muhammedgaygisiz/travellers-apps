@@ -15,7 +15,7 @@ page.
 
 Turn a candidate's evidence Bites into a starting Menu, so verification never leaves a
 Restaurant with nothing to show: one item per distinct dish name, priced at the average
-of the usable prices reported for it, in a single `Bites` category - so the business
+of the usable prices reported for it, in a single `Dishes` category - so the business
 owner edits from something instead of an empty menu.
 
 ## Actors

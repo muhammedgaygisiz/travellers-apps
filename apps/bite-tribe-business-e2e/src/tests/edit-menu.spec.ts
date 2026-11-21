@@ -35,7 +35,11 @@ interface MenuFixture {
  * #1377, opening such a category made the editor save the menu on load and
  * leave, because the stored `undefined` differed from the form's `''`.
  */
-const seedMenu = async (page: Page, runId: string): Promise<MenuFixture> => {
+const seedMenu = async (
+  page: Page,
+  runId: string,
+  { derivedFromBites = false } = {},
+): Promise<MenuFixture> => {
   const fixture = {
     restaurantId: `menu-restaurant-${runId}`,
     restaurantName: `Menu Bistro ${runId}`,
@@ -49,6 +53,12 @@ const seedMenu = async (page: Page, runId: string): Promise<MenuFixture> => {
   await seedFirestoreDocument(page, `menus/${fixture.menuId}`, {
     id: { stringValue: fixture.menuId },
     restaurantId: { stringValue: fixture.restaurantId },
+    ...(derivedFromBites
+      ? {
+          derivedFromBites: { booleanValue: true },
+          currency: { stringValue: 'CHF' },
+        }
+      : {}),
     categories: {
       arrayValue: {
         values: [
@@ -190,6 +200,7 @@ test.describe('Edit a menu in the business app', () => {
 
   const start = async (
     page: Page,
+    options: { derivedFromBites?: boolean } = {},
   ): Promise<{
     fixture: MenuFixture;
     editMenu: EditMenuPage;
@@ -201,6 +212,7 @@ test.describe('Edit a menu in the business app', () => {
     const fixture = await seedMenu(
       page,
       `${Date.now()}-${test.info().parallelIndex}`,
+      options,
     );
     seeded.push(
       `restaurants/${fixture.restaurantId}`,
@@ -375,5 +387,40 @@ test.describe('Edit a menu in the business app', () => {
         timeout: 15_000,
       })
       .toEqual([]);
+  });
+
+  /** See GitHub issue #2214. */
+  test('takes a menu built from Bites as the restaurant’s only when the owner confirms it', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { derivedFromBites: true });
+    const notice = page.getByTestId('menu-derived-notice');
+    await expect(notice).toBeVisible();
+
+    // A save is not the confirmation.
+    await editMenu.openCategory(fixture.categoryId);
+    await editMenu.categoryTitle.fill('Pizze');
+    await editMenu.saveCategory.click();
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(async () => (await storedCategory(page, fixture.menuId))?.title, {
+        timeout: 15_000,
+      })
+      .toBe('Pizze');
+    expect(
+      (await getFirestoreDocument(page, `menus/${fixture.menuId}`))?.[
+        'derivedFromBites'
+      ],
+    ).toBe(true);
+    await expect(notice).toBeVisible();
+
+    await editMenu.confirmOwnMenu();
+
+    await expect(notice).toBeHidden();
+    const menu = await getFirestoreDocument(page, `menus/${fixture.menuId}`);
+    expect(menu?.['derivedFromBites']).toBeUndefined();
+    expect(menu?.['currency']).toBe('CHF');
+    expect((menu?.['categories'] as StoredCategory[])[0].items).toHaveLength(2);
   });
 });

@@ -188,7 +188,7 @@ describe('verifyRestaurantCandidate', () => {
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),
@@ -421,7 +421,7 @@ describe('verifyRestaurantCandidate', () => {
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),

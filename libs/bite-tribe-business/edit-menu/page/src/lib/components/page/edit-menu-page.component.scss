@@ -30,6 +30,29 @@
     flex: 0 1 16rem;
   }
 
+  .derived-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--ion-color-step-150, #d7d8da);
+    background: var(--ion-background-color-step-50, #f2f2f2);
+
+    ion-icon {
+      flex: 0 0 auto;
+      font-size: 1.25rem;
+      color: var(--ion-color-medium-shade);
+    }
+
+    p {
+      flex: 1 1 16rem;
+      margin: 0;
+    }
+  }
+
   .layout {
     display: flex;
     align-items: flex-start;
@@ -62,7 +85,8 @@
    */
   @media (max-width: 991px) {
     .editing .list,
-    .editing .page-header {
+    .editing .page-header,
+    .editing .derived-notice {
       display: none;
     }
 

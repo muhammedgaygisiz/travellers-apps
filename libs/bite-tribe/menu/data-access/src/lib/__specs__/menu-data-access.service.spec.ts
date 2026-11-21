@@ -12,6 +12,7 @@ describe(MenuDataAccessService.name, () => {
   let service: MenuDataAccessService;
   let apiMock: {
     saveMenu: jest.Mock;
+    confirmMenuAsOwn: jest.Mock;
     loadMenuItemStats: jest.Mock;
     loadBitesForMenuItem: jest.Mock;
   };
@@ -29,6 +30,7 @@ describe(MenuDataAccessService.name, () => {
   beforeEach(() => {
     apiMock = {
       saveMenu: jest.fn(),
+      confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
       loadMenuItemStats: jest.fn().mockResolvedValue({}),
       loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
     };
@@ -139,6 +141,18 @@ describe(MenuDataAccessService.name, () => {
       service.saveMenu(menu);
 
       expect(apiMock.saveMenu).toHaveBeenCalledWith(menu, 'restaurant-1');
+    });
+  });
+
+  /** See GitHub issue #2214. */
+  describe('confirmMenuAsOwn', () => {
+    it('confirms the menu for the restaurant from the route', async () => {
+      await service.confirmMenuAsOwn('menu-1');
+
+      expect(apiMock.confirmMenuAsOwn).toHaveBeenCalledWith(
+        'menu-1',
+        'restaurant-1',
+      );
     });
   });
 

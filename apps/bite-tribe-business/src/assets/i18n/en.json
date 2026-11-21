@@ -633,5 +633,10 @@
   "menu-category-delete-confirm-message-dishes": "Everything in it is deleted too: its dishes ({{count}}), their variants and its extras. Orders already sent keep their dishes. This can’t be undone.",
   "menu-reorder": "Drag to reorder",
   "menu-sold-out": "Sold out",
-  "menu-available-label": "{{name}} available"
+  "menu-available-label": "{{name}} available",
+  "menu-derived-owner-notice": "We put this menu together from guests’ Bites, and its prices are averages of what they paid. Guests are told so until you confirm it is your menu.",
+  "menu-confirm-own": "This is our menu",
+  "menu-confirm-own-title": "Confirm this is your menu?",
+  "menu-confirm-own-message": "Guests will no longer be told the menu comes from other guests’ Bites. Check every dish and price first: confirming says they are all yours, including the ones you haven’t edited. This can’t be undone.",
+  "menu-confirmed-as-own": "Menu confirmed as yours"
 }

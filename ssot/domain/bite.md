@@ -298,12 +298,12 @@ Supported today:
 - Review Bite.
 - Add Bite to bucket list.
 - Show Bites by restaurant.
+- Create a Bite from a menu item, from the consumer menu or from a table order; the Bite records `menuItemId` (and `variantId` from an order).
 - Show Bites by user.
 - Show Bites in BiteTrail and marketplace-related journeys.
 
 Related future or expanding use cases:
 
-- Create a Bite from a menu item.
 - Improve Bite quality checks.
 - Detect duplicate Bites.
 - Match Bites to restaurants or menu items more reliably.
@@ -314,7 +314,7 @@ Related future or expanding use cases:
 - Search
 - Discovery feed
 - Restaurant menu
-- Menu items linked to Bites
+- Menu items linked to Bites — shipped in [#1113]
 - Marketplace
 - BiteTrail gamification
 - Onboarding assistant
@@ -384,7 +384,7 @@ images/bites/{biteId}/{filename}
 - Image upload and image path synchronization are separate steps.
 - Image upload can fail or become fragile when the app is backgrounded.
 - City and country are enriched asynchronously and may be missing on older or failed-enrichment Bite documents.
-- Menu item linking is not part of the current Bite model.
+- Only a Bite created from a menu item points at one. Any other Bite names its dish as free text (`name`) and is never matched to a menu item afterwards, so the same dish can appear on the menu once and under several names in Bites.
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.

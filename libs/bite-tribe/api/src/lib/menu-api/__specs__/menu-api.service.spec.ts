@@ -249,4 +249,41 @@ describe(MenuApiService.name, () => {
       expect(updateDocumentSpy).not.toHaveBeenCalled();
     });
   });
+
+  /** See GitHub issue #2214. */
+  describe('confirmMenuAsOwn', () => {
+    it('removes derivedFromBites and writes nothing else of the menu', async () => {
+      const deletion = { __type__: 'delete' };
+      (FieldValue.delete as jest.Mock).mockReturnValue(deletion);
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+
+      await service.confirmMenuAsOwn('menuId', 'restaurantId');
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'menus/menuId',
+        data: {
+          restaurantId: 'restaurantId',
+          derivedFromBites: deletion,
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+
+    it('refuses a confirmation that names no restaurant', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      await expect(
+        service.confirmMenuAsOwn('menuId', undefined),
+      ).rejects.toThrow(
+        'Cannot save a menu without the restaurant it belongs to',
+      );
+      expect(updateDocumentSpy).not.toHaveBeenCalled();
+    });
+  });
 });

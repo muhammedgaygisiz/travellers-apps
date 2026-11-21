@@ -34,10 +34,19 @@
           [attr.data-testid]="'restaurant-section-' + row.section"
           (click)="openSection.emit(row.section)"
         >
+          <!--
+            A row the setup progress does not count shows no status, so the
+            ticks add up to its "N of M done" (#2221). The hidden icon keeps
+            the row's text in line with the others.
+          -->
           <ion-icon
             slot="start"
+            [class.no-status]="!row.counted"
             [name]="row.missing ? 'ellipse-outline' : 'checkmark-circle'"
             [color]="row.missing ? 'warning' : 'success'"
+            [attr.data-status]="
+              row.counted ? (row.missing ? 'missing' : 'done') : null
+            "
             aria-hidden="true"
           />
           <ion-label>
@@ -54,6 +63,29 @@
               } @else {
                 {{ 'restaurant-overview-not-set' | transloco }}
               }
+            </p>
+          </ion-label>
+        </ion-item>
+      }
+      @if (menuRow(); as menu) {
+        <!-- "Menu reviewed" is counted, so it has a row too (#2221). -->
+        <ion-item
+          button
+          detail
+          data-testid="restaurant-section-menu"
+          (click)="openMenu()"
+        >
+          <ion-icon
+            slot="start"
+            [name]="menu.missing ? 'ellipse-outline' : 'checkmark-circle'"
+            [color]="menu.missing ? 'warning' : 'success'"
+            [attr.data-status]="menu.missing ? 'missing' : 'done'"
+            aria-hidden="true"
+          />
+          <ion-label>
+            <h2>{{ 'restaurant-overview-menu' | transloco }}</h2>
+            <p [class.missing]="menu.missing">
+              {{ menu.valueKey | transloco }}
             </p>
           </ion-label>
         </ion-item>

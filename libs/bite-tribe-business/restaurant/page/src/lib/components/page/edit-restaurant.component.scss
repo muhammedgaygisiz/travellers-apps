@@ -18,28 +18,52 @@
 }
 
 /**
- * Printing the menu code, and nothing else on this page
- * (GitHub issue #370).
+ * Printing the menu code (GitHub issues #370, #2230).
  *
- * `visibility` rather than `display`, because the block being kept is nested
- * several levels inside the ones being dropped, and `display: none` on an
- * ancestor takes its descendants with it whatever they ask for. Hidden
- * elements still occupy their boxes, so the code is lifted out of the flow and
- * put at the top of the sheet - otherwise it prints wherever the invisible
- * form left it, which is most of the way down page two.
+ * The menu code view holds the restaurant's name, the section title and the
+ * code card, so printing drops the first two and the app's header and leaves
+ * the card in normal flow. Until #2183 the code was a block on one long page,
+ * hidden around with `visibility` and lifted to the top with `position:
+ * absolute`; in a section view that put it inside Ionic's scroll container,
+ * which clips to one viewport, and Chrome printed a blank page.
  *
- * The document-level releases that make any Ionic page printable are in
- * `apps/bite-tribe-business/src/global.scss`.
+ * The rest is the same release the table QR sheets need (issue #1087): this
+ * host is a block, and both `ion-content` elements and their shadow scroll
+ * part go back into normal flow, because Ionic gives the scroll part
+ * `contain: size` and an absolute position. The `html`, `body`, `ion-app` and
+ * `ta-page` half is in the business app's `global.scss`.
  */
+:host {
+  display: block;
+}
+
 @media print {
-  :host {
-    visibility: hidden;
+  :host ::ng-deep ion-header,
+  :host ::ng-deep ion-footer,
+  :host .restaurant-name,
+  :host h1 {
+    display: none !important;
   }
 
-  bt-business-menu-qr {
-    visibility: visible;
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline: 0;
+  :host ::ng-deep .ion-page,
+  :host ::ng-deep ion-content {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    contain: none !important;
+  }
+
+  :host ::ng-deep ion-content {
+    --offset-top: 0 !important;
+    --offset-bottom: 0 !important;
+    --background: #fff;
+  }
+
+  :host ::ng-deep ion-content::part(scroll) {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    contain: none !important;
   }
 }

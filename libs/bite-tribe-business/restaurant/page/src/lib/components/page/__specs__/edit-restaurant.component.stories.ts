@@ -104,6 +104,17 @@ export const TableOrdering: Story = { args: { section: 'table-ordering' } };
 export const MenuCode: Story = { args: { section: 'menu-code' } };
 
 /**
+ * What Print code puts on paper (GitHub issue #2230): the code, the
+ * restaurant's name and nothing of the page around it. Captured in print
+ * media, so a change that blanks the printout fails the visual suite; it
+ * printed one empty page once the code moved into its own section view.
+ */
+export const MenuCodePrinted: Story = {
+  args: { section: 'menu-code' },
+  parameters: { loki: { media: 'print' } },
+};
+
+/**
  * The links of a restaurant an operator has just handed over: there are none
  * yet, so the section shows its empty state.
  */

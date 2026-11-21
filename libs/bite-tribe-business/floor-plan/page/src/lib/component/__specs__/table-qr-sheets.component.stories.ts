@@ -81,6 +81,16 @@ type Story = StoryObj<TableQrSheetsComponent>;
 export const StickerSheet: Story = {};
 
 /**
+ * The sticker sheet as printed (GitHub issue #2230): the page framing and the
+ * controls gone, the codes kept. Captured in print media because the print
+ * rules of this page and of the restaurant's menu code share the business
+ * app's global release, and a change to one can blank the other.
+ */
+export const StickerSheetPrinted: Story = {
+  parameters: { loki: { media: 'print' } },
+};
+
+/**
  * Fifteen tables, which is two sheets of label paper.
  *
  * The preview draws the pages the printer will produce rather than one long

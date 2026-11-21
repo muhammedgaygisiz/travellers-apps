@@ -16,6 +16,7 @@ import {
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import {
+  isOpenDay,
   linkNetworkName,
   Restaurant,
   restaurantCategoriesOf,
@@ -134,9 +135,8 @@ export const overviewRow = (
         : row();
     }
     case 'opening-hours': {
-      const openDays = (restaurant.openingHours ?? []).filter(
-        (day) => day.isOpen,
-      ).length;
+      // The days guests are shown as open, and no others (#2227).
+      const openDays = (restaurant.openingHours ?? []).filter(isOpenDay).length;
 
       return restaurant.openingHours?.length
         ? row({

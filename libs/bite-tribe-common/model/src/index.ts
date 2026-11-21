@@ -38,6 +38,8 @@ export type * from './lib/profile-meta-data';
 export type * from './lib/create-and-upload-image-callback-params';
 export type * from './lib/bite-trail-rating';
 export type * from './lib/opening-hours';
+/** A value export: when a day counts as open (#2227). */
+export * from './lib/open-day';
 export type * from './lib/address';
 export type * from './lib/place-details';
 export type * from './lib/search-result';

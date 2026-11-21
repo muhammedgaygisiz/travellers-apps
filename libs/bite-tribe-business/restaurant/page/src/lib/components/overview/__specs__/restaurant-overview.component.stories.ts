@@ -23,11 +23,31 @@ const trattoria: Restaurant = {
   menuReviewedAtTimestamp: 1,
   openingHours: [
     { day: 'monday', isOpen: false, timeRanges: [] },
-    { day: 'tuesday', isOpen: true, timeRanges: [] },
-    { day: 'wednesday', isOpen: true, timeRanges: [] },
-    { day: 'thursday', isOpen: true, timeRanges: [] },
-    { day: 'friday', isOpen: true, timeRanges: [] },
-    { day: 'saturday', isOpen: true, timeRanges: [] },
+    {
+      day: 'tuesday',
+      isOpen: true,
+      timeRanges: [{ from: '12:00', to: '22:00' }],
+    },
+    {
+      day: 'wednesday',
+      isOpen: true,
+      timeRanges: [{ from: '12:00', to: '22:00' }],
+    },
+    {
+      day: 'thursday',
+      isOpen: true,
+      timeRanges: [{ from: '12:00', to: '22:00' }],
+    },
+    {
+      day: 'friday',
+      isOpen: true,
+      timeRanges: [{ from: '12:00', to: '22:00' }],
+    },
+    {
+      day: 'saturday',
+      isOpen: true,
+      timeRanges: [{ from: '12:00', to: '22:00' }],
+    },
     { day: 'sunday', isOpen: false, timeRanges: [] },
   ],
   socialMediaLinks: [

@@ -208,6 +208,7 @@ all be reviewed for the first time.
 - Issue [#2224] added removing a link, left a blank link row out of the save instead of letting it block one, put the links' text in Transloco, and replaced Twitter with X and added TikTok in the network list. Part of epic [#2123].
 - Issue [#2225] put every section save under a "Saving…" overlay and ignored a second press while one runs. Part of epic [#2123].
 - Issue [#2226] opened the position map at street level instead of the world, said how to move the pin, and opened a Restaurant without a position on the device's position. The fix is in the shared map, so the consumer app's Bite position picker opens the same way. Part of epic [#2123].
+- Issue [#2227] made an open day need its times: the editor asks for them and will not save without, and the overview counts only the days guests are shown as open. Part of epic [#2123].
 
 ## Related Domains
 
@@ -256,3 +257,4 @@ all be reviewed for the first time.
 [#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
 [#2225]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2225
 [#2226]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2226
+[#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227

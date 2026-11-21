@@ -372,6 +372,79 @@ describe('RestaurantComponent', () => {
    * The kind of venue, as the restaurant states it (issue #2131). Absent is a
    * restaurant that has not said, and shows nothing.
    */
+  /**
+   * A day is open only with its times, the rule the owner's overview counts
+   * by (GitHub issue #2227).
+   */
+  describe('opening hours', () => {
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TranslocoTestingModule.forRoot({
+            langs: { en: { closed: 'Closed' } },
+            translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+            preloadLangs: true,
+          }),
+        ],
+        providers: [provideIonicAngular(getIonicConfig())],
+      });
+
+      fixture = TestBed.createComponent(RestaurantComponent);
+      componentRef = fixture.componentRef;
+    });
+
+    const days = (openingHours: Restaurant['openingHours']): string[] => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Test Restaurant',
+        openingHours,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      return [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll('.day'),
+      ].map((day) => {
+        const ranges = [...day.querySelectorAll('.time-ranges > div')].map(
+          (range) => range.textContent?.trim(),
+        );
+
+        return ranges.length
+          ? ranges.join(' ')
+          : (day.querySelector('.closed')?.textContent?.trim() ?? '');
+      });
+    };
+
+    it('shows a day marked open without times as closed', () => {
+      expect(
+        days([
+          { day: 'wednesday', isOpen: true, timeRanges: [] },
+        ] as Restaurant['openingHours']),
+      ).toEqual(['Closed']);
+    });
+
+    it('shows two ranges and a range across midnight as written', () => {
+      expect(
+        days([
+          {
+            day: 'tuesday',
+            isOpen: true,
+            timeRanges: [
+              { from: '11:00', to: '14:30' },
+              { from: '18:00', to: '23:00' },
+            ],
+          },
+          {
+            day: 'thursday',
+            isOpen: true,
+            timeRanges: [{ from: '22:00', to: '02:00' }],
+          },
+          { day: 'monday', isOpen: false, timeRanges: [] },
+        ] as Restaurant['openingHours']),
+      ).toEqual(['11:00–14:30 18:00–23:00', '22:00–02:00', 'Closed']);
+    });
+  });
+
   describe('categories', () => {
     beforeEach(() => {
       TestBed.resetTestingModule();

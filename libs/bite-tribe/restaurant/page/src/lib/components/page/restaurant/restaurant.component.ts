@@ -20,6 +20,7 @@ import {
   LikeClick,
   linkNetworkIcon,
   linkNetworkName,
+  openTimeRangesOf,
   Menu,
   MenuItem,
   Restaurant,
@@ -61,6 +62,8 @@ export class RestaurantComponent {
   /** How each link is shown: its logo and name (#2224). */
   protected readonly linkNetworkIcon = linkNetworkIcon;
   protected readonly linkNetworkName = linkNetworkName;
+  /** A day's hours as guests see them (#2227). */
+  protected readonly openTimeRangesOf = openTimeRangesOf;
 
   bite = input<Bite>();
   bites = input<Bite[]>();

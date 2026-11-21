@@ -113,7 +113,10 @@ the position and ordering at the table show none (issue [#2221]). Below the rows
 and the live tables.
 
 Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
-section's fields and its one Save. A successful save returns to the overview,
+section's fields and its one Save. Save stays disabled while the fields still
+hold what is stored, as in the menu editor, and enables again only when they
+differ (issue [#2222]); the order of the chosen categories does not count, and
+the time zone pre-filled for a restaurant that never set one is not a change. A successful save returns to the overview,
 which reads the Restaurant again and shows the new value; a failed save stays on
 the section with the edit kept, so it can be tried again. The photo is the
 exception that stays: its upload reports its own progress in place. Every item
@@ -200,6 +203,7 @@ all be reviewed for the first time.
 - Issue [#2214] added the owner's confirmation that a menu built from Bites is their own. Part of epic [#2123].
 - Issue [#2216] added Guest Bites, where the owner links guests' Bites to the dishes they are about. Part of epic [#2123].
 - Issue [#2221] made the overview's ticks agree with the setup progress: the menu got a row, and the rows the checklist does not count lost their tick. Part of epic [#2123].
+- Issue [#2222] disabled every section's Save until something changed, and made the Kind of place toast read "Kind of place saved". Part of epic [#2123].
 
 ## Related Domains
 
@@ -243,3 +247,4 @@ all be reviewed for the first time.
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
 [#2221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2221
+[#2222]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2222

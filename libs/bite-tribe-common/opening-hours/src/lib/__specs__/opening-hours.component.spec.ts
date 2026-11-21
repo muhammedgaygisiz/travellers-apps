@@ -162,6 +162,61 @@ describe('OpeningHoursComponent', () => {
     });
   });
 
+  /** GitHub issue #2222: no Save while the schedule is the stored one. */
+  describe('Save without a change', () => {
+    const saveButton = (): { disabled?: boolean } | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        'ion-button[data-testid="save-opening-hours"]',
+      );
+
+    const STORED: DaySchedule[] = [
+      {
+        day: 'tuesday',
+        isOpen: true,
+        timeRanges: [{ from: '10:00', to: '22:00' }],
+      },
+    ];
+
+    it('disables Save for the stored schedule, missing days read as closed', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      expect(saveButton()?.disabled).toBe(true);
+    });
+
+    it('disables Save for a restaurant with no hours until a day opens', () => {
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(true);
+
+      component.schedule.at(0).patchValue({ isOpen: true });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+    });
+
+    it('enables Save once a time changes, and disables it when undone', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      const range = component.getTimeRanges(1).at(0);
+      range.patchValue({ to: '23:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+
+      range.patchValue({ to: '22:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(true);
+    });
+
+    it('enables Save once a time range is added', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      component.addTimeRange(1);
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+    });
+  });
+
   describe('showSubmit', () => {
     // With every day closed by default, the save button is the only ion-button
     // rendered (add/remove-time-range buttons appear only for open days).

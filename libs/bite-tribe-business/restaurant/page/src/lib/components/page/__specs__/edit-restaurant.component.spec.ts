@@ -363,6 +363,157 @@ describe('EditRestaurantComponent', () => {
   });
 
   /** One section at a time (GitHub issue #2183). */
+  /**
+   * Save stays disabled while a section's form holds what is stored, like the
+   * menu editor's (GitHub issue #2222).
+   */
+  describe('Save without a change', () => {
+    const STORED = {
+      id: '1',
+      name: 'Sakura Kitchen',
+      description: 'Ramen since 1990.',
+      categories: ['restaurant', 'fine-dining'],
+      socialMediaLinks: [
+        { network: 'instagram', url: 'https://instagram.com/sakura' },
+      ],
+      address: {
+        street: 'Main St 1',
+        postcode: '1000',
+        city: 'Ljubljana',
+        country: 'Slovenia',
+      },
+      position: { latitude: 46.05, longitude: 14.5 },
+      facilities: { genderNeutralRestroom: true },
+      tableOrdering: { enabled: true, timeZone: 'Europe/Ljubljana' },
+    } as Restaurant;
+
+    const show = (
+      restaurant: Restaurant,
+      section: Parameters<typeof componentRef.setInput>[1] = 'about',
+    ): void => {
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.setInput('section', section);
+      fixture.detectChanges();
+    };
+
+    const saveButton = (testId: string): { disabled?: boolean } | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        `ion-button[data-testid="${testId}"]`,
+      );
+
+    it('counts every section unchanged as it is opened', () => {
+      show(STORED);
+
+      expect(component.unchanged()).toEqual({
+        categories: true,
+        about: true,
+        links: true,
+        address: true,
+        position: true,
+        facilities: true,
+        tableOrdering: true,
+      });
+    });
+
+    it.each([
+      [
+        'categories',
+        (): void =>
+          component.categoriesForm.patchValue({ categories: ['bar'] }),
+      ],
+      [
+        'about',
+        (): void =>
+          component.descriptionForm.patchValue({ description: 'Udon.' }),
+      ],
+      [
+        'links',
+        (): void =>
+          component.links.at(0).patchValue({ url: 'https://sakura.si' }),
+      ],
+      [
+        'address',
+        (): void => component.addressForm.patchValue({ city: 'Bled' }),
+      ],
+      [
+        'position',
+        (): void =>
+          component.positionForm.patchValue({
+            position: { latitude: 46.37, longitude: 14.11 },
+          }),
+      ],
+      [
+        'facilities',
+        (): void =>
+          component.facilitiesForm.patchValue({ genderNeutralRestroom: 'no' }),
+      ],
+      [
+        'tableOrdering',
+        (): void => component.tableOrderingForm.patchValue({ enabled: false }),
+      ],
+    ] as const)('counts %s changed once its value differs', (key, change) => {
+      show(STORED);
+      change();
+
+      expect(component.unchanged()[key]).toBe(false);
+    });
+
+    it('does not count a change of order in the categories', () => {
+      show(STORED);
+      component.categoriesForm.patchValue({
+        categories: ['fine-dining', 'restaurant'],
+      });
+
+      expect(component.unchanged().categories).toBe(true);
+    });
+
+    /** The case #2222 was found on: "Not stated" and Save already enabled. */
+    it('disables the categories Save until the choice differs, and again when it is undone', () => {
+      show({ id: '1', name: 'Sakura Kitchen' } as Restaurant, 'categories');
+      expect(saveButton('save-categories')?.disabled).toBe(true);
+
+      component.categoriesForm.patchValue({ categories: ['bar'] });
+      fixture.detectChanges();
+      expect(saveButton('save-categories')?.disabled).toBe(false);
+
+      component.categoriesForm.patchValue({ categories: [] });
+      fixture.detectChanges();
+      expect(saveButton('save-categories')?.disabled).toBe(true);
+    });
+
+    it.each([
+      ['about', 'save-description'],
+      ['address', 'save-address'],
+      ['facilities', 'save-facilities'],
+      ['table-ordering', 'save-table-ordering'],
+      ['links', 'save-social-media'],
+    ] as const)(
+      'disables the %s Save while nothing changed',
+      (section, testId) => {
+        show(STORED, section);
+
+        expect(saveButton(testId)?.disabled).toBe(true);
+      },
+    );
+
+    /**
+     * An unconfigured restaurant is offered the browser's zone; leaving it
+     * there with ordering off is not a change the owner made.
+     */
+    it('does not count the pre-filled zone of an unconfigured restaurant', () => {
+      show({ id: '1', name: 'Sakura Kitchen' } as Restaurant);
+
+      expect(component.unchanged().tableOrdering).toBe(true);
+    });
+
+    it('counts an added link as a change', () => {
+      show(STORED);
+      component.addSocialMedia();
+
+      expect(component.unchanged().links).toBe(false);
+    });
+  });
+
   describe('section', () => {
     it.each([
       ['about', '[data-testid="restaurant-description"]'],

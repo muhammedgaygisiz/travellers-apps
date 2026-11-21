@@ -146,7 +146,11 @@ const hasRestaurant = (data: DocumentData): boolean => {
     : restaurantId !== undefined && restaurantId !== null;
 };
 
-const toInitialMenuBite = (data: DocumentData): InitialMenuBite => ({
+const toInitialMenuBite = (
+  id: string,
+  data: DocumentData,
+): InitialMenuBite => ({
+  id,
   name: typeof data['name'] === 'string' ? data['name'] : undefined,
   price: typeof data['price'] === 'number' ? data['price'] : undefined,
   currency: typeof data['currency'] === 'string' ? data['currency'] : undefined,
@@ -284,9 +288,9 @@ export const verifyRestaurantCandidateHandler = async (
       const skippedBiteIds = existingBiteSnapshots
         .filter((snapshot) => hasRestaurant(snapshot.data() ?? {}))
         .map((snapshot) => snapshot.ref.id);
-      const { categories, currency } = buildInitialMenu(
+      const { categories, currency, menuItemIdByBiteId } = buildInitialMenu(
         unassignedBiteSnapshots.map((snapshot) =>
-          toInitialMenuBite(snapshot.data() ?? {}),
+          toInitialMenuBite(snapshot.ref.id, snapshot.data() ?? {}),
         ),
       );
 
@@ -318,9 +322,19 @@ export const verifyRestaurantCandidateHandler = async (
         createdAtTimestamp: now.getTime(),
       });
 
+      // Each Bite is also linked to the menu item built from its dish name
+      // (issue #2216), so the item's stats and "Bites about this dish" start
+      // from the evidence it was built from. A Bite already linked to a menu
+      // item keeps that link.
       unassignedBiteSnapshots.forEach((snapshot) => {
+        const menuItemId = menuItemIdByBiteId[snapshot.ref.id];
+        const linksMenuItem = !!menuItemId && !snapshot.data()?.['menuItemId'];
+
         transaction.update(snapshot.ref, {
           restaurantId: restaurantRef.id,
+          ...(linksMenuItem
+            ? { menuItemId, menuItemLinkedBy: 'verification' }
+            : {}),
           updatedAt: now.toISOString(),
           updatedAtTimestamp: now.getTime(),
         });

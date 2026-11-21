@@ -17,6 +17,7 @@ import {
   Validators,
 } from '@angular/forms';
 import {
+  AlertController,
   IonButton,
   IonIcon,
   IonInput,
@@ -24,7 +25,7 @@ import {
   IonList,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import type { MenuItem } from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
@@ -68,6 +69,8 @@ const MIN_PRICE = 0.01;
 })
 export class DishEditorComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
 
   /** The dish to edit; absent for a new one. */
   readonly dish = input<MenuItem>();
@@ -76,6 +79,8 @@ export class DishEditorComponent {
 
   readonly save = output<MenuItem>();
   readonly cancelEdit = output<void>();
+  /** The owner confirmed deleting the stored dish (GitHub issue #2181). */
+  readonly deleteDish = output<void>();
 
   readonly form = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
@@ -199,5 +204,41 @@ export class DishEditorComponent {
       isAvailable: value.isAvailable,
       ...(variants.length ? { variants } : {}),
     });
+  }
+
+  /**
+   * Asks before deleting the dish, because a delete is saved at once and has
+   * no undo (GitHub issue #2181). Its variants go with it, and the question
+   * says so when there are any.
+   */
+  async confirmDelete(): Promise<void> {
+    const dish = this.dish();
+
+    if (!dish) {
+      return;
+    }
+
+    const variantCount = dish.variants?.length ?? 0;
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('menu-dish-delete-confirm-title', {
+        name: dish.name,
+      }),
+      message: this.transloco.translate(
+        variantCount
+          ? 'menu-dish-delete-confirm-message-variants'
+          : 'menu-dish-delete-confirm-message',
+        { count: variantCount },
+      ),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('delete'),
+          role: 'destructive',
+          handler: (): void => this.deleteDish.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

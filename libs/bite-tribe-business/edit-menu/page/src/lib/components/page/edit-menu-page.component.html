@@ -69,6 +69,7 @@
                 [categoryTitle]="editingCategory()?.title"
                 [currency]="currency()"
                 (save)="onSaveDish($event)"
+                (deleteDish)="onDeleteDish()"
                 (cancelEdit)="closeEditor()"
               />
             } @else {
@@ -77,6 +78,7 @@
                 [currency]="currency()"
                 (save)="onSaveCategory($event)"
                 (saveExtras)="onSaveExtras($event)"
+                (deleteCategory)="onDeleteCategory()"
                 (cancelEdit)="closeEditor()"
               />
             }

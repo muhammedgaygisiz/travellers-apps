@@ -26,6 +26,8 @@ import {
   type DishRef,
   moveCategory,
   moveDish,
+  removeCategory,
+  removeDish,
   saveCategoryDetails,
   saveDish,
   saveExtras,
@@ -221,6 +223,32 @@ export class EditMenuPage {
     if (editing?.kind === 'category' && editing.categoryId) {
       const categoryId = editing.categoryId;
       this.write((menu) => saveExtras(menu, categoryId, extrasBlock), false);
+    }
+  }
+
+  /**
+   * Deletes the open dish, once its editor has had the owner confirm (GitHub
+   * issue #2181). The editor closes when the saved menu comes back, as after
+   * any save.
+   */
+  onDeleteDish(): void {
+    const editing = this.editing();
+
+    if (editing?.kind === 'dish' && editing.itemId) {
+      const { categoryId, itemId } = editing;
+
+      this.write((menu) => removeDish(menu, categoryId, itemId));
+    }
+  }
+
+  /** Deletes the open category with everything in it (GitHub issue #2181). */
+  onDeleteCategory(): void {
+    const editing = this.editing();
+
+    if (editing?.kind === 'category' && editing.categoryId) {
+      const categoryId = editing.categoryId;
+
+      this.write((menu) => removeCategory(menu, categoryId));
     }
   }
 

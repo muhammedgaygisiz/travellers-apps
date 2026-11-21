@@ -1,6 +1,9 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import type { Category } from 'model';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
@@ -113,5 +116,88 @@ describe(CategoryEditorComponent.name, () => {
       ?.click();
 
     expect(cancelled).toHaveBeenCalled();
+  });
+
+  /** See GitHub issue #2181. */
+  describe('deleting the category', () => {
+    type AlertOptions = Parameters<AlertController['create']>[0];
+
+    const withAlert = (): {
+      options: () => AlertOptions | undefined;
+      present: jest.Mock;
+    } => {
+      let options: AlertOptions | undefined;
+      const present = jest.fn();
+
+      jest
+        .spyOn(TestBed.inject(AlertController), 'create')
+        .mockImplementation(async (given) => {
+          options = given;
+
+          return { present } as unknown as HTMLIonAlertElement;
+        });
+
+      return { options: () => options, present };
+    };
+
+    const deleteButton = (
+      fixture: ComponentFixture<CategoryEditorComponent>,
+    ): Element | null =>
+      fixture.nativeElement.querySelector('[data-testid="delete-category"]');
+
+    it('offers no delete for a category that is not saved yet', () => {
+      const { fixture } = setup(undefined);
+
+      expect(deleteButton(fixture)).toBeNull();
+    });
+
+    it('asks first, and deletes only once the owner confirms', async () => {
+      const { fixture, component } = setup(PIZZA);
+      const alert = withAlert();
+      const deleted = jest.fn();
+      component.deleteCategory.subscribe(deleted);
+
+      expect(deleteButton(fixture)).not.toBeNull();
+
+      await component.confirmDelete();
+
+      expect(alert.present).toHaveBeenCalled();
+      expect(deleted).not.toHaveBeenCalled();
+
+      (alert.options()?.buttons as { role?: string; handler?: () => void }[])
+        .find((entry) => entry.role === 'destructive')
+        ?.handler?.();
+
+      expect(deleted).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts the dishes that go with the category', async () => {
+      const { component } = setup({
+        ...PIZZA,
+        items: [
+          { id: 'd1', name: 'Margherita', description: '', price: 11 },
+          { id: 'd2', name: 'Marinara', description: '', price: 9 },
+        ],
+      });
+      const alert = withAlert();
+
+      await component.confirmDelete();
+
+      expect(component.dishCount()).toBe(2);
+      expect(alert.options()?.message).toContain(
+        'menu-category-delete-confirm-message-dishes',
+      );
+    });
+
+    it('asks without dishes for an empty category', async () => {
+      const { component } = setup(PIZZA);
+      const alert = withAlert();
+
+      await component.confirmDelete();
+
+      expect(alert.options()?.message).toBe(
+        'menu-category-delete-confirm-message',
+      );
+    });
   });
 });

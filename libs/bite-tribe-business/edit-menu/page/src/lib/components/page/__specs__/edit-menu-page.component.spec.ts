@@ -199,6 +199,43 @@ describe(EditMenuPage.name, () => {
       expect(component.editing()).toBeUndefined();
     });
 
+    /** See GitHub issue #2181. */
+    it('deletes the open dish and closes once the menu is read back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onDeleteDish();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: [expect.objectContaining({ id: 'c1', items: [] })],
+        }),
+      );
+      expect(component.editing()).toBeTruthy();
+
+      withMenu({ ...FULL, categories: [{ ...FULL.categories[0], items: [] }] });
+
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('deletes the open category with its dishes', () => {
+      component.openCategory('c1');
+
+      component.onDeleteCategory();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({ categories: [] }),
+      );
+    });
+
+    it('deletes nothing for an editor that holds a new dish or category', () => {
+      component.addDish('c1');
+      component.onDeleteDish();
+      component.addCategory();
+      component.onDeleteCategory();
+
+      expect(saved).not.toHaveBeenCalled();
+    });
+
     it('keeps the editor open when the save is refused and nothing comes back', () => {
       component.openDish({ categoryId: 'c1', itemId: 'd1' });
 

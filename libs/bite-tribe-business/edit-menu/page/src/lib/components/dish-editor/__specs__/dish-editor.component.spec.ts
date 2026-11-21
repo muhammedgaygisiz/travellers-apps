@@ -1,6 +1,9 @@
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import type { MenuItem } from 'model';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
@@ -210,5 +213,72 @@ describe(DishEditorComponent.name, () => {
     expect(component.form.value.name).toBe('Water');
     expect(component.variants.length).toBe(0);
     expect(component.isNew()).toBe(false);
+  });
+
+  /** See GitHub issue #2181. */
+  describe('deleting the dish', () => {
+    type AlertOptions = Parameters<AlertController['create']>[0];
+    let alertOptions: AlertOptions | undefined;
+    let present: jest.Mock;
+    let deleted: jest.Mock;
+
+    beforeEach(() => {
+      present = jest.fn();
+      jest
+        .spyOn(TestBed.inject(AlertController), 'create')
+        .mockImplementation(async (options) => {
+          alertOptions = options;
+
+          return { present } as unknown as HTMLIonAlertElement;
+        });
+      deleted = jest.fn();
+      component.deleteDish.subscribe(deleted);
+    });
+
+    const button = (): Element | null =>
+      fixture.nativeElement.querySelector('[data-testid="delete-dish"]');
+
+    const confirmButton = (): { handler?: () => void } =>
+      (alertOptions?.buttons as { role?: string; handler?: () => void }[]).find(
+        (entry) => entry.role === 'destructive',
+      ) ?? {};
+
+    it('offers no delete for a dish that is not saved yet', () => {
+      open(undefined);
+
+      expect(button()).toBeNull();
+    });
+
+    it('asks first, and deletes only once the owner confirms', async () => {
+      open(PAD_THAI);
+      expect(button()).not.toBeNull();
+
+      await component.confirmDelete();
+
+      expect(present).toHaveBeenCalled();
+      expect(deleted).not.toHaveBeenCalled();
+
+      confirmButton().handler?.();
+
+      expect(deleted).toHaveBeenCalledTimes(1);
+    });
+
+    it('says the variants go with the dish when it has any', async () => {
+      open(PAD_THAI);
+
+      await component.confirmDelete();
+
+      expect(alertOptions?.message).toContain(
+        'menu-dish-delete-confirm-message-variants',
+      );
+    });
+
+    it('asks without variants for a dish that has none', async () => {
+      open({ ...PAD_THAI, price: 12, variants: [] });
+
+      await component.confirmDelete();
+
+      expect(alertOptions?.message).toBe('menu-dish-delete-confirm-message');
+    });
   });
 });

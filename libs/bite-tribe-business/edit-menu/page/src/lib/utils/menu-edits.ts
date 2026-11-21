@@ -136,6 +136,34 @@ export const saveExtras = (
 ): Menu =>
   mapCategory(menu, categoryId, (category) => ({ ...category, extrasBlock }));
 
+/**
+ * Takes a dish, with its variants, off the menu (GitHub issue #2181).
+ *
+ * Not a soft delete: `isAvailable` already covers a dish that is out for an
+ * evening, and a dish deleted here is one the restaurant does not serve. An
+ * order already submitted keeps its line, because each line carries its own
+ * copy of the dish's name and price.
+ */
+export const removeDish = (
+  menu: Menu,
+  categoryId: string,
+  itemId: string,
+): Menu =>
+  mapCategory(menu, categoryId, (category) => ({
+    ...category,
+    items: (category.items ?? []).filter((item) => item.id !== itemId),
+  }));
+
+/**
+ * Takes a category off the menu, and with it every dish, variant and extra it
+ * holds (GitHub issue #2181).
+ */
+export const removeCategory = (menu: Menu, categoryId: string): Menu =>
+  withCategories(
+    menu,
+    menu.categories.filter((category) => category.id !== categoryId),
+  );
+
 export const moveCategory = (menu: Menu, from: number, to: number): Menu =>
   withCategories(menu, move(menu.categories, from, to));
 

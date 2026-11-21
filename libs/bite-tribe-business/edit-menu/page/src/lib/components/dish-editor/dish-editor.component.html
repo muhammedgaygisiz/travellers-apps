@@ -138,6 +138,17 @@
   </ion-list>
 
   <div class="actions">
+    @if (!isNew()) {
+      <ion-button
+        class="delete"
+        fill="clear"
+        color="danger"
+        data-testid="delete-dish"
+        (click)="confirmDelete()"
+      >
+        {{ 'menu-dish-delete' | transloco }}
+      </ion-button>
+    }
     <ion-button
       fill="outline"
       data-testid="cancel-dish"

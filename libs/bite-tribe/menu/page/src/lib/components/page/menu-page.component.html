@@ -19,6 +19,19 @@
       <div class="ion-padding">
         <h1>{{ placeName() }}</h1>
 
+        <!-- A menu verification put together from Bites says so once, above
+        the categories, because its prices are guest averages rather than the
+        restaurant's (issue #1511). -->
+        @if (showsDerivedNotice()) {
+          <ion-note
+            class="derived-menu-notice"
+            data-testid="derived-menu-notice"
+          >
+            <ion-icon name="information-circle-outline" aria-hidden="true" />
+            <span>{{ 'menu-derived-from-bites-notice' | transloco }}</span>
+          </ion-note>
+        }
+
         <!--
           What people said about one dish, over the menu rather than instead of
           it (issue #1113): the guest is choosing what to order, and a route

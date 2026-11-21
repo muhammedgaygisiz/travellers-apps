@@ -13,12 +13,14 @@ import { PageComponent } from 'common/ui/page';
 import {
   AlertController,
   IonContent,
+  IonIcon,
   IonImg,
+  IonNote,
   IonSkeletonText,
 } from '@ionic/angular/standalone';
 import { DishBitesComponent } from '../dish-bites/dish-bites.component';
 import type { Bite, Menu, MenuItem, MenuItemStats, Restaurant } from 'model';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { MenuComponent } from '../menu/menu.component';
 
@@ -29,9 +31,12 @@ import { MenuComponent } from '../menu/menu.component';
   imports: [
     PageComponent,
     IonContent,
+    IonIcon,
     IonImg,
+    IonNote,
     IonSkeletonText,
     MenuComponent,
+    TranslocoPipe,
     DishBitesComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,6 +99,24 @@ export class MenuPage {
     const restaurant = this.restaurant();
 
     return restaurant?.imagePath || restaurant?.image;
+  });
+
+  /**
+   * The menu was assembled from guests' Bites, and has a price to say so about
+   * (GitHub issue #1511).
+   *
+   * Its prices are averages of what guests reported, not the restaurant's, so
+   * the page says that once, above the categories: the claim is about the menu
+   * as a whole. A derived menu with no items has no price to mislead anyone and
+   * says nothing.
+   */
+  readonly showsDerivedNotice = computed(() => {
+    const menu = this.menu();
+
+    return (
+      !!menu?.derivedFromBites &&
+      (menu.categories ?? []).some((category) => category.items?.length)
+    );
   });
 
   /**

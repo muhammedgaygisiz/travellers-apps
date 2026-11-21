@@ -30,6 +30,12 @@ action triggers it belongs to `UC-VRC`, not to this page.
 - Each group becomes one Menu item, priced at the average of that group's usable
   reported prices (a missing or non-positive price doesn't count toward the average;
   an item with no priced Bite at all defaults to 0).
+- The Menu states a currency ([#1511]): the one most priced Bites were paid in, when one
+  clearly leads; otherwise - a tie, or no priced Bite records one - the currency of the
+  country most of the Bites were taken in (`countryCode`); otherwise none. Only Bites
+  paid in that currency count toward a price, so a dish priced only in another
+  currency stays at 0. A Bite that records no currency counts only when no priced Bite
+  records one. With no Menu currency, every price counts, as before.
 - Items land in one category, sorted by how many Bites support them, then by name.
 - A Bite with no usable dish name is dropped; an evidence set with nothing usable
   yields an empty category list, not an error.
@@ -47,14 +53,19 @@ permission, and changes no store declaration.
 
 ## Supported Evidence
 
-- `buildInitialMenuCategories` and `buildInitialMenuItems` in
+- `buildInitialMenu`, `buildInitialMenuItems` and `chooseInitialMenuCurrency` in
   `apps/bite-tribe-firebase/functions/src/functions/shared/utils/initial-menu.ts`, invoked
   from `UC-VRC` `V19` and nowhere else in the codebase.
+- The country-to-currency map in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils/currency-by-region.ts`, a
+  copy of the device helper's map kept equal by
+  `apps/bite-tribe-firebase/functions/src/__specs__/currency-by-region-parity.spec.ts`.
 
 ## Related GitHub Scope
 
 - Pull request [#1210] introduced this mechanism (`seed initial menu from bites when verifying a candidate`); it names no issue.
 - Issue [#1099] added the stable per-item id (`InitialMenuItem.id`) an order line references, delivered by pull request [#1593].
+- Issue [#1511] added the Menu's currency and limited each average to the Bites paid in it.
 
 ## Related Domains
 

@@ -2972,6 +2972,35 @@ describe('bites', () => {
     await assertFails(deleteDoc(doc(asStranger(), 'bites', 'consumer-bite')));
   });
 
+  /**
+   * GitHub issue #2216. An owner links a guest's Bite to a dish only through
+   * `linkBiteToMenuItem`, which checks the dish is on their menu and that the
+   * guest did not link it. The rules were deliberately left closed to owners,
+   * so a direct write of the link is refused even on a Bite about their own
+   * restaurant.
+   */
+  it("refuses an owner writing a menu link on a guest's Bite directly", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'bites', 'guest-bite-at-owned'), {
+        userId: CONSUMER,
+        name: 'Carbonara',
+        restaurantId: OWNED_RESTAURANT,
+      });
+    });
+
+    await assertFails(
+      updateDoc(doc(asOwner(), 'bites', 'guest-bite-at-owned'), {
+        menuItemId: 'item-1',
+        menuItemLinkedBy: 'owner',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asOwner(), 'bites', 'guest-bite-at-owned'), {
+        menuLinkDismissed: true,
+      }),
+    );
+  });
+
   /** Tagged users, GitHub issue #1916. */
   const taggedUsers = (count: number): string[] =>
     Array.from({ length: count }, (_, index) => `friend-${index}`);

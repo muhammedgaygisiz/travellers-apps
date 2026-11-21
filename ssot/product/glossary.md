@@ -23,7 +23,7 @@ existing name already or the term belongs here.
 
 - **BiteTribe** — Community-driven food discovery product focused on real dishes people ate, not only restaurants they visited.
   - Business relevance: Core product and brand. The promise is authentic food discovery through user-generated bite experiences.
-- **Bite** — A guest's record of eating one dish: photo, description, star rating, the price they paid, place, restaurant, and creator. **A Bite is content a guest creates, never something a restaurant offers:** it is not a menu item, and no menu, category or menu screen is called "Bites". A Bite made from an order points at the menu item it was ordered as (`menuItemId`, `variantId`). See [Bite](../domain/bite.md).
+- **Bite** — A guest's record of eating one dish: photo, description, star rating, the price they paid, place, restaurant, and creator. **A Bite is content a guest creates, never something a restaurant offers:** it is not a menu item, and no menu, category or menu screen is called "Bites". A Bite points at the menu item it is about (`menuItemId`, `variantId`) when its author chose the dish, when candidate verification built the item from it, or when the restaurant's owner linked it ([#2216]). See [Bite](../domain/bite.md).
   - Business relevance: Primary content unit. More high-quality bites increase discovery value, engagement, and data quality.
 - **Bite creator** — A user who creates and publishes bites. Both a persona and a role, and the two are not interchangeable: the persona in [Personas](personas.md) describes the audience, the role in [User Roles](user-roles.md) describes what the account may do. See [User](../domain/user.md).
   - Business relevance: Supply-side contributor. Creator motivation, trust, and retention directly affect content growth.
@@ -158,3 +158,4 @@ See [Monetization](monetization.md) for the free and paid boundary and the reven
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

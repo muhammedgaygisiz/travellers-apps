@@ -187,6 +187,17 @@ Required by product intent, but optional or not strictly enforced in the shared 
   was eaten. Nothing is resolved off the menu to render a Bite, so a dish that is
   renamed or deleted leaves every Bite of it intact and readable under the name
   copied onto it at creation (`RD-TS-53`)
+- `menuItemLinkedBy` - who set `menuItemId` (issue [#2216]): `guest` when the
+  Bite's author chose the dish, from an order or from a dish's Create Bite
+  button; `verification` when candidate verification grouped the Bite into the
+  Initial Menu item it built from the Bite's dish name; `owner` when the
+  restaurant's owner linked it on the Business App's Guest Bites page. Absent
+  on guest links made before the field. Guests see no difference between the
+  three; the field is kept so a label, or a check on owners who link
+  selectively, can be added from evidence later
+- `menuLinkDismissed` - the restaurant's owner said the Bite is about nothing on
+  their menu (issue [#2216]), so Guest Bites stops offering it. The Bite is
+  otherwise unchanged and shows wherever it did
 
 None of those three is a field on the create form, and none of them can be: a
 guest can neither see nor change them. They are merged onto the document at
@@ -384,7 +395,7 @@ images/bites/{biteId}/{filename}
 - Image upload and image path synchronization are separate steps.
 - Image upload can fail or become fragile when the app is backgrounded.
 - City and country are enriched asynchronously and may be missing on older or failed-enrichment Bite documents.
-- Only a Bite created from a menu item points at one. Any other Bite names its dish as free text (`name`) and is never matched to a menu item afterwards, so the same dish can appear on the menu once and under several names in Bites.
+- A Bite points at a menu item only when its author chose the dish, when candidate verification built the item from it, or when the restaurant's owner linked it on Guest Bites ([#2216]). The owner's suggestion matches dish names exactly after normalising case, accents and punctuation, so "Carbonara" and "Spaghetti alla carbonara" are not matched to each other; the owner picks the dish by hand. A Bite at a place with no restaurant is never linked.
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
@@ -454,3 +465,4 @@ images/bites/{biteId}/{filename}
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

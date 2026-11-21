@@ -148,6 +148,92 @@ describe('EditRestaurantComponent', () => {
    * "Not stated" emits `undefined` so the write removes the field rather than
    * telling guests "no" on the restaurant's behalf.
    */
+  /** The time zone: its own default, and a search (GitHub issue #2228). */
+  describe('time zone', () => {
+    const MUNICH = { latitude: 48.137, longitude: 11.575 };
+    const device = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const show = (restaurant: Partial<Restaurant>): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        ...restaurant,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it("offers the zone of the restaurant's own position", () => {
+      show({ position: MUNICH });
+
+      expect(component.suggestedTimeZone()).toEqual({
+        zone: 'Europe/Berlin',
+        source: 'position',
+      });
+      expect(component.tableOrderingForm.value.timeZone).toBe('Europe/Berlin');
+    });
+
+    it('offers the device zone to a restaurant without a position', () => {
+      show({ position: { latitude: 0, longitude: 0 } });
+
+      expect(component.suggestedTimeZone()).toEqual({
+        zone: device,
+        source: 'device',
+      });
+    });
+
+    it('keeps the zone a restaurant chose', () => {
+      show({
+        position: MUNICH,
+        tableOrdering: { enabled: true, timeZone: 'Asia/Tokyo' },
+      });
+
+      expect(component.tableOrderingForm.value.timeZone).toBe('Asia/Tokyo');
+    });
+
+    it('does not count the offered zone a change', () => {
+      show({ position: MUNICH });
+
+      expect(component.unchanged().tableOrdering).toBe(true);
+    });
+
+    it.each([
+      ['berlin', 'Europe/Berlin'],
+      ['new york', 'America/New_York'],
+      ['NEW_YORK', 'America/New_York'],
+      ['europe/zur', 'Europe/Zurich'],
+    ])('finds a zone by typing %s', (query, zone) => {
+      show({ position: MUNICH });
+      component.timeZoneQuery.set(query);
+
+      expect(component.matchingTimeZones()).toContain(zone);
+      expect(component.matchingTimeZones().length).toBeLessThan(
+        component.timeZones().length,
+      );
+    });
+
+    it('chooses a zone from the search and closes it', () => {
+      show({ position: MUNICH });
+      component.openTimeZonePicker();
+      component.chooseTimeZone('Europe/Zurich');
+
+      expect(component.tableOrderingForm.value.timeZone).toBe('Europe/Zurich');
+      expect(component.timeZonePickerOpen()).toBe(false);
+      expect(component.unchanged().tableOrdering).toBe(false);
+    });
+
+    it('says where an offered zone came from, before it is saved', () => {
+      show({ position: MUNICH });
+      componentRef.setInput('section', 'table-ordering');
+      fixture.detectChanges();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="table-ordering-time-zone-source"]',
+        ),
+      ).toBeTruthy();
+    });
+  });
+
   describe('facilities', () => {
     const withFacilities = (facilities: Restaurant['facilities']): void => {
       componentRef.setInput('restaurant', {
@@ -737,6 +823,22 @@ describe('EditRestaurantComponent', () => {
         longitude: 11.575,
       });
     });
+  });
+
+  /** The menu code view says "Menu code" once (GitHub issue #2229). */
+  it('titles the menu code view once', () => {
+    componentRef.setInput('restaurant', {
+      id: '1',
+      name: 'Sakura Kitchen',
+    } as Restaurant);
+    componentRef.setInput('section', 'menu-code');
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('ion-content h1, ion-content h2')).toHaveLength(
+      1,
+    );
+    expect(el.querySelector('bt-business-menu-qr h2')).toBeNull();
   });
 
   describe('section', () => {

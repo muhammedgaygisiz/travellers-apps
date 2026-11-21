@@ -304,11 +304,11 @@ describe('EditRestaurantComponent', () => {
       expect(component.isInvalid()).toBe(false);
     });
 
-    it('should be true if invalid links', () => {
+    it('should be true for a half-filled link', () => {
       componentRef.setInput('restaurant', {
         id: '1',
         name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
+        socialMediaLinks: [{ network: 'facebook', url: '' }] as Link[],
       } as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.isInvalid()).toBe(true);
@@ -506,9 +506,16 @@ describe('EditRestaurantComponent', () => {
       expect(component.unchanged().tableOrdering).toBe(true);
     });
 
-    it('counts an added link as a change', () => {
+    it('does not count a blank row added by mistake as a change', () => {
       show(STORED);
       component.addSocialMedia();
+
+      expect(component.unchanged().links).toBe(true);
+    });
+
+    it('counts a removed link as a change', () => {
+      show(STORED);
+      component.removeSocialMedia(0);
 
       expect(component.unchanged().links).toBe(false);
     });
@@ -550,6 +557,103 @@ describe('EditRestaurantComponent', () => {
 
       expect((textarea as { label?: string } | null)?.label).toBeFalsy();
       expect(textarea?.hasAttribute('aria-label')).toBe(true);
+    });
+  });
+
+  /** Removing a link, and a row added by mistake (GitHub issue #2224). */
+  describe('removing links', () => {
+    const LINKS: Link[] = [
+      { network: 'instagram', url: 'https://instagram.com/sakura' },
+      { network: 'facebook', url: 'https://facebook.com/sakura' },
+    ];
+    let emitted: jest.Mock;
+
+    const show = (socialMediaLinks: Link[]): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks,
+      } as Restaurant);
+      componentRef.setInput('section', 'links');
+      fixture.detectChanges();
+      emitted = jest.fn();
+      component.submitSocialMediaLinks.subscribe(emitted);
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('removes a row from its button and saves the list without it', () => {
+      const el = show(LINKS);
+
+      el.querySelectorAll<HTMLElement>(
+        '[data-testid="remove-link"]',
+      )[0].click();
+      fixture.detectChanges();
+      component.saveSocialMediaLinks();
+
+      expect(el.querySelectorAll('ion-item')).toHaveLength(1);
+      expect(emitted).toHaveBeenCalledWith({ links: [LINKS[1]] });
+    });
+
+    it('saves an empty list once the last link is removed', () => {
+      const el = show([LINKS[0]]);
+
+      component.removeSocialMedia(0);
+      fixture.detectChanges();
+
+      const save = el.querySelector<HTMLElement & { disabled?: boolean }>(
+        'ion-button[data-testid="save-social-media"]',
+      );
+      expect(save?.disabled).toBe(false);
+
+      component.saveSocialMediaLinks();
+      expect(emitted).toHaveBeenCalledWith({ links: [] });
+    });
+
+    it('leaves a blank row out of the save, and does not let it block one', () => {
+      show(LINKS);
+      component.addSocialMedia();
+      component.links.at(0).patchValue({ url: 'https://instagram.com/new' });
+
+      expect(component.isInvalid()).toBe(false);
+      component.saveSocialMediaLinks();
+      expect(emitted).toHaveBeenCalledWith({
+        links: [
+          { network: 'instagram', url: 'https://instagram.com/new' },
+          LINKS[1],
+        ],
+      });
+    });
+
+    it('keeps a row the restaurant is read again under', () => {
+      show(LINKS);
+      component.removeSocialMedia(0);
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks: LINKS,
+      } as Restaurant);
+      fixture.detectChanges();
+
+      expect(component.links.length).toBe(1);
+    });
+
+    it('opens a link saved as Twitter as X, without counting that a change', () => {
+      show([{ network: 'twitter', url: 'https://twitter.com/sakura' }]);
+
+      expect(component.links.at(0).value.network).toBe('x');
+      expect(component.unchanged().links).toBe(true);
+    });
+
+    it('offers X and TikTok, and no Twitter', () => {
+      expect(component.linkNetworks.map(({ network }) => network)).toEqual([
+        'website',
+        'instagram',
+        'facebook',
+        'tiktok',
+        'x',
+        'linkedin',
+      ]);
     });
   });
 
@@ -720,7 +824,7 @@ describe('EditRestaurantComponent', () => {
       componentRef.setInput('restaurant', {
         id: '1',
         name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
+        socialMediaLinks: [{ network: '', url: 'https://x.test' }] as Link[],
       } as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       component.saveSocialMediaLinks();

@@ -108,24 +108,22 @@
 
           <ion-list lines="full" formArrayName="links">
             @for (socialMedia of links.controls; track $index; let i = $index) {
-              <ion-item [formGroupName]="i">
+              <ion-item
+                [formGroupName]="i"
+                [attr.data-testid]="'restaurant-link-' + i"
+              >
                 <ion-select
                   class="ion-margin-end"
-                  placeholder="Social Network"
+                  [placeholder]="'restaurant-link-network' | transloco"
+                  [attr.aria-label]="'restaurant-link-network' | transloco"
                   interface="popover"
                   formControlName="network"
                 >
-                  <ion-select-option value="facebook"
-                    >Facebook
-                  </ion-select-option>
-                  <ion-select-option value="instagram"
-                    >Instagram
-                  </ion-select-option>
-                  <ion-select-option value="twitter">Twitter</ion-select-option>
-                  <ion-select-option value="linkedin"
-                    >LinkedIn
-                  </ion-select-option>
-                  <ion-select-option value="website">Website</ion-select-option>
+                  @for (option of linkNetworks; track option.network) {
+                    <ion-select-option [value]="option.network">{{
+                      option.name
+                    }}</ion-select-option>
+                  }
                 </ion-select>
                 <!-- A label that stays once a URL is typed (#2223). -->
                 <ion-input
@@ -134,28 +132,42 @@
                   placeholder="https://"
                   formControlName="url"
                 ></ion-input>
+                <!-- Takes the link off; Save writes the list without it (#2224). -->
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  data-testid="remove-link"
+                  [attr.aria-label]="'restaurant-link-remove' | transloco"
+                  (click)="removeSocialMedia(i)"
+                >
+                  <ion-icon
+                    slot="icon-only"
+                    name="trash-outline"
+                    aria-hidden="true"
+                  />
+                </ion-button>
               </ion-item>
             }
           </ion-list>
 
           <!--
-              Add and Save sit together under the list they belong to. The Save
-              used to be at the very bottom of the page, under the navigation
-              buttons; in two columns that put it beside the opening hours and
-              nowhere near the links it writes.
+              Add and Save sit together under the list they belong to. Save
+              shows with no rows too: removing the last link is a change to
+              save (#2224).
             -->
           <div class="section-actions">
-            <ion-button (click)="addSocialMedia()">Add Link</ion-button>
+            <ion-button data-testid="add-link" (click)="addSocialMedia()">{{
+              'restaurant-link-add' | transloco
+            }}</ion-button>
 
-            @if (links.length) {
-              <ion-button
-                data-testid="save-social-media"
-                [disabled]="isInvalid() || unchanged().links"
-                (click)="saveSocialMediaLinks()"
-              >
-                {{ 'save' | transloco }}
-              </ion-button>
-            }
+            <ion-button
+              data-testid="save-social-media"
+              [disabled]="isInvalid() || unchanged().links"
+              (click)="saveSocialMediaLinks()"
+            >
+              {{ 'save' | transloco }}
+            </ion-button>
           </div>
         </div>
       }

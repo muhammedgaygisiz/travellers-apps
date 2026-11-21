@@ -205,6 +205,7 @@ all be reviewed for the first time.
 - Issue [#2221] made the overview's ticks agree with the setup progress: the menu got a row, and the rows the checklist does not count lost their tick. Part of epic [#2123].
 - Issue [#2222] disabled every section's Save until something changed, and made the Kind of place toast read "Kind of place saved". Part of epic [#2123].
 - Issue [#2223] stacked the address and link labels above their fields, as in the menu editor, and left the About field to its section heading. Part of epic [#2123].
+- Issue [#2224] added removing a link, left a blank link row out of the save instead of letting it block one, put the links' text in Transloco, and replaced Twitter with X and added TikTok in the network list. Part of epic [#2123].
 
 ## Related Domains
 
@@ -250,3 +251,4 @@ all be reviewed for the first time.
 [#2221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2221
 [#2222]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2222
 [#2223]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2223
+[#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224

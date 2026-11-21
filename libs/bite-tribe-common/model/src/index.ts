@@ -21,6 +21,8 @@ export * from './lib/link-bite-to-menu-item';
 export type * from './lib/geopoint';
 export type * from './lib/position-source';
 export type * from './lib/link';
+/** A value export: the networks a restaurant links to (#2224). */
+export * from './lib/link-network';
 export type * from './lib/save-to-bucket-list-params';
 export type * from './lib/create-and-save-to-bucket-list-params';
 export type * from './lib/create-bucket-list-from-bite-trail-params';

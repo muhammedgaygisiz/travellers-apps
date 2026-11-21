@@ -5,6 +5,8 @@ import { Restaurant, restaurantSetupChecklist } from 'model';
 import { of } from 'rxjs';
 import { addNecessaryIcons } from 'utils';
 import {
+  OverviewMenuRow,
+  overviewMenuRow,
   OverviewRow,
   overviewRow,
   RestaurantOverviewComponent,
@@ -77,6 +79,7 @@ describe('overviewRow', () => {
   ] as const)('summarises %s from what is stored', (section, expected) => {
     expect(rowOf(COMPLETE, section)).toEqual({
       section,
+      counted: section !== 'position' && section !== 'table-ordering',
       missing: false,
       ...expected,
     });
@@ -91,12 +94,17 @@ describe('overviewRow', () => {
     'opening-hours',
     'facilities',
   ] as const)('marks %s missing on a bare restaurant', (section) => {
-    expect(rowOf(BARE, section)).toEqual({ section, missing: true });
+    expect(rowOf(BARE, section)).toEqual({
+      section,
+      counted: true,
+      missing: true,
+    });
   });
 
   it('shows no position for the null island a new restaurant starts on', () => {
     expect(rowOf(BARE, 'position')).toEqual({
       section: 'position',
+      counted: false,
       missing: false,
     });
   });
@@ -128,6 +136,41 @@ describe('overviewRow', () => {
   it('shows nothing for the menu code, which is an action rather than a row', () => {
     expect(rowOf(COMPLETE, 'menu-code')).toEqual({
       section: 'menu-code',
+      counted: false,
+      missing: false,
+    });
+  });
+
+  it.each(['position', 'table-ordering'] as const)(
+    'does not count %s, which the setup progress leaves out (#2221)',
+    (section) => {
+      expect(rowOf(BARE, section).counted).toBe(false);
+    },
+  );
+});
+
+/** See GitHub issue #2221. */
+describe('overviewMenuRow', () => {
+  const menuRowOf = (restaurant: Restaurant): OverviewMenuRow =>
+    overviewMenuRow(restaurant, restaurantSetupChecklist(restaurant));
+
+  it('says there is no menu yet, and counts it missing', () => {
+    expect(menuRowOf(BARE)).toEqual({
+      valueKey: 'restaurant-overview-menu-none',
+      missing: true,
+    });
+  });
+
+  it('says a menu nobody has saved is not checked yet', () => {
+    expect(menuRowOf({ ...BARE, menuId: 'menu-1' })).toEqual({
+      valueKey: 'restaurant-overview-menu-unchecked',
+      missing: true,
+    });
+  });
+
+  it('says a saved menu is checked', () => {
+    expect(menuRowOf(COMPLETE)).toEqual({
+      valueKey: 'restaurant-overview-menu-checked',
       missing: false,
     });
   });
@@ -179,7 +222,70 @@ describe(RestaurantOverviewComponent.name, () => {
       'restaurant-section-opening-hours',
       'restaurant-section-facilities',
       'restaurant-section-table-ordering',
+      'restaurant-section-menu',
     ]);
+  });
+
+  /**
+   * The restaurant #2221 was found on: only a position, and ordering at the
+   * table off. The progress said "0 of 8 done" over two ticks.
+   */
+  it.each([
+    ['a bare restaurant', BARE],
+    [
+      'a half set-up one',
+      {
+        ...BARE,
+        imagePath: 'https://example.test/photo.jpg',
+        description: 'Wood-fired.',
+        menuId: 'menu-1',
+      } as Restaurant,
+    ],
+    ['a set-up one', COMPLETE],
+  ])(
+    'ticks as many rows as the progress counts done, on %s',
+    (_, restaurant) => {
+      show(restaurant);
+      const items = restaurantSetupChecklist(restaurant);
+      const status = (value: string): number =>
+        el().querySelectorAll(`ion-item ion-icon[data-status="${value}"]`)
+          .length;
+
+      expect(status('done')).toBe(items.filter((item) => item.done).length);
+      expect(status('done') + status('missing')).toBe(items.length);
+    },
+  );
+
+  it('shows no status on the rows the progress does not count', () => {
+    show(BARE);
+
+    for (const section of ['position', 'table-ordering']) {
+      const icon = el().querySelector(
+        `[data-testid="restaurant-section-${section}"] ion-icon`,
+      );
+
+      expect(icon?.classList).toContain('no-status');
+      expect(icon?.getAttribute('data-status')).toBeNull();
+    }
+  });
+
+  it('opens the menu from its row, or creates one when there is none', () => {
+    const edited = jest.fn();
+    const created = jest.fn();
+    component.editMenu.subscribe(edited);
+    component.createMenu.subscribe(created);
+    const menuRow = (): HTMLElement | null =>
+      el().querySelector<HTMLElement>(
+        'ion-item[data-testid="restaurant-section-menu"]',
+      );
+
+    show(COMPLETE);
+    menuRow()?.click();
+    expect(edited).toHaveBeenCalledWith(COMPLETE);
+
+    show(BARE);
+    menuRow()?.click();
+    expect(created).toHaveBeenCalled();
   });
 
   it('lists nothing before the restaurant has loaded', () => {

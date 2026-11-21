@@ -103,8 +103,12 @@ An overview, and one section at a time (issue [#2183]). `restaurant/:restaurantI
 lists the Restaurant's sections - photo, kind of place, About, links, address,
 position on the map, opening hours, facilities, ordering at the table - one row
 each, showing what the section holds now or "Not set yet" for one the setup
-checklist still counts. While anything is missing, the setup progress sits at
-the top with the next item to do. Below the rows are the ways _out_: the menu
+checklist still counts, and a last row for the menu, which says whether there is
+one and whether it has been checked, and opens the menu editor or creates the
+menu. While anything is missing, the setup progress sits at the top with the
+next item to do. Only the rows the checklist counts carry a status, a tick or
+an open circle, so the ticks always add up to the progress's "N of M done";
+the position and ordering at the table show none (issue [#2221]). Below the rows are the ways _out_: the menu
 (edit, or create when there is none), the menu code, the staff, the floor plan
 and the live tables.
 
@@ -195,6 +199,7 @@ all be reviewed for the first time.
 - Issue [#2181] added deleting a dish and a category, each behind a confirmation. Part of epic [#2123].
 - Issue [#2214] added the owner's confirmation that a menu built from Bites is their own. Part of epic [#2123].
 - Issue [#2216] added Guest Bites, where the owner links guests' Bites to the dishes they are about. Part of epic [#2123].
+- Issue [#2221] made the overview's ticks agree with the setup progress: the menu got a row, and the rows the checklist does not count lost their tick. Part of epic [#2123].
 
 ## Related Domains
 
@@ -237,3 +242,4 @@ all be reviewed for the first time.
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2221

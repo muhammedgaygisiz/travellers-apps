@@ -24,8 +24,8 @@ import {
 } from 'model';
 
 /**
- * One row of the overview: a section, what it holds now, and whether the
- * setup checklist still counts it as missing.
+ * One row of the overview: a section, what it holds now, and where it stands
+ * in the setup checklist.
  *
  * `value` is text the restaurant wrote (its description, its street);
  * `valueKeys` are translation keys joined with a middle dot (its categories);
@@ -38,7 +38,24 @@ export interface OverviewRow {
   readonly valueKeys?: readonly string[];
   readonly valueKey?: string;
   readonly valueParams?: Record<string, unknown>;
+  /**
+   * Whether the setup checklist counts the section at all. A row it does not
+   * count (the map position, ordering at the table) shows no status, so the
+   * ticked rows are exactly the "N" of "N of M done" (GitHub issue #2221).
+   */
+  readonly counted: boolean;
   /** `true` while the setup checklist still counts the section as missing. */
+  readonly missing: boolean;
+}
+
+/**
+ * The menu's row: the one checklist item, "menu reviewed", that is not a
+ * restaurant section. It opens the menu editor, or creates the menu
+ * (GitHub issue #2221).
+ */
+export interface OverviewMenuRow {
+  readonly valueKey: string;
+  /** `true` while the setup checklist still counts the menu as unreviewed. */
   readonly missing: boolean;
 }
 
@@ -71,12 +88,12 @@ export const overviewRow = (
   section: RestaurantSection,
   checklist: readonly SetupItem[],
 ): OverviewRow => {
-  const missing = checklist.some(
-    (item) => item.target === section && !item.done,
-  );
+  const items = checklist.filter((item) => item.target === section);
+  const counted = items.length > 0;
+  const missing = items.some((item) => !item.done);
   const row = (
-    fields: Omit<OverviewRow, 'section' | 'missing'> = {},
-  ): OverviewRow => ({ section, missing, ...fields });
+    fields: Omit<OverviewRow, 'section' | 'counted' | 'missing'> = {},
+  ): OverviewRow => ({ section, counted, missing, ...fields });
 
   switch (section) {
     case 'photo':
@@ -152,6 +169,25 @@ export const overviewRow = (
   }
 };
 
+/** What the menu's row says, read from the stored restaurant (#2221). */
+export const overviewMenuRow = (
+  restaurant: Restaurant,
+  checklist: readonly SetupItem[],
+): OverviewMenuRow => {
+  const missing = checklist.some(
+    (item) => item.target === 'edit-menu' && !item.done,
+  );
+
+  return {
+    missing,
+    valueKey: !restaurant.menuId
+      ? 'restaurant-overview-menu-none'
+      : missing
+        ? 'restaurant-overview-menu-unchecked'
+        : 'restaurant-overview-menu-checked',
+  };
+};
+
 /**
  * The business app's restaurant page (GitHub issue #2183): what the restaurant
  * holds now, one row per section, and the ways to its menu, staff and tables.
@@ -206,6 +242,14 @@ export class RestaurantOverviewComponent {
       : [];
   });
 
+  protected readonly menuRow = computed(() => {
+    const restaurant = this.restaurant();
+
+    return restaurant
+      ? overviewMenuRow(restaurant, this.checklist())
+      : undefined;
+  });
+
   /** The setup progress, while anything is still missing (#2126). */
   protected readonly progress = computed(() => {
     const items = this.checklist();
@@ -223,6 +267,15 @@ export class RestaurantOverviewComponent {
   });
 
   protected readonly hasMenu = computed(() => !!this.restaurant()?.menuId);
+
+  /** The menu's row: the editor for a menu there is, else a new menu. */
+  protected openMenu(): void {
+    if (this.hasMenu()) {
+      this.gotoEditMenu();
+    } else {
+      this.createMenu.emit();
+    }
+  }
 
   protected gotoGuestBites(): void {
     const restaurant = this.restaurant();

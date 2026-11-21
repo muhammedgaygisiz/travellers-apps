@@ -514,6 +514,45 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
+  /** Labels above what the owner types, as in the menu editor (#2223). */
+  describe('field labels', () => {
+    const open = (section: 'about' | 'address' | 'links'): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks: [{ network: 'instagram', url: 'https://x.test' }],
+      } as Restaurant);
+      componentRef.setInput('section', section);
+      fixture.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('stacks every address label above its field', () => {
+      const inputs = [...open('address').querySelectorAll('ion-input')];
+
+      expect(inputs).toHaveLength(4);
+      inputs.forEach((input) =>
+        expect(input.getAttribute('labelPlacement')).toBe('stacked'),
+      );
+    });
+
+    it('labels the link field, above it, so the label outlasts the URL', () => {
+      const input = open('links').querySelector('ion-input');
+
+      expect(input?.getAttribute('labelPlacement')).toBe('stacked');
+      // The mocked pipe renders no text; the binding is what is checked.
+      expect((input as { label?: string } | null)?.label).toBeDefined();
+    });
+
+    it('leaves the About field to its heading, with no label of its own', () => {
+      const textarea = open('about').querySelector('ion-textarea');
+
+      expect((textarea as { label?: string } | null)?.label).toBeFalsy();
+      expect(textarea?.hasAttribute('aria-label')).toBe(true);
+    });
+  });
+
   describe('section', () => {
     it.each([
       ['about', '[data-testid="restaurant-description"]'],

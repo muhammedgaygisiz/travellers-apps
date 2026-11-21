@@ -16,6 +16,7 @@ import {
 import { TranslocoPipe } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
 import {
+  linkNetworkName,
   Restaurant,
   restaurantCategoriesOf,
   RestaurantSection,
@@ -74,9 +75,6 @@ const ROW_SECTIONS: readonly RestaurantSection[] = [
   'table-ordering',
 ];
 
-const capitalise = (word: string): string =>
-  word.charAt(0).toUpperCase() + word.slice(1);
-
 /**
  * What one section holds now, read from the stored restaurant.
  *
@@ -116,7 +114,7 @@ export const overviewRow = (
     case 'links': {
       const networks = (restaurant.socialMediaLinks ?? [])
         .filter((link) => hasText(link.url))
-        .map((link) => capitalise(link.network ?? ''))
+        .map((link) => linkNetworkName(link.network))
         .filter(Boolean);
 
       return networks.length ? row({ value: networks.join(' · ') }) : row();

@@ -12,6 +12,7 @@ import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
   IonList,
@@ -26,6 +27,9 @@ import {
   DaySchedule,
   Geopoint,
   Link,
+  LINK_NETWORKS,
+  linkNetworkName,
+  linkNetworkOf,
   MAX_RESTAURANT_CATEGORIES,
   RESTAURANT_CATEGORIES,
   Restaurant,
@@ -37,6 +41,7 @@ import {
 import {
   AbstractControl,
   FormArray,
+  FormGroup,
   FormBuilder,
   ReactiveFormsModule,
   Validators,
@@ -92,6 +97,35 @@ const valueOf = <T>(form: AbstractControl<unknown, T>): Signal<T> =>
     { initialValue: form.getRawValue() },
   );
 
+/**
+ * A link row: the network and its URL, typed in by the owner. A row with
+ * neither is one added by mistake and is left out of the save; a row with
+ * only one of them is invalid, so it cannot be saved half-done (#2224).
+ */
+interface LinkRow {
+  readonly network: string;
+  readonly url: string;
+}
+
+const isBlankRow = (row: Partial<LinkRow>): boolean =>
+  !row.network && !row.url?.trim();
+
+const completeOrBlank = (
+  control: AbstractControl,
+): { incomplete: true } | null => {
+  const row = control.value as Partial<LinkRow>;
+
+  return isBlankRow(row) || (!!row.network && !!row.url?.trim())
+    ? null
+    : { incomplete: true };
+};
+
+/** The links a form's rows stand for: the filled ones, URLs trimmed. */
+const linksOf = (rows: readonly Partial<LinkRow>[]): Link[] =>
+  rows
+    .filter((row) => !isBlankRow(row))
+    .map((row) => ({ network: row.network ?? '', url: row.url?.trim() ?? '' }));
+
 const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
   a.length === b.length && a.every((value) => b.includes(value));
 
@@ -103,6 +137,7 @@ const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
     PageComponent,
     IonContent,
     IonButton,
+    IonIcon,
     IonList,
     ReactiveFormsModule,
     IonItem,
@@ -338,13 +373,27 @@ export class EditRestaurantComponent {
 
     socialMediaLinks.forEach((socialMediaLink) => {
       this.links.push(
-        this.formBuilder.group({
-          network: [socialMediaLink.network, Validators.required],
-          url: [socialMediaLink.url, Validators.required],
+        this.linkRow({
+          // A link saved as `twitter` opens as X (#2224).
+          network: linkNetworkOf(socialMediaLink.network),
+          url: socialMediaLink.url ?? '',
         }),
       );
     });
   });
+
+  /** The networks the picker offers, by name (#2224). */
+  readonly linkNetworks = LINK_NETWORKS.map((network) => ({
+    network,
+    name: linkNetworkName(network),
+  }));
+
+  private linkRow(row: LinkRow): FormGroup {
+    return this.formBuilder.nonNullable.group(
+      { network: [row.network], url: [row.url] },
+      { validators: completeOrBlank },
+    );
+  }
 
   initDescription = effect(() => {
     const description = this.restaurant()?.description ?? '';
@@ -377,15 +426,13 @@ export class EditRestaurantComponent {
     }
   });
 
+  /**
+   * A half-filled row blocks the save. No rows at all does not: removing the
+   * last link is a change the owner saves (#2224).
+   */
   isInvalid = toSignal(
     this.socialMediaForm.valueChanges.pipe(
-      map(() => {
-        if (this.socialMediaForm.controls.links.length === 0) {
-          return true;
-        }
-
-        return !this.socialMediaForm.valid;
-      }),
+      map(() => !this.socialMediaForm.valid),
     ),
     { initialValue: !this.socialMediaForm.valid },
   );
@@ -410,7 +457,9 @@ export class EditRestaurantComponent {
     const position = this.positionValue().position;
     const tableOrdering = restaurant?.tableOrdering;
     const storedLinks = restaurant?.socialMediaLinks ?? [];
-    const links = (this.socialMediaValue().links ?? []) as Partial<Link>[];
+    const links = linksOf(
+      (this.socialMediaValue().links ?? []) as Partial<LinkRow>[],
+    );
 
     return {
       categories: sameSet(
@@ -424,8 +473,8 @@ export class EditRestaurantComponent {
         links.length === storedLinks.length &&
         links.every(
           (link, index) =>
-            (link.network ?? '') === (storedLinks[index].network ?? '') &&
-            (link.url ?? '') === (storedLinks[index].url ?? ''),
+            link.network === linkNetworkOf(storedLinks[index].network) &&
+            link.url === (storedLinks[index].url ?? ''),
         ),
       address: (['street', 'postcode', 'city', 'country'] as const).every(
         (field) =>
@@ -451,19 +500,29 @@ export class EditRestaurantComponent {
 
   hasMenu = computed(() => !!this.restaurant()?.menuId);
 
+  /**
+   * Adding or removing a row is the owner's edit, so the form is marked
+   * dirty: a fresh read of the restaurant must not put the rows back.
+   */
   addSocialMedia(): void {
-    this.links.push(
-      this.formBuilder.group({
-        network: ['', Validators.required],
-        url: ['', Validators.required],
-      }),
-    );
+    this.links.push(this.linkRow({ network: '', url: '' }));
+    this.socialMediaForm.markAsDirty();
   }
 
+  /** Takes a link off; the save writes the list without it (#2224). */
+  removeSocialMedia(index: number): void {
+    this.links.removeAt(index);
+    this.socialMediaForm.markAsDirty();
+  }
+
+  /** Saves the filled rows; a blank one added by mistake is left out. */
   saveSocialMediaLinks(): void {
     if (this.socialMediaForm.valid) {
-      const socialMediaLinks = this.socialMediaForm.value;
-      this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });
+      this.submitSocialMediaLinks.emit({
+        links: linksOf(
+          this.socialMediaForm.getRawValue().links as Partial<LinkRow>[],
+        ),
+      });
     }
   }
 

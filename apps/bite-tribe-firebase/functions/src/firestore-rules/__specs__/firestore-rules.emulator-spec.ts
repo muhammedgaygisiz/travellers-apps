@@ -3079,10 +3079,24 @@ describe('bites', () => {
       );
     });
 
+    /**
+     * The store app 1.2.0 sends its whole form, `imagePath: ''` included
+     * (GitHub issue #2236).
+     */
+    it('lets the creator start a Bite that carries an empty photo URL', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'bites', 'empty-url-bite'), {
+          userId: CONSUMER,
+          name: 'Pho',
+          imagePath: '',
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
     it('refuses a new Bite that carries its own photo', async () => {
       for (const [id, fields] of [
         ['url-bite', { imagePath: 'https://example.com/photo.jpg' }],
-        ['empty-url-bite', { imagePath: '' }],
         ['uploaded-bite', { imageStatus: 'uploaded' }],
         ['refused-bite', { imageStatus: 'refused' }],
         ['category-bite', { imageRefusalCategory: 'violence' }],

@@ -242,6 +242,62 @@
           </ion-button>
         </div>
       }
+      @case ('dietary') {
+        <!--
+          What the restaurant says about its whole kitchen (issue #2194).
+          Guests read it on the restaurant page as declared by the restaurant.
+          The note is checked before it is published, so a refused one is
+          not saved.
+        -->
+        <div class="ion-margin-top" [formGroup]="dietaryForm">
+          <ion-item>
+            <ion-select
+              formControlName="statements"
+              [multiple]="true"
+              interface="popover"
+              [interfaceOptions]="{ cssClass: 'restaurant-dietary-popover' }"
+              [label]="'restaurant-dietary-statements' | transloco"
+              [placeholder]="'restaurant-dietary-statements-none' | transloco"
+              data-testid="restaurant-dietary-statements"
+            >
+              @for (statement of dietaryStatementOptions; track statement) {
+                <ion-select-option [value]="statement">{{
+                  'dietary-statement-' + statement | transloco
+                }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-text color="medium">
+            <p class="text-small">
+              {{ 'restaurant-dietary-statements-hint' | transloco }}
+            </p>
+          </ion-text>
+          <ion-textarea
+            class="ion-margin-top"
+            [label]="'restaurant-cross-contamination-note' | transloco"
+            labelPlacement="stacked"
+            formControlName="crossContaminationNote"
+            fill="outline"
+            auto-grow="true"
+            [maxlength]="maxCrossContaminationNote"
+            [counter]="true"
+            [rows]="3"
+            mode="md"
+            [placeholder]="
+              'restaurant-cross-contamination-note-placeholder' | transloco
+            "
+            data-testid="restaurant-cross-contamination-note"
+          />
+          <ion-button
+            class="ion-margin-top"
+            data-testid="save-dietary"
+            [disabled]="dietaryForm.invalid"
+            (click)="saveDietary()"
+          >
+            {{ 'save' | transloco }}
+          </ion-button>
+        </div>
+      }
       @case ('table-ordering') {
         <div class="ion-margin-top" [formGroup]="tableOrderingForm">
           <ion-item>

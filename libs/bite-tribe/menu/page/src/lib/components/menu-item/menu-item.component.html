@@ -14,6 +14,41 @@
     <p>{{ itemData?.description }}</p>
 
     <!--
+      The dietary labels the restaurant declares for this row (issue #2194).
+      Never shown as plain fact: the line says who claims them, RD-DC-1.
+    -->
+    @if (hasDietary()) {
+      <div class="dietary" data-testid="menu-item-dietary">
+        <ul class="dietary-labels">
+          @for (label of dietary().labels; track label) {
+            <li
+              class="dietary-label"
+              [class.dietary-label-high-risk]="isHighRisk(label)"
+              [attr.data-testid]="'menu-item-dietary-label-' + label"
+            >
+              {{ 'dietary-label-' + label | transloco }}
+            </li>
+          }
+          @for (option of dietary().options; track option) {
+            <li
+              class="dietary-label dietary-option"
+              [attr.data-testid]="'menu-item-dietary-option-' + option"
+            >
+              {{
+                'dietary-option'
+                  | transloco
+                    : { label: ('dietary-label-' + option | transloco) }
+              }}
+            </li>
+          }
+        </ul>
+        <span class="dietary-source" data-testid="menu-item-dietary-source">{{
+          'dietary-declared-by-restaurant' | transloco
+        }}</span>
+      </div>
+    }
+
+    <!--
       What people thought of this dish (GitHub issue #1113). One line under the
       name rather than the Bites themselves: a menu can run to sixty items, and
       a guest deciding what to order should not have to scroll past other

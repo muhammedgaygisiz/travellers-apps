@@ -1,3 +1,4 @@
+import { ContentRefusedError } from 'utils';
 import { TestBed } from '@angular/core/testing';
 import { EditRestaurantService } from '../edit-restaurant.service';
 import {
@@ -38,6 +39,7 @@ describe('EditRestaurantService', () => {
       submitOpeningHours: jest.fn(),
       submitGenderNeutralRestroom: jest.fn(),
       submitCategories: jest.fn(),
+      submitDietaryStatements: jest.fn(),
       submitAddress: jest.fn(),
       submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
@@ -393,6 +395,61 @@ describe('EditRestaurantService', () => {
       );
 
       await service.submitCategories(['cafe']);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /** See GitHub issue #2194. */
+  describe('submitDietaryStatements', () => {
+    const value = {
+      statements: ['fully-halal' as const],
+      crossContaminationNote: 'Shared fryer.',
+    };
+
+    beforeEach(() => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+    });
+
+    it('saves them and confirms it', async () => {
+      await service.submitDietaryStatements(value);
+
+      expect(dataAccessMock.submitDietaryStatements).toHaveBeenCalledWith(
+        'rest1',
+        ['fully-halal'],
+        'Shared fryer.',
+      );
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'dietary-statements-saved',
+        outcome: 'success',
+      });
+    });
+
+    it('says the note was refused when the content check refuses it', async () => {
+      (dataAccessMock.submitDietaryStatements as jest.Mock).mockRejectedValue(
+        new ContentRefusedError('crossContaminationNote'),
+      );
+
+      await service.submitDietaryStatements(value);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'content-refused',
+        outcome: 'failure',
+      });
+    });
+
+    it('says so when the save fails for another reason', async () => {
+      (dataAccessMock.submitDietaryStatements as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
+
+      await service.submitDietaryStatements(value);
 
       expect(toastMock.present).toHaveBeenCalledWith({
         messageKey: 'something-went-wrong-please-try-again',

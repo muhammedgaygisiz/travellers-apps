@@ -31,6 +31,9 @@ describe('RestaurantDataAccessService', () => {
         .fn()
         .mockResolvedValue(undefined),
       saveCategoriesForRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveDietaryStatementsForRestaurant: jest
+        .fn()
+        .mockResolvedValue(undefined),
       saveAddressForRestaurant: jest.fn().mockResolvedValue(undefined),
       savePositionForRestaurant: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<BiteTribeApiService>;
@@ -112,6 +115,16 @@ describe('RestaurantDataAccessService', () => {
       expect(apiMock.saveCategoriesForRestaurant).toHaveBeenCalledWith(
         'rest-1',
         ['pub'],
+      );
+    });
+
+    it('saves the dietary statements through the API', async () => {
+      await service.submitDietaryStatements('rest-1', ['fully-halal'], 'Note');
+
+      expect(apiMock.saveDietaryStatementsForRestaurant).toHaveBeenCalledWith(
+        'rest-1',
+        ['fully-halal'],
+        'Note',
       );
     });
 

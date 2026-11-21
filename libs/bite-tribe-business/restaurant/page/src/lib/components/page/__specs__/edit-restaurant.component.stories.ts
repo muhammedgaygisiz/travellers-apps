@@ -209,3 +209,15 @@ export const StoredPhotoRefused: Story = {
     photoRefusalCategory: 'violence',
   },
 };
+
+/** What the whole kitchen is, and a cross-contamination note (issue #2194). */
+export const Dietary: Story = {
+  args: {
+    section: 'dietary',
+    restaurant: {
+      ...trattoria,
+      dietaryStatements: ['fully-vegetarian'],
+      crossContaminationNote: 'Our fryer is shared with fish.',
+    } as Restaurant,
+  },
+};

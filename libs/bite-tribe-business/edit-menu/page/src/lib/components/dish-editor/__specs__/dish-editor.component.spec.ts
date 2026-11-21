@@ -211,4 +211,65 @@ describe(DishEditorComponent.name, () => {
     expect(component.variants.length).toBe(0);
     expect(component.isNew()).toBe(false);
   });
+
+  /** Dietary labels and options, as the restaurant declares them (#2194). */
+  describe('dietary labels', () => {
+    it('shows the declared labels and options, dropping unknown values', () => {
+      open({
+        ...PAD_THAI,
+        dietaryLabels: ['halal', 'keto' as never],
+        dietaryOptions: ['vegan', 'halal'],
+        variants: [
+          { ...PAD_THAI.variants![0], dietaryLabels: ['vegetarian'] },
+          PAD_THAI.variants![1],
+        ],
+      });
+
+      expect(component.form.value.dietaryLabels).toEqual(['halal']);
+      expect(component.form.value.dietaryOptions).toEqual(['vegan']);
+      expect(component.variants.at(0).value.dietaryLabels).toEqual([
+        'vegetarian',
+      ]);
+      expect(component.variants.at(1).value.dietaryLabels).toEqual([]);
+    });
+
+    it('saves the labels and options on the dish and each variant', () => {
+      open(PAD_THAI);
+      component.form.patchValue({
+        dietaryLabels: ['nut-free'],
+        dietaryOptions: ['gluten-free', 'nut-free'],
+      });
+      component.variants.at(0).patchValue({ dietaryLabels: ['vegetarian'] });
+      component.variants.at(1).patchValue({ dietaryOptions: ['halal'] });
+
+      component.saveDish();
+
+      const dish = saved.mock.calls[0][0];
+      expect(dish.dietaryLabels).toEqual(['nut-free']);
+      expect(dish.dietaryOptions).toEqual(['gluten-free']);
+      expect(dish.variants[0]).toEqual(
+        expect.objectContaining({ id: 'v1', dietaryLabels: ['vegetarian'] }),
+      );
+      expect(dish.variants[0]).not.toHaveProperty('dietaryOptions');
+      expect(dish.variants[1]).toEqual(
+        expect.objectContaining({ id: 'v2', dietaryOptions: ['halal'] }),
+      );
+    });
+
+    it('removes labels the owner took off, on the dish and its variants', () => {
+      open({
+        ...PAD_THAI,
+        dietaryLabels: ['halal'],
+        variants: [{ ...PAD_THAI.variants![0], dietaryLabels: ['vegetarian'] }],
+      });
+      component.form.patchValue({ dietaryLabels: [] });
+      component.variants.at(0).patchValue({ dietaryLabels: [] });
+
+      component.saveDish();
+
+      const dish = saved.mock.calls[0][0];
+      expect(dish).not.toHaveProperty('dietaryLabels');
+      expect(dish.variants[0]).not.toHaveProperty('dietaryLabels');
+    });
+  });
 });

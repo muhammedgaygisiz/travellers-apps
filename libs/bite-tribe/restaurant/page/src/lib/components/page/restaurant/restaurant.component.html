@@ -199,6 +199,41 @@
           </p>
         }
 
+        <!--
+          The restaurant's statements about its whole kitchen (issue #2194),
+          with their source: never shown as plain fact, RD-DC-1.
+        -->
+        @if (dietaryStatements().length || crossContaminationNote()) {
+          <div class="dietary" data-testid="restaurant-dietary">
+            @if (dietaryStatements().length) {
+              <ul class="dietary-statements">
+                @for (statement of dietaryStatements(); track statement) {
+                  <li
+                    class="dietary-statement"
+                    [attr.data-testid]="'restaurant-dietary-' + statement"
+                  >
+                    {{ 'dietary-statement-' + statement | transloco }}
+                  </li>
+                }
+              </ul>
+            }
+            @if (crossContaminationNote()) {
+              <p
+                class="dietary-note text-small"
+                data-testid="restaurant-cross-contamination-note"
+              >
+                {{ crossContaminationNote() }}
+              </p>
+            }
+            <p
+              class="dietary-source text-small"
+              data-testid="restaurant-dietary-source"
+            >
+              {{ 'dietary-declared-by-restaurant' | transloco }}
+            </p>
+          </div>
+        }
+
         <div
           class="rating-container ion-display-flex ion-align-items-center ion-margin-bottom"
         >

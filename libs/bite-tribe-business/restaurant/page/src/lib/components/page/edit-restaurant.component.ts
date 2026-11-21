@@ -31,6 +31,10 @@ import {
   RestaurantCategory,
   RestaurantSection,
   restaurantCategoriesOf,
+  MAX_CROSS_CONTAMINATION_NOTE_LENGTH,
+  RESTAURANT_DIETARY_STATEMENTS,
+  RestaurantDietaryStatement,
+  restaurantDietaryStatementsOf,
   TableOrderingSettings,
 } from 'model';
 import {
@@ -133,6 +137,14 @@ export class EditRestaurantComponent {
   readonly submitTableOrderingSettings = output<TableOrderingSettings>();
   /** An empty list is "not stated", which removes the field (issue #2131). */
   readonly submitCategories = output<RestaurantCategory[]>();
+  /**
+   * The restaurant's dietary statements and cross-contamination note
+   * (issue #2194). Empty removes each field.
+   */
+  readonly submitDietaryStatements = output<{
+    statements: RestaurantDietaryStatement[];
+    crossContaminationNote: string;
+  }>();
   /** `undefined` is "Not stated", which removes the field (issue #1830). */
   readonly submitGenderNeutralRestroom = output<boolean | undefined>();
 
@@ -299,6 +311,50 @@ export class EditRestaurantComponent {
     this.submitGenderNeutralRestroom.emit(
       fromFacilityAnswer(genderNeutralRestroom),
     );
+  }
+
+  /**
+   * What the restaurant says about its whole kitchen (issue #2194): any of a
+   * fixed list of statements, and a free note on cross-contamination that the
+   * backend checks before guests read it. One Save for both.
+   */
+  readonly dietaryStatementOptions = RESTAURANT_DIETARY_STATEMENTS;
+  readonly maxCrossContaminationNote = MAX_CROSS_CONTAMINATION_NOTE_LENGTH;
+
+  readonly dietaryForm = this.formBuilder.nonNullable.group({
+    statements: [[] as RestaurantDietaryStatement[]],
+    crossContaminationNote: [
+      '',
+      Validators.maxLength(MAX_CROSS_CONTAMINATION_NOTE_LENGTH),
+    ],
+  });
+
+  initDietary = effect(() => {
+    const restaurant = this.restaurant();
+
+    if (this.dietaryForm.dirty) {
+      return;
+    }
+
+    this.dietaryForm.patchValue({
+      statements: restaurantDietaryStatementsOf(restaurant?.dietaryStatements),
+      crossContaminationNote: restaurant?.crossContaminationNote ?? '',
+    });
+  });
+
+  saveDietary(): void {
+    if (this.dietaryForm.invalid) {
+      return;
+    }
+
+    const { statements, crossContaminationNote } =
+      this.dietaryForm.getRawValue();
+
+    this.submitDietaryStatements.emit({
+      statements,
+      crossContaminationNote: crossContaminationNote.trim(),
+    });
+    this.dietaryForm.markAsPristine();
   }
 
   get links(): FormArray {

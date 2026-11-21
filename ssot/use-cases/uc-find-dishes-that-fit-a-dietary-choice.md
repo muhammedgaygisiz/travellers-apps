@@ -4,12 +4,15 @@
 
 **Level:** L1.
 
-Next to implement, under epic [#2193]. Nothing of it exists: the only dietary trace today
-is a free-text tag such as `#vegan` on a Bite, which the Restaurant's derived tags repeat
-([Restaurant](../domain/restaurant.md)) and nothing filters on. `explainBite` states no
-dietary property by design (`UC-IBD` `R-2`), and this page keeps it that way. The flow below
-is the behaviour as the team agreed it on 20 November 2026; the thresholds it depends on are
-open in `Dietary Choice Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+Partly built, under epic [#2193]. The vocabulary and the restaurant's declarations of
+[#2194] exist: an owner declares labels on menu items and statements for the whole
+Restaurant, and the consumer menu and restaurant page show them as declared by the
+restaurant. Nothing else in the flow exists yet - no creator labels, no votes, no choices,
+no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that nothing filters
+on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
+it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
+thresholds it depends on are open in `Dietary Choice Questions` in
+[Current State - Open Questions](../current-state/open-questions.md).
 
 ## Goal
 
@@ -50,9 +53,12 @@ Once the behaviour has succeeded:
 
 ## Flow
 
-- The Restaurant Owner opens a menu item in the business app and sets its dietary labels, and
-  the labels it _can be made_ to fit. They set restaurant-wide statements, such as fully
-  plant-based or a dedicated gluten-free kitchen, on the Restaurant ([#2194]).
+- Built: the Restaurant Owner opens a menu item in the business app and sets its dietary
+  labels, and the labels it _can be made_ to fit, on the dish and on each variant. They set
+  restaurant-wide statements, such as fully plant-based or a dedicated gluten-free kitchen,
+  and a free cross-contamination note, in the restaurant's `Dietary` section, and the note is
+  checked before it is published (`RD-UR-11`). Readers of the menu and of the restaurant page
+  see each as declared by the restaurant ([#2194]). The rest of this flow is intended.
 - A Bite Creator creating or editing a Bite picks dietary label chips beside the tags
   ([#2195]). A Bite linked to a menu item shows the restaurant's label for it too.
 - A Bite Creator sets their dietary choices in settings, and gives consent before the first
@@ -87,8 +93,11 @@ Once the behaviour has succeeded:
 
 ## Authorization
 
-The boundary as this page understands it: the Restaurant's labels are owner-scoped like
-`facilities`, the Bite's labels are creator-scoped like the rest of the Bite, votes go
+The boundary as this page understands it: a menu item's labels are written with the menu,
+whose rules admit only an account holding the Restaurant or an Operator. The Restaurant's
+statements and note are written only by the `saveRestaurantDietaryStatements` callable,
+which admits the same two and checks the note, and the rules refuse every client write of
+them. The Bite's labels are creator-scoped like the rest of the Bite, votes go
 through a callable that checks eligibility, every count and the removal state are
 backend-only, and restoration is an Operator action. A member's dietary choices live in
 their private settings and no other account reads them. The per-step enforcement is written
@@ -111,15 +120,27 @@ high-risk notice so that it never reads as medical advice.
 
 ## Supported Evidence
 
-Not implemented. The surfaces this will touch:
+Built by [#2194]:
 
-- `libs/bite-tribe-common/model` - `menu.ts` and the Bite and Restaurant models, for the
-  vocabulary and the label fields
-- `libs/bite-tribe-business` - the menu editor and the Restaurant editor
-- `libs/bite-tribe/bite`, `libs/bite-tribe/menu/page`, `libs/bite-tribe/restaurant/page`,
-  `libs/bite-tribe/home/page` and `libs/bite-tribe/settings`
+- `libs/bite-tribe-common/model/src/lib/dietary-label.ts` - the vocabulary, each label's
+  class, the restaurant statements and the read rules that drop an unknown value;
+  `MenuItem.dietaryLabels` and `dietaryOptions` in `menu.ts`;
+  `Restaurant.dietaryStatements` and `crossContaminationNote` in `restaurant.ts`
+- `libs/bite-tribe-business/edit-menu/page` - the dish editor's pickers, for a dish and each
+  variant
+- `libs/bite-tribe-business/restaurant/page` - the restaurant's `dietary` section
+- `apps/bite-tribe-firebase/functions/src/functions/restaurants/save-restaurant-dietary-statements.ts`
+  - the callable that writes the statements and checks the note
+- `apps/bite-tribe-firebase/firestore.rules` - `dietaryStatementFields()`, refused to every
+  client write
+- `libs/bite-tribe/menu/page` (`menu-item`) and `libs/bite-tribe/restaurant/page` - the
+  labels and statements as declared by the restaurant
+
+Not implemented yet, the surfaces the later stories will touch:
+
+- `libs/bite-tribe/bite`, `libs/bite-tribe/home/page` and `libs/bite-tribe/settings`
 - `apps/bite-tribe-firebase/functions` - the vote callable and the removal trigger
-- `firestore.rules` and `firestore.indexes.json`
+- `firestore.indexes.json`
 
 ## Related GitHub Scope
 

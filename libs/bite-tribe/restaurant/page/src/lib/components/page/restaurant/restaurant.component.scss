@@ -51,6 +51,38 @@
     color: var(--ion-color-medium);
   }
 
+  /* The restaurant's dietary statements (issue #2194). */
+  .dietary {
+    margin: 0 0 12px;
+
+    .dietary-statements {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 0 0 4px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .dietary-statement {
+      border: 1px solid var(--ion-color-success);
+      border-radius: var(--border-radius);
+      color: var(--ion-color-success-shade);
+      font-size: 0.75rem;
+      line-height: 1;
+      padding: 4px 6px;
+    }
+
+    .dietary-note {
+      margin: 0 0 2px;
+    }
+
+    .dietary-source {
+      margin: 0;
+      color: var(--ion-color-medium);
+    }
+  }
+
   .rating-container {
     white-space: nowrap;
 

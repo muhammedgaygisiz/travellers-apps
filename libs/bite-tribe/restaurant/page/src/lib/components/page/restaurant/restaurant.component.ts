@@ -22,6 +22,7 @@ import {
   MenuItem,
   Restaurant,
   restaurantCategoriesOf,
+  restaurantDietaryStatementsOf,
 } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { TitleCasePipe } from '@angular/common';
@@ -151,6 +152,18 @@ export class RestaurantComponent {
    * restaurant that has not said, and then nothing is shown.
    */
   categories = computed(() => restaurantCategoriesOf(this.restaurant()));
+
+  /**
+   * What the restaurant says about its whole kitchen (issue #2194), and its
+   * cross-contamination note. Both shown as declared by the restaurant.
+   */
+  dietaryStatements = computed(() =>
+    restaurantDietaryStatementsOf(this.restaurant()?.dietaryStatements),
+  );
+
+  crossContaminationNote = computed(
+    () => this.restaurant()?.crossContaminationNote?.trim() ?? '',
+  );
 
   setSelectedSegment(selectedSegment: unknown): void {
     if (selectedSegment !== 'bites' && selectedSegment !== 'menu') {

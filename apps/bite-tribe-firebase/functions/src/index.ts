@@ -76,6 +76,7 @@ export {
   searchNearbyPlaces,
 } from './functions/restaurants/search-places';
 export { getPlaceDetails } from './functions/restaurants/get-place-details';
+export { saveRestaurantDietaryStatements } from './functions/restaurants/save-restaurant-dietary-statements';
 export { countUsers } from './functions/users/count-users';
 export { updateLastSeen } from './functions/users/update-last-seen';
 export { updateUserMetadata } from './functions/users/update-user-metadata';

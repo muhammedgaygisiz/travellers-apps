@@ -222,6 +222,18 @@ service cloud.firestore {
         && holds(restaurantData(restaurantId));
     }
 
+    /**
+     * What a restaurant says about its whole kitchen (GitHub issue #2194):
+     * the dietary statements and the free cross-contamination note. Written
+     * only by `saveRestaurantDietaryStatements`, which checks the note before
+     * another account can read it (`RD-UR-11`) and admits the accounts
+     * holding the restaurant and operators. A client write of either is
+     * refused, an operator's included, so the check cannot be stepped around.
+     */
+    function dietaryStatementFields() {
+      return ['dietaryStatements', 'crossContaminationNote'];
+    }
+
     match /restaurants/{restaurantId} {
       allow read: if isMember();
 
@@ -234,7 +246,9 @@ service cloud.firestore {
        * never by writing one for itself — which is also why a create may not
        * carry the ownership fields.
        */
-      allow create: if isOperator() && absentAll(ownershipFields());
+      allow create: if isOperator()
+        && absentAll(ownershipFields())
+        && absentAll(dietaryStatementFields());
 
       /**
        * A holder edits the restaurant but never its published photo, which
@@ -242,6 +256,7 @@ service cloud.firestore {
        * new-restaurant page is an operator write and stays open.
        */
       allow update: if unchangedAll(ownershipFields())
+        && unchangedAll(dietaryStatementFields())
         && (isOperator() || (holds(resource.data) && keepsPublishedFolderPhoto()));
 
       allow delete: if isOperator();

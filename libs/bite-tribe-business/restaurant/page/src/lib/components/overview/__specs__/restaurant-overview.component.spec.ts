@@ -107,6 +107,27 @@ describe('overviewRow', () => {
     );
   });
 
+  /** See GitHub issue #2194. */
+  it('lists the stated dietary statements, and nothing before any', () => {
+    expect(
+      rowOf(
+        { ...BARE, dietaryStatements: ['fully-halal', 'fully-plant-based'] },
+        'dietary',
+      ),
+    ).toEqual({
+      section: 'dietary',
+      missing: false,
+      valueKeys: [
+        'dietary-statement-fully-plant-based',
+        'dietary-statement-fully-halal',
+      ],
+    });
+    expect(rowOf(BARE, 'dietary')).toEqual({
+      section: 'dietary',
+      missing: false,
+    });
+  });
+
   it('says a stated restroom yes', () => {
     expect(
       rowOf(
@@ -178,6 +199,7 @@ describe(RestaurantOverviewComponent.name, () => {
       'restaurant-section-position',
       'restaurant-section-opening-hours',
       'restaurant-section-facilities',
+      'restaurant-section-dietary',
       'restaurant-section-table-ordering',
     ]);
   });

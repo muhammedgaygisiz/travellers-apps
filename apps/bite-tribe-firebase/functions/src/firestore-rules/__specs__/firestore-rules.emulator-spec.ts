@@ -920,6 +920,56 @@ describe('restaurants', () => {
       );
     });
   });
+
+  /**
+   * The dietary statements and the cross-contamination note (issue #2194)
+   * are written by `saveRestaurantDietaryStatements` alone, so the note is
+   * checked first. Every client write is refused, the holder's included.
+   */
+  describe('the dietary statements (issue #2194)', () => {
+    it.each([
+      ['the owner', (): Firestore => asOwner()],
+      ['an operator', (): Firestore => asOperator()],
+      [
+        'a business account that does not hold it',
+        (): Firestore => asOtherBusiness(),
+      ],
+      ['a consumer', (): Firestore => asConsumer()],
+    ])('refuses %s writing them from a client', async (_who, as) => {
+      for (const fields of [
+        { dietaryStatements: ['fully-halal'] },
+        { crossContaminationNote: 'Unchecked text' },
+      ]) {
+        await assertFails(
+          updateDoc(doc(as(), 'restaurants', OWNED_RESTAURANT), fields),
+        );
+      }
+    });
+
+    it('refuses an operator creating a restaurant that carries them', async () => {
+      await assertFails(
+        setDoc(doc(asOperator(), 'restaurants', 'new-dietary-restaurant'), {
+          name: 'New',
+          dietaryStatements: ['fully-kosher'],
+        }),
+      );
+    });
+
+    it('leaves the owner editing the rest of the restaurant', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(
+          doc(context.firestore(), 'restaurants', OWNED_RESTAURANT),
+          { dietaryStatements: ['fully-halal'] },
+        );
+      });
+
+      await assertSucceeds(
+        updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+          description: 'Still mine to write',
+        }),
+      );
+    });
+  });
 });
 
 /**
@@ -1204,6 +1254,47 @@ describe('menus', () => {
       addDoc(collection(asOwner(), 'menus'), {
         restaurantId: OWNED_RESTAURANT,
         categories: [],
+      }),
+    );
+  });
+
+  /**
+   * A dish's dietary labels and options (issue #2194) live inside the menu,
+   * so the menu's own owner check is what guards them.
+   */
+  it('lets the owner declare dietary labels on a dish and its variants', async () => {
+    await assertSucceeds(
+      updateDoc(doc(asOwner(), 'menus', OWNED_MENU), {
+        restaurantId: OWNED_RESTAURANT,
+        categories: [
+          {
+            title: 'Mains',
+            items: [
+              {
+                id: 'pad-thai',
+                name: 'Pad Thai',
+                dietaryOptions: ['vegan'],
+                variants: [
+                  { id: 'tofu', name: 'Tofu', dietaryLabels: ['vegetarian'] },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+  });
+
+  it("refuses a business account declaring labels on another restaurant's menu", async () => {
+    await assertFails(
+      updateDoc(doc(asOtherBusiness(), 'menus', OWNED_MENU), {
+        restaurantId: OWNED_RESTAURANT,
+        categories: [
+          {
+            title: 'Mains',
+            items: [{ id: 'x', name: 'X', dietaryLabels: ['halal'] }],
+          },
+        ],
       }),
     );
   });

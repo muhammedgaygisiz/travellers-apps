@@ -4,7 +4,8 @@ import { ErrorHandler } from '@angular/core';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import * as getRestaurantByIdUtils from '../utils/get-restaurant-by-id';
 import * as uploadBase64Utils from '../../utils/upload-base64-to-firebase-storage';
-import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { ContentRefusedError, getDownloadUrlFromFirebaseStorage } from 'utils';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 
 jest.mock('../utils/get-restaurant-by-id');
 
@@ -26,6 +27,10 @@ jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
   uploadBase64ToFirebaseStorage: jest
     .fn()
     .mockResolvedValue('restaurants/resto-123.jpg'),
+}));
+
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
 }));
 
 jest.mock('utils', () => ({
@@ -692,6 +697,40 @@ describe(RestaurantApiService.name, () => {
           updatedAtTimestamp: 1710504000000,
         },
       });
+    });
+  });
+
+  /** See GitHub issue #2194. */
+  describe('saveDietaryStatementsForRestaurant', () => {
+    it('sends the statements and note to the checking callable', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { status: 'saved' },
+      });
+
+      await service.saveDietaryStatementsForRestaurant(
+        'resto-123',
+        ['fully-halal'],
+        'Shared fryer.',
+      );
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'saveRestaurantDietaryStatements',
+        data: {
+          restaurantId: 'resto-123',
+          statements: ['fully-halal'],
+          crossContaminationNote: 'Shared fryer.',
+        },
+      });
+    });
+
+    it('throws a content refusal when the note is refused', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { status: 'refused', field: 'crossContaminationNote' },
+      });
+
+      await expect(
+        service.saveDietaryStatementsForRestaurant('resto-123', [], 'bad'),
+      ).rejects.toBeInstanceOf(ContentRefusedError);
     });
   });
 

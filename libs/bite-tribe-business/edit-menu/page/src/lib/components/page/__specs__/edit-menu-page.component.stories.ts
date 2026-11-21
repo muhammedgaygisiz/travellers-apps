@@ -65,6 +65,9 @@ const menu: Menu = {
           // Sold as its variants only, so it has no price of its own (#2182).
           price: 0,
           isAvailable: true,
+          // Declared by the restaurant (#2194).
+          dietaryLabels: ['vegetarian'],
+          dietaryOptions: ['gluten-free'],
           variants: [
             {
               id: 'variant-margherita-regular',

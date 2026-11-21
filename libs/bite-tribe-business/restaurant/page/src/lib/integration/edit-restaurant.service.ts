@@ -12,7 +12,8 @@ import {
   RestaurantSection,
   TableOrderingSettings,
 } from 'model';
-import { NavController } from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +22,11 @@ export class EditRestaurantService {
   private readonly navController = inject(NavController);
   private readonly toast = inject(ToastService);
   private readonly photoUpload = inject(RestaurantImageUploadService);
+  private readonly loadingController = inject(LoadingController);
+  private readonly transloco = inject(TranslocoService);
+
+  /** A section save is under way; a second one is not started (#2225). */
+  private saving = false;
 
   restaurant = this.dataAccess.restaurant;
 
@@ -173,48 +179,27 @@ export class EditRestaurantService {
   }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {
-      try {
-        await this.dataAccess.submitSocialMediaLinks(restaurant.id, links);
-        await this.toast.present({
-          messageKey: 'social-media-links-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'social-media-links-saved', () =>
+        this.dataAccess.submitSocialMediaLinks(restaurant.id, links),
+      );
     }
   }
 
   async submitDescription(description: string): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitDescription(restaurant.id, description);
-        await this.toast.present({
-          messageKey: 'about-restaurant-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'about-restaurant-saved', () =>
+        this.dataAccess.submitDescription(restaurant.id, description),
+      );
     }
   }
 
   async submitOpeningHours(openingHours: DaySchedule[]): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitOpeningHours(restaurant.id, openingHours);
-        await this.toast.present({
-          messageKey: 'opening-hours-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'opening-hours-saved', () =>
+        this.dataAccess.submitOpeningHours(restaurant.id, openingHours),
+      );
     }
   }
 
@@ -231,19 +216,12 @@ export class EditRestaurantService {
   ): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitTableOrderingSettings(
+      await this.saveSection(restaurant.id, 'table-ordering-saved', () =>
+        this.dataAccess.submitTableOrderingSettings(
           restaurant.id,
           tableOrdering,
-        );
-        await this.toast.present({
-          messageKey: 'table-ordering-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+        ),
+      );
     }
   }
 
@@ -256,19 +234,12 @@ export class EditRestaurantService {
   ): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitGenderNeutralRestroom(
+      await this.saveSection(restaurant.id, 'facilities-saved', () =>
+        this.dataAccess.submitGenderNeutralRestroom(
           restaurant.id,
           genderNeutralRestroom,
-        );
-        await this.toast.present({
-          messageKey: 'facilities-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+        ),
+      );
     }
   }
 
@@ -276,49 +247,67 @@ export class EditRestaurantService {
   async submitCategories(categories: RestaurantCategory[]): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitCategories(restaurant.id, categories);
-        await this.toast.present({
-          messageKey: 'categories-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'categories-saved', () =>
+        this.dataAccess.submitCategories(restaurant.id, categories),
+      );
     }
   }
 
   async submitAddress(address: Address): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitAddress(restaurant.id, address);
-        await this.toast.present({
-          messageKey: 'address-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'address-saved', () =>
+        this.dataAccess.submitAddress(restaurant.id, address),
+      );
     }
   }
 
   async submitPosition(position: Geopoint): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitPosition(restaurant.id, position);
-        await this.toast.present({
-          messageKey: 'location-saved',
-          outcome: 'success',
-        });
-        this.backToOverview(restaurant.id);
-      } catch {
-        await this.showFailureToast();
-      }
+      await this.saveSection(restaurant.id, 'location-saved', () =>
+        this.dataAccess.submitPosition(restaurant.id, position),
+      );
     }
+  }
+
+  /**
+   * Saves one section (GitHub issue #2225): under the same overlay as the
+   * menu editor's save (#1377), which tells the owner the write is under way
+   * and covers the page, so Save cannot be pressed twice. A press that still
+   * arrives while a save runs is ignored. A refused write ends the overlay
+   * and shows the failure toast on the section, with the owner's edit kept.
+   */
+  private async saveSection(
+    restaurantId: string,
+    savedKey: string,
+    write: () => Promise<unknown>,
+  ): Promise<void> {
+    if (this.saving) {
+      return;
+    }
+
+    this.saving = true;
+    const loading = await this.loadingController.create({
+      message: this.transloco.translate('restaurant-saving'),
+      backdropDismiss: false,
+    });
+    await loading.present();
+
+    try {
+      await write();
+    } catch {
+      await loading.dismiss();
+      this.saving = false;
+      await this.showFailureToast();
+
+      return;
+    }
+
+    await loading.dismiss();
+    this.saving = false;
+    await this.toast.present({ messageKey: savedKey, outcome: 'success' });
+    this.backToOverview(restaurantId);
   }
 
   private showFailureToast(): Promise<void> {

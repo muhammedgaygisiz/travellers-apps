@@ -113,7 +113,7 @@ the position and ordering at the table show none (issue [#2221]). Below the rows
 and the live tables.
 
 Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
-section's fields and its one Save. While a save runs, the section is covered by the same "Saving…" overlay as the menu editor's save, so Save cannot be pressed twice (issue [#2225]). Save stays disabled while the fields still
+section's fields and its one Save. While a save runs, the section is covered by the same "Saving…" overlay as the menu editor's save, so Save cannot be pressed twice (issue [#2225]). The position section says how the pin moves (a tap places it, nothing changes until Save) and opens at street level on the stored position, or on the device's position for a Restaurant that has none (`0, 0` counts as none), before the world view (issue [#2226]). Save stays disabled while the fields still
 hold what is stored, as in the menu editor, and enables again only when they
 differ (issue [#2222]); the order of the chosen categories does not count, and
 the time zone pre-filled for a restaurant that never set one is not a change. A successful save returns to the overview,
@@ -207,6 +207,7 @@ all be reviewed for the first time.
 - Issue [#2223] stacked the address and link labels above their fields, as in the menu editor, and left the About field to its section heading. Part of epic [#2123].
 - Issue [#2224] added removing a link, left a blank link row out of the save instead of letting it block one, put the links' text in Transloco, and replaced Twitter with X and added TikTok in the network list. Part of epic [#2123].
 - Issue [#2225] put every section save under a "Saving…" overlay and ignored a second press while one runs. Part of epic [#2123].
+- Issue [#2226] opened the position map at street level instead of the world, said how to move the pin, and opened a Restaurant without a position on the device's position. The fix is in the shared map, so the consumer app's Bite position picker opens the same way. Part of epic [#2123].
 
 ## Related Domains
 
@@ -254,3 +255,4 @@ all be reviewed for the first time.
 [#2223]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2223
 [#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
 [#2225]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2225
+[#2226]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2226

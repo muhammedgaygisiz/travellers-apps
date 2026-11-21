@@ -223,7 +223,13 @@
       }
       @case ('position') {
         <div [formGroup]="positionForm">
-          <position formControlName="position" />
+          <!-- How the pin moves; a tap is all it takes (#2226). -->
+          <ion-text color="medium">
+            <p class="note" data-testid="position-hint">
+              {{ 'restaurant-position-hint' | transloco }}
+            </p>
+          </ion-text>
+          <position formControlName="position" [gpsPosition]="gpsPosition()" />
           <ion-button
             class="ion-margin-top"
             data-testid="save-position"

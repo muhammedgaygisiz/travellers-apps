@@ -21,6 +21,8 @@ export class RestaurantDataAccessService {
 
   /** The restaurant currently being edited, from the shared store. */
   restaurant = toSignal(this.storeService.restaurant$);
+  /** The device's position, for a restaurant that has none (#2226). */
+  gpsPosition = toSignal(this.storeService.position$);
 
   /**
    * How many of the restaurant's Bites wait for a link to a dish (GitHub

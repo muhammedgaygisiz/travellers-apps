@@ -169,6 +169,11 @@ export class EditRestaurantComponent {
   /** The image check has the photo and has not answered (GitHub issue #2141). */
   photoChecking = input(false);
   photoRefusalCategory = input<string>();
+  /**
+   * The device's position. The position map opens there for a restaurant
+   * that has none yet (GitHub issue #2226).
+   */
+  gpsPosition = input<Geopoint | null | undefined>();
 
   readonly savePhoto = output<string>();
   readonly retryPhoto = output<void>();
@@ -419,7 +424,12 @@ export class EditRestaurantComponent {
   });
 
   initPosition = effect(() => {
-    const position = this.restaurant()?.position ?? null;
+    // `0, 0` is where a restaurant without a position starts, not a place:
+    // the map opens on the device position instead (#2226), as the overview
+    // shows it "Not set yet".
+    const stored = this.restaurant()?.position;
+    const position =
+      stored && (stored.latitude || stored.longitude) ? stored : null;
 
     if (!this.positionForm.dirty) {
       this.positionForm.patchValue({ position });

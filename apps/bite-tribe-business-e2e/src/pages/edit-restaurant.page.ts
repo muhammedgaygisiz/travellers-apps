@@ -104,6 +104,30 @@ export class EditRestaurantPage {
     await this.expectBackOnOverview();
   }
 
+  /**
+   * Moves the restaurant's pin (GitHub issue #2226): a tap on the position
+   * map places it, offset from the centre the map opened on, then Save. The
+   * hint that explains the tap must be there first.
+   */
+  async movePin(offset: { x: number; y: number }): Promise<void> {
+    await this.openSection('position');
+    await expect(this.page.getByTestId('position-hint')).toBeVisible();
+
+    const map = this.page.locator('position .leaflet-container');
+    await expect(map).toBeVisible();
+    const box = await map.boundingBox();
+
+    if (!box) {
+      throw new Error('The position map has no size');
+    }
+
+    await map.click({
+      position: { x: box.width / 2 + offset.x, y: box.height / 2 + offset.y },
+    });
+    await this.page.getByTestId('save-position').click();
+    await this.expectBackOnOverview();
+  }
+
   async expectGenderNeutralRestroom(
     value: 'yes' | 'no' | 'not-stated',
   ): Promise<void> {

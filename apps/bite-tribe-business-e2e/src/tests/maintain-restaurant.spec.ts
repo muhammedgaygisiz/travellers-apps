@@ -100,6 +100,75 @@ test.describe('Maintain restaurants in the business app', () => {
   });
 
   /**
+   * The position map (issue #2226): it opens at street level on the stored
+   * position, so a tap a little off the centre moves the pin a few metres,
+   * not to another country, and the new position survives a reload.
+   */
+  test('moves the restaurant pin a few streets and keeps it after a reload', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const restaurantId = `business-position-${runId}`;
+    const restaurantName = `Position Bistro ${runId}`;
+
+    seededRestaurantIds.push(restaurantId);
+    await seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
+      id: { stringValue: restaurantId },
+      name: { stringValue: restaurantName },
+      ownerUserIds: {
+        arrayValue: { values: [{ stringValue: TEST_USERS.organisation.uid }] },
+      },
+      claimStatus: { stringValue: 'claimed' },
+      position: {
+        mapValue: {
+          fields: {
+            latitude: { doubleValue: POSITION.latitude },
+            longitude: { doubleValue: POSITION.longitude },
+          },
+        },
+      },
+    });
+
+    await loginAsBusinessUser(page);
+
+    const dashboard = new DashboardPage(page);
+    await dashboard.openRestaurants();
+    await dashboard.openRestaurant(restaurantName, restaurantId);
+
+    const editRestaurant = new EditRestaurantPage(page);
+    await editRestaurant.expectRestaurantName(restaurantName);
+    await editRestaurant.movePin({ x: 80, y: 40 });
+    await editRestaurant.expectSavedToast('Location saved successfully!');
+
+    const readPosition = async (): Promise<
+      { latitude: number; longitude: number } | undefined
+    > =>
+      (await getFirestoreDocument(page, `restaurants/${restaurantId}`))?.[
+        'position'
+      ] as { latitude: number; longitude: number } | undefined;
+
+    // Moved, east and a little south, and only by a street or two: at the
+    // world zoom the map used to open on, 80 pixels was a whole country.
+    await expect
+      .poll(async () => (await readPosition())?.longitude, { timeout: 15_000 })
+      .toBeGreaterThan(POSITION.longitude);
+    const saved = await readPosition();
+    expect(saved?.latitude).toBeLessThan(POSITION.latitude);
+    expect(Math.abs((saved?.latitude ?? 0) - POSITION.latitude)).toBeLessThan(
+      0.01,
+    );
+    expect(Math.abs((saved?.longitude ?? 0) - POSITION.longitude)).toBeLessThan(
+      0.01,
+    );
+
+    await page.reload();
+    await editRestaurant.expectRestaurantName(restaurantName);
+    expect(await readPosition()).toEqual(saved);
+  });
+
+  /**
    * The gender-neutral restroom (issue #1830): an answer survives a reload,
    * and "Not stated" removes the field rather than writing `false` - which
    * the consumer page would show as "No gender-neutral restroom".

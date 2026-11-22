@@ -1,4 +1,5 @@
 import {
+  inject,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -27,8 +28,9 @@ import type {
   MenuOptionGroup,
   MenuOptionSelection,
 } from 'model';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { currencyCodes } from 'utils';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { formatMoney } from 'utils';
 
 /**
  * A dish a guest picked, with the size where they picked one
@@ -141,15 +143,13 @@ export class MenuItemComponent {
    */
   canCreateBite = input(true, { transform: booleanAttribute });
 
-  /** The symbol for {@link currency}, or the code where none is known. */
-  readonly currencySymbol = computed(() => {
-    const code = this.currency();
-
-    if (!code) {
-      return '';
-    }
-
-    return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+  /**
+   * The language prices are written in (GitHub issue #2261): a German guest
+   * reads "5,90 €" where an English one reads "€5.90".
+   */
+  private readonly transloco = inject(TranslocoService);
+  private readonly lang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
   });
 
   /**
@@ -171,9 +171,7 @@ export class MenuItemComponent {
       return '';
     }
 
-    const symbol = this.currencySymbol();
-
-    return symbol ? `${price} ${symbol}` : `${price}`;
+    return formatMoney(price, this.currency(), this.lang());
   });
 
   /**
@@ -348,9 +346,7 @@ export class MenuItemComponent {
 
   /** What one extra adds, rendered beside its name. */
   extraPriceLabel(extra: ExtraItem): string {
-    const symbol = this.currencySymbol();
-
-    return symbol ? `+${extra.price} ${symbol}` : `+${extra.price}`;
+    return `+${formatMoney(extra.price, this.currency(), this.lang())}`;
   }
 
   toggleExtra(extraId: string, checked: boolean): void {

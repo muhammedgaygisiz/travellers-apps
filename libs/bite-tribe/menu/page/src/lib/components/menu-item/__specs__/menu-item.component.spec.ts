@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Pipe, PipeTransform } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import {
+  TranslocoPipe,
+  TranslocoService,
+  TranslocoTestingModule,
+} from '@jsverse/transloco';
 import { MenuItemComponent } from '../menu-item.component';
 import { ExtraItem, MenuItem, MenuItemStats, MenuOptionGroup } from 'model';
 import SpyInstance = jest.SpyInstance;
@@ -20,7 +24,13 @@ describe('MenuItemComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuItemComponent],
+      imports: [
+        MenuItemComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en: {}, de: {} },
+          translocoConfig: { availableLangs: ['en', 'de'], defaultLang: 'en' },
+        }),
+      ],
     })
       .overrideComponent(MenuItemComponent, {
         remove: { imports: [TranslocoPipe] },
@@ -34,6 +44,64 @@ describe('MenuItemComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  /**
+   * Prices as money is written (GitHub issue #2261): the currency's
+   * minor-unit decimals and the guest's own separator, on the signed-in menu,
+   * the public one and the ordering screen alike - they all draw this row.
+   */
+  describe('the price', () => {
+    /** Intl separates a currency from its amount with a no-break space. */
+    const plain = (text: string): string => text.replace(/\s/g, ' ');
+
+    const priced = (price: number, currency = 'EUR'): void => {
+      fixture.componentRef.setInput('item', {
+        id: 'soup',
+        name: 'Garnelen-Suppe',
+        price,
+      } as MenuItem);
+      fixture.componentRef.setInput('currency', currency);
+    };
+
+    it('writes the two decimals a stored 5.9 dropped', () => {
+      priced(5.9);
+
+      expect(plain(component.priceLabel())).toBe('€5.90');
+    });
+
+    it("writes them with the guest's separator", () => {
+      TestBed.inject(TranslocoService).setActiveLang('de');
+      priced(5.9);
+
+      expect(plain(component.priceLabel())).toBe('5,90 €');
+    });
+
+    it('writes the decimals of a whole price', () => {
+      priced(5);
+
+      expect(plain(component.priceLabel())).toBe('€5.00');
+    });
+
+    it('writes no decimals for a currency without minor units', () => {
+      priced(1200, 'JPY');
+
+      expect(plain(component.priceLabel())).toBe('¥1,200');
+    });
+
+    it('writes an extra the same way, keeping its plus', () => {
+      priced(9.5);
+
+      expect(
+        plain(
+          component.extraPriceLabel({
+            id: 'mozzarella',
+            name: 'Mozzarella',
+            price: 2,
+          }),
+        ),
+      ).toBe('+€2.00');
+    });
   });
 
   describe('onCreateBiteClick', () => {

@@ -88,8 +88,8 @@ describe(VisitSummaryComponent.name, () => {
     render(MEAL);
 
     expect(text()).toContain('2 × Margherita');
-    expect(text()).toContain('24 €');
-    expect(text()).toContain('Total 24 €');
+    expect(text()).toContain('€24.00');
+    expect(text()).toContain('Total €24.00');
   });
 
   /** "Margherita" twice at two prices is a bill nobody can check. */
@@ -147,6 +147,6 @@ describe(VisitSummaryComponent.name, () => {
   it('falls back to the currency code where no symbol is known', () => {
     render({ ...MEAL, currency: 'XYZ' });
 
-    expect(text()).toContain('Total 24 XYZ');
+    expect(text()).toMatch(/Total XYZ\s24\.00/);
   });
 });

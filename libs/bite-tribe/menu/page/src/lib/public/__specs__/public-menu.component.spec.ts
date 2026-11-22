@@ -179,7 +179,7 @@ describe(PublicMenu.name, () => {
       menu: { ...MENU, currency: undefined },
     });
 
-    expect(text()).toContain('1200');
+    expect(text()).toContain('1,200');
     expect(text()).not.toContain('€');
   });
 

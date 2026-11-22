@@ -1,4 +1,5 @@
 import {
+  inject,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -8,8 +9,9 @@ import {
   output,
 } from '@angular/core';
 import { IonReorderGroup } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { currencyCodes } from 'utils';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { formatMoney } from 'utils';
 import type { Category, ExtraItem, MenuItem, MenuItemStats } from 'model';
 import {
   MenuItemComponent,
@@ -80,21 +82,17 @@ export class CategoryComponent {
     () => !this.canAddToCart() && this.extras().length > 0,
   );
 
-  /** The symbol for {@link currency}, or the code where none is known. */
-  private readonly currencySymbol = computed(() => {
-    const code = this.currency();
-
-    if (!code) {
-      return '';
-    }
-
-    return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
+  /**
+   * The language prices are written in (GitHub issue #2261): a German guest
+   * reads "5,90 €" where an English one reads "€5.90".
+   */
+  private readonly transloco = inject(TranslocoService);
+  private readonly lang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
   });
 
   /** One extra as the menu reads it, on the same terms as a dish's price. */
   extraPriceLabel(extra: ExtraItem): string {
-    const symbol = this.currencySymbol();
-
-    return symbol ? `${extra.price} ${symbol}` : `${extra.price}`;
+    return formatMoney(extra.price, this.currency(), this.lang());
   }
 }

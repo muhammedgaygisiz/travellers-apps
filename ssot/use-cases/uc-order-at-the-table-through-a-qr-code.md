@@ -206,7 +206,9 @@ price; the backend takes the names from the menu, never from the phone. The
 cart, the guest's sent orders and the bill print a line as "Ente Spezial (groß,
 scharf)" - the bill and the summary mail with a dash - and the staff queue
 prints each option with its group, "Zubereitungsart: scharf", because the
-kitchen reads a choice without the menu in front of it. Two lines that differ
+kitchen reads a choice without the menu in front of it. Since issue [#2266] the
+staff queue also prints each extra's name under the dish, without its price:
+the kitchen needs what to make, not what it cost. Two lines that differ
 only in a choice are two cart rows and two bill rows. What one unit cost is `orderLineUnitPrice`, the dish plus its
 extras, rather than the `price` field alone: that field stays the dish's, so
 the backend's price check compares a menu price against a menu price. A line
@@ -301,6 +303,11 @@ reads as an invitation with nobody there to correct it.
 menu that states none renders bare numbers - which a reader can ask about, unlike
 the hardcoded euro sign the renderer used to print at every restaurant on earth.
 The same field is the one `OrderLineSnapshot.currency` has been waiting for.
+Every price a guest reads - the menu, the public menu, the cart, the sent
+orders, the bill and the visit summary - goes through one `formatMoney` in
+`utils` (issue [#2261]): the currency's minor-unit decimals, so a stored `5.9`
+reads "€5.90" and a yen price has none, and the guest's language for the
+separator and the symbol's place, so a German guest reads "5,90 €".
 
 **A table code and a menu code are different printed things.** Both are scanned in
 the same restaurant and neither substitutes for the other: a table code carries a
@@ -1029,3 +1036,5 @@ guest's phone is retrying.
 [#1111]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1111
 [#1112]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1112
 [#2182]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2182
+[#2266]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2266
+[#2261]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2261

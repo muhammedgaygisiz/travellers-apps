@@ -29,6 +29,7 @@ export { isFromCardControl } from './lib/is-from-card-control';
 export { totalBiteCount } from './lib/total-bite-count';
 export { bucketlistProgress } from './lib/bucketlist-progress';
 export { currencyCodes } from './lib/currencies';
+export { formatMoney } from './lib/format-money';
 export { countries, type Country } from './lib/countries';
 export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';
 export { getLocalizedCountryName } from './lib/get-localized-country-name';

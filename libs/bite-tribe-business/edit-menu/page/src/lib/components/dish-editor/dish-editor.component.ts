@@ -275,6 +275,24 @@ export class DishEditorComponent {
     this.form.markAsDirty();
   }
 
+  /**
+   * Moves a variant one place (GitHub issue #2256). The rows are the form
+   * array, so the order the owner sees is the order Save writes, and guests
+   * read the variants in that order - Small before Large. The same control
+   * moves with its row, so a half-typed name or price goes with it.
+   */
+  moveVariant(from: number, to: number): void {
+    if (to < 0 || to >= this.variants.length || from === to) {
+      return;
+    }
+
+    const control = this.variants.at(from);
+
+    this.variants.removeAt(from, { emitEvent: false });
+    this.variants.insert(to, control);
+    this.form.markAsDirty();
+  }
+
   removeVariant(index: number): void {
     this.variants.removeAt(index);
     this.syncPriceValidators();

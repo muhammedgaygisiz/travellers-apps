@@ -222,6 +222,77 @@ describe(DishEditorComponent.name, () => {
     expect(component.form.dirty).toBe(true);
   });
 
+  /** Variants in the owner's order, Small before Large (GitHub issue #2256). */
+  describe('moving a variant', () => {
+    const button = (testId: string): HTMLIonButtonElement | null =>
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelector<HTMLIonButtonElement>(`[data-testid="${testId}"]`);
+
+    it('saves the variants in the order they were moved to', () => {
+      open(PAD_THAI);
+
+      component.moveVariant(1, 0);
+      component.saveDish();
+
+      expect(
+        (saved.mock.calls[0][0] as MenuItem).variants?.map(({ id }) => id),
+      ).toEqual(['v2', 'v1']);
+    });
+
+    it('moves a half-typed row with what was typed in it', () => {
+      open(PAD_THAI);
+      component.variants.at(0).patchValue({ name: 'Veggie', price: 15 });
+
+      component.moveVariant(0, 1);
+
+      expect(component.variants.at(1).value).toEqual(
+        expect.objectContaining({ id: 'v1', name: 'Veggie', price: 15 }),
+      );
+    });
+
+    it('marks the form edited', () => {
+      open(PAD_THAI);
+
+      component.moveVariant(0, 1);
+
+      expect(component.form.dirty).toBe(true);
+    });
+
+    it('ignores a move past either end', () => {
+      open(PAD_THAI);
+
+      component.moveVariant(0, -1);
+      component.moveVariant(1, 2);
+
+      expect(component.variants.controls.map((row) => row.value.id)).toEqual([
+        'v1',
+        'v2',
+      ]);
+      expect(component.form.dirty).toBe(false);
+    });
+
+    it('offers no move up on the first row and no move down on the last', () => {
+      open(PAD_THAI);
+
+      expect(button('move-dish-variant-up-0')?.disabled).toBe(true);
+      expect(button('move-dish-variant-down-0')?.disabled).toBe(false);
+      expect(button('move-dish-variant-up-1')?.disabled).toBe(false);
+      expect(button('move-dish-variant-down-1')?.disabled).toBe(true);
+    });
+
+    it('moves a row from its button', () => {
+      open(PAD_THAI);
+
+      button('move-dish-variant-down-0')?.click();
+
+      expect(component.variants.controls.map((row) => row.value.id)).toEqual([
+        'v2',
+        'v1',
+      ]);
+    });
+  });
+
   it('reads the next dish when another one is opened', () => {
     open(PAD_THAI);
     component.form.patchValue({ name: 'Edited' });

@@ -8,6 +8,7 @@
     flex-direction: column;
     margin-top: 1rem;
     padding: 0.75rem;
+    container: extras / inline-size;
 
     h3 {
       font-size: 1.1rem;
@@ -39,13 +40,29 @@
       grid-template-columns: minmax(0, 1fr) 8rem auto;
       margin-bottom: 0.5rem;
 
-      @media (max-width: 480px) {
-        grid-template-columns: minmax(0, 1fr);
+      // In a narrow editor - the side panel on a laptop - the buttons take a
+      // line of their own so the name keeps its width (issue #2256).
+      @container extras (max-width: 520px) {
+        grid-template-columns: minmax(0, 1fr) 7rem;
 
-        ion-button {
+        .row-actions {
+          grid-column: 1 / -1;
           justify-self: end;
         }
       }
+
+      @media (max-width: 480px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        .row-actions {
+          justify-self: end;
+        }
+      }
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
     }
 
     .extra-row-new {

@@ -170,6 +170,24 @@ export class BusinessCategoryExtrasComponent {
     this.emit(this.description(), remaining);
   }
 
+  /**
+   * Moves an extra one place (GitHub issue #2256). Saved at once, like every
+   * other change to the extras, and guests read them in this order on the
+   * menu and when ordering.
+   */
+  protected moveExtra(from: number, to: number): void {
+    const extras = [...this.extras()];
+
+    if (to < 0 || to >= extras.length || from === to) {
+      return;
+    }
+
+    const [moved] = extras.splice(from, 1);
+    extras.splice(to, 0, moved);
+
+    this.emit(this.description(), extras);
+  }
+
   private replace(index: number, changes: Partial<ExtraItem>): void {
     const extras = this.extras().map((extra, at) =>
       at === index ? { ...extra, ...changes } : extra,

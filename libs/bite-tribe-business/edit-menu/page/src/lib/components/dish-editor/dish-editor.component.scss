@@ -25,6 +25,10 @@
   font-size: 0.875rem;
 }
 
+.variants {
+  container: variants / inline-size;
+}
+
 .variants,
 .options {
   display: flex;
@@ -45,6 +49,24 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 8rem auto;
   gap: 0.5rem;
+  align-items: center;
+
+  // Where the editor is narrow - a phone, or the side panel on a laptop - the
+  // three buttons take a line of their own, so the name keeps the width it
+  // needs (issue #2256). Measured on the fieldset, not the screen, because
+  // the panel is narrow on a wide screen.
+  @container variants (max-width: 520px) {
+    grid-template-columns: minmax(0, 1fr) 7rem;
+
+    .row-actions {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+  }
+}
+
+.row-actions {
+  display: flex;
   align-items: center;
 }
 

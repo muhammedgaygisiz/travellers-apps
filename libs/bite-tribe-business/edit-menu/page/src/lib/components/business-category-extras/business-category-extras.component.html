@@ -14,7 +14,11 @@
     />
 
     <ul class="extras-rows">
-      @for (extra of extras(); let index = $index; track extra.id) {
+      @for (
+        extra of extras();
+        let index = $index, first = $first, last = $last;
+        track extra.id
+      ) {
         <li class="extra-row" data-testid="category-extra-row">
           <ion-input
             class="extra-name"
@@ -42,15 +46,49 @@
             <span slot="end">{{ currencySymbol() }}</span>
           </ion-input>
 
-          <ion-button
-            fill="clear"
-            color="danger"
-            [attr.data-testid]="'category-extra-remove-' + extra.id"
-            [attr.aria-label]="'menu-extras-remove' | transloco"
-            (click)="removeExtra(index)"
-          >
-            <ion-icon name="trash-outline" slot="icon-only" />
-          </ion-button>
+          <div class="row-actions">
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="first"
+              [attr.data-testid]="'category-extra-move-up-' + extra.id"
+              [attr.aria-label]="
+                'menu-extras-move-up' | transloco: { name: extra.name }
+              "
+              (click)="moveExtra(index, index - 1)"
+            >
+              <ion-icon
+                name="chevron-up-outline"
+                slot="icon-only"
+                aria-hidden="true"
+              />
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="last"
+              [attr.data-testid]="'category-extra-move-down-' + extra.id"
+              [attr.aria-label]="
+                'menu-extras-move-down' | transloco: { name: extra.name }
+              "
+              (click)="moveExtra(index, index + 1)"
+            >
+              <ion-icon
+                name="chevron-down-outline"
+                slot="icon-only"
+                aria-hidden="true"
+              />
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="danger"
+              [attr.data-testid]="'category-extra-remove-' + extra.id"
+              [attr.aria-label]="'menu-extras-remove' | transloco"
+              (click)="removeExtra(index)"
+            >
+              <ion-icon name="trash-outline" slot="icon-only" />
+            </ion-button>
+          </div>
         </li>
       }
     </ul>

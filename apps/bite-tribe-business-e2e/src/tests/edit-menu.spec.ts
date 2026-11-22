@@ -297,6 +297,40 @@ test.describe('Edit a menu in the business app', () => {
       });
   });
 
+  /** Variants keep the order the owner gives them (GitHub issue #2256). */
+  test('saves the variants in the order the owner moved them to', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.openDish(fixture.itemId);
+    await editMenu.variantName(0).fill('Regular');
+    await editMenu.moveVariantDown(0).click();
+    await expect(editMenu.variantName(0)).toHaveValue('Large');
+    await expect(editMenu.variantName(1)).toHaveValue('Regular');
+    await editMenu.saveDish.click();
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.items[0]?.variants?.map(
+            ({ name, price }) => [name, price],
+          ),
+        { timeout: 15_000 },
+      )
+      .toEqual([
+        ['Large', 14],
+        ['Regular', 9.5],
+      ]);
+
+    await page.reload();
+    await editMenu.openDish(fixture.itemId);
+    await expect(editMenu.variantName(0)).toHaveValue('Large');
+    await expect(editMenu.variantName(1)).toHaveValue('Regular');
+  });
+
   test('refuses an empty or zero price and saves a real one', async ({
     page,
   }) => {

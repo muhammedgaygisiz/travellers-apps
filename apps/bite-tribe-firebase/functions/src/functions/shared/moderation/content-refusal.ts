@@ -12,7 +12,14 @@ export type ImageSurface =
  * surface another account reads.
  */
 export type ContentSurface =
-  'bite' | 'review' | 'reviewReply' | 'displayName' | 'profile' | ImageSurface;
+  | 'bite'
+  | 'review'
+  | 'reviewReply'
+  | 'displayName'
+  | 'profile'
+  /** A restaurant's cross-contamination note (issue #2194). */
+  | 'restaurantDietaryNote'
+  | ImageSurface;
 
 /** Why something was refused, as a check reports it. */
 export interface RefusalVerdict {

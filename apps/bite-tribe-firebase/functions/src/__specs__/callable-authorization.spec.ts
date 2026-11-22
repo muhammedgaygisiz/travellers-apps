@@ -131,6 +131,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // photographed code.
   issueTableQrTokens: 'restaurantAuthority',
   rotateTableQrToken: 'restaurantAuthority',
+  // A restaurant's dietary statements and checked note (issue #2194).
+  saveRestaurantDietaryStatements: 'restaurantAuthority',
 
   // Replacing the codes of a whole room in one action (issue #1107). The same
   // door as the single rotation and deliberately *not* the `staffAuthority`

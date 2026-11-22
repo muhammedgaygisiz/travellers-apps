@@ -108,6 +108,7 @@ it on the server:
 | A display name                                  | `claimDisplayName`, before the claim                      | nothing is claimed; `display_name_refused`                                                        |
 | A profile's real name, city, about and pronouns | the `updateProfileText` callable                          | nothing is written; the app shows `content-refused`                                               |
 | A Bite's name, tags and description             | the form's `checkBiteContent`, then `moderateBiteOnWrite` | the form keeps the user and their text; the trigger undoes a write that reached the server anyway |
+| A restaurant's cross-contamination note         | the `saveRestaurantDietaryStatements` callable            | nothing is written; the business app shows `content-refused`                                      |
 
 The Firestore rules refuse a client write of every field in that table except
 the Bite's, so the callables are the only way in. A Bite is the exception

@@ -24,6 +24,7 @@ export const RESTAURANT_SECTIONS = [
   'position',
   'opening-hours',
   'facilities',
+  'dietary',
   'table-ordering',
   'menu-code',
 ] as const;

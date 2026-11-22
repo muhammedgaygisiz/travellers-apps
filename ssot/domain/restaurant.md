@@ -63,6 +63,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 
   A food truck is not on it: a venue that moves is [#2134]'s question, not a category. Filtering the map or search by category is not built.
 
+- **A Restaurant states what fits a diet, and says so as its own claim.** Since issue [#2194] it declares dietary labels on each menu item and on each variant (`dietaryLabels`), the labels a dish _can be made_ to fit on request (`dietaryOptions`), and statements about its whole kitchen (`dietaryStatements`: fully plant-based, fully vegetarian, fully halal, fully kosher, a dedicated gluten-free kitchen) with a free `crossContaminationNote`. The vocabulary and each label's class are owned by [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) (`R-1`); an unknown stored value is dropped on read, and every reader shows the claim as declared by the restaurant (`RD-DC-1`). The menu item labels are written with the menu by the account holding the Restaurant or an operator. The statements and the note are written only by the `saveRestaurantDietaryStatements` callable, which checks the note before another account can read it (`RD-UR-11`), and the rules refuse a client write of either. They are not tags: a `#vegan` on a Bite stays as typed.
+
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue [#1389] and [issue-1389](../history/records/issue-1389.md).
 
 ## Required Data
@@ -106,6 +108,8 @@ Current model fields:
 - `tableOrdering`
 - `facilities`
 - `categories`
+- `dietaryStatements`
+- `crossContaminationNote`
 - `createdAt`
 - `createdAtTimestamp`
 - `updatedAt`
@@ -323,6 +327,7 @@ images/restaurants/{restaurantId}/{filename}
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
 [#2129]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2129
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
+[#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194
 [#2134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2134
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142

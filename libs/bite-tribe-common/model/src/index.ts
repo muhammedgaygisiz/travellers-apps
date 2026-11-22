@@ -3,6 +3,11 @@ export type * from './lib/bite-author-private';
 export type * from './lib/review';
 export type * from './lib/review-thread';
 export * from './lib/restaurant';
+/**
+ * A value export: the dietary vocabulary and its read rules are applied by the
+ * business editor, the consumer renderers and the callable alike (issue #2194).
+ */
+export * from './lib/dietary-label';
 export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';

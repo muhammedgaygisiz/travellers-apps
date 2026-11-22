@@ -275,3 +275,53 @@ export const WithBiteSignals: Story = {
     },
   },
 };
+
+/**
+ * Dietary labels as the restaurant declares them (issue #2194): a label the
+ * dish fits, a high-risk one, a variant with its own, and an option the
+ * kitchen can make on request. Every line names the restaurant as source.
+ */
+export const WithDietaryLabels: Story = {
+  args: {
+    menu: {
+      ...MENU,
+      categories: [
+        {
+          id: 'category-ramen',
+          title: 'Ramen',
+          items: [
+            {
+              id: 'item-vegan-shoyu',
+              name: 'Vegan shoyu',
+              description: 'Kombu broth, tofu, menma',
+              price: 1300,
+              dietaryLabels: ['vegan', 'halal'],
+            },
+            {
+              id: 'item-tonkotsu',
+              name: 'Tonkotsu',
+              description: 'Pork broth, twelve hours',
+              price: 0,
+              dietaryOptions: ['gluten-free'],
+              variants: [
+                {
+                  id: 'variant-tonkotsu-regular',
+                  name: 'Regular',
+                  description: '',
+                  price: 1400,
+                },
+                {
+                  id: 'variant-tonkotsu-veggie',
+                  name: 'Vegetable broth',
+                  description: '',
+                  price: 1400,
+                  dietaryLabels: ['vegetarian'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};

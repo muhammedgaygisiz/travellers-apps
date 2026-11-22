@@ -57,6 +57,23 @@
     </ion-input>
   }
 
+  <!--
+    What the dish fits, as the restaurant declares it (issue #2194). A label
+    is what the dish is as served; an option is what the kitchen can make it
+    on request. A dish with variants declares here what holds for every
+    version, and each variant adds its own below.
+  -->
+  <fieldset class="dietary">
+    <legend>{{ 'menu-dish-dietary' | transloco }}</legend>
+    <ng-container
+      *ngTemplateOutlet="
+        dietarySelects;
+        context: { $implicit: form, testId: 'dish' }
+      "
+    />
+    <p class="hint">{{ 'menu-dish-dietary-hint' | transloco }}</p>
+  </fieldset>
+
   <fieldset class="variants">
     <legend>{{ 'menu-dish-variants' | transloco }}</legend>
     @for (
@@ -96,6 +113,14 @@
         >
           <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
         </ion-button>
+        <div class="variant-dietary">
+          <ng-container
+            *ngTemplateOutlet="
+              dietarySelects;
+              context: { $implicit: variant, testId: 'dish-variant-' + i }
+            "
+          />
+        </div>
       </div>
     }
     <ion-button
@@ -269,3 +294,46 @@
     </ion-button>
   </div>
 </form>
+
+<!--
+  The two dietary pickers, for the dish and for each variant (issue #2194).
+  The group passed in carries a dietaryLabels and a dietaryOptions control.
+-->
+<ng-template #dietarySelects let-group let-testId="testId">
+  <div class="dietary-selects" [formGroup]="group">
+    <ion-select
+      formControlName="dietaryLabels"
+      [multiple]="true"
+      interface="popover"
+      fill="outline"
+      mode="md"
+      labelPlacement="stacked"
+      [label]="'menu-dish-dietary-labels' | transloco"
+      [placeholder]="'menu-dish-dietary-none' | transloco"
+      [attr.data-testid]="testId + '-dietary-labels'"
+    >
+      @for (label of dietaryLabelOptions; track label) {
+        <ion-select-option [value]="label">{{
+          'dietary-label-' + label | transloco
+        }}</ion-select-option>
+      }
+    </ion-select>
+    <ion-select
+      formControlName="dietaryOptions"
+      [multiple]="true"
+      interface="popover"
+      fill="outline"
+      mode="md"
+      labelPlacement="stacked"
+      [label]="'menu-dish-dietary-options' | transloco"
+      [placeholder]="'menu-dish-dietary-none' | transloco"
+      [attr.data-testid]="testId + '-dietary-options'"
+    >
+      @for (label of dietaryLabelOptions; track label) {
+        <ion-select-option [value]="label">{{
+          'dietary-label-' + label | transloco
+        }}</ion-select-option>
+      }
+    </ion-select>
+  </div>
+</ng-template>

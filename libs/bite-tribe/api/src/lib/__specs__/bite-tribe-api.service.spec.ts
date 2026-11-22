@@ -29,6 +29,7 @@ class RestaurantApiMock {
   saveSocialMediaLinksForRestaurant = jest.fn();
   saveGenderNeutralRestroomForRestaurant = jest.fn();
   saveCategoriesForRestaurant = jest.fn();
+  saveDietaryStatementsForRestaurant = jest.fn();
   photoVerdict$ = jest.fn();
 }
 
@@ -420,6 +421,19 @@ describe(BiteTribeApiService.name, () => {
       expect(
         restaurantApiService.saveCategoriesForRestaurant,
       ).toHaveBeenCalledWith('restaurant-id', ['bar']);
+    });
+  });
+
+  describe('saveDietaryStatementsForRestaurant', () => {
+    it('passes the statements and note on to RestaurantApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const restaurantApiService = TestBed.inject(RestaurantApiService);
+
+      service.saveDietaryStatementsForRestaurant('r', ['fully-kosher'], 'n');
+
+      expect(
+        restaurantApiService.saveDietaryStatementsForRestaurant,
+      ).toHaveBeenCalledWith('r', ['fully-kosher'], 'n');
     });
   });
 

@@ -499,6 +499,63 @@ describe('RestaurantComponent', () => {
     );
   });
 
+  /**
+   * What the restaurant says about its whole kitchen (issue #2194), shown as
+   * declared by the restaurant.
+   */
+  describe('dietary statements', () => {
+    const render = (restaurant: Partial<Restaurant>): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Green Bowl',
+        ...restaurant,
+      } as Restaurant);
+      componentRef.changeDetectorRef.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('shows the known statements, the note and their source', () => {
+      const element = render({
+        dietaryStatements: [
+          'fully-halal',
+          'fully-keto' as never,
+          'fully-plant-based',
+        ],
+        crossContaminationNote: 'Nuts are used in the kitchen.',
+      });
+
+      expect(
+        Array.from(
+          element.querySelectorAll('[data-testid^="restaurant-dietary-fully"]'),
+          (node) => node.getAttribute('data-testid'),
+        ),
+      ).toEqual([
+        'restaurant-dietary-fully-plant-based',
+        'restaurant-dietary-fully-halal',
+      ]);
+      expect(
+        element
+          .querySelector('[data-testid="restaurant-cross-contamination-note"]')
+          ?.textContent?.trim(),
+      ).toBe('Nuts are used in the kitchen.');
+      expect(
+        element.querySelector('[data-testid="restaurant-dietary-source"]'),
+      ).not.toBeNull();
+    });
+
+    it.each([{}, { dietaryStatements: [] }, { crossContaminationNote: ' ' }])(
+      'shows nothing when the restaurant has not said (%j)',
+      (restaurant) => {
+        expect(
+          render(restaurant as Partial<Restaurant>).querySelector(
+            '[data-testid="restaurant-dietary"]',
+          ),
+        ).toBeNull();
+      },
+    );
+  });
+
   describe('loading state', () => {
     it('should render skeletons and no page content while the restaurant is missing', () => {
       componentRef.setInput('restaurant', undefined);

@@ -1,5 +1,6 @@
 import { ErrorHandler, Injectable, inject } from '@angular/core';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type {
   Address,
   CreateAndUploadImageCallbackParams,
@@ -10,12 +11,13 @@ import type {
   Restaurant,
   TableOrderingSettings,
   RestaurantCategory,
+  RestaurantDietaryStatement,
 } from 'model';
 import { MENU_COLLECTION } from '../menu-api/menu-api.service';
 import { BITE_COLLECTION, RESTAURANT_COLLECTION } from '../utils/constants';
 import { getRestaurantById } from './utils/get-restaurant-by-id';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
-import { getDownloadUrlFromFirebaseStorage } from 'utils';
+import { ContentRefusedError, getDownloadUrlFromFirebaseStorage } from 'utils';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { folderPhotoVerdict$ } from '../utils/folder-photo-verdict';
@@ -458,6 +460,35 @@ export class RestaurantApiService {
    * **An empty list removes the field**, so a restaurant that takes its answer
    * back reads as "not stated" again rather than as a stored empty answer.
    */
+  /**
+   * What the restaurant says about its whole kitchen (GitHub issue #2194),
+   * through `saveRestaurantDietaryStatements`, which checks the note before
+   * another account can read it. A refused note throws a
+   * {@link ContentRefusedError} and nothing is written. An empty list and an
+   * empty note remove their field.
+   */
+  async saveDietaryStatementsForRestaurant(
+    restaurantId: string,
+    statements: RestaurantDietaryStatement[],
+    crossContaminationNote: string,
+  ): Promise<void> {
+    const result = await FirebaseFunctions.callByName<
+      {
+        restaurantId: string;
+        statements: RestaurantDietaryStatement[];
+        crossContaminationNote: string;
+      },
+      { status: 'saved' } | { status: 'refused'; field: string }
+    >({
+      name: 'saveRestaurantDietaryStatements',
+      data: { restaurantId, statements, crossContaminationNote },
+    });
+
+    if (result.data?.status === 'refused') {
+      throw new ContentRefusedError(result.data.field);
+    }
+  }
+
   async saveCategoriesForRestaurant(
     restaurantId: string,
     categories: RestaurantCategory[],

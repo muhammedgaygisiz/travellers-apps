@@ -230,3 +230,18 @@ export const WithoutGenderNeutralRestroom: Story = {
     } as Restaurant,
   },
 };
+
+/**
+ * A restaurant that states what its whole kitchen is (issue #2194), with a
+ * cross-contamination note, both shown as declared by the restaurant.
+ */
+export const WithDietaryStatements: Story = {
+  args: {
+    ...Registered.args,
+    restaurant: {
+      ...verifiedRestaurant,
+      dietaryStatements: ['fully-halal', 'dedicated-gluten-free-kitchen'],
+      crossContaminationNote: 'Nuts are used in the kitchen.',
+    } as Restaurant,
+  },
+};

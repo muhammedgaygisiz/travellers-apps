@@ -1,3 +1,5 @@
+import type { DietaryLabel } from './dietary-label';
+
 /**
  * A restaurant's menu, and the identity an order line hangs from
  * (GitHub issue #1099).
@@ -68,6 +70,20 @@ export interface MenuItem {
    * available" is written once instead of at every render.
    */
   isAvailable?: boolean;
+  /**
+   * The dietary labels this dish fits, as the restaurant declares them
+   * (GitHub issue #2194). A variant carries its own: Pad Thai vegetarian is
+   * vegetarian and Pad Thai with chicken is not. Read through
+   * `dietaryLabelsOf`, which drops a value the vocabulary does not know.
+   * Absent is a dish the restaurant has said nothing about.
+   */
+  dietaryLabels?: DietaryLabel[];
+  /**
+   * The labels this dish _can be made_ to fit on request - "a vegan option is
+   * available" - which is a different promise from a label it fits as served
+   * (issue #2194). Never also one of {@link dietaryLabels}.
+   */
+  dietaryOptions?: DietaryLabel[];
   variants?: MenuItem[];
   /**
    * Choices on the dish that don't change its price, such as how spicy it

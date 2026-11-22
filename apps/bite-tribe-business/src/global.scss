@@ -84,3 +84,9 @@
 .restaurant-categories-popover {
   --width: 260px;
 }
+
+/* The restaurant dietary statement picker (issue #2194), for the same reason:
+ * "Dedicated gluten-free kitchen" is cut short at Ionic's default width. */
+.restaurant-dietary-popover {
+  --width: 300px;
+}

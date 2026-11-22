@@ -29,6 +29,7 @@ import {
   RequestFollowResult,
   Restaurant,
   RestaurantCategory,
+  RestaurantDietaryStatement,
   Review,
   SaveToBucketListParams,
   PublicMenuResult,
@@ -196,6 +197,19 @@ export class BiteTribeApiService {
     return this.restaurantApiService.saveCategoriesForRestaurant(
       restaurantId,
       categories,
+    );
+  }
+
+  /** The restaurant's dietary statements and note (GitHub issue #2194). */
+  saveDietaryStatementsForRestaurant(
+    restaurantId: string,
+    statements: RestaurantDietaryStatement[],
+    crossContaminationNote: string,
+  ): Promise<void> {
+    return this.restaurantApiService.saveDietaryStatementsForRestaurant(
+      restaurantId,
+      statements,
+      crossContaminationNote,
     );
   }
 

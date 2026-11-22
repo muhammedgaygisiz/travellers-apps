@@ -9,12 +9,14 @@ import {
   Geopoint,
   Link,
   RestaurantCategory,
+  RestaurantDietaryStatement,
   RestaurantSection,
   TableOrderingSettings,
 } from 'model';
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
+import { isContentRefused } from 'utils';
 
 @Injectable({ providedIn: 'root' })
 export class EditRestaurantService {
@@ -251,6 +253,40 @@ export class EditRestaurantService {
       await this.saveSection(restaurant.id, 'categories-saved', () =>
         this.dataAccess.submitCategories(restaurant.id, categories),
       );
+    }
+  }
+
+  /**
+   * The restaurant's dietary statements and note (GitHub issue #2194). A note
+   * the content check refuses is not saved, and the owner is told why.
+   */
+  async submitDietaryStatements({
+    statements,
+    crossContaminationNote,
+  }: {
+    statements: RestaurantDietaryStatement[];
+    crossContaminationNote: string;
+  }): Promise<void> {
+    const restaurant = this.restaurant();
+    if (restaurant) {
+      try {
+        await this.dataAccess.submitDietaryStatements(
+          restaurant.id,
+          statements,
+          crossContaminationNote,
+        );
+        await this.toast.present({
+          messageKey: 'dietary-statements-saved',
+          outcome: 'success',
+        });
+      } catch (error) {
+        await this.toast.present({
+          messageKey: isContentRefused(error)
+            ? 'content-refused'
+            : 'something-went-wrong-please-try-again',
+          outcome: 'failure',
+        });
+      }
     }
   }
 

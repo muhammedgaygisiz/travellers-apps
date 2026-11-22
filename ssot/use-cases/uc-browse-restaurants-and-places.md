@@ -79,6 +79,10 @@ screen before the state backing them existed.
 - The kind of venue the restaurant has stated shows under its name, in a muted
   line such as "Restaurant · Street food" (issue [#2131]). A restaurant that
   has not said shows nothing, and an unknown value is dropped.
+- What the restaurant states about its whole kitchen shows under the category
+  line (issue [#2194]): its dietary statements, such as "Fully halal", its
+  cross-contamination note, and "Declared by the restaurant". A restaurant
+  that has said neither shows nothing.
 - A facility the restaurant has stated shows as one line with an icon, under
   the opening hours (issue [#1830]): "Gender-neutral restroom" for yes, "No
   gender-neutral restroom" for no. A restaurant that has not said shows
@@ -139,6 +143,7 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
 - Issue [#2131] added the category line under the restaurant's name. Part of epic [#2123].
+- Issue [#2194] added the restaurant's dietary statements under it. Part of epic [#2193].
 - Issue [#2124] made the page wait for its Bites as well as its document, and
   gave it the not-found state. Part of [#2123].
 - Issue [#2125] gave the unverified place page its loading and not-found
@@ -170,3 +175,5 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#2125]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2125
 [#1830]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1830
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
+[#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
+[#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194

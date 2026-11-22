@@ -70,7 +70,7 @@ Release state and changelog
 ## Use Cases To Epics
 
 - [UC - Add BiteTrail Gamification](../use-cases/uc-add-bitetrail-gamification.md): [epic-770](https://github.com/muhammedgaygisiz/travellers-apps/issues/770)
-- [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823), [epic-2123](https://github.com/muhammedgaygisiz/travellers-apps/issues/2123)
+- [UC - Browse Restaurants And Places](../use-cases/uc-browse-restaurants-and-places.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823), [epic-2123](https://github.com/muhammedgaygisiz/travellers-apps/issues/2123), [epic-2193](https://github.com/muhammedgaygisiz/travellers-apps/issues/2193)
 - [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md): [epic-266](https://github.com/muhammedgaygisiz/travellers-apps/issues/266), [epic-1121](https://github.com/muhammedgaygisiz/travellers-apps/issues/1121), [epic-1122](https://github.com/muhammedgaygisiz/travellers-apps/issues/1122), [epic-1124](https://github.com/muhammedgaygisiz/travellers-apps/issues/1124), [epic-1125](https://github.com/muhammedgaygisiz/travellers-apps/issues/1125)
 - [UC - Complete Universal Search](../use-cases/uc-complete-universal-search.md): [epic-790](https://github.com/muhammedgaygisiz/travellers-apps/issues/790)
 - [UC - Configure Personal Settings](../use-cases/uc-configure-personal-settings.md): [epic-850](https://github.com/muhammedgaygisiz/travellers-apps/issues/850), [epic-1633](https://github.com/muhammedgaygisiz/travellers-apps/issues/1633), [epic-1740](https://github.com/muhammedgaygisiz/travellers-apps/issues/1740), [epic-1742](https://github.com/muhammedgaygisiz/travellers-apps/issues/1742)
@@ -91,7 +91,7 @@ Release state and changelog
 - [UC - Harden Platform And Backend Trust](../use-cases/uc-harden-platform-and-backend-trust.md): none
 - [UC - Improve Localization Quality](../use-cases/uc-improve-localization-quality.md): [epic-738](https://github.com/muhammedgaygisiz/travellers-apps/issues/738)
 - [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md): [epic-1284](https://github.com/muhammedgaygisiz/travellers-apps/issues/1284), [epic-1915](https://github.com/muhammedgaygisiz/travellers-apps/issues/1915)
-- [UC - Maintain Restaurants In The Business App](../use-cases/uc-maintain-restaurants-in-the-business-app.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-778](https://github.com/muhammedgaygisiz/travellers-apps/issues/778), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823), [epic-2123](https://github.com/muhammedgaygisiz/travellers-apps/issues/2123), [epic-2137](https://github.com/muhammedgaygisiz/travellers-apps/issues/2137)
+- [UC - Maintain Restaurants In The Business App](../use-cases/uc-maintain-restaurants-in-the-business-app.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-778](https://github.com/muhammedgaygisiz/travellers-apps/issues/778), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823), [epic-2123](https://github.com/muhammedgaygisiz/travellers-apps/issues/2123), [epic-2137](https://github.com/muhammedgaygisiz/travellers-apps/issues/2137), [epic-2193](https://github.com/muhammedgaygisiz/travellers-apps/issues/2193)
 - [UC - Manage A Bite's Restaurant Assignment](../use-cases/uc-manage-a-bites-restaurant-assignment.md): [epic-1495](https://github.com/muhammedgaygisiz/travellers-apps/issues/1495)
 - [UC - Manage Profile And Social Graph](../use-cases/uc-manage-profile-and-social-graph.md): [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741), [epic-1823](https://github.com/muhammedgaygisiz/travellers-apps/issues/1823), [epic-2137](https://github.com/muhammedgaygisiz/travellers-apps/issues/2137), [epic-2144](https://github.com/muhammedgaygisiz/travellers-apps/issues/2144)
 - [UC - Manage Tables During Service](../use-cases/uc-manage-tables-during-service.md): [epic-1071](https://github.com/muhammedgaygisiz/travellers-apps/issues/1071)
@@ -112,7 +112,7 @@ Release state and changelog
 - [UC - Use Gamification Signals](../use-cases/uc-use-gamification-signals.md): [epic-1741](https://github.com/muhammedgaygisiz/travellers-apps/issues/1741), [epic-2012](https://github.com/muhammedgaygisiz/travellers-apps/issues/2012), [epic-2034](https://github.com/muhammedgaygisiz/travellers-apps/issues/2034)
 - [UC - Use Local Gallery Support](../use-cases/uc-use-local-gallery-support.md): none
 - [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md): [epic-1495](https://github.com/muhammedgaygisiz/travellers-apps/issues/1495)
-- [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734)
+- [UC - View Restaurant Menus](../use-cases/uc-view-restaurant-menus.md): [epic-734](https://github.com/muhammedgaygisiz/travellers-apps/issues/734), [epic-2193](https://github.com/muhammedgaygisiz/travellers-apps/issues/2193)
 
 <!-- generated:traceability:end -->
 

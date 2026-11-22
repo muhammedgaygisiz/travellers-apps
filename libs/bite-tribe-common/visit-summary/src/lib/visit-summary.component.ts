@@ -1,4 +1,5 @@
 import {
+  inject,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -6,26 +7,11 @@ import {
   output,
 } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
-import { currencyCodes } from 'utils';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { formatMoney } from 'utils';
 import { orderLineChoiceNames } from 'model';
 import type { TableVisitBillLine, VisitSummary } from 'model';
-
-/**
- * The symbol for a currency code, or the code itself where none is known.
- *
- * A copy of the one on the table order screen rather than an import from it:
- * that screen is a `type:feature` library and this is `type:ui`, so the
- * dependency would run the wrong way through the boundaries. Four lines are a
- * cheaper duplicate than a shared library nothing else would ever join.
- */
-const symbolOf = (code: string): string => {
-  if (!code) {
-    return '';
-  }
-
-  return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
-};
 
 /**
  * What a guest ate, rendered (GitHub issue #1111).
@@ -111,10 +97,17 @@ export class VisitSummaryComponent {
     return (line.extras ?? []).map((extra) => extra.name).join(', ');
   }
 
-  /** A price in the currency the meal was ordered in. */
-  protected price(amount: number): string {
-    const symbol = symbolOf(this.summary().currency);
+  private readonly transloco = inject(TranslocoService);
+  /** The language prices are written in (GitHub issue #2261). */
+  private readonly lang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
-    return symbol ? `${amount} ${symbol}` : `${amount}`;
+  /**
+   * A price in the currency the meal was ordered in, written as the menu and
+   * the cart write it (GitHub issue #2261).
+   */
+  protected price(amount: number): string {
+    return formatMoney(amount, this.summary().currency, this.lang());
   }
 }

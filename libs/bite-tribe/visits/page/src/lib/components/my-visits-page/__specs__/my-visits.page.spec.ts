@@ -119,7 +119,7 @@ describe(MyVisitsPage.name, () => {
 
     expect(all('my-visits-row')).toHaveLength(1);
     expect(text()).toContain('Sakura Kitchen');
-    expect(text()).toContain('31 €');
+    expect(text()).toContain('€31.00');
   });
 
   /** The whole row is the target, because a thumb is aiming at it. */
@@ -136,6 +136,6 @@ describe(MyVisitsPage.name, () => {
   it('falls back to the currency code where no symbol is known', () => {
     render({ summaries: [{ ...MEAL, currency: 'XYZ' }] });
 
-    expect(text()).toContain('31 XYZ');
+    expect(text()).toMatch(/XYZ\s31\.00/);
   });
 });

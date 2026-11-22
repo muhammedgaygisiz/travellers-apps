@@ -16,14 +16,15 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { PageComponent } from 'common/ui/page';
 import { NavController } from '@ionic/angular/standalone';
 import { AnalyticsEvent, AnalyticsService, AuthService } from 'ta-firestore';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { PATH, currencyCodes } from 'utils';
+import { PATH, formatMoney } from 'utils';
 import {
   TABLE_ASSISTANCE_REFUSAL_KEYS,
   TABLE_ORDER_BLOCKED_KEYS,
@@ -64,21 +65,6 @@ import type {
 import { VisitSummaryComponent } from 'visit-summary';
 import { MenuComponent } from '../components/menu/menu.component';
 import type { MenuItemSelection } from '../components/menu-item/menu-item.component';
-
-/**
- * The symbol for a currency code, or the code itself where none is known.
- *
- * A free function because two things need it now: the menu's currency, which
- * the whole screen is priced in, and the currency each *sent* order carries -
- * and an order outlives the menu state it was built from.
- */
-const symbolOf = (code: string): string => {
-  if (!code) {
-    return '';
-  }
-
-  return currencyCodes.find((entry) => entry.code === code)?.symbol ?? code;
-};
 
 /**
  * The screen a guest at a table orders from (GitHub issue #1103).
@@ -234,14 +220,14 @@ export class TableOrder implements OnInit {
   );
 
   /**
-   * The symbol for it, or the code where none is known.
-   *
-   * The same fallback `menu-item` uses, and deliberately: the cart and the
-   * dishes above it show one price each and must not show them differently.
+   * The language prices are written in (GitHub issue #2261). The same
+   * `formatMoney` the dishes above use, so the cart and the menu never write
+   * one price two ways.
    */
-  protected readonly currencySymbol = computed(() =>
-    symbolOf(this.currencyCode()),
-  );
+  private readonly transloco = inject(TranslocoService);
+  private readonly lang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
   /**
    * The currency every order so far is priced in, or nothing where they differ.
@@ -501,16 +487,12 @@ export class TableOrder implements OnInit {
 
   /** A price with the menu's symbol, or the bare number where there is none. */
   protected priceLabel(amount: number): string {
-    const symbol = this.currencySymbol();
-
-    return symbol ? `${amount} ${symbol}` : `${amount}`;
+    return formatMoney(amount, this.currencyCode(), this.lang());
   }
 
   /** A price in a currency of its own, for a row the menu no longer prices. */
   protected priceLabelIn(amount: number, currency: string): string {
-    const symbol = symbolOf(currency);
-
-    return symbol ? `${amount} ${symbol}` : `${amount}`;
+    return formatMoney(amount, currency, this.lang());
   }
 
   /** The sentence one order's status is told with. */

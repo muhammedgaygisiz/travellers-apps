@@ -448,7 +448,7 @@ describe(TableOrder.name, () => {
     show(ORDERING);
 
     expect(has('table-order-cart-empty')).toBe(true);
-    expect(text()).toContain('Total 0 €');
+    expect(text()).toContain('Total €0.00');
   });
 
   /**
@@ -462,7 +462,7 @@ describe(TableOrder.name, () => {
     click('menu-item-add-to-cart');
 
     expect(text()).toContain('Margherita');
-    expect(text()).toContain('Total 12 €');
+    expect(text()).toContain('Total €12.00');
   });
 
   it('raises and lowers a row from the cart', () => {
@@ -472,11 +472,11 @@ describe(TableOrder.name, () => {
 
     click('cart-line-increase');
 
-    expect(text()).toContain('Total 24 €');
+    expect(text()).toContain('Total €24.00');
 
     click('cart-line-decrease');
 
-    expect(text()).toContain('Total 12 €');
+    expect(text()).toContain('Total €12.00');
   });
 
   it('removes a row outright', () => {
@@ -540,7 +540,7 @@ describe(TableOrder.name, () => {
     });
     fixture.detectChanges();
 
-    expect(text()).toContain('It was 12 € and it is now 14 €');
+    expect(text()).toContain('It was €12.00 and it is now €14.00');
   });
 
   /**
@@ -578,7 +578,7 @@ describe(TableOrder.name, () => {
 
     expect(text()).toContain('Your order is with the kitchen');
     expect(text()).toContain('Sakura Kitchen has it for table 12.');
-    expect(text()).toContain('Total 24 €');
+    expect(text()).toContain('Total €24.00');
     expect(has('table-order-again')).toBe(true);
   });
 
@@ -660,7 +660,7 @@ describe(TableOrder.name, () => {
       expect(text()).toContain('Your orders');
       expect(text()).toContain('Being made');
       expect(text()).toContain('1 × Margherita');
-      expect(text()).toContain('12 €');
+      expect(text()).toContain('€12.00');
     });
 
     /**
@@ -738,7 +738,7 @@ describe(TableOrder.name, () => {
       ]);
       show(ORDERING);
 
-      expect(text()).toContain('Ordered so far 42 €');
+      expect(text()).toContain('Ordered so far €42.00');
     });
 
     /**
@@ -928,7 +928,7 @@ describe(TableOrder.name, () => {
       unsure('unknown');
 
       expect(has('table-order-menu')).toBe(true);
-      expect(text()).toContain('Total 12 €');
+      expect(text()).toContain('Total €12.00');
     });
 
     /** The tap is a question rather than a second order, and says so. */
@@ -1060,7 +1060,7 @@ describe(TableOrder.name, () => {
       show(ORDERING);
 
       expect(text()).toContain('3 × Margherita');
-      expect(text()).toContain('Table total 36 €');
+      expect(text()).toContain('Table total €36.00');
     });
 
     /**
@@ -1093,7 +1093,7 @@ describe(TableOrder.name, () => {
       show(ORDERING);
 
       expect(has('table-bill-empty')).toBe(false);
-      expect(text()).toContain('Table total 0 €');
+      expect(text()).toContain('Table total €0.00');
     });
 
     /**
@@ -1270,7 +1270,7 @@ describe(TableOrder.name, () => {
 
       expect(text()).toContain('Sakura Kitchen, table 12');
       expect(text()).toContain('2 × Margherita');
-      expect(text()).toContain('Total 24 €');
+      expect(text()).toContain('Total €24.00');
     });
 
     /** `ADR-0004`. The wording is the contract, not decoration. */

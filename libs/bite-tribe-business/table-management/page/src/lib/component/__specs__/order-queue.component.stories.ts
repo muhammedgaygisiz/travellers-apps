@@ -98,7 +98,7 @@ const busy: OrderTableGroup[] = [
         id: 'o1',
         waiting: waiting(2),
         lines: [
-          { name: 'Margherita', quantity: 1 },
+          { name: 'Margherita', quantity: 1, extras: ['Extra mozzarella'] },
           { name: 'Spaghetti alle vongole', quantity: 2, notes: 'No chilli' },
         ],
       }),

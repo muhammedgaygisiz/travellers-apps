@@ -86,6 +86,12 @@ export interface QueuedOrderLine {
    * the menu in front of it. Absent where none were chosen.
    */
   options?: string[];
+  /**
+   * The names of the extras ticked on the line, such as "Extra mozzarella"
+   * (GitHub issue #2266). Names only: the kitchen needs what to make, not what
+   * it cost. Absent where none were ticked.
+   */
+  extras?: string[];
   quantity: number;
   /** What the guest asked for. The line a kitchen actually has to read. */
   notes?: string;
@@ -170,6 +176,9 @@ const toLine = (line: TableOrder['lines'][number]): QueuedOrderLine => ({
           (option) => `${option.groupName}: ${option.choiceName}`,
         ),
       }
+    : {}),
+  ...(line.extras?.length
+    ? { extras: line.extras.map((extra) => extra.name) }
     : {}),
   ...(line.notes ? { notes: line.notes } : {}),
 });

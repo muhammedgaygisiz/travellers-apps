@@ -105,7 +105,7 @@ describe('CategoryComponent', () => {
 
       expect(extrasBlock()?.textContent).toContain('Add to any pizza');
       expect(extrasBlock()?.textContent).toContain('Extra mozzarella');
-      expect(extrasBlock()?.textContent).toContain('2 €');
+      expect(extrasBlock()?.textContent).toMatch(/2,00\s€/);
     });
 
     /**

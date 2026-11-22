@@ -455,6 +455,13 @@
                                 >{{ option }}</span
                               >
                             }
+                            @for (extra of line.extras; track $index) {
+                              <span
+                                class="order-queue__variant"
+                                data-testid="order-line-extra"
+                                >{{ extra }}</span
+                              >
+                            }
                             @if (line.notes) {
                               <span
                                 class="order-queue__note"

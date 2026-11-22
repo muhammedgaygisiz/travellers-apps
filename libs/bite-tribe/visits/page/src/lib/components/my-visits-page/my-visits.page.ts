@@ -1,13 +1,15 @@
 import {
+  inject,
   ChangeDetectionStrategy,
   Component,
   input,
   output,
 } from '@angular/core';
 import { IonButton, IonContent, IonSpinner } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
-import { currencyCodes } from 'utils';
+import { formatMoney } from 'utils';
 import type { VisitSummary } from 'model';
 
 /**
@@ -49,12 +51,14 @@ export class MyVisitsPage {
     return new Date(summary.closedAt).toLocaleDateString();
   }
 
-  /** What the table came to, in the currency it was ordered in. */
-  protected total(summary: VisitSummary): string {
-    const symbol =
-      currencyCodes.find((entry) => entry.code === summary.currency)?.symbol ??
-      summary.currency;
+  private readonly transloco = inject(TranslocoService);
+  /** The language prices are written in (GitHub issue #2261). */
+  private readonly lang = toSignal(this.transloco.langChanges$, {
+    initialValue: this.transloco.getActiveLang?.() || 'en',
+  });
 
-    return symbol ? `${summary.total} ${symbol}` : `${summary.total}`;
+  /** What the table came to, in the currency it was ordered in (#2261). */
+  protected total(summary: VisitSummary): string {
+    return formatMoney(summary.total, summary.currency, this.lang());
   }
 }

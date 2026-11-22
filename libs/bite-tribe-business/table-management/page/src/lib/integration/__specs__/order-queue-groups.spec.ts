@@ -268,6 +268,60 @@ describe('the order queue grouping', () => {
     });
   });
 
+  it('carries the name of each extra ticked on the line (#2266)', () => {
+    const [group] = groupOrdersByTable(
+      [
+        order('a', {
+          lines: [
+            {
+              menuItemId: 'item-1',
+              name: 'Margherita',
+              price: 9.5,
+              currency: 'EUR',
+              quantity: 1,
+              extras: [
+                { extraId: 'mozzarella', name: 'Extra mozzarella', price: 2 },
+                { extraId: 'olives', name: 'Olives', price: 1.5 },
+              ],
+            },
+          ],
+        }),
+      ],
+      tables,
+      NOW,
+    );
+
+    // Names only: the kitchen needs what to make, not what it cost.
+    expect(group.orders[0].lines[0]).toEqual({
+      name: 'Margherita',
+      extras: ['Extra mozzarella', 'Olives'],
+      quantity: 1,
+    });
+  });
+
+  it('leaves extras off a line that was ordered with an empty list', () => {
+    const [group] = groupOrdersByTable(
+      [
+        order('a', {
+          lines: [
+            {
+              menuItemId: 'item-1',
+              name: 'Margherita',
+              price: 9.5,
+              currency: 'EUR',
+              quantity: 1,
+              extras: [],
+            },
+          ],
+        }),
+      ],
+      tables,
+      NOW,
+    );
+
+    expect(group.orders[0].lines[0]).not.toHaveProperty('extras');
+  });
+
   it('is empty when nothing is outstanding', () => {
     expect(groupOrdersByTable([], tables, NOW)).toEqual([]);
     expect(openOrderCount([])).toBe(0);

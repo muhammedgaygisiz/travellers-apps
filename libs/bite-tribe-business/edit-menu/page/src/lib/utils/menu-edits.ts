@@ -130,11 +130,22 @@ export const saveCategoryDetails = (
     ]);
   }
 
-  return mapCategory(menu, categoryId, (category) => ({
-    ...category,
-    ...fields,
-    ...('extrasBlock' in details ? { extrasBlock: details.extrasBlock } : {}),
-  }));
+  return mapCategory(menu, categoryId, (category) => {
+    const next: Category = { ...category, ...fields };
+
+    if (!('extrasBlock' in details)) {
+      return next;
+    }
+
+    // No extras is a missing field, never `extrasBlock: undefined`: Firestore
+    // refuses to write an undefined value, and the whole menu save fails
+    // with it (issue #2258).
+    const { extrasBlock: _stored, ...rest } = next;
+
+    return details.extrasBlock
+      ? { ...rest, extrasBlock: details.extrasBlock }
+      : rest;
+  });
 };
 
 /**

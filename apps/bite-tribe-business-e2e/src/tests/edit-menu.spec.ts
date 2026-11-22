@@ -317,6 +317,29 @@ test.describe('Edit a menu in the business app', () => {
     await expect.poll(storedExtraPrice, { timeout: 15_000 }).toBe(2.2);
   });
 
+  /**
+   * The last extra removed leaves no extras field at all: a field written as
+   * `undefined` is refused by Firestore, and the whole menu save with it.
+   */
+  test('removes the last extra with the category', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { withExtras: true });
+
+    await editMenu.openCategory(fixture.categoryId);
+    await page.getByTestId(`category-extra-remove-${EXTRA_ID}`).click();
+    await editMenu.expectEnabled(editMenu.saveCategory);
+    await editMenu.saveCategory.click();
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.extrasBlock ?? null,
+        { timeout: 15_000 },
+      )
+      .toBeNull();
+  });
+
   test('throws an edited extra away on Cancel', async ({ page }) => {
     test.setTimeout(90_000);
     const { fixture, editMenu } = await start(page, { withExtras: true });

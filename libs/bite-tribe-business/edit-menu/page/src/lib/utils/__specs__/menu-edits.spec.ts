@@ -152,12 +152,22 @@ describe('menu edits', () => {
       extrasBlock: { description: 'Toppings', extras: [] },
     });
 
+    // Absent, not `undefined`: Firestore refuses to write an undefined value.
     expect(
       saveCategoryDetails(withExtras, 'c1', {
         title: 'Pizze',
         extrasBlock: undefined,
-      }).categories[0].extrasBlock,
-    ).toBeUndefined();
+      }).categories[0],
+    ).not.toHaveProperty('extrasBlock');
+  });
+
+  it('writes no extras field for a category that has none', () => {
+    expect(
+      saveCategoryDetails(MENU, 'c1', {
+        title: 'Pizze',
+        extrasBlock: undefined,
+      }).categories[0],
+    ).not.toHaveProperty('extrasBlock');
   });
 
   it('leaves the extras alone when the details carry none', () => {

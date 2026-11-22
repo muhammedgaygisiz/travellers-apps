@@ -9,6 +9,8 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { NetworkStatusService } from 'common/networkstatus';
 import {
   AppCheckGateComponent,
+  AuthStorageGateComponent,
+  AuthStorageHealthService,
   AppCheckReadinessService,
   StageRibbonComponent,
 } from 'ta-firestore';
@@ -20,6 +22,8 @@ import { addNecessaryIcons } from 'bite-tribe-business/shell';
     <ion-app>
       @if (appCheckReadiness.isBlocked()) {
         <bite-app-check-gate />
+      } @else if (authStorageHealth.isStuck()) {
+        <bite-auth-storage-gate />
       } @else {
         <ion-router-outlet />
       }
@@ -31,6 +35,7 @@ import { addNecessaryIcons } from 'bite-tribe-business/shell';
     IonApp,
     IonRouterOutlet,
     AppCheckGateComponent,
+    AuthStorageGateComponent,
     StageRibbonComponent,
   ],
 })
@@ -38,6 +43,7 @@ export class AppComponent implements OnDestroy {
   title = 'bite-tribe-business';
 
   readonly appCheckReadiness = inject(AppCheckReadinessService);
+  readonly authStorageHealth = inject(AuthStorageHealthService);
   private readonly networkStatusService = inject(NetworkStatusService);
 
   constructor() {

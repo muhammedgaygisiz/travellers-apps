@@ -14,6 +14,8 @@ import {
 import {
   AnalyticsService,
   AppCheckGateComponent,
+  AuthStorageGateComponent,
+  AuthStorageHealthService,
   AppCheckReadinessService,
   StageRibbonComponent,
 } from 'ta-firestore';
@@ -35,6 +37,8 @@ import { NetworkStatusService } from 'common/networkstatus';
     <ion-app>
       @if (appCheckReadiness.isBlocked()) {
         <bite-app-check-gate />
+      } @else if (authStorageHealth.isStuck()) {
+        <bite-auth-storage-gate />
       } @else {
         <ion-router-outlet />
       }
@@ -46,6 +50,7 @@ import { NetworkStatusService } from 'common/networkstatus';
     IonApp,
     IonRouterOutlet,
     AppCheckGateComponent,
+    AuthStorageGateComponent,
     StageRibbonComponent,
   ],
 })
@@ -53,6 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'bite-tribe';
 
   readonly appCheckReadiness = inject(AppCheckReadinessService);
+  readonly authStorageHealth = inject(AuthStorageHealthService);
   platform = inject(Platform);
   navController = inject(NavController);
   private readonly router = inject(Router);

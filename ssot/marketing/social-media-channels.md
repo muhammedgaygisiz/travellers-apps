@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026) and Diyarbakır (18 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026) and Bangkok (19 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1694,6 +1694,21 @@ were notified of their tags twice. Leela wears an embroidered velvet dress
 and a coin headband and holds a liver skewer; the cover photo is the Ulu Cami
 and its minaret. Leela's cover line is "Inside Diyarbakır's black basalt
 walls, liver kebab is breakfast". The city page `/eat/diyarbakir` went up the
+same evening, with no aliases, and its Instagram and Facebook post links were
+added once both posts were live.
+
+**Bangkok** (19 November 2026, scheduled for 22:00) tags two of five dish
+slides: `@phedmarkbkk` (phat kaphrao with wagyu shank; the Maps listing links
+it, and its bio names the Ekkamai dine-in) and `@koongtung.original` (King of
+Sea, boiled seafood in a spicy sauce; the Maps website is a bit.ly link to
+linktr.ee/koongtung, which links the account, and its bio lists the Banthat
+Thong branch). Khaosan Thai Food (pad see ew) has no Maps listing, Aheesah
+roddee Halal (beef noodle soup) has no account that could be found, and for
+Mae Sri Ruen Thai Dessert (khanom krok) there are only namesakes, a chicken
+noodle place and a shop. Thailand had 198 Bites, 30 of them in Bangkok. Leela
+wears a chut thai with a sabai and a jasmine garland and holds pad see ew; the
+cover photo is Wat Arun at dusk. Leela's cover line is "Bangkok's best bites
+are on the street, not in the mall". The city page `/eat/bangkok` went up the
 same evening, with no aliases, and its Instagram and Facebook post links were
 added once both posts were live.
 

@@ -264,6 +264,14 @@ export class AdminDashboard {
       group: 'primary',
     },
     {
+      titleKey: 'admin-tool-restaurant-photos',
+      descriptionKey: 'admin-tool-restaurant-photos-description',
+      icon: 'image-outline',
+      path: '/restaurant-photos',
+      testId: 'admin-tool-restaurant-photos',
+      group: 'primary',
+    },
+    {
       titleKey: 'admin-tool-table-sessions',
       descriptionKey: 'admin-tool-table-sessions-description',
       icon: 'people-outline',

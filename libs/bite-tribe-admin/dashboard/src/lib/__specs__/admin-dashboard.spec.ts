@@ -107,6 +107,7 @@ describe(AdminDashboard.name, () => {
       '/landing-pages',
       '/restaurant-candidates',
       '/restaurant-ownership',
+      '/restaurant-photos',
       '/table-sessions',
       '/bite-places',
       '/new-version-notification',
@@ -156,6 +157,7 @@ describe(AdminDashboard.name, () => {
       '/landing-pages',
       '/restaurant-candidates',
       '/restaurant-ownership',
+      '/restaurant-photos',
       '/table-sessions',
       '/bite-places',
     ]);

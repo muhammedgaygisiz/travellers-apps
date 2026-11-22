@@ -189,7 +189,7 @@ describe(CategoryEditorComponent.name, () => {
       );
     });
 
-    it('asks without dishes for an empty category', async () => {
+    it('says the extras go with a category that has extras but no dishes', async () => {
       const { component } = setup(PIZZA);
       const alert = withAlert();
 
@@ -197,6 +197,36 @@ describe(CategoryEditorComponent.name, () => {
 
       expect(alert.options()?.message).toBe(
         'menu-category-delete-confirm-message',
+      );
+    });
+
+    /** No extras mentioned where there are none (GitHub issue #2260). */
+    it('says a category with neither dishes nor extras is empty', async () => {
+      const { component } = setup({
+        ...PIZZA,
+        title: 'Dolci',
+        extrasBlock: undefined,
+      });
+      const alert = withAlert();
+
+      await component.confirmDelete();
+
+      expect(alert.options()?.message).toBe(
+        'menu-category-delete-confirm-message-empty',
+      );
+    });
+
+    it('treats an extras block with no extras as empty', async () => {
+      const { component } = setup({
+        ...PIZZA,
+        extrasBlock: { description: 'Toppings', extras: [] },
+      });
+      const alert = withAlert();
+
+      await component.confirmDelete();
+
+      expect(alert.options()?.message).toBe(
+        'menu-category-delete-confirm-message-empty',
       );
     });
   });

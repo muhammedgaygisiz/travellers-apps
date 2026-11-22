@@ -86,11 +86,11 @@ test.describe('Maintain restaurants in the business app', () => {
 
     await editRestaurant.fillDescription(description);
     await editRestaurant.expectSavedToast(
-      'About the restaurant saved successfully!',
+      'About saved',
     );
 
     await editRestaurant.fillAddress(address);
-    await editRestaurant.expectSavedToast('Address saved successfully!');
+    await editRestaurant.expectSavedToast('Address saved');
 
     await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {
       name: restaurantName,
@@ -140,7 +140,7 @@ test.describe('Maintain restaurants in the business app', () => {
     const editRestaurant = new EditRestaurantPage(page);
     await editRestaurant.expectRestaurantName(restaurantName);
     await editRestaurant.movePin({ x: 80, y: 40 });
-    await editRestaurant.expectSavedToast('Location saved successfully!');
+    await editRestaurant.expectSavedToast('Position on the map saved');
 
     const readPosition = async (): Promise<
       { latitude: number; longitude: number } | undefined
@@ -308,7 +308,7 @@ test.describe('Maintain restaurants in the business app', () => {
     await editRestaurant.expectRestaurantName(restaurantName);
     await editRestaurant.fillDescription(description);
     await editRestaurant.expectSavedToast(
-      'About the restaurant saved successfully!',
+      'About saved',
     );
 
     await expectFirestoreDocument(page, `restaurants/${restaurantId}`, {

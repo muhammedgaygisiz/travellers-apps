@@ -18,6 +18,65 @@ import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
 import { isContentRefused } from 'utils';
 
+/**
+ * The sections of the restaurant page that save from a form. The photo has an
+ * upload flow of its own, and the menu code saves nothing.
+ */
+type SavedSection = Exclude<RestaurantSection, 'photo' | 'menu-code'>;
+
+/**
+ * What each section says when a save lands or is refused (GitHub issue #2263).
+ *
+ * One pattern for the whole page: "<the section's label> saved", and on a
+ * refusal the section's name with the reassurance that the edit is still on
+ * screen - which it is, because a refused write leaves the form as it was.
+ * Written out per section rather than built from the label, because English
+ * agrees the verb with it: "Links weren't saved", "Address wasn't saved".
+ *
+ * A table typed by the section, so a section the page gains without copy is a
+ * compile error here rather than a toast that shows its own key.
+ */
+export const SECTION_TOASTS: Readonly<
+  Record<SavedSection, { saved: string; notSaved: string }>
+> = {
+  categories: {
+    saved: 'restaurant-section-categories-saved',
+    notSaved: 'restaurant-section-categories-not-saved',
+  },
+  about: {
+    saved: 'restaurant-section-about-saved',
+    notSaved: 'restaurant-section-about-not-saved',
+  },
+  links: {
+    saved: 'restaurant-section-links-saved',
+    notSaved: 'restaurant-section-links-not-saved',
+  },
+  address: {
+    saved: 'restaurant-section-address-saved',
+    notSaved: 'restaurant-section-address-not-saved',
+  },
+  position: {
+    saved: 'restaurant-section-position-saved',
+    notSaved: 'restaurant-section-position-not-saved',
+  },
+  'opening-hours': {
+    saved: 'restaurant-section-opening-hours-saved',
+    notSaved: 'restaurant-section-opening-hours-not-saved',
+  },
+  facilities: {
+    saved: 'restaurant-section-facilities-saved',
+    notSaved: 'restaurant-section-facilities-not-saved',
+  },
+  dietary: {
+    saved: 'restaurant-section-dietary-saved',
+    notSaved: 'restaurant-section-dietary-not-saved',
+  },
+  'table-ordering': {
+    saved: 'restaurant-section-table-ordering-saved',
+    notSaved: 'restaurant-section-table-ordering-not-saved',
+  },
+};
+
 @Injectable({ providedIn: 'root' })
 export class EditRestaurantService {
   private readonly dataAccess = inject(RestaurantDataAccessService);
@@ -182,7 +241,7 @@ export class EditRestaurantService {
   }: Partial<{ links: Link[] }>): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant && links) {
-      await this.saveSection(restaurant.id, 'social-media-links-saved', () =>
+      await this.saveSection(restaurant.id, 'links', () =>
         this.dataAccess.submitSocialMediaLinks(restaurant.id, links),
       );
     }
@@ -191,7 +250,7 @@ export class EditRestaurantService {
   async submitDescription(description: string): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'about-restaurant-saved', () =>
+      await this.saveSection(restaurant.id, 'about', () =>
         this.dataAccess.submitDescription(restaurant.id, description),
       );
     }
@@ -200,7 +259,7 @@ export class EditRestaurantService {
   async submitOpeningHours(openingHours: DaySchedule[]): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'opening-hours-saved', () =>
+      await this.saveSection(restaurant.id, 'opening-hours', () =>
         this.dataAccess.submitOpeningHours(restaurant.id, openingHours),
       );
     }
@@ -219,7 +278,7 @@ export class EditRestaurantService {
   ): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'table-ordering-saved', () =>
+      await this.saveSection(restaurant.id, 'table-ordering', () =>
         this.dataAccess.submitTableOrderingSettings(
           restaurant.id,
           tableOrdering,
@@ -237,7 +296,7 @@ export class EditRestaurantService {
   ): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'facilities-saved', () =>
+      await this.saveSection(restaurant.id, 'facilities', () =>
         this.dataAccess.submitGenderNeutralRestroom(
           restaurant.id,
           genderNeutralRestroom,
@@ -250,7 +309,7 @@ export class EditRestaurantService {
   async submitCategories(categories: RestaurantCategory[]): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'categories-saved', () =>
+      await this.saveSection(restaurant.id, 'categories', () =>
         this.dataAccess.submitCategories(restaurant.id, categories),
       );
     }
@@ -276,14 +335,14 @@ export class EditRestaurantService {
           crossContaminationNote,
         );
         await this.toast.present({
-          messageKey: 'dietary-statements-saved',
+          messageKey: SECTION_TOASTS.dietary.saved,
           outcome: 'success',
         });
       } catch (error) {
         await this.toast.present({
           messageKey: isContentRefused(error)
             ? 'content-refused'
-            : 'something-went-wrong-please-try-again',
+            : SECTION_TOASTS.dietary.notSaved,
           outcome: 'failure',
         });
       }
@@ -293,7 +352,7 @@ export class EditRestaurantService {
   async submitAddress(address: Address): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'address-saved', () =>
+      await this.saveSection(restaurant.id, 'address', () =>
         this.dataAccess.submitAddress(restaurant.id, address),
       );
     }
@@ -302,7 +361,7 @@ export class EditRestaurantService {
   async submitPosition(position: Geopoint): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      await this.saveSection(restaurant.id, 'location-saved', () =>
+      await this.saveSection(restaurant.id, 'position', () =>
         this.dataAccess.submitPosition(restaurant.id, position),
       );
     }
@@ -317,7 +376,7 @@ export class EditRestaurantService {
    */
   private async saveSection(
     restaurantId: string,
-    savedKey: string,
+    section: SavedSection,
     write: () => Promise<unknown>,
   ): Promise<void> {
     if (this.saving) {
@@ -336,14 +395,20 @@ export class EditRestaurantService {
     } catch {
       await loading.dismiss();
       this.saving = false;
-      await this.showFailureToast();
+      await this.toast.present({
+        messageKey: SECTION_TOASTS[section].notSaved,
+        outcome: 'failure',
+      });
 
       return;
     }
 
     await loading.dismiss();
     this.saving = false;
-    await this.toast.present({ messageKey: savedKey, outcome: 'success' });
+    await this.toast.present({
+      messageKey: SECTION_TOASTS[section].saved,
+      outcome: 'success',
+    });
     this.backToOverview(restaurantId);
   }
 

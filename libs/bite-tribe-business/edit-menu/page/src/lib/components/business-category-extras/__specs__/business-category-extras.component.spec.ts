@@ -22,6 +22,8 @@ const MOZZARELLA: ExtraItem = {
 
 const NDUJA: ExtraItem = { id: 'extra-nduja', name: "'Nduja", price: 2.5 };
 
+const OLIVES: ExtraItem = { id: 'extra-olives', name: 'Olives', price: 1.5 };
+
 const blockOf = (...extras: ExtraItem[]): Category['extrasBlock'] => ({
   description: 'Add to any pizza',
   extras,
@@ -47,6 +49,7 @@ describe(BusinessCategoryExtrasComponent.name, () => {
     cancelAdd(): void;
     addExtra(): void;
     removeExtra(index: number): void;
+    moveExtra(from: number, to: number): void;
     renameExtra(index: number, name: string): void;
     repriceExtra(index: number, price: number | undefined): void;
     onDescriptionChange(description: string): void;
@@ -224,6 +227,59 @@ describe(BusinessCategoryExtrasComponent.name, () => {
       editor().removeExtra(0);
 
       expect(emitted).toEqual([undefined]);
+    });
+  });
+
+  /** Extras in the owner's order (GitHub issue #2256). */
+  describe('moving', () => {
+    const button = (testId: string): HTMLIonButtonElement | null =>
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelector<HTMLIonButtonElement>(`[data-testid="${testId}"]`);
+
+    it('saves the extras in the order they were moved to', () => {
+      withBlock(blockOf(MOZZARELLA, NDUJA, OLIVES));
+      editor().moveExtra(2, 1);
+
+      expect(emitted[0]).toEqual({
+        description: 'Add to any pizza',
+        extras: [MOZZARELLA, OLIVES, NDUJA],
+      });
+    });
+
+    it('emits nothing for a move past either end', () => {
+      withBlock(blockOf(MOZZARELLA, NDUJA));
+      editor().moveExtra(0, -1);
+      editor().moveExtra(1, 2);
+
+      expect(emitted).toEqual([]);
+    });
+
+    it('offers no move up on the first extra and no move down on the last', () => {
+      withBlock(blockOf(MOZZARELLA, NDUJA));
+
+      expect(button(`category-extra-move-up-${MOZZARELLA.id}`)?.disabled).toBe(
+        true,
+      );
+      expect(
+        button(`category-extra-move-down-${MOZZARELLA.id}`)?.disabled,
+      ).toBe(false);
+      expect(button(`category-extra-move-up-${NDUJA.id}`)?.disabled).toBe(
+        false,
+      );
+      expect(button(`category-extra-move-down-${NDUJA.id}`)?.disabled).toBe(
+        true,
+      );
+    });
+
+    it('moves an extra from its button', () => {
+      withBlock(blockOf(MOZZARELLA, NDUJA));
+      button(`category-extra-move-up-${NDUJA.id}`)?.click();
+
+      expect(emitted[0]?.extras.map(({ id }) => id)).toEqual([
+        NDUJA.id,
+        MOZZARELLA.id,
+      ]);
     });
   });
 });

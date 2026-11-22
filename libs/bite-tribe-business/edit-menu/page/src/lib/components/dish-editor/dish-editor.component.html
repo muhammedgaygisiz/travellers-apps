@@ -79,7 +79,7 @@
     @for (
       variant of variants.controls;
       track variant.value.id;
-      let i = $index
+      let i = $index, first = $first, last = $last
     ) {
       <div class="variant-row" [formGroup]="variant">
         <ion-input
@@ -104,15 +104,60 @@
             <span slot="end">{{ currency() }}</span>
           }
         </ion-input>
-        <ion-button
-          fill="clear"
-          color="medium"
-          [attr.aria-label]="'menu-dish-variant-remove' | transloco"
-          [attr.data-testid]="'remove-dish-variant-' + i"
-          (click)="removeVariant(i)"
-        >
-          <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
-        </ion-button>
+        <!--
+          Up and down rather than a drag handle (issue #2256): a button is
+          reached by keyboard and pressed at phone width, where a drag inside
+          a scrolling editor fights the scroll.
+        -->
+        <div class="row-actions">
+          <ion-button
+            fill="clear"
+            color="medium"
+            [disabled]="first"
+            [attr.aria-label]="
+              'menu-dish-variant-move-up'
+                | transloco: { name: variant.value.name || i + 1 }
+            "
+            [attr.data-testid]="'move-dish-variant-up-' + i"
+            (click)="moveVariant(i, i - 1)"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="chevron-up-outline"
+              aria-hidden="true"
+            />
+          </ion-button>
+          <ion-button
+            fill="clear"
+            color="medium"
+            [disabled]="last"
+            [attr.aria-label]="
+              'menu-dish-variant-move-down'
+                | transloco: { name: variant.value.name || i + 1 }
+            "
+            [attr.data-testid]="'move-dish-variant-down-' + i"
+            (click)="moveVariant(i, i + 1)"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="chevron-down-outline"
+              aria-hidden="true"
+            />
+          </ion-button>
+          <ion-button
+            fill="clear"
+            color="medium"
+            [attr.aria-label]="'menu-dish-variant-remove' | transloco"
+            [attr.data-testid]="'remove-dish-variant-' + i"
+            (click)="removeVariant(i)"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="close-outline"
+              aria-hidden="true"
+            />
+          </ion-button>
+        </div>
         <div class="variant-dietary">
           <ng-container
             *ngTemplateOutlet="

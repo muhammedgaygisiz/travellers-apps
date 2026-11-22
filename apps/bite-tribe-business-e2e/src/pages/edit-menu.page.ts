@@ -93,6 +93,11 @@ export class EditMenuPage {
     return this.page.getByTestId(`dish-variant-name-${index}`).locator('input');
   }
 
+  /** The button that moves a variant row one place down (issue #2256). */
+  moveVariantDown(index: number): Locator {
+    return this.page.getByTestId(`move-dish-variant-down-${index}`);
+  }
+
   variantPrice(index: number): Locator {
     return this.page
       .getByTestId(`dish-variant-price-${index}`)

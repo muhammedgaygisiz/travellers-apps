@@ -234,6 +234,40 @@ describe('the order queue grouping', () => {
     });
   });
 
+  it('carries each chosen option with the name of its option (#2254)', () => {
+    const [group] = groupOrdersByTable(
+      [
+        order('a', {
+          lines: [
+            {
+              menuItemId: 'item-1',
+              name: 'Chop-Suey-Spezial',
+              price: 12.9,
+              currency: 'EUR',
+              quantity: 1,
+              options: [
+                {
+                  groupId: 'heat',
+                  groupName: 'Zubereitungsart',
+                  choiceId: 'hot',
+                  choiceName: 'scharf',
+                },
+              ],
+            },
+          ],
+        }),
+      ],
+      tables,
+      NOW,
+    );
+
+    expect(group.orders[0].lines[0]).toEqual({
+      name: 'Chop-Suey-Spezial',
+      options: ['Zubereitungsart: scharf'],
+      quantity: 1,
+    });
+  });
+
   it('is empty when nothing is outstanding', () => {
     expect(groupOrdersByTable([], tables, NOW)).toEqual([]);
     expect(openOrderCount([])).toBe(0);

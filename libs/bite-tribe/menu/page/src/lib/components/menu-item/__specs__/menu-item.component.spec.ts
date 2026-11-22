@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Pipe, PipeTransform } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MenuItemComponent } from '../menu-item.component';
-import { ExtraItem, MenuItem, MenuItemStats } from 'model';
+import { ExtraItem, MenuItem, MenuItemStats, MenuOptionGroup } from 'model';
 import SpyInstance = jest.SpyInstance;
 
 @Pipe({
@@ -254,6 +254,165 @@ describe('MenuItemComponent', () => {
       });
     });
   });
+  /** Options: choices on a dish that don't change its price (#2254). */
+  describe('options', () => {
+    const HEAT: MenuOptionGroup = {
+      id: 'heat',
+      name: 'Zubereitungsart',
+      required: true,
+      choices: [
+        { id: 'mild', name: 'nicht scharf' },
+        { id: 'hot', name: 'scharf' },
+      ],
+    };
+    const SAUCE: MenuOptionGroup = {
+      id: 'sauce',
+      name: 'Sauce',
+      required: false,
+      choices: [
+        { id: 'side', name: 'on the side' },
+        { id: 'over', name: 'over it' },
+      ],
+    };
+    const CHOP_SUEY: MenuItem = {
+      id: 'chop-suey',
+      name: 'Chop-Suey-Spezial',
+      description: '',
+      price: 12.9,
+      optionGroups: [HEAT, SAUCE],
+    };
+    const GROSS: MenuItem = {
+      id: 'gross',
+      name: 'groß',
+      description: '',
+      price: 15.4,
+    };
+
+    let emitSpy: SpyInstance;
+
+    const render = (item: MenuItem, canAddToCart: boolean): HTMLElement => {
+      fixture.componentRef.setInput('item', item);
+      fixture.componentRef.setInput('canAddToCart', canAddToCart);
+      fixture.componentRef.changeDetectorRef.detectChanges();
+      emitSpy = jest.spyOn(component.addToCartClick, 'emit');
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('reads as one line per option where nothing is ordered', () => {
+      const el = render(CHOP_SUEY, false);
+
+      expect(
+        [...el.querySelectorAll('[data-testid="menu-item-option-line"]')].map(
+          (line) => line.textContent?.trim(),
+        ),
+      ).toEqual([
+        'Zubereitungsart: nicht scharf · scharf',
+        'Sauce: on the side · over it',
+      ]);
+      expect(el.querySelector('[data-testid="menu-item-options"]')).toBeNull();
+    });
+
+    it('offers the choices on the ordering screen instead', () => {
+      const el = render(CHOP_SUEY, true);
+
+      expect(
+        el.querySelector('[data-testid="menu-item-options"]'),
+      ).not.toBeNull();
+      expect(
+        el.querySelector('[data-testid="menu-item-option-line"]'),
+      ).toBeNull();
+    });
+
+    it('blocks adding until every required option is chosen, and says which', () => {
+      const el = render(CHOP_SUEY, true);
+
+      expect(component.missingOptions()).toEqual([HEAT]);
+      expect(
+        el.querySelector('[data-testid="menu-item-option-hint"]'),
+      ).not.toBeNull();
+
+      component.onAddToCartClick(CHOP_SUEY);
+      expect(emitSpy).not.toHaveBeenCalled();
+
+      component.choose('heat', 'hot');
+      fixture.componentRef.changeDetectorRef.detectChanges();
+      expect(
+        el.querySelector('[data-testid="menu-item-option-hint"]'),
+      ).toBeNull();
+    });
+
+    it("emits the chosen options in the dish's order, and then forgets them", () => {
+      render(CHOP_SUEY, true);
+      component.choose('sauce', 'side');
+      component.choose('heat', 'hot');
+
+      component.onAddToCartClick(CHOP_SUEY);
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        item: CHOP_SUEY,
+        options: [
+          { group: HEAT, choice: HEAT.choices[1] },
+          { group: SAUCE, choice: SAUCE.choices[0] },
+        ],
+      });
+      expect(component.chosenChoice('heat')).toBeUndefined();
+    });
+
+    it('lets an optional option be cleared again', () => {
+      render(CHOP_SUEY, true);
+      component.choose('heat', 'mild');
+      component.choose('sauce', 'side');
+      component.choose('sauce', undefined);
+
+      component.onAddToCartClick(CHOP_SUEY);
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        item: CHOP_SUEY,
+        options: [{ group: HEAT, choice: HEAT.choices[0] }],
+      });
+    });
+
+    it("adds the dish's options to a variant added below it", () => {
+      render({ ...CHOP_SUEY, price: 0, variants: [GROSS] }, true);
+      component.choose('heat', 'mild');
+
+      component.onVariantAdded({ item: CHOP_SUEY, variant: GROSS });
+
+      expect(emitSpy).toHaveBeenCalledWith({
+        item: CHOP_SUEY,
+        variant: GROSS,
+        options: [{ group: HEAT, choice: HEAT.choices[0] }],
+      });
+    });
+
+    it('adds no variant while a required option is open', () => {
+      render({ ...CHOP_SUEY, price: 0, variants: [GROSS] }, true);
+
+      component.onVariantAdded({ item: CHOP_SUEY, variant: GROSS });
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('lets a variant row refuse to add while its dish is blocked', () => {
+      fixture.componentRef.setInput('optionsBlocked', true);
+      fixture.componentRef.setInput('parentItem', CHOP_SUEY);
+      render(GROSS, true);
+
+      component.onAddToCartClick(GROSS);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('draws no options on a variant row', () => {
+      fixture.componentRef.setInput('isVariant', true);
+      const el = render({ ...GROSS, optionGroups: [HEAT] }, true);
+
+      expect(component.optionGroups()).toEqual([]);
+      expect(el.querySelector('[data-testid="menu-item-options"]')).toBeNull();
+    });
+  });
+
   /** A dish sold only as its variants (GitHub issue #2182). */
   describe('ordering a dish with variants', () => {
     const withItem = (item: MenuItem, isVariant = false): void => {

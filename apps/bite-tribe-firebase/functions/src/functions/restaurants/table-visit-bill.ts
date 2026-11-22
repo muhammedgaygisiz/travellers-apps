@@ -1,4 +1,8 @@
-import { OrderLineExtraSnapshot, orderLineUnitPrice } from './table-order';
+import {
+  OrderLineExtraSnapshot,
+  OrderLineOptionSnapshot,
+  orderLineUnitPrice,
+} from './table-order';
 import type {
   TableVisitPaymentStatus,
   TableVisitSettlementMethod,
@@ -45,6 +49,8 @@ export interface TableVisitBillLine {
   readonly variantName?: string;
   readonly notes?: string;
   readonly extras?: readonly OrderLineExtraSnapshot[];
+  /** The options chosen on this row (GitHub issue #2254). */
+  readonly options?: readonly OrderLineOptionSnapshot[];
   readonly quantity: number;
   readonly unitPrice: number;
   readonly lineTotal: number;
@@ -118,7 +124,18 @@ const mergeKeyOf = (line: {
   notes?: unknown;
   price?: unknown;
   extras?: unknown;
+  options?: unknown;
 }): string => {
+  // Each choice by id and by name (issue #2254): "scharf" and "nicht scharf"
+  // are two rows, and so is a choice renamed mid-service.
+  const options = Array.isArray(line.options)
+    ? (line.options as OrderLineOptionSnapshot[])
+        .map(
+          (option) =>
+            `${option.groupId}:${option.choiceId}:${option.choiceName}`,
+        )
+        .join(',')
+    : '';
   const extras = Array.isArray(line.extras)
     ? [...(line.extras as OrderLineExtraSnapshot[])]
         .map((extra) => `${extra.extraId}:${extra.price}`)
@@ -137,6 +154,7 @@ const mergeKeyOf = (line: {
     String(line.notes ?? ''),
     String(line.price ?? ''),
     extras,
+    options,
   ].join('|');
 };
 
@@ -150,6 +168,7 @@ interface StoredLine {
   price?: unknown;
   quantity?: unknown;
   extras?: unknown;
+  options?: unknown;
 }
 
 const asPositiveNumber = (value: unknown): number =>
@@ -205,6 +224,9 @@ export const tableVisitBillLines = (
         ? (line.extras as OrderLineExtraSnapshot[])
         : undefined;
       const unitPrice = orderLineUnitPrice({ price, extras });
+      const options = Array.isArray(line.options)
+        ? (line.options as OrderLineOptionSnapshot[])
+        : undefined;
 
       rows.set(key, {
         menuItemId: String(line.menuItemId ?? ''),
@@ -219,6 +241,7 @@ export const tableVisitBillLines = (
           ? { notes: line.notes }
           : {}),
         ...(extras && extras.length > 0 ? { extras } : {}),
+        ...(options && options.length > 0 ? { options } : {}),
         quantity,
         unitPrice,
         lineTotal: unitPrice * quantity,

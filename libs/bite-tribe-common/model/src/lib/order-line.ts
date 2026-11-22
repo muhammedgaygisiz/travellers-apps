@@ -1,4 +1,9 @@
-import type { ExtraItem, MenuItem } from './menu';
+import type {
+  ExtraItem,
+  MenuItem,
+  MenuOptionChoice,
+  MenuOptionGroup,
+} from './menu';
 
 /**
  * What one line of a table order recorded about the dish it is for
@@ -52,6 +57,21 @@ export interface OrderLineExtraSnapshot {
   readonly name: string;
   /** What it added to the unit price, at the moment of the order. */
   readonly price: number;
+}
+
+/**
+ * One option a line was ordered with, as it stood at that moment
+ * (GitHub issue #2254).
+ *
+ * Names copied, ids kept, on the terms of the whole line: the owner who renames
+ * "scharf" to "pikant" next week has not changed what the kitchen was asked
+ * for tonight. No price, because an option has none.
+ */
+export interface OrderLineOptionSnapshot {
+  readonly groupId: string;
+  readonly groupName: string;
+  readonly choiceId: string;
+  readonly choiceName: string;
 }
 
 export interface OrderLineSnapshot {
@@ -122,6 +142,11 @@ export interface OrderLineSnapshot {
    * per line that the extras are priced into {@link orderLineUnitPrice}.
    */
   readonly extras?: readonly OrderLineExtraSnapshot[];
+  /**
+   * The options chosen on this line, in the dish's order (GitHub issue
+   * #2254). Absent rather than empty, like {@link extras}.
+   */
+  readonly options?: readonly OrderLineOptionSnapshot[];
 }
 
 /**
@@ -158,6 +183,14 @@ export interface OrderLineRequest {
    * be charged.
    */
   extras?: readonly ExtraItem[];
+  /** The options chosen, one per group at most (GitHub issue #2254). */
+  options?: readonly MenuOptionSelection[];
+}
+
+/** One choice made in one option group of a dish (GitHub issue #2254). */
+export interface MenuOptionSelection {
+  readonly group: MenuOptionGroup;
+  readonly choice: MenuOptionChoice;
 }
 
 /**
@@ -179,6 +212,7 @@ export const createOrderLineSnapshot = ({
   currency,
   notes,
   extras,
+  options,
 }: OrderLineRequest): OrderLineSnapshot => ({
   menuItemId: item.id,
   name: item.name,
@@ -196,4 +230,30 @@ export const createOrderLineSnapshot = ({
         })),
       }
     : {}),
+  ...(options?.length
+    ? {
+        options: options.map(({ group, choice }) => ({
+          groupId: group.id,
+          groupName: group.name,
+          choiceId: choice.id,
+          choiceName: choice.name,
+        })),
+      }
+    : {}),
 });
+
+/**
+ * What tells this line apart from the plain dish: its variant, then each
+ * chosen option, by name (GitHub issue #2254).
+ *
+ * One list for every surface that prints a line - the cart, the guest's sent
+ * orders, the staff queue, the bill, the visit summary - so "Ente Spezial
+ * (groß, scharf)" reads the same wherever it is printed. Each surface keeps
+ * its own punctuation around it.
+ */
+export const orderLineChoiceNames = (
+  line: Pick<OrderLineSnapshot, 'variantName' | 'options'>,
+): string[] => [
+  ...(line.variantName ? [line.variantName] : []),
+  ...(line.options ?? []).map((option) => option.choiceName),
+];

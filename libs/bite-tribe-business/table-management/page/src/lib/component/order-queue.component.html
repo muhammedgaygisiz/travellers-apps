@@ -448,6 +448,13 @@
                                 line.variantName
                               }}</span>
                             }
+                            @for (option of line.options; track $index) {
+                              <span
+                                class="order-queue__variant"
+                                data-testid="order-line-option"
+                                >{{ option }}</span
+                              >
+                            }
                             @if (line.notes) {
                               <span
                                 class="order-queue__note"

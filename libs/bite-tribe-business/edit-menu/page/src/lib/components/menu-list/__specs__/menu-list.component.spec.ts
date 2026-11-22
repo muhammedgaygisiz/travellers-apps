@@ -46,7 +46,23 @@ const MENU: Menu = {
             },
           ],
         },
-        { id: 'd3', name: 'Fried rice', description: '', price: 13 },
+        {
+          id: 'd3',
+          name: 'Fried rice',
+          description: '',
+          price: 13,
+          optionGroups: [
+            {
+              id: 'g1',
+              name: 'Spice level',
+              required: true,
+              choices: [
+                { id: 'o1', name: 'mild' },
+                { id: 'o2', name: 'hot' },
+              ],
+            },
+          ],
+        },
       ],
       extrasBlock: {
         description: 'Toppings',
@@ -105,6 +121,16 @@ describe(MenuListComponent.name, () => {
 
     expect(margherita.price).toBe('CHF 11.00');
     expect(margherita.variants[0].name).toBe('Large 40 cm');
+  });
+
+  it("shows a dish's options, one line per group (#2254)", () => {
+    const [padThai, , friedRice] = component.categories()[0].dishes;
+
+    expect(friedRice.options).toEqual(['Spice level: mild · hot']);
+    expect(padThai.options).toEqual([]);
+    expect(
+      el().querySelector('[data-testid="dish-options"]')?.textContent,
+    ).toContain('Spice level: mild · hot');
   });
 
   it('summarises the extras on one line', () => {

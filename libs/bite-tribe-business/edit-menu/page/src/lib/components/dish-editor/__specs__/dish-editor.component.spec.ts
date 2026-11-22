@@ -29,6 +29,24 @@ const PAD_THAI: MenuItem = {
   ],
 };
 
+const CHOP_SUEY: MenuItem = {
+  id: 'd2',
+  name: 'Chop-Suey-Spezial',
+  description: '',
+  price: 12.9,
+  optionGroups: [
+    {
+      id: 'g1',
+      name: 'Zubereitungsart',
+      required: true,
+      choices: [
+        { id: 'c1', name: 'nicht scharf' },
+        { id: 'c2', name: 'scharf' },
+      ],
+    },
+  ],
+};
+
 /** See GitHub issue #2182. */
 describe(DishEditorComponent.name, () => {
   let fixture: ComponentFixture<DishEditorComponent>;
@@ -216,6 +234,128 @@ describe(DishEditorComponent.name, () => {
   });
 
   /** See GitHub issue #2181. */
+  describe('options (#2254)', () => {
+    it('shows the option groups of a dish with their choices', () => {
+      open(CHOP_SUEY);
+
+      expect(component.optionGroups.length).toBe(1);
+      expect(component.optionGroups.at(0).getRawValue()).toEqual(
+        CHOP_SUEY.optionGroups?.[0],
+      );
+      expect(component.form.valid).toBe(true);
+    });
+
+    it('keeps the option groups when other fields are saved', () => {
+      open(CHOP_SUEY);
+      component.form.patchValue({ price: 13.4 });
+
+      component.saveDish();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          price: 13.4,
+          optionGroups: CHOP_SUEY.optionGroups,
+        }),
+      );
+    });
+
+    it('starts a new group as required with two empty choices', () => {
+      open(undefined);
+
+      component.addOptionGroup();
+
+      const group = component.optionGroups.at(0);
+      expect(group.controls.required.value).toBe(true);
+      expect(group.controls.choices.length).toBe(2);
+      expect(component.form.dirty).toBe(true);
+    });
+
+    it('saves a new group trimmed, with fresh ids', () => {
+      open(undefined);
+      component.form.patchValue({ name: 'Ente Spezial', price: 15.4 });
+      component.addOptionGroup();
+      const group = component.optionGroups.at(0);
+      group.patchValue({ name: ' Spice level ', required: false });
+      group.controls.choices.at(0).patchValue({ name: ' mild ' });
+      group.controls.choices.at(1).patchValue({ name: 'hot' });
+
+      component.saveDish();
+
+      const [{ optionGroups }] = saved.mock.calls[0];
+      expect(optionGroups).toEqual([
+        {
+          id: expect.any(String),
+          name: 'Spice level',
+          required: false,
+          choices: [
+            { id: expect.any(String), name: 'mild' },
+            { id: expect.any(String), name: 'hot' },
+          ],
+        },
+      ]);
+      expect(optionGroups[0].choices[0].id).not.toBe(
+        optionGroups[0].choices[1].id,
+      );
+    });
+
+    it('needs a name on the group and on every choice', () => {
+      open(undefined);
+      component.form.patchValue({ name: 'Ente Spezial', price: 15.4 });
+      component.addOptionGroup();
+
+      expect(component.form.invalid).toBe(true);
+
+      const group = component.optionGroups.at(0);
+      group.patchValue({ name: 'Spice level' });
+      group.controls.choices.at(0).patchValue({ name: 'mild' });
+      expect(component.form.invalid).toBe(true);
+
+      group.controls.choices.at(1).patchValue({ name: 'hot' });
+      expect(component.form.valid).toBe(true);
+    });
+
+    it('needs at least two choices in a group, and says so', () => {
+      open(CHOP_SUEY);
+
+      component.removeChoice(0, 1);
+      fixture.detectChanges();
+
+      expect(component.form.invalid).toBe(true);
+      expect(fixture.nativeElement.textContent).toContain(
+        'menu-dish-option-choices-min',
+      );
+
+      component.addChoice(0);
+      component.optionGroups
+        .at(0)
+        .controls.choices.at(1)
+        .patchValue({ name: 'sehr scharf' });
+      expect(component.form.valid).toBe(true);
+    });
+
+    it('drops the groups from the dish when the last one is removed', () => {
+      open(CHOP_SUEY);
+
+      component.removeOptionGroup(0);
+      component.saveDish();
+
+      expect(component.form.dirty).toBe(true);
+      expect(saved.mock.calls[0][0]).not.toHaveProperty('optionGroups');
+    });
+
+    it('renders a card per group with its choices', () => {
+      open(CHOP_SUEY);
+
+      const card: HTMLElement = fixture.nativeElement.querySelector(
+        '[data-testid="dish-option-group-0"]',
+      );
+      expect(card).toBeTruthy();
+      expect(
+        card.querySelectorAll('[data-testid^="dish-option-choice-0-"]').length,
+      ).toBe(2);
+    });
+  });
+
   describe('deleting the dish', () => {
     type AlertOptions = Parameters<AlertController['create']>[0];
     let alertOptions: AlertOptions | undefined;

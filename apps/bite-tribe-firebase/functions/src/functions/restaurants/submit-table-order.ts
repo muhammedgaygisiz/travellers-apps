@@ -22,6 +22,7 @@ import {
   INITIAL_TABLE_ORDER_STATUS,
   ORDERABLE_TABLE_STATUSES,
   OrderLineExtraSnapshot,
+  OrderLineOptionSnapshot,
   OrderLineSnapshot,
   TABLE_ORDERS_COLLECTION,
   TABLE_ORDER_REQUEST_ID_PATTERN,
@@ -137,6 +138,12 @@ export interface SubmitTableOrderExtra {
   price?: unknown;
 }
 
+/** One option chosen on a line (GitHub issue #2254). Parsed, never trusted. */
+export interface SubmitTableOrderOption {
+  groupId?: unknown;
+  choiceId?: unknown;
+}
+
 /** One line, as the guest's phone sends it. Parsed, never trusted. */
 export interface SubmitTableOrderLine {
   menuItemId?: unknown;
@@ -147,6 +154,8 @@ export interface SubmitTableOrderLine {
   price?: unknown;
   /** The extras ticked on this line (GitHub issue #1598). */
   extras?: unknown;
+  /** The options chosen on this line (GitHub issue #2254). */
+  options?: unknown;
 }
 
 export interface SubmitTableOrderRequest {
@@ -199,6 +208,13 @@ interface RequestedLine {
   notes: string;
   shownPrice: number;
   extras: RequestedExtra[];
+  options: RequestedOption[];
+}
+
+/** An option after parsing, before it has been checked against the menu. */
+interface RequestedOption {
+  groupId: string;
+  choiceId: string;
 }
 
 /**
@@ -209,6 +225,9 @@ interface RequestedLine {
  * a cap a single line could ask the transaction to check an unbounded list.
  */
 const MAX_LINE_EXTRAS = 20;
+
+/** The most options one line may carry (GitHub issue #2254), on the same terms. */
+const MAX_LINE_OPTIONS = 20;
 
 /** The free-text note on a line, capped so it cannot be used as storage. */
 const MAX_NOTES_LENGTH = 280;
@@ -383,6 +402,51 @@ const parseExtras = (value: unknown): RequestedExtra[] => {
   return extras;
 };
 
+/**
+ * The options chosen on one line (GitHub issue #2254).
+ *
+ * One choice per group: a group named twice is a client bug, not something a
+ * guest did, so it is an `invalid-argument` rather than a refusal - the line
+ * {@link parseExtras} draws too. Whether the group and the choice exist, and
+ * whether every required group is answered, is the menu's question.
+ */
+const parseOptions = (value: unknown): RequestedOption[] => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new HttpsError('invalid-argument', 'options must be a list.');
+  }
+
+  if (value.length > MAX_LINE_OPTIONS) {
+    throw new HttpsError(
+      'invalid-argument',
+      `A line carries at most ${MAX_LINE_OPTIONS} options.`,
+    );
+  }
+
+  const options = value.map((entry) => {
+    const option = (entry ?? {}) as SubmitTableOrderOption;
+
+    return {
+      groupId: parseRequiredString(option.groupId, 'groupId'),
+      choiceId: parseRequiredString(option.choiceId, 'choiceId'),
+    };
+  });
+
+  if (
+    new Set(options.map((option) => option.groupId)).size !== options.length
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      'options must not name the same group twice.',
+    );
+  }
+
+  return options;
+};
+
 const parseLines = (value: unknown): RequestedLine[] => {
   if (!Array.isArray(value)) {
     throw new HttpsError('invalid-argument', 'lines must be a list.');
@@ -405,6 +469,7 @@ const parseLines = (value: unknown): RequestedLine[] => {
       notes: parseNotes(line.notes),
       shownPrice: parseShownPrice(line.price),
       extras: parseExtras(line.extras),
+      options: parseOptions(line.options),
     };
   });
 };
@@ -415,6 +480,22 @@ const priceOf = (item: StoredMenuItem): number | undefined =>
 
 const nameOf = (item: StoredMenuItem): string =>
   typeof item['name'] === 'string' ? (item['name'] as string) : '';
+
+/** A stored option group (GitHub issue #2254), read defensively. */
+interface StoredOptionGroup {
+  id?: unknown;
+  name?: unknown;
+  required?: unknown;
+  choices?: { id?: unknown; name?: unknown }[];
+}
+
+const optionGroupsOf = (item: StoredMenuItem): StoredOptionGroup[] =>
+  Array.isArray(item['optionGroups'])
+    ? (item['optionGroups'] as StoredOptionGroup[])
+    : [];
+
+const textOf = (value: unknown): string =>
+  typeof value === 'string' ? value : '';
 
 /** Whether the kitchen is serving this today, reading absent as available. */
 const isAvailable = (item: StoredMenuItem): boolean =>
@@ -560,6 +641,53 @@ const checkLine = (
     });
   }
 
+  // The options (issue #2254), against the dish as it is stored now: each
+  // chosen group and choice must still exist, and every required group must be
+  // answered. The names on the line are the menu's, never the client's.
+  const groups = optionGroupsOf(dish);
+  const options: OrderLineOptionSnapshot[] = [];
+
+  for (const chosen of line.options) {
+    const group = groups.find((entry) => entry.id === chosen.groupId);
+    const choice = (group?.choices ?? []).find(
+      (entry) => entry?.id === chosen.choiceId,
+    );
+
+    if (!group || !choice) {
+      return refuseOrder('optionMissing', {
+        ...named,
+        optionGroupId: chosen.groupId,
+        ...(group ? { optionGroupName: textOf(group.name) } : {}),
+      });
+    }
+
+    options.push({
+      groupId: chosen.groupId,
+      groupName: textOf(group.name),
+      choiceId: chosen.choiceId,
+      choiceName: textOf(choice.name),
+    });
+  }
+
+  // In the dish's order, so a line reads the way the menu prints the groups.
+  const position = (groupId: string): number =>
+    groups.findIndex((group) => group.id === groupId);
+  options.sort((a, b) => position(a.groupId) - position(b.groupId));
+
+  const unanswered = groups.find(
+    (group) =>
+      group.required === true &&
+      !options.some((option) => option.groupId === group.id),
+  );
+
+  if (unanswered) {
+    return refuseOrder('optionRequired', {
+      ...named,
+      optionGroupId: textOf(unanswered.id),
+      optionGroupName: textOf(unanswered.name),
+    });
+  }
+
   return {
     menuItemId: line.menuItemId,
     name: nameOf(dish),
@@ -571,6 +699,7 @@ const checkLine = (
     quantity: line.quantity,
     ...(line.notes ? { notes: line.notes } : {}),
     ...(extras.length ? { extras } : {}),
+    ...(options.length ? { options } : {}),
   };
 };
 

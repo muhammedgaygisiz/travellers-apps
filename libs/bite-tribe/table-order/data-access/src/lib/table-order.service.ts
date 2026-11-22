@@ -469,9 +469,16 @@ export class TableOrderService {
   /** Adding to the cart, which also clears whatever the last refusal said. */
   add(
     line: Pick<TableCartLine, 'item' | 'variant'> &
-      Partial<Pick<TableCartLine, 'extras'>>,
+      Partial<Pick<TableCartLine, 'extras' | 'options'>>,
   ): void {
-    this.edit(() => this.cart.add(line.item, line.variant, line.extras ?? []));
+    this.edit(() =>
+      this.cart.add(
+        line.item,
+        line.variant,
+        line.extras ?? [],
+        line.options ?? [],
+      ),
+    );
   }
 
   increase(key: string): void {

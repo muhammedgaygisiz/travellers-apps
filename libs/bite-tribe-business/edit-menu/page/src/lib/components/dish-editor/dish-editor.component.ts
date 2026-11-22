@@ -26,7 +26,7 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import type { MenuItem } from 'model';
+import type { MenuItem, MenuOptionGroup } from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
 import { editableDish } from '../../utils/menu-edits';
@@ -36,6 +36,21 @@ type VariantForm = FormGroup<{
   name: FormControl<string>;
   price: FormControl<number | null>;
 }>;
+
+type ChoiceForm = FormGroup<{
+  id: FormControl<string>;
+  name: FormControl<string>;
+}>;
+
+type OptionGroupForm = FormGroup<{
+  id: FormControl<string>;
+  name: FormControl<string>;
+  required: FormControl<boolean>;
+  choices: FormArray<ChoiceForm>;
+}>;
+
+/** A group is a choice between things, so it needs at least two of them. */
+const MIN_CHOICES = 2;
 
 /** The smallest price a dish or variant can be saved with. */
 const MIN_PRICE = 0.01;
@@ -90,10 +105,16 @@ export class DishEditorComponent {
     notes: [''],
     isAvailable: [true],
     variants: this.formBuilder.array<VariantForm>([]),
+    optionGroups: this.formBuilder.array<OptionGroupForm>([]),
   });
 
   get variants(): FormArray<VariantForm> {
     return this.form.controls.variants;
+  }
+
+  /** Priceless choices on the dish (GitHub issue #2254). */
+  get optionGroups(): FormArray<OptionGroupForm> {
+    return this.form.controls.optionGroups;
   }
 
   private readonly value = toSignal(
@@ -115,6 +136,7 @@ export class DishEditorComponent {
     const dish = stored ? editableDish(stored) : undefined;
 
     this.variants.clear();
+    this.optionGroups.clear();
     this.form.reset({
       name: dish?.name ?? '',
       description: dish?.description ?? '',
@@ -126,6 +148,11 @@ export class DishEditorComponent {
     // After the reset, which would otherwise empty every variant row.
     (dish?.variants ?? []).forEach((variant) =>
       this.variants.push(this.variantForm(variant), { emitEvent: false }),
+    );
+    (dish?.optionGroups ?? []).forEach((group) =>
+      this.optionGroups.push(this.optionGroupForm(group), {
+        emitEvent: false,
+      }),
     );
     this.syncPriceValidators();
     this.form.markAsPristine();
@@ -140,6 +167,33 @@ export class DishEditorComponent {
       price: this.formBuilder.control<number | null>(variant?.price ?? null, [
         Validators.required,
         Validators.min(MIN_PRICE),
+      ]),
+    });
+  }
+
+  private optionGroupForm(group?: MenuOptionGroup): OptionGroupForm {
+    const choices = group?.choices.length
+      ? group.choices
+      : [undefined, undefined];
+
+    return this.formBuilder.group({
+      id: this.formBuilder.nonNullable.control(group?.id ?? createEntityId()),
+      name: this.formBuilder.nonNullable.control(group?.name ?? '', [
+        Validators.required,
+      ]),
+      required: this.formBuilder.nonNullable.control(group?.required ?? true),
+      choices: this.formBuilder.array<ChoiceForm>(
+        choices.map((choice) => this.choiceForm(choice)),
+        [Validators.minLength(MIN_CHOICES)],
+      ),
+    });
+  }
+
+  private choiceForm(choice?: { id: string; name: string }): ChoiceForm {
+    return this.formBuilder.group({
+      id: this.formBuilder.nonNullable.control(choice?.id ?? createEntityId()),
+      name: this.formBuilder.nonNullable.control(choice?.name ?? '', [
+        Validators.required,
       ]),
     });
   }
@@ -169,6 +223,31 @@ export class DishEditorComponent {
     this.form.markAsDirty();
   }
 
+  /**
+   * A new group starts with two empty choices and required, because the case
+   * the feature exists for - mild or hot - is a question the kitchen needs an
+   * answer to.
+   */
+  addOptionGroup(): void {
+    this.optionGroups.push(this.optionGroupForm());
+    this.form.markAsDirty();
+  }
+
+  removeOptionGroup(index: number): void {
+    this.optionGroups.removeAt(index);
+    this.form.markAsDirty();
+  }
+
+  addChoice(groupIndex: number): void {
+    this.optionGroups.at(groupIndex).controls.choices.push(this.choiceForm());
+    this.form.markAsDirty();
+  }
+
+  removeChoice(groupIndex: number, choiceIndex: number): void {
+    this.optionGroups.at(groupIndex).controls.choices.removeAt(choiceIndex);
+    this.form.markAsDirty();
+  }
+
   saveDish(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -191,6 +270,15 @@ export class DishEditorComponent {
         price: Number(variant.price),
       };
     });
+    const optionGroups: MenuOptionGroup[] = value.optionGroups.map((group) => ({
+      id: group.id,
+      name: group.name.trim(),
+      required: group.required,
+      choices: group.choices.map((choice) => ({
+        id: choice.id,
+        name: choice.name.trim(),
+      })),
+    }));
     const ingredients = value.ingredients.trim();
     const notes = value.notes.trim();
 
@@ -203,6 +291,7 @@ export class DishEditorComponent {
       ...(notes ? { notes } : {}),
       isAvailable: value.isAvailable,
       ...(variants.length ? { variants } : {}),
+      ...(optionGroups.length ? { optionGroups } : {}),
     });
   }
 

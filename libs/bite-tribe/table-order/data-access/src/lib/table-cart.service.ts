@@ -6,12 +6,14 @@ import {
   isMenuVariantAvailable,
   MAX_ORDER_LINES,
   MAX_ORDER_LINE_QUANTITY,
+  missingRequiredOptions,
   tableOrderTotal,
 } from 'model';
 import type {
   ExtraItem,
   Menu,
   MenuItem,
+  MenuOptionSelection,
   OrderLineSnapshot,
   SubmitTableOrderLine,
 } from 'model';
@@ -100,6 +102,12 @@ export interface TableCartLine {
    * branch in every one of them.
    */
   readonly extras: readonly ExtraItem[];
+  /**
+   * The options chosen on this row, in the dish's order (GitHub issue #2254).
+   * Part of the row's identity, like the extras: a mild and a hot Chop Suey
+   * are two rows.
+   */
+  readonly options: readonly MenuOptionSelection[];
 }
 
 /**
@@ -114,11 +122,16 @@ export const cartLineKey = (
   item: MenuItem,
   variant?: MenuItem,
   extras: readonly ExtraItem[] = [],
+  options: readonly MenuOptionSelection[] = [],
 ): string => {
   const dish = variant ? `${item.id}:${variant.id}` : item.id;
   const ticked = [...extras].map((extra) => extra.id).sort();
+  const chosen = options
+    .map(({ group, choice }) => `${group.id}=${choice.id}`)
+    .sort();
+  const withExtras = ticked.length ? `${dish}+${ticked.join('+')}` : dish;
 
-  return ticked.length ? `${dish}+${ticked.join('+')}` : dish;
+  return chosen.length ? `${withExtras}~${chosen.join('~')}` : withExtras;
 };
 
 /**
@@ -137,6 +150,7 @@ const snapshotOf = (line: TableCartLine, currency: string): OrderLineSnapshot =>
     currency,
     notes: line.notes,
     extras: line.extras,
+    options: line.options,
   });
 
 /**
@@ -152,6 +166,8 @@ interface StoredCartLine {
   notes?: string;
   /** The extras ticked, by id alone. Re-priced off the live menu on the way back. */
   extraIds?: string[];
+  /** The options chosen, by ids. Resolved against the live menu on the way back. */
+  options?: { groupId: string; choiceId: string }[];
 }
 
 const toStoredLine = (line: TableCartLine): StoredCartLine => ({
@@ -161,6 +177,14 @@ const toStoredLine = (line: TableCartLine): StoredCartLine => ({
   ...(line.notes ? { notes: line.notes } : {}),
   ...(line.extras.length
     ? { extraIds: line.extras.map((extra) => extra.id) }
+    : {}),
+  ...(line.options.length
+    ? {
+        options: line.options.map(({ group, choice }) => ({
+          groupId: group.id,
+          choiceId: choice.id,
+        })),
+      }
     : {}),
 });
 
@@ -182,7 +206,14 @@ const isStoredCartLine = (value: unknown): value is StoredCartLine => {
     // which is the failure this parser exists to keep off the screen.
     (row.extraIds === undefined ||
       (Array.isArray(row.extraIds) &&
-        row.extraIds.every((id) => typeof id === 'string')))
+        row.extraIds.every((id) => typeof id === 'string'))) &&
+    (row.options === undefined ||
+      (Array.isArray(row.options) &&
+        row.options.every(
+          (option) =>
+            typeof option?.groupId === 'string' &&
+            typeof option?.choiceId === 'string',
+        )))
   );
 };
 
@@ -239,7 +270,21 @@ export class TableCartService {
     item: MenuItem,
     variant?: MenuItem,
     extras: readonly ExtraItem[] = [],
+    options: readonly MenuOptionSelection[] = [],
   ): void {
+    // A dish with a required option nobody chose is refused here, as an
+    // unpriced one is below: the backend would refuse the order, and the guest
+    // would learn it only on sending (issue #2254). The menu row disables its
+    // button first; this is the guard behind it.
+    if (
+      missingRequiredOptions(
+        item,
+        options.map(({ group }) => group.id),
+      ).length
+    ) {
+      return;
+    }
+
     // `variant ?? item` collapses the two cases into the one rule: a plain
     // dish is checked against itself, and a variant is checked against itself
     // *and* the dish it belongs to - because unavailability travels down.
@@ -259,7 +304,7 @@ export class TableCartService {
       return;
     }
 
-    const key = cartLineKey(item, variant, extras);
+    const key = cartLineKey(item, variant, extras, options);
     const existing = this.rows().find((line) => line.key === key);
 
     if (existing) {
@@ -281,6 +326,7 @@ export class TableCartService {
         quantity: 1,
         notes: '',
         extras: [...extras],
+        options: [...options],
       },
     ]);
   }
@@ -466,8 +512,38 @@ export class TableCartService {
       extras.push(extra);
     }
 
+    // The options, on the terms of the extras above (issue #2254): a row whose
+    // chosen option or choice has gone, or that leaves an option the dish now
+    // requires unanswered, is dropped whole rather than sent as something the
+    // guest did not order.
+    const options: MenuOptionSelection[] = [];
+
+    for (const stored of row.options ?? []) {
+      const group = (item.optionGroups ?? []).find(
+        (entry) => entry.id === stored.groupId,
+      );
+      const choice = group?.choices.find(
+        (entry) => entry.id === stored.choiceId,
+      );
+
+      if (!group || !choice) {
+        return undefined;
+      }
+
+      options.push({ group, choice });
+    }
+
+    if (
+      missingRequiredOptions(
+        item,
+        options.map(({ group }) => group.id),
+      ).length
+    ) {
+      return undefined;
+    }
+
     return {
-      key: cartLineKey(item, variant, extras),
+      key: cartLineKey(item, variant, extras, options),
       item,
       ...(variant ? { variant } : {}),
       quantity: Math.min(
@@ -476,6 +552,7 @@ export class TableCartService {
       ),
       notes: row.notes ?? '',
       extras,
+      options,
     };
   }
 
@@ -521,6 +598,14 @@ export class TableCartService {
               extras: snapshot.extras.map((extra) => ({
                 extraId: extra.extraId,
                 price: extra.price,
+              })),
+            }
+          : {}),
+        ...(snapshot.options?.length
+          ? {
+              options: snapshot.options.map((option) => ({
+                groupId: option.groupId,
+                choiceId: option.choiceId,
               })),
             }
           : {}),

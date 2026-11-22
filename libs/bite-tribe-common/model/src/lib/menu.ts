@@ -69,6 +69,55 @@ export interface MenuItem {
    */
   isAvailable?: boolean;
   variants?: MenuItem[];
+  /**
+   * Choices on the dish that don't change its price, such as how spicy it
+   * should be (GitHub issue #2254).
+   *
+   * They belong to the dish, so they apply to whichever variant is ordered:
+   * a large or a small Ente Spezial is still cooked mild or hot. Absent and
+   * empty are the same answer, a dish with nothing to choose.
+   */
+  optionGroups?: MenuOptionGroup[];
+}
+
+/**
+ * One choice a guest makes on a dish, at no charge (GitHub issue #2254).
+ *
+ * A group has a name ("Zubereitungsart") and two or more choices ("nicht
+ * scharf", "scharf"), of which the guest picks exactly one; when it is
+ * `required`, the dish can't be ordered without that pick, and when it isn't,
+ * the guest may leave it empty.
+ *
+ * Deliberately priceless. A choice that costs something is either a version of
+ * the dish, which is a variant, or something added to it, which is an extra,
+ * and keeping those apart is what lets an order line say what was ordered and
+ * what it cost without asking which of three mechanisms priced it.
+ */
+export interface MenuOptionGroup {
+  /** Stable identity, on the same terms as {@link MenuItem.id}. */
+  id: string;
+  name: string;
+  required: boolean;
+  choices: MenuOptionChoice[];
+}
+
+/**
+ * The required option groups of a dish that the given choices leave
+ * unanswered (GitHub issue #2254). Empty when the dish can be ordered.
+ */
+export const missingRequiredOptions = (
+  item: Pick<MenuItem, 'optionGroups'> | undefined,
+  chosenGroupIds: readonly string[],
+): MenuOptionGroup[] =>
+  (item?.optionGroups ?? []).filter(
+    (group) => group.required && !chosenGroupIds.includes(group.id),
+  );
+
+/** One answer within a {@link MenuOptionGroup}. */
+export interface MenuOptionChoice {
+  /** Stable identity, on the same terms as {@link MenuItem.id}. */
+  id: string;
+  name: string;
 }
 
 /**

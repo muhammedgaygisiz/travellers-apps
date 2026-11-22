@@ -65,6 +65,7 @@ export const OPERATOR_ACTIONS = [
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
   'saveLandingPage',
+  'saveRestaurantDietaryStatements',
   'rotateTableQrToken',
   'rotateTableQrTokens',
   'sendNewVersionNotification',

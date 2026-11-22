@@ -343,6 +343,61 @@ describe('EditRestaurantComponent', () => {
     });
   });
 
+  /** The restaurant's dietary statements and note (GitHub issue #2194). */
+  describe('dietary statements', () => {
+    const withDietary = (restaurant: Partial<Restaurant>): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Green Bowl',
+        ...restaurant,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it('shows the stated ones, dropping any the list does not know', () => {
+      withDietary({
+        dietaryStatements: ['fully-halal', 'fully-keto' as never],
+        crossContaminationNote: 'Shared fryer.',
+      });
+
+      expect(component.dietaryForm.getRawValue()).toEqual({
+        statements: ['fully-halal'],
+        crossContaminationNote: 'Shared fryer.',
+      });
+    });
+
+    it('saves the statements and the trimmed note', () => {
+      withDietary({});
+      component.dietaryForm.patchValue({
+        statements: ['fully-kosher'],
+        crossContaminationNote: '  No pork in the kitchen. ',
+      });
+
+      const emitted = jest.fn();
+      component.submitDietaryStatements.subscribe(emitted);
+      component.saveDietary();
+
+      expect(emitted).toHaveBeenCalledWith({
+        statements: ['fully-kosher'],
+        crossContaminationNote: 'No pork in the kitchen.',
+      });
+    });
+
+    it('refuses a note over the limit', () => {
+      withDietary({});
+      component.dietaryForm.patchValue({
+        crossContaminationNote: 'x'.repeat(501),
+      });
+
+      const emitted = jest.fn();
+      component.submitDietaryStatements.subscribe(emitted);
+      component.saveDietary();
+
+      expect(component.dietaryForm.invalid).toBe(true);
+      expect(emitted).not.toHaveBeenCalled();
+    });
+  });
+
   describe('links', () => {
     it('should return empty array if no links', () => {
       componentRef.setInput('restaurant', {

@@ -7,6 +7,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormArray,
@@ -23,10 +24,18 @@ import {
   IonInput,
   IonItem,
   IonList,
+  IonSelect,
+  IonSelectOption,
   IonToggle,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import type { MenuItem, MenuOptionGroup } from 'model';
+import {
+  DIETARY_LABELS,
+  menuItemDietaryOf,
+  type DietaryLabel,
+  type MenuItem,
+  type MenuOptionGroup,
+} from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
 import { editableDish } from '../../utils/menu-edits';
@@ -35,7 +44,29 @@ type VariantForm = FormGroup<{
   id: FormControl<string>;
   name: FormControl<string>;
   price: FormControl<number | null>;
+  dietaryLabels: FormControl<DietaryLabel[]>;
+  dietaryOptions: FormControl<DietaryLabel[]>;
 }>;
+
+/**
+ * A dish's declared dietary labels and options, as they are saved (GitHub
+ * issue #2194): an empty list leaves the field off, and an option the dish
+ * already fits as served is dropped rather than stored twice.
+ */
+const dietaryFields = (
+  labels: DietaryLabel[],
+  options: DietaryLabel[],
+): Pick<MenuItem, 'dietaryLabels' | 'dietaryOptions'> => {
+  const dietary = menuItemDietaryOf({
+    dietaryLabels: labels,
+    dietaryOptions: options,
+  });
+
+  return {
+    ...(dietary.labels.length ? { dietaryLabels: dietary.labels } : {}),
+    ...(dietary.options.length ? { dietaryOptions: dietary.options } : {}),
+  };
+};
 
 type ChoiceForm = FormGroup<{
   id: FormControl<string>;
@@ -72,10 +103,13 @@ const MIN_PRICE = 0.01;
   styleUrl: './dish-editor.component.scss',
   imports: [
     ReactiveFormsModule,
+    NgTemplateOutlet,
     IonList,
     IonItem,
     IonInput,
     IonToggle,
+    IonSelect,
+    IonSelectOption,
     IonButton,
     IonIcon,
     TranslocoPipe,
@@ -93,6 +127,9 @@ export class DishEditorComponent {
   readonly currency = input<string>();
 
   readonly save = output<MenuItem>();
+
+  /** The dietary vocabulary, in the order it is offered (issue #2194). */
+  readonly dietaryLabelOptions = DIETARY_LABELS;
   readonly cancelEdit = output<void>();
   /** The owner confirmed deleting the stored dish (GitHub issue #2181). */
   readonly deleteDish = output<void>();
@@ -104,6 +141,8 @@ export class DishEditorComponent {
     ingredients: [''],
     notes: [''],
     isAvailable: [true],
+    dietaryLabels: [[] as DietaryLabel[]],
+    dietaryOptions: [[] as DietaryLabel[]],
     variants: this.formBuilder.array<VariantForm>([]),
     optionGroups: this.formBuilder.array<OptionGroupForm>([]),
   });
@@ -144,6 +183,7 @@ export class DishEditorComponent {
       ingredients: dish?.ingredients ?? '',
       notes: dish?.notes ?? '',
       isAvailable: dish?.isAvailable !== false,
+      ...this.dietaryValue(dish),
     });
     // After the reset, which would otherwise empty every variant row.
     (dish?.variants ?? []).forEach((variant) =>
@@ -158,7 +198,19 @@ export class DishEditorComponent {
     this.form.markAsPristine();
   });
 
+  /** What the form shows: known labels only, never an option twice. */
+  private dietaryValue(item: MenuItem | undefined): {
+    dietaryLabels: DietaryLabel[];
+    dietaryOptions: DietaryLabel[];
+  } {
+    const dietary = menuItemDietaryOf(item);
+
+    return { dietaryLabels: dietary.labels, dietaryOptions: dietary.options };
+  }
+
   private variantForm(variant?: MenuItem): VariantForm {
+    const dietary = this.dietaryValue(variant);
+
     return this.formBuilder.group({
       id: this.formBuilder.nonNullable.control(variant?.id ?? createEntityId()),
       name: this.formBuilder.nonNullable.control(variant?.name ?? '', [
@@ -168,6 +220,12 @@ export class DishEditorComponent {
         Validators.required,
         Validators.min(MIN_PRICE),
       ]),
+      dietaryLabels: this.formBuilder.nonNullable.control(
+        dietary.dietaryLabels,
+      ),
+      dietaryOptions: this.formBuilder.nonNullable.control(
+        dietary.dietaryOptions,
+      ),
     });
   }
 
@@ -260,7 +318,11 @@ export class DishEditorComponent {
       (stored?.variants ?? []).map((variant) => [variant.id, variant]),
     );
     const variants: MenuItem[] = value.variants.map((variant) => {
-      const before = storedVariants.get(variant.id);
+      // The stored variant's labels are replaced, not merged: a label the
+      // owner took off is gone (issue #2194).
+      const before: Partial<MenuItem> = { ...storedVariants.get(variant.id) };
+      delete before.dietaryLabels;
+      delete before.dietaryOptions;
 
       return {
         ...before,
@@ -268,6 +330,7 @@ export class DishEditorComponent {
         name: variant.name.trim(),
         description: '',
         price: Number(variant.price),
+        ...dietaryFields(variant.dietaryLabels, variant.dietaryOptions),
       };
     });
     const optionGroups: MenuOptionGroup[] = value.optionGroups.map((group) => ({
@@ -290,6 +353,7 @@ export class DishEditorComponent {
       ...(ingredients ? { ingredients } : {}),
       ...(notes ? { notes } : {}),
       isAvailable: value.isAvailable,
+      ...dietaryFields(value.dietaryLabels, value.dietaryOptions),
       ...(variants.length ? { variants } : {}),
       ...(optionGroups.length ? { optionGroups } : {}),
     });

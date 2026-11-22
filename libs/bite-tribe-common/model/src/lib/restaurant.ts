@@ -4,6 +4,7 @@ import type { Link } from './link';
 import type { DaySchedule } from './opening-hours';
 import type { Address } from './address';
 import type { TableOrderingSettings } from './table-ordering';
+import type { RestaurantDietaryStatement } from './dietary-label';
 
 /**
  * What an operator's assignment can have made of a restaurant.
@@ -169,6 +170,24 @@ export interface Restaurant {
    * `restaurantCategoriesOf`, which drops anything the list does not know.
    */
   categories?: RestaurantCategory[];
+
+  /**
+   * What the restaurant says about its whole kitchen (GitHub issue #2194):
+   * any of `RESTAURANT_DIETARY_STATEMENTS`. Absent is a restaurant that has
+   * not said. Read it through `restaurantDietaryStatementsOf`.
+   *
+   * Written only by the `saveRestaurantDietaryStatements` callable, together
+   * with {@link crossContaminationNote}, so the note is checked before another
+   * account can read it (`RD-UR-11`); the rules refuse a client write of both.
+   */
+  dietaryStatements?: RestaurantDietaryStatement[];
+
+  /**
+   * The restaurant's own words on cross-contamination - a shared fryer, nuts
+   * in the kitchen (GitHub issue #2194). Free text, so it goes through the
+   * content check; absent when the restaurant has written none.
+   */
+  crossContaminationNote?: string;
 
   createdAt?: string;
   createdAtTimestamp?: number;

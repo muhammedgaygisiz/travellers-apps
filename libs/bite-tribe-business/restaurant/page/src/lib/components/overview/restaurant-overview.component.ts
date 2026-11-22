@@ -20,6 +20,7 @@ import {
   linkNetworkName,
   Restaurant,
   restaurantCategoriesOf,
+  restaurantDietaryStatementsOf,
   RestaurantSection,
   restaurantSetupChecklist,
   SetupItem,
@@ -73,6 +74,7 @@ const ROW_SECTIONS: readonly RestaurantSection[] = [
   'position',
   'opening-hours',
   'facilities',
+  'dietary',
   'table-ordering',
 ];
 
@@ -155,6 +157,19 @@ export const overviewRow = (
               ? 'restaurant-overview-restroom-yes'
               : 'restaurant-overview-restroom-no',
           });
+    }
+    case 'dietary': {
+      const statements = restaurantDietaryStatementsOf(
+        restaurant.dietaryStatements,
+      );
+
+      return statements.length
+        ? row({
+            valueKeys: statements.map(
+              (statement) => `dietary-statement-${statement}`,
+            ),
+          })
+        : row();
     }
     case 'table-ordering':
       return row({

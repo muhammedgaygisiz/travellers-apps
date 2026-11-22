@@ -54,6 +54,7 @@ from its own scan and owns nothing about it.
   `Reading A Menu Without An Account`.
 - User can create a Bite from a menu item, which opens the Bite form prefilled with that Restaurant and dish. The prefilled draft is scoped to that one creation session; see [UC - Create And Maintain Personal Bites](uc-create-and-maintain-personal-bites.md).
 - A dish other people have written about carries one line under its name: how many Bites name it, and their average rating where any of them rated it (issue [#1113]). Tapping it opens those Bites in a sheet - photo, rating and comment, and nothing else: no author, no likes and nothing to tap through to, because somebody reading this is choosing between two pizzas and every affordance is a way out of that decision. A dish nobody has written about says nothing at all, and a dish whose Bites carry no rating prints the count alone (`RD-TS-52`). The aggregates arrive as one read for the whole menu, and a read that fails leaves the menu exactly as it was before this issue rather than failing to load.
+- A dish or variant the restaurant has declared dietary labels for carries them under its description (issue [#2194]): each label it fits as served, high-risk ones (gluten-free, lactose-free, nut-free, halal, kosher) set apart from lifestyle ones, each label it can be made to fit as "Vegan on request", and the line "Declared by the restaurant". A value the vocabulary does not know is not shown. The same row renders on the published and the ordering menu. The vocabulary and the rule that every label names its source are [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)'s.
 - An item the kitchen is not serving reads as unavailable. `MenuItem.isAvailable` is absent-means-available, read through `isMenuItemAvailable`, and written by the business menu editor and nowhere else ([UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)). Since issue [#923] a dish carrying `false` renders dimmed, with its price struck through and a translated `Not available` beside it, and the button that would create a Bite from it is disabled. The backend reads the same flag, so [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md) refuses to order such a dish and its add-to-cart button is disabled here too. Nothing in production sets the flag yet, because the business app has not launched.
 
 ## Menu Page State Contract
@@ -186,6 +187,7 @@ no privacy label entry changes. Table ordering shares this page's library and be
   and it delivered issue [#371], the same feature from the restaurant's side.
 - Issue [#1654] leaves a member with unfinished onboarding on the published page rather
   than sending them through the assistant.
+- Issue [#2194] shows a dish's dietary labels as declared by the restaurant. Part of epic [#2193].
 - Issue [#1653] keeps the business restaurant page, and with it the code that leads here,
   rendered when the device reports no GPS position.
 
@@ -219,3 +221,5 @@ no privacy label entry changes. Table ordering shares this page's library and be
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
 [#1654]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1654
 [#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
+[#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
+[#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194

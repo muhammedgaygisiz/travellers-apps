@@ -44,6 +44,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
         service.submitGenderNeutralRestroom($event)
       "
       (submitCategories)="service.submitCategories($event)"
+      (submitDietaryStatements)="service.submitDietaryStatements($event)"
       (submitAddress)="service.submitAddress($event)"
       (submitPosition)="service.submitPosition($event)"
     />

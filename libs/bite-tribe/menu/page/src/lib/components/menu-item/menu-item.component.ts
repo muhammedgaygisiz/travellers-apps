@@ -15,12 +15,15 @@ import {
   IonRadioGroup,
 } from '@ionic/angular/standalone';
 import {
+  dietaryLabelClass,
   hasMenuItemSignal,
   isMenuVariantAvailable,
   menuItemAverageRating,
+  menuItemDietaryOf,
   missingRequiredOptions,
 } from 'model';
 import type {
+  DietaryLabel,
   ExtraItem,
   MenuItem,
   MenuItemStats,
@@ -107,6 +110,23 @@ export class MenuItemComponent {
    * `0` for the first would libel a kitchen.
    */
   stats = input<MenuItemStats | undefined>(undefined);
+
+  /**
+   * What this row fits, as the restaurant declares it (GitHub issue #2194):
+   * its labels and the labels it can be made to fit. A value the vocabulary
+   * does not know is not shown, and every label names its source (`RD-DC-1`).
+   */
+  protected readonly dietary = computed(() => menuItemDietaryOf(this.item()));
+
+  protected readonly hasDietary = computed(() => {
+    const { labels, options } = this.dietary();
+
+    return labels.length > 0 || options.length > 0;
+  });
+
+  protected isHighRisk(label: DietaryLabel): boolean {
+    return dietaryLabelClass(label) === 'high-risk';
+  }
 
   /** Somebody wants to read what people said about this dish. */
   readonly biteSignalClick = output<MenuItem>();

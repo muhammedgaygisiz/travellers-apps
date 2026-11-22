@@ -529,4 +529,89 @@ describe('MenuItemComponent', () => {
       expect(emitSpy).toHaveBeenCalledWith(DISH);
     });
   });
+
+  /** The restaurant's dietary labels on a row (GitHub issue #2194). */
+  describe('dietary labels', () => {
+    const render = (item: Partial<MenuItem>): HTMLElement => {
+      fixture.componentRef.setInput('item', {
+        id: 'd1',
+        name: 'Pad Thai',
+        description: '',
+        price: 12,
+        ...item,
+      } as MenuItem);
+      fixture.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    const testIds = (element: HTMLElement, prefix: string): string[] =>
+      Array.from(
+        element.querySelectorAll(`[data-testid^="${prefix}"]`),
+        (node) => node.getAttribute('data-testid') ?? '',
+      );
+
+    it('shows the labels and options and names the restaurant as their source', () => {
+      const element = render({
+        dietaryLabels: ['halal', 'vegetarian'],
+        dietaryOptions: ['vegan'],
+      });
+
+      expect(testIds(element, 'menu-item-dietary-label-')).toEqual([
+        'menu-item-dietary-label-vegetarian',
+        'menu-item-dietary-label-halal',
+      ]);
+      expect(testIds(element, 'menu-item-dietary-option-')).toEqual([
+        'menu-item-dietary-option-vegan',
+      ]);
+      expect(
+        element
+          .querySelector('[data-testid="menu-item-dietary-source"]')
+          ?.textContent?.trim(),
+      ).toBe('dietary-declared-by-restaurant');
+    });
+
+    it('marks a high-risk label apart from a lifestyle one', () => {
+      const element = render({ dietaryLabels: ['vegan', 'gluten-free'] });
+
+      expect(
+        element
+          .querySelector('[data-testid="menu-item-dietary-label-gluten-free"]')
+          ?.classList.contains('dietary-label-high-risk'),
+      ).toBe(true);
+      expect(
+        element
+          .querySelector('[data-testid="menu-item-dietary-label-vegan"]')
+          ?.classList.contains('dietary-label-high-risk'),
+      ).toBe(false);
+    });
+
+    it('shows nothing for a value the vocabulary does not know', () => {
+      const element = render({
+        dietaryLabels: ['keto'] as unknown as MenuItem['dietaryLabels'],
+      });
+
+      expect(
+        element.querySelector('[data-testid="menu-item-dietary"]'),
+      ).toBeNull();
+    });
+
+    it('shows a variant its own labels', () => {
+      const element = render({
+        variants: [
+          {
+            id: 'v1',
+            name: 'Tofu',
+            description: '',
+            price: 12,
+            dietaryLabels: ['vegan'],
+          },
+        ],
+      });
+
+      expect(testIds(element, 'menu-item-dietary-label-')).toEqual([
+        'menu-item-dietary-label-vegan',
+      ]);
+    });
+  });
 });

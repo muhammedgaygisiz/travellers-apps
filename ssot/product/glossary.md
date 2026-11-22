@@ -72,6 +72,7 @@ existing name already or the term belongs here.
 - **Category** — A named section of a Menu (`title`, optional `subtitle`), such as "Pizze" or "Antipasti", holding menu items in order and optionally a category's extras. Named for what it holds, never for where its items came from.
 - **Menu item** — A dish or product a restaurant offers, with its name, price and variants, inside a category of the restaurant's Menu. **Written by the restaurant (or, as a draft, built from Bites), never by a guest:** it is not a Bite. Guests write Bites _about_ menu items; one menu item can have many Bites.
   - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
+- **Option** — A choice on a menu item that doesn't change its price, such as "Zubereitungsart: nicht scharf / scharf". It has a name and two or more choices, the guest picks one, and it can be required. A choice that costs something is a variant or an extra, never an option ([#2254]).
 - **Variant** — One version of a menu item with its own name and price, such as "Small" or "Con bufala". A dish with variants is ordered only as one of them. A Bite made from an order records which one.
 - **Extra** — An add-on offered across a category, such as "Extra mozzarella +2.00", listed once for that category rather than per dish.
 - **Initial Menu** — The Menu that candidate verification creates for a new restaurant, built from that restaurant's Bites. It has one item per dish name guests used, priced at the average of what they paid, in a single "Dishes" category. It is marked `derivedFromBites` and guests are told so until the owner confirms it as their own ([#2214]). It is evidence about the menu, not the restaurant's statement, and its items are menu items, not Bites.
@@ -159,3 +160,4 @@ See [Monetization](monetization.md) for the free and paid boundary and the reven
 [#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2254]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2254

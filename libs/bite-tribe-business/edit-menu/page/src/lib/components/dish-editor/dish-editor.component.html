@@ -109,6 +109,110 @@
     <p class="hint">{{ 'menu-dish-variants-hint' | transloco }}</p>
   </fieldset>
 
+  <fieldset class="options">
+    <legend>{{ 'menu-dish-options' | transloco }}</legend>
+    @for (
+      group of optionGroups.controls;
+      track group.value.id;
+      let g = $index
+    ) {
+      <div
+        class="option-group"
+        [formGroup]="group"
+        [attr.data-testid]="'dish-option-group-' + g"
+      >
+        <div class="option-group-header">
+          <ion-input
+            formControlName="name"
+            fill="outline"
+            mode="md"
+            labelPlacement="stacked"
+            [label]="'menu-dish-option-group-name' | transloco"
+            [placeholder]="
+              'menu-dish-option-group-name-placeholder' | transloco
+            "
+            [attr.data-testid]="'dish-option-group-name-' + g"
+          />
+          <ion-button
+            fill="clear"
+            color="medium"
+            [attr.aria-label]="'menu-dish-option-group-remove' | transloco"
+            [attr.data-testid]="'remove-dish-option-group-' + g"
+            (click)="removeOptionGroup(g)"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="close-outline"
+              aria-hidden="true"
+            />
+          </ion-button>
+        </div>
+        @for (
+          choice of group.controls.choices.controls;
+          track choice.value.id;
+          let c = $index
+        ) {
+          <div class="choice-row" [formGroup]="choice">
+            <ion-input
+              formControlName="name"
+              fill="outline"
+              mode="md"
+              [placeholder]="'menu-dish-option-choice-placeholder' | transloco"
+              [attr.aria-label]="'menu-dish-option-choice' | transloco"
+              [attr.data-testid]="'dish-option-choice-' + g + '-' + c"
+            />
+            <ion-button
+              fill="clear"
+              color="medium"
+              [attr.aria-label]="'menu-dish-option-choice-remove' | transloco"
+              [attr.data-testid]="'remove-dish-option-choice-' + g + '-' + c"
+              (click)="removeChoice(g, c)"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="close-outline"
+                aria-hidden="true"
+              />
+            </ion-button>
+          </div>
+        }
+        @if (group.controls.choices.hasError('minlength')) {
+          <p class="hint error" role="alert">
+            {{ 'menu-dish-option-choices-min' | transloco }}
+          </p>
+        }
+        <ion-button
+          fill="clear"
+          size="small"
+          class="add-choice"
+          [attr.data-testid]="'add-dish-option-choice-' + g"
+          (click)="addChoice(g)"
+        >
+          {{ 'menu-dish-option-choice-add' | transloco }}
+        </ion-button>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-toggle
+              formControlName="required"
+              [attr.data-testid]="'dish-option-required-' + g"
+            >
+              {{ 'menu-dish-option-required' | transloco }}
+            </ion-toggle>
+          </ion-item>
+        </ion-list>
+      </div>
+    }
+    <ion-button
+      fill="clear"
+      class="add-option-group"
+      data-testid="add-dish-option-group"
+      (click)="addOptionGroup()"
+    >
+      {{ 'menu-dish-option-group-add' | transloco }}
+    </ion-button>
+    <p class="hint">{{ 'menu-dish-options-hint' | transloco }}</p>
+  </fieldset>
+
   <details class="more">
     <summary>{{ 'menu-dish-more' | transloco }}</summary>
     <ion-input

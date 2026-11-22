@@ -25,7 +25,8 @@
   font-size: 0.875rem;
 }
 
-.variants {
+.variants,
+.options {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -47,9 +48,44 @@
   align-items: center;
 }
 
-.add-variant {
+.add-variant,
+.add-option-group,
+.add-choice {
   align-self: flex-start;
   margin: 0;
+}
+
+// One group per card, so its choices read as belonging to its name
+// (issue #2254).
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 0.5rem;
+
+  ion-list {
+    padding: 0;
+    background: transparent;
+  }
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+  }
+}
+
+.option-group-header,
+.choice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.hint.error {
+  color: var(--ion-color-danger);
 }
 
 .hint {

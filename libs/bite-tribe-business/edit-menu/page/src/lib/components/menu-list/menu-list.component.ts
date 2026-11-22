@@ -43,6 +43,8 @@ interface DishRow {
   readonly price: string;
   readonly available: boolean;
   readonly variants: readonly VariantRow[];
+  /** One line per option group, "Spice level: mild · hot" (issue #2254). */
+  readonly options: readonly string[];
 }
 
 interface CategoryRow {
@@ -121,6 +123,10 @@ export class MenuListComponent {
           ? ''
           : priceLabel(item.price, currency),
       available: isMenuItemAvailable(item),
+      options: (item.optionGroups ?? []).map(
+        (group) =>
+          `${group.name}: ${group.choices.map(({ name }) => name).join(' · ')}`,
+      ),
       variants: variants.map((variant) => ({
         ref: { categoryId, itemId: item.id, variantId: variant.id },
         // A variant written before issue #2182 repeats its dish's name and

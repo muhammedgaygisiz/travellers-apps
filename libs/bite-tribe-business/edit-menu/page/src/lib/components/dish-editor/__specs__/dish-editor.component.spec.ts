@@ -293,6 +293,115 @@ describe(DishEditorComponent.name, () => {
     });
   });
 
+  /**
+   * The same dish read back after a save of something else - the currency,
+   * a switch or a reorder in the list - while the editor is open
+   * (GitHub issue #2259).
+   */
+  describe('the same dish read again', () => {
+    const BRUSCHETTA: MenuItem = {
+      id: 'd3',
+      name: 'Bruschetta',
+      description: 'Tomato',
+      price: 6.5,
+    };
+
+    const readAgain = (dish: MenuItem): void => {
+      componentRef.setInput('dish', { ...dish });
+      fixture.detectChanges();
+    };
+
+    it('keeps an unsaved edit, and Save stays on offer', () => {
+      open(BRUSCHETTA);
+      component.form.controls.name.setValue('Bruschetta al pomodoro');
+      component.form.controls.name.markAsDirty();
+
+      readAgain(BRUSCHETTA);
+
+      expect(component.form.controls.name.value).toBe('Bruschetta al pomodoro');
+      expect(component.form.dirty).toBe(true);
+    });
+
+    it('shows the new currency beside the kept edit', () => {
+      open(BRUSCHETTA);
+      component.form.controls.name.setValue('Bruschetta al pomodoro');
+      component.form.controls.name.markAsDirty();
+
+      componentRef.setInput('currency', 'EUR');
+      readAgain(BRUSCHETTA);
+
+      expect(component.form.controls.name.value).toBe('Bruschetta al pomodoro');
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="dish-price"] [slot="end"]',
+        )?.textContent,
+      ).toContain('EUR');
+    });
+
+    it('reads again a field the owner has not touched', () => {
+      open(BRUSCHETTA);
+      component.form.controls.name.setValue('Bruschetta al pomodoro');
+      component.form.controls.name.markAsDirty();
+
+      // Switched off from the list while the editor was open.
+      readAgain({ ...BRUSCHETTA, isAvailable: false });
+
+      expect(component.form.controls.isAvailable.value).toBe(false);
+      expect(component.form.controls.name.value).toBe('Bruschetta al pomodoro');
+    });
+
+    it('keeps an unsaved variant edit, and its moved order', () => {
+      open(PAD_THAI);
+      component.variants.at(0).controls.name.setValue('Veggie');
+      component.variants.at(0).controls.name.markAsDirty();
+      component.moveVariant(0, 1);
+
+      readAgain(PAD_THAI);
+
+      expect(component.variants.controls.map((row) => row.value.name)).toEqual([
+        'With chicken',
+        'Veggie',
+      ]);
+    });
+
+    it('reads the variants again when only another field was edited', () => {
+      open(PAD_THAI);
+      component.form.controls.name.setValue('Pad Thai Spezial');
+      component.form.controls.name.markAsDirty();
+
+      readAgain({
+        ...PAD_THAI,
+        variants: [
+          ...(PAD_THAI.variants ?? []),
+          { id: 'v3', name: 'With tofu', description: '', price: 15 },
+        ],
+      });
+
+      expect(component.variants.length).toBe(3);
+      expect(component.form.controls.name.value).toBe('Pad Thai Spezial');
+    });
+
+    it('takes the stored dish whole while nothing was edited', () => {
+      open(BRUSCHETTA);
+
+      readAgain({ ...BRUSCHETTA, name: 'Bruschetta classica' });
+
+      expect(component.form.controls.name.value).toBe('Bruschetta classica');
+      expect(component.form.dirty).toBe(false);
+    });
+
+    it('replaces a pending edit when a different dish opens', () => {
+      open(BRUSCHETTA);
+      component.form.controls.name.setValue('Bruschetta al pomodoro');
+      component.form.controls.name.markAsDirty();
+
+      open(PAD_THAI);
+
+      expect(component.form.controls.name.value).toBe(PAD_THAI.name);
+      expect(component.form.dirty).toBe(false);
+    });
+  });
+
   it('reads the next dish when another one is opened', () => {
     open(PAD_THAI);
     component.form.patchValue({ name: 'Edited' });

@@ -438,6 +438,78 @@ test.describe('Edit a menu in the business app', () => {
     await expect(editMenu.variantName(1)).toHaveValue('Regular');
   });
 
+  /**
+   * Changing the currency saves on its own path and reads the menu back. An
+   * open dish editor used to take the re-read dish and drop the owner's
+   * unsaved typing (GitHub issue #2259, the journey #1957 asks for).
+   */
+  test('keeps an unsaved dish edit when the currency changes', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+    const storedName = async (): Promise<string | undefined> =>
+      (await storedCategory(page, fixture.menuId))?.items.find(({ name }) =>
+        name.startsWith('Marinara'),
+      )?.name;
+
+    await editMenu.openDish(fixture.plainItemId);
+    await editMenu.dishName.fill('Marinara classica');
+    await editMenu.expectEnabled(editMenu.saveDish);
+
+    await editMenu.chooseCurrency('EUR');
+
+    await expect(editMenu.dishName).toHaveValue('Marinara classica');
+    await editMenu.expectEnabled(editMenu.saveDish);
+    await expect(page.getByTestId('dish-price')).toContainText('EUR');
+    expect(await storedName()).toBe('Marinara');
+
+    await editMenu.saveDish.click();
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(storedName, { timeout: 15_000 })
+      .toBe('Marinara classica');
+    expect(
+      (await getFirestoreDocument(page, `menus/${fixture.menuId}`))?.[
+        'currency'
+      ],
+    ).toBe('EUR');
+  });
+
+  /**
+   * A switch flipped in the list saves at once and reads the menu back; an
+   * open category editor keeps its unsaved title through it (#2259).
+   */
+  test('keeps an unsaved category title through a switch in the list', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.openCategory(fixture.categoryId);
+    await editMenu.categoryTitle.fill('Pizze napoletane');
+
+    await page
+      .getByTestId(`menu-dish-${fixture.plainItemId}`)
+      .locator('ion-toggle')
+      .first()
+      .click();
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.items.find(
+            ({ name }) => name === 'Marinara',
+          )?.isAvailable,
+        { timeout: 15_000 },
+      )
+      .toBe(false);
+
+    await expect(editMenu.categoryTitle).toHaveValue('Pizze napoletane');
+    await editMenu.expectEnabled(editMenu.saveCategory);
+    expect((await storedCategory(page, fixture.menuId))?.title).toBe('Pizza');
+  });
+
   test('refuses an empty or zero price and saves a real one', async ({
     page,
   }) => {

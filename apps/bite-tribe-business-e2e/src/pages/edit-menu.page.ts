@@ -104,6 +104,24 @@ export class EditMenuPage {
       .locator('input');
   }
 
+  /**
+   * Chooses the menu's currency from the picker, which saves it on its own
+   * path and reads the menu back (issues #1102 and #2259).
+   */
+  async chooseCurrency(code: string): Promise<void> {
+    await this.page.getByTestId('menu-currency').click();
+    await this.page
+      .getByTestId('menu-currency-search')
+      .locator('input')
+      .fill(code);
+    await this.page.getByTestId(`menu-currency-option-${code}`).click();
+    await expect(
+      this.page.locator('ion-toast').getByText('Currency saved', {
+        exact: true,
+      }),
+    ).toBeVisible({ timeout: 20_000 });
+  }
+
   /** An existing extra's price field in the category editor (issue #2258). */
   extraPrice(extraId: string): Locator {
     return this.page

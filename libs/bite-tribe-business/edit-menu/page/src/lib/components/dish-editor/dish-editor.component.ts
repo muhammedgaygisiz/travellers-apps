@@ -169,14 +169,87 @@ export class DishEditorComponent {
 
   readonly isNew = computed(() => !this.dish());
 
-  /** The stored dish, read into the form whenever a different one opens. */
+  /** The id of the dish the form was last read from. */
+  private loadedId: string | undefined;
+
+  /**
+   * The stored dish, read into the form when it opens (GitHub issue #2259).
+   *
+   * The same dish arrives again whenever the menu is read back after a save
+   * of something else - the currency, an availability switch, a reorder in
+   * the list - while this editor is open. Reading it into the form then used
+   * to drop whatever the owner had typed and leave the editor open as if
+   * nothing had been changed. So a re-read of the same dish replaces the form
+   * only while the owner has changed nothing; with an edit pending, it keeps
+   * the edit and refreshes just the fields the owner has not touched, so a
+   * switch flipped in the list is not undone by this editor's Save.
+   */
   readonly load = effect(() => {
     const stored = this.dish();
+    const sameDish = !!stored && stored.id === this.loadedId;
+
+    if (sameDish && this.form.dirty) {
+      this.refreshUntouched(stored);
+
+      return;
+    }
+
+    this.loadedId = stored?.id;
+    this.readIntoForm(stored);
+  });
+
+  private readIntoForm(stored: MenuItem | undefined): void {
     const dish = stored ? editableDish(stored) : undefined;
 
     this.variants.clear();
     this.optionGroups.clear();
-    this.form.reset({
+    this.form.reset(this.scalarValue(dish));
+    // After the reset, which would otherwise empty every variant row.
+    this.readVariants(dish);
+    this.readOptionGroups(dish);
+    this.syncPriceValidators();
+    this.form.markAsPristine();
+  }
+
+  /** The fields the owner has not touched, read again from the stored dish. */
+  private refreshUntouched(stored: MenuItem): void {
+    const dish = editableDish(stored);
+    const scalars = this.scalarValue(dish);
+    const controls = this.form.controls;
+
+    (Object.keys(scalars) as (keyof typeof scalars)[]).forEach((key) => {
+      const control = controls[key];
+
+      if (control.pristine) {
+        control.setValue(scalars[key] as never, { emitEvent: false });
+      }
+    });
+
+    if (this.variants.pristine) {
+      this.variants.clear({ emitEvent: false });
+      this.readVariants(dish);
+      this.syncPriceValidators();
+    }
+
+    if (this.optionGroups.pristine) {
+      this.optionGroups.clear({ emitEvent: false });
+      this.readOptionGroups(dish);
+    }
+
+    this.form.updateValueAndValidity();
+  }
+
+  private scalarValue(dish: MenuItem | undefined): {
+    name: string;
+    description: string;
+    price: number | null;
+    ingredients: string;
+    notes: string;
+    isAvailable: boolean;
+    dietaryLabels: DietaryLabel[];
+    dietaryOptions: DietaryLabel[];
+  } {
+    return {
       name: dish?.name ?? '',
       description: dish?.description ?? '',
       price: dish && !dish.variants?.length ? dish.price : null,
@@ -184,19 +257,22 @@ export class DishEditorComponent {
       notes: dish?.notes ?? '',
       isAvailable: dish?.isAvailable !== false,
       ...this.dietaryValue(dish),
-    });
-    // After the reset, which would otherwise empty every variant row.
+    };
+  }
+
+  private readVariants(dish: MenuItem | undefined): void {
     (dish?.variants ?? []).forEach((variant) =>
       this.variants.push(this.variantForm(variant), { emitEvent: false }),
     );
+  }
+
+  private readOptionGroups(dish: MenuItem | undefined): void {
     (dish?.optionGroups ?? []).forEach((group) =>
       this.optionGroups.push(this.optionGroupForm(group), {
         emitEvent: false,
       }),
     );
-    this.syncPriceValidators();
-    this.form.markAsPristine();
-  });
+  }
 
   /** What the form shows: known labels only, never an option twice. */
   private dietaryValue(item: MenuItem | undefined): {
@@ -272,7 +348,7 @@ export class DishEditorComponent {
   addVariant(): void {
     this.variants.push(this.variantForm());
     this.syncPriceValidators();
-    this.form.markAsDirty();
+    this.variants.markAsDirty();
   }
 
   /**
@@ -290,13 +366,13 @@ export class DishEditorComponent {
 
     this.variants.removeAt(from, { emitEvent: false });
     this.variants.insert(to, control);
-    this.form.markAsDirty();
+    this.variants.markAsDirty();
   }
 
   removeVariant(index: number): void {
     this.variants.removeAt(index);
     this.syncPriceValidators();
-    this.form.markAsDirty();
+    this.variants.markAsDirty();
   }
 
   /**
@@ -306,22 +382,22 @@ export class DishEditorComponent {
    */
   addOptionGroup(): void {
     this.optionGroups.push(this.optionGroupForm());
-    this.form.markAsDirty();
+    this.optionGroups.markAsDirty();
   }
 
   removeOptionGroup(index: number): void {
     this.optionGroups.removeAt(index);
-    this.form.markAsDirty();
+    this.optionGroups.markAsDirty();
   }
 
   addChoice(groupIndex: number): void {
     this.optionGroups.at(groupIndex).controls.choices.push(this.choiceForm());
-    this.form.markAsDirty();
+    this.optionGroups.markAsDirty();
   }
 
   removeChoice(groupIndex: number, choiceIndex: number): void {
     this.optionGroups.at(groupIndex).controls.choices.removeAt(choiceIndex);
-    this.form.markAsDirty();
+    this.optionGroups.markAsDirty();
   }
 
   saveDish(): void {

@@ -61,6 +61,11 @@
                 @if (dish.description) {
                   <span class="dish-description">{{ dish.description }}</span>
                 }
+                @for (option of dish.options; track $index) {
+                  <span class="dish-options" data-testid="dish-options">{{
+                    option
+                  }}</span>
+                }
               </button>
               @if (dish.price) {
                 <span class="price">{{ dish.price }}</span>

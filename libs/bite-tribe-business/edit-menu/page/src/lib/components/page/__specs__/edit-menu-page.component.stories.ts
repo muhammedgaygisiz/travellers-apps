@@ -133,6 +133,56 @@ export const DishEditor: Story = {
     ),
 };
 
+/**
+ * A dish with options, which change nothing about its price (GitHub issue
+ * #2254): the list shows each group on a line under the dish, and the editor
+ * shows each group as a card with its choices and whether guests must choose.
+ */
+export const DishWithOptions: Story = {
+  args: {
+    menu: {
+      ...menu,
+      categories: menu.categories.map((category) => ({
+        ...category,
+        items: category.items.map((item) =>
+          item.id === 'item-diavola'
+            ? {
+                ...item,
+                isAvailable: true,
+                optionGroups: [
+                  {
+                    id: 'option-heat',
+                    name: 'How hot',
+                    required: true,
+                    choices: [
+                      { id: 'choice-medium', name: 'Medium' },
+                      { id: 'choice-hot', name: 'Hot' },
+                      { id: 'choice-calabrian', name: 'Calabrian hot' },
+                    ],
+                  },
+                  {
+                    id: 'option-crust',
+                    name: 'Crust',
+                    required: false,
+                    choices: [
+                      { id: 'choice-classic', name: 'Classic' },
+                      { id: 'choice-wholegrain', name: 'Wholegrain' },
+                    ],
+                  },
+                ],
+              }
+            : item,
+        ),
+      })),
+    },
+  },
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-dish-item-diavola"] [data-testid="open-dish"]',
+    ),
+};
+
 /** A new dish, from a category's "Add dish". */
 export const NewDish: Story = {
   play: async ({ canvasElement }) =>

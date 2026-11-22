@@ -64,6 +64,13 @@ Operator may write any Restaurant and its Menu from the Admin App. **The surface
 not:** there is no edit surface in the Admin App, explicitly out of scope in [#1510], so
 an Operator still cannot maintain the Restaurant it just verified — which, by `G7`, also
 has no owner. What changed is that the permission is now there when the surface is built.
+**One field is the exception:** a Restaurant's photo. "Attach a restaurant photo" on the
+admin dashboard lists the Restaurants with no `imagePath` and lets the Operator attach one
+([#1510]). It reuses the path every Restaurant photo takes - the upload lands in
+`images/restaurants/{restaurantId}/`, which the storage rules let an Operator write, and
+`setRestaurantImagePathOnUpload` publishes it once the image check passes it ([#2141]) - so
+it needed no callable and makes no client write to `imagePath`. A Restaurant that has an
+owner gets its photo in the Business App as well.
 
 ## Lanes
 
@@ -587,7 +594,8 @@ app, which _is_ reviewed:
 3. **A published Restaurant may have no image,** per `R-4`. The consumer app must render
    a page for a real, named business with no photograph of it, which is the same
    presentation question as point 2 one notch weaker. Recorded here because `V9` is
-   where the image becomes optional.
+   where the image becomes optional. Such a Restaurant can be given one afterwards from the Admin App's
+   "Attach a restaurant photo" ([#1510]).
 
 Neither blocks the current release candidate. Both are recorded here so they are not
 discovered in review.
@@ -675,3 +683,4 @@ discovered in review.
 [#2172]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2172
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141

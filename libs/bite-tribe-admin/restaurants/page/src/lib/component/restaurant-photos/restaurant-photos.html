@@ -1,0 +1,64 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="restaurant-photos">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'restaurant-photos' | transloco }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-note>{{ 'restaurant-photos-hint' | transloco }}</ion-note>
+
+          @if (loading() && !restaurants().length) {
+          <ion-spinner data-testid="restaurant-photos-loading" />
+          } @else {
+          <ion-list lines="full" data-testid="restaurant-photos">
+            @for (restaurant of restaurants(); track restaurant.id) {
+            <ion-item
+              button
+              [detail]="false"
+              [color]="
+                    restaurant.id === selectedId() ? 'light' : undefined
+                  "
+              [attr.data-testid]="'restaurant-photos-' + restaurant.id"
+              (click)="select(restaurant)"
+            >
+              <ion-label>
+                <h2>{{ restaurant.name || restaurant.id }}</h2>
+                @if (placeOf(restaurant)) {
+                <p>{{ placeOf(restaurant) }}</p>
+                } @if (!restaurant.ownerUserIds?.length) {
+                <p>{{ 'restaurant-photos-no-owner' | transloco }}</p>
+                }
+              </ion-label>
+            </ion-item>
+            } @empty {
+            <ion-item data-testid="restaurant-photos-empty">
+              <ion-label>{{ 'restaurant-photos-empty' | transloco }}</ion-label>
+            </ion-item>
+            }
+          </ion-list>
+          } @if (selected(); as restaurant) {
+          <div class="attach" data-testid="restaurant-photos-attach">
+            <h3>{{ restaurant.name || restaurant.id }}</h3>
+            <image-upload [formControl]="photo" />
+            <ion-button
+              data-testid="restaurant-photos-submit"
+              [disabled]="!photo.value || !!attachingId()"
+              (click)="submit()"
+            >
+              @if (attachingId() === restaurant.id) {
+              <ion-spinner slot="start" name="crescent" />
+              {{ 'restaurant-photos-attaching' | transloco }} } @else { {{
+              'restaurant-photos-submit' | transloco }} }
+            </ion-button>
+          </div>
+          }
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ion-content>
+</ta-page>

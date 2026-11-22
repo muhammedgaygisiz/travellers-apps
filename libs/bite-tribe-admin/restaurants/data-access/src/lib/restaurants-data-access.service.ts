@@ -204,6 +204,14 @@ const toRestaurant = (doc: { id: string; data: unknown }): Restaurant =>
  * moved here with issue #1473, and the business app keeps only the restaurants
  * it already owns.
  */
+/** The restaurants with neither a published photo nor a legacy one (#1510). */
+export const restaurantsWithoutPhotoOf = (
+  restaurants: readonly Restaurant[],
+): Restaurant[] =>
+  restaurants.filter(
+    (restaurant) => !restaurant.imagePath?.trim() && !restaurant.image?.trim(),
+  );
+
 @Injectable({ providedIn: 'root' })
 export class RestaurantsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
@@ -493,6 +501,59 @@ export class RestaurantsDataAccessService {
     [] as AdminTableSession[],
   );
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
+
+  /**
+   * The restaurants with no photo (GitHub issue #1510): the worklist an
+   * operator attaches one from. Derived from the whole collection rather than
+   * queried, because a restaurant without a photo omits `imagePath`, and
+   * Firestore leaves a document missing a field out of every query that
+   * filters on it.
+   */
+  restaurantsWithoutPhoto = computed(() =>
+    restaurantsWithoutPhotoOf(this.restaurantsValue()),
+  );
+
+  /**
+   * Attaches a photo to a restaurant that has none (GitHub issue #1510), by
+   * the path every restaurant photo takes: the operator's upload lands in
+   * `images/restaurants/{restaurantId}/`, which the storage rules let an
+   * operator write, and `setRestaurantImagePathOnUpload` publishes it once
+   * the image check passes it (#2141). No client write sets `imagePath`.
+   *
+   * The restaurant is marked `pending` first, and only a verdict after that
+   * mark counts: a restaurant can be on this list because an earlier photo
+   * was refused, and that refusal must not read as this upload's answer.
+   * Resolves with the verdict, or `undefined` when the check has not
+   * answered yet; rejects when the upload fails, after marking it `failed`.
+   */
+  async attachRestaurantPhoto(
+    restaurantId: string,
+    photo: string,
+  ): Promise<FolderPhotoVerdict | undefined> {
+    const verdict = awaitFolderPhotoVerdict(
+      this.api.restaurantPhotoVerdict$(restaurantId, true),
+    );
+
+    await this.api.setRestaurantImageStatus(
+      restaurantId,
+      'pending',
+      Date.now(),
+    );
+
+    try {
+      await this.api.uploadRestaurantImageForUrl(restaurantId, photo);
+    } catch (error) {
+      await this.api
+        .setRestaurantImageStatus(restaurantId, 'failed')
+        .catch(() => undefined);
+      throw error;
+    }
+
+    const result = await verdict;
+    this.restaurants.reload();
+
+    return result;
+  }
 
   /** Moves to the page after the shown one, when there is one. */
   showNextCandidatePage(): void {

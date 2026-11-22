@@ -33,34 +33,6 @@
     [label]="'menu-category-subtitle' | transloco"
     data-testid="category-subtitle"
   />
-
-  <div class="actions">
-    @if (category()) {
-      <ion-button
-        class="delete"
-        fill="clear"
-        color="danger"
-        data-testid="delete-category"
-        (click)="confirmDelete()"
-      >
-        {{ 'menu-category-delete' | transloco }}
-      </ion-button>
-    }
-    <ion-button
-      fill="outline"
-      data-testid="cancel-category"
-      (click)="cancelEdit.emit()"
-    >
-      {{ 'cancel' | transloco }}
-    </ion-button>
-    <ion-button
-      type="submit"
-      data-testid="save-category"
-      [disabled]="!canSave()"
-    >
-      {{ 'save' | transloco }}
-    </ion-button>
-  </div>
 </form>
 
 @if (category()) {
@@ -74,3 +46,36 @@
     (extrasBlockChanged)="extrasDraft.set($event)"
   />
 }
+
+<!--
+  Below the extras (issue #2278): since #2258 this Save writes them too, and
+  a Save above the box was out of sight once the owner had scrolled to an
+  extra. Outside the form, so Enter in an extra's field submits nothing.
+-->
+<div class="actions">
+  @if (category()) {
+    <ion-button
+      class="delete"
+      fill="clear"
+      color="danger"
+      data-testid="delete-category"
+      (click)="confirmDelete()"
+    >
+      {{ 'menu-category-delete' | transloco }}
+    </ion-button>
+  }
+  <ion-button
+    fill="outline"
+    data-testid="cancel-category"
+    (click)="cancelEdit.emit()"
+  >
+    {{ 'cancel' | transloco }}
+  </ion-button>
+  <ion-button
+    data-testid="save-category"
+    [disabled]="!canSave()"
+    (click)="saveCategory()"
+  >
+    {{ 'save' | transloco }}
+  </ion-button>
+</div>

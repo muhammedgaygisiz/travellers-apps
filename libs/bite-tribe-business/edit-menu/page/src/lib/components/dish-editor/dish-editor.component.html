@@ -43,7 +43,7 @@
   @if (!hasVariants()) {
     <ion-input
       formControlName="price"
-      type="number"
+      type="text"
       inputmode="decimal"
       fill="outline"
       mode="md"
@@ -92,7 +92,7 @@
         />
         <ion-input
           formControlName="price"
-          type="number"
+          type="text"
           inputmode="decimal"
           fill="outline"
           mode="md"
@@ -184,7 +184,7 @@
     @for (
       group of optionGroups.controls;
       track group.value.id;
-      let g = $index
+      let g = $index, firstGroup = $first, lastGroup = $last
     ) {
       <div
         class="option-group"
@@ -203,24 +203,60 @@
             "
             [attr.data-testid]="'dish-option-group-name-' + g"
           />
-          <ion-button
-            fill="clear"
-            color="medium"
-            [attr.aria-label]="'menu-dish-option-group-remove' | transloco"
-            [attr.data-testid]="'remove-dish-option-group-' + g"
-            (click)="removeOptionGroup(g)"
-          >
-            <ion-icon
-              slot="icon-only"
-              name="close-outline"
-              aria-hidden="true"
-            />
-          </ion-button>
+          <div class="row-actions">
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="firstGroup"
+              [attr.aria-label]="
+                'menu-dish-variant-move-up'
+                  | transloco: { name: group.value.name || g + 1 }
+              "
+              [attr.data-testid]="'move-dish-option-group-up-' + g"
+              (click)="moveOptionGroup(g, g - 1)"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="chevron-up-outline"
+                aria-hidden="true"
+              />
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="medium"
+              [disabled]="lastGroup"
+              [attr.aria-label]="
+                'menu-dish-variant-move-down'
+                  | transloco: { name: group.value.name || g + 1 }
+              "
+              [attr.data-testid]="'move-dish-option-group-down-' + g"
+              (click)="moveOptionGroup(g, g + 1)"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="chevron-down-outline"
+                aria-hidden="true"
+              />
+            </ion-button>
+            <ion-button
+              fill="clear"
+              color="medium"
+              [attr.aria-label]="'menu-dish-option-group-remove' | transloco"
+              [attr.data-testid]="'remove-dish-option-group-' + g"
+              (click)="removeOptionGroup(g)"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="close-outline"
+                aria-hidden="true"
+              />
+            </ion-button>
+          </div>
         </div>
         @for (
           choice of group.controls.choices.controls;
           track choice.value.id;
-          let c = $index
+          let c = $index, firstChoice = $first, lastChoice = $last
         ) {
           <div class="choice-row" [formGroup]="choice">
             <ion-input
@@ -231,19 +267,57 @@
               [attr.aria-label]="'menu-dish-option-choice' | transloco"
               [attr.data-testid]="'dish-option-choice-' + g + '-' + c"
             />
-            <ion-button
-              fill="clear"
-              color="medium"
-              [attr.aria-label]="'menu-dish-option-choice-remove' | transloco"
-              [attr.data-testid]="'remove-dish-option-choice-' + g + '-' + c"
-              (click)="removeChoice(g, c)"
-            >
-              <ion-icon
-                slot="icon-only"
-                name="close-outline"
-                aria-hidden="true"
-              />
-            </ion-button>
+            <div class="row-actions">
+              <ion-button
+                fill="clear"
+                color="medium"
+                [disabled]="firstChoice"
+                [attr.aria-label]="
+                  'menu-dish-variant-move-up'
+                    | transloco: { name: choice.value.name || c + 1 }
+                "
+                [attr.data-testid]="'move-dish-option-choice-up-' + g + '-' + c"
+                (click)="moveChoice(g, c, c - 1)"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  name="chevron-up-outline"
+                  aria-hidden="true"
+                />
+              </ion-button>
+              <ion-button
+                fill="clear"
+                color="medium"
+                [disabled]="lastChoice"
+                [attr.aria-label]="
+                  'menu-dish-variant-move-down'
+                    | transloco: { name: choice.value.name || c + 1 }
+                "
+                [attr.data-testid]="
+                  'move-dish-option-choice-down-' + g + '-' + c
+                "
+                (click)="moveChoice(g, c, c + 1)"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  name="chevron-down-outline"
+                  aria-hidden="true"
+                />
+              </ion-button>
+              <ion-button
+                fill="clear"
+                color="medium"
+                [attr.aria-label]="'menu-dish-option-choice-remove' | transloco"
+                [attr.data-testid]="'remove-dish-option-choice-' + g + '-' + c"
+                (click)="removeChoice(g, c)"
+              >
+                <ion-icon
+                  slot="icon-only"
+                  name="close-outline"
+                  aria-hidden="true"
+                />
+              </ion-button>
+            </div>
           </div>
         }
         @if (group.controls.choices.hasError('minlength')) {

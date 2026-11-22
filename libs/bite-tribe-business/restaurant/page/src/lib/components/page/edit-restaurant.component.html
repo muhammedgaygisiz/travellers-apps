@@ -328,7 +328,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-dietary"
-            [disabled]="dietaryForm.invalid"
+            [disabled]="dietaryForm.invalid || unchanged().dietary"
             (click)="saveDietary()"
           >
             {{ 'save' | transloco }}

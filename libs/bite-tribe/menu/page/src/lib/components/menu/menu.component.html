@@ -1,9 +1,7 @@
-@let menuData = linkedMenu();
-
 <div class="menu-container">
-  @if (menuData?.categories?.length) {
+  @if (visibleCategories().length) {
     <ion-reorder-group [disabled]="true">
-      @for (category of menuData?.categories; track category.id) {
+      @for (category of visibleCategories(); track category.id) {
         <div class="menu-item">
           <category
             [category]="category"

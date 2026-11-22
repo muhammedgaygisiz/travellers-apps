@@ -373,9 +373,9 @@ test.describe('Edit a menu in the business app', () => {
     await editMenu.openDish(fixture.itemId);
     await expect(editMenu.dishName).toHaveValue('Margherita');
     await expect(editMenu.variantName(0)).toHaveValue('');
-    await expect(editMenu.variantPrice(0)).toHaveValue('9.5');
+    await expect(editMenu.variantPrice(0)).toHaveValue('9.50');
     await expect(editMenu.variantName(1)).toHaveValue('Large');
-    await expect(editMenu.variantPrice(1)).toHaveValue('14');
+    await expect(editMenu.variantPrice(1)).toHaveValue('14.00');
     await editMenu.expectDisabled(editMenu.saveDish);
 
     await editMenu.variantName(0).fill('Regular');
@@ -517,7 +517,8 @@ test.describe('Edit a menu in the business app', () => {
     const { fixture, editMenu } = await start(page);
 
     await editMenu.openDish(fixture.plainItemId);
-    await expect(editMenu.dishPrice).toHaveValue('8');
+    // Shown with the currency's decimals since #2279.
+    await expect(editMenu.dishPrice).toHaveValue('8.00');
 
     await editMenu.dishPrice.fill('0');
     await editMenu.expectDisabled(editMenu.saveDish);

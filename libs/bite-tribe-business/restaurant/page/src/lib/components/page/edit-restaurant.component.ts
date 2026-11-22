@@ -592,6 +592,7 @@ export class EditRestaurantComponent {
   private readonly positionValue = valueOf(this.positionForm);
   private readonly facilitiesValue = valueOf(this.facilitiesForm);
   private readonly tableOrderingValue = valueOf(this.tableOrderingForm);
+  private readonly dietaryValue = valueOf(this.dietaryForm);
 
   /**
    * Whether each section's form still holds what is stored (GitHub issue
@@ -641,6 +642,15 @@ export class EditRestaurantComponent {
           (tableOrdering?.enabled ?? false) &&
         this.tableOrderingValue().timeZone ===
           (tableOrdering?.timeZone || this.suggestedTimeZone().zone),
+      // The statements as a set and the note as it would be saved, trimmed
+      // (GitHub issue #2275).
+      dietary:
+        sameSet(
+          this.dietaryValue().statements ?? [],
+          restaurantDietaryStatementsOf(restaurant?.dietaryStatements),
+        ) &&
+        (this.dietaryValue().crossContaminationNote ?? '').trim() ===
+          (restaurant?.crossContaminationNote ?? '').trim(),
     };
   });
 

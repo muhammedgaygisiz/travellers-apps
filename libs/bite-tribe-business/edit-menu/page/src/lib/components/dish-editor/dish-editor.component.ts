@@ -6,10 +6,12 @@ import {
   inject,
   input,
   output,
+  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -38,12 +40,18 @@ import {
 } from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
+import {
+  formatPriceInput,
+  parsePriceInput,
+  priceValidator,
+} from '../../utils/price-input';
 import { editableDish } from '../../utils/menu-edits';
 
 type VariantForm = FormGroup<{
   id: FormControl<string>;
   name: FormControl<string>;
-  price: FormControl<number | null>;
+  /** Text as the field shows it, or a number patched in (issue #2279). */
+  price: FormControl<number | string | null>;
   dietaryLabels: FormControl<DietaryLabel[]>;
   dietaryOptions: FormControl<DietaryLabel[]>;
 }>;
@@ -79,6 +87,27 @@ type OptionGroupForm = FormGroup<{
   required: FormControl<boolean>;
   choices: FormArray<ChoiceForm>;
 }>;
+
+/**
+ * Moves one row of a form array to another index and marks the array edited
+ * (GitHub issues #2256, #2277). Out of range or in place is a no-op, so the
+ * first row's "up" and the last row's "down" need no guard of their own.
+ */
+const moveControl = <T extends AbstractControl>(
+  array: FormArray<T>,
+  from: number,
+  to: number,
+): void => {
+  if (to < 0 || to >= array.length || from === to) {
+    return;
+  }
+
+  const control = array.at(from) as T;
+
+  array.removeAt(from, { emitEvent: false });
+  array.insert(to, control);
+  array.markAsDirty();
+};
 
 /** A group is a choice between things, so it needs at least two of them. */
 const MIN_CHOICES = 2;
@@ -126,6 +155,15 @@ export class DishEditorComponent {
   readonly categoryTitle = input<string>();
   readonly currency = input<string>();
 
+  /**
+   * The currency for formatting a price into its field (issue #2279), read
+   * untracked: the load effect must not re-run - and reset an open edit - when
+   * the currency changes (#2259).
+   */
+  private currencyCode(): string | undefined {
+    return untracked(() => this.currency());
+  }
+
   readonly save = output<MenuItem>();
 
   /** The dietary vocabulary, in the order it is offered (issue #2194). */
@@ -137,7 +175,7 @@ export class DishEditorComponent {
   readonly form = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
     description: [''],
-    price: this.formBuilder.control<number | null>(null),
+    price: this.formBuilder.control<number | string | null>(null),
     ingredients: [''],
     notes: [''],
     isAvailable: [true],
@@ -242,7 +280,7 @@ export class DishEditorComponent {
   private scalarValue(dish: MenuItem | undefined): {
     name: string;
     description: string;
-    price: number | null;
+    price: string | null;
     ingredients: string;
     notes: string;
     isAvailable: boolean;
@@ -252,7 +290,10 @@ export class DishEditorComponent {
     return {
       name: dish?.name ?? '',
       description: dish?.description ?? '',
-      price: dish && !dish.variants?.length ? dish.price : null,
+      price:
+        dish && !dish.variants?.length
+          ? formatPriceInput(dish.price, this.currencyCode())
+          : null,
       ingredients: dish?.ingredients ?? '',
       notes: dish?.notes ?? '',
       isAvailable: dish?.isAvailable !== false,
@@ -292,10 +333,10 @@ export class DishEditorComponent {
       name: this.formBuilder.nonNullable.control(variant?.name ?? '', [
         Validators.required,
       ]),
-      price: this.formBuilder.control<number | null>(variant?.price ?? null, [
-        Validators.required,
-        Validators.min(MIN_PRICE),
-      ]),
+      price: this.formBuilder.control<number | string | null>(
+        variant ? formatPriceInput(variant.price, this.currencyCode()) : null,
+        [priceValidator(MIN_PRICE)],
+      ),
       dietaryLabels: this.formBuilder.nonNullable.control(
         dietary.dietaryLabels,
       ),
@@ -337,9 +378,7 @@ export class DishEditorComponent {
     const price = this.form.controls.price;
 
     price.setValidators(
-      this.variants.length
-        ? []
-        : [Validators.required, Validators.min(MIN_PRICE)],
+      this.variants.length ? [] : [priceValidator(MIN_PRICE)],
     );
     price.updateValueAndValidity({ emitEvent: false });
     this.form.updateValueAndValidity();
@@ -358,15 +397,17 @@ export class DishEditorComponent {
    * moves with its row, so a half-typed name or price goes with it.
    */
   moveVariant(from: number, to: number): void {
-    if (to < 0 || to >= this.variants.length || from === to) {
-      return;
-    }
+    moveControl(this.variants, from, to);
+  }
 
-    const control = this.variants.at(from);
+  /** An option up or down among the dish's options (GitHub issue #2277). */
+  moveOptionGroup(from: number, to: number): void {
+    moveControl(this.optionGroups, from, to);
+  }
 
-    this.variants.removeAt(from, { emitEvent: false });
-    this.variants.insert(to, control);
-    this.variants.markAsDirty();
+  /** A choice up or down within its option (GitHub issue #2277). */
+  moveChoice(groupIndex: number, from: number, to: number): void {
+    moveControl(this.optionGroups.at(groupIndex).controls.choices, from, to);
   }
 
   removeVariant(index: number): void {
@@ -423,7 +464,7 @@ export class DishEditorComponent {
         id: variant.id,
         name: variant.name.trim(),
         description: '',
-        price: Number(variant.price),
+        price: parsePriceInput(variant.price) ?? 0,
         ...dietaryFields(variant.dietaryLabels, variant.dietaryOptions),
       };
     });
@@ -443,7 +484,7 @@ export class DishEditorComponent {
       id: stored?.id ?? createEntityId(),
       name: value.name.trim(),
       description: value.description.trim(),
-      price: variants.length ? 0 : Number(value.price),
+      price: variants.length ? 0 : (parsePriceInput(value.price) ?? 0),
       ...(ingredients ? { ingredients } : {}),
       ...(notes ? { notes } : {}),
       isAvailable: value.isAvailable,

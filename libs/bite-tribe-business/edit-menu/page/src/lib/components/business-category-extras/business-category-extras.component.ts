@@ -10,6 +10,7 @@ import { IonButton, IonIcon, IonInput } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Category, ExtraItem } from 'model';
 import { createEntityId } from 'utils';
+import { formatPriceInput, parsePriceInput } from '../../utils/price-input';
 
 /** The extras block as this editor writes it. `undefined` once it is empty. */
 export type ExtrasBlock = Category['extrasBlock'];
@@ -91,6 +92,21 @@ export class BusinessCategoryExtrasComponent {
 
     return !!this.newName().trim() && price !== undefined && price > 0;
   });
+
+  /**
+   * An extra's price as its field shows it, with the currency's decimals
+   * (GitHub issue #2279), like the dish editor's price fields.
+   */
+  protected priceText(price: number): string {
+    return formatPriceInput(price, this.currencySymbol());
+  }
+
+  /** What a price field holds, "2,50" and "2.50" alike; none is `undefined`. */
+  protected readPrice(
+    value: string | number | null | undefined,
+  ): number | undefined {
+    return parsePriceInput(value) ?? undefined;
+  }
 
   protected showAdd(): void {
     this.isAdding.set(true);

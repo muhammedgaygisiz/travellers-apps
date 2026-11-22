@@ -555,6 +555,7 @@ describe('EditRestaurantComponent', () => {
         position: true,
         facilities: true,
         tableOrdering: true,
+        dietary: true,
       });
     });
 
@@ -594,11 +595,42 @@ describe('EditRestaurantComponent', () => {
         'tableOrdering',
         (): void => component.tableOrderingForm.patchValue({ enabled: false }),
       ],
+      [
+        'dietary',
+        (): void =>
+          component.dietaryForm.patchValue({ statements: ['fully-halal'] }),
+      ],
+      [
+        'dietary',
+        (): void =>
+          component.dietaryForm.patchValue({
+            crossContaminationNote: 'Nuts in the kitchen.',
+          }),
+      ],
     ] as const)('counts %s changed once its value differs', (key, change) => {
       show(STORED);
       change();
 
       expect(component.unchanged()[key]).toBe(false);
+    });
+
+    /** The case #2275 was found on: Dietary's Save on an untouched form. */
+    it('disables the Dietary Save until a statement or the note differs', () => {
+      show(STORED, 'dietary');
+      expect(saveButton('save-dietary')?.disabled).toBe(true);
+
+      component.dietaryForm.patchValue({ statements: ['fully-vegetarian'] });
+      fixture.detectChanges();
+      expect(saveButton('save-dietary')?.disabled).toBe(false);
+
+      component.dietaryForm.patchValue({ statements: [] });
+      fixture.detectChanges();
+      expect(saveButton('save-dietary')?.disabled).toBe(true);
+
+      // A note that differs only in surrounding spaces is the same note.
+      component.dietaryForm.patchValue({ crossContaminationNote: '  ' });
+      fixture.detectChanges();
+      expect(saveButton('save-dietary')?.disabled).toBe(true);
     });
 
     it('does not count a change of order in the categories', () => {
@@ -630,6 +662,7 @@ describe('EditRestaurantComponent', () => {
       ['facilities', 'save-facilities'],
       ['table-ordering', 'save-table-ordering'],
       ['links', 'save-social-media'],
+      ['dietary', 'save-dietary'],
     ] as const)(
       'disables the %s Save while nothing changed',
       (section, testId) => {

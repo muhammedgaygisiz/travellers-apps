@@ -189,6 +189,36 @@ describe(CategoryEditorComponent.name, () => {
       expect(saveButton(fixture)?.disabled).toBe(false);
     });
 
+    /** Save below what it saves (GitHub issue #2278). */
+    it('places Delete, Cancel and Save after the extras', () => {
+      const { fixture } = setup(PIZZA);
+      const el = fixture.nativeElement as HTMLElement;
+      const extras = el.querySelector('business-category-extras');
+      const save = el.querySelector('[data-testid="save-category"]');
+
+      expect(extras).toBeTruthy();
+      expect(save).toBeTruthy();
+      expect(
+        extras &&
+          save &&
+          extras.compareDocumentPosition(save) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    it('saves the extras when the Save below them is pressed', () => {
+      const { fixture, component } = setup(PIZZA);
+      const saved = jest.fn();
+      component.save.subscribe(saved);
+
+      editExtras(fixture, CHANGED);
+      saveButton(fixture)?.click();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({ extrasBlock: CHANGED }),
+      );
+    });
+
     it('writes the edited extras with the category', () => {
       const { fixture, component } = setup(PIZZA);
       const saved = jest.fn();

@@ -26,6 +26,20 @@ export class MenuComponent {
   linkedMenu = linkedSignal(() => this.menu());
 
   /**
+   * The categories a guest is shown: only those with a dish in them (GitHub
+   * issue #2280). An empty one is the owner's work in progress - "No items in
+   * this category yet" is a note for them, which the business editor keeps -
+   * and to a guest it only says the menu is unfinished. A category holding
+   * nothing but an extras block is empty too: there is nothing to add it to.
+   * With every category empty the menu reads as having none.
+   */
+  readonly visibleCategories = computed(() =>
+    (this.linkedMenu()?.categories ?? []).filter(
+      (category) => (category.items ?? []).length > 0,
+    ),
+  );
+
+  /**
    * The currency the menu's prices are stated in (issue #1102).
    *
    * Read off the menu by default, so the authenticated page needs no change and

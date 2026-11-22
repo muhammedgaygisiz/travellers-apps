@@ -328,24 +328,21 @@ export class EditRestaurantService {
   }): Promise<void> {
     const restaurant = this.restaurant();
     if (restaurant) {
-      try {
-        await this.dataAccess.submitDietaryStatements(
-          restaurant.id,
-          statements,
-          crossContaminationNote,
-        );
-        await this.toast.present({
-          messageKey: SECTION_TOASTS.dietary.saved,
-          outcome: 'success',
-        });
-      } catch (error) {
-        await this.toast.present({
-          messageKey: isContentRefused(error)
-            ? 'content-refused'
-            : SECTION_TOASTS.dietary.notSaved,
-          outcome: 'failure',
-        });
-      }
+      // Through the same save as every other section (GitHub issue #2276):
+      // the overlay, the guard against a second tap, and back to the
+      // overview. A note the content check refuses says so instead of the
+      // section's generic failure.
+      await this.saveSection(
+        restaurant.id,
+        'dietary',
+        () =>
+          this.dataAccess.submitDietaryStatements(
+            restaurant.id,
+            statements,
+            crossContaminationNote,
+          ),
+        (error) => (isContentRefused(error) ? 'content-refused' : undefined),
+      );
     }
   }
 
@@ -378,6 +375,7 @@ export class EditRestaurantService {
     restaurantId: string,
     section: SavedSection,
     write: () => Promise<unknown>,
+    failureKey?: (error: unknown) => string | undefined,
   ): Promise<void> {
     if (this.saving) {
       return;
@@ -392,11 +390,11 @@ export class EditRestaurantService {
 
     try {
       await write();
-    } catch {
+    } catch (error) {
       await loading.dismiss();
       this.saving = false;
       await this.toast.present({
-        messageKey: SECTION_TOASTS[section].notSaved,
+        messageKey: failureKey?.(error) ?? SECTION_TOASTS[section].notSaved,
         outcome: 'failure',
       });
 

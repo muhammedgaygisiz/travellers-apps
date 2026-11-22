@@ -197,7 +197,8 @@ describe(DishEditorComponent.name, () => {
       '',
       'Large 40 cm',
     ]);
-    expect(component.variants.at(0).value.price).toBe(11);
+    // Shown with the currency's decimals (#2279).
+    expect(component.variants.at(0).value.price).toBe('11.00');
     // The first variant is the dish's old price; the owner names it first.
     expect(component.form.invalid).toBe(true);
   });
@@ -474,6 +475,39 @@ describe(DishEditorComponent.name, () => {
     });
   });
 
+  /** One price format in every field (GitHub issue #2279). */
+  describe('price fields', () => {
+    it("shows a stored price with the currency's decimals", () => {
+      open({ id: 'd9', name: 'Burrata', description: '', price: 11.5 });
+
+      expect(component.form.controls.price.value).toBe('11.50');
+      expect(component.variants.length).toBe(0);
+    });
+
+    it('shows each variant price the same way', () => {
+      open(PAD_THAI);
+
+      expect(component.variants.at(0).value.price).toBe('14.00');
+    });
+
+    it('saves a price typed with a comma', () => {
+      open(undefined);
+      component.form.patchValue({ name: 'Burrata', price: '11,50' });
+
+      expect(component.form.valid).toBe(true);
+      component.saveDish();
+
+      expect(saved.mock.calls[0][0].price).toBe(11.5);
+    });
+
+    it('refuses a price that is not a number', () => {
+      open(undefined);
+      component.form.patchValue({ name: 'Burrata', price: 'elf' });
+
+      expect(component.form.invalid).toBe(true);
+    });
+  });
+
   describe('options (#2254)', () => {
     it('shows the option groups of a dish with their choices', () => {
       open(CHOP_SUEY);
@@ -581,6 +615,74 @@ describe(DishEditorComponent.name, () => {
 
       expect(component.form.dirty).toBe(true);
       expect(saved.mock.calls[0][0]).not.toHaveProperty('optionGroups');
+    });
+
+    describe('reordering (#2277)', () => {
+      const TWO_GROUPS: MenuItem = {
+        ...CHOP_SUEY,
+        optionGroups: [
+          ...(CHOP_SUEY.optionGroups ?? []),
+          {
+            id: 'g2',
+            name: 'Reis',
+            required: false,
+            choices: [
+              { id: 'r1', name: 'weiß' },
+              { id: 'r2', name: 'gebraten' },
+            ],
+          },
+        ],
+      };
+
+      it('moves an option and saves the new order', () => {
+        open(TWO_GROUPS);
+
+        component.moveOptionGroup(1, 0);
+        component.saveDish();
+
+        expect(component.form.dirty).toBe(true);
+        expect(
+          saved.mock.calls[0][0].optionGroups.map(
+            (group: { id: string }) => group.id,
+          ),
+        ).toEqual(['g2', 'g1']);
+      });
+
+      it('moves a choice within its option and saves the new order', () => {
+        open(CHOP_SUEY);
+
+        component.moveChoice(0, 0, 1);
+        component.saveDish();
+
+        expect(
+          saved.mock.calls[0][0].optionGroups[0].choices.map(
+            (choice: { name: string }) => choice.name,
+          ),
+        ).toEqual(['scharf', 'nicht scharf']);
+      });
+
+      it('ignores a move past either end', () => {
+        open(TWO_GROUPS);
+
+        component.moveOptionGroup(0, -1);
+        component.moveChoice(1, 1, 2);
+
+        expect(component.form.dirty).toBe(false);
+      });
+
+      it('turns off the first "up" and the last "down"', () => {
+        open(TWO_GROUPS);
+        const button = (id: string): { disabled?: boolean } | null =>
+          (fixture.nativeElement as HTMLElement).querySelector(
+            `[data-testid="${id}"]`,
+          );
+
+        expect(button('move-dish-option-group-up-0')?.disabled).toBe(true);
+        expect(button('move-dish-option-group-down-1')?.disabled).toBe(true);
+        expect(button('move-dish-option-choice-up-0-0')?.disabled).toBe(true);
+        expect(button('move-dish-option-choice-down-0-1')?.disabled).toBe(true);
+        expect(button('move-dish-option-group-down-0')?.disabled).toBe(false);
+      });
     });
 
     it('renders a card per group with its choices', () => {

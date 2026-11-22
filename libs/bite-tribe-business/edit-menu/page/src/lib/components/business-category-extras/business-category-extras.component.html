@@ -35,13 +35,13 @@
             class="extra-price"
             fill="outline"
             mode="md"
-            type="number"
-            min="0"
+            type="text"
+            inputmode="decimal"
             [attr.data-testid]="'category-extra-price-' + extra.id"
             [label]="'price' | transloco"
             labelPlacement="floating"
-            [value]="extra.price.toFixed(2)"
-            (ionChange)="repriceExtra(index, +($event.detail.value ?? 0))"
+            [value]="priceText(extra.price)"
+            (ionChange)="repriceExtra(index, readPrice($event.detail.value))"
           >
             <span slot="end">{{ currencySymbol() }}</span>
           </ion-input>
@@ -115,13 +115,12 @@
         class="extra-price"
         fill="outline"
         mode="md"
-        type="number"
-        min="0"
+        type="text"
+        inputmode="decimal"
         data-testid="category-extra-new-price"
         [label]="'price' | transloco"
         labelPlacement="floating"
-        [value]="newPrice()"
-        (ionInput)="newPrice.set(+($event.detail.value ?? 0))"
+        (ionInput)="newPrice.set(readPrice($event.detail.value))"
       >
         <span slot="end">{{ currencySymbol() }}</span>
       </ion-input>

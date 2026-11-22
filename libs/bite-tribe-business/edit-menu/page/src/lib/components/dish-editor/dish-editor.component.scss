@@ -47,20 +47,48 @@
 
 .variant-row {
   display: grid;
+  grid-template-areas:
+    'name price actions'
+    'dietary dietary dietary';
   grid-template-columns: minmax(0, 1fr) 8rem auto;
   gap: 0.5rem;
   align-items: center;
+  // One card per variant (issue #2281), like an option: its name, price,
+  // dietary fields and buttons read as one thing, so a button can only belong
+  // to the card it is in.
+  padding: 0.75rem;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 0.5rem;
+
+  > ion-input:first-of-type {
+    grid-area: name;
+  }
+
+  .variant-price {
+    grid-area: price;
+  }
+
+  .row-actions {
+    grid-area: actions;
+  }
+
+  .variant-dietary {
+    grid-area: dietary;
+  }
 
   // Where the editor is narrow - a phone, or the side panel on a laptop - the
-  // three buttons take a line of their own, so the name keeps the width it
-  // needs (issue #2256). Measured on the fieldset, not the screen, because
+  // price takes a line of its own and the buttons stay on the name's line
+  // (issues #2256, #2281). Measured on the fieldset, not the screen, because
   // the panel is narrow on a wide screen.
   @container variants (max-width: 520px) {
-    grid-template-columns: minmax(0, 1fr) 7rem;
+    grid-template-areas:
+      'name actions'
+      'price price'
+      'dietary dietary';
+    grid-template-columns: minmax(0, 1fr) auto;
 
-    .row-actions {
-      grid-column: 1 / -1;
-      justify-self: end;
+    .variant-price {
+      max-width: 9rem;
     }
   }
 }
@@ -68,10 +96,6 @@
 .row-actions {
   display: flex;
   align-items: center;
-}
-
-.variant-dietary {
-  grid-column: 1 / -1;
 }
 
 .dietary {

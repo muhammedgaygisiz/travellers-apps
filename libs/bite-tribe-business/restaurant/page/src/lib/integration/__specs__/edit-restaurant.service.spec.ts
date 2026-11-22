@@ -550,6 +550,44 @@ describe('EditRestaurantService', () => {
         outcome: 'failure',
       });
     });
+
+    /** Like every other section (GitHub issue #2276). */
+    it('saves under the overlay and goes back to the overview', async () => {
+      await service.submitDietaryStatements(value);
+
+      expect(loading.present).toHaveBeenCalled();
+      expect(loading.dismiss).toHaveBeenCalled();
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+      ]);
+    });
+
+    it('stays on the section when the note is refused', async () => {
+      (dataAccessMock.submitDietaryStatements as jest.Mock).mockRejectedValue(
+        new ContentRefusedError('crossContaminationNote'),
+      );
+
+      await service.submitDietaryStatements(value);
+
+      expect(loading.dismiss).toHaveBeenCalled();
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
+    });
+
+    it('ignores a second save while the first is under way', async () => {
+      let finish!: () => void;
+      (dataAccessMock.submitDietaryStatements as jest.Mock).mockReturnValue(
+        new Promise<void>((resolve) => (finish = resolve)),
+      );
+
+      const first = service.submitDietaryStatements(value);
+      await Promise.resolve();
+      await service.submitDietaryStatements(value);
+      finish();
+      await first;
+
+      expect(dataAccessMock.submitDietaryStatements).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('submitAddress', () => {

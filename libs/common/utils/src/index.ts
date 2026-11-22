@@ -34,6 +34,7 @@ export { getLocalizedCurrencyName } from './lib/get-localized-currency-name';
 export { getLocalizedCountryName } from './lib/get-localized-country-name';
 export {
   getCurrencyForDevice,
+  getCurrencyForTimeZone,
   type DeviceRegionSignals,
 } from './lib/get-currency-for-device';
 export { getSimilarityScore } from './lib/get-similarity-score';

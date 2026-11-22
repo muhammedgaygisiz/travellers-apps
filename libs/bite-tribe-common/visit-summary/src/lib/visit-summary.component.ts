@@ -8,6 +8,7 @@ import {
 import { IonButton } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
+import { orderLineChoiceNames } from 'model';
 import type { TableVisitBillLine, VisitSummary } from 'model';
 
 /**
@@ -99,7 +100,10 @@ export class VisitSummaryComponent {
 
   /** One row's dish, with its variant where it has one. */
   protected lineName(line: TableVisitBillLine): string {
-    return line.variantName ? `${line.name} - ${line.variantName}` : line.name;
+    // The variant and the chosen options (issue #2254).
+    const choices = orderLineChoiceNames(line);
+
+    return choices.length ? `${line.name} - ${choices.join(', ')}` : line.name;
   }
 
   /** The extras on a row, as one readable string. */

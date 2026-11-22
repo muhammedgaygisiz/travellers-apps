@@ -101,6 +101,18 @@ export interface MenuOptionGroup {
   choices: MenuOptionChoice[];
 }
 
+/**
+ * The required option groups of a dish that the given choices leave
+ * unanswered (GitHub issue #2254). Empty when the dish can be ordered.
+ */
+export const missingRequiredOptions = (
+  item: Pick<MenuItem, 'optionGroups'> | undefined,
+  chosenGroupIds: readonly string[],
+): MenuOptionGroup[] =>
+  (item?.optionGroups ?? []).filter(
+    (group) => group.required && !chosenGroupIds.includes(group.id),
+  );
+
 /** One answer within a {@link MenuOptionGroup}. */
 export interface MenuOptionChoice {
   /** Stable identity, on the same terms as {@link MenuItem.id}. */

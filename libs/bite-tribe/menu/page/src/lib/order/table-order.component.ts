@@ -44,7 +44,11 @@ import {
   type TableCartLine,
   type TableOrderView,
 } from 'bite-tribe/table-order-data-access';
-import { orderLineUnitPrice, TABLE_ASSISTANCE_KINDS } from 'model';
+import {
+  orderLineChoiceNames,
+  orderLineUnitPrice,
+  TABLE_ASSISTANCE_KINDS,
+} from 'model';
 // Aliased because the screen's own class is called `TableOrder` too, and a
 // merged declaration of the two is a compile error rather than a shadowing.
 import type {
@@ -376,7 +380,9 @@ export class TableOrder implements OnInit {
    * different on each.
    */
   protected billLineName(line: TableVisitBillLine): string {
-    return line.variantName ? `${line.name} - ${line.variantName}` : line.name;
+    const choices = orderLineChoiceNames(line);
+
+    return choices.length ? `${line.name} - ${choices.join(', ')}` : line.name;
   }
 
   /** The extras on a bill row, as one readable string. */
@@ -514,7 +520,9 @@ export class TableOrder implements OnInit {
 
   /** One line of a sent order, with the size where the guest chose one. */
   protected orderLineName(line: OrderLineSnapshot): string {
-    return line.variantName ? `${line.name} (${line.variantName})` : line.name;
+    const choices = orderLineChoiceNames(line);
+
+    return choices.length ? `${line.name} (${choices.join(', ')})` : line.name;
   }
 
   /**
@@ -552,8 +560,15 @@ export class TableOrder implements OnInit {
 
   /** The row's name, with the size where the guest chose one. */
   protected lineName(line: TableCartLine): string {
-    return line.variant
-      ? `${line.item.name} (${line.variant.name})`
+    // The size, then each option chosen (issue #2254): "Ente Spezial (groß,
+    // scharf)", the way a sent order and the kitchen print it.
+    const choices = [
+      ...(line.variant ? [line.variant.name] : []),
+      ...line.options.map(({ choice }) => choice.name),
+    ];
+
+    return choices.length
+      ? `${line.item.name} (${choices.join(', ')})`
       : line.item.name;
   }
 
@@ -581,6 +596,25 @@ export class TableOrder implements OnInit {
    * has been deleted has no name left on the menu, and the guest still needs
    * to know which tick to take off.
    */
+  /**
+   * The option a refusal is about, named for the sentence (issue #2254): the
+   * menu's name where the backend could still read one, the cart's otherwise.
+   */
+  protected refusedOptionName(): string {
+    const item = this.refusal()?.item;
+
+    if (!item?.optionGroupId) {
+      return '';
+    }
+
+    const chosen = this.cart
+      .lines()
+      .flatMap((line) => line.options)
+      .find(({ group }) => group.id === item.optionGroupId);
+
+    return item.optionGroupName || chosen?.group.name || '';
+  }
+
   protected refusedExtraName(): string {
     const item = this.refusal()?.item;
 

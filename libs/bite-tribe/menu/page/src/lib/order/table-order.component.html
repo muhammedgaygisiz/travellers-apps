@@ -60,7 +60,11 @@
               {{
                 'table-order-refused-' + refused.reason
                   | transloco
-                    : { item: refusedName(), extra: refusedExtraName() }
+                    : {
+                        item: refusedName(),
+                        extra: refusedExtraName(),
+                        option: refusedOptionName(),
+                      }
               }}
             </p>
 

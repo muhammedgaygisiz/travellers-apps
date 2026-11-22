@@ -49,6 +49,7 @@ A guest at a table scans a BiteTribe QR code, sees the right menu for the right 
 - The guest joins the table's open visit, or raises a pending signal that staff confirm. Implemented, issue [#1101].
 - The guest browses the menu, with unavailable items marked and not addable, a variant of an unavailable dish included. Implemented, issues [#1102] and [#1103].
 - The guest picks a dish's extras, which are the extras its category offers, and the running total includes them. Implemented, issue [#1598].
+- The guest answers a dish's options, choices that don't change its price such as how spicy it should be, before adding it: one choice per option, an option the owner marked required must be answered, and the choice is made once on the dish for whichever of its variants is added. Implemented, issue [#2254].
 - The guest builds a cart and submits an order. Implemented, issue [#1103].
 - Staff see the order in a queue attached to the correct table, accept it, and update its status. Implemented, issue [#1105].
 - The guest watches each order move along its status, and is told when one is cancelled and why. Implemented, issues [#1104] and [#1105].
@@ -199,7 +200,14 @@ issue actually assert.
 in `order-line.ts` carries the dish's name, the price charged, the currency,
 the variant and - since issue [#1598] - every extra the line was ordered with,
 each by its own id, name and price, as they stood at the moment of the order,
-alongside the id. What one unit cost is `orderLineUnitPrice`, the dish plus its
+alongside the id. Since issue [#2254] it also carries the options chosen, each
+by its group's and its choice's id and name, in the dish's order and without a
+price; the backend takes the names from the menu, never from the phone. The
+cart, the guest's sent orders and the bill print a line as "Ente Spezial (groß,
+scharf)" - the bill and the summary mail with a dash - and the staff queue
+prints each option with its group, "Zubereitungsart: scharf", because the
+kitchen reads a choice without the menu in front of it. Two lines that differ
+only in a choice are two cart rows and two bill rows. What one unit cost is `orderLineUnitPrice`, the dish plus its
 extras, rather than the `price` field alone: that field stays the dish's, so
 the backend's price check compares a menu price against a menu price. A line
 that read its price through the id would tell a guest they were charged
@@ -333,7 +341,14 @@ dish that is off, and a menu whose currency has moved - and, since issue
 the description. Those two carry their own reasons rather than reusing the
 dish's, because they call for something different: a dish that is gone means
 picking something else, an extra that is gone means the dish is still there
-without it (`RD-TS-36`).
+without it (`RD-TS-36`). Options add two more, since issue [#2254]:
+`optionMissing`, for a chosen option or choice the dish no longer has, and
+`optionRequired`, for a required option left unanswered. Both name the dish and
+the option. The phone keeps the second from happening - a dish's add buttons
+stay off until its required options are answered - so it is the backend's
+answer to a menu that gained a required option while the guest read it. A cart
+restored after a reload drops a row whose choice has gone or whose dish now asks
+a required choice, as it drops one whose extra has gone.
 
 **A menu that states no currency cannot be ordered from.** `Menu.currency` is
 optional and absent means "not stated" rather than a default, which is right for
@@ -950,6 +965,7 @@ guest's phone is retrying.
 - Issue [#1105] - incoming order queue for staff, which gave the restaurant the screen that answers a guest: the queue, every order status after `submitted`, the badge on the floor plan and the push that reaches the people on shift
 - Issue [#1106] - request staff assistance and request the bill, which gave the guest a way to ask for a person without waving and the floor a way to see it and clear it
 - Issue [#1108] - offline-tolerant and idempotent order submission, which closed the epic: the key that makes a retry one order, the cart that survives a reload, and the sentence a guest gets when the phone cannot tell what happened
+- Issue [#2254] - options on a dish, choices that don't change its price. The model and the business editor came first; the second half added the reading line, the choices on the ordering screen, the per-line snapshot, the two refusals, and the option on the staff queue, the bill and the summary mail
 - Issue [#1598] - orderable menu extras, split out of [#1103] because `Category.extrasBlock` had no ids, no renderer and no editor. It settled where an extra lives first (`RD-TS-35`: on the category, applying to every dish in it) and then gave extras ids, an editor in the business app, a printed block on both reading surfaces, a tick box per orderable dish, a per-line snapshot, and the two refusals that answer an extra withdrawn or repriced mid-meal (`RD-TS-36`)
 - Issue [#1107] - QR token abuse protection, which made the resolution limit durable, gave the restaurant the rows and the rotation that answer a public code, and drew the pending session the epic had been writing since [#1101]
 - Issue [#1087] - printable table QR sheets, which fixed the scan URL this use case has to serve
@@ -1005,6 +1021,7 @@ guest's phone is retrying.
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1597]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1597
 [#1598]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1598
+[#2254]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2254
 [#1657]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1657
 [#1658]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1658
 [#1629]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1629

@@ -46,6 +46,8 @@ export {
 export { AppCheckReadinessService } from './lib/app-check-readiness.service';
 export { StartupNavigationService } from './lib/startup-navigation.service';
 export { AppCheckGateComponent } from './lib/app-check-gate/app-check-gate.component';
+export { AuthStorageGateComponent } from './lib/auth-storage-gate/auth-storage-gate.component';
+export { AuthStorageHealthService } from './lib/auth-storage-health.service';
 export { isFirebaseAppCheckEnforced } from './lib/initialize-firebase-app-check';
 export {
   type DeploymentStage,

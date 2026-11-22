@@ -3,6 +3,7 @@ import {
   AuthService,
   TABLE_CLAIM_TTL_MS,
 } from '../auth.service';
+import { AuthStorageHealthService } from '../auth-storage-health.service';
 import { TestBed } from '@angular/core/testing';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../provide-firestore-utils';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
@@ -429,6 +430,64 @@ describe(AuthService.name, () => {
       });
     });
 
+    describe('given the web, where Auth never answers (#2253)', () => {
+      let health: AuthStorageHealthService;
+      let check: jest.SpyInstance;
+      let notifyAuthStateChange: ((change: unknown) => void) | undefined;
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+        (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+        jest
+          .spyOn(FirebaseAuthentication, 'getCurrentUser')
+          .mockResolvedValue({ user: null } as unknown as Awaited<
+            ReturnType<typeof FirebaseAuthentication.getCurrentUser>
+          >);
+        (FirebaseAuthentication.addListener as jest.Mock).mockImplementation(
+          (event, callback) => {
+            if (event === 'authStateChange') {
+              notifyAuthStateChange = callback;
+            }
+          },
+        );
+        health = TestBed.inject(AuthStorageHealthService);
+        check = jest.spyOn(health, 'check').mockResolvedValue('stuck');
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should ask the storage once the restore bound has passed', async () => {
+        await service.initialize();
+
+        jest.advanceTimersByTime(AUTH_RESTORE_TIMEOUT_MS - 1);
+        expect(check).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(1);
+        expect(check).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not ask when Auth answered in time', async () => {
+        await service.initialize();
+
+        notifyAuthStateChange?.({ user: null });
+        jest.advanceTimersByTime(AUTH_RESTORE_TIMEOUT_MS);
+
+        expect(check).not.toHaveBeenCalled();
+      });
+
+      it('should lift the storage gate when Auth answers late', async () => {
+        const markResponsive = jest.spyOn(health, 'markResponsive');
+        await service.initialize();
+        jest.advanceTimersByTime(AUTH_RESTORE_TIMEOUT_MS);
+
+        notifyAuthStateChange?.({ user: null });
+
+        expect(markResponsive).toHaveBeenCalled();
+      });
+    });
+
     describe('given a native platform, where the first answer is final', () => {
       beforeEach(() => {
         (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
@@ -446,6 +505,20 @@ describe(AuthService.name, () => {
         await service.initialize();
 
         expect(service.isAuthStateRestored()).toBe(true);
+      });
+
+      it('should never ask the browser storage', async () => {
+        jest.useFakeTimers();
+        const check = jest.spyOn(
+          TestBed.inject(AuthStorageHealthService),
+          'check',
+        );
+
+        await service.initialize();
+        jest.advanceTimersByTime(AUTH_RESTORE_TIMEOUT_MS);
+
+        expect(check).not.toHaveBeenCalled();
+        jest.useRealTimers();
       });
     });
   });

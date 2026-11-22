@@ -18,6 +18,9 @@ import {
 import {
   Bite,
   LikeClick,
+  linkNetworkIcon,
+  linkNetworkName,
+  openTimeRangesOf,
   Menu,
   MenuItem,
   Restaurant,
@@ -25,7 +28,6 @@ import {
   restaurantDietaryStatementsOf,
 } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
-import { TitleCasePipe } from '@angular/common';
 import { EnsureProtocolPipe } from '../../../pipes/ensure-protocol.pipe';
 import { RestaurantImageComponent } from '../../restaurant-image/restaurant-image.component';
 import { getPosition } from '../../../utils/get-position';
@@ -49,7 +51,6 @@ import { TagsInputComponent } from 'common/ui/tags';
     IonSkeletonText,
     MapComponent,
     IonLabel,
-    TitleCasePipe,
     EnsureProtocolPipe,
     RestaurantImageComponent,
     DistanceComponent,
@@ -59,6 +60,12 @@ import { TagsInputComponent } from 'common/ui/tags';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RestaurantComponent {
+  /** How each link is shown: its logo and name (#2224). */
+  protected readonly linkNetworkIcon = linkNetworkIcon;
+  protected readonly linkNetworkName = linkNetworkName;
+  /** A day's hours as guests see them (#2227). */
+  protected readonly openTimeRangesOf = openTimeRangesOf;
+
   bite = input<Bite>();
   bites = input<Bite[]>();
   userId = input<string>();

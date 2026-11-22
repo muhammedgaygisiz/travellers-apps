@@ -18,7 +18,10 @@ describe(RestaurantOverviewContainer.name, () => {
         provideIonicAngular(),
         {
           provide: EditRestaurantService,
-          useValue: { restaurant: signal(undefined) },
+          useValue: {
+            restaurant: signal(undefined),
+            guestBitesToLink: { value: signal(undefined) },
+          },
         },
         {
           provide: TranslocoService,

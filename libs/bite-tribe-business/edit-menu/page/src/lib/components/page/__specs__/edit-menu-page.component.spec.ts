@@ -1,10 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Menu } from 'model';
 import { EditMenuPage } from '../edit-menu-page.component';
+
+addNecessaryIcons();
 
 /**
  * The currency a menu states (GitHub issue #1102).
@@ -122,16 +127,147 @@ describe(EditMenuPage.name, () => {
     expect(saved).not.toHaveBeenCalled();
   });
 
-  /**
-   * The device's currency is a good guess and never an answer - a chain
-   * operator editing a Zurich menu from Berlin would be handed euros - so it is
-   * offered first and still has to be saved.
-   */
-  it('offers the device currency first, and every other one after it', () => {
+  it('offers every currency once', () => {
     const offered = component.currencies();
 
     expect(offered.length).toBeGreaterThan(1);
     expect(new Set(offered.map((c) => c.code)).size).toBe(offered.length);
+  });
+
+  /**
+   * The restaurant's currency, from its position, before the device's: a chain
+   * operator or an agency sets a Munich menu up from Zurich (GitHub issue
+   * #2255).
+   */
+  describe('the suggested currency (#2255)', () => {
+    const at = (latitude: number, longitude: number): void => {
+      componentRef.setInput('restaurant', {
+        id: 'r1',
+        name: 'Trattoria',
+        position: { latitude, longitude },
+      });
+      withMenu({ ...MENU, currency: undefined });
+    };
+
+    it("suggests the currency of the restaurant's country from its position", () => {
+      at(48.137, 11.575); // Munich
+
+      expect(component.suggestedCurrency()).toEqual({
+        code: 'EUR',
+        source: 'position',
+      });
+      expect(component.currencies()[0].code).toBe('EUR');
+
+      at(47.376, 8.541); // Zurich
+
+      expect(component.suggestedCurrency().code).toBe('CHF');
+    });
+
+    it('falls back to the device without a position', () => {
+      at(0, 0);
+
+      expect(component.suggestedCurrency()).toEqual({
+        code: component.deviceCurrency,
+        source: 'device',
+      });
+    });
+
+    it('lists the rest by code', () => {
+      at(48.137, 11.575);
+
+      const rest = component
+        .currencies()
+        .slice(1)
+        .map(({ code }) => code);
+
+      expect(rest).toEqual([...rest].sort((a, b) => a.localeCompare(b)));
+    });
+
+    it('says where the suggestion comes from, and uses it in one tap', () => {
+      at(48.137, 11.575);
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(
+        el.querySelector('[data-testid="menu-currency-suggestion"]')
+          ?.textContent,
+      ).toContain('menu-currency-from-position');
+
+      (
+        el.querySelector(
+          '[data-testid="menu-currency-use-suggestion"]',
+        ) as HTMLElement
+      ).click();
+
+      expect(saved).toHaveBeenCalledWith('EUR');
+      expect(component.currency()).toBe('EUR');
+    });
+
+    it('offers no suggestion once the menu states a currency', () => {
+      at(48.137, 11.575);
+      withMenu(MENU);
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="menu-currency-suggestion"]',
+        ),
+      ).toBeNull();
+    });
+  });
+
+  describe('the currency picker (#2255)', () => {
+    beforeEach(() => withMenu(MENU));
+
+    it.each([
+      ['code', 'chf', 'CHF'],
+      ['symbol', '£', 'GBP'],
+      ['name', 'yen', 'JPY'],
+    ])('finds a currency by its %s', (_field, query, code) => {
+      component.currencyQuery.set(query);
+
+      expect(component.matchingCurrencies().map((c) => c.code)).toContain(code);
+    });
+
+    it('opens with an empty search', () => {
+      component.currencyQuery.set('yen');
+
+      component.openCurrencyPicker();
+
+      expect(component.currencyPickerOpen()).toBe(true);
+      expect(component.matchingCurrencies()).toEqual(component.currencies());
+    });
+
+    it('saves the chosen currency and closes', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+      component.openCurrencyPicker();
+
+      component.chooseCurrency('JPY');
+
+      expect(saved).toHaveBeenCalledWith('JPY');
+      expect(component.currencyPickerOpen()).toBe(false);
+      expect(component.currentCurrency()?.code).toBe('JPY');
+    });
+
+    it('unsets the currency with "Not set"', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      component.chooseCurrency('');
+
+      expect(saved).toHaveBeenCalledWith('');
+      expect(component.currentCurrency()).toBeUndefined();
+    });
+
+    it('saves nothing when the same currency is chosen again', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      component.chooseCurrency('EUR');
+
+      expect(saved).not.toHaveBeenCalled();
+    });
   });
 
   /** One editor at a time over the list (GitHub issue #2182). */
@@ -197,6 +333,43 @@ describe(EditMenuPage.name, () => {
 
       // ...and closed once it has.
       expect(component.editing()).toBeUndefined();
+    });
+
+    /** See GitHub issue #2181. */
+    it('deletes the open dish and closes once the menu is read back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onDeleteDish();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: [expect.objectContaining({ id: 'c1', items: [] })],
+        }),
+      );
+      expect(component.editing()).toBeTruthy();
+
+      withMenu({ ...FULL, categories: [{ ...FULL.categories[0], items: [] }] });
+
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('deletes the open category with its dishes', () => {
+      component.openCategory('c1');
+
+      component.onDeleteCategory();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({ categories: [] }),
+      );
+    });
+
+    it('deletes nothing for an editor that holds a new dish or category', () => {
+      component.addDish('c1');
+      component.onDeleteDish();
+      component.addCategory();
+      component.onDeleteCategory();
+
+      expect(saved).not.toHaveBeenCalled();
     });
 
     it('keeps the editor open when the save is refused and nothing comes back', () => {
@@ -269,6 +442,93 @@ describe(EditMenuPage.name, () => {
       component.onSaveDish({ id: 'x', name: 'X', description: '', price: 1 });
 
       expect(saved).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * A menu verification built from Bites (GitHub issue #2214). The owner takes
+   * it as their own on purpose, once; an edit is not that.
+   */
+  describe('menu built from Bites', () => {
+    type AlertOptions = Parameters<AlertController['create']>[0];
+    let alertOptions: AlertOptions | undefined;
+    let present: jest.Mock;
+    let confirmed: jest.Mock;
+
+    const notice = (): Element | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="menu-derived-notice"]',
+      );
+
+    beforeEach(() => {
+      alertOptions = undefined;
+      present = jest.fn();
+      jest
+        .spyOn(TestBed.inject(AlertController), 'create')
+        .mockImplementation(async (options) => {
+          alertOptions = options;
+
+          return { present } as unknown as HTMLIonAlertElement;
+        });
+      confirmed = jest.fn();
+      component.confirmAsOwn.subscribe(confirmed);
+    });
+
+    it('shows the notice and its button on a menu built from Bites', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      expect(notice()).not.toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="confirm-menu-own"]'),
+      ).not.toBeNull();
+    });
+
+    it('shows nothing on a menu the restaurant wrote', () => {
+      withMenu(MENU);
+
+      expect(notice()).toBeNull();
+    });
+
+    it('asks before confirming, and confirms only on the confirm button', async () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
+
+      const buttons = alertOptions?.buttons as {
+        role?: string;
+        handler?: () => void;
+      }[];
+      expect(buttons.find(({ role }) => role === 'cancel')?.handler).toBe(
+        undefined,
+      );
+      buttons.find(({ role }) => role === 'confirm')?.handler?.();
+
+      expect(confirmed).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks nothing on a menu that is already the restaurant’s', async () => {
+      withMenu(MENU);
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).not.toHaveBeenCalled();
+    });
+
+    it('never confirms through a menu save', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+      const saved = jest.fn();
+      component.saveMenu.subscribe(saved);
+
+      component.openCategory('c1');
+      component.onSaveCategory({ title: 'Pizze', subtitle: '' });
+      component.currency.set('CHF');
+      component.saveCurrency();
+
+      expect(saved).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
     });
   });
 });

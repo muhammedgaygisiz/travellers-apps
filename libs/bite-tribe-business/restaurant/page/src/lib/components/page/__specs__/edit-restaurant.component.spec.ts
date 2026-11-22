@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { addNecessaryIcons, getIonicConfig } from 'utils';
-import { ComponentRef } from '@angular/core';
+import { Component, ComponentRef, forwardRef, input } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { PositionComponent } from 'bite-tribe-common/map';
 import { EditRestaurantComponent } from '../edit-restaurant.component';
 import { Address, DaySchedule, Geopoint, Link, Restaurant } from 'model';
 import SpyInstance = jest.SpyInstance;
@@ -146,6 +148,92 @@ describe('EditRestaurantComponent', () => {
    * "Not stated" emits `undefined` so the write removes the field rather than
    * telling guests "no" on the restaurant's behalf.
    */
+  /** The time zone: its own default, and a search (GitHub issue #2228). */
+  describe('time zone', () => {
+    const MUNICH = { latitude: 48.137, longitude: 11.575 };
+    const device = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const show = (restaurant: Partial<Restaurant>): void => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        ...restaurant,
+      } as Restaurant);
+      fixture.detectChanges();
+    };
+
+    it("offers the zone of the restaurant's own position", () => {
+      show({ position: MUNICH });
+
+      expect(component.suggestedTimeZone()).toEqual({
+        zone: 'Europe/Berlin',
+        source: 'position',
+      });
+      expect(component.tableOrderingForm.value.timeZone).toBe('Europe/Berlin');
+    });
+
+    it('offers the device zone to a restaurant without a position', () => {
+      show({ position: { latitude: 0, longitude: 0 } });
+
+      expect(component.suggestedTimeZone()).toEqual({
+        zone: device,
+        source: 'device',
+      });
+    });
+
+    it('keeps the zone a restaurant chose', () => {
+      show({
+        position: MUNICH,
+        tableOrdering: { enabled: true, timeZone: 'Asia/Tokyo' },
+      });
+
+      expect(component.tableOrderingForm.value.timeZone).toBe('Asia/Tokyo');
+    });
+
+    it('does not count the offered zone a change', () => {
+      show({ position: MUNICH });
+
+      expect(component.unchanged().tableOrdering).toBe(true);
+    });
+
+    it.each([
+      ['berlin', 'Europe/Berlin'],
+      ['new york', 'America/New_York'],
+      ['NEW_YORK', 'America/New_York'],
+      ['europe/zur', 'Europe/Zurich'],
+    ])('finds a zone by typing %s', (query, zone) => {
+      show({ position: MUNICH });
+      component.timeZoneQuery.set(query);
+
+      expect(component.matchingTimeZones()).toContain(zone);
+      expect(component.matchingTimeZones().length).toBeLessThan(
+        component.timeZones().length,
+      );
+    });
+
+    it('chooses a zone from the search and closes it', () => {
+      show({ position: MUNICH });
+      component.openTimeZonePicker();
+      component.chooseTimeZone('Europe/Zurich');
+
+      expect(component.tableOrderingForm.value.timeZone).toBe('Europe/Zurich');
+      expect(component.timeZonePickerOpen()).toBe(false);
+      expect(component.unchanged().tableOrdering).toBe(false);
+    });
+
+    it('says where an offered zone came from, before it is saved', () => {
+      show({ position: MUNICH });
+      componentRef.setInput('section', 'table-ordering');
+      fixture.detectChanges();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="table-ordering-time-zone-source"]',
+        ),
+      ).toBeTruthy();
+    });
+  });
+
   describe('facilities', () => {
     const withFacilities = (facilities: Restaurant['facilities']): void => {
       componentRef.setInput('restaurant', {
@@ -359,11 +447,11 @@ describe('EditRestaurantComponent', () => {
       expect(component.isInvalid()).toBe(false);
     });
 
-    it('should be true if invalid links', () => {
+    it('should be true for a half-filled link', () => {
       componentRef.setInput('restaurant', {
         id: '1',
         name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
+        socialMediaLinks: [{ network: 'facebook', url: '' }] as Link[],
       } as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       expect(component.isInvalid()).toBe(true);
@@ -418,6 +506,396 @@ describe('EditRestaurantComponent', () => {
   });
 
   /** One section at a time (GitHub issue #2183). */
+  /**
+   * Save stays disabled while a section's form holds what is stored, like the
+   * menu editor's (GitHub issue #2222).
+   */
+  describe('Save without a change', () => {
+    const STORED = {
+      id: '1',
+      name: 'Sakura Kitchen',
+      description: 'Ramen since 1990.',
+      categories: ['restaurant', 'fine-dining'],
+      socialMediaLinks: [
+        { network: 'instagram', url: 'https://instagram.com/sakura' },
+      ],
+      address: {
+        street: 'Main St 1',
+        postcode: '1000',
+        city: 'Ljubljana',
+        country: 'Slovenia',
+      },
+      position: { latitude: 46.05, longitude: 14.5 },
+      facilities: { genderNeutralRestroom: true },
+      tableOrdering: { enabled: true, timeZone: 'Europe/Ljubljana' },
+    } as Restaurant;
+
+    const show = (
+      restaurant: Restaurant,
+      section: Parameters<typeof componentRef.setInput>[1] = 'about',
+    ): void => {
+      componentRef.setInput('restaurant', restaurant);
+      componentRef.setInput('section', section);
+      fixture.detectChanges();
+    };
+
+    const saveButton = (testId: string): { disabled?: boolean } | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        `ion-button[data-testid="${testId}"]`,
+      );
+
+    it('counts every section unchanged as it is opened', () => {
+      show(STORED);
+
+      expect(component.unchanged()).toEqual({
+        categories: true,
+        about: true,
+        links: true,
+        address: true,
+        position: true,
+        facilities: true,
+        tableOrdering: true,
+      });
+    });
+
+    it.each([
+      [
+        'categories',
+        (): void =>
+          component.categoriesForm.patchValue({ categories: ['bar'] }),
+      ],
+      [
+        'about',
+        (): void =>
+          component.descriptionForm.patchValue({ description: 'Udon.' }),
+      ],
+      [
+        'links',
+        (): void =>
+          component.links.at(0).patchValue({ url: 'https://sakura.si' }),
+      ],
+      [
+        'address',
+        (): void => component.addressForm.patchValue({ city: 'Bled' }),
+      ],
+      [
+        'position',
+        (): void =>
+          component.positionForm.patchValue({
+            position: { latitude: 46.37, longitude: 14.11 },
+          }),
+      ],
+      [
+        'facilities',
+        (): void =>
+          component.facilitiesForm.patchValue({ genderNeutralRestroom: 'no' }),
+      ],
+      [
+        'tableOrdering',
+        (): void => component.tableOrderingForm.patchValue({ enabled: false }),
+      ],
+    ] as const)('counts %s changed once its value differs', (key, change) => {
+      show(STORED);
+      change();
+
+      expect(component.unchanged()[key]).toBe(false);
+    });
+
+    it('does not count a change of order in the categories', () => {
+      show(STORED);
+      component.categoriesForm.patchValue({
+        categories: ['fine-dining', 'restaurant'],
+      });
+
+      expect(component.unchanged().categories).toBe(true);
+    });
+
+    /** The case #2222 was found on: "Not stated" and Save already enabled. */
+    it('disables the categories Save until the choice differs, and again when it is undone', () => {
+      show({ id: '1', name: 'Sakura Kitchen' } as Restaurant, 'categories');
+      expect(saveButton('save-categories')?.disabled).toBe(true);
+
+      component.categoriesForm.patchValue({ categories: ['bar'] });
+      fixture.detectChanges();
+      expect(saveButton('save-categories')?.disabled).toBe(false);
+
+      component.categoriesForm.patchValue({ categories: [] });
+      fixture.detectChanges();
+      expect(saveButton('save-categories')?.disabled).toBe(true);
+    });
+
+    it.each([
+      ['about', 'save-description'],
+      ['address', 'save-address'],
+      ['facilities', 'save-facilities'],
+      ['table-ordering', 'save-table-ordering'],
+      ['links', 'save-social-media'],
+    ] as const)(
+      'disables the %s Save while nothing changed',
+      (section, testId) => {
+        show(STORED, section);
+
+        expect(saveButton(testId)?.disabled).toBe(true);
+      },
+    );
+
+    /**
+     * An unconfigured restaurant is offered the browser's zone; leaving it
+     * there with ordering off is not a change the owner made.
+     */
+    it('does not count the pre-filled zone of an unconfigured restaurant', () => {
+      show({ id: '1', name: 'Sakura Kitchen' } as Restaurant);
+
+      expect(component.unchanged().tableOrdering).toBe(true);
+    });
+
+    it('does not count a blank row added by mistake as a change', () => {
+      show(STORED);
+      component.addSocialMedia();
+
+      expect(component.unchanged().links).toBe(true);
+    });
+
+    it('counts a removed link as a change', () => {
+      show(STORED);
+      component.removeSocialMedia(0);
+
+      expect(component.unchanged().links).toBe(false);
+    });
+  });
+
+  /** Labels above what the owner types, as in the menu editor (#2223). */
+  describe('field labels', () => {
+    const open = (section: 'about' | 'address' | 'links'): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks: [{ network: 'instagram', url: 'https://x.test' }],
+      } as Restaurant);
+      componentRef.setInput('section', section);
+      fixture.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('stacks every address label above its field', () => {
+      const inputs = [...open('address').querySelectorAll('ion-input')];
+
+      expect(inputs).toHaveLength(4);
+      inputs.forEach((input) =>
+        expect(input.getAttribute('labelPlacement')).toBe('stacked'),
+      );
+    });
+
+    it('labels the link field, above it, so the label outlasts the URL', () => {
+      const input = open('links').querySelector('ion-input');
+
+      expect(input?.getAttribute('labelPlacement')).toBe('stacked');
+      // The mocked pipe renders no text; the binding is what is checked.
+      expect((input as { label?: string } | null)?.label).toBeDefined();
+    });
+
+    it('leaves the About field to its heading, with no label of its own', () => {
+      const textarea = open('about').querySelector('ion-textarea');
+
+      expect((textarea as { label?: string } | null)?.label).toBeFalsy();
+      expect(textarea?.hasAttribute('aria-label')).toBe(true);
+    });
+  });
+
+  /** Removing a link, and a row added by mistake (GitHub issue #2224). */
+  describe('removing links', () => {
+    const LINKS: Link[] = [
+      { network: 'instagram', url: 'https://instagram.com/sakura' },
+      { network: 'facebook', url: 'https://facebook.com/sakura' },
+    ];
+    let emitted: jest.Mock;
+
+    const show = (socialMediaLinks: Link[]): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks,
+      } as Restaurant);
+      componentRef.setInput('section', 'links');
+      fixture.detectChanges();
+      emitted = jest.fn();
+      component.submitSocialMediaLinks.subscribe(emitted);
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('removes a row from its button and saves the list without it', () => {
+      const el = show(LINKS);
+
+      el.querySelectorAll<HTMLElement>(
+        '[data-testid="remove-link"]',
+      )[0].click();
+      fixture.detectChanges();
+      component.saveSocialMediaLinks();
+
+      expect(el.querySelectorAll('ion-item')).toHaveLength(1);
+      expect(emitted).toHaveBeenCalledWith({ links: [LINKS[1]] });
+    });
+
+    it('saves an empty list once the last link is removed', () => {
+      const el = show([LINKS[0]]);
+
+      component.removeSocialMedia(0);
+      fixture.detectChanges();
+
+      const save = el.querySelector<HTMLElement & { disabled?: boolean }>(
+        'ion-button[data-testid="save-social-media"]',
+      );
+      expect(save?.disabled).toBe(false);
+
+      component.saveSocialMediaLinks();
+      expect(emitted).toHaveBeenCalledWith({ links: [] });
+    });
+
+    it('leaves a blank row out of the save, and does not let it block one', () => {
+      show(LINKS);
+      component.addSocialMedia();
+      component.links.at(0).patchValue({ url: 'https://instagram.com/new' });
+
+      expect(component.isInvalid()).toBe(false);
+      component.saveSocialMediaLinks();
+      expect(emitted).toHaveBeenCalledWith({
+        links: [
+          { network: 'instagram', url: 'https://instagram.com/new' },
+          LINKS[1],
+        ],
+      });
+    });
+
+    it('keeps a row the restaurant is read again under', () => {
+      show(LINKS);
+      component.removeSocialMedia(0);
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        socialMediaLinks: LINKS,
+      } as Restaurant);
+      fixture.detectChanges();
+
+      expect(component.links.length).toBe(1);
+    });
+
+    it('opens a link saved as Twitter as X, without counting that a change', () => {
+      show([{ network: 'twitter', url: 'https://twitter.com/sakura' }]);
+
+      expect(component.links.at(0).value.network).toBe('x');
+      expect(component.unchanged().links).toBe(true);
+    });
+
+    it('offers X and TikTok, and no Twitter', () => {
+      expect(component.linkNetworks.map(({ network }) => network)).toEqual([
+        'website',
+        'instagram',
+        'facebook',
+        'tiktok',
+        'x',
+        'linkedin',
+      ]);
+    });
+  });
+
+  /** The position section (GitHub issue #2226). */
+  describe('position section', () => {
+    /** The map cannot render on the mocked Leaflet; a stub stands in. */
+    @Component({
+      selector: 'position',
+      template: '',
+      providers: [
+        {
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => PositionStubComponent),
+          multi: true,
+        },
+      ],
+    })
+    class PositionStubComponent implements ControlValueAccessor {
+      readonly gpsPosition = input<Geopoint | null | undefined>();
+      writeValue(): void {
+        return;
+      }
+      registerOnChange(): void {
+        return;
+      }
+      registerOnTouched(): void {
+        return;
+      }
+    }
+
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideIonicAngular(getIonicConfig()),
+          { provide: TranslocoService, useValue: MockTranslocoService },
+        ],
+      });
+      TestBed.overrideComponent(EditRestaurantComponent, {
+        remove: { imports: [PositionComponent] },
+        add: { imports: [PositionStubComponent] },
+      });
+      fixture = TestBed.createComponent(EditRestaurantComponent);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+    });
+
+    const open = (position: Geopoint | undefined): HTMLElement => {
+      componentRef.setInput('restaurant', {
+        id: '1',
+        name: 'Sakura Kitchen',
+        position,
+      } as Restaurant);
+      componentRef.setInput('section', 'position');
+      fixture.detectChanges();
+
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('says how to move the pin', () => {
+      expect(
+        open({ latitude: 48.137, longitude: 11.575 }).querySelector(
+          '[data-testid="position-hint"]',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('treats the 0, 0 a new restaurant starts on as no position', () => {
+      open({ latitude: 0, longitude: 0 });
+
+      expect(component.positionForm.value.position).toBeNull();
+    });
+
+    it('keeps a real position', () => {
+      open({ latitude: 48.137, longitude: 11.575 });
+
+      expect(component.positionForm.value.position).toEqual({
+        latitude: 48.137,
+        longitude: 11.575,
+      });
+    });
+  });
+
+  /** The menu code view says "Menu code" once (GitHub issue #2229). */
+  it('titles the menu code view once', () => {
+    componentRef.setInput('restaurant', {
+      id: '1',
+      name: 'Sakura Kitchen',
+    } as Restaurant);
+    componentRef.setInput('section', 'menu-code');
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('ion-content h1, ion-content h2')).toHaveLength(
+      1,
+    );
+    expect(el.querySelector('bt-business-menu-qr h2')).toBeNull();
+  });
+
   describe('section', () => {
     it.each([
       ['about', '[data-testid="restaurant-description"]'],
@@ -585,7 +1063,7 @@ describe('EditRestaurantComponent', () => {
       componentRef.setInput('restaurant', {
         id: '1',
         name: 'Test Restaurant',
-        socialMediaLinks: [{ network: '', url: '' }] as Link[],
+        socialMediaLinks: [{ network: '', url: 'https://x.test' }] as Link[],
       } as Restaurant);
       componentRef.changeDetectorRef.detectChanges();
       component.saveSocialMediaLinks();

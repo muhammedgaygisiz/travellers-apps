@@ -188,7 +188,7 @@ describe('verifyRestaurantCandidate', () => {
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),
@@ -226,6 +226,69 @@ describe('verifyRestaurantCandidate', () => {
       candidateId: 'candidate-1',
       skippedBiteIds: [],
       status: 'created',
+    });
+  });
+
+  /**
+   * Issue #2216: each Bite is linked to the menu item built from its dish
+   * name, in the same transaction, so the dish's stats start from the
+   * evidence it was built from.
+   */
+  describe('linking Bites to their menu item', () => {
+    const verify = (): ReturnType<typeof verifyRestaurantCandidate> =>
+      verifyRestaurantCandidate(
+        request({
+          candidateId: 'candidate-1',
+          restaurant: {
+            name: 'Pizza Palace',
+            position: { latitude: 46.948, longitude: 7.4474 },
+          },
+        }),
+      );
+
+    const createdItemId = (): string =>
+      createMock.mock.calls.find(
+        ([ref]) => (ref as DocRef).path === 'menus/menus-new-id',
+      )?.[1].categories[0].items[0].id;
+
+    it('writes the item id and its source on every Bite it assigns', async () => {
+      await verify();
+
+      ['bites/bite-1', 'bites/bite-2'].forEach((path) =>
+        expect(updateMock).toHaveBeenCalledWith(
+          expect.objectContaining({ path }),
+          expect.objectContaining({
+            restaurantId: 'restaurants-new-id',
+            menuItemId: createdItemId(),
+            menuItemLinkedBy: 'verification',
+          }),
+        ),
+      );
+    });
+
+    it('keeps the link of a Bite that is already linked to a menu item', async () => {
+      getAllMock.mockImplementationOnce(async (...refs: DocRef[]) =>
+        refs.map((ref) => ({
+          exists: true,
+          ref,
+          data: (): Record<string, unknown> => ({
+            name: 'Margherita',
+            price: 12,
+            ...(ref.id === 'bite-2' ? { menuItemId: 'item-ordered' } : {}),
+          }),
+        })),
+      );
+
+      await verify();
+
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'bites/bite-2' }),
+        expect.not.objectContaining({ menuItemId: expect.anything() }),
+      );
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'bites/bite-1' }),
+        expect.objectContaining({ menuItemLinkedBy: 'verification' }),
+      );
     });
   });
 
@@ -421,7 +484,7 @@ describe('verifyRestaurantCandidate', () => {
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),

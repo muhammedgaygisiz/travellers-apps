@@ -1092,11 +1092,17 @@ service cloud.firestore {
        * cleared, or a client could publish an unchecked photo through it.
        *
        * The admin app's image migration is an operator write and stays open.
+       *
+       * An empty `imagePath` publishes nothing and is let through on create
+       * (GitHub issue #2236): the store app 1.2.0 sends its whole form, which
+       * always carries `imagePath: ''`, and refusing it lost every Bite that
+       * app created.
        */
       function createsUnpublishedPhoto() {
         let data = request.resource.data;
 
-        return absentAll(['imagePath', 'imageRefusalCategory'])
+        return data.get('imagePath', '') == ''
+          && absentAll(['imageRefusalCategory'])
           && absentAll(imageCheckFields())
           && data.get('imageStatus', 'pending') == 'pending'
           && data.get('image', '') == '';

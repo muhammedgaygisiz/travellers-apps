@@ -6,17 +6,28 @@ import {
   inject,
   input,
   output,
+  Signal,
+  signal,
 } from '@angular/core';
+import tzlookup from '@photostructure/tz-lookup';
 import { PageComponent } from 'common/ui/page';
 import {
   IonButton,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
+  IonLabel,
   IonList,
+  IonNote,
+  IonHeader,
+  IonModal,
+  IonSearchbar,
   IonSelect,
   IonSelectOption,
   IonText,
+  IonTitle,
+  IonToolbar,
   IonToggle,
   IonTextarea,
 } from '@ionic/angular/standalone';
@@ -25,6 +36,9 @@ import {
   DaySchedule,
   Geopoint,
   Link,
+  LINK_NETWORKS,
+  linkNetworkName,
+  linkNetworkOf,
   MAX_RESTAURANT_CATEGORIES,
   RESTAURANT_CATEGORIES,
   Restaurant,
@@ -38,13 +52,15 @@ import {
   TableOrderingSettings,
 } from 'model';
 import {
+  AbstractControl,
   FormArray,
+  FormGroup,
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { map, startWith } from 'rxjs';
 import {
   RestaurantPhotoEditorComponent,
   RestaurantPhotoStatus,
@@ -67,6 +83,30 @@ const detectedTimeZone = (): string =>
   Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
 /**
+ * The zone a restaurant's own position lies in (GitHub issue #2228), looked
+ * up offline. `undefined` without a position: `0, 0` is where a restaurant
+ * without one starts, not a place in the Gulf of Guinea.
+ */
+const positionTimeZone = (
+  position: Geopoint | undefined,
+): string | undefined => {
+  if (!position || (!position.latitude && !position.longitude)) {
+    return undefined;
+  }
+
+  try {
+    return tzlookup(position.latitude, position.longitude);
+  } catch {
+    return undefined;
+  }
+};
+
+/** A zone as typed into the search: "new york" finds America/New_York. */
+const zoneMatches = (zone: string, query: string): boolean =>
+  zone.toLowerCase().replace(/_/g, ' ').includes(query) ||
+  zone.toLowerCase().includes(query);
+
+/**
  * The three answers a restaurant can give about a facility (issue #1830).
  *
  * A string rather than the `boolean | undefined` the model holds, because a
@@ -81,6 +121,51 @@ const toFacilityAnswer = (value: boolean | undefined): FacilityAnswer =>
 const fromFacilityAnswer = (answer: FacilityAnswer): boolean | undefined =>
   answer === 'not-stated' ? undefined : answer === 'yes';
 
+/**
+ * A form's whole value as a signal, so a `computed` can compare it with the
+ * stored restaurant. Raw, so a disabled control still counts.
+ */
+const valueOf = <T>(form: AbstractControl<unknown, T>): Signal<T> =>
+  toSignal(
+    form.valueChanges.pipe(
+      startWith(null),
+      map(() => form.getRawValue()),
+    ),
+    { initialValue: form.getRawValue() },
+  );
+
+/**
+ * A link row: the network and its URL, typed in by the owner. A row with
+ * neither is one added by mistake and is left out of the save; a row with
+ * only one of them is invalid, so it cannot be saved half-done (#2224).
+ */
+interface LinkRow {
+  readonly network: string;
+  readonly url: string;
+}
+
+const isBlankRow = (row: Partial<LinkRow>): boolean =>
+  !row.network && !row.url?.trim();
+
+const completeOrBlank = (
+  control: AbstractControl,
+): { incomplete: true } | null => {
+  const row = control.value as Partial<LinkRow>;
+
+  return isBlankRow(row) || (!!row.network && !!row.url?.trim())
+    ? null
+    : { incomplete: true };
+};
+
+/** The links a form's rows stand for: the filled ones, URLs trimmed. */
+const linksOf = (rows: readonly Partial<LinkRow>[]): Link[] =>
+  rows
+    .filter((row) => !isBlankRow(row))
+    .map((row) => ({ network: row.network ?? '', url: row.url?.trim() ?? '' }));
+
+const sameSet = (a: readonly string[], b: readonly string[]): boolean =>
+  a.length === b.length && a.every((value) => b.includes(value));
+
 @Component({
   selector: 'edit-restaurant',
   templateUrl: 'edit-restaurant.component.html',
@@ -89,12 +174,20 @@ const fromFacilityAnswer = (answer: FacilityAnswer): boolean | undefined =>
     PageComponent,
     IonContent,
     IonButton,
+    IonIcon,
+    IonLabel,
+    IonNote,
     IonList,
     ReactiveFormsModule,
     IonItem,
     IonSelect,
     IonSelectOption,
     IonToggle,
+    IonModal,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonSearchbar,
     IonInput,
     IonText,
     IonTextarea,
@@ -120,6 +213,11 @@ export class EditRestaurantComponent {
   /** The image check has the photo and has not answered (GitHub issue #2141). */
   photoChecking = input(false);
   photoRefusalCategory = input<string>();
+  /**
+   * The device's position. The position map opens there for a restaurant
+   * that has none yet (GitHub issue #2226).
+   */
+  gpsPosition = input<Geopoint | null | undefined>();
 
   readonly savePhoto = output<string>();
   readonly retryPhoto = output<void>();
@@ -194,7 +292,7 @@ export class EditRestaurantComponent {
    * rather than leaving an empty select.
    */
   readonly timeZones = computed(() => {
-    const detected = detectedTimeZone();
+    const detected = this.suggestedTimeZone().zone;
     // Reached through a local type rather than `Intl.supportedValuesOf`: the
     // method is newer than the `lib` some of this workspace's tsconfigs target,
     // and the Storybook build is one of them. The guard is needed at runtime
@@ -204,10 +302,52 @@ export class EditRestaurantComponent {
         Intl as { supportedValuesOf?: (key: string) => string[] }
       ).supportedValuesOf?.('timeZone') ?? [];
 
-    // The detected zone is guaranteed to be offered even when the runtime has a
-    // list, because a list that somehow omits it would strand the pre-fill.
+    // The suggested zone is guaranteed to be offered even when the runtime has
+    // a list, because a list that somehow omits it would strand the pre-fill.
     return supported.includes(detected) ? supported : [detected, ...supported];
   });
+
+  /**
+   * The zone offered to a restaurant that has not chosen one (GitHub issue
+   * #2228): its own position's, and the device's only when it has no
+   * position. A chain operator setting up a Munich restaurant from Zurich is
+   * offered Munich's zone.
+   */
+  readonly suggestedTimeZone = computed(() => {
+    const fromPosition = positionTimeZone(this.restaurant()?.position);
+
+    return fromPosition
+      ? { zone: fromPosition, source: 'position' as const }
+      : { zone: detectedTimeZone(), source: 'device' as const };
+  });
+
+  /** The device's zone, named when the suggestion differs from it. */
+  readonly deviceTimeZone = detectedTimeZone();
+
+  /** The searchable zone picker (#2228): open, and what is typed into it. */
+  readonly timeZonePickerOpen = signal(false);
+  readonly timeZoneQuery = signal('');
+
+  readonly matchingTimeZones = computed(() => {
+    const query = this.timeZoneQuery().trim().toLowerCase();
+
+    return query
+      ? this.timeZones().filter((zone) => zoneMatches(zone, query))
+      : this.timeZones();
+  });
+
+  openTimeZonePicker(): void {
+    this.timeZoneQuery.set('');
+    this.timeZonePickerOpen.set(true);
+  }
+
+  chooseTimeZone(zone: string): void {
+    const control = this.tableOrderingForm.controls.timeZone;
+
+    control.setValue(zone);
+    control.markAsDirty();
+    this.timeZonePickerOpen.set(false);
+  }
 
   /**
    * Each form is filled from the stored restaurant until the owner edits it,
@@ -225,10 +365,10 @@ export class EditRestaurantComponent {
 
     this.tableOrderingForm.patchValue({
       enabled: tableOrdering?.enabled ?? false,
-      // An unconfigured restaurant is offered the zone its owner is sitting in,
-      // which is right far more often than it is wrong - and wrong is visible,
-      // because the opening hours below are read in it.
-      timeZone: tableOrdering?.timeZone || detectedTimeZone(),
+      // An unconfigured restaurant is offered its own position's zone, or the
+      // one its owner is sitting in without a position (#2228); the note
+      // under the picker says which.
+      timeZone: tableOrdering?.timeZone || this.suggestedTimeZone().zone,
     });
   });
 
@@ -376,13 +516,27 @@ export class EditRestaurantComponent {
 
     socialMediaLinks.forEach((socialMediaLink) => {
       this.links.push(
-        this.formBuilder.group({
-          network: [socialMediaLink.network, Validators.required],
-          url: [socialMediaLink.url, Validators.required],
+        this.linkRow({
+          // A link saved as `twitter` opens as X (#2224).
+          network: linkNetworkOf(socialMediaLink.network),
+          url: socialMediaLink.url ?? '',
         }),
       );
     });
   });
+
+  /** The networks the picker offers, by name (#2224). */
+  readonly linkNetworks = LINK_NETWORKS.map((network) => ({
+    network,
+    name: linkNetworkName(network),
+  }));
+
+  private linkRow(row: LinkRow): FormGroup {
+    return this.formBuilder.nonNullable.group(
+      { network: [row.network], url: [row.url] },
+      { validators: completeOrBlank },
+    );
+  }
 
   initDescription = effect(() => {
     const description = this.restaurant()?.description ?? '';
@@ -408,43 +562,115 @@ export class EditRestaurantComponent {
   });
 
   initPosition = effect(() => {
-    const position = this.restaurant()?.position ?? null;
+    // `0, 0` is where a restaurant without a position starts, not a place:
+    // the map opens on the device position instead (#2226), as the overview
+    // shows it "Not set yet".
+    const stored = this.restaurant()?.position;
+    const position =
+      stored && (stored.latitude || stored.longitude) ? stored : null;
 
     if (!this.positionForm.dirty) {
       this.positionForm.patchValue({ position });
     }
   });
 
+  /**
+   * A half-filled row blocks the save. No rows at all does not: removing the
+   * last link is a change the owner saves (#2224).
+   */
   isInvalid = toSignal(
     this.socialMediaForm.valueChanges.pipe(
-      map(() => {
-        if (this.socialMediaForm.controls.links.length === 0) {
-          return true;
-        }
-
-        return !this.socialMediaForm.valid;
-      }),
+      map(() => !this.socialMediaForm.valid),
     ),
     { initialValue: !this.socialMediaForm.valid },
   );
+
+  private readonly categoriesValue = valueOf(this.categoriesForm);
+  private readonly descriptionValue = valueOf(this.descriptionForm);
+  private readonly socialMediaValue = valueOf(this.socialMediaForm);
+  private readonly addressValue = valueOf(this.addressForm);
+  private readonly positionValue = valueOf(this.positionForm);
+  private readonly facilitiesValue = valueOf(this.facilitiesForm);
+  private readonly tableOrderingValue = valueOf(this.tableOrderingForm);
+
+  /**
+   * Whether each section's form still holds what is stored (GitHub issue
+   * #2222). Its Save stays disabled until it does not, like the menu editor's:
+   * saving what is already stored writes nothing new and would still say it
+   * saved.
+   */
+  readonly unchanged = computed(() => {
+    const restaurant = this.restaurant();
+    const address = restaurant?.address;
+    const position = this.positionValue().position;
+    const tableOrdering = restaurant?.tableOrdering;
+    const storedLinks = restaurant?.socialMediaLinks ?? [];
+    const links = linksOf(
+      (this.socialMediaValue().links ?? []) as Partial<LinkRow>[],
+    );
+
+    return {
+      categories: sameSet(
+        this.categoriesValue().categories,
+        restaurantCategoriesOf(restaurant),
+      ),
+      about:
+        (this.descriptionValue().description ?? '') ===
+        (restaurant?.description ?? ''),
+      links:
+        links.length === storedLinks.length &&
+        links.every(
+          (link, index) =>
+            link.network === linkNetworkOf(storedLinks[index].network) &&
+            link.url === (storedLinks[index].url ?? ''),
+        ),
+      address: (['street', 'postcode', 'city', 'country'] as const).every(
+        (field) =>
+          (this.addressValue()[field] ?? '') === (address?.[field] ?? ''),
+      ),
+      position:
+        position?.latitude === restaurant?.position?.latitude &&
+        position?.longitude === restaurant?.position?.longitude,
+      facilities:
+        this.facilitiesValue().genderNeutralRestroom ===
+        toFacilityAnswer(restaurant?.facilities?.genderNeutralRestroom),
+      // Against what the form shows: an unconfigured restaurant is offered
+      // the suggested zone, which is not a change the owner made.
+      tableOrdering:
+        !!this.tableOrderingValue().enabled ===
+          (tableOrdering?.enabled ?? false) &&
+        this.tableOrderingValue().timeZone ===
+          (tableOrdering?.timeZone || this.suggestedTimeZone().zone),
+    };
+  });
 
   placeName = computed(() => this.restaurant()?.name);
 
   hasMenu = computed(() => !!this.restaurant()?.menuId);
 
+  /**
+   * Adding or removing a row is the owner's edit, so the form is marked
+   * dirty: a fresh read of the restaurant must not put the rows back.
+   */
   addSocialMedia(): void {
-    this.links.push(
-      this.formBuilder.group({
-        network: ['', Validators.required],
-        url: ['', Validators.required],
-      }),
-    );
+    this.links.push(this.linkRow({ network: '', url: '' }));
+    this.socialMediaForm.markAsDirty();
   }
 
+  /** Takes a link off; the save writes the list without it (#2224). */
+  removeSocialMedia(index: number): void {
+    this.links.removeAt(index);
+    this.socialMediaForm.markAsDirty();
+  }
+
+  /** Saves the filled rows; a blank one added by mistake is left out. */
   saveSocialMediaLinks(): void {
     if (this.socialMediaForm.valid) {
-      const socialMediaLinks = this.socialMediaForm.value;
-      this.submitSocialMediaLinks.emit(socialMediaLinks as { links: Link[] });
+      this.submitSocialMediaLinks.emit({
+        links: linksOf(
+          this.socialMediaForm.getRawValue().links as Partial<LinkRow>[],
+        ),
+      });
     }
   }
 

@@ -97,11 +97,42 @@ export const Address: Story = { args: { section: 'address' } };
 /** Opening hours across two service windows and two closed days. */
 export const OpeningHours: Story = { args: { section: 'opening-hours' } };
 
+/**
+ * The opening hours on a phone (GitHub issue #2234): one line per day and
+ * each range full width under it, so both times and the remove button are on
+ * screen. The header shows the whole name at this width too (#2233).
+ *
+ * Business stories are baselined at `chrome.laptop` only (#1547); these two
+ * set the phone's size themselves, which a story's `loki` parameters can do
+ * within that configuration.
+ */
+export const OpeningHoursPhone: Story = {
+  args: { section: 'opening-hours' },
+  parameters: { loki: { width: 375, height: 812 } },
+};
+
+/** The narrowest phone a restaurant owner is likely to hold. */
+export const OpeningHoursNarrowPhone: Story = {
+  args: { section: 'opening-hours' },
+  parameters: { loki: { width: 320, height: 640 } },
+};
+
 export const Facilities: Story = { args: { section: 'facilities' } };
 
 export const TableOrdering: Story = { args: { section: 'table-ordering' } };
 
 export const MenuCode: Story = { args: { section: 'menu-code' } };
+
+/**
+ * What Print code puts on paper (GitHub issue #2230): the code, the
+ * restaurant's name and nothing of the page around it. Captured in print
+ * media, so a change that blanks the printout fails the visual suite; it
+ * printed one empty page once the code moved into its own section view.
+ */
+export const MenuCodePrinted: Story = {
+  args: { section: 'menu-code' },
+  parameters: { loki: { media: 'print' } },
+};
 
 /**
  * The links of a restaurant an operator has just handed over: there are none

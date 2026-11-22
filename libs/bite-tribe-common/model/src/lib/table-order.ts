@@ -413,6 +413,12 @@ export interface SubmitTableOrderExtra {
   price: number;
 }
 
+/** One option chosen on a line, by ids (GitHub issue #2254). */
+export interface SubmitTableOrderOption {
+  groupId: string;
+  choiceId: string;
+}
+
 export interface SubmitTableOrderLine {
   /** The dish, by `MenuItem.id`. */
   menuItemId: string;
@@ -431,6 +437,11 @@ export interface SubmitTableOrderLine {
    * refused as one.
    */
   extras?: SubmitTableOrderExtra[];
+  /**
+   * The options chosen on this line, one per group at most (GitHub issue
+   * #2254). Absent rather than empty. No price: an option has none.
+   */
+  options?: SubmitTableOrderOption[];
   /**
    * The unit price the guest's phone displayed for this line.
    *
@@ -543,6 +554,14 @@ export const TABLE_ORDER_REFUSAL_REASONS = [
   'extraMissing',
   /** An extra's price has moved since the guest ticked it. */
   'extraPriceChanged',
+  /**
+   * A chosen option, or the choice made in it, is no longer on the dish
+   * (GitHub issue #2254). Names the option group, so the guest knows which
+   * choice to make again.
+   */
+  'optionMissing',
+  /** A required option of the dish was not chosen (GitHub issue #2254). */
+  'optionRequired',
   /** The menu is priced in a different currency from the one the guest saw. */
   'currencyChanged',
 ] as const;
@@ -584,6 +603,10 @@ export interface TableOrderRefusedItem {
   extraId?: string;
   /** The extra's name on the menu now. Absent when it has been deleted. */
   extraName?: string;
+  /** The option group a refusal is about, on the two reasons about one (#2254). */
+  optionGroupId?: string;
+  /** That group's name on the menu now. Absent when it has been deleted. */
+  optionGroupName?: string;
 }
 
 export interface TableOrderRefused {

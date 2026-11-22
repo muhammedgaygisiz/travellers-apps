@@ -5,6 +5,8 @@ import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import {
   MENU_ITEM_STATS_COLLECTION,
   type Bite,
+  type LinkBiteToMenuItemRequest,
+  type LinkBiteToMenuItemResult,
   type LoadPublicMenuRequest,
   type Menu,
   type MenuItemStats,
@@ -108,6 +110,68 @@ export class MenuApiService {
     }
   }
 
+  /**
+   * Every Bite about one restaurant, newest first (GitHub issue #2216), for
+   * the business app's Guest Bites page.
+   *
+   * One equality filter and no `orderBy`, so it needs no composite index; the
+   * order is applied here. Bounded by `limit`, which is far above the Bites
+   * any restaurant has today.
+   */
+  async loadBitesForRestaurant(
+    restaurantId: string,
+    limit = 300,
+  ): Promise<Bite[]> {
+    if (!restaurantId) {
+      return [];
+    }
+
+    const { snapshots } = await FirebaseFirestore.getCollection({
+      reference: 'bites',
+      compositeFilter: {
+        type: 'and',
+        queryConstraints: [
+          {
+            type: 'where',
+            fieldPath: 'restaurantId',
+            opStr: '==',
+            value: restaurantId,
+          },
+        ],
+      },
+      queryConstraints: [{ type: 'limit', limit }],
+    });
+
+    return snapshots
+      .map((snapshot) =>
+        snapshot.data
+          ? ({ ...snapshot.data, id: snapshot.id } as Bite)
+          : undefined,
+      )
+      .filter((bite): bite is Bite => !!bite)
+      .sort(
+        (left, right) =>
+          (right.createdAtTimestamp ?? 0) - (left.createdAtTimestamp ?? 0),
+      );
+  }
+
+  /**
+   * Links a guest's Bite to a dish, or marks it as not on the menu (GitHub
+   * issue #2216). A callable, because an owner may not write a guest's Bite
+   * directly: the backend checks the restaurant, the dish and who linked it
+   * before.
+   */
+  async linkBiteToMenuItem(
+    request: LinkBiteToMenuItemRequest,
+  ): Promise<LinkBiteToMenuItemResult> {
+    const result = await FirebaseFunctions.callByName<
+      LinkBiteToMenuItemRequest,
+      LinkBiteToMenuItemResult
+    >({ name: 'linkBiteToMenuItem', data: request });
+
+    return result.data;
+  }
+
   handleError(err: unknown): typeof EMPTY {
     console.error('Error fetching menu:', err);
     this.errorHandler.handleError(err);
@@ -182,6 +246,37 @@ export class MenuApiService {
       data: {
         restaurantId,
         currency: currency || FieldValue.delete(),
+        updatedAt: new Date().toISOString(),
+        updatedAtTimestamp: Date.now(),
+      },
+    });
+  }
+
+  /**
+   * The owner says a menu built from guests' Bites is now their own (GitHub
+   * issue #2214), which removes `derivedFromBites` and with it the consumer
+   * notice that the prices are guest averages.
+   *
+   * A write of its own for the reason {@link saveMenuCurrency} gives, and the
+   * one place the flag is ever removed: an edit is not this confirmation, so
+   * {@link saveMenu} never touches the field. `restaurantId` travels for the
+   * ownership-scoped rules (issue #1078).
+   */
+  async confirmMenuAsOwn(
+    menuId: string,
+    restaurantId: string | undefined,
+  ): Promise<void> {
+    if (!restaurantId) {
+      throw new Error(
+        'Cannot save a menu without the restaurant it belongs to',
+      );
+    }
+
+    await FirebaseFirestore.updateDocument({
+      reference: `${MENU_COLLECTION}/${menuId}`,
+      data: {
+        restaurantId,
+        derivedFromBites: FieldValue.delete(),
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(),
       },

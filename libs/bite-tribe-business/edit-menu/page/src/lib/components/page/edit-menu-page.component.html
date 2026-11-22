@@ -10,35 +10,169 @@
     <div class="page" [class.editing]="!!editing()">
       <header class="page-header">
         <div class="titles">
-          <p class="restaurant-name">{{ placeName() }}</p>
+          <p class="restaurant-name" data-testid="menu-restaurant-name">
+            {{ placeName() }}
+          </p>
           <h1>{{ 'menu' | transloco }}</h1>
         </div>
         <!--
           Asked once, at the top: a menu is priced in one currency, and a
           control per price would invite two (issue #1102).
         -->
-        <ion-item class="currency" lines="none">
-          <ion-select
-            [label]="'menu-currency' | transloco"
-            [ngModel]="currency()"
-            (ngModelChange)="currency.set($event); saveCurrency()"
-            interface="popover"
+        <div class="currency">
+          <!--
+            A row that opens a searchable list (issue #2255), as the time zone
+            does (#2228): a popover of every currency took a long scroll to
+            reach EUR.
+          -->
+          <ion-item
+            button
+            detail
+            lines="none"
             data-testid="menu-currency"
+            (click)="openCurrencyPicker()"
           >
-            <ion-select-option value="">
-              {{ 'menu-currency-none' | transloco }}
-            </ion-select-option>
-            @for (option of currencies(); track option.code) {
-              <ion-select-option [value]="option.code">
-                {{ option.code }} — {{ option.symbol }}
-              </ion-select-option>
-            }
-          </ion-select>
-        </ion-item>
+            <ion-label>{{ 'menu-currency' | transloco }}</ion-label>
+            <ion-note slot="end" data-testid="menu-currency-value">
+              @if (currentCurrency(); as current) {
+                {{ current.code }} — {{ current.symbol }}
+              } @else {
+                {{ 'menu-currency-none' | transloco }}
+              }
+            </ion-note>
+          </ion-item>
+          @if (!currency()) {
+            <!-- What would be saved, and where it came from (#2255). -->
+            <ion-text color="medium">
+              <p class="note" data-testid="menu-currency-suggestion">
+                @if (suggestedCurrency().source === 'position') {
+                  {{
+                    'menu-currency-from-position'
+                      | transloco: { currency: suggestedCurrency().code }
+                  }}
+                  @if (suggestedCurrency().code !== deviceCurrency) {
+                    {{
+                      'menu-currency-device-differs'
+                        | transloco: { currency: deviceCurrency }
+                    }}
+                  }
+                } @else {
+                  {{
+                    'menu-currency-from-device'
+                      | transloco: { currency: suggestedCurrency().code }
+                  }}
+                }
+              </p>
+            </ion-text>
+            <ion-button
+              size="small"
+              fill="outline"
+              data-testid="menu-currency-use-suggestion"
+              (click)="chooseCurrency(suggestedCurrency().code)"
+            >
+              {{
+                'menu-currency-use'
+                  | transloco: { currency: suggestedCurrency().code }
+              }}
+            </ion-button>
+          }
+        </div>
+
+        <ion-modal
+          [isOpen]="currencyPickerOpen()"
+          (didDismiss)="currencyPickerOpen.set(false)"
+        >
+          <ng-template>
+            <ion-header>
+              <ion-toolbar>
+                <ion-title>{{ 'menu-currency' | transloco }}</ion-title>
+              </ion-toolbar>
+              <ion-toolbar>
+                <ion-searchbar
+                  data-testid="menu-currency-search"
+                  [placeholder]="'menu-currency-search' | transloco"
+                  [value]="currencyQuery()"
+                  [debounce]="0"
+                  (ionInput)="
+                    currencyQuery.set($any($event).detail.value ?? '')
+                  "
+                />
+              </ion-toolbar>
+            </ion-header>
+            <ion-content>
+              <ion-list lines="full">
+                @if (!currencyQuery()) {
+                  <ion-item
+                    button
+                    data-testid="menu-currency-option-none"
+                    (click)="chooseCurrency('')"
+                  >
+                    <ion-label color="medium">{{
+                      'menu-currency-none' | transloco
+                    }}</ion-label>
+                    @if (!currency()) {
+                      <ion-icon
+                        slot="end"
+                        name="checkmark"
+                        color="primary"
+                        aria-hidden="true"
+                      />
+                    }
+                  </ion-item>
+                }
+                @for (option of matchingCurrencies(); track option.code) {
+                  <ion-item
+                    button
+                    [attr.data-testid]="'menu-currency-option-' + option.code"
+                    (click)="chooseCurrency(option.code)"
+                  >
+                    <ion-label>
+                      {{ option.code }} — {{ option.symbol }}
+                      <p>{{ option.name }}</p>
+                    </ion-label>
+                    @if (option.code === currency()) {
+                      <ion-icon
+                        slot="end"
+                        name="checkmark"
+                        color="primary"
+                        aria-hidden="true"
+                      />
+                    }
+                  </ion-item>
+                } @empty {
+                  <ion-item lines="none">
+                    <ion-label color="medium">{{
+                      'menu-currency-search-none' | transloco
+                    }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
         <ion-button data-testid="add-category" (click)="addCategory()">
           {{ 'add-category' | transloco }}
         </ion-button>
       </header>
+
+      @if (derivedFromBites()) {
+        <!--
+          Verification built this menu from guests' Bites, and the consumer
+          menu says so until the owner confirms it here (issue #2214).
+        -->
+        <section class="derived-notice" data-testid="menu-derived-notice">
+          <ion-icon name="information-circle-outline" aria-hidden="true" />
+          <p>{{ 'menu-derived-owner-notice' | transloco }}</p>
+          <ion-button
+            fill="outline"
+            size="small"
+            data-testid="confirm-menu-own"
+            (click)="confirmMenuAsOwn()"
+          >
+            {{ 'menu-confirm-own' | transloco }}
+          </ion-button>
+        </section>
+      }
 
       <div class="layout">
         <main class="list">
@@ -69,6 +203,7 @@
                 [categoryTitle]="editingCategory()?.title"
                 [currency]="currency()"
                 (save)="onSaveDish($event)"
+                (deleteDish)="onDeleteDish()"
                 (cancelEdit)="closeEditor()"
               />
             } @else {
@@ -77,6 +212,7 @@
                 [currency]="currency()"
                 (save)="onSaveCategory($event)"
                 (saveExtras)="onSaveExtras($event)"
+                (deleteCategory)="onDeleteCategory()"
                 (cancelEdit)="closeEditor()"
               />
             }

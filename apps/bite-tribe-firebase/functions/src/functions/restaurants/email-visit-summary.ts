@@ -15,6 +15,7 @@ import {
   USERS_COLLECTION,
   VISIT_SUMMARIES_COLLECTION,
   VisitSummary,
+  summaryLineName,
   isSendableAddress,
   refuseEmail,
 } from './visit-summary';
@@ -74,9 +75,7 @@ const uidOf = (request: CallableRequest<unknown>): string => {
 const rowsOf = (summary: VisitSummary): string =>
   summary.lines
     .map((line) => {
-      const name = line.variantName
-        ? `${line.name} - ${line.variantName}`
-        : line.name;
+      const name = summaryLineName(line);
       const extras = (line.extras ?? []).map((extra) => extra.name).join(', ');
 
       return [

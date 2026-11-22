@@ -119,7 +119,7 @@ export const WithoutCurrency: Story = {
 
 /**
  * A menu candidate verification put together from guests' Bites (GitHub issue
- * #1511): one `Bites` category, each price the average of what guests
+ * #1511): one `Dishes` category, each price the average of what guests
  * reported, in the currency they paid in. The notice above the categories says
  * so. {@link WithMenu} is the same page for a menu the restaurant published,
  * without it.
@@ -134,7 +134,7 @@ export const DerivedFromBites: Story = {
       categories: [
         {
           id: 'category-bites',
-          title: 'Bites',
+          title: 'Dishes',
           items: [
             {
               id: 'item-margherita',

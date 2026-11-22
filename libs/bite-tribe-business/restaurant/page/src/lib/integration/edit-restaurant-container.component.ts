@@ -26,6 +26,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
       [section]="section()"
       [restaurant]="service.restaurant()"
       [photoStatus]="service.photoStatus()"
+      [gpsPosition]="service.gpsPosition()"
       [pendingPhoto]="service.pendingPhoto()"
       [uploadedImagePath]="service.uploadedImagePath()"
       [canRetryPhoto]="service.canRetryPhoto()"

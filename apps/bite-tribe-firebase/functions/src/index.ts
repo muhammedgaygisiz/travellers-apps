@@ -93,6 +93,7 @@ export { getCurrencyByPosition } from './functions/location/get-currency-by-posi
 export { clusterRestaurantCandidateForBite } from './functions/restaurants/cluster-restaurant-candidate-for-bite';
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';
 export { verifyRestaurantCandidate } from './functions/restaurants/verify-restaurant-candidate';
+export { linkBiteToMenuItem } from './functions/restaurants/link-bite-to-menu-item';
 export {
   assignRestaurantOwner,
   revokeRestaurantOwner,

@@ -8,16 +8,28 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { IonButton, IonCheckbox } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonCheckbox,
+  IonRadio,
+  IonRadioGroup,
+} from '@ionic/angular/standalone';
 import {
   dietaryLabelClass,
   hasMenuItemSignal,
   isMenuVariantAvailable,
   menuItemAverageRating,
   menuItemDietaryOf,
+  missingRequiredOptions,
 } from 'model';
-import type { DietaryLabel } from 'model';
-import type { ExtraItem, MenuItem, MenuItemStats } from 'model';
+import type {
+  DietaryLabel,
+  ExtraItem,
+  MenuItem,
+  MenuItemStats,
+  MenuOptionGroup,
+  MenuOptionSelection,
+} from 'model';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { currencyCodes } from 'utils';
 
@@ -40,6 +52,11 @@ export interface MenuItemSelection {
    * whose category offers none.
    */
   extras?: ExtraItem[];
+  /**
+   * The options the guest chose on the dish (GitHub issue #2254). Absent where
+   * none were, and on every surface that is not ordering.
+   */
+  options?: MenuOptionSelection[];
 }
 
 @Component({
@@ -47,7 +64,14 @@ export interface MenuItemSelection {
   selector: 'menu-item',
   templateUrl: './menu-item.component.html',
   styleUrl: './menu-item.component.scss',
-  imports: [IonButton, IonCheckbox, NgTemplateOutlet, TranslocoPipe],
+  imports: [
+    IonButton,
+    IonCheckbox,
+    IonRadio,
+    IonRadioGroup,
+    NgTemplateOutlet,
+    TranslocoPipe,
+  ],
 })
 export class MenuItemComponent {
   item = input<MenuItem>();
@@ -217,6 +241,96 @@ export class MenuItemComponent {
   readonly hasExtras = computed(() => this.extras().length > 0);
 
   /**
+   * Whether a parent dish has a required option still unanswered, which
+   * blocks this variant row's add button (GitHub issue #2254). The dish row
+   * owns the choice; a variant only shows whether it can be added.
+   */
+  optionsBlocked = input(false, { transform: booleanAttribute });
+
+  /**
+   * The dish's options (GitHub issue #2254), on the dish row only: a variant
+   * is a version of the dish, and the dish's options apply to whichever one
+   * is ordered.
+   */
+  readonly optionGroups = computed<readonly MenuOptionGroup[]>(() =>
+    this.isVariant() ? [] : (this.item()?.optionGroups ?? []),
+  );
+
+  /** One reading line per option, "Spice level: mild · hot". */
+  readonly optionLines = computed(() =>
+    this.optionGroups().map(
+      (group) =>
+        `${group.name}: ${group.choices.map(({ name }) => name).join(' · ')}`,
+    ),
+  );
+
+  /**
+   * The choice made in each option, by group id. Local to the row and reset
+   * once the dish is added, like the extras ticks: a choice belongs to the one
+   * line being built.
+   */
+  private readonly chosen = signal<Readonly<Record<string, string>>>({});
+
+  /** Whether the ordering screen draws the option choices on this row. */
+  readonly showOptionsPicker = computed(
+    () =>
+      this.canAddToCart() &&
+      this.optionGroups().length > 0 &&
+      !this.isUnavailable(this.item()),
+  );
+
+  /** The required options still unanswered, which block adding the dish. */
+  readonly missingOptions = computed(() =>
+    missingRequiredOptions(
+      { optionGroups: [...this.optionGroups()] },
+      Object.keys(this.chosen()),
+    ),
+  );
+
+  chosenChoice(groupId: string): string | undefined {
+    return this.chosen()[groupId];
+  }
+
+  choose(groupId: string, choiceId: string | null | undefined): void {
+    this.chosen.update((chosen) => {
+      const others = Object.fromEntries(
+        Object.entries(chosen).filter(([id]) => id !== groupId),
+      );
+
+      return choiceId ? { ...others, [groupId]: choiceId } : others;
+    });
+  }
+
+  /** The chosen options in the dish's order, as the cart takes them. */
+  private selectedOptions(): MenuOptionSelection[] {
+    return this.optionGroups().flatMap((group) => {
+      const choice = group.choices.find(
+        ({ id }) => id === this.chosen()[group.id],
+      );
+
+      return choice ? [{ group, choice }] : [];
+    });
+  }
+
+  /**
+   * A variant row below was added: the dish adds its own options to the
+   * selection, because it is the row that holds them.
+   */
+  onVariantAdded(selection: MenuItemSelection): void {
+    if (this.missingOptions().length) {
+      return;
+    }
+
+    const options = this.selectedOptions();
+
+    this.addToCartClick.emit({
+      ...selection,
+      ...(options.length ? { options } : {}),
+    });
+    this.chosen.set({});
+  }
+
+  /**
    * Whether this row draws the extras picker.
    *
    * Also decides where the add button goes: a row with a picker puts it under
@@ -284,9 +398,16 @@ export class MenuItemComponent {
   onAddToCartClick(itemData: MenuItem | undefined): void {
     const parent = this.parentItem();
 
-    if (!itemData || this.isUnavailable(itemData)) {
+    if (
+      !itemData ||
+      this.isUnavailable(itemData) ||
+      this.optionsBlocked() ||
+      this.missingOptions().length
+    ) {
       return;
     }
+
+    const options = this.selectedOptions();
 
     // Taken in the menu's order rather than in the order they were tapped, so
     // a line reads the way the section it came from is printed. The cart's key
@@ -297,9 +418,11 @@ export class MenuItemComponent {
     this.addToCartClick.emit({
       ...(parent ? { item: parent, variant: itemData } : { item: itemData }),
       ...(ticked.length ? { extras: [...ticked] } : {}),
+      ...(options.length ? { options } : {}),
     });
 
     this.ticked.set([]);
+    this.chosen.set({});
   }
 
   onCreateBiteClick(itemData: MenuItem | undefined): void {

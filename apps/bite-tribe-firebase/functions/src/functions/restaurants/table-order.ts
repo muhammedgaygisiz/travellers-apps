@@ -114,6 +114,14 @@ export interface OrderLineExtraSnapshot {
   readonly price: number;
 }
 
+/** The library's `OrderLineOptionSnapshot` (GitHub issue #2254). */
+export interface OrderLineOptionSnapshot {
+  readonly groupId: string;
+  readonly groupName: string;
+  readonly choiceId: string;
+  readonly choiceName: string;
+}
+
 export interface OrderLineSnapshot {
   readonly menuItemId: string;
   readonly name: string;
@@ -126,6 +134,8 @@ export interface OrderLineSnapshot {
   readonly notes?: string;
   /** The extras ticked on this line. Absent rather than empty. */
   readonly extras?: readonly OrderLineExtraSnapshot[];
+  /** The options chosen on this line. Absent rather than empty (#2254). */
+  readonly options?: readonly OrderLineOptionSnapshot[];
 }
 
 /** One order, as one party sent it. */
@@ -241,6 +251,14 @@ export const TABLE_ORDER_REFUSAL_REASONS = [
   'priceChanged',
   'extraMissing',
   'extraPriceChanged',
+  /**
+   * A chosen option, or the choice made in it, is no longer on the dish
+   * (GitHub issue #2254). Names the option group, so the guest knows which
+   * choice to make again.
+   */
+  'optionMissing',
+  /** A required option of the dish was not chosen (GitHub issue #2254). */
+  'optionRequired',
   'currencyChanged',
 ] as const;
 
@@ -259,6 +277,10 @@ export interface TableOrderRefusedItem {
   extraId?: string;
   /** The extra's name on the menu now. Absent when it has been deleted. */
   extraName?: string;
+  /** The option group a refusal is about, on the two reasons about one (#2254). */
+  optionGroupId?: string;
+  /** That group's name on the menu now. Absent when it has been deleted. */
+  optionGroupName?: string;
 }
 
 export interface TableOrderRefused {

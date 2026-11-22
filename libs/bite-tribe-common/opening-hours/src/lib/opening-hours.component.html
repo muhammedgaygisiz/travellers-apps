@@ -14,7 +14,12 @@
             <ion-label>{{ 'day-' + days[i] | transloco }}</ion-label>
           </td>
           <td class="open-cell">
-            <ion-checkbox formControlName="isOpen" />
+            <ion-checkbox
+              formControlName="isOpen"
+              [attr.data-testid]="'open-' + days[i]"
+              [attr.aria-label]="'open' | transloco"
+              (ionChange)="openChanged(i)"
+            />
           </td>
           <td class="times-cell">
             @if (dayGroup.get('isOpen')?.value) {
@@ -57,6 +62,17 @@
                   <ion-icon slot="start" name="add-outline" />
                   {{ 'add-time-range' | transloco }}
                 </ion-button>
+                <!-- Guests see an open day without times as closed (#2227). -->
+                @if (daysNeedingTimes().has(days[i])) {
+                  <ion-text color="danger">
+                    <p
+                      class="times-needed"
+                      [attr.data-testid]="'times-needed-' + days[i]"
+                    >
+                      {{ 'opening-hours-times-needed' | transloco }}
+                    </p>
+                  </ion-text>
+                }
               </div>
             }
           </td>
@@ -66,7 +82,12 @@
   </table>
 
   @if (showSubmit()) {
-    <ion-button class="ion-margin-top" (click)="save()">
+    <ion-button
+      class="ion-margin-top"
+      data-testid="save-opening-hours"
+      [disabled]="unchanged() || !complete()"
+      (click)="save()"
+    >
       {{ 'save' | transloco }}
     </ion-button>
   }

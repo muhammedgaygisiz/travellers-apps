@@ -63,6 +63,32 @@ export class EditMenuPage {
     await expect(this.editorPanel).toBeVisible();
   }
 
+  /**
+   * Deletes the open dish or category: the editor's Delete button, then the
+   * confirmation's Delete (GitHub issue #2181).
+   */
+  async deleteOpen(kind: 'dish' | 'category'): Promise<void> {
+    await this.page.getByTestId(`delete-${kind}`).click();
+
+    const alert = this.page.locator('ion-alert');
+    await expect(alert).toBeVisible();
+    await alert.getByRole('button', { name: 'Delete', exact: true }).click();
+  }
+
+  /**
+   * Takes a menu built from Bites as the restaurant's: the notice's button,
+   * then the confirmation's (GitHub issue #2214).
+   */
+  async confirmOwnMenu(): Promise<void> {
+    await this.page.getByTestId('confirm-menu-own').click();
+
+    const alert = this.page.locator('ion-alert');
+    await expect(alert).toBeVisible();
+    await alert
+      .getByRole('button', { name: 'This is our menu', exact: true })
+      .click();
+  }
+
   variantName(index: number): Locator {
     return this.page.getByTestId(`dish-variant-name-${index}`).locator('input');
   }

@@ -39,6 +39,8 @@ import {
   Link,
   PlaceDetails,
   Restaurant,
+  LINK_NETWORKS,
+  linkNetworkName,
 } from 'model';
 import { map } from 'rxjs';
 import { BiteComponent } from 'bite-tribe-common/bite';
@@ -89,6 +91,12 @@ const PREFILLABLE_CONTROLS = [
   ],
 })
 export class NewRestaurantPageComponent {
+  /** The networks a restaurant links to, by name (#2224). */
+  protected readonly linkNetworks = LINK_NETWORKS.map((network) => ({
+    network,
+    name: linkNetworkName(network),
+  }));
+
   restaurant = input<Restaurant>();
   googlePlaces = input<GooglePlace[]>([]);
   googlePlacesLoading = input<boolean>(false);

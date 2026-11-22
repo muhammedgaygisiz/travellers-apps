@@ -291,14 +291,19 @@
                 <div
                   class="social-link ion-display-flex ion-align-items-center ion-flex-1 ion-margin-top"
                 >
+                  <!--
+                    A logo for each network, a globe for a website, and the
+                    network's own spelling ("TikTok", "X"); a link saved as
+                    Twitter shows as X (#2224).
+                  -->
                   <ion-icon
-                    [name]="'logo-' + link.network"
+                    [name]="linkNetworkIcon(link.network)"
                     size="large"
                     class="ion-margin-end"
                   />
                   <ion-label>
                     <a [href]="link.url | ensureProtocol" target="_blank">{{
-                      link.network | titlecase
+                      linkNetworkName(link.network)
                     }}</a>
                   </ion-label>
                 </div>
@@ -363,16 +368,22 @@
                   <span>{{ 'day-' + day.day | transloco }}</span>
                 </ion-label>
 
+                <!--
+                  Open only with times, the same rule the owner's overview
+                  counts by (#2227); a day marked open without them used to
+                  show nothing here at all.
+                -->
                 <div class="ion-flex-1">
-                  @if (day.isOpen && day.timeRanges.length) {
+                  @let ranges = openTimeRangesOf(day);
+                  @if (ranges.length) {
                     <span class="time-ranges">
-                      @for (range of day.timeRanges; track $index) {
+                      @for (range of ranges; track $index) {
                         <div>
                           <span>{{ range.from }}–{{ range.to }}</span>
                         </div>
                       }
                     </span>
-                  } @else if (!day.isOpen) {
+                  } @else {
                     <span class="closed">{{ 'closed' | transloco }}</span>
                   }
                 </div>

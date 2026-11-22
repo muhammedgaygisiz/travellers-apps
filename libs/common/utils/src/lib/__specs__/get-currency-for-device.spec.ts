@@ -1,4 +1,7 @@
-import { getCurrencyForDevice } from '../get-currency-for-device';
+import {
+  getCurrencyForDevice,
+  getCurrencyForTimeZone,
+} from '../get-currency-for-device';
 
 describe('getCurrencyForDevice', () => {
   it('maps the device time zone to that region currency', () => {
@@ -57,5 +60,21 @@ describe('getCurrencyForDevice', () => {
     expect(
       getCurrencyForDevice({ locale: 'xx-YY', timeZone: 'Mars/Olympus_Mons' }),
     ).toBe('EUR');
+  });
+});
+
+/** The currency of a time zone's country, with no fallback (#2255). */
+describe('getCurrencyForTimeZone', () => {
+  it.each([
+    ['Europe/Berlin', 'EUR'],
+    ['Europe/Zurich', 'CHF'],
+    ['Asia/Tokyo', 'JPY'],
+  ])('answers %s with %s', (zone, currency) => {
+    expect(getCurrencyForTimeZone(zone)).toBe(currency);
+  });
+
+  it('answers nothing for an unknown or missing zone', () => {
+    expect(getCurrencyForTimeZone('Mars/Olympus_Mons')).toBeUndefined();
+    expect(getCurrencyForTimeZone(undefined)).toBeUndefined();
   });
 });

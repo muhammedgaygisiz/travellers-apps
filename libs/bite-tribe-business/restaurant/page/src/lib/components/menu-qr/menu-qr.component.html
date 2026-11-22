@@ -1,8 +1,8 @@
+<!--
+  No heading of its own: the section view it lives in is titled "Menu code"
+  already (#2229). The card dates from the long restaurant page (#370).
+-->
 <section class="menu-qr" data-testid="menu-qr">
-  <ion-text>
-    <h2>{{ 'menu-qr-title' | transloco }}</h2>
-  </ion-text>
-
   @if (hasMenu()) {
     <ion-text>
       <p class="note">{{ 'menu-qr-hint' | transloco }}</p>

@@ -18,6 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import {
+  AlertController,
   IonButton,
   IonIcon,
   IonInput,
@@ -27,12 +28,13 @@ import {
   IonSelectOption,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   DIETARY_LABELS,
   menuItemDietaryOf,
   type DietaryLabel,
   type MenuItem,
+  type MenuOptionGroup,
 } from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
@@ -65,6 +67,21 @@ const dietaryFields = (
     ...(dietary.options.length ? { dietaryOptions: dietary.options } : {}),
   };
 };
+
+type ChoiceForm = FormGroup<{
+  id: FormControl<string>;
+  name: FormControl<string>;
+}>;
+
+type OptionGroupForm = FormGroup<{
+  id: FormControl<string>;
+  name: FormControl<string>;
+  required: FormControl<boolean>;
+  choices: FormArray<ChoiceForm>;
+}>;
+
+/** A group is a choice between things, so it needs at least two of them. */
+const MIN_CHOICES = 2;
 
 /** The smallest price a dish or variant can be saved with. */
 const MIN_PRICE = 0.01;
@@ -101,6 +118,8 @@ const MIN_PRICE = 0.01;
 })
 export class DishEditorComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly alertController = inject(AlertController);
+  private readonly transloco = inject(TranslocoService);
 
   /** The dish to edit; absent for a new one. */
   readonly dish = input<MenuItem>();
@@ -112,6 +131,8 @@ export class DishEditorComponent {
   /** The dietary vocabulary, in the order it is offered (issue #2194). */
   readonly dietaryLabelOptions = DIETARY_LABELS;
   readonly cancelEdit = output<void>();
+  /** The owner confirmed deleting the stored dish (GitHub issue #2181). */
+  readonly deleteDish = output<void>();
 
   readonly form = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],
@@ -123,10 +144,16 @@ export class DishEditorComponent {
     dietaryLabels: [[] as DietaryLabel[]],
     dietaryOptions: [[] as DietaryLabel[]],
     variants: this.formBuilder.array<VariantForm>([]),
+    optionGroups: this.formBuilder.array<OptionGroupForm>([]),
   });
 
   get variants(): FormArray<VariantForm> {
     return this.form.controls.variants;
+  }
+
+  /** Priceless choices on the dish (GitHub issue #2254). */
+  get optionGroups(): FormArray<OptionGroupForm> {
+    return this.form.controls.optionGroups;
   }
 
   private readonly value = toSignal(
@@ -148,6 +175,7 @@ export class DishEditorComponent {
     const dish = stored ? editableDish(stored) : undefined;
 
     this.variants.clear();
+    this.optionGroups.clear();
     this.form.reset({
       name: dish?.name ?? '',
       description: dish?.description ?? '',
@@ -160,6 +188,11 @@ export class DishEditorComponent {
     // After the reset, which would otherwise empty every variant row.
     (dish?.variants ?? []).forEach((variant) =>
       this.variants.push(this.variantForm(variant), { emitEvent: false }),
+    );
+    (dish?.optionGroups ?? []).forEach((group) =>
+      this.optionGroups.push(this.optionGroupForm(group), {
+        emitEvent: false,
+      }),
     );
     this.syncPriceValidators();
     this.form.markAsPristine();
@@ -196,6 +229,33 @@ export class DishEditorComponent {
     });
   }
 
+  private optionGroupForm(group?: MenuOptionGroup): OptionGroupForm {
+    const choices = group?.choices.length
+      ? group.choices
+      : [undefined, undefined];
+
+    return this.formBuilder.group({
+      id: this.formBuilder.nonNullable.control(group?.id ?? createEntityId()),
+      name: this.formBuilder.nonNullable.control(group?.name ?? '', [
+        Validators.required,
+      ]),
+      required: this.formBuilder.nonNullable.control(group?.required ?? true),
+      choices: this.formBuilder.array<ChoiceForm>(
+        choices.map((choice) => this.choiceForm(choice)),
+        [Validators.minLength(MIN_CHOICES)],
+      ),
+    });
+  }
+
+  private choiceForm(choice?: { id: string; name: string }): ChoiceForm {
+    return this.formBuilder.group({
+      id: this.formBuilder.nonNullable.control(choice?.id ?? createEntityId()),
+      name: this.formBuilder.nonNullable.control(choice?.name ?? '', [
+        Validators.required,
+      ]),
+    });
+  }
+
   /** The dish's own price is required only while it has no variants. */
   private syncPriceValidators(): void {
     const price = this.form.controls.price;
@@ -218,6 +278,31 @@ export class DishEditorComponent {
   removeVariant(index: number): void {
     this.variants.removeAt(index);
     this.syncPriceValidators();
+    this.form.markAsDirty();
+  }
+
+  /**
+   * A new group starts with two empty choices and required, because the case
+   * the feature exists for - mild or hot - is a question the kitchen needs an
+   * answer to.
+   */
+  addOptionGroup(): void {
+    this.optionGroups.push(this.optionGroupForm());
+    this.form.markAsDirty();
+  }
+
+  removeOptionGroup(index: number): void {
+    this.optionGroups.removeAt(index);
+    this.form.markAsDirty();
+  }
+
+  addChoice(groupIndex: number): void {
+    this.optionGroups.at(groupIndex).controls.choices.push(this.choiceForm());
+    this.form.markAsDirty();
+  }
+
+  removeChoice(groupIndex: number, choiceIndex: number): void {
+    this.optionGroups.at(groupIndex).controls.choices.removeAt(choiceIndex);
     this.form.markAsDirty();
   }
 
@@ -248,6 +333,15 @@ export class DishEditorComponent {
         ...dietaryFields(variant.dietaryLabels, variant.dietaryOptions),
       };
     });
+    const optionGroups: MenuOptionGroup[] = value.optionGroups.map((group) => ({
+      id: group.id,
+      name: group.name.trim(),
+      required: group.required,
+      choices: group.choices.map((choice) => ({
+        id: choice.id,
+        name: choice.name.trim(),
+      })),
+    }));
     const ingredients = value.ingredients.trim();
     const notes = value.notes.trim();
 
@@ -261,6 +355,43 @@ export class DishEditorComponent {
       isAvailable: value.isAvailable,
       ...dietaryFields(value.dietaryLabels, value.dietaryOptions),
       ...(variants.length ? { variants } : {}),
+      ...(optionGroups.length ? { optionGroups } : {}),
     });
+  }
+
+  /**
+   * Asks before deleting the dish, because a delete is saved at once and has
+   * no undo (GitHub issue #2181). Its variants go with it, and the question
+   * says so when there are any.
+   */
+  async confirmDelete(): Promise<void> {
+    const dish = this.dish();
+
+    if (!dish) {
+      return;
+    }
+
+    const variantCount = dish.variants?.length ?? 0;
+    const alert = await this.alertController.create({
+      header: this.transloco.translate('menu-dish-delete-confirm-title', {
+        name: dish.name,
+      }),
+      message: this.transloco.translate(
+        variantCount
+          ? 'menu-dish-delete-confirm-message-variants'
+          : 'menu-dish-delete-confirm-message',
+        { count: variantCount },
+      ),
+      buttons: [
+        { text: this.transloco.translate('cancel'), role: 'cancel' },
+        {
+          text: this.transloco.translate('delete'),
+          role: 'destructive',
+          handler: (): void => this.deleteDish.emit(),
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

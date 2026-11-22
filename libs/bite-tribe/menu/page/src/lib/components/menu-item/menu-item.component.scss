@@ -137,6 +137,50 @@
       }
     }
 
+    /* A dish's options (issue #2254): one radio row per option. */
+    .options {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .option-name {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .option-optional {
+        margin-left: 0.25rem;
+        color: var(--ion-color-medium);
+        font-weight: normal;
+      }
+
+      .option-choices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1.25rem;
+        font-size: 0.9rem;
+      }
+
+      .option-hint {
+        margin: 0;
+        color: var(--ion-color-medium);
+        font-size: 0.85rem;
+      }
+
+      .options-add {
+        display: flex;
+        justify-content: flex-end;
+
+        ion-button {
+          --padding-start: 0;
+          --padding-end: 0;
+          margin: 0;
+        }
+      }
+    }
+
     .variants {
       border-left: 1px solid var(--ion-color-tertiary-tint);
       grid-column: 1 / -1;

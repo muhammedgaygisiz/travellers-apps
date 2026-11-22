@@ -87,8 +87,10 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
 - The Restaurant Owner states the Restaurant's facilities (issue [#1830]). Today that is one: whether it has a gender-neutral restroom, answered `Yes`, `No` or `Not stated`. `Not stated` removes the field rather than writing no, because the consumer page shows nothing for a Restaurant that has not said and would otherwise tell a guest "no" on the owner's behalf. Only the account holding the Restaurant states it; the rule is the Restaurant's, in [Restaurant](../domain/restaurant.md).
 - The Restaurant Owner states what kind of venue the Restaurant is (issue [#2131]): one or two categories from a fixed list, picked under the description and saved with their own Save. Choosing a third is refused and Save is disabled until one is removed. Choosing none removes the field, so the consumer page shows nothing rather than an empty answer. The list and the rule are in [Restaurant](../domain/restaurant.md).
 - The Restaurant Owner declares what fits a diet (issue [#2194]). In the dish editor, a dish and each of its variants get the labels they fit as served and the labels the kitchen can make them fit on request, saved with the dish. In the restaurant's `Dietary` section they pick statements about the whole kitchen and write a cross-contamination note, saved together by the `saveRestaurantDietaryStatements` callable, which refuses a note that fails the content check and writes nothing. Empty removes each field. The vocabulary is [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)'s; the rule is the Restaurant's, in [Restaurant](../domain/restaurant.md).
-- The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Bites` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
-- The edit-menu page is the menu as a list, and one editor at a time (issue [#2182]). Each category is a heading with its subtitle and an edit button; each dish is one line with its description, its price and an availability switch; each variant is a line of its own under its dish, with its own name, its own price and its own switch; a category's extras are one line under its dishes. Nothing in the list is a form. A dish or a category opens its own editor - beside the list on a wide screen, in its place on a phone - with labelled fields and one Save and one Cancel: a dish's name, description, price or variants, and its ingredients and notes folded under "More details"; a category's title and subtitle, with its extras below. An empty name or title cannot be saved, and every price must be above zero. Availability is switched from the list, for a dish and for each variant, because it is the one change an owner makes during service. Every change is saved by the owner, never by a pause in typing (issue [#1377]): it writes the whole menu under a loading overlay, a toast reports the outcome, and the editor closes once the saved menu has been read back - so a refused save leaves the edit in the editor for another try. Every price shows the menu's currency, so a price is never read as a time.
+- The initial Menu saves the Restaurant Owner the first round of typing: each distinct Bite dish name becomes one item, priced with the average of the prices users reported, in a single `Dishes` category. The Restaurant Owner then corrects, renames, and structures it in the edit-menu page.
+- The edit-menu page is the menu as a list, and one editor at a time (issue [#2182]). Each category is a heading with its subtitle and an edit button; each dish is one line with its description, its price and an availability switch; each variant is a line of its own under its dish, with its own name, its own price and its own switch; a category's extras are one line under its dishes. Nothing in the list is a form. A dish or a category opens its own editor - beside the list on a wide screen, in its place on a phone - with labelled fields and one Save and one Cancel: a dish's name, description, price or variants, and its ingredients and notes folded under "More details"; a category's title and subtitle, with its extras below. An empty name or title cannot be saved, and every price must be above zero. A saved dish and a saved category each carry a Delete in their editor, behind a confirmation that says what goes with it - a dish's variants, a category's dishes, their variants and its extras - and the delete is saved like any other change (issue [#2181]); a variant is removed with its row's remove button and the removal is written by the dish's Save. Orders already sent keep a deleted dish, because each order line carries its own copy of the dish's name and price. Availability is switched from the list, for a dish and for each variant, because it is the one change an owner makes during service. Every change is saved by the owner, never by a pause in typing (issue [#1377]): it writes the whole menu under a loading overlay, a toast reports the outcome, and the editor closes once the saved menu has been read back - so a refused save leaves the edit in the editor for another try. Every price shows the menu's currency, so a price is never read as a time. The currency is one row at the top that opens a list searchable by code, symbol or name, in code order (issue [#2255]); choosing one saves it, and "Not set" removes it. A menu with no currency is offered the currency of the restaurant's own country - its position on the map, looked up offline through the time zone it lies in - with a note that says so, names the device's currency when it differs, and a one-tap "Use EUR". Only without a position is the device's currency offered, and the note says that too: a chain or an agency sets menus up from somewhere else. A menu that verification built from guests' Bites (`derivedFromBites`) shows a notice above the list that says so and a "This is our menu" button; confirming it, behind a dialog that says it covers every dish and price and cannot be undone, removes the mark, and the consumer menu stops telling guests the prices are averages (issue [#2214]). Saving the menu or its currency never removes it.
+- Guest Bites (issue [#2216]), opened from the restaurant overview's "Guest Bites" button, which counts the Bites still waiting, lists the guests' Bites about the Restaurant that are linked to no dish and not dismissed, newest first. Each shows its photo, dish name, rating and date, and the dish whose name matches it when one does (`dishNameKey`: case, accents and punctuation do not count). The owner links it to that dish, chooses another dish (and a variant, or "Not sure") from a sheet listing the menu by category, or marks it "Not on the menu" after a confirmation. A linked or dismissed Bite leaves the list; a dismissed one cannot be brought back here. A Bite the guest linked themself, from an order or a dish's Create Bite button, never appears. Every write goes through the `linkBiteToMenuItem` callable, which checks the Restaurant, the dish and the guest's own link; the Bite rules are unchanged. A linked Bite counts toward its dish's stats and shows under the dish on the consumer menu, and guests see nothing that says who linked it.
+- An option is a choice on a dish that doesn't change its price, such as how spicy it should be (issue [#2254]). A dish's editor has an "Options" section below Variants: each option has a name ("Zubereitungsart"), two or more named choices ("nicht scharf", "scharf"), and a "Guests must choose" switch, which is on for a new option. An option without a name, a choice without a name, or an option with fewer than two choices cannot be saved. Options belong to the dish, so they apply to whichever variant is ordered, and the list shows each one on a line under the dish ("Zubereitungsart: nicht scharf · scharf"). A choice that costs something stays a variant or an extra. Guests read an option under the dish and answer it when they order at a table; see [UC - Order At The Table Through A QR Code](uc-order-at-the-table-through-a-qr-code.md).
 - A variant is any version of a dish with its own price - Pad Thai vegetarian or with chicken, a pizza regular or large - and it has a name of its own (issue [#2182]). A dish with variants has no price of its own, and guests order one of its variants. A dish written before that, whose variants repeated its name and carried their difference in their description, opens in the editor with each variant named by its description, and with its own price as a first variant the owner names before saving; saving writes the new shape. Until then guests see it as they always did.
 
 This page owns producing the code and not what it leads to, which is the split
@@ -103,13 +105,20 @@ An overview, and one section at a time (issue [#2183]). `restaurant/:restaurantI
 lists the Restaurant's sections - photo, kind of place, About, links, address,
 position on the map, opening hours, facilities, ordering at the table - one row
 each, showing what the section holds now or "Not set yet" for one the setup
-checklist still counts. While anything is missing, the setup progress sits at
-the top with the next item to do. Below the rows are the ways _out_: the menu
+checklist still counts, and a last row for the menu, which says whether there is
+one and whether it has been checked, and opens the menu editor or creates the
+menu. While anything is missing, the setup progress sits at the top with the
+next item to do. Only the rows the checklist counts carry a status, a tick or
+an open circle, so the ticks always add up to the progress's "N of M done";
+the position and ordering at the table show none (issue [#2221]). Below the rows are the ways _out_: the menu
 (edit, or create when there is none), the menu code, the staff, the floor plan
 and the live tables.
 
 Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
-section's fields and its one Save. A successful save returns to the overview,
+section's fields and its one Save. While a save runs, the section is covered by the same "Saving…" overlay as the menu editor's save, so Save cannot be pressed twice (issue [#2225]). The position section says how the pin moves (a tap places it, nothing changes until Save) and opens at street level on the stored position, or on the device's position for a Restaurant that has none (`0, 0` counts as none), before the world view (issue [#2226]). Save stays disabled while the fields still
+hold what is stored, as in the menu editor, and enables again only when they
+differ (issue [#2222]); the order of the chosen categories does not count, and
+the time zone pre-filled for a restaurant that never set one is not a change. That pre-filled zone is the one the Restaurant's own position lies in, looked up offline (`@photostructure/tz-lookup`), and the device's only for a Restaurant without a position; a note under the picker names where it came from, and the device's zone when the two differ, before anything is saved. The picker opens a searchable list, by any part of the zone's name (issue [#2228]). A successful save returns to the overview,
 which reads the Restaurant again and shows the new value; a failed save stays on
 the section with the edit kept, so it can be tried again. The photo is the
 exception that stays: its upload reports its own progress in place. Every item
@@ -158,8 +167,10 @@ all be reviewed for the first time.
 - `restaurant/:restaurantId`, the overview
 - `restaurant/:restaurantId/edit/:section`, one section
 - `restaurant/:restaurantId/menu/:menuId`
+- `restaurant/:restaurantId/menu/:menuId/guest-bites`
+- `apps/bite-tribe-business-e2e/src/tests/guest-bites.spec.ts` covers Guest Bites: the overview's count leaves out a Bite the guest linked; a Bite whose name matches a dish is linked and stored as the owner's link; another is marked not on the menu after the confirmation and the list ends empty; the guest's own link is untouched
 - `apps/bite-tribe-business-e2e/src/tests/maintain-restaurant.spec.ts` covers the business login, the dashboard, the restaurants section, opening a Restaurant, and persisting its About text and address, stating the gender-neutral restroom across a reload and taking the answer back as a removed field, plus the ownership boundary: a Restaurant assigned to another account is absent from the list, the empty state renders, and the direct URL is refused
-- `apps/bite-tribe-business-e2e/src/tests/edit-menu.spec.ts` covers the edit-menu page: a category title stays unsaved through a pause in typing, cannot be saved empty, and persists on Save, which keeps the owner on the page with a toast and closes the editor; an older dish opens with its own price as an unnamed first variant and its variant named by its description, and saves in the new shape once named; a zero or empty price cannot be saved; and a variant switched off from the list is stored
+- `apps/bite-tribe-business-e2e/src/tests/edit-menu.spec.ts` covers the edit-menu page: a category title stays unsaved through a pause in typing, cannot be saved empty, and persists on Save, which keeps the owner on the page with a toast and closes the editor; an older dish opens with its own price as an unnamed first variant and its variant named by its description, and saves in the new shape once named; a zero or empty price cannot be saved; a variant switched off from the list is stored; and a dish deleted after the confirmation stays deleted after a reload, and a deleted category takes its dishes with it; and a menu built from Bites keeps its mark through a save and loses it, with its categories and currency intact, only when the owner confirms it
 
 ## Related GitHub Scope
 
@@ -190,7 +201,25 @@ all be reviewed for the first time.
 - Issue [#1377] moved the edit-menu page onto the public Signal Forms API and replaced the
   title and name autosave with an explicit Save, fixing an item rename that was never stored. A menu
   save no longer leaves the editor; it reports itself with a loading overlay and a toast.
+- Issue [#2254] adds options, choices on a dish that don't change its price. Part of epic [#2123].
 - Issue [#2182] made the edit-menu page a list with one editor per dish and per category, gave variants names of their own, and put availability switches in the list. Part of epic [#2123].
+- Issue [#2181] added deleting a dish and a category, each behind a confirmation. Part of epic [#2123].
+- Issue [#2214] added the owner's confirmation that a menu built from Bites is their own. Part of epic [#2123].
+- Issue [#2216] added Guest Bites, where the owner links guests' Bites to the dishes they are about. Part of epic [#2123].
+- Issue [#2221] made the overview's ticks agree with the setup progress: the menu got a row, and the rows the checklist does not count lost their tick. Part of epic [#2123].
+- Issue [#2222] disabled every section's Save until something changed, and made the Kind of place toast read "Kind of place saved". Part of epic [#2123].
+- Issue [#2223] stacked the address and link labels above their fields, as in the menu editor, and left the About field to its section heading. Part of epic [#2123].
+- Issue [#2224] added removing a link, left a blank link row out of the save instead of letting it block one, put the links' text in Transloco, and replaced Twitter with X and added TikTok in the network list. Part of epic [#2123].
+- Issue [#2225] put every section save under a "Saving…" overlay and ignored a second press while one runs. Part of epic [#2123].
+- Issue [#2226] opened the position map at street level instead of the world, said how to move the pin, and opened a Restaurant without a position on the device's position. The fix is in the shared map, so the consumer app's Bite position picker opens the same way. Part of epic [#2123].
+- Issue [#2227] made an open day need its times: the editor asks for them and will not save without, and the overview counts only the days guests are shown as open. Part of epic [#2123].
+- Issue [#2228] offered a Restaurant its own position's time zone instead of the device's, said which before saving, and made the zone picker searchable. Part of epic [#2123].
+- Issue [#2229] dropped the menu code card's own heading, which repeated the section's title. Part of epic [#2123].
+- Issue [#2230] fixed printing the menu code, which came out as one blank page once the code moved into its own section view ([#2183]), and added print-media Loki stories for it and the table sticker sheet so a blank printout fails the visual suite. Part of epic [#2123].
+- Issue [#2231] loaded the Restaurant on the menu editor and Guest Bites when they are opened by URL, so a reload or a shared link keeps the Restaurant's name above the menu. Part of epic [#2123].
+- Issue [#2232] sent a staff account refused by an owner route back to its own tables, told the page is the owner's, instead of to the owner's empty restaurant list. Part of epic [#2123].
+- Issue [#2233] made the shared header show the whole logo and app name at phone width: the title's button reserve fits the buttons, and a long name is sized to the space it has. Part of epic [#2123].
+- Issue [#2234] laid the opening hours out as a list at phone width, one line per day and its ranges under it, so both times and the remove button are on screen; phone-width stories guard it. Part of epic [#2123].
 
 ## Related Domains
 
@@ -226,9 +255,28 @@ all be reviewed for the first time.
 [#2127]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2127
 [#2123]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2123
 [#2183]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2183
+[#2181]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2181
 [#2182]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2182
+[#2255]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2255
+[#2254]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2254
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
 [#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194
+[#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2221
+[#2222]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2222
+[#2223]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2223
+[#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
+[#2225]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2225
+[#2226]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2226
+[#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227
+[#2228]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2228
+[#2229]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2229
+[#2230]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2230
+[#2231]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2231
+[#2232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2232
+[#2233]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2233
+[#2234]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2234

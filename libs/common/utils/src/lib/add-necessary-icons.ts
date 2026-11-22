@@ -15,6 +15,7 @@ import {
   businessOutline,
   cameraOutline,
   chatbubblesOutline,
+  checkmark,
   checkmarkCircle,
   checkmarkCircleOutline,
   ellipseOutline,
@@ -64,6 +65,9 @@ import {
   logoFacebook,
   logoGoogle,
   logoInstagram,
+  logoLinkedin,
+  logoTiktok,
+  logoX,
   logOutOutline,
   maleFemaleOutline,
   mapOutline,
@@ -119,7 +123,14 @@ export const addNecessaryIcons = (): void => {
     logoApple,
     logoFacebook,
     logoInstagram,
+    // The networks a restaurant links to (#2224).
+    logoLinkedin,
+    logoTiktok,
+    logoX,
     closeOutline,
+    // The pickers' "this one" mark (#2228, #2255): unregistered, it drew
+    // nothing at all.
+    checkmark,
     checkmarkOutline,
     checkmarkCircle,
     checkmarkCircleOutline,

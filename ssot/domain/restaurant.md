@@ -22,9 +22,11 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have one menu.
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
+- A day of the opening hours is open only when it is marked open **and** has at least one complete time range (`isOpenDay` in the model, issue [#2227]). The business overview counts open days by that rule and the consumer page shows a day as closed otherwise, so the two cannot disagree; the editor will not save a day marked open without its times. A range may cross midnight (22:00–02:00) and is shown as written.
+- A social media link names its `network` from a fixed list, `LINK_NETWORKS` in the model: website, instagram, facebook, tiktok, x and linkedin (issue [#2224]). X replaced Twitter: a link stored as `twitter` is read as `x` everywhere it is shown, and becomes `x` the next time its Restaurant's links are saved. The consumer page shows each network's logo, a globe for a website, and the network's own spelling.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
 - Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates every candidate Bite that does not already name a Restaurant with the new `restaurantId`, and records the verification on the candidate. A candidate Bite that already names one - picked by its Bite Creator after clustering - is left untouched, kept out of the initial Menu and listed in the candidate's `skippedBiteIds` (issue [#1498]). The full flow, its rules and its failure modes are in [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md).
-- The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
+- The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Dishes` category the business user edits afterwards. Not `Bites`, which it was called until [#2214]: a Bite is a guest's experience of a dish, a menu item is what the restaurant offers, and the category holds menu items. Menus created before then keep `Bites` until their owner renames it.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
 - A Restaurant records its owners and a claim state. The owner field and `claimStatus` exist on the model as of issue [#1074] and are written by an operator as of issue [#1077]; a missing `claimStatus` means `unclaimed`. The owner field is the set `ownerUserIds` since epic [#1614]. Ownership, assignment, and authorization are specified in [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and are the prerequisite for every operational restaurant capability.
@@ -218,7 +220,7 @@ Related future or expanding use cases:
 ## Related Epics
 
 - Restaurant menu
-- Menu items linked to Bites
+- Menu items linked to Bites — shipped in [#1113]
 - Search
 - BiteTrail packages
 - Issue [#735] - Restaurant Interaction Platform, the umbrella for ownership, floor plans, table management, QR ordering, and Bites from orders
@@ -310,6 +312,7 @@ images/restaurants/{restaurantId}/{filename}
 [#1100]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1100
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1389]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1389
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
@@ -329,3 +332,6 @@ images/restaurants/{restaurantId}/{filename}
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
+[#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227

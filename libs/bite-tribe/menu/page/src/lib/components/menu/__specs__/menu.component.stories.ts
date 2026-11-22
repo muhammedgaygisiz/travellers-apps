@@ -180,6 +180,61 @@ export const OrderingWithExtras: Story = {
   args: { menu: EXTRAS_MENU, canCreateBite: false, canAddToCart: true },
 };
 
+const OPTIONS_MENU: Menu = {
+  ...ORDERING_MENU,
+  categories: [
+    {
+      ...ORDERING_MENU.categories[0],
+      items: ORDERING_MENU.categories[0].items.map((item) =>
+        item.id === 'item-tsukemen'
+          ? {
+              ...item,
+              optionGroups: [
+                {
+                  id: 'option-broth',
+                  name: 'Broth',
+                  required: true,
+                  choices: [
+                    { id: 'broth-light', name: 'Light' },
+                    { id: 'broth-rich', name: 'Rich' },
+                  ],
+                },
+                {
+                  id: 'option-noodles',
+                  name: 'Noodles',
+                  required: false,
+                  choices: [
+                    { id: 'noodles-firm', name: 'Firm' },
+                    { id: 'noodles-soft', name: 'Soft' },
+                  ],
+                },
+              ],
+            }
+          : item,
+      ),
+    },
+  ],
+};
+
+/**
+ * Reading a menu whose dish has options (GitHub issue #2254): one line per
+ * option under the dish, with its choices and no prices, because an option
+ * has none.
+ */
+export const OptionsOnTheMenu: Story = {
+  args: { menu: OPTIONS_MENU, canCreateBite: false },
+};
+
+/**
+ * Ordering the same dish (GitHub issue #2254). Each option becomes a row of
+ * choices above the dish's sizes, the optional one says so, and until the
+ * required one is answered the hint says which and every add button of the
+ * dish is off.
+ */
+export const OrderingWithOptions: Story = {
+  args: { menu: OPTIONS_MENU, canCreateBite: false, canAddToCart: true },
+};
+
 /**
  * What people thought of two of the dishes (GitHub issue #1113).
  *

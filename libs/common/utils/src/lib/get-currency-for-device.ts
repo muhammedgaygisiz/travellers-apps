@@ -147,3 +147,20 @@ export function getCurrencyForDevice({
     ? currency
     : FALLBACK_CURRENCY;
 }
+
+/**
+ * The currency of the country a time zone lies in, or `undefined` when the
+ * zone is not one the map knows (GitHub issue #2255).
+ *
+ * Unlike {@link getCurrencyForDevice} it has no fallback, because its caller
+ * has a better one: a restaurant's position whose zone is unmapped should fall
+ * back to the device's currency, not to a default nobody chose.
+ */
+export function getCurrencyForTimeZone(
+  timeZone: string | undefined,
+): string | undefined {
+  const region = getRegionForTimeZone(timeZone);
+  const currency = region ? CURRENCY_BY_REGION[region] : undefined;
+
+  return currency && isSupportedCurrency(currency) ? currency : undefined;
+}

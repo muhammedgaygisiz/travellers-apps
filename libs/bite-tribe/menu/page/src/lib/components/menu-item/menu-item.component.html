@@ -49,6 +49,18 @@
     }
 
     <!--
+      A dish's options (issue #2254), read-only wherever nothing is ordered.
+      The ordering screen draws them as choices below instead.
+    -->
+    @if (!showOptionsPicker()) {
+      @for (line of optionLines(); track $index) {
+        <p class="option-line" data-testid="menu-item-option-line">
+          {{ line }}
+        </p>
+      }
+    }
+
+    <!--
       What people thought of this dish (GitHub issue #1113). One line under the
       name rather than the Bites themselves: a menu can run to sixty items, and
       a guest deciding what to order should not have to scroll past other
@@ -110,10 +122,75 @@
       taps before reading them - and the line it adds is then the plain dish
       they did not mean to order.
     -->
-    @if (canAddToCart() && orderable() && !showExtrasPicker()) {
+    @if (
+      canAddToCart() &&
+      orderable() &&
+      !showExtrasPicker() &&
+      !showOptionsPicker()
+    ) {
       <ng-container [ngTemplateOutlet]="addButton" />
     }
   </div>
+  <!--
+    The option choices (issue #2254). Ordering only, on the dish row, above its
+    variants: the choice is made once for the dish, whichever version of it is
+    added. A required option left open disables every add button of the dish.
+  -->
+  @if (showOptionsPicker()) {
+    <div class="options" data-testid="menu-item-options">
+      @for (group of optionGroups(); track group.id) {
+        <ion-radio-group
+          class="option-group"
+          [allowEmptySelection]="!group.required"
+          [value]="chosenChoice(group.id)"
+          [attr.data-testid]="'menu-item-option-' + group.id"
+          (ionChange)="choose(group.id, $event.detail.value)"
+        >
+          <p class="option-name">
+            {{ group.name }}
+            @if (!group.required) {
+              <span class="option-optional">{{
+                'menu-item-option-optional' | transloco
+              }}</span>
+            }
+          </p>
+          <div class="option-choices">
+            @for (choice of group.choices; track choice.id) {
+              <!--
+                `md` for a circle that is visible before it is chosen: the app
+                runs in `ios` mode, whose radio draws nothing until checked,
+                and a choice laid out inline rather than in a list row would
+                then read as plain text.
+              -->
+              <ion-radio
+                mode="md"
+                labelPlacement="end"
+                justify="start"
+                [value]="choice.id"
+                [attr.data-testid]="'menu-item-option-choice-' + choice.id"
+              >
+                {{ choice.name }}
+              </ion-radio>
+            }
+          </div>
+        </ion-radio-group>
+      }
+      @if (missingOptions().length) {
+        <p class="option-hint" data-testid="menu-item-option-hint">
+          {{
+            'menu-item-option-choose'
+              | transloco: { option: missingOptions()[0].name }
+          }}
+        </p>
+      }
+      <!-- Below the choices, for the reason the extras picker gives. -->
+      @if (orderable() && !showExtrasPicker()) {
+        <div class="options-add">
+          <ng-container [ngTemplateOutlet]="addButton" />
+        </div>
+      }
+    </div>
+  }
   <!--
     The extras picker (issue #1598). Ordering only: the reading surfaces draw
     the category's extras block once, under its dishes, which is where a menu
@@ -151,7 +228,8 @@
           [canCreateBite]="canCreateBite()"
           [canAddToCart]="canAddToCart()"
           [extras]="extras()"
-          (addToCartClick)="addToCartClick.emit($event)"
+          [optionsBlocked]="missingOptions().length > 0"
+          (addToCartClick)="onVariantAdded($event)"
           isVariant
         />
       }
@@ -163,7 +241,9 @@
   <ion-button
     size="small"
     data-testid="menu-item-add-to-cart"
-    [disabled]="isUnavailable(item())"
+    [disabled]="
+      isUnavailable(item()) || optionsBlocked() || missingOptions().length > 0
+    "
     (click)="onAddToCartClick(item())"
   >
     {{ 'table-order-add' | transloco }}

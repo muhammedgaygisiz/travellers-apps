@@ -162,6 +162,147 @@ describe('OpeningHoursComponent', () => {
     });
   });
 
+  /** GitHub issue #2222: no Save while the schedule is the stored one. */
+  describe('Save without a change', () => {
+    const saveButton = (): { disabled?: boolean } | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        'ion-button[data-testid="save-opening-hours"]',
+      );
+
+    const STORED: DaySchedule[] = [
+      {
+        day: 'tuesday',
+        isOpen: true,
+        timeRanges: [{ from: '10:00', to: '22:00' }],
+      },
+    ];
+
+    it('disables Save for the stored schedule, missing days read as closed', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      expect(saveButton()?.disabled).toBe(true);
+    });
+
+    it('disables Save for a restaurant with no hours until a day opens with times', () => {
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(true);
+
+      component.schedule.at(0).patchValue({ isOpen: true });
+      component.addTimeRange(0);
+      component
+        .getTimeRanges(0)
+        .at(0)
+        .patchValue({ from: '11:00', to: '22:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+    });
+
+    it('enables Save once a time changes, and disables it when undone', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      const range = component.getTimeRanges(1).at(0);
+      range.patchValue({ to: '23:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+
+      range.patchValue({ to: '22:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(true);
+    });
+
+    it('enables Save once a time range is added', () => {
+      componentRef.setInput('openingHours', STORED);
+      fixture.detectChanges();
+
+      component.addTimeRange(1);
+      component
+        .getTimeRanges(1)
+        .at(1)
+        .patchValue({ from: '18:00', to: '23:00' });
+      fixture.detectChanges();
+      expect(saveButton()?.disabled).toBe(false);
+    });
+  });
+
+  /**
+   * An open day needs its times (GitHub issue #2227): guests are shown a day
+   * without them as closed, so the editor asks for them before saving.
+   */
+  describe('open days without times', () => {
+    const el = (): HTMLElement => fixture.nativeElement as HTMLElement;
+    const saveButton = (): { disabled?: boolean } | null =>
+      el().querySelector('ion-button[data-testid="save-opening-hours"]');
+    let emitted: jest.Mock;
+
+    beforeEach(() => {
+      emitted = jest.fn();
+      component.submitOpeningHours.subscribe(emitted);
+      fixture.detectChanges();
+    });
+
+    it('starts a day ticked open with an empty range to fill in', () => {
+      component.schedule.at(2).patchValue({ isOpen: true });
+      (component as unknown as { openChanged(i: number): void }).openChanged(2);
+
+      expect(component.getTimeRanges(2).length).toBe(1);
+    });
+
+    it('asks for the times of an open day and will not save it', () => {
+      component.schedule.at(2).patchValue({ isOpen: true });
+      fixture.detectChanges();
+
+      expect(
+        el().querySelector('[data-testid="times-needed-wednesday"]'),
+      ).toBeTruthy();
+      expect(saveButton()?.disabled).toBe(true);
+      component.save();
+      expect(emitted).not.toHaveBeenCalled();
+    });
+
+    it('asks again for a range missing its end', () => {
+      component.schedule.at(2).patchValue({ isOpen: true });
+      component.addTimeRange(2);
+      component.getTimeRanges(2).at(0).patchValue({ from: '11:00' });
+      fixture.detectChanges();
+
+      expect(component.complete()).toBe(false);
+    });
+
+    it('saves once the day has its times, a range across midnight included', () => {
+      component.schedule.at(3).patchValue({ isOpen: true });
+      component.addTimeRange(3);
+      component
+        .getTimeRanges(3)
+        .at(0)
+        .patchValue({ from: '22:00', to: '02:00' });
+      fixture.detectChanges();
+
+      expect(
+        el().querySelector('[data-testid="times-needed-thursday"]'),
+      ).toBeNull();
+      component.save();
+      expect(emitted).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          {
+            day: 'thursday',
+            isOpen: true,
+            timeRanges: [{ from: '22:00', to: '02:00' }],
+          },
+        ]),
+      );
+    });
+
+    it('lets a day be unticked instead', () => {
+      component.schedule.at(2).patchValue({ isOpen: true });
+      component.schedule.at(2).patchValue({ isOpen: false });
+      fixture.detectChanges();
+
+      expect(component.complete()).toBe(true);
+    });
+  });
+
   describe('showSubmit', () => {
     // With every day closed by default, the save button is the only ion-button
     // rendered (add/remove-time-range buttons appear only for open days).

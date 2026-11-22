@@ -61,3 +61,58 @@
     padding: 0 4px;
   }
 }
+
+.times-needed {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+}
+
+/*
+ * At phone width the week is a list rather than a table (GitHub issue #2234).
+ * Three columns need about 540px, so at 375px the closing time and the remove
+ * button sat off the right edge of a page that cannot scroll sideways, and an
+ * owner could enter when they open but not when they close. Each day is one
+ * line - its name, and the open box at the end - with its ranges full width
+ * below. A range wraps its closing time under the opening one only where both
+ * boxes do not fit beside each other, which is a 12-hour locale at 320px; the
+ * boxes keep their 140px floor (#1549).
+ */
+@media (width < 600px) {
+  .opening-hours-table {
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding-block: 4px;
+      border-bottom: 1px solid var(--ion-color-step-150, #d7d8da);
+    }
+
+    td {
+      padding: 4px 0;
+    }
+
+    .day-cell,
+    .open-cell {
+      min-width: 0;
+    }
+
+    .times-cell {
+      grid-column: 1 / -1;
+      padding-top: 0;
+    }
+  }
+
+  .time-range-row {
+    flex-wrap: wrap;
+  }
+}

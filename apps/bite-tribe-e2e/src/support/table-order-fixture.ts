@@ -41,6 +41,16 @@ export interface TableOrderFixture {
   token: string;
   dishName: string;
   dishPrice: number;
+  /** Options on the dish (GitHub issue #2254). Absent for a plain dish. */
+  dishOptionGroups?: readonly FixtureOptionGroup[];
+}
+
+/** One option group as the fixture seeds it (GitHub issue #2254). */
+export interface FixtureOptionGroup {
+  id: string;
+  name: string;
+  required: boolean;
+  choices: readonly { id: string; name: string }[];
 }
 
 export const TABLE_ORDER_FIXTURE: TableOrderFixture = {
@@ -85,6 +95,31 @@ export const TABLE_GUEST_FIXTURE: TableOrderFixture = {
  * already (issue #1658). Its own everything, for the reason the one above
  * gives.
  */
+/** A dish with a required option, for ordering with options (#2254). */
+export const TABLE_OPTIONS_FIXTURE: TableOrderFixture = {
+  ...TABLE_ORDER_FIXTURE,
+  restaurantId: 'e2e-table-options-restaurant',
+  restaurantName: 'Two Chillies Kitchen',
+  roomId: 'e2e-table-options-room',
+  tableId: 'e2e-table-options-table',
+  menuId: 'e2e-table-options-menu',
+  visitId: 'e2e-table-options-visit',
+  token: 'TESTTESTTESTTESTTESTTEST44',
+  dishName: 'Chop Suey',
+  dishPrice: 13,
+  dishOptionGroups: [
+    {
+      id: 'e2e-option-heat',
+      name: 'How hot',
+      required: true,
+      choices: [
+        { id: 'e2e-heat-mild', name: 'Mild' },
+        { id: 'e2e-heat-hot', name: 'Hot' },
+      ],
+    },
+  ],
+};
+
 export const TABLE_CLAIM_FIXTURE: TableOrderFixture = {
   ...TABLE_ORDER_FIXTURE,
   restaurantId: 'e2e-table-claim-restaurant',
@@ -140,6 +175,34 @@ const openingHours = {
   },
 };
 
+const optionGroupsValue = (
+  groups: readonly FixtureOptionGroup[],
+): Record<string, unknown> => ({
+  arrayValue: {
+    values: groups.map((group) => ({
+      mapValue: {
+        fields: {
+          id: { stringValue: group.id },
+          name: { stringValue: group.name },
+          required: { booleanValue: group.required },
+          choices: {
+            arrayValue: {
+              values: group.choices.map((choice) => ({
+                mapValue: {
+                  fields: {
+                    id: { stringValue: choice.id },
+                    name: { stringValue: choice.name },
+                  },
+                },
+              })),
+            },
+          },
+        },
+      },
+    })),
+  },
+});
+
 const menuItem = (fixture: TableOrderFixture): Record<string, unknown> => ({
   mapValue: {
     fields: {
@@ -148,6 +211,9 @@ const menuItem = (fixture: TableOrderFixture): Record<string, unknown> => ({
       description: { stringValue: 'Tomato and mozzarella' },
       price: { integerValue: String(fixture.dishPrice) },
       isAvailable: { booleanValue: true },
+      ...(fixture.dishOptionGroups?.length
+        ? { optionGroups: optionGroupsValue(fixture.dishOptionGroups) }
+        : {}),
     },
   },
 });

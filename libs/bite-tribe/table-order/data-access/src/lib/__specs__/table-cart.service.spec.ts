@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import type { ExtraItem, Menu, MenuItem } from 'model';
+import type { ExtraItem, Menu, MenuItem, MenuOptionGroup } from 'model';
 import {
   TABLE_CART_KEY_PREFIX,
   TableCartService,
@@ -74,6 +74,28 @@ const MOZZARELLA: ExtraItem = {
 
 const NDUJA: ExtraItem = { id: 'extra-nduja', name: "'Nduja", price: 2.5 };
 
+/** A required option on a dish (GitHub issue #2254). */
+const HEAT: MenuOptionGroup = {
+  id: 'option-heat',
+  name: 'How hot',
+  required: true,
+  choices: [
+    { id: 'heat-mild', name: 'Mild' },
+    { id: 'heat-hot', name: 'Hot' },
+  ],
+};
+
+const DIAVOLA: MenuItem = {
+  id: 'item-diavola',
+  name: 'Diavola',
+  description: '',
+  price: 11.5,
+  optionGroups: [HEAT],
+};
+
+const MILD = { group: HEAT, choice: HEAT.choices[0] };
+const HOT = { group: HEAT, choice: HEAT.choices[1] };
+
 describe(TableCartService.name, () => {
   let cart: TableCartService;
 
@@ -85,6 +107,38 @@ describe(TableCartService.name, () => {
     });
 
     cart = TestBed.inject(TableCartService);
+  });
+
+  describe('options (#2254)', () => {
+    it('refuses a dish whose required option was not chosen', () => {
+      cart.add(DIAVOLA);
+
+      expect(cart.isEmpty()).toBe(true);
+    });
+
+    it('keeps a row per choice, and one row per repeated choice', () => {
+      cart.add(DIAVOLA, undefined, [], [HOT]);
+      cart.add(DIAVOLA, undefined, [], [MILD]);
+      cart.add(DIAVOLA, undefined, [], [HOT]);
+
+      expect(cart.lines().map((line) => line.quantity)).toEqual([2, 1]);
+      expect(cartLineKey(DIAVOLA, undefined, [], [HOT])).not.toBe(
+        cartLineKey(DIAVOLA, undefined, [], [MILD]),
+      );
+    });
+
+    it('sends the chosen options by id, at the dish price', () => {
+      cart.add(DIAVOLA, undefined, [], [HOT]);
+
+      expect(cart.toRequestLines('EUR')).toEqual([
+        {
+          menuItemId: DIAVOLA.id,
+          quantity: 1,
+          price: 11.5,
+          options: [{ groupId: HEAT.id, choiceId: 'heat-hot' }],
+        },
+      ]);
+    });
   });
 
   describe('adding', () => {
@@ -104,6 +158,7 @@ describe(TableCartService.name, () => {
           quantity: 1,
           notes: '',
           extras: [],
+          options: [],
         },
       ]);
       expect(cart.total()).toBe(12);
@@ -450,6 +505,41 @@ describe(TableCartService.name, () => {
           price: 12,
         },
       ]);
+    });
+
+    it('keeps the options a guest chose (#2254)', async () => {
+      cart.add(DIAVOLA, undefined, [], [HOT]);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(menuOf(DIAVOLA));
+
+      expect(next.lines()[0].options).toEqual([HOT]);
+    });
+
+    it('drops a row whose chosen choice has gone (#2254)', async () => {
+      cart.add(DIAVOLA, undefined, [], [HOT]);
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(
+        menuOf({
+          ...DIAVOLA,
+          optionGroups: [{ ...HEAT, choices: [HEAT.choices[0]] }],
+        }),
+      );
+
+      expect(next.isEmpty()).toBe(true);
+    });
+
+    it('drops a row the dish now asks a required choice of (#2254)', async () => {
+      cart.add({ ...DIAVOLA, optionGroups: [] });
+      await Promise.resolve();
+
+      const next = reloaded();
+      await next.restore(menuOf(DIAVOLA));
+
+      expect(next.isEmpty()).toBe(true);
     });
 
     it('keeps the variant a guest chose', async () => {

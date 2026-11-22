@@ -19,9 +19,15 @@ export type * from './lib/settings';
  * run, not shapes they compile against (issue #1099).
  */
 export * from './lib/menu';
+/** A value export: the dish-name key a Bite is matched to a menu item by (#2216). */
+export * from './lib/dish-name-key';
+/** A value export: whether a Bite still waits for its owner's link (#2216). */
+export * from './lib/link-bite-to-menu-item';
 export type * from './lib/geopoint';
 export type * from './lib/position-source';
 export type * from './lib/link';
+/** A value export: the networks a restaurant links to (#2224). */
+export * from './lib/link-network';
 export type * from './lib/save-to-bucket-list-params';
 export type * from './lib/create-and-save-to-bucket-list-params';
 export type * from './lib/create-bucket-list-from-bite-trail-params';
@@ -37,6 +43,8 @@ export type * from './lib/profile-meta-data';
 export type * from './lib/create-and-upload-image-callback-params';
 export type * from './lib/bite-trail-rating';
 export type * from './lib/opening-hours';
+/** A value export: when a day counts as open (#2227). */
+export * from './lib/open-day';
 export type * from './lib/address';
 export type * from './lib/place-details';
 export type * from './lib/search-result';

@@ -141,6 +141,11 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // this one invalidates a printed sticker.
   rotateTableQrTokens: 'restaurantAuthority',
 
+  // An owner linking a guest's Bite to a dish on their own menu, or marking it
+  // as not on the menu (issue #2216). The Bite rules stay closed to owners, so
+  // this guard and the ownership check behind it are the whole authority.
+  linkBiteToMenuItem: 'restaurantAuthority',
+
   // A restaurant operating its own dining room during service (issue #1092).
   // Not `restaurantAuthority`: the caller is usually a host rather than the
   // account the restaurant is assigned to, and requiring `business` here would

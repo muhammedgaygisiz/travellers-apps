@@ -525,6 +525,8 @@ describe('BiteService', () => {
           visitId: 'visit-1',
           menuItemId: 'item-margherita',
           variantId: 'variant-large',
+          // The guest chose the dish themself (issue #2216).
+          menuItemLinkedBy: 'guest',
         },
         undefined,
       );

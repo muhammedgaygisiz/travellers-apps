@@ -66,7 +66,7 @@
           </ion-text>
           <ion-button
             data-testid="save-categories"
-            [disabled]="categoriesForm.invalid"
+            [disabled]="categoriesForm.invalid || unchanged().categories"
             (click)="saveCategories()"
           >
             {{ 'save' | transloco }}
@@ -75,8 +75,13 @@
       }
       @case ('about') {
         <div class="ion-margin-top" [formGroup]="descriptionForm">
+          <!--
+            No label of its own: the field sits under the section's "About"
+            heading, and an inline label read as the description's first
+            words (#2223). Screen readers get the heading's text.
+          -->
           <ion-textarea
-            label="{{ 'about-restaurant' | transloco }}"
+            [attr.aria-label]="'restaurant-section-about' | transloco"
             formControlName="description"
             fill="outline"
             auto-grow="true"
@@ -88,6 +93,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-description"
+            [disabled]="unchanged().about"
             (click)="saveDescription()"
           >
             {{ 'save' | transloco }}
@@ -102,48 +108,66 @@
 
           <ion-list lines="full" formArrayName="links">
             @for (socialMedia of links.controls; track $index; let i = $index) {
-              <ion-item [formGroupName]="i">
+              <ion-item
+                [formGroupName]="i"
+                [attr.data-testid]="'restaurant-link-' + i"
+              >
                 <ion-select
                   class="ion-margin-end"
-                  placeholder="Social Network"
+                  [placeholder]="'restaurant-link-network' | transloco"
+                  [attr.aria-label]="'restaurant-link-network' | transloco"
                   interface="popover"
                   formControlName="network"
                 >
-                  <ion-select-option value="facebook"
-                    >Facebook
-                  </ion-select-option>
-                  <ion-select-option value="instagram"
-                    >Instagram
-                  </ion-select-option>
-                  <ion-select-option value="twitter">Twitter</ion-select-option>
-                  <ion-select-option value="linkedin"
-                    >LinkedIn
-                  </ion-select-option>
-                  <ion-select-option value="website">Website</ion-select-option>
+                  @for (option of linkNetworks; track option.network) {
+                    <ion-select-option [value]="option.network">{{
+                      option.name
+                    }}</ion-select-option>
+                  }
                 </ion-select>
-                <ion-input placeholder="Link" formControlName="url"></ion-input>
+                <!-- A label that stays once a URL is typed (#2223). -->
+                <ion-input
+                  labelPlacement="stacked"
+                  [label]="'restaurant-link-url' | transloco"
+                  placeholder="https://"
+                  formControlName="url"
+                ></ion-input>
+                <!-- Takes the link off; Save writes the list without it (#2224). -->
+                <ion-button
+                  slot="end"
+                  fill="clear"
+                  color="danger"
+                  data-testid="remove-link"
+                  [attr.aria-label]="'restaurant-link-remove' | transloco"
+                  (click)="removeSocialMedia(i)"
+                >
+                  <ion-icon
+                    slot="icon-only"
+                    name="trash-outline"
+                    aria-hidden="true"
+                  />
+                </ion-button>
               </ion-item>
             }
           </ion-list>
 
           <!--
-              Add and Save sit together under the list they belong to. The Save
-              used to be at the very bottom of the page, under the navigation
-              buttons; in two columns that put it beside the opening hours and
-              nowhere near the links it writes.
+              Add and Save sit together under the list they belong to. Save
+              shows with no rows too: removing the last link is a change to
+              save (#2224).
             -->
           <div class="section-actions">
-            <ion-button (click)="addSocialMedia()">Add Link</ion-button>
+            <ion-button data-testid="add-link" (click)="addSocialMedia()">{{
+              'restaurant-link-add' | transloco
+            }}</ion-button>
 
-            @if (links.length) {
-              <ion-button
-                data-testid="save-social-media"
-                [disabled]="isInvalid()"
-                (click)="saveSocialMediaLinks()"
-              >
-                {{ 'save' | transloco }}
-              </ion-button>
-            }
+            <ion-button
+              data-testid="save-social-media"
+              [disabled]="isInvalid() || unchanged().links"
+              (click)="saveSocialMediaLinks()"
+            >
+              {{ 'save' | transloco }}
+            </ion-button>
           </div>
         </div>
       }
@@ -151,6 +175,7 @@
         <div class="ion-margin-top" [formGroup]="addressForm">
           <ion-input
             label="{{ 'street' | transloco }}"
+            labelPlacement="stacked"
             formControlName="street"
             fill="outline"
             class="ion-margin-top"
@@ -160,6 +185,7 @@
           <div class="ion-display-flex ion-gap-2 ion-margin-top">
             <ion-input
               label="{{ 'postcode' | transloco }}"
+              labelPlacement="stacked"
               formControlName="postcode"
               fill="outline"
               mode="md"
@@ -168,6 +194,7 @@
             />
             <ion-input
               label="{{ 'city' | transloco }}"
+              labelPlacement="stacked"
               formControlName="city"
               fill="outline"
               mode="md"
@@ -177,6 +204,7 @@
           </div>
           <ion-input
             label="{{ 'country' | transloco }}"
+            labelPlacement="stacked"
             formControlName="country"
             fill="outline"
             class="ion-margin-top"
@@ -186,6 +214,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-address"
+            [disabled]="unchanged().address"
             (click)="saveAddress()"
           >
             {{ 'save' | transloco }}
@@ -194,10 +223,17 @@
       }
       @case ('position') {
         <div [formGroup]="positionForm">
-          <position formControlName="position" />
+          <!-- How the pin moves; a tap is all it takes (#2226). -->
+          <ion-text color="medium">
+            <p class="note" data-testid="position-hint">
+              {{ 'restaurant-position-hint' | transloco }}
+            </p>
+          </ion-text>
+          <position formControlName="position" [gpsPosition]="gpsPosition()" />
           <ion-button
             class="ion-margin-top"
             data-testid="save-position"
+            [disabled]="unchanged().position"
             (click)="savePosition()"
           >
             {{ 'save' | transloco }}
@@ -236,6 +272,7 @@
           <ion-button
             class="ion-margin-top"
             data-testid="save-facilities"
+            [disabled]="unchanged().facilities"
             (click)="saveFacilities()"
           >
             {{ 'save' | transloco }}
@@ -324,22 +361,106 @@
               The opening hours above are read in it, so a wrong one closes a
               Jakarta restaurant at four in the afternoon (issue #1100).
             -->
-          <ion-item>
-            <ion-select
-              formControlName="timeZone"
-              [label]="'table-ordering-time-zone' | transloco"
-              data-testid="table-ordering-time-zone"
-            >
-              @for (zone of timeZones(); track zone) {
-                <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
-              }
-            </ion-select>
+          @let zone = tableOrderingForm.controls.timeZone.value;
+          <!--
+              A row that opens a searchable list (#2228): several hundred zones
+              in one alert took four scrolls to get from Zurich to Berlin.
+            -->
+          <ion-item
+            button
+            detail
+            data-testid="table-ordering-time-zone"
+            (click)="openTimeZonePicker()"
+          >
+            <ion-label>{{ 'table-ordering-time-zone' | transloco }}</ion-label>
+            <ion-note slot="end" data-testid="table-ordering-time-zone-value">{{
+              zone
+            }}</ion-note>
           </ion-item>
+          @if (!restaurantData?.tableOrdering?.timeZone) {
+            <!-- What will be saved, and where it came from (#2228). -->
+            <ion-text color="medium">
+              <p class="note" data-testid="table-ordering-time-zone-source">
+                @if (suggestedTimeZone().source === 'position') {
+                  {{
+                    'table-ordering-time-zone-from-position'
+                      | transloco: { zone: suggestedTimeZone().zone }
+                  }}
+                  @if (suggestedTimeZone().zone !== deviceTimeZone) {
+                    {{
+                      'table-ordering-time-zone-device-differs'
+                        | transloco: { zone: deviceTimeZone }
+                    }}
+                  }
+                } @else {
+                  {{
+                    'table-ordering-time-zone-from-device'
+                      | transloco: { zone: suggestedTimeZone().zone }
+                  }}
+                }
+              </p>
+            </ion-text>
+          }
+
+          <ion-modal
+            [isOpen]="timeZonePickerOpen()"
+            (didDismiss)="timeZonePickerOpen.set(false)"
+          >
+            <ng-template>
+              <ion-header>
+                <ion-toolbar>
+                  <ion-title>{{
+                    'table-ordering-time-zone' | transloco
+                  }}</ion-title>
+                </ion-toolbar>
+                <ion-toolbar>
+                  <ion-searchbar
+                    data-testid="time-zone-search"
+                    [placeholder]="
+                      'table-ordering-time-zone-search' | transloco
+                    "
+                    [value]="timeZoneQuery()"
+                    [debounce]="0"
+                    (ionInput)="
+                      timeZoneQuery.set($any($event).detail.value ?? '')
+                    "
+                  />
+                </ion-toolbar>
+              </ion-header>
+              <ion-content>
+                <ion-list lines="full">
+                  @for (option of matchingTimeZones(); track option) {
+                    <ion-item
+                      button
+                      [attr.data-testid]="'time-zone-' + option"
+                      (click)="chooseTimeZone(option)"
+                    >
+                      <ion-label>{{ option }}</ion-label>
+                      @if (option === zone) {
+                        <ion-icon
+                          slot="end"
+                          name="checkmark"
+                          color="primary"
+                          aria-hidden="true"
+                        />
+                      }
+                    </ion-item>
+                  } @empty {
+                    <ion-item lines="none">
+                      <ion-label color="medium">{{
+                        'table-ordering-time-zone-none' | transloco
+                      }}</ion-label>
+                    </ion-item>
+                  }
+                </ion-list>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
 
           <ion-button
             class="ion-margin-top"
             data-testid="save-table-ordering"
-            [disabled]="tableOrderingForm.invalid"
+            [disabled]="tableOrderingForm.invalid || unchanged().tableOrdering"
             (click)="submitTableOrdering()"
           >
             {{ 'save' | transloco }}

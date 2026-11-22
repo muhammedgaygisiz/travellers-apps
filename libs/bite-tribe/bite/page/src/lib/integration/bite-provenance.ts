@@ -40,11 +40,17 @@ import type { Bite } from 'model';
  */
 
 /** The fields a draft carries that the form cannot. */
-export type BiteProvenance = Pick<Bite, 'visitId' | 'menuItemId' | 'variantId'>;
+export type BiteProvenance = Pick<
+  Bite,
+  'visitId' | 'menuItemId' | 'variantId' | 'menuItemLinkedBy'
+>;
 
 const linkOf = (draft: Partial<Bite> | undefined): BiteProvenance => ({
   ...(draft?.visitId ? { visitId: draft.visitId } : {}),
-  ...(draft?.menuItemId ? { menuItemId: draft.menuItemId } : {}),
+  // The guest chose the dish, from an order or from the menu (issue #2216).
+  ...(draft?.menuItemId
+    ? { menuItemId: draft.menuItemId, menuItemLinkedBy: 'guest' as const }
+    : {}),
   ...(draft?.variantId ? { variantId: draft.variantId } : {}),
 });
 

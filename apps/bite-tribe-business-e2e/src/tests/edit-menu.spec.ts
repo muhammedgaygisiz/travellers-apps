@@ -35,7 +35,11 @@ interface MenuFixture {
  * #1377, opening such a category made the editor save the menu on load and
  * leave, because the stored `undefined` differed from the form's `''`.
  */
-const seedMenu = async (page: Page, runId: number): Promise<MenuFixture> => {
+const seedMenu = async (
+  page: Page,
+  runId: string,
+  { derivedFromBites = false } = {},
+): Promise<MenuFixture> => {
   const fixture = {
     restaurantId: `menu-restaurant-${runId}`,
     restaurantName: `Menu Bistro ${runId}`,
@@ -49,6 +53,12 @@ const seedMenu = async (page: Page, runId: number): Promise<MenuFixture> => {
   await seedFirestoreDocument(page, `menus/${fixture.menuId}`, {
     id: { stringValue: fixture.menuId },
     restaurantId: { stringValue: fixture.restaurantId },
+    ...(derivedFromBites
+      ? {
+          derivedFromBites: { booleanValue: true },
+          currency: { stringValue: 'CHF' },
+        }
+      : {}),
     categories: {
       arrayValue: {
         values: [
@@ -137,6 +147,15 @@ type StoredItem = {
 };
 type StoredCategory = { title: string; items: StoredItem[] };
 
+const storedCategories = async (
+  page: Page,
+  menuId: string,
+): Promise<StoredCategory[] | undefined> => {
+  const menu = await getFirestoreDocument(page, `menus/${menuId}`);
+
+  return menu?.['categories'] as StoredCategory[] | undefined;
+};
+
 const storedCategory = async (
   page: Page,
   menuId: string,
@@ -181,11 +200,20 @@ test.describe('Edit a menu in the business app', () => {
 
   const start = async (
     page: Page,
+    options: { derivedFromBites?: boolean } = {},
   ): Promise<{
     fixture: MenuFixture;
     editMenu: EditMenuPage;
   }> => {
-    const fixture = await seedMenu(page, Date.now());
+    // Unique per test, not per millisecond: the tests in this file run in
+    // parallel and each deletes its menu afterwards, so two tests that start
+    // in the same millisecond would share a menu and delete it under each
+    // other (seen while adding the delete tests, issue #2181).
+    const fixture = await seedMenu(
+      page,
+      `${Date.now()}-${test.info().parallelIndex}`,
+      options,
+    );
     seeded.push(
       `restaurants/${fixture.restaurantId}`,
       `menus/${fixture.menuId}`,
@@ -312,5 +340,111 @@ test.describe('Edit a menu in the business app', () => {
         { timeout: 15_000 },
       )
       .toBe(false);
+  });
+
+  /** See GitHub issue #2181. */
+  /**
+   * The restaurant's name above the menu, opened by URL (issue #2231): a
+   * reload of the editor and Guest Bites opened directly both used to lose it,
+   * because only navigating from the overview had put the restaurant in the
+   * store.
+   */
+  test('shows the restaurant name on the menu pages after a reload', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const { fixture } = await start(page);
+    const name = page.getByTestId('menu-restaurant-name');
+
+    await expect(name).toHaveText(fixture.restaurantName);
+
+    await page.reload();
+    await expect(name).toHaveText(fixture.restaurantName, { timeout: 20_000 });
+
+    await page.goto(
+      `/restaurant/${fixture.restaurantId}/menu/${fixture.menuId}/guest-bites`,
+    );
+    await expect(name).toHaveText(fixture.restaurantName, { timeout: 20_000 });
+  });
+
+  test('deletes a dish after asking, and it stays deleted after a reload', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.openDish(fixture.plainItemId);
+    await editMenu.deleteOpen('dish');
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.items.map(
+            (item) => item.name,
+          ),
+        { timeout: 15_000 },
+      )
+      .toEqual(['Margherita']);
+
+    // The reloaded page reads the stored menu again: the kept dish is back,
+    // the deleted one is not.
+    await page.reload();
+    await expect(page.getByTestId(`menu-dish-${fixture.itemId}`)).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(
+      page.getByTestId(`menu-dish-${fixture.plainItemId}`),
+    ).toHaveCount(0);
+  });
+
+  test('deletes a category with its dishes after asking', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page);
+
+    await editMenu.openCategory(fixture.categoryId);
+    await editMenu.deleteOpen('category');
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(async () => await storedCategories(page, fixture.menuId), {
+        timeout: 15_000,
+      })
+      .toEqual([]);
+  });
+
+  /** See GitHub issue #2214. */
+  test('takes a menu built from Bites as the restaurant’s only when the owner confirms it', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { derivedFromBites: true });
+    const notice = page.getByTestId('menu-derived-notice');
+    await expect(notice).toBeVisible();
+
+    // A save is not the confirmation.
+    await editMenu.openCategory(fixture.categoryId);
+    await editMenu.categoryTitle.fill('Pizze');
+    await editMenu.saveCategory.click();
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(async () => (await storedCategory(page, fixture.menuId))?.title, {
+        timeout: 15_000,
+      })
+      .toBe('Pizze');
+    expect(
+      (await getFirestoreDocument(page, `menus/${fixture.menuId}`))?.[
+        'derivedFromBites'
+      ],
+    ).toBe(true);
+    await expect(notice).toBeVisible();
+
+    await editMenu.confirmOwnMenu();
+
+    await expect(notice).toBeHidden();
+    const menu = await getFirestoreDocument(page, `menus/${fixture.menuId}`);
+    expect(menu?.['derivedFromBites']).toBeUndefined();
+    expect(menu?.['currency']).toBe('CHF');
+    expect((menu?.['categories'] as StoredCategory[])[0].items).toHaveLength(2);
   });
 });

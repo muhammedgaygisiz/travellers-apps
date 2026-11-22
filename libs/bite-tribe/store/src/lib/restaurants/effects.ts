@@ -2,9 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { routerNavigatedAction } from '@ngrx/router-store';
-import { catchError, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { menuId, restaurantId } from '../router/selectors';
+import { restaurant } from './selectors';
 import {
   loadedRestaurantFromApi,
   noRestaurantFound,
@@ -20,11 +21,18 @@ export class RestaurantEffects {
 
   restaurantID = toSignal(this.store.select(restaurantId));
   menuID = toSignal(this.store.select(menuId));
+  private readonly routeRestaurant = toSignal(this.store.select(restaurant));
 
   /**
-   * Loads the Restaurant the current route identifies. The menu route is left
-   * alone, because it reuses the Restaurant its own page already put in the
-   * store.
+   * Loads the Restaurant the current route identifies.
+   *
+   * A menu route loads it only when the store does not hold it already. Reached
+   * from the Restaurant's own page it is there and is reused; opened by URL - a
+   * reload, a bookmark, a shared link - nothing had loaded it, and the business
+   * menu editor and Guest Bites lost the Restaurant's name (GitHub issue
+   * #2231). A menu route whose Restaurant cannot be read reports nothing: its
+   * menu loads from the route's `menuId` either way, so a menu page that
+   * worked without the Restaurant keeps working exactly as before.
    *
    * Which route this is comes from the parsed route parameters. Deciding it by
    * searching the URL text instead also matched a Restaurant whose id or place
@@ -39,18 +47,23 @@ export class RestaurantEffects {
   loadRestaurantById$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(routerNavigatedAction),
-      map(() => this.restaurantID()),
-      filter((id): id is string => !!id && !this.menuID()),
-      switchMap((id) =>
+      map(() => ({ id: this.restaurantID(), onMenu: !!this.menuID() })),
+      filter(
+        (route): route is { id: string; onMenu: boolean } =>
+          !!route.id && (!route.onMenu || !this.routeRestaurant()),
+      ),
+      switchMap(({ id, onMenu }) =>
         from(this.api.loadRestaurant(id)).pipe(
-          map((restaurant) => {
-            if (!restaurant) {
-              return noRestaurantFound({ restaurantId: id });
+          switchMap((restaurant) => {
+            if (restaurant) {
+              return of(loadedRestaurantFromApi({ restaurant }));
             }
 
-            return loadedRestaurantFromApi({ restaurant });
+            return onMenu ? EMPTY : of(noRestaurantFound({ restaurantId: id }));
           }),
-          catchError(() => of(noRestaurantFound({ restaurantId: id }))),
+          catchError(() =>
+            onMenu ? EMPTY : of(noRestaurantFound({ restaurantId: id })),
+          ),
         ),
       ),
     );

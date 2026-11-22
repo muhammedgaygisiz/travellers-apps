@@ -127,16 +127,147 @@ describe(EditMenuPage.name, () => {
     expect(saved).not.toHaveBeenCalled();
   });
 
-  /**
-   * The device's currency is a good guess and never an answer - a chain
-   * operator editing a Zurich menu from Berlin would be handed euros - so it is
-   * offered first and still has to be saved.
-   */
-  it('offers the device currency first, and every other one after it', () => {
+  it('offers every currency once', () => {
     const offered = component.currencies();
 
     expect(offered.length).toBeGreaterThan(1);
     expect(new Set(offered.map((c) => c.code)).size).toBe(offered.length);
+  });
+
+  /**
+   * The restaurant's currency, from its position, before the device's: a chain
+   * operator or an agency sets a Munich menu up from Zurich (GitHub issue
+   * #2255).
+   */
+  describe('the suggested currency (#2255)', () => {
+    const at = (latitude: number, longitude: number): void => {
+      componentRef.setInput('restaurant', {
+        id: 'r1',
+        name: 'Trattoria',
+        position: { latitude, longitude },
+      });
+      withMenu({ ...MENU, currency: undefined });
+    };
+
+    it("suggests the currency of the restaurant's country from its position", () => {
+      at(48.137, 11.575); // Munich
+
+      expect(component.suggestedCurrency()).toEqual({
+        code: 'EUR',
+        source: 'position',
+      });
+      expect(component.currencies()[0].code).toBe('EUR');
+
+      at(47.376, 8.541); // Zurich
+
+      expect(component.suggestedCurrency().code).toBe('CHF');
+    });
+
+    it('falls back to the device without a position', () => {
+      at(0, 0);
+
+      expect(component.suggestedCurrency()).toEqual({
+        code: component.deviceCurrency,
+        source: 'device',
+      });
+    });
+
+    it('lists the rest by code', () => {
+      at(48.137, 11.575);
+
+      const rest = component
+        .currencies()
+        .slice(1)
+        .map(({ code }) => code);
+
+      expect(rest).toEqual([...rest].sort((a, b) => a.localeCompare(b)));
+    });
+
+    it('says where the suggestion comes from, and uses it in one tap', () => {
+      at(48.137, 11.575);
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(
+        el.querySelector('[data-testid="menu-currency-suggestion"]')
+          ?.textContent,
+      ).toContain('menu-currency-from-position');
+
+      (
+        el.querySelector(
+          '[data-testid="menu-currency-use-suggestion"]',
+        ) as HTMLElement
+      ).click();
+
+      expect(saved).toHaveBeenCalledWith('EUR');
+      expect(component.currency()).toBe('EUR');
+    });
+
+    it('offers no suggestion once the menu states a currency', () => {
+      at(48.137, 11.575);
+      withMenu(MENU);
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          '[data-testid="menu-currency-suggestion"]',
+        ),
+      ).toBeNull();
+    });
+  });
+
+  describe('the currency picker (#2255)', () => {
+    beforeEach(() => withMenu(MENU));
+
+    it.each([
+      ['code', 'chf', 'CHF'],
+      ['symbol', '£', 'GBP'],
+      ['name', 'yen', 'JPY'],
+    ])('finds a currency by its %s', (_field, query, code) => {
+      component.currencyQuery.set(query);
+
+      expect(component.matchingCurrencies().map((c) => c.code)).toContain(code);
+    });
+
+    it('opens with an empty search', () => {
+      component.currencyQuery.set('yen');
+
+      component.openCurrencyPicker();
+
+      expect(component.currencyPickerOpen()).toBe(true);
+      expect(component.matchingCurrencies()).toEqual(component.currencies());
+    });
+
+    it('saves the chosen currency and closes', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+      component.openCurrencyPicker();
+
+      component.chooseCurrency('JPY');
+
+      expect(saved).toHaveBeenCalledWith('JPY');
+      expect(component.currencyPickerOpen()).toBe(false);
+      expect(component.currentCurrency()?.code).toBe('JPY');
+    });
+
+    it('unsets the currency with "Not set"', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      component.chooseCurrency('');
+
+      expect(saved).toHaveBeenCalledWith('');
+      expect(component.currentCurrency()).toBeUndefined();
+    });
+
+    it('saves nothing when the same currency is chosen again', () => {
+      const saved = jest.fn();
+      component.saveCurrencyCode.subscribe(saved);
+
+      component.chooseCurrency('EUR');
+
+      expect(saved).not.toHaveBeenCalled();
+    });
   });
 
   /** One editor at a time over the list (GitHub issue #2182). */

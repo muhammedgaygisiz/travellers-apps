@@ -26,8 +26,25 @@
   }
 
   .currency {
-    --background: transparent;
-    flex: 0 1 16rem;
+    display: flex;
+    flex: 0 1 18rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    ion-item {
+      --background: transparent;
+      width: 100%;
+    }
+
+    .note {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+
+    ion-button {
+      margin: 0;
+    }
   }
 
   .derived-notice {

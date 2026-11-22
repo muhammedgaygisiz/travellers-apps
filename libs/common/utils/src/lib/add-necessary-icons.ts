@@ -15,6 +15,7 @@ import {
   businessOutline,
   cameraOutline,
   chatbubblesOutline,
+  checkmark,
   checkmarkCircle,
   checkmarkCircleOutline,
   ellipseOutline,
@@ -127,6 +128,9 @@ export const addNecessaryIcons = (): void => {
     logoTiktok,
     logoX,
     closeOutline,
+    // The pickers' "this one" mark (#2228, #2255): unregistered, it drew
+    // nothing at all.
+    checkmark,
     checkmarkOutline,
     checkmarkCircle,
     checkmarkCircleOutline,

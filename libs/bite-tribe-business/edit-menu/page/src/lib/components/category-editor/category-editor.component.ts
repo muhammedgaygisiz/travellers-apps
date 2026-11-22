@@ -7,6 +7,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
@@ -98,8 +99,47 @@ export class CategoryEditorComponent {
       JSON.stringify(this.category()?.extrasBlock ?? null),
   );
 
+  /** The category the form and the extras draft were last read from. */
+  private loaded: Category | undefined;
+
+  /**
+   * The stored category, read into the editor when it opens.
+   *
+   * The same category arrives again whenever the menu is read back after a
+   * save of something else - the currency, an availability switch, a reorder
+   * in the list (GitHub issue #2259). With an edit pending that re-read keeps
+   * the edit: only a field the owner has not touched is read again, and the
+   * extras draft only when it still holds what was loaded.
+   */
   readonly load = effect(() => {
     const category = this.category();
+    const loaded = this.loaded;
+    const sameCategory = !!category && category.id === loaded?.id;
+    // Untracked: the effect answers a change of the stored category, not
+    // every keystroke in the extras.
+    const extrasEdited =
+      JSON.stringify(untracked(() => this.extrasDraft()) ?? null) !==
+      JSON.stringify(loaded?.extrasBlock ?? null);
+
+    this.loaded = category;
+
+    if (sameCategory && (this.form.dirty || extrasEdited)) {
+      const { title, subtitle } = this.form.controls;
+
+      if (title.pristine) {
+        title.setValue(category.title ?? '');
+      }
+
+      if (subtitle.pristine) {
+        subtitle.setValue(category.subtitle ?? '');
+      }
+
+      if (!extrasEdited) {
+        this.extrasDraft.set(category.extrasBlock);
+      }
+
+      return;
+    }
 
     this.form.reset({
       title: category?.title ?? '',

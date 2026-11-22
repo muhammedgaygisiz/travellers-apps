@@ -87,6 +87,46 @@ describe(CategoryEditorComponent.name, () => {
     expect(saved).toHaveBeenCalledWith({ title: 'Dolci', subtitle: '' });
   });
 
+  /**
+   * The same category read back after a save of something else, while the
+   * editor is open (GitHub issue #2259).
+   */
+  describe('the same category read again', () => {
+    it('keeps an unsaved title and reads again the untouched subtitle', () => {
+      const { fixture, component } = setup(PIZZA);
+      component.form.controls.title.setValue('Pizze');
+      component.form.controls.title.markAsDirty();
+
+      fixture.componentRef.setInput('category', {
+        ...PIZZA,
+        subtitle: 'From the wood oven',
+      });
+      fixture.detectChanges();
+
+      expect(component.form.getRawValue()).toEqual({
+        title: 'Pizze',
+        subtitle: 'From the wood oven',
+      });
+      expect(component.form.dirty).toBe(true);
+    });
+
+    it('replaces a pending edit when a different category opens', () => {
+      const { fixture, component } = setup(PIZZA);
+      component.form.controls.title.setValue('Pizze');
+      component.form.controls.title.markAsDirty();
+
+      fixture.componentRef.setInput('category', {
+        ...PIZZA,
+        id: 'c2',
+        title: 'Dolci',
+      });
+      fixture.detectChanges();
+
+      expect(component.form.controls.title.value).toBe('Dolci');
+      expect(component.form.dirty).toBe(false);
+    });
+  });
+
   it('saves no category without a title', () => {
     const { component } = setup(undefined);
     const saved = jest.fn();
@@ -179,15 +219,31 @@ describe(CategoryEditorComponent.name, () => {
       });
     });
 
-    it('throws the edit away when the stored category is read again', () => {
+    /** A re-read after a save elsewhere keeps the draft (#2259). */
+    it('keeps the edited extras when the stored category is read again', () => {
       const { fixture, component } = setup(PIZZA);
 
       editExtras(fixture, CHANGED);
       fixture.componentRef.setInput('category', { ...PIZZA });
       fixture.detectChanges();
 
-      expect(component.extrasDraft()).toEqual(PIZZA.extrasBlock);
-      expect(component.extrasChanged()).toBe(false);
+      expect(component.extrasDraft()).toEqual(CHANGED);
+      expect(component.extrasChanged()).toBe(true);
+    });
+
+    it('reads the extras again when they were not edited', () => {
+      const { fixture, component } = setup(PIZZA);
+      component.form.controls.title.setValue('Pizze');
+      component.form.controls.title.markAsDirty();
+
+      fixture.componentRef.setInput('category', {
+        ...PIZZA,
+        extrasBlock: CHANGED,
+      });
+      fixture.detectChanges();
+
+      expect(component.extrasDraft()).toEqual(CHANGED);
+      expect(component.form.controls.title.value).toBe('Pizze');
     });
 
     it('takes no edit back to unchanged as a change', () => {

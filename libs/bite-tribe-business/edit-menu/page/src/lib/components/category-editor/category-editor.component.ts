@@ -24,6 +24,24 @@ import type { CategoryDetails } from '../../utils/menu-edits';
  * subtitle with one Save, and its extras below, which keep their own add,
  * change and remove (issue #1598).
  */
+/**
+ * Which sentence the delete question uses (GitHub issue #2260): what goes
+ * with the category, and nothing it does not hold. Dishes first, because
+ * that sentence already names the extras with them.
+ */
+export const deleteConfirmMessageKey = (
+  dishCount: number,
+  extras: readonly unknown[],
+): string => {
+  if (dishCount) {
+    return 'menu-category-delete-confirm-message-dishes';
+  }
+
+  return extras.length
+    ? 'menu-category-delete-confirm-message'
+    : 'menu-category-delete-confirm-message-empty';
+};
+
 @Component({
   selector: 'bt-category-editor',
   templateUrl: './category-editor.component.html',
@@ -83,7 +101,9 @@ export class CategoryEditorComponent {
    * Asks before deleting the category, because a delete is saved at once and
    * has no undo (GitHub issue #2181). Its dishes, their variants and its
    * extras go with it, and the question counts the dishes, so an owner who
-   * meant to empty a heading sees what else it holds.
+   * meant to empty a heading sees what else it holds. A category with neither
+   * dishes nor extras says it is empty rather than mentioning extras it does
+   * not have (#2260).
    */
   async confirmDelete(): Promise<void> {
     const category = this.category();
@@ -98,9 +118,7 @@ export class CategoryEditorComponent {
         title: category.title,
       }),
       message: this.transloco.translate(
-        dishCount
-          ? 'menu-category-delete-confirm-message-dishes'
-          : 'menu-category-delete-confirm-message',
+        deleteConfirmMessageKey(dishCount, category.extrasBlock?.extras ?? []),
         { count: dishCount },
       ),
       buttons: [

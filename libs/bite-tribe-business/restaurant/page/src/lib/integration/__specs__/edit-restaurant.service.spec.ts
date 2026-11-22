@@ -1,6 +1,11 @@
 import { ContentRefusedError } from 'utils';
 import { TestBed } from '@angular/core/testing';
-import { EditRestaurantService } from '../edit-restaurant.service';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import {
+  EditRestaurantService,
+  SECTION_TOASTS,
+} from '../edit-restaurant.service';
 import {
   RestaurantDataAccessService,
   RestaurantImageUploadService,
@@ -45,6 +50,7 @@ describe('EditRestaurantService', () => {
       submitDietaryStatements: jest.fn(),
       submitAddress: jest.fn(),
       submitPosition: jest.fn(),
+      submitTableOrderingSettings: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
     navControllerMock = { navigateForward: jest.fn(), navigateBack: jest.fn() };
@@ -122,7 +128,7 @@ describe('EditRestaurantService', () => {
 
       expect(loading.dismiss).toHaveBeenCalled();
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-address-not-saved',
         outcome: 'failure',
       });
       expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
@@ -235,7 +241,7 @@ describe('EditRestaurantService', () => {
         [{ network: 'facebook', url: 'https://fb.com' }],
       );
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'social-media-links-saved',
+        messageKey: 'restaurant-section-links-saved',
         outcome: 'success',
       });
     });
@@ -252,7 +258,7 @@ describe('EditRestaurantService', () => {
       });
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-links-not-saved',
         outcome: 'failure',
       });
     });
@@ -334,7 +340,7 @@ describe('EditRestaurantService', () => {
         'A great place',
       );
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'about-restaurant-saved',
+        messageKey: 'restaurant-section-about-saved',
         outcome: 'success',
       });
     });
@@ -349,7 +355,7 @@ describe('EditRestaurantService', () => {
       await service.submitDescription('A great place');
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-about-not-saved',
         outcome: 'failure',
       });
     });
@@ -384,7 +390,7 @@ describe('EditRestaurantService', () => {
         },
       ]);
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'opening-hours-saved',
+        messageKey: 'restaurant-section-opening-hours-saved',
         outcome: 'success',
       });
     });
@@ -399,7 +405,7 @@ describe('EditRestaurantService', () => {
       await service.submitOpeningHours([]);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-opening-hours-not-saved',
         outcome: 'failure',
       });
     });
@@ -426,7 +432,7 @@ describe('EditRestaurantService', () => {
           genderNeutralRestroom,
         );
         expect(toastMock.present).toHaveBeenCalledWith({
-          messageKey: 'facilities-saved',
+          messageKey: 'restaurant-section-facilities-saved',
           outcome: 'success',
         });
       },
@@ -442,7 +448,7 @@ describe('EditRestaurantService', () => {
       await service.submitGenderNeutralRestroom(true);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-facilities-not-saved',
         outcome: 'failure',
       });
     });
@@ -468,7 +474,7 @@ describe('EditRestaurantService', () => {
         'bakery',
       ]);
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'categories-saved',
+        messageKey: 'restaurant-section-categories-saved',
         outcome: 'success',
       });
     });
@@ -485,7 +491,7 @@ describe('EditRestaurantService', () => {
       await service.submitCategories(['cafe']);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-categories-not-saved',
         outcome: 'failure',
       });
     });
@@ -514,7 +520,7 @@ describe('EditRestaurantService', () => {
         'Shared fryer.',
       );
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'dietary-statements-saved',
+        messageKey: 'restaurant-section-dietary-saved',
         outcome: 'success',
       });
     });
@@ -540,7 +546,7 @@ describe('EditRestaurantService', () => {
       await service.submitDietaryStatements(value);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-dietary-not-saved',
         outcome: 'failure',
       });
     });
@@ -571,7 +577,7 @@ describe('EditRestaurantService', () => {
         address,
       );
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'address-saved',
+        messageKey: 'restaurant-section-address-saved',
         outcome: 'success',
       });
     });
@@ -586,7 +592,7 @@ describe('EditRestaurantService', () => {
       await service.submitAddress(address);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-address-not-saved',
         outcome: 'failure',
       });
     });
@@ -612,7 +618,7 @@ describe('EditRestaurantService', () => {
         position,
       );
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'location-saved',
+        messageKey: 'restaurant-section-position-saved',
         outcome: 'success',
       });
     });
@@ -627,10 +633,72 @@ describe('EditRestaurantService', () => {
       await service.submitPosition(position);
 
       expect(toastMock.present).toHaveBeenCalledWith({
-        messageKey: 'something-went-wrong-please-try-again',
+        messageKey: 'restaurant-section-position-not-saved',
         outcome: 'failure',
       });
     });
+  });
+
+  describe('submitTableOrderingSettings', () => {
+    const restaurant = { id: 'rest1', name: 'Test' } as Restaurant;
+    const settings = { enabled: true } as never;
+
+    it('confirms with the section label', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (
+        dataAccessMock.submitTableOrderingSettings as jest.Mock
+      ).mockResolvedValue(undefined);
+
+      await service.submitTableOrderingSettings(settings);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'restaurant-section-table-ordering-saved',
+        outcome: 'success',
+      });
+    });
+
+    it('names the section when the save is refused', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set(restaurant);
+      (
+        dataAccessMock.submitTableOrderingSettings as jest.Mock
+      ).mockRejectedValue(new Error('fail'));
+
+      await service.submitTableOrderingSettings(settings);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'restaurant-section-table-ordering-not-saved',
+        outcome: 'failure',
+      });
+    });
+  });
+
+  /**
+   * One pattern for every section's toast (GitHub issue #2263): a key the
+   * table names and the locale lacks would show the key itself.
+   */
+  describe('the save toasts', () => {
+    const en = JSON.parse(
+      readFileSync(
+        resolve(
+          __dirname,
+          '../../../../../../../../apps/bite-tribe-business/src/assets/i18n/en.json',
+        ),
+        'utf8',
+      ),
+    ) as Record<string, string>;
+
+    it.each(Object.entries(SECTION_TOASTS))(
+      'has copy for both of %s',
+      (section, { saved, notSaved }) => {
+        const label = en[`restaurant-section-${section}`];
+
+        expect(en[saved]).toBe(`${label} saved`);
+        expect(en[notSaved]).toMatch(
+          new RegExp(`^${label} (wasn't|weren't) saved\\. `),
+        );
+        expect(en[notSaved]).toContain('Your changes are still here');
+      },
+    );
   });
 
   describe('the photo (issue #2126)', () => {

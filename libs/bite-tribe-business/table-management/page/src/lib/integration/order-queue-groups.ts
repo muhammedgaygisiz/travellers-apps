@@ -80,6 +80,12 @@ export interface QueuedOrderLine {
   name: string;
   /** The variant, where the dish has one. */
   variantName?: string;
+  /**
+   * The options chosen, each as "Zubereitungsart: scharf" (GitHub issue
+   * #2254). With the group's name, because the kitchen reads a choice without
+   * the menu in front of it. Absent where none were chosen.
+   */
+  options?: string[];
   quantity: number;
   /** What the guest asked for. The line a kitchen actually has to read. */
   notes?: string;
@@ -158,6 +164,13 @@ const toLine = (line: TableOrder['lines'][number]): QueuedOrderLine => ({
   name: line.name,
   quantity: line.quantity,
   ...(line.variantName ? { variantName: line.variantName } : {}),
+  ...(line.options?.length
+    ? {
+        options: line.options.map(
+          (option) => `${option.groupName}: ${option.choiceName}`,
+        ),
+      }
+    : {}),
   ...(line.notes ? { notes: line.notes } : {}),
 });
 

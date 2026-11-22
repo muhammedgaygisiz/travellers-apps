@@ -155,3 +155,19 @@ export const isSendableAddress = (value: unknown): value is string => {
     !/[\r\n]/.test(address)
   );
 };
+
+/**
+ * One row's dish, with its variant and the options chosen on it (GitHub issue
+ * #2254), the way the guest's own summary prints it: "Ente Spezial - groß,
+ * scharf".
+ */
+export const summaryLineName = (
+  line: Pick<TableVisitBillLine, 'name' | 'variantName' | 'options'>,
+): string => {
+  const choices = [
+    ...(line.variantName ? [line.variantName] : []),
+    ...(line.options ?? []).map((option) => option.choiceName),
+  ];
+
+  return choices.length ? `${line.name} - ${choices.join(', ')}` : line.name;
+};

@@ -1,4 +1,7 @@
-import type { OrderLineExtraSnapshot } from './order-line';
+import type {
+  OrderLineExtraSnapshot,
+  OrderLineOptionSnapshot,
+} from './order-line';
 import type {
   TableVisitPaymentStatus,
   TableVisitSettlementMethod,
@@ -69,6 +72,8 @@ export interface TableVisitBillLine {
   readonly notes?: string;
   /** The extras ticked on this row, priced into {@link unitPrice}. */
   readonly extras?: readonly OrderLineExtraSnapshot[];
+  /** The options chosen on this row (GitHub issue #2254). Part of the merge key. */
+  readonly options?: readonly OrderLineOptionSnapshot[];
   /** How many of this row the table ordered, summed across every order. */
   readonly quantity: number;
   /**

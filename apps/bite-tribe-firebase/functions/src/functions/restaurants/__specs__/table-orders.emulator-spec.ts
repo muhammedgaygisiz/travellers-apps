@@ -1001,6 +1001,202 @@ describe('table cart and order submission', () => {
     });
   });
 
+  /** Options: choices on a dish that don't change its price (#2254). */
+  describe('options', () => {
+    const HEAT = 'option-heat';
+    const CRUST = 'option-crust';
+
+    const optionsMenu = (
+      heat: Record<string, unknown> = {},
+    ): Record<string, unknown>[] => [
+      {
+        id: 'category-pizza',
+        title: 'Pizza',
+        items: [
+          {
+            id: MARGHERITA,
+            name: 'Margherita',
+            price: 12,
+            optionGroups: [
+              {
+                id: CRUST,
+                name: 'Crust',
+                required: false,
+                choices: [
+                  { id: 'crust-classic', name: 'Classic' },
+                  { id: 'crust-wholegrain', name: 'Wholegrain' },
+                ],
+              },
+              {
+                id: HEAT,
+                name: 'How hot',
+                required: true,
+                choices: [
+                  { id: 'heat-mild', name: 'Mild' },
+                  { id: 'heat-hot', name: 'Hot' },
+                ],
+                ...heat,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    it("records each option by the menu's ids and names, in the dish's order", async () => {
+      await ordering();
+      await setMenu(optionsMenu());
+
+      const { order } = await submitted([
+        margherita({
+          options: [
+            { groupId: HEAT, choiceId: 'heat-hot' },
+            { groupId: CRUST, choiceId: 'crust-wholegrain' },
+          ],
+        }),
+      ]);
+
+      expect(order.lines[0].options).toEqual([
+        {
+          groupId: CRUST,
+          groupName: 'Crust',
+          choiceId: 'crust-wholegrain',
+          choiceName: 'Wholegrain',
+        },
+        {
+          groupId: HEAT,
+          groupName: 'How hot',
+          choiceId: 'heat-hot',
+          choiceName: 'Hot',
+        },
+      ]);
+      expect(order.lines[0].price).toBe(12);
+      expect(order.total).toBe(12);
+    });
+
+    it('lets an optional option be left open', async () => {
+      await ordering();
+      await setMenu(optionsMenu());
+
+      const { order } = await submitted([
+        margherita({ options: [{ groupId: HEAT, choiceId: 'heat-mild' }] }),
+      ]);
+
+      expect(order.lines[0].options?.map((o) => o.choiceName)).toEqual([
+        'Mild',
+      ]);
+    });
+
+    it('writes no options field for a dish that has none', async () => {
+      await ordering();
+
+      const { order } = await submitted();
+
+      expect('options' in order.lines[0]).toBe(false);
+    });
+
+    it('refuses a dish whose required option was not chosen, naming it', async () => {
+      await ordering();
+      await setMenu(optionsMenu());
+
+      expect(await refused([margherita()])).toEqual({
+        ok: false,
+        reason: 'optionRequired',
+        item: {
+          menuItemId: MARGHERITA,
+          name: 'Margherita',
+          optionGroupId: HEAT,
+          optionGroupName: 'How hot',
+        },
+      });
+    });
+
+    it('refuses a choice the owner has removed', async () => {
+      await ordering();
+      await setMenu(
+        optionsMenu({ choices: [{ id: 'heat-mild', name: 'Mild' }] }),
+      );
+
+      expect(
+        await refused([
+          margherita({ options: [{ groupId: HEAT, choiceId: 'heat-hot' }] }),
+        ]),
+      ).toEqual({
+        ok: false,
+        reason: 'optionMissing',
+        item: {
+          menuItemId: MARGHERITA,
+          name: 'Margherita',
+          optionGroupId: HEAT,
+          optionGroupName: 'How hot',
+        },
+      });
+    });
+
+    it('refuses an option the dish does not have', async () => {
+      await ordering();
+
+      const result = await refused([
+        margherita({ options: [{ groupId: HEAT, choiceId: 'heat-hot' }] }),
+      ]);
+
+      expect(result.reason).toBe('optionMissing');
+      expect(result.item?.optionGroupId).toBe(HEAT);
+      expect(result.item?.optionGroupName).toBeUndefined();
+    });
+
+    it('keeps the names it recorded after the owner renames a choice', async () => {
+      await ordering();
+      await setMenu(optionsMenu());
+
+      const { order } = await submitted([
+        margherita({ options: [{ groupId: HEAT, choiceId: 'heat-hot' }] }),
+      ]);
+      await setMenu(
+        optionsMenu({
+          choices: [
+            { id: 'heat-mild', name: 'Mild' },
+            { id: 'heat-hot', name: 'Very hot' },
+          ],
+        }),
+      );
+
+      const [stored] = await readOrders(order.visitId);
+      expect(stored.lines[0].options?.[0].choiceName).toBe('Hot');
+    });
+
+    it('rejects a line that names the same option twice', async () => {
+      await ordering();
+      await setMenu(optionsMenu());
+
+      expect(
+        await codeOf(
+          submit([
+            margherita({
+              options: [
+                { groupId: HEAT, choiceId: 'heat-hot' },
+                { groupId: HEAT, choiceId: 'heat-mild' },
+              ],
+            }),
+          ]),
+        ),
+      ).toBe('invalid-argument');
+    });
+
+    it('rejects an option with no group or no choice', async () => {
+      await ordering();
+
+      expect(
+        await codeOf(
+          submit([margherita({ options: [{ choiceId: 'heat-hot' }] })]),
+        ),
+      ).toBe('invalid-argument');
+      expect(
+        await codeOf(submit([margherita({ options: [{ groupId: HEAT }] })])),
+      ).toBe('invalid-argument');
+    });
+  });
+
   describe('a session that cannot order', () => {
     it('refuses a guest who never scanned this table', async () => {
       await ordering();

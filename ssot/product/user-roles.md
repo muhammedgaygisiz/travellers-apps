@@ -291,6 +291,12 @@ others.
 `restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
 `Restaurant.ownerUserIds`, so without the redirect a staff account arrives at an empty page and
 the surfaces its role has are reachable only by typing a URL.
+A staff account that opens an owner route by URL - the restaurant, a section, the menu,
+Guest Bites, staff, the floor plan - is refused by the same `ownedRestaurantGuard` as anyone
+else, but sent back to its own `restaurant/{restaurantId}/tables` with "Only the restaurant's
+owner can open this page.", not to `/restaurants` and the owner's "not assigned to this
+account" ([#2232]). An owner refused a restaurant it does not hold still lands on
+`/restaurants`.
 
 ⁸ The split is what made the read safe to open at all ([#1088]). The published arrangement is
 the room document and the table documents; the owner's half-finished one lives at
@@ -392,3 +398,4 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2232

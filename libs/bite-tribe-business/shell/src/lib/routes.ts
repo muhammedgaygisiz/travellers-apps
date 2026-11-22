@@ -3,6 +3,7 @@ import { withAuthRoutes } from 'auth';
 import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
 import { restaurantAccessGuard } from './restaurant-access.guard';
 import { staffEntryGuard } from './staff-entry.guard';
+import { staffRestaurantIdOf } from './restaurant-staff-association';
 
 /**
  * The second half of the ownership boundary, and the half a link cannot dodge.
@@ -26,6 +27,19 @@ const ownedRestaurantGuard = documentOwnerGuard({
   ownerSetField: 'ownerUserIds',
   refusalMessageKey: 'restaurant-not-assigned-to-account',
   redirectTo: '/restaurants',
+  // A staff account is refused every owner route, and `/restaurants` would
+  // tell it to ask support for restaurants: it goes back to the tables of the
+  // one it works at instead, told the page is the owner's (issue #2232).
+  refusalFor: async (uid) => {
+    const restaurantId = await staffRestaurantIdOf(uid);
+
+    return restaurantId
+      ? {
+          redirectTo: `/restaurant/${restaurantId}/tables`,
+          refusalMessageKey: 'owner-only-page',
+        }
+      : undefined;
+  },
 });
 
 /**

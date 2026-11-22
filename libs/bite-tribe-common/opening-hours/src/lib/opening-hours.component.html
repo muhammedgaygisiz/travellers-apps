@@ -17,6 +17,7 @@
             <ion-checkbox
               formControlName="isOpen"
               [attr.data-testid]="'open-' + days[i]"
+              [attr.aria-label]="'open' | transloco"
               (ionChange)="openChanged(i)"
             />
           </td>

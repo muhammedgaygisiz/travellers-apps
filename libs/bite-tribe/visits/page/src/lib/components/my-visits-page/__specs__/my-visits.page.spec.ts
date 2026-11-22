@@ -136,6 +136,6 @@ describe(MyVisitsPage.name, () => {
   it('falls back to the currency code where no symbol is known', () => {
     render({ summaries: [{ ...MEAL, currency: 'XYZ' }] });
 
-    expect(text()).toContain('31 XYZ');
+    expect(text()).toMatch(/XYZ\s31\.00/);
   });
 });

@@ -9,7 +9,12 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { IonIcon, IonSpinner, IonText } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonText,
+} from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RetryUploadButtonComponent } from '../retry-upload-button/retry-upload-button.component';
 import { NetworkStatusService } from 'common/networkstatus';
@@ -18,19 +23,22 @@ import {
   getEffectiveImageStatus,
   PENDING_UPLOAD_RECHECK_MS,
 } from '../utils/image-status';
+import { photoRefusalReasonKey } from '../utils/photo-refusal-reason';
 
 /**
- * Stands in for a Bite photo that is not there yet, or never arrived.
+ * Stands in for a Bite photo that is not there yet, never arrived, or was
+ * refused by the image check.
  *
  * Shared by the feed card and the Bite details page so the two cannot drift:
- * both need the same three-way answer (uploading / failed / show the photo) and
+ * both need the same answer (uploading / failed / refused / show the photo) and
  * the same rule about who is told to keep their app open. Consumers size it
  * through the host element and render the photo only when `imageStatus` is
- * neither `pending` nor `failed`. See GitHub issue #1168.
+ * none of `pending`, `failed` and `refused`. See GitHub issues #1168 and #2139.
  */
 @Component({
   selector: 'bt-bite-image-status',
   imports: [
+    IonButton,
     IonIcon,
     IonSpinner,
     IonText,
@@ -61,7 +69,11 @@ export class BiteImageStatusComponent {
    */
   enableRetry = input(false, { transform: booleanAttribute });
 
-  /** Asks the surface to re-send this Bite's photo. */
+  /**
+   * Asks the surface to re-send this Bite's photo. For a `refused` photo the
+   * surface opens the photo picker rather than re-sending the local copy,
+   * which is the refused photo itself (issue #2139).
+   */
   readonly retryImageUpload = output<Bite>();
 
   /**
@@ -117,10 +129,22 @@ export class BiteImageStatusComponent {
    * photo lives on the poster's device, so nobody else has anything to send.
    */
   private readonly isRetryable = computed((): boolean => {
+    const status = this.imageStatus();
+
     return (
-      this.enableRetry() && this.imageStatus() === 'failed' && this.isOwnBite()
+      this.enableRetry() &&
+      (status === 'failed' || status === 'refused') &&
+      this.isOwnBite()
     );
   });
+
+  /**
+   * Why the image check refused the photo, as a line of copy (issue #2139).
+   * Only the creator is shown it.
+   */
+  protected readonly refusalReasonKey = computed((): string =>
+    photoRefusalReasonKey(this.bite().imageRefusalCategory),
+  );
 
   /**
    * Offline only when the device has said so. The status is `undefined` until
@@ -161,4 +185,10 @@ export class BiteImageStatusComponent {
 
     return !!userId && this.bite().userId === userId;
   });
+
+  /** Stops here, so a surface that is itself tappable does not open twice. */
+  protected chooseDifferentPhoto(event: Event): void {
+    event.stopPropagation();
+    this.retryImageUpload.emit(this.bite());
+  }
 }

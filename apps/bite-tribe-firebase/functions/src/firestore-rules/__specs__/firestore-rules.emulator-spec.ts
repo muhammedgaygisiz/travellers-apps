@@ -834,6 +834,47 @@ describe('restaurants', () => {
    * to an operator, and these pin that it covers this one, both ways it is
    * written - a value through the field path, and "Not stated" as a delete.
    */
+  describe('the published photo (issue #2141)', () => {
+    it('lets the owner mark a photo upload pending or failed', async () => {
+      for (const imageStatus of ['pending', 'failed']) {
+        await assertSucceeds(
+          updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), {
+            imageStatus,
+            imageUploadStartedAtTimestamp: Date.now(),
+          }),
+        );
+      }
+    });
+
+    it('refuses the owner publishing a photo itself', async () => {
+      for (const fields of [
+        { imagePath: 'https://example.com/photo.jpg' },
+        { imagePath: '' },
+        { imageStatus: 'uploaded' },
+        { imageStatus: 'refused' },
+        { imageRefusalCategory: 'violence' },
+        { image: 'data:image/jpeg;base64,AAAA' },
+        // The wait on a check that could not run (issue #2142).
+        { imageCheckPath: 'images/restaurants/other/photo.jpg' },
+        { imageCheckNextAt: 0 },
+        { imageCheckAttempts: 7 },
+      ]) {
+        await assertFails(
+          updateDoc(doc(asOwner(), 'restaurants', OWNED_RESTAURANT), fields),
+        );
+      }
+    });
+
+    it('lets an operator write the photo from the admin app', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'restaurants', OWNED_RESTAURANT), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
+  });
+
   describe('the gender-neutral restroom (issue #1830)', () => {
     it.each([true, false])('lets the owner state %s', async (value) => {
       await assertSucceeds(
@@ -2705,6 +2746,40 @@ describe('content-check verdicts', () => {
   });
 });
 
+describe('migration progress', () => {
+  const run = (db: Firestore): DocumentReference =>
+    doc(db, 'migrationRuns', 'image-moderation-report');
+
+  /**
+   * Server-only (issue #2143): the stored-photo backfill keeps where it got
+   * to here, and the documents it found refused. A client that could write
+   * it could mark a report finished, or skip the photos it holds.
+   */
+  it('refuses every reader and writer there is', async () => {
+    for (const db of [signedOut(), asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(getDoc(run(db)));
+      await assertFails(setDoc(run(db), { completedAt: 1 }));
+    }
+  });
+});
+
+describe('identity-provider avatars waiting for the check', () => {
+  /**
+   * Server-only (issue #2140): a client that could queue an avatar would point
+   * the mirror at an image of its choosing.
+   */
+  it('refuses every reader and writer there is', async () => {
+    for (const db of [signedOut(), asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(getDoc(doc(db, 'identityAvatars', CONSUMER)));
+    }
+    await assertFails(
+      setDoc(doc(asConsumer(), 'identityAvatars', CONSUMER), {
+        sourceUrl: 'https://lh3.googleusercontent.com/a/avatar',
+      }),
+    );
+  });
+});
+
 describe('scan rate limits', () => {
   const counter = (db: Firestore): DocumentReference =>
     doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000');
@@ -2897,6 +2972,35 @@ describe('bites', () => {
     await assertFails(deleteDoc(doc(asStranger(), 'bites', 'consumer-bite')));
   });
 
+  /**
+   * GitHub issue #2216. An owner links a guest's Bite to a dish only through
+   * `linkBiteToMenuItem`, which checks the dish is on their menu and that the
+   * guest did not link it. The rules were deliberately left closed to owners,
+   * so a direct write of the link is refused even on a Bite about their own
+   * restaurant.
+   */
+  it("refuses an owner writing a menu link on a guest's Bite directly", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'bites', 'guest-bite-at-owned'), {
+        userId: CONSUMER,
+        name: 'Carbonara',
+        restaurantId: OWNED_RESTAURANT,
+      });
+    });
+
+    await assertFails(
+      updateDoc(doc(asOwner(), 'bites', 'guest-bite-at-owned'), {
+        menuItemId: 'item-1',
+        menuItemLinkedBy: 'owner',
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asOwner(), 'bites', 'guest-bite-at-owned'), {
+        menuLinkDismissed: true,
+      }),
+    );
+  });
+
   /** Tagged users, GitHub issue #1916. */
   const taggedUsers = (count: number): string[] =>
     Array.from({ length: count }, (_, index) => `friend-${index}`);
@@ -2954,6 +3058,138 @@ describe('bites', () => {
         taggedUserIds: STRANGER,
       }),
     );
+  });
+
+  /**
+   * The photo is published only by `setBiteImagePathOnUpload`, after the image
+   * check (GitHub issue #2139). The client keeps the two statuses its upload
+   * owns.
+   */
+  describe('the published photo', () => {
+    const photoBite = (): ReturnType<typeof doc> =>
+      doc(asConsumer(), 'bites', 'consumer-bite');
+
+    it('lets the creator start a Bite whose photo is on its way', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'bites', 'pending-bite'), {
+          userId: CONSUMER,
+          name: 'Pho',
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
+    /**
+     * The store app 1.2.0 sends its whole form, `imagePath: ''` included
+     * (GitHub issue #2236).
+     */
+    it('lets the creator start a Bite that carries an empty photo URL', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'bites', 'empty-url-bite'), {
+          userId: CONSUMER,
+          name: 'Pho',
+          imagePath: '',
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
+    it('refuses a new Bite that carries its own photo', async () => {
+      for (const [id, fields] of [
+        ['url-bite', { imagePath: 'https://example.com/photo.jpg' }],
+        ['uploaded-bite', { imageStatus: 'uploaded' }],
+        ['refused-bite', { imageStatus: 'refused' }],
+        ['category-bite', { imageRefusalCategory: 'violence' }],
+        ['base64-bite', { image: 'data:image/jpeg;base64,AAAA' }],
+        ['check-bite', { imageCheckPath: 'images/bites/other/photo.jpg' }],
+        ['next-check-bite', { imageCheckNextAt: 0 }],
+      ] as const) {
+        await assertFails(
+          setDoc(doc(asConsumer(), 'bites', id), {
+            userId: CONSUMER,
+            name: 'Pho',
+            ...fields,
+          }),
+        );
+      }
+    });
+
+    it('lets the creator mark its own upload pending or failed', async () => {
+      await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'pending' }));
+      await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'failed' }));
+    });
+
+    it('refuses a client write that publishes or changes the photo', async () => {
+      await assertFails(
+        updateDoc(photoBite(), { imagePath: 'https://example.com/photo.jpg' }),
+      );
+      await assertFails(updateDoc(photoBite(), { imageStatus: 'uploaded' }));
+      await assertFails(updateDoc(photoBite(), { imageStatus: 'refused' }));
+      await assertFails(
+        updateDoc(photoBite(), { imageRefusalCategory: 'violence' }),
+      );
+      await assertFails(
+        updateDoc(photoBite(), { image: 'data:image/jpeg;base64,AAAA' }),
+      );
+    });
+
+    describe('while its photo waits for a check that could not run (issue #2142)', () => {
+      beforeEach(async () => {
+        await testEnv.withSecurityRulesDisabled(async (context) => {
+          await updateDoc(doc(context.firestore(), 'bites', 'consumer-bite'), {
+            imageStatus: 'pending',
+            imageCheckAttempts: 2,
+            imageCheckNextAt: 1_000,
+            imageCheckPath: 'images/bites/consumer-bite/photo.jpg',
+          });
+        });
+      });
+
+      it('refuses the creator moving, ending or redirecting the wait', async () => {
+        for (const fields of [
+          { imageCheckPath: 'images/bites/other-bite/photo.jpg' },
+          { imageCheckNextAt: 0 },
+          { imageCheckAttempts: 1 },
+          { imageCheckNextAt: deleteField() },
+        ]) {
+          await assertFails(updateDoc(photoBite(), fields));
+        }
+      });
+
+      it('lets the creator edit the Bite and give up on the upload', async () => {
+        await assertSucceeds(updateDoc(photoBite(), { price: 12 }));
+        await assertSucceeds(updateDoc(photoBite(), { imageStatus: 'failed' }));
+      });
+    });
+
+    it('lets an edit send the published photo back unchanged', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(doc(context.firestore(), 'bites', 'consumer-bite'), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        });
+      });
+
+      await assertSucceeds(
+        updateDoc(photoBite(), {
+          price: 12,
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+      await assertFails(
+        updateDoc(photoBite(), { imagePath: 'https://example.com/other.jpg' }),
+      );
+    });
+
+    it('lets the image migration rewrite a photo as an operator', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'bites', 'consumer-bite'), {
+          imagePath: 'https://example.com/migrated.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
   });
 
   /** The admin app's Bite migrations rewrite Bites belonging to every account. */
@@ -3177,6 +3413,73 @@ describe('bite trails', () => {
     );
   });
 
+  describe('the published photo (issue #2141)', () => {
+    it('lets the owner start a trail whose photo is on its way', async () => {
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'biteTrails', 'pending-trail'), {
+          ownerId: CONSUMER,
+          name: 'Pending Trail',
+          biteIds: [],
+          imageStatus: 'pending',
+        }),
+      );
+    });
+
+    it('refuses a new trail that carries its own photo', async () => {
+      for (const [id, fields] of [
+        ['url-trail', { imagePath: 'https://example.com/photo.jpg' }],
+        ['empty-url-trail', { imagePath: '' }],
+        ['uploaded-trail', { imageStatus: 'uploaded' }],
+        ['refused-trail', { imageStatus: 'refused' }],
+        ['category-trail', { imageRefusalCategory: 'violence' }],
+        ['base64-trail', { image: 'data:image/jpeg;base64,AAAA' }],
+        ['check-trail', { imageCheckPath: 'images/biteTrails/x/photo.jpg' }],
+      ] as const) {
+        await assertFails(
+          setDoc(doc(asConsumer(), 'biteTrails', id), {
+            ownerId: CONSUMER,
+            name: 'Trail',
+            biteIds: [],
+            ...fields,
+          }),
+        );
+      }
+    });
+
+    it('lets the owner mark the upload failed', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'biteTrails', 'consumer-trail'), {
+          imageStatus: 'failed',
+        }),
+      );
+    });
+
+    it('refuses the owner publishing a photo on its trail', async () => {
+      for (const fields of [
+        { imagePath: 'https://example.com/photo.jpg' },
+        { imageStatus: 'uploaded' },
+        { imageStatus: 'refused' },
+        { imageRefusalCategory: 'violence' },
+        { image: 'data:image/jpeg;base64,AAAA' },
+        { imageCheckPath: 'images/biteTrails/other/photo.jpg' },
+        { imageCheckNextAt: 0 },
+      ]) {
+        await assertFails(
+          updateDoc(doc(asConsumer(), 'biteTrails', 'consumer-trail'), fields),
+        );
+      }
+    });
+
+    it('lets an operator write the photo', async () => {
+      await assertSucceeds(
+        updateDoc(doc(asOperator(), 'biteTrails', 'consumer-trail'), {
+          imagePath: 'https://example.com/photo.jpg',
+          imageStatus: 'uploaded',
+        }),
+      );
+    });
+  });
+
   it("refuses editing another account's trail", async () => {
     await assertFails(
       updateDoc(doc(asStranger(), 'biteTrails', 'consumer-trail'), {
@@ -3227,9 +3530,106 @@ describe('users', () => {
     await assertSucceeds(
       updateDoc(doc(asConsumer(), 'users', CONSUMER), {
         public: true,
-        photoUrl: 'https://example.com/me.jpg',
+        photoUrl: '',
       }),
     );
+  });
+
+  /**
+   * Only `setUserPhotoUrlOnUpload` publishes a profile photo, once the image
+   * check passed it (GitHub issue #2140). The device writes the statuses its
+   * upload owns, and nothing else of the photo.
+   */
+  describe('the published profile photo (issue #2140)', () => {
+    it.each([
+      ['photoUrl', { photoUrl: 'https://example.com/me.jpg' }],
+      ['photoUrl removed', { photoUrl: deleteField() }],
+      ['photoStatus uploaded', { photoStatus: 'uploaded' }],
+      ['photoStatus refused', { photoStatus: 'refused' }],
+      ['photoRefusalCategory', { photoRefusalCategory: 'hate' }],
+      [
+        'imageCheckPath',
+        { imageCheckPath: 'images/users/someone-else/photo.jpg' },
+      ],
+      ['imageCheckNextAt', { imageCheckNextAt: 0 }],
+      ['imageCheckAttempts', { imageCheckAttempts: 7 }],
+    ])(
+      'refuses a client writing %s',
+      async (_field, change: Record<string, unknown>) => {
+        await assertFails(
+          updateDoc(doc(asConsumer(), 'users', CONSUMER), change),
+        );
+      },
+    );
+
+    it.each(['pending', 'failed'])(
+      'lets the device write the %s status of its upload',
+      async (photoStatus) => {
+        await assertSucceeds(
+          updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+            photoStatus,
+            photoUploadStartedAtTimestamp: 1,
+          }),
+        );
+      },
+    );
+
+    it('lets the device start a new upload after a refusal, keeping the refusal fields it may not touch', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(doc(context.firestore(), 'users', CONSUMER), {
+          photoUrl: 'https://example.com/previous.jpg',
+          photoStatus: 'refused',
+          photoRefusalCategory: 'hate',
+        });
+      });
+
+      await assertSucceeds(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          photoStatus: 'pending',
+          photoUrl: 'https://example.com/previous.jpg',
+        }),
+      );
+      await assertFails(
+        updateDoc(doc(asConsumer(), 'users', CONSUMER), {
+          photoRefusalCategory: deleteField(),
+        }),
+      );
+    });
+
+    it('refuses a first write that carries a photo', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), 'users', CONSUMER));
+      });
+
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoUrl: 'https://lh3.googleusercontent.com/a/avatar',
+        }),
+      );
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoStatus: 'uploaded',
+        }),
+      );
+      await assertFails(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          imageCheckPath: 'images/users/someone-else/photo.jpg',
+        }),
+      );
+      await assertSucceeds(
+        setDoc(doc(asConsumer(), 'users', CONSUMER), {
+          userId: CONSUMER,
+          email: 'consumer@test.com',
+          photoUrl: '',
+        }),
+      );
+    });
   });
 
   it("refuses editing another account's profile", async () => {

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Release Story'
+  short_description: 'Render the "New in v<version>" Instagram Story'
+  default_prompt: 'Use $release-story to create the release announcement story for the current marketing version.'

@@ -41,6 +41,7 @@ const ApiMock = {
   bitesByUser: jest.fn(),
   claimDisplayName: jest.fn(),
   reportUser: jest.fn(),
+  countPendingFollowRequests: jest.fn().mockResolvedValue(0),
 };
 
 const MOCK_PUBLIC_USER: PublicUser = {
@@ -394,5 +395,57 @@ describe('ProfileDataAccessService', () => {
         },
       ));
     });
+  });
+});
+
+/** The own private profile's pending follow request count (issue #2165). */
+describe('ProfileDataAccessService pendingFollowRequestCount', () => {
+  const configure = (me: PublicUser | undefined): ProfileDataAccessService => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        ProfileDataAccessService,
+        {
+          provide: BiteTribeStoreService,
+          useValue: Object.assign(new Mock(), { publicUser$: of(me) }),
+        },
+        { provide: BiteTribeApiService, useValue: ApiMock },
+        { provide: ProfilePhotoUploadService, useValue: photoUploadMock },
+        provideMockStore(),
+      ],
+    });
+
+    return TestBed.inject(ProfileDataAccessService);
+  };
+
+  const settle = async (): Promise<void> => {
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve));
+    TestBed.tick();
+  };
+
+  beforeEach(() => {
+    ApiMock.countPendingFollowRequests.mockClear().mockResolvedValue(3);
+  });
+
+  it('counts the requests while the own profile is private', async () => {
+    const service = configure({ ...MOCK_PUBLIC_USER, public: false });
+
+    await settle();
+
+    expect(ApiMock.countPendingFollowRequests).toHaveBeenCalledTimes(1);
+    expect(service.pendingFollowRequestCount()).toBe(3);
+  });
+
+  it('counts nothing for a public own profile or while signed out', async () => {
+    const service = configure({ ...MOCK_PUBLIC_USER, public: true });
+    await settle();
+    expect(service.pendingFollowRequestCount()).toBe(0);
+
+    const signedOut = configure(undefined);
+    await settle();
+    expect(signedOut.pendingFollowRequestCount()).toBe(0);
+
+    expect(ApiMock.countPendingFollowRequests).not.toHaveBeenCalled();
   });
 });

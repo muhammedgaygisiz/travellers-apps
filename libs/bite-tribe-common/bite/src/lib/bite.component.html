@@ -17,7 +17,11 @@ their own action and press, and never also open the card. See GitHub issue
       <!-- Checked before the image branch: on a failed upload the poster still
       holds the local base64 copy, and rendering it would suggest the upload
       succeeded. -->
-      @if (imageStatus() === 'pending' || imageStatus() === 'failed') {
+      @if (
+        imageStatus() === 'pending' ||
+        imageStatus() === 'failed' ||
+        imageStatus() === 'refused'
+      ) {
         <bt-bite-image-status
           [bite]="biteData"
           [userId]="userId()"

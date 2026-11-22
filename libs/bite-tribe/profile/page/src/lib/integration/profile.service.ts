@@ -27,6 +27,12 @@ import {
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { countBitesByCountry } from './utils/count-bites-by-country';
 
+/**
+ * The query parameter that has Edit Profile open its photo picker on arrival
+ * (GitHub issue #2140).
+ */
+export const CHOOSE_PHOTO_QUERY_PARAM = 'choosePhoto';
+
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly dataAccess = inject(ProfileDataAccessService);
@@ -53,6 +59,7 @@ export class ProfileService {
   isPublicProfile = this.dataAccess.isPublicProfile;
   profileMetadata = this.dataAccess.profileMetadata;
   isBlockedByMe = this.dataAccess.isBlockedByMe;
+  pendingFollowRequestCount = this.dataAccess.pendingFollowRequestCount;
   emailVerificationPromptVisible = this.emailVerification.promptVisible;
   emailVerificationResendRunning = this.emailVerification.resendRunning;
 
@@ -81,7 +88,19 @@ export class ProfileService {
     this.navController.navigateForward(['my-bites']);
   }
 
-  gotoEditProfile(): void {
+  /**
+   * With `choosePhoto`, Edit Profile opens its photo picker on arrival, for a
+   * photo the image check refused (GitHub issue #2140).
+   */
+  gotoEditProfile(choosePhoto = false): void {
+    if (choosePhoto) {
+      this.navController.navigateForward([PATH.EDIT_PROFILE], {
+        queryParams: { [CHOOSE_PHOTO_QUERY_PARAM]: 'true' },
+      });
+
+      return;
+    }
+
     this.navController.navigateForward([PATH.EDIT_PROFILE]);
   }
 
@@ -191,11 +210,16 @@ export class ProfileService {
 
   /**
    * Sends a profile photo whose upload failed again, or has the user choose
-   * it again when this device no longer holds it (GitHub issue #1953).
+   * it again when this device no longer holds it (GitHub issue #1953). A
+   * photo the image check refused is never sent again: the user is taken
+   * straight to the photo picker to choose a different one (GitHub issue
+   * #2140).
    */
   async retryProfilePhotoUpload(): Promise<void> {
+    const refused = this.myUser()?.photoStatus === 'refused';
+
     if (!(await this.dataAccess.retryProfilePhotoUpload())) {
-      this.gotoEditProfile();
+      this.gotoEditProfile(refused);
     }
   }
 
@@ -332,6 +356,16 @@ export class ProfileService {
     this.navController.navigateForward([PATH.FOLLOWERS, userId, 'following']);
   }
 
+  /** Opens the own private profile's pending follow requests (issue #2165). */
+  gotoFollowRequests(): void {
+    this.navController.navigateForward([PATH.FOLLOW_REQUESTS]);
+  }
+
+  /** Counts the pending follow requests again, when the own profile is entered. */
+  refreshPendingFollowRequests(): void {
+    this.dataAccess.pendingFollowRequests.reload();
+  }
+
   trackEmailVerificationPromptShown(surface: EmailVerificationSurface): void {
     this.emailVerification.trackPromptShown(surface);
   }
@@ -345,13 +379,14 @@ export class ProfileService {
    * depending on whether this device still holds the Bite's own copy: a recent
    * Bite posted from here is re-sent straight away, while an older one — or one
    * posted from another device — asks the user to pick from the photos saved
-   * locally, the same set the gallery shows. Picking nothing cancels.
+   * locally, the same set the gallery shows. Picking nothing cancels. A photo
+   * the image check refused always asks for a different one (issue #2139).
    *
    * Presenting the picker is a workflow decision, so it lives here rather than
    * in the card that raised the request. See GitHub issue #1168.
    */
   async retryBiteImageUpload(bite: Bite): Promise<void> {
-    const localCopy = await this.biteDataAccess.findLocalImageForBite(bite.id);
+    const localCopy = await this.biteDataAccess.findLocalImageForBite(bite);
     const fileUri = localCopy?.uri ?? (await this.localImagePicker.pick())?.uri;
 
     if (fileUri) {

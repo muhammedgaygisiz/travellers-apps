@@ -11,7 +11,7 @@ normal case. Follow suggestions ship with [#1708]. The visited-countries globe
 ships with [#1787]. A changed display name reaches every stored copy of it since
 [#1827]. A profile can state its pronouns since [#1826]. A profile can be reported to the
 Operator since [#1829]. A private profile is unreadable to other accounts since [#1863],
-and is followed by request since [#2164]; the owner's side of a request is not built yet.
+and is followed by request since [#2164], which its owner accepts or declines since [#2165].
 
 ## Goal
 
@@ -32,24 +32,8 @@ report one account files against another.
 - User views or edits their own profile.
 - User opens public profiles.
 - User follows or unfollows other users. A public profile is followed in one tap.
-- User asks to follow another account's private profile ([#2164], epic [#2144]). Follow
-  sends a request through `requestFollow` and writes no follow edge, and the button then
-  reads `Requested`; a toast says the request went out. Tapping `Requested` withdraws the
-  request through `withdrawFollowRequest`, with no confirmation, and the button reads
-  `Follow` again. The button reads the request from `/followRequests/{ownerUid}_{viewerUid}`
-  beside the follow state, so a pending request still reads `Requested` after a reload,
-  and an accepted one reads `Stop following`, as any follow does. The store learns of a
-  request or a withdrawal once the callable has answered, so no follower count moves
-  and a refusal leaves the button as it was, says so, and reloads its state. A request
-  is not a follow: it raises no first-follow celebration and is not counted as
-  `user_followed`. A profile without a saved visibility choice is private here too, as
-  everywhere else.
-- A client may write a follow edge only onto a public profile ([#2164]). The rules refuse
-  creating or rewriting either edge onto a private one, so the request is the only way
-  in, and still let the follower delete their own edges onto either, so a private
-  profile can be unfollowed. An app build from before [#2164] that follows a private
-  profile is refused and puts its button back, as on any failed follow; following a
-  private profile granted nothing before epic [#2144], so nothing is lost.
+- User asks to follow another account's private profile, and the owner of a private
+  profile accepts or declines each request, per `Follow Request Contract` below.
 - The first person a user follows is celebrated: a short confetti burst and
   `You're now following {{user}}. Welcome to their food journey!`, naming the
   followed account by display name only, never a real name ([#1308]). Every follow
@@ -159,8 +143,93 @@ account can read are the harm.
   out. The owner's own listener filters on `userId == uid`, which the rule admits.
   The About page's member count therefore comes from the `countUsers` callable, and
   still counts every account.
+- **A private profile is followed by request.** Another account cannot follow it in one
+  tap; it asks, and the owner decides, per `Follow Request Contract` below.
 - **Not in this contract.** A public profile still exposes its email to every member;
   whether it should is a separate product decision.
+
+## Follow Request Contract
+
+Epic [#2144]. A follow of a private profile is something its owner granted, so the owner
+can refuse a follower without blocking them. A public profile is followed in one tap, as
+before. A profile without a saved visibility choice is private here too, as everywhere
+else.
+
+**The requester's side** ([#2164]):
+
+- On another account's private profile, Follow sends a request through `requestFollow`
+  and writes no follow edge, and the button then reads `Requested`; a toast says the
+  request went out. Tapping `Requested` withdraws the request through
+  `withdrawFollowRequest`, with no confirmation, and the button reads `Follow` again.
+- The button reads the request from `/followRequests/{ownerUid}_{viewerUid}` beside the
+  follow state, so a pending request still reads `Requested` after a reload, and an
+  accepted one reads `Stop following`, as any follow does.
+- The store learns of a request or a withdrawal once the callable has answered, so no
+  follower count moves and a refusal leaves the button as it was, says so, and reloads
+  its state. A request is not a follow: it raises no first-follow celebration and is not
+  counted as `user_followed`.
+- A client may write a follow edge only onto a public profile. The rules refuse creating
+  or rewriting either edge onto a private one, so the request is the only way in, and
+  still let the follower delete their own edges onto either, so a private profile can be
+  unfollowed. An app build from before [#2164] that follows a private profile is refused
+  and puts its button back, as on any failed follow; following a private profile granted
+  nothing before epic [#2144], so nothing is lost.
+
+**The owner's side** ([#2165]):
+
+- While the own profile is private and at least one request is pending, it shows a
+  `Follow requests` row with the pending count under its visibility status. With none
+  pending, or on a public profile, there is no row. The count is a count query over the
+  owner's `/followRequests`, taken each time the own profile is entered, so it is current
+  on coming back from the requests page.
+- The row opens `follow-requests`: every pending request, newest first, from the
+  `listFollowRequests` callable. A callable rather than a client read, because the owner
+  may not read a private requester's user document.
+- **What the owner sees of a requester.** A public requester shows their display name and
+  photo. A private requester shows their display name and the default avatar, and nothing
+  else of their profile (decided on 19 November 2026, under `Follow Request Questions` in
+  [Current State - Open Questions](../current-state/open-questions.md)): from `Anonymous`
+  the owner could not judge a request. A requester without a display name reads
+  `Anonymous`. A request from an account the owner blocks is never listed; blocking
+  deletes it, per `User Block Contract` below.
+- Each row has `Accept` and `Decline`. `Accept` calls `acceptFollowRequest`, which turns
+  the request into a follow edge on both sides, and the requester joins the owner's
+  followers. `Decline` calls `declineFollowRequest`, which deletes the request and adds no
+  follower. Either way the row leaves the list once the callable answers. Both buttons
+  wait while the answer is on its way, and a refused answer keeps the row and says so.
+  An accepted requester is told by push, and a declined one is not told; see `Follow
+Request Contract` in [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- Tapping a row opens the requester's profile, which for a private requester is the
+  private-profile notice of `Profile Visibility Contract` above.
+- With nothing pending the page says so; a list that could not be read says that instead
+  and offers a retry.
+- **Pushes** ([#2166]). A new request pushes to the owner and opens this page; an accepted
+  one pushes to the requester and opens the owner's profile. Each names the other party by
+  display name only. They are owned by `Follow Request Contract` in
+  [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md).
+- **Switching visibility** ([#2168]). Neither direction costs a follower or leaves anyone
+  waiting (decided on 19 November 2026, under `Follow Request Questions` in
+  [Current State - Open Questions](../current-state/open-questions.md)).
+  - Turning private keeps every follower: each counts as accepted, as if the owner had
+    approved them, so the private profile's new Bites still reach them.
+  - Turning public accepts every pending request: each becomes a follow on both sides, both
+    follow counts rise by one per request, and no request addressed to the profile is left.
+    The requesters get no acceptance push, because the owner did not answer them one by one
+    and following a public profile tells the follower nothing either.
+  - Because the switch to public lets every requester in at once, profile edit asks first
+    when at least one request is pending, naming the count. Cancelling puts the switch back
+    to private and leaves the requests pending. Without a pending request, and on the switch
+    to private, the switch saves as before. The count is taken again each time profile edit
+    is entered.
+  - Both happen in `applyFollowVisibilityOnUserUpdate`, a trigger on the user document that
+    acts only when `public` changes, because the flag is a plain client write and the edges
+    and requests it touches are not the owner's to write. A save that keeps the flag touches
+    no edge and no request.
+  - The followers a profile had while private before this trigger existed are stamped once
+    by the `follower-acceptance` migration in
+    [UC - Run Operational Migrations](uc-run-operational-migrations.md).
+- **Not in this contract.** Removing an accepted follower without blocking them, which the
+  epic leaves out.
 
 ## Pronouns
 
@@ -440,8 +509,12 @@ A new photo chosen on `Edit Profile` uploads in the background, the way a Bite p
 - `Save Changes` writes the other fields at once, marks the user document `photoStatus: pending` with `photoUploadStartedAtTimestamp`, and goes back. A write that fails keeps the user on the form with a `profile-could-not-be-saved` toast.
 - The previous photo stays in `photoUrl` until the new one lands, so nobody else ever sees a missing photo. The status is shown to the owner alone, on the own avatar: the new photo blurred, with a spinner while it uploads, the retry button once it failed, or an offline mark while a retry could not work. The whole avatar retries, and the wording is read out to a screen reader rather than shown. Where the device no longer holds the new photo, the previous one is blurred instead.
 - The retry button is `bt-retry-upload-button`, shared with the Bite photo status so both read as the same action: outline, with a refresh icon and the card background. The avatar uses its short label (`retry-upload-short`, "Retry"), the Bite card the full one.
-- The storage finalize trigger `setUserPhotoUrlOnUpload` points `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the older objects in `images/users/{uid}/`. The device writes the same URL itself for an immediate update; the trigger is what makes the save independent of that device staying open.
-- The device writes `failed` when the transfer errors, or reports nothing for 30 seconds. A `pending` status older than 10 minutes reads as failed, as on a Bite.
+- The storage finalize trigger `setUserPhotoUrlOnUpload` runs the image check of [Architecture - AI](../architecture/ai.md) on the new object first ([#2140]). A passed photo becomes `photoUrl`, with `photoStatus: uploaded`, and the older objects in `images/users/{uid}/` are deleted. A refused photo is deleted from Storage, `photoUrl` keeps the previous photo, and the document gets `photoStatus: refused` with `photoRefusalCategory`; nobody else sees any change to the profile. A check that cannot answer keeps the status `pending`, and the backend checks the photo again over about sixteen hours, with the same outcomes; when the last attempt still cannot answer it deletes the new object and writes `photoStatus: failed`, and `photoUrl` keeps the previous photo ([#2142]).
+- The trigger is the only writer of `photoUrl`. The device never writes it, not even after its own upload finishes, and the rules refuse a client write of `photoUrl`, of `photoRefusalCategory`, and of the `uploaded` and `refused` statuses. The new photo stays blurred on the own avatar until the trigger's verdict arrives.
+- A refused photo is shown to its owner alone, as a mark on the own avatar and a notice on `Edit Profile`: the photo was not allowed, why, and that nobody else sees it. Neither shows the refused photo. The avatar opens `Edit Profile` with its photo picker open, and the notice's `Choose a different photo` opens the picker; a refused photo is never sent again.
+- A photo stored before the image check is checked once by the `image-moderation-backfill` migration of [UC - Run Operational Migrations](uc-run-operational-migrations.md) ([#2143]). A refused one was the photo shown, so it is taken down with `photoUrl`, and the notice says the profile has no photo until another is chosen (`profile-photo-refused-removed`) rather than that the previous one stays. The notice picks its wording from whether `photoUrl` still holds a photo, so a first photo refused on an account that had none reads the same way.
+- The avatar a new account brings from its identity provider goes through the same check. The account starts with an empty `photoUrl`, `mirrorIdentityAvatarOnCreate` uploads the avatar to `images/users/{uid}/`, and the trigger publishes or refuses it like a chosen photo. A refused or unreachable avatar leaves the account on the placeholder.
+- The device writes `failed` when the transfer errors, or reports nothing for 30 seconds. A `pending` status older than 10 minutes reads as failed, as on a Bite, unless the backend will check the photo again (`imageCheckNextAt` set), when it stays `pending` until the verdict or the backend's `failed` ([#2142]).
 - A retry sends the photo kept from this session, else the device's local copy (`users_{uid}.*`). With neither, it opens `Edit Profile` to choose the photo again. While the device reports no connection, the retry is replaced by the offline hint.
 - `Edit Profile` fills its form from the profile only while the form is untouched. A new copy of the profile (the email verification sync writes one while the page is open) used to overwrite a photo the user had just picked.
 - Leaving `Edit Profile` goes back inside the app. When it was the first page (a reload or a link), it opens the own profile instead, because going back would unload the app with the upload still running.
@@ -493,7 +566,10 @@ The user block contract is the blocking half of Apple's user-generated-content g
 reporting of abusive users; see [User Roles](../product/user-roles.md) footnote 5 for the rest of the set.
 Reporting adds no permission and no data declaration: a report is user content already
 declared as `Other User Content` in [Implementation - Store Declarations](../implementation/store-declarations.md).
-The `Profile Text Check` is the filtering half of the same guideline, for a profile's text.
+The `Profile Text Check` is the filtering half of the same guideline, for a profile's text, and
+the image check in the `Profile Photo Upload Contract` is that half for its photo ([#2140]),
+which other members see on profiles, follower lists and the leaderboard. It adds no
+permission and no store listing change.
 
 The profile visibility contract is what makes the public/private switch do what it says,
 which Apple guideline 5.1.1 and Google Play's User Data policy expect of a privacy control.
@@ -517,6 +593,21 @@ It changes no declaration: the data collected and its purpose are the same.
   the `Requested` button of `profile-page`, `profile-follow-request.spec.ts` and the
   `Other Private Profile Requested` story; and the `follow edges onto a private profile`
   cases in `firestore-rules.emulator-spec.ts`.
+- The owner's side ([#2165]): `follow-requests`; the `listFollowRequests` callable in
+  `list-follow-requests.ts` with `list-follow-requests.spec.ts`;
+  `countPendingFollowRequests`, `listFollowRequests`, `acceptFollowRequest` and
+  `declineFollowRequest` on `ProfileApiService`; `FollowRequestsDataAccessService`,
+  `FollowRequestsService` and `follow-requests-list` in `libs/bite-tribe/followers`, with
+  the `Pages/Follow Requests` stories; and the `Follow requests` row of `profile-page`,
+  `profile-follow-requests-row.spec.ts` and the
+  `Own Private Profile With Follow Requests` story.
+- Switching visibility ([#2168]): `applyFollowVisibilityOnUserUpdate`,
+  `stampFollowersAsAccepted` and `acceptAllFollowRequests` in `follow-visibility.ts`, and
+  `backfillFollowerAcceptanceCallable` in `backfill-follower-acceptance.ts`, under
+  `apps/bite-tribe-firebase/functions/src/functions/users`, with `follow-visibility.spec.ts`;
+  the go-public confirmation of `edit-profile-page` and its `the go-public confirmation`
+  cases in `edit-profile.page.spec.ts`, and the `Pages/Edit Profile`
+  `Go Public With Pending Requests` story.
 - Profile reports: the `reportUser` callable; the Report entry and reason dialog of
   `profile-page`, and its `Blocked Account Actions Menu Open` story.
 - Profile API.
@@ -565,8 +656,10 @@ It changes no declaration: the data collected and its purpose are the same.
 - Issue [#1826] is `Pronouns` above, part of epic [#1823].
 - Issue [#1610] is the `Profile Text Check` above.
 - Issue [#1863] is the `Profile Visibility Contract` above, part of epic [#1823].
-- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Three of the epic's questions are settled and one is still open, all under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
+- Epic [#2144] turns a follow of a private profile into a request its owner accepts or declines. Its backend story [#2163] stores the request and writes the follow only on acceptance. Its requester's story [#2164] turns the follow button on a private profile into a request and stops a client writing a follow edge onto one. Its owner's story [#2165] lists the pending requests and answers each with Accept or Decline. Its push story [#2166] tells the owner of a new request and the requester of an accepted one. Its story [#2167] sends a private author's new-Bite push to the followers they accepted. Its story [#2168] keeps the followers when a profile turns private and accepts the pending requests when it turns public. Together they are the `Follow Request Contract` above. The epic's questions are settled under `Follow Request Questions` in [Current State - Open Questions](../current-state/open-questions.md).
 - Issue [#1953] is the `Profile Photo Upload Contract` above.
+- Issue [#2140] checks the profile photo before it is published, including the identity-provider avatar, part of epic [#2137].
+- Issue [#2142] checks again a profile photo whose check could not run, part of epic [#2137].
 
 ## Related Domains
 
@@ -617,4 +710,12 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2163]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2163
+[#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
 [#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164
+[#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
+[#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
+[#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

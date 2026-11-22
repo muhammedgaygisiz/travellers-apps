@@ -35,6 +35,7 @@
     "@ngrx/router-store",
     "@ngrx/signals",
     "@ngrx/store",
+    "@photostructure/tz-lookup",
     "@types/leaflet",
     "@types/leaflet.markercluster",
     "bootstrap-icons",

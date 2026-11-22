@@ -4,7 +4,8 @@ import {
   RestaurantDataAccessService,
   RestaurantImageUploadService,
 } from 'bite-tribe-business/restaurant-data-access';
-import { NavController } from '@ionic/angular/standalone';
+import { LoadingController, NavController } from '@ionic/angular/standalone';
+import { TranslocoService } from '@jsverse/transloco';
 import { signal } from '@angular/core';
 import { Address, Geopoint, Restaurant } from 'model';
 import { ToastService } from 'toast';
@@ -16,11 +17,17 @@ jest.mock('@capacitor-firebase/analytics');
 describe('EditRestaurantService', () => {
   let service: EditRestaurantService;
   let dataAccessMock: jest.Mocked<RestaurantDataAccessService>;
-  let navControllerMock: { navigateForward: jest.Mock };
+  let navControllerMock: {
+    navigateForward: jest.Mock;
+    navigateBack: jest.Mock;
+  };
   let toastMock: { present: jest.Mock };
+  let loading: { present: jest.Mock; dismiss: jest.Mock };
+  let loadingControllerMock: { create: jest.Mock };
   let photoUploadMock: {
     upload: ReturnType<typeof signal>;
     statusFor: jest.Mock;
+    refusalCategoryFor: jest.Mock;
     start: jest.Mock;
     retry: jest.Mock;
   };
@@ -38,11 +45,17 @@ describe('EditRestaurantService', () => {
       submitPosition: jest.fn(),
     } as unknown as jest.Mocked<RestaurantDataAccessService>;
 
-    navControllerMock = { navigateForward: jest.fn() };
+    navControllerMock = { navigateForward: jest.fn(), navigateBack: jest.fn() };
     toastMock = { present: jest.fn().mockResolvedValue(undefined) };
+    loading = {
+      present: jest.fn().mockResolvedValue(undefined),
+      dismiss: jest.fn().mockResolvedValue(true),
+    };
+    loadingControllerMock = { create: jest.fn().mockResolvedValue(loading) };
     photoUploadMock = {
       upload: signal(undefined),
       statusFor: jest.fn().mockReturnValue(undefined),
+      refusalCategoryFor: jest.fn().mockReturnValue(undefined),
       start: jest.fn(),
       retry: jest.fn().mockReturnValue(true),
     };
@@ -54,6 +67,11 @@ describe('EditRestaurantService', () => {
         { provide: NavController, useValue: navControllerMock },
         { provide: ToastService, useValue: toastMock },
         { provide: RestaurantImageUploadService, useValue: photoUploadMock },
+        { provide: LoadingController, useValue: loadingControllerMock },
+        {
+          provide: TranslocoService,
+          useValue: { translate: jest.fn((key: string) => key) },
+        },
       ],
     });
 
@@ -62,6 +80,81 @@ describe('EditRestaurantService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  /** A section shows that it is saving (GitHub issue #2225). */
+  describe('saving a section', () => {
+    beforeEach(() => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Sakura Kitchen',
+      } as Restaurant);
+    });
+
+    it('saves under the overlay, then confirms and goes back', async () => {
+      const order: string[] = [];
+      loading.present.mockImplementation(async () => order.push('present'));
+      dataAccessMock.submitDescription.mockImplementation(async () => {
+        order.push('write');
+      });
+      loading.dismiss.mockImplementation(async () => order.push('dismiss'));
+      toastMock.present.mockImplementation(async () => order.push('toast'));
+
+      await service.submitDescription('Ramen.');
+
+      expect(loadingControllerMock.create).toHaveBeenCalledWith({
+        message: 'restaurant-saving',
+        backdropDismiss: false,
+      });
+      expect(order).toEqual(['present', 'write', 'dismiss', 'toast']);
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+      ]);
+    });
+
+    it('ends the overlay on a refused save and stays on the section', async () => {
+      dataAccessMock.submitAddress.mockRejectedValue(new Error('denied'));
+
+      await service.submitAddress({ city: 'Bled' } as Address);
+
+      expect(loading.dismiss).toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
+    });
+
+    it('starts no second write while one is running, and allows the next after', async () => {
+      let finish: () => void = () => undefined;
+      dataAccessMock.submitCategories.mockReturnValue(
+        new Promise<void>((resolve) => (finish = resolve)),
+      );
+
+      const first = service.submitCategories(['bar']);
+      await service.submitCategories(['bar']);
+      finish();
+      await first;
+
+      expect(dataAccessMock.submitCategories).toHaveBeenCalledTimes(1);
+
+      dataAccessMock.submitCategories.mockResolvedValue(undefined);
+      await service.submitCategories(['pub']);
+      expect(dataAccessMock.submitCategories).toHaveBeenCalledTimes(2);
+    });
+
+    it('allows a retry after a refused save', async () => {
+      dataAccessMock.submitPosition.mockRejectedValueOnce(new Error('x'));
+      dataAccessMock.submitPosition.mockResolvedValueOnce(undefined);
+      const position = { latitude: 1, longitude: 2 } as Geopoint;
+
+      await service.submitPosition(position);
+      await service.submitPosition(position);
+
+      expect(dataAccessMock.submitPosition).toHaveBeenCalledTimes(2);
+      expect(navControllerMock.navigateBack).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('gotoEditMenu', () => {
@@ -160,6 +253,62 @@ describe('EditRestaurantService', () => {
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
       });
+    });
+  });
+
+  /** One section at a time (GitHub issue #2183). */
+  describe('sections', () => {
+    it('opens a section of the restaurant on screen', () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+
+      service.gotoSection('opening-hours');
+
+      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+        'edit',
+        'opening-hours',
+      ]);
+    });
+
+    it('opens nothing without a restaurant', () => {
+      service.gotoSection('about');
+
+      expect(navControllerMock.navigateForward).not.toHaveBeenCalled();
+    });
+
+    it('returns to the overview once a section is saved', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      await service.submitDescription('A great place');
+
+      expect(navControllerMock.navigateBack).toHaveBeenCalledWith([
+        'restaurant',
+        'rest1',
+      ]);
+    });
+
+    it('stays on the section when the save fails, so the edit can be retried', async () => {
+      (dataAccessMock.restaurant as ReturnType<typeof signal>).set({
+        id: 'rest1',
+        name: 'Test',
+      } as Restaurant);
+      (dataAccessMock.submitDescription as jest.Mock).mockRejectedValue(
+        new Error('fail'),
+      );
+
+      await service.submitDescription('A great place');
+
+      expect(navControllerMock.navigateBack).not.toHaveBeenCalled();
     });
   });
 
@@ -461,6 +610,37 @@ describe('EditRestaurantService', () => {
 
       expect(service.pendingPhoto()).toBeUndefined();
       expect(service.canRetryPhoto()).toBe(false);
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    it('says the photo is being checked, for the restaurant on screen only', () => {
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+      photoUploadMock.upload.set({
+        restaurantId: 'r-1',
+        status: 'pending',
+        photo: 'p',
+        checking: true,
+      });
+      expect(service.photoChecking()).toBe(true);
+
+      photoUploadMock.upload.set({
+        restaurantId: 'another',
+        status: 'pending',
+        checking: true,
+      });
+      expect(service.photoChecking()).toBe(false);
+    });
+
+    it('reads why the photo was refused from the upload service', () => {
+      (service as unknown as { restaurant: unknown }).restaurant =
+        signal(restaurant);
+      photoUploadMock.refusalCategoryFor.mockReturnValue('hate');
+
+      expect(service.photoRefusalCategory()).toBe('hate');
+      expect(photoUploadMock.refusalCategoryFor).toHaveBeenCalledWith(
+        restaurant,
+      );
     });
 
     it('retries through the upload service', () => {

@@ -194,6 +194,52 @@ describe(RestaurantPhotoEditorComponent.name, () => {
     );
   });
 
+  // GitHub issue #2141: only the image check publishes the photo.
+  it('says the photo is being checked once the transfer is done', () => {
+    ref.setInput('status', 'pending');
+    fixture.detectChanges();
+    expect(byTestId('restaurant-photo-pending')?.textContent).toContain(
+      'uploading-keep-app-open',
+    );
+
+    ref.setInput('checking', true);
+    fixture.detectChanges();
+    expect(byTestId('restaurant-photo-pending')?.textContent).toContain(
+      'restaurant-photo-checking',
+    );
+  });
+
+  it('says why a photo was refused, keeps the previous one and lets another be chosen', () => {
+    ref.setInput('status', 'refused');
+    ref.setInput('refusalCategory', 'violence');
+    fixture.detectChanges();
+
+    const refused = byTestId('restaurant-photo-refused')?.textContent;
+    expect(refused).toContain('photo-refused');
+    expect(refused).toContain('photo-refused-reason-violence');
+    expect(refused).toContain('restaurant-photo-refused-kept');
+    expect(picker().imageUrl()).toBe('https://example.test/stored.jpg');
+    expect(component.photoControl.disabled).toBe(false);
+
+    picker().onChange('data:image/jpeg;base64,NEW');
+    fixture.detectChanges();
+    expect(byTestId('restaurant-photo-refused')).toBeNull();
+  });
+
+  // GitHub issue #2143: the check of stored photos refuses the photo that was
+  // shown, so there is no previous one to keep.
+  it('says the restaurant has no photo when the refused one was the only one', () => {
+    ref.setInput('restaurant', { id: 'restaurant-1' } as Restaurant);
+    ref.setInput('status', 'refused');
+    ref.setInput('refusalCategory', 'hate');
+    fixture.detectChanges();
+
+    const refused = byTestId('restaurant-photo-refused')?.textContent;
+    expect(refused).toContain('photo-refused-reason-hate');
+    expect(refused).toContain('restaurant-photo-refused-removed');
+    expect(refused).not.toContain('restaurant-photo-refused-kept');
+  });
+
   it('hides the status while a new photo is being chosen', () => {
     ref.setInput('status', 'failed');
     fixture.detectChanges();

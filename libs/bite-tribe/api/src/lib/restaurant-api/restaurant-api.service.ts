@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { ErrorHandler, Injectable, inject } from '@angular/core';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import type {
   Address,
   CreateAndUploadImageCallbackParams,
   DaySchedule,
+  FolderPhotoVerdict,
   Geopoint,
   Link,
   Restaurant,
@@ -16,6 +17,8 @@ import { getRestaurantById } from './utils/get-restaurant-by-id';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 import { getDownloadUrlFromFirebaseStorage } from 'utils';
 import { v4 as uuidv4 } from 'uuid';
+import type { Observable } from 'rxjs';
+import { folderPhotoVerdict$ } from '../utils/folder-photo-verdict';
 
 /**
  * Whether a Bite already names a restaurant, in any shape - the same test
@@ -39,11 +42,17 @@ const hasRestaurant = (data: Record<string, unknown>): boolean => {
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantApiService {
+  private readonly errorHandler = inject(ErrorHandler);
+
   loadRestaurantById(restaurantId: string): Promise<Restaurant | undefined> {
     return getRestaurantById(restaurantId);
   }
 
-  async saveNewRestaurant(restaurant: Restaurant): Promise<void> {
+  /**
+   * Creates a restaurant from the admin app's new-restaurant page and answers
+   * its id. A failure is thrown, so the page can say so (issue #1952).
+   */
+  async saveNewRestaurant(restaurant: Restaurant): Promise<string> {
     // Remove biteIds and image (base64) from the restaurant object before saving to Firestore.
     // The image will be uploaded to Firebase Storage separately and linked via imagePath.
     // A restaurant created here has no candidate - a candidate goes through
@@ -62,28 +71,48 @@ export class RestaurantApiService {
       Object.entries(rest).filter(([, value]) => value !== undefined),
     );
 
-    // The id is chosen here, the way a Bite's is (`createBite`), so the photo
-    // can be uploaded under the restaurant's own folder *before* anything is
-    // written (issue #2172): a stalled or failed upload stops the save here,
-    // and a retry cannot leave a first restaurant behind without its photo.
+    // The photo is published by the finalize trigger once the image check
+    // passes it (issue #2141), so the page never writes `imagePath`: a client
+    // copy would be public before anything had looked at it.
+    delete restaurantToBeSaved['imagePath'];
+
     const newRestaurantId = uuidv4();
+    const reference = `${RESTAURANT_COLLECTION}/${newRestaurantId}`;
 
-    if (image) {
-      restaurantToBeSaved['imagePath'] = await this.uploadRestaurantImageForUrl(
-        newRestaurantId,
-        image,
-      );
-    }
-
-    // Create the restaurant document without the base64 image
+    // The restaurant is written first, `pending` while its photo uploads, so
+    // the trigger finds a document to publish the photo on (issue #2141).
     await FirebaseFirestore.setDocument({
-      reference: `${RESTAURANT_COLLECTION}/${newRestaurantId}`,
+      reference,
       data: {
         ...restaurantToBeSaved,
+        ...(image
+          ? {
+              imageStatus: 'pending',
+              imageUploadStartedAtTimestamp: Date.now(),
+            }
+          : {}),
         createdAt: new Date().toISOString(),
         createdAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
     });
+
+    // A stalled or failed upload still stops the save (issue #2172): the
+    // restaurant just written is removed again, so a retry cannot leave a
+    // first restaurant behind without its photo.
+    if (image) {
+      try {
+        await this.uploadWithStallWindow(
+          newRestaurantId,
+          image,
+          RESTAURANT_IMAGE_STALL_MS,
+        );
+      } catch (error) {
+        await FirebaseFirestore.deleteDocument({ reference }).catch(
+          () => undefined,
+        );
+        throw error;
+      }
+    }
 
     // Add a new menu for the restaurant. It names the restaurant it belongs
     // to, which is what the ownership-scoped rules authorise a menu write from
@@ -115,6 +144,24 @@ export class RestaurantApiService {
         biteIds.map((biteId) => this.linkBite(biteId, newRestaurantId)),
       );
     }
+
+    return newRestaurantId;
+  }
+
+  /**
+   * The image check's verdict on the restaurant's photo, as its finalize
+   * trigger writes it (GitHub issue #2141). With `afterPending`, only a
+   * verdict that follows the `pending` of a new upload counts.
+   */
+  photoVerdict$(
+    restaurantId: string,
+    afterPending: boolean,
+  ): Observable<FolderPhotoVerdict> {
+    return folderPhotoVerdict$(
+      `${RESTAURANT_COLLECTION}/${restaurantId}`,
+      { afterPending },
+      (error) => this.errorHandler.handleError(error),
+    );
   }
 
   /**
@@ -231,10 +278,10 @@ export class RestaurantApiService {
 
   /**
    * Sends a restaurant photo chosen in the business app (GitHub issue #2126).
-   * Started by the upload service and not awaited by the page: the outcome
-   * arrives through `callbackFn`, and the finalize trigger
-   * `setRestaurantImagePathOnUpload` points the restaurant at the object even
-   * if this device is gone by then - the way a profile photo is sent (#1953).
+   * Started by the upload service and not awaited by the page: the transfer
+   * reports through `callbackFn`, and the finalize trigger
+   * `setRestaurantImagePathOnUpload` alone publishes the photo once the image
+   * check passed it, or marks it refused (GitHub issue #2141).
    */
   async uploadRestaurantImage(
     restaurantId: string,
@@ -247,30 +294,6 @@ export class RestaurantApiService {
       collection: RESTAURANT_COLLECTION,
       callbackFn,
     });
-  }
-
-  /**
-   * Points the restaurant at a finished upload. The finalize trigger writes the
-   * same thing; the client does too so the page shows the photo at once.
-   */
-  async setUploadedRestaurantImage(
-    restaurantId: string,
-    storagePath: string,
-  ): Promise<string> {
-    const imagePath =
-      (await getDownloadUrlFromFirebaseStorage(storagePath)) || '';
-
-    await FirebaseFirestore.updateDocument({
-      reference: `${RESTAURANT_COLLECTION}/${restaurantId}`,
-      data: {
-        imagePath,
-        imageStatus: 'uploaded',
-        updatedAt: new Date().toISOString(),
-        updatedAtTimestamp: Date.now(),
-      },
-    });
-
-    return imagePath;
   }
 
   /**

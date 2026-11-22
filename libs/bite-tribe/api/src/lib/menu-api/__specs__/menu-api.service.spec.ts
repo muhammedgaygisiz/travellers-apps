@@ -2,11 +2,15 @@ import { MenuApiService } from '../menu-api.service';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
+import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { of } from 'rxjs';
 import type { Menu } from 'model';
 import * as getMenuByIdUtil from '../utils/get-menu-by-id';
 
 jest.mock('../utils/get-menu-by-id');
+jest.mock('@capacitor-firebase/functions', () => ({
+  FirebaseFunctions: { callByName: jest.fn() },
+}));
 
 /**
  * Named rather than automocked, because the automock leaves `FieldValue`
@@ -19,6 +23,7 @@ jest.mock('@capacitor-firebase/firestore', () => ({
   FirebaseFirestore: {
     getDocument: jest.fn(),
     updateDocument: jest.fn(),
+    getCollection: jest.fn(),
   },
   FieldValue: { delete: jest.fn(() => ({ __type__: 'delete' })) },
 }));
@@ -137,6 +142,33 @@ describe(MenuApiService.name, () => {
     });
 
     /**
+     * A menu derived from Bites keeps saying so after its owner edits it: only
+     * an explicit owner confirmation may retract `derivedFromBites`, and that
+     * does not exist yet (issue #1511). `updateDocument` merges, so the save
+     * keeps the flag - and the menu's currency - by not naming them.
+     */
+    it('leaves derivedFromBites and currency out of the write', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      const menuData: Menu = {
+        id: 'menuId',
+        categories: [],
+        derivedFromBites: true,
+        currency: 'CHF',
+      };
+
+      await service.saveMenu(menuData, 'restaurantId');
+
+      const [{ data }] = updateDocumentSpy.mock.calls[0];
+
+      expect(data).not.toHaveProperty('derivedFromBites');
+      expect(data).not.toHaveProperty('currency');
+    });
+
+    /**
      * The restaurant is what the ownership-scoped rules read the write's
      * authority from (issue #1078), so a save without one cannot succeed. It is
      * refused here rather than at Firestore, where it would come back as a
@@ -220,6 +252,99 @@ describe(MenuApiService.name, () => {
         'Cannot save a menu without the restaurant it belongs to',
       );
       expect(updateDocumentSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  /** See GitHub issue #2214. */
+  describe('confirmMenuAsOwn', () => {
+    it('removes derivedFromBites and writes nothing else of the menu', async () => {
+      const deletion = { __type__: 'delete' };
+      (FieldValue.delete as jest.Mock).mockReturnValue(deletion);
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+
+      await service.confirmMenuAsOwn('menuId', 'restaurantId');
+
+      expect(updateDocumentSpy).toHaveBeenCalledWith({
+        reference: 'menus/menuId',
+        data: {
+          restaurantId: 'restaurantId',
+          derivedFromBites: deletion,
+          updatedAt: '2024-03-15T12:00:00.000Z',
+          updatedAtTimestamp: 1710504000000,
+        },
+      });
+    });
+
+    it('refuses a confirmation that names no restaurant', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      await expect(
+        service.confirmMenuAsOwn('menuId', undefined),
+      ).rejects.toThrow(
+        'Cannot save a menu without the restaurant it belongs to',
+      );
+      expect(updateDocumentSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  /** The business app's Guest Bites page (GitHub issue #2216). */
+  describe('loadBitesForRestaurant', () => {
+    it("reads the restaurant's Bites by one filter and orders them newest first", async () => {
+      (FirebaseFirestore.getCollection as jest.Mock).mockResolvedValue({
+        snapshots: [
+          { id: 'old', data: { name: 'Old', createdAtTimestamp: 1 } },
+          { id: 'gone', data: undefined },
+          { id: 'new', data: { name: 'New', createdAtTimestamp: 2 } },
+        ],
+      });
+
+      const bites = await service.loadBitesForRestaurant('restaurant-1');
+
+      expect(bites.map(({ id }) => id)).toEqual(['new', 'old']);
+      expect(FirebaseFirestore.getCollection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reference: 'bites',
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'restaurantId',
+                opStr: '==',
+                value: 'restaurant-1',
+              },
+            ],
+          },
+        }),
+      );
+    });
+
+    it('reads nothing without a restaurant', async () => {
+      (FirebaseFirestore.getCollection as jest.Mock).mockClear();
+
+      await expect(service.loadBitesForRestaurant('')).resolves.toEqual([]);
+      expect(FirebaseFirestore.getCollection).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('linkBiteToMenuItem', () => {
+    it('calls the callable and returns its answer', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { biteId: 'b1', menuItemId: 'm1' },
+      });
+
+      await expect(
+        service.linkBiteToMenuItem({ biteId: 'b1', menuItemId: 'm1' }),
+      ).resolves.toEqual({ biteId: 'b1', menuItemId: 'm1' });
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'linkBiteToMenuItem',
+        data: { biteId: 'b1', menuItemId: 'm1' },
+      });
     });
   });
 });

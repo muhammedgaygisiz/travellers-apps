@@ -117,6 +117,65 @@ export const WithoutCurrency: Story = {
   },
 };
 
+/**
+ * A menu candidate verification put together from guests' Bites (GitHub issue
+ * #1511): one `Dishes` category, each price the average of what guests
+ * reported, in the currency they paid in. The notice above the categories says
+ * so. {@link WithMenu} is the same page for a menu the restaurant published,
+ * without it.
+ */
+export const DerivedFromBites: Story = {
+  args: {
+    ...Empty.args,
+    menu: {
+      id: 'derived-menu',
+      derivedFromBites: true,
+      currency: 'CHF',
+      categories: [
+        {
+          id: 'category-bites',
+          title: 'Dishes',
+          items: [
+            {
+              id: 'item-margherita',
+              name: 'Pizza margherita',
+              description: '',
+              price: 12,
+            },
+            {
+              id: 'item-carbonara',
+              name: 'Spaghetti carbonara',
+              description: '',
+              price: 15,
+            },
+            {
+              id: 'item-tiramisu',
+              name: 'Tiramisu',
+              description: '',
+              price: 7,
+            },
+          ],
+        },
+      ],
+    } as unknown as Menu,
+  },
+};
+
+/**
+ * A derived menu with no items - its Bites named no usable dish. There is no
+ * price to mislead anyone, so the page keeps the empty state and no notice.
+ */
+export const DerivedFromBitesEmpty: Story = {
+  args: {
+    ...Empty.args,
+    menu: {
+      id: 'derived-empty-menu',
+      derivedFromBites: true,
+      categories: [],
+    } as unknown as Menu,
+  },
+};
+
 export const WithDishVariants: Story = {
   args: {
     restaurant: {

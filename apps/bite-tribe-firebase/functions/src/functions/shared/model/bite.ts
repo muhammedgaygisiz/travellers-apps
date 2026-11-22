@@ -22,7 +22,8 @@ export type Bite = {
   currency?: string;
   rating?: number;
   imagePath?: string;
-  imageStatus?: 'pending' | 'uploaded' | 'failed';
+  imageStatus?: 'pending' | 'uploaded' | 'failed' | 'refused';
+  imageRefusalCategory?: string;
   thumbup?: number;
   drooling?: number;
   mindblown?: number;

@@ -2,13 +2,33 @@ import type { Geopoint } from './geopoint';
 import type { Like } from './like';
 import type { PositionSource } from './position-source';
 
+/** Who linked a Bite to a menu item (GitHub issue #2216). */
+export type MenuItemLinkSource = 'guest' | 'verification' | 'owner';
+
 export interface Bite {
   userId?: string;
   id: string;
   name: string;
   image: string;
   imagePath?: string;
-  imageStatus?: 'pending' | 'uploaded' | 'failed';
+  /**
+   * Where the Bite's photo stands (GitHub issues #1168, #1717, #2139). Only
+   * `uploaded` is listable. `uploaded` and `refused` are written only by
+   * `setBiteImagePathOnUpload`; the client writes `pending` and `failed`.
+   */
+  imageStatus?: 'pending' | 'uploaded' | 'failed' | 'refused';
+  /**
+   * Why the image check refused the photo, present only while `imageStatus`
+   * is `refused`. Written by `setBiteImagePathOnUpload` alone (issue #2139).
+   */
+  imageRefusalCategory?: string;
+  /**
+   * When the backend checks the photo again, in milliseconds since the epoch,
+   * while its last image check could not run (GitHub issue #2142). Present
+   * only while the photo waits; the client reads it as a photo still being
+   * checked rather than an upload that stalled. Written by the backend alone.
+   */
+  imageCheckNextAt?: number;
   place: string;
   price: number;
   currency?: string;
@@ -70,6 +90,27 @@ export interface Bite {
    * every Bite - the field is cheap now and unrecoverable later.
    */
   variantId?: string;
+  /**
+   * Who set {@link menuItemId} (GitHub issue #2216):
+   *
+   * - `guest` - the Bite's author, from a table order or from a dish's
+   *   "Create Bite" button. Absent on Bites linked that way before the field.
+   * - `verification` - candidate verification, from the dish name the Bite
+   *   gave, when it built the restaurant's Initial Menu from those Bites.
+   * - `owner` - the restaurant's owner, on the business app's Guest Bites
+   *   page, through `linkBiteToMenuItem`.
+   *
+   * Guests see no difference between them. It is kept so a label, or a check
+   * for owners who link selectively, can be added later from evidence. Only
+   * `verification` and `owner` links can be changed by the owner.
+   */
+  menuItemLinkedBy?: MenuItemLinkSource;
+  /**
+   * The restaurant's owner said this Bite is about nothing on their menu
+   * (GitHub issue #2216), so the Guest Bites page stops offering it. The Bite
+   * itself is unchanged and shows everywhere it did.
+   */
+  menuLinkDismissed?: boolean;
   tags?: string[];
   /**
    * The BiteTribe users the creator ate with (GitHub issue #1915), by uid.

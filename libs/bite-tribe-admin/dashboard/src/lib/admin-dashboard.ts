@@ -264,6 +264,14 @@ export class AdminDashboard {
       group: 'primary',
     },
     {
+      titleKey: 'admin-tool-restaurant-photos',
+      descriptionKey: 'admin-tool-restaurant-photos-description',
+      icon: 'image-outline',
+      path: '/restaurant-photos',
+      testId: 'admin-tool-restaurant-photos',
+      group: 'primary',
+    },
+    {
       titleKey: 'admin-tool-table-sessions',
       descriptionKey: 'admin-tool-table-sessions-description',
       icon: 'people-outline',
@@ -325,6 +333,22 @@ export class AdminDashboard {
       icon: 'earth-outline',
       path: '/bite-countries-rebuild',
       testId: 'admin-tool-bite-countries-rebuild',
+      group: 'secondary',
+    },
+    {
+      titleKey: 'admin-tool-follower-acceptance-backfill',
+      descriptionKey: 'admin-tool-follower-acceptance-backfill-description',
+      icon: 'person-add-outline',
+      path: '/follower-acceptance-backfill',
+      testId: 'admin-tool-follower-acceptance-backfill',
+      group: 'secondary',
+    },
+    {
+      titleKey: 'admin-tool-image-moderation-backfill',
+      descriptionKey: 'admin-tool-image-moderation-backfill-description',
+      icon: 'eye-off-outline',
+      path: '/image-moderation-backfill',
+      testId: 'admin-tool-image-moderation-backfill',
       group: 'secondary',
     },
     {

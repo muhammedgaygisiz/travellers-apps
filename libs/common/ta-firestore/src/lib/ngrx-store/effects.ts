@@ -16,12 +16,14 @@ import {
   switchMap,
   tap,
   timeout,
+  TimeoutError,
 } from 'rxjs';
 
 import { NavController } from '@ionic/angular';
 import { AuthCredentials } from '../api/auth-credentials.model';
 import { AuthService } from '../auth.service';
 import { AppCheckReadinessService } from '../app-check-readiness.service';
+import { AuthStorageHealthService } from '../auth-storage-health.service';
 import { isAppCheckRefusal } from '../initialize-firebase-app-check';
 import {
   getSignInErrorCode,
@@ -73,6 +75,7 @@ export class AuthEffects {
   private readonly store = inject(Store);
   private readonly requestedUrlService = inject(RequestedUrlService);
   private readonly appCheckReadiness = inject(AppCheckReadinessService);
+  private readonly authStorageHealth = inject(AuthStorageHealthService);
 
   private hasRoutedAfterSignIn = false;
 
@@ -144,6 +147,7 @@ export class AuthEffects {
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => {
             console.debug('#mo error login: ', err);
+            this.checkStorageAfterTimeout(err);
             return of(this.toLoginFailure(err));
           }),
         ),
@@ -364,6 +368,19 @@ export class AuthEffects {
     void this.appCheckReadiness.reportTokenLost();
 
     return AuthActions.loginBlockedByAppCheck();
+  }
+
+  /**
+   * A sign-in that timed out may be waiting behind the browser's storage
+   * rather than the network (GitHub issue #2253). Asking the storage raises the
+   * storage gate when that is it. The form is released at once either way,
+   * with the usual "try again", which is the right advice for a slow network;
+   * the gate replaces the page a moment later if the storage is the cause.
+   */
+  private checkStorageAfterTimeout(err: unknown): void {
+    if (err instanceof TimeoutError) {
+      void this.authStorageHealth.check();
+    }
   }
 
   private login(authCreds: AuthCredentials): Promise<SignInResult> {

@@ -6,7 +6,9 @@ import type { PublicUser } from 'model';
  * `pending` upload old enough to be abandoned reads as `failed`, as a Bite
  * photo's does (GitHub issue #1953). Without a start time a `pending` upload
  * stays `pending`, because claiming failure for a photo that may still arrive
- * is worse than waiting.
+ * is worse than waiting. So does a photo the backend will check again, while
+ * `imageCheckNextAt` is set: it writes `failed` itself after the last attempt
+ * (GitHub issue #2142).
  */
 export const getEffectivePhotoStatus = (
   user: PublicUser | undefined,
@@ -14,6 +16,10 @@ export const getEffectivePhotoStatus = (
 ): PublicUser['photoStatus'] => {
   if (user?.photoStatus !== 'pending') {
     return user?.photoStatus;
+  }
+
+  if (typeof user.imageCheckNextAt === 'number') {
+    return 'pending';
   }
 
   const startedAt = user.photoUploadStartedAtTimestamp;

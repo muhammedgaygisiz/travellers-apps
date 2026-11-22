@@ -17,6 +17,7 @@
         "polyfills": [],
         "tsConfig": "apps/bite-tribe-business/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
+        "allowedCommonJsDependencies": ["@photostructure/tz-lookup"],
         "assets": [
           {
             "glob": "**/*",

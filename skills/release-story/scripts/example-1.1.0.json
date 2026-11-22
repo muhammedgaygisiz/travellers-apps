@@ -1,0 +1,32 @@
+{
+  "version": "1.1.0",
+  "headline": ["Share it.", "Celebrate it."],
+  "characters": ["01-viking", "06-japanese"],
+  "highlights": [
+    {
+      "icon": "instagram",
+      "title": "Share Bites as images",
+      "text": "Story & post designs, straight to Instagram and Facebook"
+    },
+    {
+      "icon": "celebrate",
+      "title": "Celebrate your firsts",
+      "text": "First Bite, a new country, a finished BiteTrail"
+    },
+    {
+      "icon": "globe",
+      "title": "Your Bites on a globe",
+      "text": "See every country you've eaten your way through"
+    },
+    {
+      "icon": "hand",
+      "title": "Feels better in your hand",
+      "text": "Haptics and pressed states on every tap"
+    },
+    {
+      "icon": "people",
+      "title": "A friendlier tribe",
+      "text": "People to follow, plus report & block"
+    }
+  ]
+}

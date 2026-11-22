@@ -29,6 +29,7 @@ class RestaurantApiMock {
   saveSocialMediaLinksForRestaurant = jest.fn();
   saveGenderNeutralRestroomForRestaurant = jest.fn();
   saveCategoriesForRestaurant = jest.fn();
+  photoVerdict$ = jest.fn();
 }
 
 class MenuApiMock {
@@ -75,6 +76,7 @@ class ProfileApiMock {
   followRequestPending = jest.fn();
   requestFollow = jest.fn();
   withdrawFollowRequest = jest.fn();
+  countPendingFollowRequests = jest.fn();
   fetchFollowersWithDetails = jest.fn();
   fetchFollowingWithDetails = jest.fn();
 }
@@ -91,7 +93,6 @@ class BiteApiMock {
   startlatestBitesListener = jest.fn();
   getTotalNumberOfBites = jest.fn();
   uploadImage = jest.fn();
-  updateImagePathInBite = jest.fn();
   setImageStatus = jest.fn();
   reportBite = jest.fn();
   removeSelfFromBiteTags = jest.fn();
@@ -112,6 +113,7 @@ class ExchangeRatesApiMock {
 
 class BiteTrailApiMock {
   createBiteTrail = jest.fn().mockResolvedValue(undefined);
+  photoVerdict$ = jest.fn();
 }
 
 describe(BiteTribeApiService.name, () => {
@@ -376,6 +378,36 @@ describe(BiteTribeApiService.name, () => {
         );
       },
     ));
+  });
+
+  // GitHub issue #2141: the image check's verdict on a folder photo.
+  describe('photo verdicts', () => {
+    it('passes a restaurant on to RestaurantApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const restaurantApiService = TestBed.inject(RestaurantApiService);
+      const verdict$ = of({ imageStatus: 'refused' as const });
+      jest.mocked(restaurantApiService.photoVerdict$).mockReturnValue(verdict$);
+
+      expect(service.restaurantPhotoVerdict$('restaurant-id', true)).toBe(
+        verdict$,
+      );
+      expect(restaurantApiService.photoVerdict$).toHaveBeenCalledWith(
+        'restaurant-id',
+        true,
+      );
+    });
+
+    it('passes a trail on to BiteTrailApiService', () => {
+      const service = TestBed.inject(BiteTribeApiService);
+      const biteTrailApiService = TestBed.inject(BiteTrailApiService);
+      const verdict$ = of({ imageStatus: 'uploaded' as const, imagePath: 'p' });
+      jest.mocked(biteTrailApiService.photoVerdict$).mockReturnValue(verdict$);
+
+      expect(service.biteTrailPhotoVerdict$('trail-id')).toBe(verdict$);
+      expect(biteTrailApiService.photoVerdict$).toHaveBeenCalledWith(
+        'trail-id',
+      );
+    });
   });
 
   describe('saveCategoriesForRestaurant', () => {
@@ -646,22 +678,6 @@ describe(BiteTribeApiService.name, () => {
     ));
   });
 
-  describe('updateImagePathInBite', () => {
-    it('should call updateImagePathInBite on BiteApiService', inject(
-      [BiteTribeApiService, BiteApiService],
-      (service: BiteTribeApiService, biteApiService: BiteApiService) => {
-        const updateImagePathInBiteSpy = jest.spyOn(
-          biteApiService,
-          'updateImagePathInBite',
-        );
-        const bite = { id: 'bite-id', content: 'Bite with image' } as any;
-        const imagePath = 'path/to/image.jpg';
-        service.updateImagePathInBite(bite, imagePath);
-        expect(updateImagePathInBiteSpy).toHaveBeenCalledWith(bite, imagePath);
-      },
-    ));
-  });
-
   describe('updateUser', () => {
     it('should call updateUser on ProfileApiService', inject(
       [BiteTribeApiService, ProfileApiService],
@@ -669,7 +685,7 @@ describe(BiteTribeApiService.name, () => {
         const updateUserSpy = jest.spyOn(profileApiService, 'updateUser');
         const publicUser = { id: 'user-id', name: 'Updated Name' } as any;
         service.updateUser(publicUser);
-        expect(updateUserSpy).toHaveBeenCalledWith(publicUser);
+        expect(updateUserSpy).toHaveBeenCalledWith(publicUser, undefined);
       },
     ));
   });
@@ -793,6 +809,20 @@ describe(BiteTribeApiService.name, () => {
         expect(profileApiService.withdrawFollowRequest).toHaveBeenCalledWith(
           'owner-uid',
         );
+      },
+    ));
+
+    it('should forward the pending request count (#2165)', inject(
+      [BiteTribeApiService, ProfileApiService],
+      async (
+        service: BiteTribeApiService,
+        profileApiService: ProfileApiService,
+      ) => {
+        jest
+          .spyOn(profileApiService, 'countPendingFollowRequests')
+          .mockResolvedValue(2);
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(2);
       },
     ));
   });

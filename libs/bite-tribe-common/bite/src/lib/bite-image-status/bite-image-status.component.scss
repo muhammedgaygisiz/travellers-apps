@@ -33,8 +33,15 @@
   }
 
   /* The failure is a dead end rather than something in progress, so it reads
-   * quieter than the uploading state. */
-  [data-testid='bite-image-failed'] .image-state-text {
+   * quieter than the uploading state. So does a refused photo (issue #2139). */
+  [data-testid='bite-image-failed'] .image-state-text,
+  [data-testid='bite-image-refused'] .image-state-text {
     color: var(--ion-color-medium);
+  }
+
+  /* Matches the retry button, so it stays readable on a card or a photo. */
+  [data-testid='bite-image-choose-different'] {
+    --background: var(--ion-background-color, #fff);
+    margin: 0;
   }
 }

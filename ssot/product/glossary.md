@@ -23,7 +23,7 @@ existing name already or the term belongs here.
 
 - **BiteTribe** — Community-driven food discovery product focused on real dishes people ate, not only restaurants they visited.
   - Business relevance: Core product and brand. The promise is authentic food discovery through user-generated bite experiences.
-- **Bite** — A shared food experience for a specific dish, including context such as photo, description, star rating, price, place, restaurant, and creator. See [Bite](../domain/bite.md).
+- **Bite** — A guest's record of eating one dish: photo, description, star rating, the price they paid, place, restaurant, and creator. **A Bite is content a guest creates, never something a restaurant offers:** it is not a menu item, and no menu, category or menu screen is called "Bites". A Bite points at the menu item it is about (`menuItemId`, `variantId`) when its author chose the dish, when candidate verification built the item from it, or when the restaurant's owner linked it ([#2216]). See [Bite](../domain/bite.md).
   - Business relevance: Primary content unit. More high-quality bites increase discovery value, engagement, and data quality.
 - **Bite creator** — A user who creates and publishes bites. Both a persona and a role, and the two are not interchangeable: the persona in [Personas](personas.md) describes the audience, the role in [User Roles](user-roles.md) describes what the account may do. See [User](../domain/user.md).
   - Business relevance: Supply-side contributor. Creator motivation, trust, and retention directly affect content growth.
@@ -68,8 +68,14 @@ existing name already or the term belongs here.
   - Business relevance: Every Bite has a place and only a few places ever become restaurants. Keeping the two apart is what lets the product carry thousands of Bites without thousands of restaurant pages, and it is why a Bite is complete even where no restaurant exists.
 - **Restaurant** — A verified or managed place: the record that groups business information, location, menu-related content, and the bites connected to that place. _Restaurant profile_ is retired as a domain term — the public restaurant page is a surface, not a second concept. See [Restaurant](../domain/restaurant.md).
   - Business relevance: Anchor for business-side value, discovery, and potential monetization.
-- **Menu item** — A dish or product offered by a restaurant.
+- **Menu** — A restaurant's own statement of what it serves and at what price: an ordered list of categories, priced in one currency (`currency`). One per restaurant. Guests read it on the restaurant's menu page, the public menu (`/m/…`) and at the table; the owner writes it in the Business App menu editor.
+- **Category** — A named section of a Menu (`title`, optional `subtitle`), such as "Pizze" or "Antipasti", holding menu items in order and optionally a category's extras. Named for what it holds, never for where its items came from.
+- **Menu item** — A dish or product a restaurant offers, with its name, price and variants, inside a category of the restaurant's Menu. **Written by the restaurant (or, as a draft, built from Bites), never by a guest:** it is not a Bite. Guests write Bites _about_ menu items; one menu item can have many Bites.
   - Business relevance: Connects business inventory to user-generated bite content and can support conversion flows such as creating a bite from a menu item.
+- **Option** — A choice on a menu item that doesn't change its price, such as "Zubereitungsart: nicht scharf / scharf". It has a name and two or more choices, the guest picks one, and it can be required. A choice that costs something is a variant or an extra, never an option ([#2254]).
+- **Variant** — One version of a menu item with its own name and price, such as "Small" or "Con bufala". A dish with variants is ordered only as one of them. A Bite made from an order records which one.
+- **Extra** — An add-on offered across a category, such as "Extra mozzarella +2.00", listed once for that category rather than per dish.
+- **Initial Menu** — The Menu that candidate verification creates for a new restaurant, built from that restaurant's Bites. It has one item per dish name guests used, priced at the average of what they paid, in a single "Dishes" category. It is marked `derivedFromBites` and guests are told so until the owner confirms it as their own ([#2214]). It is evidence about the menu, not the restaurant's statement, and its items are menu items, not Bites.
 - **Restaurant claim** — The step before ownership: settling who should own a restaurant that has none. **Not a record in the product.** The self-service claim was declined ([#1076]) and the `RestaurantClaim` model removed with it ([#1077]), so a claim is settled off-system, on the call the operator is already having, and reaches BiteTribe only as the operator's assignment and its stated reason. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md).
   - Business relevance: A restaurant with no owner has nobody accountable for its data, and a claim is how that gap closes. Where it is settled decides how much evidence anyone can point to afterwards.
 - **Restaurant ownership** — The state a claim leads to: one or more accounts, up to ten and each holding the business role, are accountable for a restaurant's data, with equal rights (`RD-UR-10`). An operator assigns it with a stated reason and can revoke it; `claimStatus` is `unclaimed`, `claimed` or `revoked`. A restaurant is assigned, never self-requested. See [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md).
@@ -152,3 +158,6 @@ See [Monetization](monetization.md) for the free and paid boundary and the reven
 [#1077]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1077
 [#1078]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1078
 [#1079]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1079
+[#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2254]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2254

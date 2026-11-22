@@ -7,7 +7,7 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, take } from 'rxjs';
 import {
   enablePushOnThisDevice,
   getPushPermissionState,
@@ -178,9 +178,16 @@ export class OnboardingDataAccessService {
    * The assistant writes through the API rather than the store's save action,
    * so nothing else dispatches the result. The store profile is only loaded at
    * login, which would otherwise leave it on the pre-onboarding snapshot.
+   *
+   * A newly chosen photo is published by the backend once the image check
+   * passed it (GitHub issue #2140), so the profile that comes back keeps the
+   * photo the store already shows.
    */
   async saveProfile(profile: PublicUser): Promise<PublicUser> {
-    const updated = await this.api.updateUser(profile);
+    const current = await firstValueFrom(
+      this.storeService.publicUser$.pipe(take(1)),
+    );
+    const updated = await this.api.updateUser(profile, current?.photoUrl ?? '');
     this.storeService.notifySavedProfile(updated);
 
     return updated;

@@ -264,6 +264,15 @@ const APP_ROUTES: Routes = [
     canActivate: [authGuard],
   },
   {
+    // The own private profile's pending follow requests (issue #2165). The
+    // signed-in user's own, so the route takes no user id.
+    path: PATH.FOLLOW_REQUESTS,
+    loadComponent: () =>
+      import('bite-tribe/followers').then((m) => m.FollowRequestsContainer),
+    title: 'Follow Requests',
+    canActivate: [authGuard],
+  },
+  {
     path: PATH.ABOUT,
     loadComponent: () =>
       import('bite-tribe/about').then((m) => m.AboutContainerComponent),

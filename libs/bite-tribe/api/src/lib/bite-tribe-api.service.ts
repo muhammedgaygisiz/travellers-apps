@@ -12,10 +12,13 @@ import {
   CreateAndUploadImageCallbackParams,
   CreateBucketListFromBiteTrailParams,
   DaySchedule,
+  FolderPhotoVerdict,
   Geopoint,
   GooglePlace,
   Like,
   Link,
+  LinkBiteToMenuItemRequest,
+  LinkBiteToMenuItemResult,
   Menu,
   PlaceDetails,
   PublicUser,
@@ -217,7 +220,7 @@ export class BiteTribeApiService {
   }
 
   /** A failure is thrown, so the page can say so (issue #1952). */
-  saveNewRestaurant(restaurant: Restaurant): Promise<void> {
+  saveNewRestaurant(restaurant: Restaurant): Promise<string> {
     return this.restaurantApiService.saveNewRestaurant(restaurant);
   }
 
@@ -230,7 +233,7 @@ export class BiteTribeApiService {
       | 'updatedAt'
       | 'updatedAtTimestamp'
     >,
-  ): Promise<void> {
+  ): Promise<string> {
     return this.biteTrailApiService.createBiteTrail(trailData);
   }
 
@@ -255,14 +258,17 @@ export class BiteTribeApiService {
     );
   }
 
-  setUploadedRestaurantImage(
+  /** See {@link RestaurantApiService.photoVerdict$} (GitHub issue #2141). */
+  restaurantPhotoVerdict$(
     restaurantId: string,
-    storagePath: string,
-  ): Promise<string> {
-    return this.restaurantApiService.setUploadedRestaurantImage(
-      restaurantId,
-      storagePath,
-    );
+    afterPending: boolean,
+  ): Observable<FolderPhotoVerdict> {
+    return this.restaurantApiService.photoVerdict$(restaurantId, afterPending);
+  }
+
+  /** See {@link BiteTrailApiService.photoVerdict$} (GitHub issue #2141). */
+  biteTrailPhotoVerdict$(biteTrailId: string): Observable<FolderPhotoVerdict> {
+    return this.biteTrailApiService.photoVerdict$(biteTrailId);
   }
 
   setRestaurantImageStatus(
@@ -304,6 +310,18 @@ export class BiteTribeApiService {
     return this.menuApiService.loadBitesForMenuItem(menuItemId);
   }
 
+  /** Every Bite about one restaurant, newest first (issue #2216). */
+  loadBitesForRestaurant(restaurantId: string): Promise<Bite[]> {
+    return this.menuApiService.loadBitesForRestaurant(restaurantId);
+  }
+
+  /** An owner's link between a guest's Bite and a dish (issue #2216). */
+  linkBiteToMenuItem(
+    request: LinkBiteToMenuItemRequest,
+  ): Promise<LinkBiteToMenuItemResult> {
+    return this.menuApiService.linkBiteToMenuItem(request);
+  }
+
   saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {
     return this.menuApiService.saveMenu(menu, restaurantId);
   }
@@ -315,6 +333,14 @@ export class BiteTribeApiService {
     currency: string,
   ): Promise<void> {
     return this.menuApiService.saveMenuCurrency(menuId, restaurantId, currency);
+  }
+
+  /** The owner takes a menu built from Bites as their own (issue #2214). */
+  confirmMenuAsOwn(
+    menuId: string,
+    restaurantId: string | undefined,
+  ): Promise<void> {
+    return this.menuApiService.confirmMenuAsOwn(menuId, restaurantId);
   }
 
   loadMenu(menuId: string): Promise<Menu | undefined> {
@@ -408,12 +434,11 @@ export class BiteTribeApiService {
     );
   }
 
-  updateImagePathInBite(bite: Bite, imagePath: string): Promise<Bite> {
-    return this.biteApiService.updateImagePathInBite(bite, imagePath);
-  }
-
-  updateUser(publicUser: PublicUser): Promise<PublicUser> {
-    return this.profileApiService.updateUser(publicUser);
+  updateUser(
+    publicUser: PublicUser,
+    currentPhotoUrl?: string,
+  ): Promise<PublicUser> {
+    return this.profileApiService.updateUser(publicUser, currentPhotoUrl);
   }
 
   /** See {@link ProfileApiService.saveProfile}: a failure is thrown. */
@@ -434,10 +459,6 @@ export class BiteTribeApiService {
 
   findLocalProfilePhoto(userId: string): Promise<string | undefined> {
     return this.profileApiService.findLocalProfilePhoto(userId);
-  }
-
-  setUploadedProfilePhoto(userId: string, imagePath: string): Promise<string> {
-    return this.profileApiService.setUploadedProfilePhoto(userId, imagePath);
   }
 
   setProfilePhotoStatus(
@@ -518,6 +539,11 @@ export class BiteTribeApiService {
 
   withdrawFollowRequest(userId: string): Promise<WithdrawFollowRequestResult> {
     return this.profileApiService.withdrawFollowRequest(userId);
+  }
+
+  /** Pending requests to follow the signed-in user's profile (#2165). */
+  countPendingFollowRequests(): Promise<number> {
+    return this.profileApiService.countPendingFollowRequests();
   }
 
   async followsAnyone(): Promise<boolean | undefined> {

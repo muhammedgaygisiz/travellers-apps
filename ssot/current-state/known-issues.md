@@ -41,7 +41,7 @@ Firebase enforces `disabled` when a session is created or a token is refreshed, 
 **Why it matters:** the check of [#1610] is the store's filtering safeguard, and three of its edges are open by decision rather than by oversight.
 
 - **A Bite saved offline, or by a client that skips the form, is readable for seconds.** `moderateBiteOnWrite` undoes it once the write reaches the server; until then other members can read the text. The pushes do not carry it. The bound is the price of saving a Bite offline (`RD-QG-1`), and the alternative - a hidden state every Bite read filters on - is the one the Bite photo question in [Current State - Open Questions](open-questions.md) declined.
-- **Photos are not checked.** Same page, same reason.
+- **Three profile photos from early 2026 were reviewed by an operator, not by the image check.** Every upload path is checked before it publishes ([#2139], [#2140], [#2141]), and the photos published before were checked once by the `image-moderation-backfill` migration, whose report and apply passes ran in production on 21 November 2026 ([#2143]). The migration checks only an object named `images/{collection}/{id}/{file}`. Three profiles still publish an identity-provider avatar mirrored in January and February 2026, whose file name carries the provider's URL path and so extra slashes; the migration counted them as skipped. An operator looked at all three on 21 November 2026 - letter-on-colour placeholders - and kept them. No new file can be named that way: `mirrorIdentityAvatar` writes `identity-avatar-{time}.{ext}`, and `setUserPhotoUrlOnUpload` publishes only a single-segment name. A photo whose check could not run stays unpublished and is checked again by `recheckPendingImages` over about 16 hours, then marked `failed` for its uploader's retry ([#2142]). The decision and its reopening are on the same page.
 - **Vertex down means the wordlist alone.** A model outage publishes what the short wordlist passes, logged as `checkContent: model unavailable`, rather than refusing every post.
 
 How the check works is in [Architecture - AI](../architecture/ai.md).
@@ -262,3 +262,9 @@ a one-off step. It is the filter, not traffic, and it does not recur.
 [#1653]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1653
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

@@ -9,6 +9,7 @@ import {
   BITE_COLLECTION,
   getBitesNeedingAddressBackfill,
   getRestaurantClusteringEligibleBites,
+  IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
   MigrationsDataAccessService,
   RESTAURANT_CANDIDATES_COLLECTION,
   RESTAURANT_CLUSTERING_ELIGIBLE_BITES_LIMIT,
@@ -324,6 +325,67 @@ describe(MigrationsDataAccessService.name, () => {
         name: 'sendNewVersionNotification',
         data: { platform: 'android' },
       });
+    });
+  });
+
+  describe('backfillFollowerAcceptance', () => {
+    it('calls the follower acceptance migration and returns its counts', async () => {
+      jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
+        data: { processed: 10, private: 3, stamped: 7 },
+      });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.backfillFollowerAcceptance();
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'backfillFollowerAcceptanceCallable',
+      });
+      expect(result).toEqual({ processed: 10, private: 3, stamped: 7 });
+    });
+  });
+
+  describe('runImageModerationBackfill', () => {
+    // One call stops after a few minutes and keeps where it got to (issue
+    // #2143), so one press calls until the run is complete.
+    it('calls until the run is complete and returns the run counts', async () => {
+      const counts = {
+        checked: 40,
+        passed: 38,
+        refused: 1,
+        unavailable: 1,
+        skipped: 4,
+      };
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockResolvedValueOnce({
+          data: { ...counts, checked: 20, mode: 'report', complete: false },
+        })
+        .mockResolvedValueOnce({
+          data: { ...counts, mode: 'report', complete: true },
+        });
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      const result = await service.runImageModerationBackfill('report');
+
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledTimes(2);
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'imageModerationBackfillCallable',
+        data: { mode: 'report' },
+        // Outwaits the function: the SDK's 70-second default failed every run.
+        timeout: IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
+      });
+      expect(result).toEqual(counts);
+    });
+
+    it('rejects when a call fails, so the next press continues the run', async () => {
+      jest
+        .mocked(FirebaseFunctions.callByName)
+        .mockRejectedValue(new Error('failed-precondition'));
+      const service = TestBed.inject(MigrationsDataAccessService);
+
+      await expect(service.runImageModerationBackfill('apply')).rejects.toThrow(
+        'failed-precondition',
+      );
     });
   });
 

@@ -22,6 +22,35 @@
         <ion-button fill="clear">{{ 'edit' | transloco }}</ion-button>
       </div>
 
+      <!-- The image check refused the new photo (GitHub issue #2140). It is
+      not shown: the photo above is the one everybody else still sees. A photo
+      refused by the check of stored photos (GitHub issue #2143) was that
+      photo, so the profile has none until another is chosen. -->
+      @if (photoRefused()) {
+      <div
+        class="photo-refused-notice"
+        role="status"
+        data-testid="edit-profile-photo-refused"
+      >
+        <ion-icon name="alert-circle-outline" aria-hidden="true" />
+        <div class="photo-refused-text">
+          <strong>{{ refusalNoticeKeys().title | transloco }}</strong>
+          <ion-text>{{ refusalReasonKey() | transloco }}</ion-text>
+          <ion-text color="medium">
+            {{ refusalNoticeKeys().note | transloco }}
+          </ion-text>
+        </div>
+        <ion-button
+          fill="outline"
+          size="small"
+          data-testid="edit-profile-choose-different-photo"
+          (click)="openPhotoPicker()"
+        >
+          {{ 'choose-different-photo' | transloco }}
+        </ion-button>
+      </div>
+      }
+
       <ion-modal
         #profileImageSelectionModal
         trigger="select-image"
@@ -167,5 +196,21 @@ issue #1343. -->
   message="{{ 'are-you-sure-you-want-to-return-to-a-private-profile-you-will-be-shown-as-anonymous' | transloco }}"
   [buttons]="confirmationButtons"
   (didDismiss)="handleGoPrivateConfirmation($event)"
+/>
+}
+
+<!-- Making a private profile public accepts every pending follow request at
+once, so the switch asks first while at least one is pending. See GitHub issue
+#2168. -->
+@if (isGoPublicOpen()) {
+<ion-alert
+  [isOpen]="true"
+  header="{{ 'accept-follow-requests-header' | transloco }}"
+  message="{{ 'make-public-accepts-follow-requests' | transloco: { count: pendingFollowRequestCount() } }}"
+  [buttons]="[
+    { text: 'keep-private' | transloco, role: keepPrivateRole },
+    { text: 'yes-make-public' | transloco, role: goPublicRole }
+  ]"
+  (didDismiss)="handleGoPublicConfirmation($event)"
 />
 }

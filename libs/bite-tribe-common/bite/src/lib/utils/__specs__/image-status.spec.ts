@@ -51,6 +51,25 @@ describe('getEffectiveImageStatus', () => {
     expect(status).toBe('failed');
   });
 
+  it('should keep a photo the backend will check again pending past the threshold', () => {
+    const status = getEffectiveImageStatus(
+      bite({
+        imageStatus: 'pending',
+        createdAtTimestamp: NOW - 8 * STALE_PENDING_UPLOAD_MS,
+        imageCheckNextAt: NOW + 60 * 1000,
+      }),
+      NOW,
+    );
+
+    expect(status).toBe('pending');
+  });
+
+  it('should show the failure the backend wrote after its last recheck', () => {
+    expect(getEffectiveImageStatus(bite({ imageStatus: 'failed' }), NOW)).toBe(
+      'failed',
+    );
+  });
+
   it('should fall back to the ISO creation date when no numeric timestamp exists', () => {
     const status = getEffectiveImageStatus(
       bite({

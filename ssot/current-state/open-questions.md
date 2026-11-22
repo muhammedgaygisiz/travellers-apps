@@ -84,7 +84,7 @@ Advertising, stage 1, issue [#1123]:
 
 - What ad frequency? Issue [#542] proposes every 5 bites, the epic proposes every 8th card.
 - One consent prompt covering analytics and ads, or two? This has to be settled with issue [#989].
-- Which ad content categories must be excluded for a food product with dietary, religious and health sensitivities?
+- ~~Which ad content categories must be excluded for a food product with dietary, religious and health sensitivities?~~ **Settled 20 November 2026 by `RD-DC-2`:** every category the member's own dietary choices rule out, by a fixed mapping, owned by [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) and built by issue [#2201]. Whether the ad network can apply that per request is open under `Dietary Choice Questions`.
 
 Subscriptions, stage 2, issue [#1124]:
 
@@ -123,17 +123,58 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   on every Bite, where text that was already judged costs nothing. Until then a photo is
   handled after the fact: any member reports the Bite ([#1608]) and an operator removes it
   ([#1475]). The question reopens if reports show objectionable photos arriving.
+  **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
+  Its image check exists since [#2138], Bite photos go through it since [#2139], profile
+  photos since [#2140], and restaurant and Bite Trail photos since [#2141], so every upload
+  path is checked. Photos stored before the check were checked once by the
+  `image-moderation-backfill` migration ([#2143]), whose two passes ran in production on 21
+  November 2026.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
   a change is a pull request; nothing records why a term is on it beyond the review.
 - Does a member whose text is refused get a way to contest it? Today the only answer is to
   reword, and a model refusal says which surface failed but not which words.
 
+## Image Moderation Questions
+
+These belong to epic [#2137], the check every uploaded image passes before another account
+can see it. The check is described in [Architecture - AI](../architecture/ai.md).
+
+- **What does the image check refuse? Settled 20 November 2026 by the maintainer, on
+  [#2138].** Five categories: `sexual` (nudity and sexually explicit content), `violence`
+  (graphic violence, gore, serious injury), `hate` (hate symbols and attacks on a group),
+  `self_harm` and `illegal` (illegal drugs, and drugs or weapons offered for sale). This is
+  the text check's list without `harassment`, which a photo rarely carries on its own. A photo
+  that shows no food is **not** refused: a selfie at the table, a menu or a street front is an
+  ordinary upload, and a Bite photo that is not food stays with the report's `notFood` reason
+  ([#1608]). Food in any form - raw meat, blood, whole animals - is not `violence`, and alcohol
+  or tobacco is not `illegal`; the prompt says so.
+- **How long does an image whose check answered `unavailable` wait, and how many attempts
+  are made, before it is marked `failed`? Settled 20 November 2026 by the maintainer, on
+  [#2142].** Seven checks over about 16 hours: the upload's own, then one recheck after each
+  of 15 minutes, 30 minutes, 1, 2, 4 and 8 hours, run by `recheckPendingImages` every 15
+  minutes at most 50 images a run. A shorter bound sends an uploader to a manual retry for
+  any outage longer than an hour; a longer one keeps a Bite hidden for days. While the photo
+  waits, the apps show it as still being checked rather than reading it as a stalled upload,
+  and only the backend's `failed` after the last attempt brings the retry.
+- **What happens to a refused photo found by the migration of stored photos? Settled 20
+  November 2026 by the maintainer, on [#2143]: report first, then apply.** The migration runs
+  in two passes. The report pass changes nothing: it counts what the check passes and refuses
+  and lists the refused documents in the operator log entry of the run. Only once a report has
+  finished does the apply pass run, and it takes each refused photo down the way a refused
+  upload is: the object is deleted, the document's published URL is removed, and its status
+  becomes `refused` with the category, so the uploader is told and can choose another.
+  The report guards against a bulk run turning one miscalibrated category into many false
+  refusals at once, without the screen for reviewing each refusal that epic [#2137] keeps out
+  of scope. The verdicts are kept, so the apply pass asks the model about nothing the
+  report judged. Unlike a refused upload, a refused stored photo was the one shown, so a
+  profile, restaurant or Bite Trail is left without a photo until its owner chooses one.
+
 ## Follow Request Questions
 
 These belong to epic [#2144], which turns a follow of a private profile into a request its
-owner accepts or declines. Today a follow is instant and one-sided on every profile, and
-following a private one gets nothing: `notifyFollowersOnNewBite` skips an author who is not
-public, and since [#1863] the profile itself is unreadable to other accounts. Each question
+owner accepts or declines. Before it a follow was instant and one-sided on every profile, and
+following a private one got nothing: `notifyFollowersOnNewBite` skipped an author who was not
+public until [#2167], and since [#1863] the profile itself is unreadable to other accounts. Each question
 gates the story named with it.
 
 - **What does an accepted follower of a private profile get that a stranger does not?**
@@ -148,10 +189,12 @@ gates the story named with it.
 - **Are pending requests accepted when a private profile turns public, or dropped?**
   **Decided on 19 November 2026: accepted** ([#2168]). The visibility switch warns the owner
   first, and only when there is at least one pending request.
-- **How much of a requester does the owner see when the requester is private too?** The owner
-  cannot read a private requester's profile, so a request from one would show as `Anonymous`
-  and could not be judged. The leaning is the display name only, still under debate. Gates
-  the owner's list ([#2165]) and the owner's push ([#2166]).
+- **How much of a requester does the owner see when the requester is private too?**
+  **Decided on 19 November 2026: the display name only** ([#2165]). The owner cannot read a
+  private requester's profile, so a request from one would otherwise show as `Anonymous`
+  and could not be judged. The `listFollowRequests` callable returns the name, the list
+  shows it with the default avatar, and nothing else of the private profile leaves the
+  backend. The owner's push ([#2166]) names the requester by the same rule.
 
 ## Analytics Questions
 
@@ -209,6 +252,29 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 - **Do the store declarations change?** [Implementation - Store Declarations](../implementation/store-declarations.md) owns the App Store privacy nutrition labels and the Play data safety form. A flow named in the policy may need a matching declaration, or may already be covered by one.
 - **Should [Architecture - Context](../architecture/context.md) mark which systems receive user data?** A marker on the page would make the policy checkable against it. Since [#2066], `npm run check:ssot` (rule `CONTEXT`) fails when the code gains a signal no system on the page claims, so a new system reaches the page when it arrives; with a marker, the same check could also fail until the new system is classified for the policy.
 
+## Dietary Choice Questions
+
+These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it gates.
+
+- **How many disputes remove a restaurant's label, over what window, and is it a count or a
+  ratio?** The proposal is 3 eligible disputes within 90 days for a lifestyle label, 2 for a
+  high-risk one, and one "I got sick" dispute for a high-risk one, each only while disputes
+  outnumber confirmations. Gates [#2198].
+- **Who is eligible to vote?** Having a Bite at that restaurant, a minimum account age and
+  activity, or both. Without a bar, throwaway accounts can remove a competitor's labels.
+  Gates [#2197].
+- **How many confirmations turn a creator's label into "reported by diners"?** The proposal
+  is 3, with no open dispute. Gates [#2197].
+- **Are halal and kosher shown from diner reports at all**, or only once the restaurant has
+  declared them? Both carry the high-risk notice either way (`RD-DC-5`). Gates [#2195] and
+  [#2197].
+- **How many confirmed removals, over what period, cost a restaurant self-declaration?** The
+  proposal is 3 in 12 months. Gates [#2198].
+- **Can the ad network exclude categories per request, without the member's choices leaving
+  BiteTribe?** If not, the options are to block the sensitive categories for every member,
+  to show members with dietary choices only house or direct-sold ads, or to show them none.
+  Gates [#2201], and is settled together with [#1134].
+
 ## Related Pages
 
 - [Current State - Roadmap](roadmap.md)
@@ -262,8 +328,21 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 [#1608]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1608
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2144]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2144
 [#2165]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2165
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
 [#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
+[#2195]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2195
+[#2197]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2197
+[#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
+[#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201
+[#1134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1134
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

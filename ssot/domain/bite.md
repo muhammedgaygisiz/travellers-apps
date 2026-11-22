@@ -90,8 +90,8 @@ A good Bite makes one concrete dish understandable enough that another person ca
 - A Bite should have an image because the image is a core trust signal.
 - **A Bite is listable once its photo is uploaded**, and only then: exactly
   when `imageStatus` is `uploaded`, which `setBiteImagePathOnUpload` writes
-  from a finalized Storage object. `pending`, `failed` and an absent status are
-  not listable. A non-listable Bite is shown to its creator and to nobody else:
+  from a finalized Storage object once the image check has passed the photo.
+  `pending`, `failed`, `refused` and an absent status are not listable. A non-listable Bite is shown to its creator and to nobody else:
   not in the nearby feed, the three searches, the weekly page or a bucket list,
   and its share link answers exactly like a Bite id that does not exist.
   Its creator still finds it on every surface, with the failed-upload tile
@@ -187,6 +187,17 @@ Required by product intent, but optional or not strictly enforced in the shared 
   was eaten. Nothing is resolved off the menu to render a Bite, so a dish that is
   renamed or deleted leaves every Bite of it intact and readable under the name
   copied onto it at creation (`RD-TS-53`)
+- `menuItemLinkedBy` - who set `menuItemId` (issue [#2216]): `guest` when the
+  Bite's author chose the dish, from an order or from a dish's Create Bite
+  button; `verification` when candidate verification grouped the Bite into the
+  Initial Menu item it built from the Bite's dish name; `owner` when the
+  restaurant's owner linked it on the Business App's Guest Bites page. Absent
+  on guest links made before the field. Guests see no difference between the
+  three; the field is kept so a label, or a check on owners who link
+  selectively, can be added from evidence later
+- `menuLinkDismissed` - the restaurant's owner said the Bite is about nothing on
+  their menu (issue [#2216]), so Guest Bites stops offering it. The Bite is
+  otherwise unchanged and shows wherever it did
 
 None of those three is a field on the create form, and none of them can be: a
 guest can neither see nor change them. They are merged onto the document at
@@ -252,7 +263,9 @@ Current implementation notes:
 - During Bite creation, the user selects the Bite place through the restaurant selector before saving. The selector can use nearby verified restaurants, unverified restaurants, nearby Google Places, or the explicit custom-place fallback.
 - The Bite page warns users when the entered price looks suspiciously high.
 - Uploaded Bite images are stored below `images/bites/{biteId}/{filename}`.
-- `setBiteImagePathOnUpload` updates `imagePath` after a matching storage upload is finalized, and writes `imageStatus = uploaded` - the only write that makes a Bite listable. A `pending` Bite becomes listable with no client action once it lands.
+- `setBiteImagePathOnUpload` runs the image check on a matching finalized upload before it writes anything (issue [#2139]). A photo the check passes gets `imagePath` and `imageStatus = uploaded` - the only write that makes a Bite listable - so a `pending` Bite becomes listable with no client action once it lands. A refused photo is deleted from Storage, `imagePath` is removed, and the Bite gets `imageStatus = refused` and `imageRefusalCategory`; the Bite is kept, and its creator can choose a different photo. A check that cannot answer keeps the Bite `pending` and writes `imageCheckAttempts`, `imageCheckNextAt` and `imageCheckPath`, and `recheckPendingImages` checks the photo again over about 16 hours, applying its verdict the same way; after the last attempt it deletes the object and writes `imageStatus = failed`, which brings the creator's retry (issue [#2142]). While `imageCheckNextAt` is set the app reads the Bite as `pending` however old it is, not as an upload that stalled.
+- A photo published before the image check existed is checked once by the `image-moderation-backfill` migration (issue [#2143]). A refused one is taken down as a refused upload is - the object deleted, `imagePath` removed, `imageStatus = refused` with the category - without touching `updatedAt`. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
+- The trigger is the only writer of `imagePath`, `imageRefusalCategory`, and the `uploaded` and `refused` statuses, with the recheck that applies the same verdicts, and the two alone write the three `imageCheck*` fields. The Firestore rules refuse a client create or update that sets or changes any of them, or that writes a base64 `image`; the client writes only `pending` and `failed`. The admin app's operator writes are exempt.
 - Bites written before the upload states of issue [#1168] have no `imageStatus`. The admin `bite-image-status` collection migration gives each one `uploaded` where Storage holds an object under `images/bites/{biteId}/` or at the path `imagePath` names, and `failed` otherwise. It has to run before the listing rule is deployed, or every such Bite disappears for everybody but its poster. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
 - A photo upload that fails is offered back to the poster as a retry, but only when the device reports a connection. Offline the failed tile says so instead, because a retry started with no network cannot upload and only earns the poster another thirty-second stall before the same failure. `BiteImageStatusComponent` owns that rule for every surface that shows a Bite photo. See [issue-1390](../history/records/issue-1390.md).
 - The current delete flow removes the Bite document and attempts to remove the image file.
@@ -296,12 +309,12 @@ Supported today:
 - Review Bite.
 - Add Bite to bucket list.
 - Show Bites by restaurant.
+- Create a Bite from a menu item, from the consumer menu or from a table order; the Bite records `menuItemId` (and `variantId` from an order).
 - Show Bites by user.
 - Show Bites in BiteTrail and marketplace-related journeys.
 
 Related future or expanding use cases:
 
-- Create a Bite from a menu item.
 - Improve Bite quality checks.
 - Detect duplicate Bites.
 - Match Bites to restaurants or menu items more reliably.
@@ -312,7 +325,7 @@ Related future or expanding use cases:
 - Search
 - Discovery feed
 - Restaurant menu
-- Menu items linked to Bites
+- Menu items linked to Bites — shipped in [#1113]
 - Marketplace
 - BiteTrail gamification
 - Onboarding assistant
@@ -382,7 +395,7 @@ images/bites/{biteId}/{filename}
 - Image upload and image path synchronization are separate steps.
 - Image upload can fail or become fragile when the app is backgrounded.
 - City and country are enriched asynchronously and may be missing on older or failed-enrichment Bite documents.
-- Menu item linking is not part of the current Bite model.
+- A Bite points at a menu item only when its author chose the dish, when candidate verification built the item from it, or when the restaurant's owner linked it on Guest Bites ([#2216]). The owner's suggestion matches dish names exactly after normalising case, accents and punctuation, so "Carbonara" and "Spaghetti alla carbonara" are not matched to each other; the owner picks the dish by hand. A Bite at a place with no restaurant is never linked.
 - Historical behavior for deleted Bites needs a clearer product rule.
 - Counter aggregates must stay symmetric across create/delete lifecycles. If a future aggregate increments when a Bite, like, review, or related counted document is created, add the matching decrement behavior when that counted document can be deleted.
 - Older Bite documents may not have like aggregate fields. Like-count triggers migrate missing `thumbup`, `drooling`, and `mindblown` fields by recomputing counts from the Bite's `likes` subcollection before applying ongoing delta maintenance.
@@ -449,3 +462,7 @@ images/bites/{biteId}/{filename}
 [#2116]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2116
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

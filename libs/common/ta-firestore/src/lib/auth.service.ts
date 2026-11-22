@@ -25,6 +25,7 @@ import { BiteTribeRole, rolesFromClaims } from 'utils';
 import { terminate } from 'firebase/firestore';
 import { FirebaseCrashlytics } from '@capacitor-firebase/crashlytics';
 import { NavController } from '@ionic/angular';
+import { AuthStorageHealthService } from './auth-storage-health.service';
 
 /**
  * How long a caller waits for Firebase to report whether a persisted session
@@ -77,6 +78,7 @@ export class AuthService {
   readonly auth = inject(FIREBASE_AUTH);
   readonly firestore = inject(FIREBASE_FIRESTORE);
   readonly navController = inject(NavController);
+  private readonly authStorageHealth = inject(AuthStorageHealthService);
 
   readonly _authStateChange$ = new BehaviorSubject<AuthStateChange | null>(
     null,
@@ -141,6 +143,7 @@ export class AuthService {
 
     this.authStateRestored = true;
     this.resolveAuthStateRestored();
+    this.authStorageHealth.markResponsive();
   }
 
   getUser(): User | null | undefined {
@@ -319,6 +322,32 @@ export class AuthService {
       'authStateChange',
       this.authStateChangeListener.bind(this),
     );
+
+    this.watchAuthStart();
+  }
+
+  /**
+   * Asks the browser's storage why, when Firebase Auth has not answered within
+   * the bound callers already wait for (GitHub issue #2253).
+   *
+   * On the web Auth restores the session out of IndexedDB before it answers
+   * anything, and an open of that database that never finishes - another tab
+   * holding it through a pending delete or upgrade - leaves it unanswered for
+   * good. Callers stop waiting after {@link AUTH_RESTORE_TIMEOUT_MS} and carry
+   * on as signed out, so without this the user reaches the sign-in page, and a
+   * sign-in that can never finish. A slow but working start finds the storage
+   * responsive and changes nothing.
+   */
+  private watchAuthStart(): void {
+    if (this.authStateRestored || Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    setTimeout(() => {
+      if (!this.authStateRestored) {
+        void this.authStorageHealth.check();
+      }
+    }, AUTH_RESTORE_TIMEOUT_MS);
   }
 
   /**

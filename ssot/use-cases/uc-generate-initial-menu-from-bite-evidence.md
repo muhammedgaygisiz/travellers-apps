@@ -15,7 +15,7 @@ page.
 
 Turn a candidate's evidence Bites into a starting Menu, so verification never leaves a
 Restaurant with nothing to show: one item per distinct dish name, priced at the average
-of the usable prices reported for it, in a single `Bites` category - so the business
+of the usable prices reported for it, in a single `Dishes` category - so the business
 owner edits from something instead of an empty menu.
 
 ## Actors
@@ -25,11 +25,24 @@ action triggers it belongs to `UC-VRC`, not to this page.
 
 ## Flow
 
-- Dish names are grouped using the same normalizer `UC-DRC` uses for place names, so
-  "Margherita" and "margherita " become one item.
+- Dish names are grouped by `dishNameKey` - the same steps the normalizer `UC-DRC` uses
+  for place names - so "Margherita" and "margherita " become one item. The Business
+  App's Guest Bites page suggests a dish for a Bite by the same key, from a copy kept
+  in the model library and checked by a parity spec ([#2216]).
+- Every Bite that went into an item is linked to it: verification writes the item's
+  id onto the Bite as `menuItemId`, with `menuItemLinkedBy: 'verification'`, so the
+  dish's stats and "Bites about this dish" start from the evidence it was built from.
+  That includes a Bite whose price did not count because it was paid in another
+  currency ([#2216]).
 - Each group becomes one Menu item, priced at the average of that group's usable
   reported prices (a missing or non-positive price doesn't count toward the average;
   an item with no priced Bite at all defaults to 0).
+- The Menu states a currency ([#1511]): the one most priced Bites were paid in, when one
+  clearly leads; otherwise - a tie, or no priced Bite records one - the currency of the
+  country most of the Bites were taken in (`countryCode`); otherwise none. Only Bites
+  paid in that currency count toward a price, so a dish priced only in another
+  currency stays at 0. A Bite that records no currency counts only when no priced Bite
+  records one. With no Menu currency, every price counts, as before.
 - Items land in one category, sorted by how many Bites support them, then by name.
 - A Bite with no usable dish name is dropped; an evidence set with nothing usable
   yields an empty category list, not an error.
@@ -47,14 +60,19 @@ permission, and changes no store declaration.
 
 ## Supported Evidence
 
-- `buildInitialMenuCategories` and `buildInitialMenuItems` in
+- `buildInitialMenu`, `buildInitialMenuItems` and `chooseInitialMenuCurrency` in
   `apps/bite-tribe-firebase/functions/src/functions/shared/utils/initial-menu.ts`, invoked
   from `UC-VRC` `V19` and nowhere else in the codebase.
+- The country-to-currency map in
+  `apps/bite-tribe-firebase/functions/src/functions/shared/utils/currency-by-region.ts`, a
+  copy of the device helper's map kept equal by
+  `apps/bite-tribe-firebase/functions/src/__specs__/currency-by-region-parity.spec.ts`.
 
 ## Related GitHub Scope
 
 - Pull request [#1210] introduced this mechanism (`seed initial menu from bites when verifying a candidate`); it names no issue.
 - Issue [#1099] added the stable per-item id (`InitialMenuItem.id`) an order line references, delivered by pull request [#1593].
+- Issue [#1511] added the Menu's currency and limited each average to the Bites paid in it.
 
 ## Related Domains
 
@@ -65,3 +83,4 @@ permission, and changes no store declaration.
 [#1210]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1210
 [#1511]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1511
 [#1593]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1593
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

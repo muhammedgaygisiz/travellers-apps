@@ -9,6 +9,16 @@ export const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
 const SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 
+/**
+ * The output limit of a one-word verdict, such as a moderation category.
+ *
+ * The answer itself is about a dozen tokens, but the model spends part of
+ * the limit before it writes any: at 20 it stopped at `{"` with
+ * `MAX_TOKENS` on every call, so every check came back unavailable (issue
+ * #2143). 256 leaves room for that and still caps a runaway answer.
+ */
+export const VERDICT_MAX_OUTPUT_TOKENS = 256;
+
 /** One image passed to the model, base64-encoded. */
 export interface GeminiImage {
   mimeType: string;
@@ -22,6 +32,11 @@ export interface GeminiRequest {
   /** The JSON schema the answer must follow (Vertex `responseSchema`). */
   responseSchema: Record<string, unknown>;
   maxOutputTokens: number;
+  /**
+   * How long the call may take before it is abandoned as unavailable. Unset,
+   * the call waits as long as the function does.
+   */
+  timeoutMs?: number;
 }
 
 export interface GeminiResponse {
@@ -72,6 +87,10 @@ export const generateWithGemini = async (
 
   const response = await fetch(url, {
     method: 'POST',
+    signal:
+      request.timeoutMs === undefined
+        ? undefined
+        : AbortSignal.timeout(request.timeoutMs),
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -94,13 +113,23 @@ export const generateWithGemini = async (
   }
 
   const data = (await response.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
+    candidates?: {
+      content?: { parts?: { text?: string }[] };
+      finishReason?: string;
+    }[];
     usageMetadata?: {
       promptTokenCount?: number;
       candidatesTokenCount?: number;
     };
   };
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const candidate = data.candidates?.[0];
+  const text = candidate?.content?.parts?.[0]?.text;
+
+  if (candidate?.finishReason === 'MAX_TOKENS') {
+    throw new GeminiUnavailableError(
+      `Gemini stopped at the output limit of ${request.maxOutputTokens} tokens.`,
+    );
+  }
 
   if (!text) {
     throw new GeminiUnavailableError('Gemini returned no text.');

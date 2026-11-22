@@ -114,7 +114,8 @@ test.describe('Staff entry and permissions', () => {
    * reaching them by URL is refused rather than shown an empty page.
    *
    * The refusal is `ownedRestaurantGuard`, which reads
-   * `Restaurant.ownerUserIds`. The data-layer half of the same boundary is in
+   * `Restaurant.ownerUserIds`, and sends a staff account back to its own
+   * tables (issue #2232). The data-layer half of the same boundary is in
    * `firestore-rules.emulator-spec.ts`, where the write itself is refused.
    */
   test('refuses the owner routes by direct URL', async ({ page }) => {
@@ -131,14 +132,28 @@ test.describe('Staff entry and permissions', () => {
       new RegExp(`/restaurant/${restaurantId}/tables$`),
     );
 
+    // Each refusal lands back on the staff member's own tables and says the
+    // page is the owner's, not on the owner's empty restaurant list telling
+    // them to ask support for restaurants (issue #2232).
     for (const path of [
+      `/restaurant/${restaurantId}`,
+      `/restaurant/${restaurantId}/edit/about`,
       `/restaurant/${restaurantId}/floor-plan`,
       `/restaurant/${restaurantId}/floor-plan/qr-codes`,
       `/restaurant/${restaurantId}/staff`,
     ]) {
       await page.goto(path);
 
-      await expect(page).not.toHaveURL(new RegExp(`${path}$`));
+      await expect(page).toHaveURL(
+        new RegExp(`/restaurant/${restaurantId}/tables$`),
+      );
+      await expect(
+        page
+          .locator('ion-toast')
+          .getByText("Only the restaurant's owner can open this page.", {
+            exact: true,
+          }),
+      ).toBeVisible();
     }
   });
 

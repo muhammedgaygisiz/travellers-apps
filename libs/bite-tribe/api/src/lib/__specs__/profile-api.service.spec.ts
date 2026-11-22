@@ -10,7 +10,7 @@ import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import type { PublicUser } from 'model';
 import { ErrorHandler } from '@angular/core';
-import { getDownloadUrlFromFirebaseStorage, isBase64String } from 'utils';
+import { isBase64String } from 'utils';
 import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
 import { findLocalUploadedImage } from '../utils/local-image-file';
 import { readLocalImageAsDataUrl } from '../utils/read-local-image-as-data-url';
@@ -330,7 +330,9 @@ describe(ProfileApiService.name, () => {
             displayName: '',
             fullName: '',
             email: '',
-            photoUrl: 'photo-url',
+            // The provider's avatar is mirrored and checked on the backend
+            // (GitHub issue #2140), never written by the app.
+            photoUrl: '',
             public: true,
             userId: '123',
           },
@@ -423,7 +425,6 @@ describe(ProfileApiService.name, () => {
             reference: 'users/123',
             data: {
               email: undefined,
-              photoUrl: undefined,
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
@@ -518,28 +519,42 @@ describe(ProfileApiService.name, () => {
         (uploadBase64ToFirebaseStorage as jest.Mock).mockResolvedValue(
           Promise.resolve('new-photo-url'),
         );
-        (getDownloadUrlFromFirebaseStorage as jest.Mock).mockReturnValue(
-          'download-url',
-        );
         jest
           .spyOn(FirebaseFirestore, 'updateDocument')
           .mockResolvedValue(Promise.resolve());
       });
 
-      it('should upload the base64 image and point the user at it', inject(
+      /**
+       * Only the storage finalize trigger publishes the photo, once the image
+       * check passed it (GitHub issue #2140): the device marks the profile
+       * pending before the transfer and never writes `photoUrl`.
+       */
+      it('marks the photo pending, then uploads it, and writes no photo URL', inject(
         [ProfileApiService],
         async (service: ProfileApiService) => {
-          const publicUser = {
-            userId: '123',
-            name: 'Updated User',
-            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
-          } as unknown as PublicUser;
+          const order: string[] = [];
+          jest
+            .mocked(FirebaseFirestore.updateDocument)
+            .mockImplementation(async () => {
+              order.push('write');
+            });
+          (uploadBase64ToFirebaseStorage as jest.Mock).mockImplementation(
+            async () => {
+              order.push('upload');
 
-          await service.updateUser(publicUser);
-
-          expect(getDownloadUrlFromFirebaseStorage).toHaveBeenCalledWith(
-            'new-photo-url',
+              return 'images/users/123/new.png';
+            },
           );
+
+          const result = await service.updateUser(
+            {
+              userId: '123',
+              photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+            } as unknown as PublicUser,
+            'current-url',
+          );
+
+          expect(order).toEqual(['write', 'upload']);
           expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
             base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
             docId: '123',
@@ -549,11 +564,35 @@ describe(ProfileApiService.name, () => {
             reference: 'users/123',
             data: {
               email: undefined,
-              photoUrl: 'download-url',
               public: false,
               updatedAt: '2024-03-15T12:00:00.000Z',
               updatedAtTimestamp: 1710504000000,
+              photoStatus: 'pending',
+              photoUploadStartedAtTimestamp: 1710504000000,
             },
+          });
+          expect(result).toMatchObject({
+            photoUrl: 'current-url',
+            photoStatus: 'pending',
+          });
+        },
+      ));
+
+      it('marks the photo failed when the upload fails', inject(
+        [ProfileApiService],
+        async (service: ProfileApiService) => {
+          (uploadBase64ToFirebaseStorage as jest.Mock).mockRejectedValue(
+            new Error('offline'),
+          );
+
+          await service.updateUser({
+            userId: '123',
+            photoUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+          } as unknown as PublicUser);
+
+          expect(FirebaseFirestore.updateDocument).toHaveBeenLastCalledWith({
+            reference: 'users/123',
+            data: { photoStatus: 'failed' },
           });
         },
       ));
@@ -592,7 +631,8 @@ describe(ProfileApiService.name, () => {
           expect(Object.keys(written)).not.toContain('createdAt');
           // The display name is `claimDisplayName`'s to write (issue #1610).
           expect(Object.keys(written)).not.toContain('displayName');
-          expect(written).toMatchObject({ photoUrl: 'download-url' });
+          // The photo is the finalize trigger's to publish (issue #2140).
+          expect(Object.keys(written)).not.toContain('photoUrl');
         },
       ));
     });
@@ -878,6 +918,95 @@ describe(ProfileApiService.name, () => {
 
         await expect(service.followRequestPending('123')).resolves.toBe(false);
         expect(FirebaseFirestore.getDocument).not.toHaveBeenCalled();
+      },
+    ));
+  });
+
+  describe('the owner side of a follow request (#2165)', () => {
+    it('counts the requests addressed to the signed-in user', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getCountFromServer)
+          .mockResolvedValueOnce({ count: 3 });
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(3);
+        expect(FirebaseFirestore.getCountFromServer).toHaveBeenCalledWith({
+          reference: 'followRequests',
+          compositeFilter: {
+            type: 'and',
+            queryConstraints: [
+              {
+                type: 'where',
+                fieldPath: 'ownerUid',
+                opStr: '==',
+                value: '123',
+              },
+            ],
+          },
+        });
+      },
+    ));
+
+    it('counts none when the count fails or nobody is signed in', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFirestore.getCountFromServer)
+          .mockRejectedValueOnce(new Error('permission-denied'));
+        await expect(service.countPendingFollowRequests()).resolves.toBe(0);
+
+        const getUser = jest
+          .spyOn(MockedAuthService, 'getUser')
+          .mockReturnValue(undefined);
+        jest.mocked(FirebaseFirestore.getCountFromServer).mockClear();
+
+        await expect(service.countPendingFollowRequests()).resolves.toBe(0);
+        expect(FirebaseFirestore.getCountFromServer).not.toHaveBeenCalled();
+        getUser.mockRestore();
+      },
+    ));
+
+    it('lists the pending requests through listFollowRequests', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        const requests = [
+          { requesterUid: 'r-1', displayName: 'Pia', createdAt: '2026-11-19' },
+        ];
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockResolvedValueOnce({ data: { requests } });
+
+        await expect(service.listFollowRequests()).resolves.toEqual(requests);
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'listFollowRequests',
+          data: {},
+        });
+      },
+    ));
+
+    it('accepts and declines through their callables', inject(
+      [ProfileApiService],
+      async (service: ProfileApiService) => {
+        jest
+          .mocked(FirebaseFunctions.callByName)
+          .mockResolvedValueOnce({ data: { accepted: true } })
+          .mockResolvedValueOnce({ data: { declined: true } });
+
+        await expect(service.acceptFollowRequest('r-1')).resolves.toEqual({
+          accepted: true,
+        });
+        await expect(service.declineFollowRequest('r-2')).resolves.toEqual({
+          declined: true,
+        });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'acceptFollowRequest',
+          data: { userId: 'r-1' },
+        });
+        expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+          name: 'declineFollowRequest',
+          data: { userId: 'r-2' },
+        });
       },
     ));
   });
@@ -2130,11 +2259,15 @@ describe(ProfileApiService.name, () => {
         );
 
         expect(written()).toMatchObject({
-          photoUrl: 'current-url',
           photoStatus: 'pending',
           photoUploadStartedAtTimestamp: 1700000000000,
         });
-        expect(result.photoStatus).toBe('pending');
+        // The trigger alone writes the photo (issue #2140).
+        expect(written()).not.toHaveProperty('photoUrl');
+        expect(result).toMatchObject({
+          photoUrl: 'current-url',
+          photoStatus: 'pending',
+        });
       },
     ));
 
@@ -2207,29 +2340,6 @@ describe(ProfileApiService.name, () => {
         await expect(
           service.findLocalProfilePhoto('123'),
         ).resolves.toBeUndefined();
-      },
-    ));
-  });
-
-  describe('setUploadedProfilePhoto', () => {
-    it('points the user at the uploaded object', inject(
-      [ProfileApiService],
-      async (service: ProfileApiService) => {
-        jest.spyOn(FirebaseFirestore, 'updateDocument').mockResolvedValue();
-        (getDownloadUrlFromFirebaseStorage as jest.Mock).mockResolvedValue(
-          'download-url',
-        );
-
-        const photoUrl = await service.setUploadedProfilePhoto(
-          '123',
-          'images/users/123/new.jpg',
-        );
-
-        expect(photoUrl).toBe('download-url');
-        expect(FirebaseFirestore.updateDocument).toHaveBeenCalledWith({
-          reference: 'users/123',
-          data: { photoUrl: 'download-url', photoStatus: 'uploaded' },
-        });
       },
     ));
   });

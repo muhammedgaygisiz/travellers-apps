@@ -1,7 +1,101 @@
 :host {
-  .place-image {
-    height: 300px;
-    object-fit: cover;
-    width: 100%;
+  .page {
+    max-width: 78rem;
+    margin-inline: auto;
+  }
+
+  .page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .titles {
+    flex: 1 1 12rem;
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .restaurant-name {
+    margin: 0;
+    color: var(--ion-color-medium-shade);
+  }
+
+  .currency {
+    --background: transparent;
+    flex: 0 1 16rem;
+  }
+
+  .derived-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--ion-color-step-150, #d7d8da);
+    background: var(--ion-background-color-step-50, #f2f2f2);
+
+    ion-icon {
+      flex: 0 0 auto;
+      font-size: 1.25rem;
+      color: var(--ion-color-medium-shade);
+    }
+
+    p {
+      flex: 1 1 16rem;
+      margin: 0;
+    }
+  }
+
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .list {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .editor {
+    flex: 0 0 26rem;
+    position: sticky;
+    top: 0;
+    padding: 1rem;
+    border: 1px solid var(--ion-color-light-shade);
+    border-radius: 14px;
+    background: var(--ion-background-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .empty {
+    color: var(--ion-color-medium-shade);
+  }
+
+  /*
+   * On a phone the editor takes the page and the list waits behind it:
+   * a panel beside a list needs a width a phone does not have.
+   */
+  @media (max-width: 991px) {
+    .editing .list,
+    .editing .page-header,
+    .editing .derived-notice {
+      display: none;
+    }
+
+    .editor {
+      flex: 1 1 auto;
+      position: static;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+    }
   }
 }

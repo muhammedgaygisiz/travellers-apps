@@ -17,7 +17,7 @@
       </ion-avatar>
       } @else {
       <ion-icon name="person-circle-outline" class="profile-image" />
-      } @if (photoInFlight()) {
+      } @if (photoInFlight() || photoRefused()) {
       <profile-photo-status
         class="avatar-overlay"
         [user]="userData"

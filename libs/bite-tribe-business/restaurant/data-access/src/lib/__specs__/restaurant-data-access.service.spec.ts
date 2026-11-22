@@ -21,9 +21,17 @@ describe('RestaurantDataAccessService', () => {
 
     storeServiceMock = {
       restaurant$: of(undefined),
+      position$: of(undefined),
     } as unknown as jest.Mocked<BiteTribeStoreService>;
     apiMock = {
       createMenuForRestaurant: jest.fn().mockResolvedValue('menu-1'),
+      loadBitesForRestaurant: jest
+        .fn()
+        .mockResolvedValue([
+          { id: 'open' },
+          { id: 'linked', menuItemId: 'm1' },
+          { id: 'dismissed', menuLinkDismissed: true },
+        ]),
       saveSocialMediaLinksForRestaurant: jest.fn().mockResolvedValue(undefined),
       saveDescriptionForRestaurant: jest.fn().mockResolvedValue(undefined),
       saveOpeningHoursForRestaurant: jest.fn().mockResolvedValue(undefined),
@@ -141,5 +149,11 @@ describe('RestaurantDataAccessService', () => {
         position,
       );
     });
+  });
+
+  /** The count on the Guest Bites button (GitHub issue #2216). */
+  it('counts the Bites still waiting for a link to a dish', async () => {
+    await expect(service.countBitesAwaitingMenuLink('rest-1')).resolves.toBe(1);
+    expect(apiMock.loadBitesForRestaurant).toHaveBeenCalledWith('rest-1');
   });
 });

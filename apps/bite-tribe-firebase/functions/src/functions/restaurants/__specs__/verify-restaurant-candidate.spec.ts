@@ -184,10 +184,11 @@ describe('verifyRestaurantCandidate', () => {
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({ path: 'menus/menus-new-id' }),
       expect.objectContaining({
+        derivedFromBites: true,
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),
@@ -225,6 +226,69 @@ describe('verifyRestaurantCandidate', () => {
       candidateId: 'candidate-1',
       skippedBiteIds: [],
       status: 'created',
+    });
+  });
+
+  /**
+   * Issue #2216: each Bite is linked to the menu item built from its dish
+   * name, in the same transaction, so the dish's stats start from the
+   * evidence it was built from.
+   */
+  describe('linking Bites to their menu item', () => {
+    const verify = (): ReturnType<typeof verifyRestaurantCandidate> =>
+      verifyRestaurantCandidate(
+        request({
+          candidateId: 'candidate-1',
+          restaurant: {
+            name: 'Pizza Palace',
+            position: { latitude: 46.948, longitude: 7.4474 },
+          },
+        }),
+      );
+
+    const createdItemId = (): string =>
+      createMock.mock.calls.find(
+        ([ref]) => (ref as DocRef).path === 'menus/menus-new-id',
+      )?.[1].categories[0].items[0].id;
+
+    it('writes the item id and its source on every Bite it assigns', async () => {
+      await verify();
+
+      ['bites/bite-1', 'bites/bite-2'].forEach((path) =>
+        expect(updateMock).toHaveBeenCalledWith(
+          expect.objectContaining({ path }),
+          expect.objectContaining({
+            restaurantId: 'restaurants-new-id',
+            menuItemId: createdItemId(),
+            menuItemLinkedBy: 'verification',
+          }),
+        ),
+      );
+    });
+
+    it('keeps the link of a Bite that is already linked to a menu item', async () => {
+      getAllMock.mockImplementationOnce(async (...refs: DocRef[]) =>
+        refs.map((ref) => ({
+          exists: true,
+          ref,
+          data: (): Record<string, unknown> => ({
+            name: 'Margherita',
+            price: 12,
+            ...(ref.id === 'bite-2' ? { menuItemId: 'item-ordered' } : {}),
+          }),
+        })),
+      );
+
+      await verify();
+
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'bites/bite-2' }),
+        expect.not.objectContaining({ menuItemId: expect.anything() }),
+      );
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'bites/bite-1' }),
+        expect.objectContaining({ menuItemLinkedBy: 'verification' }),
+      );
     });
   });
 
@@ -314,9 +378,11 @@ describe('verifyRestaurantCandidate', () => {
 
       const result = await verify();
 
+      // Marked even with no items: the flag records where the menu came from,
+      // and the page decides whether an empty menu needs saying so (#1511).
       expect(createMock).toHaveBeenCalledWith(
         expect.objectContaining({ path: 'menus/menus-new-id' }),
-        expect.objectContaining({ categories: [] }),
+        expect.objectContaining({ categories: [], derivedFromBites: true }),
       );
       expect(updateMock).toHaveBeenCalledTimes(1);
       expect(updateMock).toHaveBeenCalledWith(
@@ -332,6 +398,64 @@ describe('verifyRestaurantCandidate', () => {
         menuItemCount: 0,
         skippedBiteIds: ['bite-1', 'bite-2'],
       });
+    });
+  });
+
+  describe('the currency of the derived menu (issue #1511)', () => {
+    const verifyWith = async (
+      bites: Record<string, unknown>[],
+    ): Promise<Record<string, unknown>> => {
+      getAllMock.mockImplementationOnce(async (...refs: DocRef[]) =>
+        refs.map((ref, index) => ({
+          exists: true,
+          ref,
+          data: (): Record<string, unknown> => bites[index],
+        })),
+      );
+
+      await verifyRestaurantCandidate(
+        request({
+          candidateId: 'candidate-1',
+          restaurant: {
+            name: 'Pizza Palace',
+            position: { latitude: 46.948, longitude: 7.4474 },
+          },
+        }),
+      );
+
+      const menuCall = createMock.mock.calls.find(
+        ([ref]) => ref.path === 'menus/menus-new-id',
+      );
+
+      return menuCall?.[1] ?? {};
+    };
+
+    it('states the currency the Bites were paid in', async () => {
+      const menu = await verifyWith([
+        { name: 'Margherita', price: 12, currency: 'CHF', countryCode: 'CH' },
+        { name: 'Margherita', price: 14, currency: 'CHF', countryCode: 'CH' },
+      ]);
+
+      expect(menu).toMatchObject({ currency: 'CHF', derivedFromBites: true });
+    });
+
+    it('falls back to the country when the Bites state no currency', async () => {
+      const menu = await verifyWith([
+        { name: 'Margherita', price: 12, countryCode: 'CH' },
+        { name: 'Margherita', price: 14, countryCode: 'CH' },
+      ]);
+
+      expect(menu['currency']).toBe('CHF');
+    });
+
+    it('writes no currency when neither the Bites nor the country give one', async () => {
+      const menu = await verifyWith([
+        { name: 'Margherita', price: 12 },
+        { name: 'Margherita', price: 14 },
+      ]);
+
+      expect(menu).not.toHaveProperty('currency');
+      expect(menu['derivedFromBites']).toBe(true);
     });
   });
 
@@ -360,7 +484,7 @@ describe('verifyRestaurantCandidate', () => {
         categories: [
           {
             id: expect.any(String),
-            title: 'Bites',
+            title: 'Dishes',
             items: [
               {
                 id: expect.any(String),

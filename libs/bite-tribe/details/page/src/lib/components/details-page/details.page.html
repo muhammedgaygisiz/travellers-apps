@@ -22,7 +22,8 @@
     roundDistance | toMetric) : '';
     <div class="desktop-layout" data-testid="bite-details-desktop">
       <section class="desktop-media">
-        @if (imageStatus() === 'pending' || imageStatus() === 'failed') {
+        @if (imageStatus() === 'pending' || imageStatus() === 'failed' ||
+        imageStatus() === 'refused') {
         <bt-bite-image-status
           class="dish-image-state desktop-card"
           [bite]="biteData"
@@ -309,7 +310,8 @@
       style="width: 100vw; height: 40vh; border-radius: 0; margin: 0"
     />
     } @let imageSrc = biteData | getImage; @if (biteData) { @if (imageStatus()
-    === 'pending' || imageStatus() === 'failed') {
+    === 'pending' || imageStatus() === 'failed' || imageStatus() === 'refused')
+    {
     <!-- Same three-way answer as the feed card: on a failed upload the poster
     still holds the local base64 copy, so the placeholder is checked before the
     photo to avoid suggesting the upload succeeded. -->

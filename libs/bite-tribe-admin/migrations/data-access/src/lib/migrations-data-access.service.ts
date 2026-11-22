@@ -137,6 +137,57 @@ export interface RebuildBiteCountriesResult extends CollectionMigrationResult {
   countries: number;
 }
 
+export interface BackfillFollowerAcceptanceResult extends CollectionMigrationResult {
+  /** Every user document the migration looked at (issue #2168). */
+  processed: number;
+  /** Of those, the private profiles whose followers it walked. */
+  private: number;
+  /** Followers that gained `acceptedAt`, across every private profile. */
+  stamped: number;
+}
+
+/**
+ * The two passes of the stored-photo backfill (issue #2143): `report`
+ * changes nothing, and `apply` takes down what the report found refused.
+ * The callable refuses `apply` until a report run has finished.
+ */
+export type ImageModerationBackfillMode = 'report' | 'apply';
+
+export interface ImageModerationBackfillResult extends CollectionMigrationResult {
+  /** Published photos the check answered for or could not answer for. */
+  checked: number;
+  passed: number;
+  /** Refused photos: listed by a report, taken down by an apply. */
+  refused: number;
+  /** Photos the check could not answer for, left for a later run. */
+  unavailable: number;
+  /** Stored objects that are not their document's published photo. */
+  skipped: number;
+}
+
+/**
+ * How long the page waits for one backfill call.
+ *
+ * A call works for up to five minutes and its function may run for 540
+ * seconds. The callable SDK gives up after 70 seconds by default, which left
+ * the page reporting a failure while the run went on (issue #2143), so this
+ * outwaits the function instead.
+ */
+export const IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS = 600_000;
+
+/**
+ * One call's answer: the run's counts so far, and whether it is done. Not a
+ * {@link CollectionMigrationResult}, which holds counts only.
+ */
+interface ImageModerationBackfillCall {
+  checked: number;
+  passed: number;
+  refused: number;
+  unavailable: number;
+  skipped: number;
+  complete: boolean;
+}
+
 export interface RecomputeMenuItemStatsResult extends CollectionMigrationResult {
   /** Dishes that now carry an aggregate. */
   dishes: number;
@@ -397,6 +448,55 @@ export class MigrationsDataAccessService {
     >({ name: 'rebuildBiteCountriesCallable' });
 
     return result.data;
+  }
+
+  /**
+   * Stamps `acceptedAt` on every follower of every private profile (issue
+   * #2168), so the followers a profile had before follow requests existed
+   * count as accepted. An edge that already carries it is left alone.
+   *
+   * No resource is reloaded: nothing in this app reads follow edges.
+   */
+  async backfillFollowerAcceptance(): Promise<BackfillFollowerAcceptanceResult> {
+    const result = await FirebaseFunctions.callByName<
+      void,
+      BackfillFollowerAcceptanceResult
+    >({ name: 'backfillFollowerAcceptanceCallable' });
+
+    return result.data;
+  }
+
+  /**
+   * Checks every photo stored before the image check existed (issue #2143),
+   * in one of its two passes.
+   *
+   * One call works for a few minutes and keeps where it got to, so this calls
+   * again until the run is complete and returns the run's counts. A run that
+   * stops halfway - a closed tab, a failed call - is continued by the next
+   * press rather than started over. Each photo's verdict is kept, so the
+   * apply pass, and any run after it, asks the model about nothing judged.
+   *
+   * No resource is reloaded: nothing in this app shows the photos.
+   */
+  async runImageModerationBackfill(
+    mode: ImageModerationBackfillMode,
+  ): Promise<ImageModerationBackfillResult> {
+    for (;;) {
+      const result = await FirebaseFunctions.callByName<
+        { mode: ImageModerationBackfillMode },
+        ImageModerationBackfillCall
+      >({
+        name: 'imageModerationBackfillCallable',
+        data: { mode },
+        timeout: IMAGE_MODERATION_BACKFILL_CALL_TIMEOUT_MS,
+      });
+      const { complete, checked, passed, refused, unavailable, skipped } =
+        result.data;
+
+      if (complete) {
+        return { checked, passed, refused, unavailable, skipped };
+      }
+    }
   }
 
   /**

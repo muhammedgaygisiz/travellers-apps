@@ -4,6 +4,7 @@ import { geohashForLocation } from 'geofire-common';
 import { BITE_COLLECTION } from '../../utils/constants';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { v4 as uuid } from 'uuid';
+import { withoutPublishedImageFields } from './without-published-image-fields';
 
 export const createBite = (
   biteDoc: Omit<Bite, 'image'>,
@@ -24,7 +25,13 @@ export const createBite = (
   FirebaseFirestore.setDocument({
     reference: `${BITE_COLLECTION}/${id}`,
     data: {
-      ...biteDoc,
+      // The photo is published only by `setBiteImagePathOnUpload` (GitHub
+      // issue #2139). A Bite starts with no URL, and `pending` when a photo is
+      // on its way.
+      ...withoutPublishedImageFields(biteDoc),
+      ...(biteDoc.imageStatus === 'pending'
+        ? { imageStatus: 'pending' as const }
+        : {}),
       geohash: gh,
       addressStatus: 'pending',
       userId: user?.uid || '',

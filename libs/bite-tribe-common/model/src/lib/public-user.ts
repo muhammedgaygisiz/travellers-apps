@@ -11,16 +11,31 @@ export interface PublicUser {
   email: string;
   photoUrl: string;
   /**
-   * Where a newly chosen profile photo stands (GitHub issue #1953), as
-   * `Bite.imageStatus` does for a Bite photo. `photoUrl` keeps the previous
+   * Where a newly chosen profile photo stands (GitHub issues #1953 and #2140),
+   * as `Bite.imageStatus` does for a Bite photo. `photoUrl` keeps the previous
    * photo while a new one is `pending`; the storage finalize trigger
-   * `setUserPhotoUrlOnUpload` points it at the new object and writes
-   * `uploaded`, and the client writes `failed` when the transfer errors or
-   * stalls. Absent on a profile whose photo was never replaced this way.
+   * `setUserPhotoUrlOnUpload` runs the image check, then either points it at
+   * the new object and writes `uploaded`, or deletes the object and writes
+   * `refused`, keeping the previous photo. The client writes `failed` when
+   * the transfer errors or stalls. Absent on a profile whose photo was never
+   * replaced this way.
    */
-  photoStatus?: 'pending' | 'uploaded' | 'failed';
+  photoStatus?: 'pending' | 'uploaded' | 'failed' | 'refused';
+  /**
+   * Why the image check refused the new photo, present only while
+   * `photoStatus` is `refused`. Written by `setUserPhotoUrlOnUpload` alone
+   * (issue #2140).
+   */
+  photoRefusalCategory?: string;
   /** When the `pending` upload started, so an abandoned one can read as failed. */
   photoUploadStartedAtTimestamp?: number;
+  /**
+   * When the backend checks the new photo again, in milliseconds since the epoch,
+   * while its last image check could not run (GitHub issue #2142). Present
+   * only while the photo waits; the client reads it as a photo still being
+   * checked rather than an upload that stalled. Written by the backend alone.
+   */
+  imageCheckNextAt?: number;
   userId: string;
   city?: string;
   about?: string;

@@ -9,7 +9,7 @@ import { onAppCheck } from '../shared/callable-options';
 import { logOperatorAction } from '../shared/operator-log';
 import { requireAdmin } from '../shared/roles';
 import {
-  buildInitialMenuCategories,
+  buildInitialMenu,
   InitialMenuBite,
 } from '../shared/utils/initial-menu';
 
@@ -146,9 +146,16 @@ const hasRestaurant = (data: DocumentData): boolean => {
     : restaurantId !== undefined && restaurantId !== null;
 };
 
-const toInitialMenuBite = (data: DocumentData): InitialMenuBite => ({
+const toInitialMenuBite = (
+  id: string,
+  data: DocumentData,
+): InitialMenuBite => ({
+  id,
   name: typeof data['name'] === 'string' ? data['name'] : undefined,
   price: typeof data['price'] === 'number' ? data['price'] : undefined,
+  currency: typeof data['currency'] === 'string' ? data['currency'] : undefined,
+  countryCode:
+    typeof data['countryCode'] === 'string' ? data['countryCode'] : undefined,
 });
 
 const getExistingVerifiedRestaurantId = async (
@@ -281,9 +288,9 @@ export const verifyRestaurantCandidateHandler = async (
       const skippedBiteIds = existingBiteSnapshots
         .filter((snapshot) => hasRestaurant(snapshot.data() ?? {}))
         .map((snapshot) => snapshot.ref.id);
-      const categories = buildInitialMenuCategories(
+      const { categories, currency, menuItemIdByBiteId } = buildInitialMenu(
         unassignedBiteSnapshots.map((snapshot) =>
-          toInitialMenuBite(snapshot.data() ?? {}),
+          toInitialMenuBite(snapshot.ref.id, snapshot.data() ?? {}),
         ),
       );
 
@@ -302,16 +309,32 @@ export const verifyRestaurantCandidateHandler = async (
       // menu the client later edits is authorised through the restaurant, and a
       // menu created without the field would be inconsistent with every menu
       // the apps write (issue #1078).
+      //
+      // The menu is marked as derived from Bites, even when it has no items,
+      // so the consumer menu page can say its prices are guest averages, in
+      // the currency the guests reported (issue #1511).
       transaction.create(menuRef, {
         restaurantId: restaurantRef.id,
         categories,
+        derivedFromBites: true,
+        ...(currency ? { currency } : {}),
         createdAt: now.toISOString(),
         createdAtTimestamp: now.getTime(),
       });
 
+      // Each Bite is also linked to the menu item built from its dish name
+      // (issue #2216), so the item's stats and "Bites about this dish" start
+      // from the evidence it was built from. A Bite already linked to a menu
+      // item keeps that link.
       unassignedBiteSnapshots.forEach((snapshot) => {
+        const menuItemId = menuItemIdByBiteId[snapshot.ref.id];
+        const linksMenuItem = !!menuItemId && !snapshot.data()?.['menuItemId'];
+
         transaction.update(snapshot.ref, {
           restaurantId: restaurantRef.id,
+          ...(linksMenuItem
+            ? { menuItemId, menuItemLinkedBy: 'verification' }
+            : {}),
           updatedAt: now.toISOString(),
           updatedAtTimestamp: now.getTime(),
         });

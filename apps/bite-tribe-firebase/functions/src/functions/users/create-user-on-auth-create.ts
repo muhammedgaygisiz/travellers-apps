@@ -1,9 +1,7 @@
 import { getFirestore } from 'firebase-admin/firestore';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import type { AuthBlockingEvent } from 'firebase-functions/v2/identity';
-import { buildNewUserProfile } from './new-user-profile';
-
-const USERS_COLLECTION = 'users';
+import { writeNewUserProfile } from './new-user-profile';
 
 /**
  * Whether this sign-up is the anonymous one a scanned table code produces
@@ -48,8 +46,5 @@ export const createUserOnAuthCreate = beforeUserCreated(async (event) => {
 
   const now = new Date();
 
-  await getFirestore()
-    .collection(USERS_COLLECTION)
-    .doc(user.uid)
-    .set(buildNewUserProfile(user, now));
+  await writeNewUserProfile(getFirestore(), user, now);
 });

@@ -10,6 +10,7 @@ import {
   TableOrderingSettings,
 } from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitsMenuLink } from 'model';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +21,18 @@ export class RestaurantDataAccessService {
 
   /** The restaurant currently being edited, from the shared store. */
   restaurant = toSignal(this.storeService.restaurant$);
+  /** The device's position, for a restaurant that has none (#2226). */
+  gpsPosition = toSignal(this.storeService.position$);
+
+  /**
+   * How many of the restaurant's Bites wait for a link to a dish (GitHub
+   * issue #2216), for the count on the Guest Bites button.
+   */
+  async countBitesAwaitingMenuLink(restaurantId: string): Promise<number> {
+    const bites = await this.api.loadBitesForRestaurant(restaurantId);
+
+    return bites.filter(awaitsMenuLink).length;
+  }
 
   createMenuForRestaurant(restaurantId: string): Promise<string> {
     return this.api.createMenuForRestaurant(restaurantId);

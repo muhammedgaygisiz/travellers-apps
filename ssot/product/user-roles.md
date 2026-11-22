@@ -129,8 +129,12 @@ reported-reviews queue, where they block the author, hide the review from its th
 filtering ships** ([#1610]): text a member publishes - reviews and replies, display names,
 profile text, and a Bite's name, tags and description - is checked before another account
 can read it and refused with a message when it fails, per `RD-UR-11` and
-[Architecture - AI](../architecture/ai.md). Photos are not checked; why is in
-[Current State - Open Questions](../current-state/open-questions.md). Reporting a Review was the
+[Architecture - AI](../architecture/ai.md). A Bite photo is checked before it is published
+([#2139]), and so are a profile photo ([#2140]) and a restaurant or Bite Trail
+photo ([#2141]). Photos stored before the check are checked once by the
+`image-moderation-backfill` migration ([#2143]), which an operator runs from the admin app;
+until it has run in production they are not, as
+[Current State - Known Issues](../current-state/known-issues.md) records. Reporting a Review was the
 last piece of the user-facing half, under epic [#1284]. Store requirement rather than product
 polish:
 [Implementation - Store Declarations](../implementation/store-declarations.md) declares the **Social Media** data-use category
@@ -287,6 +291,12 @@ others.
 `restaurant/{restaurantId}/tables`. The dashboard lists restaurants by
 `Restaurant.ownerUserIds`, so without the redirect a staff account arrives at an empty page and
 the surfaces its role has are reachable only by typing a URL.
+A staff account that opens an owner route by URL - the restaurant, a section, the menu,
+Guest Bites, staff, the floor plan - is refused by the same `ownedRestaurantGuard` as anyone
+else, but sent back to its own `restaurant/{restaurantId}/tables` with "Only the restaurant's
+owner can open this page.", not to `/restaurants` and the owner's "not assigned to this
+account" ([#2232]). An owner refused a restaurant it does not hold still lands on
+`/restaurants`.
 
 ⁸ The split is what made the read safe to open at all ([#1088]). The published arrangement is
 the room document and the table documents; the owner's half-finished one lives at
@@ -384,3 +394,8 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1614]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1614
 [#2117]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2117
 [#2118]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2118
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2232

@@ -1,6 +1,11 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { BiteTribeApiService } from 'bite-tribe/api';
-import type { CreateAndUploadImageCallbackParams, Restaurant } from 'model';
+import type {
+  CreateAndUploadImageCallbackParams,
+  FolderPhotoVerdict,
+  Restaurant,
+} from 'model';
+import type { Subscription } from 'rxjs';
 
 /**
  * How long a restaurant photo upload may go without reporting anything before
@@ -17,15 +22,23 @@ export const STALLED_RESTAURANT_IMAGE_UPLOAD_MS = 30 * 1000;
  */
 export const STALE_PENDING_RESTAURANT_IMAGE_MS = 10 * 60 * 1000;
 
-export type RestaurantImageStatus = 'pending' | 'uploaded' | 'failed';
+export type RestaurantImageStatus =
+  'pending' | 'uploaded' | 'failed' | 'refused';
 
 interface UploadState {
   restaurantId: string;
   status: RestaurantImageStatus;
   /** The photo being sent, kept for a retry and for the blurred preview. */
   photo?: string;
-  /** The landed photo's URL, shown before the store reads the restaurant again. */
+  /** The published photo's URL, shown before the store reads the restaurant again. */
   imagePath?: string;
+  /**
+   * The transfer is done and the image check has not answered yet (GitHub
+   * issue #2141): the page says the photo is being checked, not uploaded.
+   */
+  checking?: boolean;
+  /** Why the image check refused the photo, while `status` is `refused`. */
+  refusalCategory?: string;
 }
 
 /**
@@ -34,11 +47,13 @@ interface UploadState {
  * and #2126).
  *
  * The restaurant is marked `pending` before the transfer starts and keeps
- * showing its previous photo. When the transfer finishes, the restaurant is
- * pointed at the new object - by this device for an immediate update, and by
- * the storage finalize trigger `setRestaurantImagePathOnUpload` in case this
- * device is gone by then. A transfer that errors or stalls is written off as
- * `failed`, which the edit page offers to retry.
+ * showing its previous photo. When the transfer finishes, the storage finalize
+ * trigger `setRestaurantImagePathOnUpload` runs the image check, and alone
+ * publishes the photo or marks it `refused` (GitHub issue #2141): this device
+ * writes neither, so nothing is published unchecked, and learns the verdict
+ * by listening to the restaurant. A transfer that errors or stalls is written
+ * off as `failed`, which the edit page offers to retry; a refused photo is
+ * never sent again.
  *
  * Unlike the profile photo there is no on-device copy to retry from after a
  * reload: the business app runs on the web only, so a failed upload from an
@@ -53,6 +68,8 @@ export class RestaurantImageUploadService {
   /** One transfer at a time: a second would leave two objects to settle. */
   private inFlight = false;
   private stallTimer: ReturnType<typeof setTimeout> | undefined;
+  /** The listener waiting for the image check's verdict on this upload. */
+  private verdictWatch: Subscription | undefined;
 
   /** This session's upload, if there is one. */
   readonly upload = this.state.asReadonly();
@@ -81,6 +98,12 @@ export class RestaurantImageUploadService {
       return restaurant?.imageStatus;
     }
 
+    // The backend checks a photo again while its check could not run, and
+    // writes `failed` itself after the last attempt (GitHub issue #2142).
+    if (typeof restaurant.imageCheckNextAt === 'number') {
+      return 'pending';
+    }
+
     const startedAt = restaurant.imageUploadStartedAtTimestamp;
 
     if (typeof startedAt !== 'number') {
@@ -90,6 +113,22 @@ export class RestaurantImageUploadService {
     return now - startedAt >= STALE_PENDING_RESTAURANT_IMAGE_MS
       ? 'failed'
       : 'pending';
+  }
+
+  /**
+   * Why the image check refused the restaurant's latest photo: this session's
+   * verdict when it is for that restaurant, otherwise the stored one.
+   */
+  refusalCategoryFor(restaurant: Restaurant | undefined): string | undefined {
+    const upload = this.state();
+
+    if (restaurant && upload?.restaurantId === restaurant.id) {
+      return upload.refusalCategory;
+    }
+
+    return restaurant?.imageStatus === 'refused'
+      ? restaurant.imageRefusalCategory
+      : undefined;
   }
 
   /**
@@ -116,6 +155,7 @@ export class RestaurantImageUploadService {
         : {}),
     });
     this.restartStallTimer(restaurantId);
+    this.watchVerdict(restaurantId);
 
     // Not awaited: see `setProfilePhotoStatus` (GitHub issue #1390).
     this.api
@@ -158,36 +198,70 @@ export class RestaurantImageUploadService {
     } else if (p.uploadParams?.evt?.completed === false) {
       this.restartStallTimer(restaurantId);
     } else if (p.uploadParams?.evt?.completed === true) {
-      void this.finish(restaurantId, p.imagePath);
+      this.finish();
     }
   }
 
-  private async finish(
-    restaurantId: string,
-    storagePath: string,
-  ): Promise<void> {
+  /**
+   * The transfer is done. The restaurant stays `pending`, with the new photo
+   * kept for the blurred preview, until the image check's verdict arrives.
+   */
+  private finish(): void {
     if (!this.inFlight) {
       return;
     }
 
     this.end();
+    this.updateUpload((upload) => ({ ...upload, checking: true }));
+  }
 
-    try {
-      const imagePath = await this.api.setUploadedRestaurantImage(
-        restaurantId,
-        storagePath,
-      );
-      this.state.set({ restaurantId, status: 'uploaded', imagePath });
-    } catch (error) {
-      // The object is in Storage, so the finalize trigger still points the
-      // restaurant at it; only this device's immediate update is lost.
-      console.warn('Could not point the restaurant at the new photo:', error);
-      this.state.update((upload) => ({
+  /**
+   * Listens for the verdict on this upload only: one that follows the
+   * `pending` this upload wrote, so the previous photo's does not count.
+   */
+  private watchVerdict(restaurantId: string): void {
+    this.stopWatchingVerdict();
+    this.verdictWatch = this.api
+      .restaurantPhotoVerdict$(restaurantId, true)
+      .subscribe((verdict) => this.settle(restaurantId, verdict));
+  }
+
+  private stopWatchingVerdict(): void {
+    this.verdictWatch?.unsubscribe();
+    this.verdictWatch = undefined;
+  }
+
+  /**
+   * Changes this session's upload. `start()` sets it before the transfer and
+   * the verdict listener begin, so every callback that ends an upload finds
+   * it, and nothing ever clears it.
+   */
+  private updateUpload(change: (upload: UploadState) => UploadState): void {
+    this.state.update((upload) => change(upload as UploadState));
+  }
+
+  private settle(restaurantId: string, verdict: FolderPhotoVerdict): void {
+    this.end();
+    this.stopWatchingVerdict();
+
+    if (verdict.imageStatus === 'uploaded') {
+      this.state.set({
         restaurantId,
         status: 'uploaded',
-        imagePath: upload?.imagePath,
-      }));
+        imagePath: verdict.imagePath,
+      });
+
+      return;
     }
+
+    // Keeps a photo published earlier this session; the refused one is
+    // dropped, so it can be neither shown nor sent again.
+    this.updateUpload((upload) => ({
+      restaurantId,
+      status: 'refused',
+      imagePath: upload.imagePath,
+      refusalCategory: verdict.imageRefusalCategory,
+    }));
   }
 
   /**
@@ -201,9 +275,12 @@ export class RestaurantImageUploadService {
     }
 
     this.end();
-    this.state.update((upload) =>
-      upload ? { ...upload, status: 'failed' } : upload,
-    );
+    this.stopWatchingVerdict();
+    this.updateUpload((upload) => ({
+      ...upload,
+      status: 'failed',
+      checking: false,
+    }));
     this.api
       .setRestaurantImageStatus(restaurantId, 'failed')
       .catch(() => undefined);

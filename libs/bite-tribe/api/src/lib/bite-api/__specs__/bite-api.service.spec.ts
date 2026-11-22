@@ -15,7 +15,6 @@ import { ErrorHandler } from '@angular/core';
 import { loadBitesByBucketlist } from '../utils/load-bites-by-bucketlist';
 import { BITE_COLLECTION } from '../../utils/constants';
 import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
-import { updateBiteWithImagePathFromFirestorage } from '../utils/update-bite-with-image-path-from-firestorage';
 import {
   loadBitePhotoPosition,
   saveBitePhotoPosition,
@@ -67,10 +66,6 @@ jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
 jest.mock('../utils/bite-photo-position', () => ({
   saveBitePhotoPosition: jest.fn(),
   loadBitePhotoPosition: jest.fn(),
-}));
-
-jest.mock('../utils/update-bite-with-image-path-from-firestorage', () => ({
-  updateBiteWithImagePathFromFirestorage: jest.fn(),
 }));
 
 const mockedUser = { uid: '123' };
@@ -268,30 +263,6 @@ describe(BiteApiService.name, () => {
         collection: 'bites',
         docId: 'bite123',
       });
-    });
-  });
-
-  describe('updateImagePathInBite', () => {
-    it('should call updateBiteWithImagePathFromFirestorage and loadBiteById', async () => {
-      const mockedBite = {
-        id: 'bite123',
-        title: 'Test Bite',
-      } as unknown as Bite;
-
-      const mockedImagePath = 'path/to/image.jpg';
-
-      await service.updateImagePathInBite(mockedBite, mockedImagePath);
-
-      expect(updateBiteWithImagePathFromFirestorage).toHaveBeenCalledWith(
-        mockedImagePath,
-        {
-          id: 'bite123',
-          title: 'Test Bite',
-        },
-        true,
-        'bite123',
-      );
-      expect(loadBiteById).toHaveBeenCalledWith('bite123');
     });
   });
 

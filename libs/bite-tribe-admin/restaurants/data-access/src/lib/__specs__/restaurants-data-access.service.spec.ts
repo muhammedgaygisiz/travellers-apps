@@ -13,6 +13,7 @@ import {
   RESTAURANT_CANDIDATES_COLLECTION,
   RESTAURANT_CANDIDATES_LIMIT,
   RestaurantsDataAccessService,
+  restaurantsWithoutPhotoOf,
 } from '../restaurants-data-access.service';
 
 jest.mock('@capacitor-firebase/firestore');
@@ -51,6 +52,8 @@ describe(RestaurantsDataAccessService.name, () => {
     getPlaceDetails: jest.Mock;
     saveRestaurantImage: jest.Mock;
     uploadRestaurantImageForUrl: jest.Mock;
+    restaurantPhotoVerdict$: jest.Mock;
+    setRestaurantImageStatus: jest.Mock;
   };
 
   beforeEach(() => {
@@ -72,7 +75,14 @@ describe(RestaurantsDataAccessService.name, () => {
         .mockResolvedValue(
           'https://storage.test/images/restaurants/candidate-1/p.jpg',
         ),
-      saveNewRestaurant: jest.fn().mockResolvedValue(undefined),
+      saveNewRestaurant: jest.fn().mockResolvedValue('restaurant-new'),
+      restaurantPhotoVerdict$: jest.fn(() =>
+        of({
+          imageStatus: 'uploaded',
+          imagePath: 'https://storage.test/p.jpg',
+        }),
+      ),
+      setRestaurantImageStatus: jest.fn().mockResolvedValue(undefined),
     };
 
     jest.mocked(FirebaseFunctions.callByName).mockResolvedValue({
@@ -93,6 +103,85 @@ describe(RestaurantsDataAccessService.name, () => {
     });
 
     service = TestBed.inject(RestaurantsDataAccessService);
+  });
+
+  /** Attaching a photo to a restaurant that has none (GitHub issue #1510). */
+  describe('restaurant photos', () => {
+    it.each([
+      [{ id: 'a' }, true],
+      [{ id: 'b', imagePath: '   ' }, true],
+      [{ id: 'c', imagePath: 'https://storage.test/c.jpg' }, false],
+      [{ id: 'd', image: 'legacy.jpg' }, false],
+    ])('lists %o without a photo: %s', (restaurant, listed) => {
+      expect(
+        restaurantsWithoutPhotoOf([restaurant as Restaurant]).length === 1,
+      ).toBe(listed);
+    });
+
+    it('marks pending, uploads into the restaurant folder, and answers the verdict', async () => {
+      const order: string[] = [];
+      apiMock.restaurantPhotoVerdict$.mockImplementation(() => {
+        order.push('watch');
+        return of({ imageStatus: 'uploaded', imagePath: 'https://p' });
+      });
+      apiMock.setRestaurantImageStatus.mockImplementation(async () => {
+        order.push('pending');
+      });
+      apiMock.uploadRestaurantImageForUrl.mockImplementation(async () => {
+        order.push('upload');
+        return 'https://p';
+      });
+
+      await expect(
+        service.attachRestaurantPhoto(
+          'restaurant-1',
+          'data:image/png;base64,x',
+        ),
+      ).resolves.toEqual({ imageStatus: 'uploaded', imagePath: 'https://p' });
+
+      expect(order).toEqual(['watch', 'pending', 'upload']);
+      // Only a verdict after this upload's own pending mark counts.
+      expect(apiMock.restaurantPhotoVerdict$).toHaveBeenCalledWith(
+        'restaurant-1',
+        true,
+      );
+      expect(apiMock.setRestaurantImageStatus).toHaveBeenCalledWith(
+        'restaurant-1',
+        'pending',
+        expect.any(Number),
+      );
+      expect(apiMock.uploadRestaurantImageForUrl).toHaveBeenCalledWith(
+        'restaurant-1',
+        'data:image/png;base64,x',
+      );
+    });
+
+    it('answers a refusal', async () => {
+      apiMock.restaurantPhotoVerdict$.mockReturnValue(
+        of({ imageStatus: 'refused', imageRefusalCategory: 'violence' }),
+      );
+
+      await expect(
+        service.attachRestaurantPhoto('restaurant-1', 'photo'),
+      ).resolves.toEqual({
+        imageStatus: 'refused',
+        imageRefusalCategory: 'violence',
+      });
+    });
+
+    it('marks a failed upload failed and rejects', async () => {
+      apiMock.uploadRestaurantImageForUrl.mockRejectedValue(
+        new Error('stalled'),
+      );
+
+      await expect(
+        service.attachRestaurantPhoto('restaurant-1', 'photo'),
+      ).rejects.toThrow('stalled');
+      expect(apiMock.setRestaurantImageStatus).toHaveBeenLastCalledWith(
+        'restaurant-1',
+        'failed',
+      );
+    });
   });
 
   describe('bitePlacesLoader', () => {
@@ -640,6 +729,25 @@ describe(RestaurantsDataAccessService.name, () => {
       await service.submitNewRestaurant(restaurant);
 
       expect(apiMock.saveNewRestaurant).toHaveBeenCalledWith(restaurant);
+      expect(apiMock.restaurantPhotoVerdict$).not.toHaveBeenCalled();
+    });
+
+    // GitHub issue #2141: only the image check publishes the photo.
+    it('waits for the image check on a restaurant with a photo', async () => {
+      const verdict = await service.submitNewRestaurant({
+        id: '',
+        name: 'Pizza Palace',
+        image: 'data:image/png;base64,abc',
+      } as Restaurant);
+
+      expect(apiMock.restaurantPhotoVerdict$).toHaveBeenCalledWith(
+        'restaurant-new',
+        false,
+      );
+      expect(verdict).toEqual({
+        imageStatus: 'uploaded',
+        imagePath: 'https://storage.test/p.jpg',
+      });
     });
 
     it('should reject when the write is refused', async () => {

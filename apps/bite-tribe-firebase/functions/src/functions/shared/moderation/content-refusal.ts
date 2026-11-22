@@ -1,15 +1,35 @@
 import { logger } from 'firebase-functions';
-import { ContentVerdict } from './check-content';
 
 /**
- * Where refused content was written (issue #1610). Each is a surface another
- * account reads.
+ * Where an image is uploaded (issue #2138). Each is published to accounts
+ * other than the uploader's.
+ */
+export type ImageSurface =
+  'bitePhoto' | 'profilePhoto' | 'restaurantPhoto' | 'biteTrailPhoto';
+
+/**
+ * Where refused content was written (issues #1610 and #2138). Each is a
+ * surface another account reads.
  */
 export type ContentSurface =
-  'bite' | 'review' | 'reviewReply' | 'displayName' | 'profile';
+  'bite' | 'review' | 'reviewReply' | 'displayName' | 'profile' | ImageSurface;
 
-/** How the refusal was reached: a callable refused it, or a trigger undid it. */
-export type ContentRefusalStage = 'precheck' | 'callable' | 'trigger';
+/** Why something was refused, as a check reports it. */
+export interface RefusalVerdict {
+  /** The field that failed: a text field, `content` or `image`. */
+  field: string;
+  /** `sample` is the image check's stand-in verdict outside production. */
+  source: 'wordlist' | 'model' | 'sample';
+  /** The model's category, or the matched term for the wordlist. */
+  reason: string;
+}
+
+/**
+ * How the refusal was reached: a callable refused it, a trigger undid it, or
+ * the backfill of stored photos (issue #2143) took down one already published.
+ */
+export type ContentRefusalStage =
+  'precheck' | 'callable' | 'trigger' | 'backfill';
 
 export interface ContentRefusal {
   uid: string;
@@ -19,9 +39,14 @@ export interface ContentRefusal {
   targetId?: string;
   /** What the trigger did about content already written. */
   action?: 'refused' | 'reverted' | 'deleted';
-  verdict: Extract<ContentVerdict, { verdict: 'refused' }>;
-  /** The refused text, cut short: enough for an operator to see the attempt. */
-  text: string;
+  verdict: RefusalVerdict;
+  /**
+   * The refused text, cut short: enough for an operator to see the attempt.
+   * An image refusal has none, and no image data is ever logged.
+   */
+  text?: string;
+  /** The Storage object a refused image was uploaded to. */
+  storagePath?: string;
 }
 
 /** The one message every refusal is logged under, so one query finds them all. */
@@ -49,6 +74,7 @@ export const recordContentRefusal = (refusal: ContentRefusal): void => {
     field: refusal.verdict.field,
     source: refusal.verdict.source,
     reason: refusal.verdict.reason,
-    text: refusal.text.slice(0, MAX_LOGGED_TEXT),
+    text: refusal.text?.slice(0, MAX_LOGGED_TEXT),
+    storagePath: refusal.storagePath,
   });
 };

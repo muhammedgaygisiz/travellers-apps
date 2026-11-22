@@ -64,6 +64,13 @@ Operator may write any Restaurant and its Menu from the Admin App. **The surface
 not:** there is no edit surface in the Admin App, explicitly out of scope in [#1510], so
 an Operator still cannot maintain the Restaurant it just verified — which, by `G7`, also
 has no owner. What changed is that the permission is now there when the surface is built.
+**One field is the exception:** a Restaurant's photo. "Attach a restaurant photo" on the
+admin dashboard lists the Restaurants with no `imagePath` and lets the Operator attach one
+([#1510]). It reuses the path every Restaurant photo takes - the upload lands in
+`images/restaurants/{restaurantId}/`, which the storage rules let an Operator write, and
+`setRestaurantImagePathOnUpload` publishes it once the image check passes it ([#2141]) - so
+it needed no callable and makes no client write to `imagePath`. A Restaurant that has an
+owner gets its photo in the Business App as well.
 
 ## Lanes
 
@@ -411,13 +418,19 @@ V21  SYS  creates the Restaurant
           → V22
 
 V22  SYS  creates the Menu
-          └─→ DB   /menus/{menuId}, with the categories derived at V19
+          └─→ DB   /menus/{menuId}, with the categories derived at V19,
+                   derivedFromBites: true, and the currency chosen at V19
+                   when there is one
+          INV:R-11
           INV:R-9
           → V23
 
 V23  SYS  links the unassigned evidence Bites to the Restaurant
           └─→ DB   bite.restaurantId = restaurantId, for every surviving Bite that
                    carries none
+          └─→ DB   bite.menuItemId = the Initial Menu item built from the Bite's
+                   dish name, with menuItemLinkedBy: 'verification', unless the
+                   Bite is already linked to a menu item ([#2216])
           └─→ DB   skippedBiteIds on the Candidate, naming every Bite left untouched
           REF:UC-MBR   must define managing a Bite's Restaurant assignment outside this flow;
                        the conflict behaviour inside it is decided by R-20
@@ -468,7 +481,7 @@ V25  SYS  returns { restaurantId, menuId, menuItemCount, candidateId, skippedBit
 | **R-8**  | `bite.restaurantId` has **four** writers. `V23` is the only transactional one, and the only one inside this Use Case. Two more sit in the Bite form, which carries a `restaurantId` control set when a Bite Creator picks a verified nearby Restaurant: the whole form value is persisted on create **and on edit**. The fourth is the Admin App's Candidate-free save path, which links the unassigned Bites behind a picked place name in client-side writes outside any transaction, skipping any that already name a Restaurant as this page's `R-20` does ([#1631]); its rules are owned by `UC - Manage A Bite's Restaurant Assignment`. Detection is deliberately **not** a writer — see `UC-DRC` `R-6` and `RD-VRC-9`. |
 | **R-9**  | `V15` to `V24` are one transaction. The Candidate read at `V15` and the evidence read at `V18` happen inside it, before any write, so no observable state has a Restaurant without its Menu, or Bites pointing at a Restaurant whose Candidate is still `pending`.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | **R-10** | Everything the Restaurant needs in order to be valid is written inside `R-9`'s transaction. An image is therefore uploaded at `V11a`, before the callable, under the Candidate id, so only its URL crosses the boundary and the transaction writes it. A failed upload stops the flow before the callable: nothing is created, the Candidate stays `pending`, and resubmitting runs the whole flow again. Candidate verification makes no client write to `/restaurants`. Met since [#1504].                                                                                                                                                                                                                                   |
-| **R-11** | The Initial Menu is a **draft derived from evidence**, not a statement about the real menu. Its prices are averages of what Bite Creators reported.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **R-11** | The Initial Menu is a **draft derived from evidence**, not a statement about the real menu. Its prices are averages of what Bite Creators reported, and it says so: `V22` writes `derivedFromBites: true`, nothing else writes it, only the owner's confirmation in the Business App removes it ([#2214]), and the consumer menu page shows a notice above the categories while it is set and the Menu has an item. The prices are stated in the currency most priced Bites were paid in, else the currency of the country most Bites were taken in, else none; only Bites paid in that currency count toward a price ([#1511]).                                                                                               |
 | **R-12** | A Bite Creator is never notified and sees no state change from this Use Case, other than their Bite now appearing under a Restaurant.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | **R-13** | _Intended, not met._ A Candidate the Operator judges not to be a restaurant is left `dismissed` (`V4a`, `UC-DIS`). No surface and no writer exist, so `dismissed` is a declared status that nothing can reach. Owned in three parts, all in epic [#1495] and all `[Secondary]`: [#1501] the backend writer, [#1508] the Operator surface, [#1502] un-dismissal.                                                                                                                                                                                                                                                                                                                                                                |
 | **R-14** | _Intended, not met._ A Candidate for a place that already has a verified Restaurant is resolved against that Restaurant (`V4b`, `UC-MRC`), creating no second Restaurant. No writer exists.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -566,14 +579,14 @@ changes.
 app, which _is_ reviewed:
 
 1. **The Initial Menu is published as a Restaurant's menu.** Its items and prices are
-   derived from Bite reports, per `R-11`, not from the business, and nothing marks it
-   as such. A reviewer comparing a listed price to the real one sees an inaccuracy
-   attributed to a named business. `RD-VRC-11` decides that marker and its retraction:
-   the marker is owned by [#1511], and retraction is sequenced behind owner assignment.
-   That assignment has a writer since [#1077] and the Business App is ownership-scoped
-   since [#1079], so the path exists; what is still missing is the assignments
-   themselves. No Restaurant is assigned in production, so no Restaurant Owner can
-   reach the Menu to retract until an operator assigns one.
+   derived from Bite reports, per `R-11`, not from the business. Since [#1511] the Menu
+   carries `derivedFromBites` and the consumer menu page says its prices are guest
+   averages, in the currency guests paid in. `RD-VRC-11` decides the marker's
+   retraction, sequenced behind owner assignment. That assignment has a writer since
+   [#1077] and the Business App is ownership-scoped since [#1079]. Since [#2214] the
+   owner retracts it from the Business App menu editor with "This is our menu", which
+   removes the field, so a Menu its owner has taken as their own no longer reads as
+   derived. One that no owner has confirmed still does, which is what `R-11` asks.
 2. **The Restaurant is created unclaimed,** per `G7`. `V21` publishes a page about a
    real, named business that has not been involved. That is a data-protection and
    business-representation question rather than a store-review one; it belongs to
@@ -581,7 +594,8 @@ app, which _is_ reviewed:
 3. **A published Restaurant may have no image,** per `R-4`. The consumer app must render
    a page for a real, named business with no photograph of it, which is the same
    presentation question as point 2 one notch weaker. Recorded here because `V9` is
-   where the image becomes optional.
+   where the image becomes optional. Such a Restaurant can be given one afterwards from the Admin App's
+   "Attach a restaurant photo" ([#1510]).
 
 Neither blocks the current release candidate. Both are recorded here so they are not
 discovered in review.
@@ -616,6 +630,8 @@ discovered in review.
   and `skippedBiteIds`.
 - [#1511] — marking a Menu as derived from Bite evidence and showing it in the consumer
   app. `R-11`, `RD-VRC-11`, and the first App Store content question.
+- [#2214] — the owner's confirmation in the Business App that removes the marker.
+  `RD-VRC-11`.
 - [#1630] — epic for duplicate resolution (`V4b`, `R-14`, `UC-MRC`), `[Secondary]` and
   deferred deliberately.
 
@@ -665,3 +681,6 @@ discovered in review.
 [#1630]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1630
 [#1631]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1631
 [#2172]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2172
+[#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141

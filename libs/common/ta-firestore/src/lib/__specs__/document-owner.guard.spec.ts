@@ -103,6 +103,72 @@ describe('documentOwnerGuard', () => {
   });
 
   /**
+   * A refusal the caller routes per account (GitHub issue #2232): the
+   * business app sends a staff account back to its own tables.
+   */
+  describe('with refusalFor', () => {
+    const runWith = (
+      refusalFor: NonNullable<
+        Parameters<typeof documentOwnerGuard>[0]['refusalFor']
+      >,
+    ): Promise<boolean | UrlTree> =>
+      TestBed.runInInjectionContext(
+        () =>
+          documentOwnerGuard({ ...OPTIONS, refusalFor })(
+            routeWith({ restaurantId: 'restaurant-1' }),
+            { url: '/restaurant/restaurant-1' } as RouterStateSnapshot,
+          ) as Promise<boolean | UrlTree>,
+      );
+
+    it('sends a refused account where the hook says, with its message', async () => {
+      documentOwnedBy('another-account');
+      const refusalFor = jest.fn(async () => ({
+        redirectTo: '/restaurant/restaurant-9/tables',
+        refusalMessageKey: 'owner-only-page',
+      }));
+
+      await expect(runWith(refusalFor)).resolves.toEqual({
+        url: '/restaurant/restaurant-9/tables',
+      });
+      expect(refusalFor).toHaveBeenCalledWith('user-1');
+      expect(present).toHaveBeenCalledWith({
+        messageKey: 'owner-only-page',
+        outcome: 'failure',
+      });
+    });
+
+    it('keeps the default refusal when the hook has none for the account', async () => {
+      documentOwnedBy('another-account');
+
+      await expect(runWith(async () => undefined)).resolves.toEqual({
+        url: '/restaurants',
+      });
+      expect(present).toHaveBeenCalledWith({
+        messageKey: OPTIONS.refusalMessageKey,
+        outcome: 'failure',
+      });
+    });
+
+    it('keeps the default refusal when the hook fails', async () => {
+      documentOwnedBy('another-account');
+
+      await expect(
+        runWith(async () => {
+          throw new Error('offline');
+        }),
+      ).resolves.toEqual({ url: '/restaurants' });
+    });
+
+    it('never asks the hook about an account it admits', async () => {
+      documentOwnedBy('user-1');
+      const refusalFor = jest.fn();
+
+      await expect(runWith(refusalFor)).resolves.toBe(true);
+      expect(refusalFor).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
    * Membership mode (epic #1614): a document held by a set of accounts admits
    * every member, and the single-owner field keeps working beside it.
    */

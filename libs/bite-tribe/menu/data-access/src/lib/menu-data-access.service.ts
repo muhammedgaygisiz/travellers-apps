@@ -2,7 +2,13 @@ import { computed, inject, Injectable, Signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { withMenuIds } from 'model';
-import type { Bite, Menu, MenuItemStats } from 'model';
+import type {
+  Bite,
+  LinkBiteToMenuItemRequest,
+  LinkBiteToMenuItemResult,
+  Menu,
+  MenuItemStats,
+} from 'model';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { createEntityId } from 'utils';
 
@@ -76,6 +82,17 @@ export class MenuDataAccessService {
   }
 
   /**
+   * The owner takes a menu built from guests' Bites as their own (GitHub
+   * issue #2214). The restaurant comes off the route, as for {@link saveMenu}.
+   */
+  confirmMenuAsOwn(menuId: string): Promise<void> {
+    return this.api.confirmMenuAsOwn(
+      menuId,
+      this.storeService.restaurantIdFromUrl(),
+    );
+  }
+
+  /**
    * Records that the account holding the route's restaurant saved its menu
    * (GitHub issue #2126), which ticks "Menu reviewed" on the business
    * dashboard. Called by the business menu editor only.
@@ -104,6 +121,23 @@ export class MenuDataAccessService {
   }
 
   /** The Bites written about one dish, newest first. */
+  /**
+   * Every Bite about the route's restaurant, newest first (GitHub issue
+   * #2216), for the business app's Guest Bites page.
+   */
+  loadBitesForRestaurant(): Promise<Bite[]> {
+    return this.api.loadBitesForRestaurant(
+      this.storeService.restaurantIdFromUrl() ?? '',
+    );
+  }
+
+  /** An owner's link between a guest's Bite and a dish (issue #2216). */
+  linkBiteToMenuItem(
+    request: LinkBiteToMenuItemRequest,
+  ): Promise<LinkBiteToMenuItemResult> {
+    return this.api.linkBiteToMenuItem(request);
+  }
+
   loadBitesForMenuItem(menuItemId: string): Promise<Bite[]> {
     return this.api.loadBitesForMenuItem(menuItemId);
   }

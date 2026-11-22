@@ -69,6 +69,43 @@ export interface MenuItem {
    */
   isAvailable?: boolean;
   variants?: MenuItem[];
+  /**
+   * Choices on the dish that don't change its price, such as how spicy it
+   * should be (GitHub issue #2254).
+   *
+   * They belong to the dish, so they apply to whichever variant is ordered:
+   * a large or a small Ente Spezial is still cooked mild or hot. Absent and
+   * empty are the same answer, a dish with nothing to choose.
+   */
+  optionGroups?: MenuOptionGroup[];
+}
+
+/**
+ * One choice a guest makes on a dish, at no charge (GitHub issue #2254).
+ *
+ * A group has a name ("Zubereitungsart") and two or more choices ("nicht
+ * scharf", "scharf"), of which the guest picks exactly one; when it is
+ * `required`, the dish can't be ordered without that pick, and when it isn't,
+ * the guest may leave it empty.
+ *
+ * Deliberately priceless. A choice that costs something is either a version of
+ * the dish, which is a variant, or something added to it, which is an extra,
+ * and keeping those apart is what lets an order line say what was ordered and
+ * what it cost without asking which of three mechanisms priced it.
+ */
+export interface MenuOptionGroup {
+  /** Stable identity, on the same terms as {@link MenuItem.id}. */
+  id: string;
+  name: string;
+  required: boolean;
+  choices: MenuOptionChoice[];
+}
+
+/** One answer within a {@link MenuOptionGroup}. */
+export interface MenuOptionChoice {
+  /** Stable identity, on the same terms as {@link MenuItem.id}. */
+  id: string;
+  name: string;
 }
 
 /**
@@ -175,16 +212,39 @@ export interface Menu {
    * **Optional, and absent means "not stated" rather than a default.** Every
    * menu written before this carries none, and guessing one would put a wrong
    * currency symbol next to a real price, which is worse than the bare number a
-   * reader can ask about. The owner sets it in the business editor, where the
-   * control is pre-filled from the restaurant's country and still has to be
-   * confirmed - so the value is one somebody chose rather than one the product
-   * inferred.
+   * reader can ask about. Two writers set it, and neither guesses:
+   *
+   * - The owner, in the business editor, where the control is pre-filled from
+   *   the device's region and still has to be confirmed.
+   * - Candidate verification, on a menu it derives from Bites (issue #1511).
+   *   Those prices are what guests reported, and each Bite records the currency
+   *   its author paid in, so the menu states the currency most of them used.
+   *   Only when the Bites give no clear answer does the country they were taken
+   *   in decide, and when that gives none either the field stays absent.
    *
    * It is also the field `OrderLineSnapshot.currency` has been waiting for
    * (issue #1103): a line records what the guest was charged, and until a menu
    * said what its prices were in, there was nowhere honest to read that from.
    */
   currency?: string;
+
+  /**
+   * The menu was assembled from guests' Bites rather than published by the
+   * restaurant (GitHub issue #1511).
+   *
+   * Candidate verification creates a restaurant's first menu from the Bites
+   * behind the candidate: one item per dish, priced at the average of what
+   * guests reported. That is evidence, not a statement by the restaurant about
+   * what it serves or charges, and the consumer menu page says so while this is
+   * `true` and the menu has items.
+   *
+   * Written only by the verification transaction. Menu saves write named fields
+   * and leave this one alone, so an owner's edits do not clear it; it is
+   * removed only when the owner confirms the menu as their own in the business
+   * menu editor (GitHub issue #2214). Absent on
+   * every menu written before the field, which cannot be told apart afterwards.
+   */
+  derivedFromBites?: boolean;
 
   createdAt?: string;
   createdAtTimestamp?: number;

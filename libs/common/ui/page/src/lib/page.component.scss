@@ -93,12 +93,45 @@ $desktop-content-max-width: 1440px;
     }
   }
 
+  /* The brand fits a phone's header whole (GitHub issue #2233). Ionic reserves
+   * 90px for buttons at each end of a centred title, but the header's buttons
+   * are 48px wide, so at 375px "BITE TRIBE BUSINESS" was clipped on both
+   * sides. 52px keeps the title centred and clear of a button at either end.
+   *
+   * Then the name is sized to the space it has, and never larger than the
+   * desktop's 1.5rem. `--title-chars` is the title's length, set by the
+   * template, and an uppercase character of this face is at most about 0.63em
+   * wide with its letter spacing. 134px is the two 52px reserves and the logo,
+   * so a short name ("BITE TRIBE") keeps its full size at every phone width and
+   * only a long one ("BITE TRIBE BUSINESS") steps down, as far as it must.
+   *
+   * Measured against the toolbar rather than the window, so a header in a
+   * column narrower than the window - a phone-width story on a laptop -
+   * behaves as it does on the phone. */
+  ion-toolbar {
+    container-type: inline-size;
+  }
+
+  @container (width < #{$desktop-breakpoint}) {
+    ion-title {
+      padding-inline: 52px;
+    }
+
+    .title-container .headline {
+      font-size: min(
+        1.5rem,
+        calc((100cqi - 134px) / (var(--title-chars, 10) * 0.63))
+      );
+    }
+  }
+
   .title-container {
     /* Held here rather than on Ionic's `ion-justify-content-center` utility,
      * which is `!important` and so cannot be overridden per breakpoint. */
     justify-content: center;
 
     ion-icon {
+      flex-shrink: 0;
       font-size: 1.6rem;
     }
 

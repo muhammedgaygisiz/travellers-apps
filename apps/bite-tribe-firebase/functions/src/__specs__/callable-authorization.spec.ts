@@ -71,7 +71,11 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   assignRestaurantOwner: 'operator',
   backfillBiteAddress: 'operator',
   backfillBiteImageStatusCallable: 'operator',
+  // Stamps acceptedAt on every private profile's followers (issue #2168).
+  backfillFollowerAcceptanceCallable: 'operator',
   backfillMenuItemIdsCallable: 'operator',
+  // Checks every photo stored before the image check (issue #2143).
+  imageModerationBackfillCallable: 'operator',
   migrateRestaurantOwnerIdsCallable: 'operator',
   backfillReviewTimestampsCallable: 'operator',
   clusterRestaurantCandidateForBite: 'operator',
@@ -135,6 +139,11 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // this one invalidates a printed sticker.
   rotateTableQrTokens: 'restaurantAuthority',
 
+  // An owner linking a guest's Bite to a dish on their own menu, or marking it
+  // as not on the menu (issue #2216). The Bite rules stay closed to owners, so
+  // this guard and the ownership check behind it are the whole authority.
+  linkBiteToMenuItem: 'restaurantAuthority',
+
   // A restaurant operating its own dining room during service (issue #1092).
   // Not `restaurantAuthority`: the caller is usually a host rather than the
   // account the restaurant is assigned to, and requiring `business` here would
@@ -181,6 +190,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   withdrawFollowRequest: 'member',
   acceptFollowRequest: 'member',
   declineFollowRequest: 'member',
+  // The caller's own pending requests (issue #2165), read by the caller's uid.
+  listFollowRequests: 'member',
   checkDisplayNameAvailability: 'member',
   // Spends billed Vertex AI quota for the caller's own Bite form (issue #2030),
   // so a table guest's anonymous session is not enough.

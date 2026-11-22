@@ -48,11 +48,17 @@ belong to. See [UC - Use Local Gallery Support](../use-cases/uc-use-local-galler
 
 ## Image Triggers
 
-`setBiteImagePathOnUpload` listens to finalized storage objects for Bite images and updates the matching Bite document with `imagePath`.
+`setBiteImagePathOnUpload` listens to finalized storage objects for Bite images, runs the image check of [Architecture - AI](ai.md) on the object, and only then writes the matching Bite document's `imagePath`. A refused object is deleted and never gets a URL on any document. It is the only writer of a Bite's `imagePath`: the app uploads the photo and no longer resolves or writes the download URL itself, and the Firestore rules refuse a client write of it ([#2139]).
 
-`setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]).
+`setUserPhotoUrlOnUpload` does the same for profile photos under `images/users/{uid}/`: it runs the image check, then points the user document's `photoUrl` at the new object, writes `photoStatus: uploaded`, and deletes the objects in that folder created before it, so the folder holds only the current photo. It deletes older objects only, so two uploads finishing out of order cannot remove the later one ([#1953]). A refused object is deleted, `photoUrl` keeps the previous photo, and the document gets `photoStatus: refused`. It is the only writer of `photoUrl`: the app uploads the photo and never writes the URL, and the Firestore rules refuse a client write of it ([#2140]).
 
-`setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`: it points the Restaurant's `imagePath` at the new object, writes `imageStatus: uploaded`, and deletes the older objects in that folder by the same older-only rule, which both triggers now share as `deleteReplacedObjects` ([#2126]). The business app uploads there in the background the way a profile photo is uploaded; the admin app's candidate verification uploads there too and writes the URL itself, which the trigger then writes again unchanged.
+`mirrorIdentityAvatarOnCreate` puts the avatar a new account brings from its identity provider through the same path. The account is created with an empty `photoUrl`, and the avatar's URL waits in the server-only `identityAvatars` collection; the trigger fetches it (Google's avatar host only, over HTTPS), uploads it to `images/users/{uid}/`, and removes the entry. The finalize trigger then checks it like any other profile photo, so a refused avatar leaves the account with no photo ([#2140]).
+
+`setRestaurantImagePathOnUpload` does the same for restaurant photos under `images/restaurants/{restaurantId}/`, and `setBiteTrailImagePathOnUpload` for Bite Trail photos under `images/biteTrails/{biteTrailId}/` ([#2141]). Both run the image check, then point the document's `imagePath` at the new object, write `imageStatus: uploaded`, and delete the older objects in that folder by the same older-only rule, which the profile, restaurant and trail triggers share as `deleteReplacedObjects` ([#2126]). A refused object is deleted, `imagePath` keeps the previous photo, and the document gets `imageStatus: refused` with `imageRefusalCategory`; a check that could not run leaves it `pending` for the recheck below. They are the only writers of `imagePath` after an upload: the business app's photo editor, its Create BiteTrail page and the admin app's new-restaurant page upload and never write the URL, and the Firestore rules refuse a client write of it outside an operator. The admin app's candidate verification is the exception: it uploads under the candidate id, which names no restaurant, and hands the URL to `verifyRestaurantCandidate`, so that photo is not checked here.
+
+`recheckPendingImages` is the one writer here that no upload starts ([#2142]). When the image check could not run, the trigger records the object on its document as `imageCheckPath`, with `imageCheckAttempts` and `imageCheckNextAt`, and this scheduled function checks it again every 15 minutes, applying each verdict exactly as the trigger would: a passed object is published and the older objects in its folder deleted, a refused one is deleted. After the last attempt, about 16 hours after the upload, it deletes the unchecked object and writes `failed`, so no photo that was never checked stays in a folder with nothing to clean it up. It checks only an object inside its own document's folder.
+
+`imageModerationBackfillCallable` is the other writer no upload starts ([#2143]). An operator runs it from the admin app to check once every photo stored before the image check existed: it lists the four `images/` prefixes above and checks the object each document's `imagePath` or `photoUrl` names. Its report pass writes nothing; its apply pass deletes a refused object and removes the URL from its document. It never deletes an object the check passed, nor the older objects it skips.
 
 ## Storage Rules
 
@@ -175,3 +181,8 @@ libs/bite-tribe-common/bite/src/lib/utils/load-bite-image-for-canvas.ts
 [#1350]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1350
 [#1953]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1953
 [#2126]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2126
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

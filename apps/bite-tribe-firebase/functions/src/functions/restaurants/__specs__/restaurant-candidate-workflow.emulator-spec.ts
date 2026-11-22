@@ -200,7 +200,7 @@ describe('restaurant candidate workflow emulator integration', () => {
       expect(menuSnapshot.docs[0].data()['categories']).toEqual([
         {
           id: expect.any(String),
-          title: 'Bites',
+          title: 'Dishes',
           items: [
             {
               id: expect.any(String),

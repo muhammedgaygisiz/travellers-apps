@@ -2,6 +2,7 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -37,9 +38,13 @@ import { map } from 'rxjs';
 import { ToggleChangeEventDetail } from '@ionic/angular';
 import { ImageUploadComponent } from 'image-upload';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { photoRefusalReasonKey } from 'bite-tribe-common/bite';
+import { isBase64String } from 'utils';
 
 const STAY_PUBLIC = 'stay-public';
 const GO_PRIVATE = 'go-private';
+const KEEP_PRIVATE = 'keep-private';
+const GO_PUBLIC = 'go-public';
 
 @Component({
   selector: 'edit-profile-page',
@@ -82,6 +87,12 @@ export class EditProfilePage {
   publicUser = input<PublicUser>();
   /** A save is being written; Save Changes waits for it (issue #1953). */
   saving = input(false);
+  /**
+   * How many requests to follow the profile are pending (GitHub issue #2168).
+   * Making a private profile public accepts every one of them, so the switch
+   * asks first when there is at least one.
+   */
+  pendingFollowRequestCount = input(0);
   showEmailVerificationPrompt = input(false);
   emailVerificationResendRunning = input(false);
 
@@ -114,6 +125,8 @@ export class EditProfilePage {
   });
 
   isOpen = signal(false);
+  /** The switch to public is waiting on the owner's go-ahead (issue #2168). */
+  isGoPublicOpen = signal(false);
   failedProfileImageUrl = signal<string | null>(null);
   readonly pronounsMaxLength = PRONOUNS_MAX_LENGTH;
   profileForm = this.formBuilder.group({
@@ -149,6 +162,54 @@ export class EditProfilePage {
     { initialValue: !this.profileForm.valid },
   );
 
+  private readonly photoValue = toSignal(
+    this.profileForm.controls.photoUrl.valueChanges,
+    { initialValue: this.profileForm.controls.photoUrl.value },
+  );
+
+  /**
+   * The image check refused the last photo, and no other has been picked
+   * since (GitHub issue #2140). Picking one replaces the notice; saving it
+   * starts a new upload.
+   */
+  readonly photoRefused = computed(
+    (): boolean =>
+      this.publicUser()?.photoStatus === 'refused' &&
+      !isBase64String(this.photoValue() ?? ''),
+  );
+
+  /**
+   * Whether the profile still shows a photo while one is refused. A refused
+   * upload leaves the previous photo in place; a photo refused by the check
+   * of stored photos (GitHub issue #2143) was the one shown, so none is left.
+   */
+  private readonly refusedPhotoKept = computed(
+    (): boolean => !!this.publicUser()?.photoUrl,
+  );
+
+  /** What the refusal notice says, depending on whether a photo is kept. */
+  readonly refusalNoticeKeys = computed(() =>
+    this.refusedPhotoKept()
+      ? {
+          title: 'profile-photo-refused',
+          note: 'profile-photo-refused-not-shown',
+        }
+      : {
+          title: 'profile-photo-refused-removed',
+          note: 'profile-photo-refused-removed-not-shown',
+        },
+  );
+
+  /** Why the image check refused the photo, as a line of copy. */
+  readonly refusalReasonKey = computed((): string =>
+    photoRefusalReasonKey(this.publicUser()?.photoRefusalCategory),
+  );
+
+  /** Opens the photo picker, as tapping the photo does. */
+  openPhotoPicker(): void {
+    void this.profileImageSelectionModal()?.present();
+  }
+
   isFormPristine = toSignal(
     this.profileForm.valueChanges.pipe(map(() => this.profileForm.pristine)),
     { initialValue: this.profileForm.pristine },
@@ -165,6 +226,14 @@ export class EditProfilePage {
     },
   ];
 
+  /**
+   * The roles of the go-public alert's buttons. Their text is translated in
+   * the template through the pipe, so it follows the translations when they
+   * load after the page was created.
+   */
+  readonly keepPrivateRole = KEEP_PRIVATE;
+  readonly goPublicRole = GO_PUBLIC;
+
   openConfirmationDialog(): void {
     this.isOpen.set(true);
   }
@@ -177,6 +246,18 @@ export class EditProfilePage {
     }
 
     this.isOpen.set(false);
+  }
+
+  /**
+   * Cancelling, or dismissing the alert any other way, puts the switch back to
+   * private, so the requests stay pending (GitHub issue #2168).
+   */
+  handleGoPublicConfirmation(event: CustomEvent<OverlayEventDetail>): void {
+    if (event.detail.role !== GO_PUBLIC) {
+      this.profileForm.patchValue({ public: false });
+    }
+
+    this.isGoPublicOpen.set(false);
   }
 
   saveProfile(): void {
@@ -214,6 +295,16 @@ export class EditProfilePage {
   ): void {
     if (!$event.detail.checked) {
       this.openConfirmationDialog();
+
+      return;
+    }
+
+    // Only a profile that is private now has requests the switch would accept.
+    if (
+      this.publicUser()?.public !== true &&
+      this.pendingFollowRequestCount() > 0
+    ) {
+      this.isGoPublicOpen.set(true);
     }
   }
 

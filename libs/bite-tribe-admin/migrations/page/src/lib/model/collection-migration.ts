@@ -17,6 +17,10 @@ export const COLLECTION_MIGRATIONS = [
   'bite-image-status',
   'bite-countries',
   'restaurant-owner-ids',
+  'follower-acceptance',
+  // The two passes of the stored-photo backfill (issue #2143), on one surface.
+  'image-moderation-report',
+  'image-moderation-backfill',
 ] as const;
 
 export type CollectionMigrationName = (typeof COLLECTION_MIGRATIONS)[number];

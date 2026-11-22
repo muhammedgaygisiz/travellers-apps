@@ -42,6 +42,8 @@ class Mock {
   });
   myUser = jest.fn((): PublicUser | undefined => undefined);
   isAuthenticated = jest.fn(() => false);
+  pendingFollowRequests = { reload: jest.fn() };
+  pendingFollowRequestCount = jest.fn(() => 0);
 }
 
 const mockBiteDataAccessService = {
@@ -161,6 +163,24 @@ describe(ProfileService.name, () => {
         .mockImplementation();
       service.gotoMyBites();
       expect(navigateSpy).toHaveBeenCalledWith(['my-bites']);
+    });
+  });
+
+  // GitHub issue #2165.
+  describe('follow requests', () => {
+    it('opens the follow requests page', () => {
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+      service.gotoFollowRequests();
+      expect(navigateSpy).toHaveBeenCalledWith(['follow-requests']);
+    });
+
+    it('counts the pending requests again', () => {
+      service.refreshPendingFollowRequests();
+      expect(
+        profileDataAccessService.pendingFollowRequests.reload,
+      ).toHaveBeenCalled();
     });
   });
 
@@ -398,6 +418,28 @@ describe(ProfileService.name, () => {
 
       expect(navigateSpy).toHaveBeenCalledWith(['edit-profile']);
     });
+
+    /** GitHub issue #2140. */
+    it('opens the photo picker for a photo the check refused', async () => {
+      // The service holds the mock's `myUser` itself, so it is stubbed in
+      // place rather than replaced.
+      jest.mocked(profileDataAccessService.myUser).mockReturnValueOnce({
+        userId: 'me',
+        photoStatus: 'refused',
+      } as PublicUser);
+      jest
+        .spyOn(profileDataAccessService, 'retryProfilePhotoUpload')
+        .mockResolvedValueOnce(false);
+      const navigateSpy = jest
+        .spyOn(service['navController'], 'navigateForward')
+        .mockImplementation();
+
+      await service.retryProfilePhotoUpload();
+
+      expect(navigateSpy).toHaveBeenCalledWith(['edit-profile'], {
+        queryParams: { choosePhoto: 'true' },
+      });
+    });
   });
 
   describe('followButtonClicked', () => {
@@ -622,6 +664,64 @@ describe(ProfileService.name, () => {
       await service.resendEmailVerification('profile_edit');
 
       expect(emailVerificationMock.resend).toHaveBeenCalledWith('profile_edit');
+    });
+  });
+
+  /** GitHub issues #1168 and #2139. */
+  describe('retryBiteImageUpload', () => {
+    const failedBite = { id: 'bite1', name: 'Pizza' } as Bite;
+
+    beforeEach(() => {
+      mockBiteDataAccessService.findLocalImageForBite.mockReset();
+      mockBiteDataAccessService.retryImageUpload.mockReset();
+      mockLocalImagePicker.pick.mockReset();
+    });
+
+    it('re-sends the local copy without asking when the bite still has one', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue({
+        uri: 'file:///bites_bite1.jpg',
+        name: 'bites_bite1.jpg',
+      });
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(
+        mockBiteDataAccessService.findLocalImageForBite,
+      ).toHaveBeenCalledWith(failedBite);
+      expect(mockLocalImagePicker.pick).not.toHaveBeenCalled();
+      expect(mockBiteDataAccessService.retryImageUpload).toHaveBeenCalledWith(
+        failedBite,
+        'file:///bites_bite1.jpg',
+      );
+    });
+
+    it('asks the user to pick a photo when there is no local copy to re-send', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue(
+        undefined,
+      );
+      mockLocalImagePicker.pick.mockResolvedValue({
+        uri: 'file:///picked.jpg',
+        name: 'picked.jpg',
+        src: 'picked',
+      });
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(mockBiteDataAccessService.retryImageUpload).toHaveBeenCalledWith(
+        failedBite,
+        'file:///picked.jpg',
+      );
+    });
+
+    it('uploads nothing when the user backs out of the picker', async () => {
+      mockBiteDataAccessService.findLocalImageForBite.mockResolvedValue(
+        undefined,
+      );
+      mockLocalImagePicker.pick.mockResolvedValue(undefined);
+
+      await service.retryBiteImageUpload(failedBite);
+
+      expect(mockBiteDataAccessService.retryImageUpload).not.toHaveBeenCalled();
     });
   });
 });

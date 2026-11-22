@@ -26,6 +26,7 @@ const POSITION_MARKER_ID = 'position';
       [dragging]="dragging()"
       [geopoints]="markerGeopoints()"
       [markerColors]="markerColors()"
+      [gpsPosition]="gpsPosition()"
       refitOnGeopointChanges
       (clickOnMap)="setValue($event)"
     />
@@ -45,6 +46,11 @@ export class PositionComponent implements ControlValueAccessor {
   disabled = signal<boolean | null>(null);
   readonly = input(false, { transform: booleanAttribute });
   dragging = input(true, { transform: booleanAttribute });
+  /**
+   * The device's position. Without a value the map opens there rather than
+   * on the whole world (GitHub issue #2226). Left unset, nothing changes.
+   */
+  gpsPosition = input<Geopoint | null | undefined>();
 
   /**
    * Colour of the marker. A form that knows where its position came from passes

@@ -1,0 +1,160 @@
+<ta-page
+  [chrome]="{
+    enableBackButton: true,
+    showHeaderMenu: false,
+    showFooter: false,
+  }"
+>
+  <ion-content class="ion-padding">
+    <div class="page">
+      <header>
+        <p class="restaurant-name" data-testid="menu-restaurant-name">
+          {{ restaurant()?.name }}
+        </p>
+        <h1>{{ 'guest-bites' | transloco }}</h1>
+        <p class="intro">{{ 'guest-bites-intro' | transloco }}</p>
+      </header>
+
+      @if (bites() === undefined) {
+        <p class="hint" data-testid="guest-bites-loading">
+          {{ 'loading' | transloco }}
+        </p>
+      } @else if (!rows().length) {
+        <p class="hint" data-testid="guest-bites-empty">
+          {{ 'guest-bites-empty' | transloco }}
+        </p>
+      } @else {
+        <ion-list lines="full" data-testid="guest-bites-list">
+          @for (row of rows(); track row.bite.id) {
+            <ion-item [attr.data-testid]="'guest-bite-' + row.bite.id">
+              <ion-thumbnail slot="start">
+                @if (row.bite.imagePath) {
+                  <img [src]="row.bite.imagePath" alt="" />
+                } @else {
+                  <ion-icon name="image-outline" aria-hidden="true" />
+                }
+              </ion-thumbnail>
+              <ion-label>
+                <h2>
+                  {{ row.bite.name }}
+                  @if (row.bite.rating) {
+                    <span class="rating">★ {{ row.bite.rating }}</span>
+                  }
+                </h2>
+                @if (row.bite.createdAt) {
+                  <p>{{ row.bite.createdAt | date: 'mediumDate' }}</p>
+                }
+                @if (row.suggestion; as dish) {
+                  <p class="suggestion" data-testid="guest-bite-suggestion">
+                    {{
+                      'guest-bites-suggested' | transloco: { dish: dish.name }
+                    }}
+                  </p>
+                } @else {
+                  <p class="hint">{{ 'guest-bites-no-match' | transloco }}</p>
+                }
+                <div class="actions">
+                  @if (row.suggestion; as dish) {
+                    <ion-button
+                      size="small"
+                      data-testid="guest-bite-link"
+                      (click)="link(row.bite, dish)"
+                    >
+                      {{ 'guest-bites-link' | transloco }}
+                    </ion-button>
+                  }
+                  <ion-button
+                    size="small"
+                    [fill]="row.suggestion ? 'outline' : 'solid'"
+                    data-testid="guest-bite-choose"
+                    (click)="openPicker(row.bite)"
+                  >
+                    {{ 'guest-bites-choose-dish' | transloco }}
+                  </ion-button>
+                  <ion-button
+                    size="small"
+                    fill="clear"
+                    color="medium"
+                    data-testid="guest-bite-not-on-menu"
+                    (click)="confirmNotOnMenu(row.bite)"
+                  >
+                    {{ 'guest-bites-not-on-menu' | transloco }}
+                  </ion-button>
+                </div>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+
+    <ion-modal
+      [isOpen]="!!choosingFor()"
+      [initialBreakpoint]="0.75"
+      [breakpoints]="[0, 0.75, 1]"
+      (didDismiss)="closePicker()"
+    >
+      <ng-template>
+        <ion-content class="ion-padding" data-testid="guest-bite-picker">
+          <h2>{{ 'guest-bites-choose-title' | transloco }}</h2>
+          <p class="hint">“{{ choosingFor()?.name }}”</p>
+          <ion-radio-group
+            [value]="chosenItemId()"
+            (ionChange)="chooseItem($event.detail.value)"
+          >
+            <ion-list>
+              @for (dish of dishes(); track dish.item.id; let first = $first) {
+                @if (
+                  first ||
+                  dish.categoryTitle !== dishes()[$index - 1].categoryTitle
+                ) {
+                  <ion-list-header>{{ dish.categoryTitle }}</ion-list-header>
+                }
+                <ion-item>
+                  <ion-radio
+                    [value]="dish.item.id"
+                    [attr.data-testid]="'guest-bite-dish-' + dish.item.id"
+                  >
+                    {{ dish.item.name }}
+                  </ion-radio>
+                </ion-item>
+              }
+            </ion-list>
+          </ion-radio-group>
+          @if (chosenItem()?.variants?.length) {
+            <ion-item lines="none">
+              <ion-select
+                [label]="'guest-bites-choose-variant' | transloco"
+                interface="popover"
+                [ngModel]="chosenVariantId()"
+                (ngModelChange)="chosenVariantId.set($event)"
+                data-testid="guest-bite-variant"
+              >
+                <ion-select-option value="">
+                  {{ 'guest-bites-choose-variant-unsure' | transloco }}
+                </ion-select-option>
+                @for (variant of chosenItem()?.variants; track variant.id) {
+                  <ion-select-option [value]="variant.id">
+                    {{ variant.name }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          }
+          <div class="picker-actions">
+            <ion-button fill="outline" (click)="closePicker()">
+              {{ 'cancel' | transloco }}
+            </ion-button>
+            <ion-button
+              data-testid="guest-bite-picker-link"
+              [disabled]="!chosenItemId()"
+              (click)="confirmChoice()"
+            >
+              {{ 'guest-bites-link' | transloco }}
+            </ion-button>
+          </div>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
+  </ion-content>
+</ta-page>

@@ -68,5 +68,36 @@ describe('createBite', () => {
         });
       });
     });
+
+    /** The photo is published only by the upload trigger, GitHub issue #2139. */
+    it('writes no published image field, and keeps a pending upload', () => {
+      createBite(
+        {
+          ...bite,
+          imagePath: '',
+          imageStatus: 'pending',
+          imageRefusalCategory: 'violence',
+        },
+        null,
+      );
+
+      const { data } = (
+        FirebaseFirestore.setDocument as jest.Mock
+      ).mock.calls.at(-1)[0];
+
+      expect(data).not.toHaveProperty('imagePath');
+      expect(data).not.toHaveProperty('imageRefusalCategory');
+      expect(data.imageStatus).toBe('pending');
+    });
+
+    it('drops an image status the client may not write', () => {
+      createBite({ ...bite, imageStatus: 'uploaded' }, null);
+
+      const { data } = (
+        FirebaseFirestore.setDocument as jest.Mock
+      ).mock.calls.at(-1)[0];
+
+      expect(data).not.toHaveProperty('imageStatus');
+    });
   });
 });

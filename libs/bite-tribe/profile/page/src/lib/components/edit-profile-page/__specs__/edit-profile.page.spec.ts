@@ -107,6 +107,118 @@ describe(EditProfilePage.name, () => {
     });
   });
 
+  /** GitHub issue #2140. */
+  describe('a refused photo', () => {
+    const refused = {
+      userId: 'me',
+      displayName: 'Me',
+      email: 'me@test.com',
+      photoUrl: 'https://example.com/previous.jpg',
+      photoStatus: 'refused',
+      photoRefusalCategory: 'violence',
+    } as PublicUser;
+
+    const query = (testId: string): HTMLElement | null =>
+      fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
+
+    it('says the photo was not allowed, and why', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).not.toBeNull();
+      expect(component.refusalReasonKey()).toBe(
+        'photo-refused-reason-violence',
+      );
+    });
+
+    it('says the previous photo stays while there is one', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      expect(component.refusalNoticeKeys()).toEqual({
+        title: 'profile-photo-refused',
+        note: 'profile-photo-refused-not-shown',
+      });
+    });
+
+    // GitHub issue #2143: the check of stored photos refuses the photo that
+    // was shown, so the profile is left without one.
+    it('says the profile has no photo when the refused one was shown', () => {
+      compRef.setInput('publicUser', { ...refused, photoUrl: '' });
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).not.toBeNull();
+      expect(component.refusalNoticeKeys()).toEqual({
+        title: 'profile-photo-refused-removed',
+        note: 'profile-photo-refused-removed-not-shown',
+      });
+    });
+
+    it('keeps the photo everybody else sees in the form', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      TestBed.tick();
+
+      expect(component.profileForm.value.photoUrl).toBe(
+        'https://example.com/previous.jpg',
+      );
+    });
+
+    it('opens the photo picker to choose a different one', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      const open = jest.spyOn(component, 'openPhotoPicker');
+
+      query('edit-profile-choose-different-photo')?.click();
+
+      expect(open).toHaveBeenCalled();
+    });
+
+    it('goes away once a different photo is picked', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+
+      component.profileForm.patchValue({
+        photoUrl: 'data:image/png;base64,iVBORw0KGgo=',
+      });
+      fixture.detectChanges();
+
+      expect(component.photoRefused()).toBe(false);
+      expect(query('edit-profile-photo-refused')).toBeNull();
+    });
+
+    it('presents the picker modal itself', () => {
+      compRef.setInput('publicUser', refused);
+      fixture.detectChanges();
+      const present = jest
+        .spyOn(component.profileImageSelectionModal()!, 'present')
+        .mockResolvedValue();
+
+      component.openPhotoPicker();
+
+      expect(present).toHaveBeenCalled();
+    });
+
+    it('reads a cleared photo field as no new photo picked', () => {
+      compRef.setInput('publicUser', refused);
+      component.profileForm.controls.photoUrl.setValue(null);
+
+      expect(component.photoRefused()).toBe(true);
+    });
+
+    it('falls back to the generic reason without a profile', () => {
+      expect(component.refusalReasonKey()).toBe('photo-refused-reason-other');
+      expect(component.photoRefused()).toBe(false);
+    });
+
+    it('is not shown for a photo that was published', () => {
+      compRef.setInput('publicUser', { ...refused, photoStatus: 'uploaded' });
+      fixture.detectChanges();
+
+      expect(query('edit-profile-photo-refused')).toBeNull();
+    });
+  });
+
   describe('setDisplayNameEffect', () => {
     it('should return "Anonymous" when no user or publicUser is provided', () => {
       compRef.setInput('publicUser', undefined);
@@ -488,6 +600,98 @@ describe(EditProfilePage.name, () => {
 
         expect(openConfirmationDialogSpy).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  // Making a private profile public accepts every pending follow request at
+  // once, so the switch asks first while one is pending (GitHub issue #2168).
+  describe('the go-public confirmation', () => {
+    const privateUser = {
+      displayName: 'Owner',
+      email: 'owner@example.com',
+      userId: 'owner-1',
+      public: false,
+    } as PublicUser;
+
+    const togglePublic = (checked: boolean): void =>
+      component.handlePubicChange({
+        detail: { checked },
+      } as unknown as Parameters<EditProfilePage['handlePubicChange']>[0]);
+
+    const queryAlerts = (): HTMLElement[] => [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('ion-alert'),
+    ];
+
+    it('asks before a private profile with pending requests turns public', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+
+      togglePublic(true);
+      fixture.detectChanges();
+
+      expect(component.isGoPublicOpen()).toBe(true);
+      expect(queryAlerts()).toHaveLength(1);
+      expect(
+        (
+          queryAlerts()[0] as unknown as { buttons: { role: string }[] }
+        ).buttons.map((button) => button.role),
+      ).toEqual(['keep-private', 'go-public']);
+    });
+
+    it('keeps the profile private when cancelled', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+      togglePublic(true);
+
+      component.handleGoPublicConfirmation({
+        detail: { role: 'keep-private' },
+      } as CustomEvent<OverlayEventDetail>);
+
+      expect(component.profileForm.value.public).toBe(false);
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('keeps the switch to public when confirmed', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 3);
+      component.profileForm.patchValue({ public: true });
+      togglePublic(true);
+
+      component.handleGoPublicConfirmation({
+        detail: { role: 'go-public' },
+      } as CustomEvent<OverlayEventDetail>);
+
+      expect(component.profileForm.value.public).toBe(true);
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing when no request is pending', () => {
+      compRef.setInput('publicUser', privateUser);
+      compRef.setInput('pendingFollowRequestCount', 0);
+
+      togglePublic(true);
+
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing when the saved profile is already public', () => {
+      compRef.setInput('publicUser', { ...privateUser, public: true });
+      compRef.setInput('pendingFollowRequestCount', 3);
+
+      togglePublic(true);
+
+      expect(component.isGoPublicOpen()).toBe(false);
+    });
+
+    it('asks nothing about requests when switching to private', () => {
+      compRef.setInput('publicUser', { ...privateUser, public: true });
+      compRef.setInput('pendingFollowRequestCount', 3);
+
+      togglePublic(false);
+
+      expect(component.isGoPublicOpen()).toBe(false);
     });
   });
 

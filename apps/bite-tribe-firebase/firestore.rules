@@ -138,6 +138,46 @@ service cloud.firestore {
       return !request.resource.data.keys().hasAny(fields);
     }
 
+    /**
+     * The wait on an image whose check could not run (GitHub issue #2142):
+     * written by the upload triggers and `recheckPendingImages` alone. A
+     * client that set `imageCheckPath` could have the recheck publish another
+     * object as its photo, and one that moved `imageCheckNextAt` could hold or
+     * hurry the queue.
+     */
+    function imageCheckFields() {
+      return ['imageCheckAttempts', 'imageCheckNextAt', 'imageCheckPath'];
+    }
+
+    /**
+     * The photo of a restaurant or a Bite Trail (GitHub issue #2141), kept in
+     * the document's own folder and published by its finalize trigger -
+     * `setRestaurantImagePathOnUpload` or `setBiteTrailImagePathOnUpload` -
+     * once the image check passed it. The rules are what make the trigger the
+     * only way in: a client other than an operator's may write the status
+     * `pending` and `failed` while its upload runs, and nothing else of the
+     * photo. `image` is the photo field readers fall back on, so it may only be
+     * cleared, or it would publish an unchecked photo around the trigger.
+     */
+    function createsUnpublishedFolderPhoto() {
+      let data = request.resource.data;
+
+      return absentAll(['imagePath', 'imageRefusalCategory'])
+        && absentAll(imageCheckFields())
+        && data.get('imageStatus', 'pending') in ['pending', 'failed']
+        && data.get('image', '') == '';
+    }
+
+    function keepsPublishedFolderPhoto() {
+      let data = request.resource.data;
+
+      return unchangedAll(['imagePath', 'imageRefusalCategory'])
+        && unchangedAll(imageCheckFields())
+        && (unchangedAll(['imageStatus'])
+          || data.get('imageStatus', null) in ['pending', 'failed'])
+        && (unchangedAll(['image']) || data.get('image', '') == '');
+    }
+
     // ------------------------------------------------------------ restaurants
 
     /**
@@ -196,8 +236,13 @@ service cloud.firestore {
        */
       allow create: if isOperator() && absentAll(ownershipFields());
 
+      /**
+       * A holder edits the restaurant but never its published photo, which
+       * only the image check publishes (GitHub issue #2141). The admin app's
+       * new-restaurant page is an operator write and stays open.
+       */
       allow update: if unchangedAll(ownershipFields())
-        && (isOperator() || holds(resource.data));
+        && (isOperator() || (holds(resource.data) && keepsPublishedFolderPhoto()));
 
       allow delete: if isOperator();
     }
@@ -1022,10 +1067,47 @@ service cloud.firestore {
             && !(data.get('userId', null) in data.taggedUserIds));
       }
 
+      /**
+       * The photo is published only by `setBiteImagePathOnUpload`, once the
+       * image check has passed it (GitHub issue #2139): it alone writes
+       * `imagePath`, `imageRefusalCategory`, and the `uploaded` and `refused`
+       * image statuses. A client may write the two statuses its upload owns,
+       * `pending` and `failed`, and nothing else of the photo. `image`, the
+       * base64 photo of Bites written before Storage uploads, may only be
+       * cleared, or a client could publish an unchecked photo through it.
+       *
+       * The admin app's image migration is an operator write and stays open.
+       *
+       * An empty `imagePath` publishes nothing and is let through on create
+       * (GitHub issue #2236): the store app 1.2.0 sends its whole form, which
+       * always carries `imagePath: ''`, and refusing it lost every Bite that
+       * app created.
+       */
+      function createsUnpublishedPhoto() {
+        let data = request.resource.data;
+
+        return data.get('imagePath', '') == ''
+          && absentAll(['imageRefusalCategory'])
+          && absentAll(imageCheckFields())
+          && data.get('imageStatus', 'pending') == 'pending'
+          && data.get('image', '') == '';
+      }
+
+      function keepsPublishedPhoto() {
+        let data = request.resource.data;
+
+        return unchangedAll(['imagePath', 'imageRefusalCategory'])
+          && unchangedAll(imageCheckFields())
+          && (unchangedAll(['imageStatus'])
+            || data.get('imageStatus', null) in ['pending', 'failed'])
+          && (unchangedAll(['image']) || data.get('image', '') == '');
+      }
+
       allow read: if isMember();
 
       allow create: if owns(request.resource.data, 'userId')
-        && hasValidTaggedUsers();
+        && hasValidTaggedUsers()
+        && createsUnpublishedPhoto();
 
       /**
        * The operator clause is the admin app's Bite migrations — geohash,
@@ -1039,7 +1121,8 @@ service cloud.firestore {
        * save. They are cosmetic, they feed no entitlement, and the Bite's own
        * owner is the only account that can touch them.
        */
-      allow update: if (isOperator() || owns(resource.data, 'userId'))
+      allow update: if (isOperator()
+          || (owns(resource.data, 'userId') && keepsPublishedPhoto()))
         && hasValidTaggedUsers();
 
       allow delete: if isOperator() || owns(resource.data, 'userId');
@@ -1112,8 +1195,12 @@ service cloud.firestore {
 
     match /biteTrails/{biteTrailId} {
       allow read: if isMember();
-      allow create: if owns(request.resource.data, 'ownerId');
-      allow update, delete: if isOperator() || owns(resource.data, 'ownerId');
+      /** The photo is published by the image check alone (GitHub issue #2141). */
+      allow create: if owns(request.resource.data, 'ownerId')
+        && createsUnpublishedFolderPhoto();
+      allow update: if isOperator()
+        || (owns(resource.data, 'ownerId') && keepsPublishedFolderPhoto());
+      allow delete: if isOperator() || owns(resource.data, 'ownerId');
 
       /**
        * A purchase record, written by the buyer and never rewritten. `soldCount`
@@ -1201,6 +1288,29 @@ service cloud.firestore {
     }
 
     /**
+     * The profile photo is published only by `setUserPhotoUrlOnUpload`, once
+     * the image check has passed it (GitHub issue #2140): it alone writes
+     * `photoUrl`, `photoRefusalCategory`, and the `uploaded` and `refused`
+     * photo statuses. A client may write the two statuses its upload owns,
+     * `pending` and `failed`, and nothing else of the photo. A first write
+     * carries no photo at all, so a client cannot publish one through a
+     * create either.
+     */
+    function createsUnpublishedProfilePhoto(data) {
+      return data.get('photoUrl', '') == ''
+        && !('photoRefusalCategory' in data)
+        && !data.keys().hasAny(imageCheckFields())
+        && data.get('photoStatus', 'pending') in ['pending', 'failed'];
+    }
+
+    function keepsPublishedProfilePhoto() {
+      return unchangedAll(['photoUrl', 'photoRefusalCategory'])
+        && unchangedAll(imageCheckFields())
+        && (unchangedAll(['photoStatus'])
+          || request.resource.data.get('photoStatus', null) in ['pending', 'failed']);
+    }
+
+    /**
      * Whether another member may read this profile at all (GitHub issue #1863).
      *
      * A read returns the whole document or none of it, so a private profile
@@ -1239,11 +1349,13 @@ service cloud.firestore {
        */
       allow create: if isSelf(userId)
         && absentAll(backendOwnedUserFields())
-        && noProfileText(request.resource.data);
+        && noProfileText(request.resource.data)
+        && createsUnpublishedProfilePhoto(request.resource.data);
 
       allow update: if isSelf(userId)
         && unchangedAll(backendOwnedUserFields())
-        && unchangedAll(checkedProfileTextFields());
+        && unchangedAll(checkedProfileTextFields())
+        && keepsPublishedProfilePhoto();
 
       /** Account deletion runs in `deleteOwnAccount` with the Admin SDK. */
       allow delete: if false;
@@ -1373,6 +1485,15 @@ service cloud.firestore {
     match /meta/{documentId} {
       allow read: if isMember() && documentId != 'postingStreakStats';
       allow write: if false;
+    }
+
+    /**
+     * Identity-provider avatars waiting to be mirrored into Storage and checked
+     * (GitHub issue #2140). Written by `writeNewUserProfile`, consumed by
+     * `mirrorIdentityAvatarOnCreate`; no client reads or writes it.
+     */
+    match /identityAvatars/{uid} {
+      allow read, write: if false;
     }
 
     match /displayNames/{normalizedDisplayName} {

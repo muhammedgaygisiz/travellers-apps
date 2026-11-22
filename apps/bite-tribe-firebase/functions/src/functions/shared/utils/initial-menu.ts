@@ -1,16 +1,28 @@
+import { currencyForRegion } from './currency-by-region';
 import { createMenuEntityId } from './menu-ids';
-import { normalizePlaceName } from './restaurant-candidates';
+import { dishNameKey } from './dish-name-key';
 
 /**
  * Title of the single category that candidate verification derives from Bites.
  * Menu content is operator-owned free text, so the title is stored as data and
  * can be renamed in the business edit-menu page.
+ *
+ * Not "Bites": a Bite is a guest's experience of a dish, and what this
+ * category holds are menu items, the dishes the restaurant offers. The
+ * glossary keeps the two apart, and a category called "Bites" told owners and
+ * guests that the menu's dishes were Bites (GitHub issue #2214).
  */
-export const INITIAL_MENU_CATEGORY_TITLE = 'Bites';
+export const INITIAL_MENU_CATEGORY_TITLE = 'Dishes';
 
 export interface InitialMenuBite {
+  /** The Bite's document id, so its menu item can be written back to it. */
+  id?: string;
   name?: string;
   price?: number;
+  /** The currency the Bite's author paid in, as an ISO 4217 code. */
+  currency?: string;
+  /** Where the Bite was taken, as an ISO 3166-1 alpha-2 code. */
+  countryCode?: string;
 }
 
 export interface InitialMenuItem {
@@ -34,25 +46,61 @@ export interface InitialMenuCategory {
   items: InitialMenuItem[];
 }
 
+/** What candidate verification writes as the restaurant's first menu. */
+export interface InitialMenu {
+  categories: InitialMenuCategory[];
+  /** Absent when neither the Bites nor their country state one. */
+  currency?: string;
+  /**
+   * The menu item each Bite was grouped into, by Bite id (GitHub issue #2216),
+   * so verification can link every Bite to the dish it is about. Every Bite
+   * with an id and a name is here, including those whose price did not count
+   * toward the item: the dish is the same, only the price evidence differs.
+   */
+  menuItemIdByBiteId: Record<string, string>;
+}
+
 interface InitialMenuItemDraft {
   name: string;
   biteCount: number;
   priceSum: number;
   pricedBiteCount: number;
+  biteIds: string[];
 }
 
 /**
- * Groups Bites that describe the same dish. Place-name normalization already
- * implements the matching rules the candidate workflow uses, so dish names
- * reuse it instead of duplicating a second normalizer. Names that normalize to
- * nothing, such as non-latin scripts, fall back to the lowercased raw name so
- * they are not all grouped into one item.
+ * Groups Bites that describe the same dish, by {@link dishNameKey}: the key
+ * the business app also suggests a dish by (GitHub issue #2216).
  */
-const getMenuItemKey = (name: string): string =>
-  normalizePlaceName(name) || name.toLocaleLowerCase();
+export const getMenuItemKey = dishNameKey;
 
 const isUsablePrice = (price: unknown): price is number =>
   typeof price === 'number' && Number.isFinite(price) && price > 0;
+
+const toCurrencyCode = (currency: unknown): string | undefined => {
+  const code =
+    typeof currency === 'string' ? currency.trim().toUpperCase() : '';
+
+  return /^[A-Z]{3}$/.test(code) ? code : undefined;
+};
+
+/**
+ * The value most entries share, or `undefined` when there is none or two share
+ * the top count - a tie is no clear answer.
+ */
+const clearMajority = (values: string[]): string | undefined => {
+  const counts = new Map<string, number>();
+
+  values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+
+  const ranked = [...counts.entries()].sort(
+    (left, right) => right[1] - left[1],
+  );
+
+  return ranked.length && ranked[0][1] !== ranked[1]?.[1]
+    ? ranked[0][0]
+    : undefined;
+};
 
 const toRoundedPrice = (price: number): number => Math.round(price * 100) / 100;
 
@@ -70,10 +118,21 @@ const toInitialMenuItem = (draft: InitialMenuItemDraft): InitialMenuItem => ({
  * Turns candidate Bites into draft menu items. Bites of the same dish become
  * one item priced with the average of the prices users reported for it, so the
  * operator starts from the evidence instead of an empty menu.
+ *
+ * `countsPrice` says which Bites' prices go into the average. A Bite it
+ * refuses still names its dish, so the menu keeps the dish at price 0 when no
+ * Bite of it qualifies.
  */
 export const buildInitialMenuItems = (
   bites: InitialMenuBite[],
-): InitialMenuItem[] => {
+  countsPrice: (bite: InitialMenuBite) => boolean = () => true,
+): InitialMenuItem[] =>
+  draftInitialMenuItems(bites, countsPrice).map(({ item }) => item);
+
+const draftInitialMenuItems = (
+  bites: InitialMenuBite[],
+  countsPrice: (bite: InitialMenuBite) => boolean,
+): { item: InitialMenuItem; biteIds: string[] }[] => {
   const drafts = new Map<string, InitialMenuItemDraft>();
 
   bites.forEach((bite) => {
@@ -89,11 +148,16 @@ export const buildInitialMenuItems = (
       biteCount: 0,
       priceSum: 0,
       pricedBiteCount: 0,
+      biteIds: [],
     };
 
     draft.biteCount += 1;
 
-    if (isUsablePrice(bite.price)) {
+    if (bite.id) {
+      draft.biteIds.push(bite.id);
+    }
+
+    if (isUsablePrice(bite.price) && countsPrice(bite)) {
       draft.priceSum += bite.price;
       draft.pricedBiteCount += 1;
     }
@@ -106,20 +170,80 @@ export const buildInitialMenuItems = (
       (left, right) =>
         right.biteCount - left.biteCount || left.name.localeCompare(right.name),
     )
-    .map(toInitialMenuItem);
+    .map((draft) => ({
+      item: toInitialMenuItem(draft),
+      biteIds: draft.biteIds,
+    }));
 };
 
 /**
- * Builds the categories of the initial menu. Bites carry no category context,
- * so everything lands in one category and an evidence-free candidate keeps the
- * previous empty-menu behavior.
+ * The currency a derived menu states (GitHub issue #1511), decided in order:
+ *
+ * 1. The currency most priced Bites were paid in, when one clearly leads.
+ * 2. Otherwise - a tie, or no priced Bite records a currency - the currency of
+ *    the country most of the candidate's Bites were taken in.
+ * 3. Otherwise none.
+ *
+ * The prices are what guests reported, so their own currency is the best
+ * evidence; the country only settles what the Bites leave open.
  */
-export const buildInitialMenuCategories = (
+export const chooseInitialMenuCurrency = (
   bites: InitialMenuBite[],
-): InitialMenuCategory[] => {
-  const items = buildInitialMenuItems(bites);
+): string | undefined => {
+  const pricedCurrencies = bites
+    .filter((bite) => bite.name?.trim() && isUsablePrice(bite.price))
+    .map((bite) => toCurrencyCode(bite.currency))
+    .filter((currency): currency is string => !!currency);
 
-  return items.length
+  const countries = bites
+    .map((bite) => bite.countryCode?.trim().toUpperCase())
+    .filter((countryCode): countryCode is string => !!countryCode);
+
+  return (
+    clearMajority(pricedCurrencies) ??
+    currencyForRegion(clearMajority(countries))
+  );
+};
+
+/**
+ * Builds the initial menu. Bites carry no category context, so everything
+ * lands in one category and an evidence-free candidate keeps the previous
+ * empty-menu behavior.
+ *
+ * Prices average only the Bites paid in the menu's currency: twelve francs and
+ * twelve euros do not average to twelve of anything. A Bite that records no
+ * currency counts only when none of the priced Bites records one, which is how
+ * every menu was priced before currencies were compared. With no menu currency
+ * at all, every price counts, as before.
+ */
+export const buildInitialMenu = (bites: InitialMenuBite[]): InitialMenu => {
+  const currency = chooseInitialMenuCurrency(bites);
+  const anyPricedBiteHasCurrency = bites.some(
+    (bite) => isUsablePrice(bite.price) && toCurrencyCode(bite.currency),
+  );
+
+  const countsPrice = (bite: InitialMenuBite): boolean => {
+    const biteCurrency = toCurrencyCode(bite.currency);
+
+    if (!currency) {
+      return true;
+    }
+
+    return biteCurrency ? biteCurrency === currency : !anyPricedBiteHasCurrency;
+  };
+
+  const drafts = draftInitialMenuItems(bites, countsPrice);
+  const items = drafts.map(({ item }) => item);
+  const categories = items.length
     ? [{ id: createMenuEntityId(), title: INITIAL_MENU_CATEGORY_TITLE, items }]
     : [];
+  const menuItemIdByBiteId = Object.fromEntries(
+    drafts.flatMap(({ item, biteIds }) =>
+      biteIds.map((biteId) => [biteId, item.id]),
+    ),
+  );
+
+  return currency
+    ? { categories, currency, menuItemIdByBiteId }
+    : { categories, menuItemIdByBiteId };
 };

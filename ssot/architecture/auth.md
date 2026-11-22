@@ -73,6 +73,20 @@ Backend callables validate request.auth where required
   after the other. Every guard that reads the current user has to wait for
   restoration itself; waiting in `authGuard` alone does not protect the guards
   running next to it.
+- **Stuck browser storage gets a screen of its own** ([#2253]). On the web the
+  session lives in IndexedDB (`firebaseLocalStorageDb`), and an open of that
+  database that never finishes - another tab of the app holding it through a
+  pending delete or upgrade - leaves Firebase Auth unanswered for good: no
+  session is restored, every sign-in waits behind it, and nothing fails or
+  logs. When Auth has not answered within the restore bound
+  (`AUTH_RESTORE_TIMEOUT_MS`, 5 s), or an email sign-in hits its 30 s bound,
+  `AuthStorageHealthService` opens that database itself with a 3 s timeout. If
+  it does not answer, every web app replaces its pages with
+  `AuthStorageGateComponent` - what is wrong, close the other tabs, a reload -
+  in the same place the App Check gate takes. The gate lifts by itself when
+  Auth answers after all. A slow start whose storage answers changes nothing.
+  The probe never creates the database and closes any connection it gets.
+  Native apps are skipped: their web view has no second tab to hold it.
 - A guard that redirects away from a requested URL remembers it, and a guard
   that resolves a visitor into the app hands it back. That keeps a shared Bite
   link alive across the whole entry chain. See the Shared Link Entry Contract in
@@ -565,7 +579,9 @@ the same way registration does rather than inventing a second pattern.
   Check refusal, which is not a login failure at all: the readiness gate takes
   the screen - see [Architecture - Firebase](firebase.md).
 - The email/password round-trip is bounded at 30 seconds and a timeout reports
-  itself as a normal login failure. The form is locked while the request runs,
+  itself as a normal login failure. A timeout also asks whether the browser's
+  storage is stuck, and raises the storage gate when it is (see Cold Start
+  Rules). The form is locked while the request runs,
   so a request that never settles would otherwise lock the form with it. The
   native provider sheets are deliberately unbounded: the user is typing a
   password in someone else's UI there.
@@ -579,6 +595,8 @@ libs/common/ta-firestore/src/lib/auth.service.ts
 libs/common/ta-firestore/src/lib/auth.guard.ts
 libs/common/ta-firestore/src/lib/role.guard.ts
 libs/common/ta-firestore/src/lib/ngrx-store/effects.ts
+libs/common/ta-firestore/src/lib/auth-storage-health.service.ts
+libs/common/ta-firestore/src/lib/auth-storage-gate/auth-storage-gate.component.ts
 libs/common/utils/src/lib/user-role.ts
 libs/common/ta-firestore/src/lib/start.guard.ts
 libs/common/ta-firestore/src/lib/requested-url.service.ts
@@ -640,3 +658,4 @@ apps/bite-tribe-firebase/functions/src/functions/users/send-email-verification-r
 [#1622]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1622
 [#1714]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1714
 [#1489]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1489
+[#2253]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2253

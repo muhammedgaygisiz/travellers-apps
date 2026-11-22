@@ -15,11 +15,11 @@ import {
   RestaurantCandidate,
 } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitFolderPhotoVerdict, BiteTribeApiService } from 'bite-tribe/api';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { TABLE_SESSIONS_COLLECTION } from 'model';
-import type { TableSession } from 'model';
+import type { FolderPhotoVerdict, TableSession } from 'model';
 import { isBase64String, resourceValue } from 'utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -204,6 +204,14 @@ const toRestaurant = (doc: { id: string; data: unknown }): Restaurant =>
  * moved here with issue #1473, and the business app keeps only the restaurants
  * it already owns.
  */
+/** The restaurants with neither a published photo nor a legacy one (#1510). */
+export const restaurantsWithoutPhotoOf = (
+  restaurants: readonly Restaurant[],
+): Restaurant[] =>
+  restaurants.filter(
+    (restaurant) => !restaurant.imagePath?.trim() && !restaurant.image?.trim(),
+  );
+
 @Injectable({ providedIn: 'root' })
 export class RestaurantsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
@@ -494,6 +502,59 @@ export class RestaurantsDataAccessService {
   );
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
 
+  /**
+   * The restaurants with no photo (GitHub issue #1510): the worklist an
+   * operator attaches one from. Derived from the whole collection rather than
+   * queried, because a restaurant without a photo omits `imagePath`, and
+   * Firestore leaves a document missing a field out of every query that
+   * filters on it.
+   */
+  restaurantsWithoutPhoto = computed(() =>
+    restaurantsWithoutPhotoOf(this.restaurantsValue()),
+  );
+
+  /**
+   * Attaches a photo to a restaurant that has none (GitHub issue #1510), by
+   * the path every restaurant photo takes: the operator's upload lands in
+   * `images/restaurants/{restaurantId}/`, which the storage rules let an
+   * operator write, and `setRestaurantImagePathOnUpload` publishes it once
+   * the image check passes it (#2141). No client write sets `imagePath`.
+   *
+   * The restaurant is marked `pending` first, and only a verdict after that
+   * mark counts: a restaurant can be on this list because an earlier photo
+   * was refused, and that refusal must not read as this upload's answer.
+   * Resolves with the verdict, or `undefined` when the check has not
+   * answered yet; rejects when the upload fails, after marking it `failed`.
+   */
+  async attachRestaurantPhoto(
+    restaurantId: string,
+    photo: string,
+  ): Promise<FolderPhotoVerdict | undefined> {
+    const verdict = awaitFolderPhotoVerdict(
+      this.api.restaurantPhotoVerdict$(restaurantId, true),
+    );
+
+    await this.api.setRestaurantImageStatus(
+      restaurantId,
+      'pending',
+      Date.now(),
+    );
+
+    try {
+      await this.api.uploadRestaurantImageForUrl(restaurantId, photo);
+    } catch (error) {
+      await this.api
+        .setRestaurantImageStatus(restaurantId, 'failed')
+        .catch(() => undefined);
+      throw error;
+    }
+
+    const result = await verdict;
+    this.restaurants.reload();
+
+    return result;
+  }
+
   /** Moves to the page after the shown one, when there is one. */
   showNextCandidatePage(): void {
     const next = this.restaurantCandidatePage().next;
@@ -613,13 +674,27 @@ export class RestaurantsDataAccessService {
   }
 
   /**
-   * Creates a restaurant without a candidate, and resolves once it, its menu
-   * and its photo are written. It used to dispatch a store action whose effect
-   * dropped the promise, so a rejected write never reached the page, which
-   * navigated away as if it had worked (issue #1952).
+   * Creates a restaurant without a candidate, and resolves once it and its
+   * menu are written and its photo uploaded. It used to dispatch a store
+   * action whose effect dropped the promise, so a rejected write never reached
+   * the page, which navigated away as if it had worked (issue #1952).
+   *
+   * With a photo it then waits for the image check (GitHub issue #2141), so
+   * the page can say whether the photo was published: the verdict, or
+   * `undefined` when there was no photo or the check has not answered yet.
    */
-  submitNewRestaurant(restaurant: Restaurant): Promise<void> {
-    return this.api.saveNewRestaurant(restaurant);
+  async submitNewRestaurant(
+    restaurant: Restaurant,
+  ): Promise<FolderPhotoVerdict | undefined> {
+    const restaurantId = await this.api.saveNewRestaurant(restaurant);
+
+    if (!restaurant.image) {
+      return undefined;
+    }
+
+    return awaitFolderPhotoVerdict(
+      this.api.restaurantPhotoVerdict$(restaurantId, false),
+    );
   }
 
   async searchPlaces(

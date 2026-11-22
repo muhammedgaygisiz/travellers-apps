@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.category-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  // Delete sits apart from Cancel and Save, at the start of the row, so it is
+  // never the button a hurried tap lands on (issue #2181).
+  .delete {
+    margin-inline-end: auto;
+  }
+}
+
+.extras {
+  display: block;
+  margin-top: 1.5rem;
+}

@@ -1,23 +1,39 @@
 import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import { getFirestore } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
-import { storageDownloadUrl } from '../shared/utils/storage-download-url';
+import { checkImage } from '../shared/moderation/check-image';
 import {
-  createdAtMs,
-  deleteReplacedObjects,
-} from '../shared/utils/delete-replaced-objects';
+  applyImageVerdict,
+  PROFILE_PHOTO,
+  updateDocument,
+} from '../shared/moderation/checked-image-subjects';
+import { createdAtMs } from '../shared/utils/delete-replaced-objects';
 
 // Matches: images/users/{uid}/{filename}
 const USER_PHOTO_PATH_REGEX = /^images\/users\/([^/]+)\/[^/]+$/;
 
 /**
- * Points a profile at its new photo once the upload finalizes, and removes the
- * photo it replaced (GitHub issue #1953).
+ * Points a profile at its new photo once the upload finalizes and the image
+ * check has passed it, and removes the photo it replaced (GitHub issues #1953
+ * and #2140).
  *
- * The uploading device writes the same URL itself for an immediate update,
- * but cannot be relied on to still be there: an upload outlives the page that
- * started it. This is the Bite photo's `setBiteImagePathOnUpload` for profile
- * photos, and like it, clears the `pending` status the client set.
+ * This is the only writer of `photoUrl`, of `photoRefusalCategory`, and of the
+ * `uploaded` and `refused` photo statuses, with the scheduled recheck that
+ * applies the same verdicts (#2142): the rules refuse all of them from a
+ * client. So a profile photo reaches another account only through here, and
+ * only once `checkImage` passed it. The identity-provider avatar a new account
+ * starts with arrives the same way, mirrored into Storage by
+ * `mirrorIdentityAvatarOnCreate`.
+ *
+ * - `passed`: writes the download URL and `photoStatus: uploaded`, and deletes
+ *   the older objects in the account's folder.
+ * - `refused`: deletes the new object and writes `photoStatus: refused` with
+ *   the category. `photoUrl` keeps the previous photo, or stays empty for an
+ *   account that had none, so nobody else sees any change.
+ * - `unavailable`: the status stays `pending`, and `recheckPendingImages`
+ *   checks the photo again (#2142).
+ *
+ * See {@link applyImageVerdict} for each write.
  */
 export const setUserPhotoUrlOnUpload = onObjectFinalized(async (event) => {
   const objectPath = event.data.name;
@@ -41,20 +57,22 @@ export const setUserPhotoUrlOnUpload = onObjectFinalized(async (event) => {
     return;
   }
 
-  const photoUrl = await storageDownloadUrl(event.data.bucket, objectPath);
-
-  await userRef.update({
-    photoUrl,
-    photoStatus: 'uploaded',
+  const verdict = await checkImage(getFirestore(), {
+    bucket: event.data.bucket,
+    path: objectPath,
+    surface: PROFILE_PHOTO.surface,
+    uid,
   });
 
-  await deleteReplacedObjects({
-    bucketName: event.data.bucket,
-    prefix: `images/users/${uid}/`,
-    objectPath,
+  await applyImageVerdict({
+    subject: PROFILE_PHOTO,
+    docId: uid,
+    bucket: event.data.bucket,
+    path: objectPath,
     finalizedAt: createdAtMs(event.data.timeCreated),
+    verdict,
+    attempt: 1,
+    write: updateDocument(userRef),
     caller: 'setUserPhotoUrlOnUpload',
   });
-
-  logger.info(`setUserPhotoUrlOnUpload: photoUrl set for user ${uid}`);
 });

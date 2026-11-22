@@ -42,6 +42,16 @@ for `responseMimeType: application/json` with a `responseSchema`, so the answer
 is parsed rather than scraped, and any failure - quota, network, a non-JSON or
 empty answer - is a `GeminiUnavailableError`.
 
+**A one-word verdict still needs room.** The image and text checks answer a
+single category, about a dozen tokens, yet `gemini-3.5-flash-lite` spends part
+of `maxOutputTokens` before it writes any. At 20 it stopped at `{"` with
+`finishReason: MAX_TOKENS` on every call, so until the fix of 20 November 2026
+both checks answered `unavailable` in production: the text check fell back to
+the wordlist, and the stored photo check judged nothing ([#2143]). Both
+now pass `VERDICT_MAX_OUTPUT_TOKENS` (256), and a `MAX_TOKENS` stop is reported as
+the output limit rather than as text that is not JSON. A new structured call sets
+its limit from a sampled answer, not from the size of the JSON it expects.
+
 ## The Dish Explanation
 
 Issue [#2106]: **Explain me** on the Bite details page explains the dish to a
@@ -136,8 +146,104 @@ pushes judge the text themselves, so neither sends it out in that window.
   Cloud Logging rather than a collection by the same decision that made it the
   operator audit trail (epic [#1471]): the query is
   `jsonPayload.message="content refused"`, and the logs expire on their own.
-- **Photos are not checked.** The decision and its reason are in
+- **Every uploaded photo is checked before it is published.**
+  `setBiteImagePathOnUpload` calls `The Image Check` below since [#2139],
+  `setUserPhotoUrlOnUpload` since [#2140], which also covers the avatar a new
+  account brings from its identity provider, and
+  `setRestaurantImagePathOnUpload` and `setBiteTrailImagePathOnUpload` since
+  [#2141]. A photo whose check could not run stays unpublished and is checked
+  again since [#2142]. Photos stored before the check existed are checked once
+  by the `image-moderation-backfill` migration since [#2143], below, and stay
+  unchecked until an operator has run it in production. A restaurant photo chosen during
+  candidate verification is an operator's and is handed to
+  `verifyRestaurantCandidate` without the check. The earlier decision and its
+  reopening are in
   [Current State - Open Questions](../current-state/open-questions.md).
+
+## The Image Check
+
+Issue [#2138], the first story of epic [#2137]: `checkImage` in
+`shared/moderation/check-image.ts`, next to `checkContent`, judges one uploaded
+image before it is published. It takes the Storage object (bucket and path),
+the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
+`biteTrailPhoto` - and the uploading account, and answers `passed`,
+`refused` with a category, or `unavailable`. What a verdict does to the image
+is the caller's; each upload path is its own story in the epic, and all four
+apply it through `applyImageVerdict` in `shared/moderation/checked-image-subjects.ts`.
+The Bite photo path ([#2139]) deletes a refused photo and marks the Bite
+`refused`; see [Bite](../domain/bite.md). The profile photo path ([#2140])
+deletes a refused photo and marks the profile `photoStatus: refused` while
+`photoUrl` keeps the previous photo; see [User](../domain/user.md). The
+restaurant and Bite Trail photo paths ([#2141]) share `publishCheckedFolderPhoto`:
+a refused photo is deleted and the document gets `imageStatus: refused` while
+`imagePath` keeps the previous photo; see [Restaurant](../domain/restaurant.md)
+and [Bite Trail](../domain/bite-trail.md). On `unavailable` every path keeps the
+photo `pending` and schedules it to be checked again ([#2142]), below.
+
+- **What the model is asked.** The image goes to the same Gemini model as
+  inline data, with `imageModerationInstructions`, which names the categories
+  it may answer - `sexual`, `violence`, `hate`, `self_harm`, `illegal` - or
+  `none`. The list was settled for the story in
+  [Current State - Open Questions](../current-state/open-questions.md), `Image Moderation Questions`.
+  The prompt says food in any form, alcohol, tobacco and a photo with no food
+  are not objectionable. An answer outside the list reads as `none`.
+- **One verdict per image.** A `passed` or `refused` verdict is kept in
+  `contentChecks/{sha256}` by a hash of the image bytes, with
+  `subject: image`, so the same image is judged once. `unavailable` is never
+  kept.
+- **It fails closed.** When the model errors, the image cannot be read, or
+  the call passes `IMAGE_CHECK_TIMEOUT_MS` (20 seconds, inside a Storage
+  trigger's 60), the check answers `unavailable` and the caller keeps the
+  image unpublished. Unlike text, there is no wordlist to fall back on, so an
+  outage must not publish unchecked images (epic [#2137]'s decision). An image
+  over the 10 MB the Storage rules allow is never sent and answers
+  `unavailable` too.
+- **What it could not judge is checked again** ([#2142]). On `unavailable` the
+  caller writes the `pending` status and three fields onto the document:
+  `imageCheckAttempts`, the checks made so far; `imageCheckNextAt`, when the
+  next is due in epoch milliseconds; and `imageCheckPath`, the object. The
+  scheduled `recheckPendingImages` runs every 15 minutes, reads each of the four
+  collections for documents whose `imageCheckNextAt` has passed, takes the 50
+  oldest across them, checks them five at a time, and applies each verdict
+  through the same `applyImageVerdict`, so a recheck publishes or refuses
+  exactly as the upload would have. It writes in a transaction that first
+  confirms the document still waits on the same object and attempt, so a newer
+  upload's verdict is never overwritten. The waits between attempts are 15
+  minutes, 30 minutes, 1, 2, 4 and 8 hours (`IMAGE_RECHECK_DELAYS_MS`), seven
+  checks in all over about 16 hours, settled in
+  [Current State - Open Questions](../current-state/open-questions.md). After the last, the unchecked object is
+  deleted and the document gets `failed`, the state its uploader's retry
+  starts from. An object that is gone fails at once, and a recheck that throws
+  counts as one more attempt that could not answer. The rules refuse the three
+  fields from every client but an operator's; the apps read `imageCheckNextAt`
+  as a photo still being checked, not as an upload that stalled.
+- **Photos stored before the check are checked once** ([#2143]).
+  `imageModerationBackfillCallable` in `shared/moderation/image-moderation-backfill.ts`
+  lists `images/bites/`, `images/users/`, `images/restaurants/` and
+  `images/biteTrails/` and checks each object its document publishes - the one
+  `imagePath` or `photoUrl` names; any other object in a folder is counted as
+  `skipped`. It runs in two passes, settled in
+  [Current State - Open Questions](../current-state/open-questions.md): `report`
+  changes nothing and logs no refusal, and `apply`, refused until a report has
+  finished, deletes each refused object and writes the subject's
+  `storedRefusedUpdate` - `refused` with the category, and no published URL,
+  since the refused photo was the one shown. A document whose newer upload is
+  still `pending` loses only the URL. Both passes answer from `contentChecks`,
+  so the apply pass asks the model about nothing the report judged. An
+  `unavailable` verdict is left for a later run and never marks a stored photo
+  `failed`. One call works for at most five minutes and keeps its place - the
+  prefix and the Storage page token - in the server-only `migrationRuns`, and
+  the next call carries on from there; the admin app calls until the run is
+  complete. See [UC - Run Operational Migrations](../use-cases/uc-run-operational-migrations.md).
+- **A refusal is recorded** under `content refused` with the account, the
+  surface, the stage - `trigger`, or `backfill` for the apply pass above - the
+  field `image`, the category as `reason` and the `storagePath`. No image data
+  and no text go in the log.
+
+Both checks send the content to Google Cloud as a processor, so the store
+declarations do not change; the privacy policy names them in its own Gemini
+entry. See [Implementation - Store Declarations](../implementation/store-declarations.md),
+`The Automatic Content Check Changes No Declaration`.
 
 The rules a member meets are on each use case:
 [UC - Inspect Bite Details](../use-cases/uc-inspect-bite-details.md) for reviews,
@@ -155,7 +261,9 @@ outside production.` (`[DEV]` in the emulator). Neither needs the Vertex AI
 API, credentials or billing, and a test run spends nothing. The daily limit
 still counts, so the limit message can be tested there. The content check
 runs its wordlist there and no model, so a refusal can be tested with a listed
-term. What the model writes is seen only in production.
+term. The image check reads no image there: it answers `passed`, except for a
+file whose name contains `refuse-sample`, which answers `refused` with
+category `sample` (source `sample` in the log), so QA can drive a refusal. What the model writes is seen only in production.
 
 ## The Model
 
@@ -284,4 +392,11 @@ function:
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1610]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1610
 [#2030]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2030
+[#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
+[#2138]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2138
 [#2106]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2106
+[#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
+[#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

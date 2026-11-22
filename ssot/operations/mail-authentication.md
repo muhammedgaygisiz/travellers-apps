@@ -53,6 +53,24 @@ The change is to add the provider's `include:` to SPF and publish the DKIM
 selector it gives, then send one test mail and confirm the next day's aggregate
 report shows it passing.
 
+## Apple Private Relay
+
+A user who signs in with Apple and chooses "Hide My Email" has an
+`@privaterelay.appleid.com` address. Apple forwards mail to it only from
+senders registered in the Apple Developer portal, under Certificates,
+Identifiers & Profiles → Services → **Sign in with Apple for Email
+Communication**. Anything else is refused with `550 5.1.1 unauthorized sender`,
+which comes back as a bounce to the sending mailbox. DNS has no part in this
+check, so a sender can pass SPF, DKIM and DMARC and still be refused.
+
+Registered there:
+
+- the domain `bitetribe.app`, which Apple accepts only when SPF passes
+- the address `noreply@bitetribe.app`, the value of
+  `GOOGLE_WORKSPACE_SENDER_ADDRESS`
+
+A new sender address, or a new domain, has to be added there as well as in DNS.
+
 ## Reading The Reports
 
 Receivers mail a daily XML summary to the `dmarc@bitetribe.app` Google Group.
@@ -92,6 +110,9 @@ Registering it would add a delivery and reputation dashboard.
   selector `firebase2`. Postmark DMARC Digests was added as a second `rua`
   address, and a Gmail filter now files the raw reports under a
   `DMARC Reports` label instead of the inbox.
+- **18 November 2026** — a welcome mail to an Apple private relay address
+  bounced with `550 5.1.1 unauthorized sender`, because the domain was not
+  registered with Apple. Registered on 20 November 2026.
 
 ## Related Pages
 

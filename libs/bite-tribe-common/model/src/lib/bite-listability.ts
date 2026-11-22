@@ -5,7 +5,8 @@
  * object, so a Bite carrying it has a photo that is known to exist. No check at
  * read time is needed or made.
  *
- * `pending`, `failed` and an absent field are all not listable. That includes a
+ * `pending`, `failed`, `refused` (the image check refused the photo, issue
+ * #2139) and an absent field are all not listable. That includes a
  * fresh `pending` upload: the few seconds before the finalize trigger lands are
  * not worth a second rule, and the Bite appears on its own once it does.
  */

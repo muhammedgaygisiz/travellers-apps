@@ -125,4 +125,16 @@ describe(ProfilePhotoStatus.name, () => {
 
     expect(query('profile-photo-failed')).not.toBeNull();
   });
+
+  /** GitHub issue #2140. */
+  it('marks a refused photo and has a different one chosen on a tap', () => {
+    const choose = jest.fn();
+    fixture.componentInstance.retryPhotoUpload.subscribe(choose);
+    render(user({ photoStatus: 'refused', photoRefusalCategory: 'hate' }));
+
+    expect(query('profile-photo-retry')).toBeNull();
+    query('profile-photo-refused')?.click();
+
+    expect(choose).toHaveBeenCalledTimes(1);
+  });
 });

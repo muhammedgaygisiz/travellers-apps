@@ -72,6 +72,18 @@ export const buildCollapseKey = (
     case 'NEW_FOLLOWER':
       return buildKey(type, data['followerUid']);
 
+    case 'FOLLOW_REQUEST':
+      // One push per requester, so a request withdrawn and sent again
+      // replaces the first instead of stacking beside it (issue #2166). Its
+      // surface is the follow-requests page, a fixed page, so the type stands
+      // in for it and the requester is the variant.
+      return buildKey(type, type, data['requesterUid']);
+
+    case 'FOLLOW_REQUEST_ACCEPTED':
+      // Opens the owner's profile, so the owner is the surface and opening
+      // that profile clears it, as `NEW_FOLLOWER` does (issue #2166).
+      return buildKey(type, data['ownerUid']);
+
     case 'NEW_TABLE_ORDER':
       // The restaurant is the surface - one queue per restaurant - and the
       // table is the variant, so a second round from table 12 replaces the

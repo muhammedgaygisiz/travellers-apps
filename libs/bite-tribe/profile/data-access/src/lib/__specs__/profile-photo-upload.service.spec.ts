@@ -42,7 +42,6 @@ describe(ProfilePhotoUploadService.name, () => {
 
   const api = {
     uploadProfilePhoto: jest.fn(),
-    setUploadedProfilePhoto: jest.fn(),
     setProfilePhotoStatus: jest.fn(),
     findLocalProfilePhoto: jest.fn(),
   };
@@ -58,7 +57,6 @@ describe(ProfilePhotoUploadService.name, () => {
         callback = cb;
       },
     );
-    api.setUploadedProfilePhoto.mockResolvedValue('new-url');
     api.setProfilePhotoStatus.mockResolvedValue(undefined);
     api.findLocalProfilePhoto.mockResolvedValue(undefined);
 
@@ -76,7 +74,11 @@ describe(ProfilePhotoUploadService.name, () => {
     jest.useRealTimers();
   });
 
-  it('points the profile at the photo once the upload finishes', async () => {
+  /**
+   * Only the finalize trigger publishes the photo, once the image check
+   * passed it (GitHub issue #2140): a finished transfer writes nothing here.
+   */
+  it('leaves publishing the photo to the backend once the upload finishes', async () => {
     service.start(PROFILE, PHOTO);
     callback(progress(true));
     await jest.runOnlyPendingTimersAsync();
@@ -86,13 +88,16 @@ describe(ProfilePhotoUploadService.name, () => {
       PHOTO,
       expect.any(Function),
     );
-    expect(api.setUploadedProfilePhoto).toHaveBeenCalledWith(
-      'user-1',
-      'images/users/user-1/new.jpg',
-    );
-    expect(store.notifySavedProfile).toHaveBeenCalledWith(
-      expect.objectContaining({ photoUrl: 'new-url', photoStatus: 'uploaded' }),
-    );
+    expect(store.notifySavedProfile).not.toHaveBeenCalled();
+    expect(api.setProfilePhotoStatus).not.toHaveBeenCalled();
+  });
+
+  it('does not write a finished upload off when it later goes quiet', () => {
+    service.start(PROFILE, PHOTO);
+    callback(progress(true));
+
+    jest.advanceTimersByTime(STALLED_PROFILE_PHOTO_UPLOAD_MS * 2);
+
     expect(api.setProfilePhotoStatus).not.toHaveBeenCalled();
   });
 
@@ -133,15 +138,32 @@ describe(ProfilePhotoUploadService.name, () => {
   });
 
   describe('pendingPhoto', () => {
-    it('holds the photo while it uploads and lets go once it landed', async () => {
+    it('holds the photo until the check publishes it', () => {
       service.start(PROFILE, PHOTO);
 
       expect(service.pendingPhoto()).toBe(PHOTO);
 
       callback(progress(true));
-      await jest.runOnlyPendingTimersAsync();
+      TestBed.tick();
+
+      // Transferred, but still waiting for the check's verdict.
+      expect(service.pendingPhoto()).toBe(PHOTO);
+
+      publicUser$.next({ ...PROFILE, photoStatus: 'uploaded' });
+      TestBed.tick();
 
       expect(service.pendingPhoto()).toBeUndefined();
+    });
+
+    it('lets go of a photo the check refused', () => {
+      service.start(PROFILE, PHOTO);
+      callback(progress(true));
+
+      publicUser$.next({ ...PROFILE, photoStatus: 'refused' });
+      TestBed.tick();
+
+      expect(service.pendingPhoto()).toBeUndefined();
+      expect(api.findLocalProfilePhoto).not.toHaveBeenCalled();
     });
 
     it('keeps the photo of a failed upload', () => {
@@ -211,6 +233,17 @@ describe(ProfilePhotoUploadService.name, () => {
         'data:local-copy',
         expect.any(Function),
       );
+    });
+
+    it('never sends a refused photo again, and has the user choose another', async () => {
+      api.findLocalProfilePhoto.mockResolvedValue('data:refused-copy');
+      publicUser$.next({ ...PROFILE, photoStatus: 'refused' });
+      TestBed.tick();
+
+      await expect(service.retry()).resolves.toBe(false);
+
+      expect(api.uploadProfilePhoto).not.toHaveBeenCalled();
+      expect(api.setProfilePhotoStatus).not.toHaveBeenCalled();
     });
 
     it('answers false when there is no photo left to send', async () => {

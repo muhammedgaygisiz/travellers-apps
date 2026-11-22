@@ -86,14 +86,27 @@ export interface Restaurant {
   image?: string;
   imagePath?: string;
   /**
-   * Where a photo the business app is uploading has got to (GitHub issue
-   * #2126), the way `Bite.imageStatus` and `PublicUser.photoStatus` work.
-   * `imagePath` keeps the previous photo until the new one lands. Absent on
-   * every restaurant whose photo came from candidate verification or the
-   * admin app, and absent reads as settled.
+   * Where a photo being uploaded has got to (GitHub issues #2126 and #2141),
+   * the way `Bite.imageStatus` and `PublicUser.photoStatus` work. `imagePath`
+   * keeps the previous photo until the image check passes the new one, and
+   * keeps it when the check refuses it. Only `setRestaurantImagePathOnUpload`
+   * writes `uploaded` and `refused`. Absent on a restaurant whose photo came
+   * from candidate verification, and absent reads as settled.
    */
-  imageStatus?: 'pending' | 'uploaded' | 'failed';
+  imageStatus?: 'pending' | 'uploaded' | 'failed' | 'refused';
+  /**
+   * Why the image check refused the latest photo, present only while
+   * `imageStatus` is `refused` (GitHub issue #2141).
+   */
+  imageRefusalCategory?: string;
   imageUploadStartedAtTimestamp?: number;
+  /**
+   * When the backend checks the photo again, in milliseconds since the epoch,
+   * while its last image check could not run (GitHub issue #2142). Present
+   * only while the photo waits; the client reads it as a photo still being
+   * checked rather than an upload that stalled. Written by the backend alone.
+   */
+  imageCheckNextAt?: number;
   position: Geopoint;
   address?: Address;
 

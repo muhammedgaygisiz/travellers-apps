@@ -11,7 +11,9 @@ export { backfillMenuItemIdsCallable } from './functions/menus/backfill-menu-ite
 export { migrateRestaurantOwnerIdsCallable } from './functions/restaurants/migrate-restaurant-owner-ids';
 export { backfillBiteImageStatusCallable } from './functions/bites/backfill-bite-image-status';
 export { rebuildBiteCountriesCallable } from './functions/bites/rebuild-bite-countries';
+export { backfillFollowerAcceptanceCallable } from './functions/users/backfill-follower-acceptance';
 export { notifyUserOnNewFollower } from './functions/notifications/notify-user-on-new-follower';
+export { notifyOwnerOnFollowRequest } from './functions/notifications/notify-on-follow-request';
 export { notifyStaffOnNewTableOrder } from './functions/notifications/notify-staff-on-new-table-order';
 export { handleSharedLinkToBite } from './functions/bites/handle-shared-link-to-bite';
 export { handleDownloadLink } from './functions/web/handle-download-link';
@@ -26,7 +28,11 @@ export { sendWeeklyBiteNotification } from './functions/notifications/send-weekl
 export { sendNewVersionNotification } from './functions/notifications/send-new-version-notification';
 export { setBiteImagePathOnUpload } from './functions/bites/set-bite-image-path-on-upload';
 export { setUserPhotoUrlOnUpload } from './functions/users/set-user-photo-url-on-upload';
+export { mirrorIdentityAvatarOnCreate } from './functions/users/mirror-identity-avatar';
 export { setRestaurantImagePathOnUpload } from './functions/restaurants/set-restaurant-image-path-on-upload';
+export { setBiteTrailImagePathOnUpload } from './functions/bite-trails/set-bite-trail-image-path-on-upload';
+export { recheckPendingImages } from './functions/shared/moderation/recheck-pending-images';
+export { imageModerationBackfillCallable } from './functions/shared/moderation/image-moderation-backfill';
 export {
   backfillBiteAddress,
   enrichBiteAddressOnWrite,
@@ -86,6 +92,7 @@ export { getCurrencyByPosition } from './functions/location/get-currency-by-posi
 export { clusterRestaurantCandidateForBite } from './functions/restaurants/cluster-restaurant-candidate-for-bite';
 export { createRestaurantCandidateOnBiteCreate } from './functions/restaurants/create-restaurant-candidate-on-bite-create';
 export { verifyRestaurantCandidate } from './functions/restaurants/verify-restaurant-candidate';
+export { linkBiteToMenuItem } from './functions/restaurants/link-bite-to-menu-item';
 export {
   assignRestaurantOwner,
   revokeRestaurantOwner,
@@ -146,6 +153,8 @@ export {
   acceptFollowRequest,
   declineFollowRequest,
 } from './functions/users/answer-follow-request';
+export { listFollowRequests } from './functions/users/list-follow-requests';
+export { applyFollowVisibilityOnUserUpdate } from './functions/users/follow-visibility';
 export { listUsersWithRoles } from './functions/users/list-users-with-roles';
 export { setUserSubscriptionTier } from './functions/users/set-user-subscription-tier';
 export { deleteOwnAccount } from './functions/users/delete-own-account';

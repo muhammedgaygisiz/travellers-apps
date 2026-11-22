@@ -22,9 +22,11 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 - A Restaurant can have one menu.
 - A Restaurant can have an address and GPS position.
 - A Restaurant can have social media links, opening hours, description, and image.
+- A day of the opening hours is open only when it is marked open **and** has at least one complete time range (`isOpenDay` in the model, issue [#2227]). The business overview counts open days by that rule and the consumer page shows a day as closed otherwise, so the two cannot disagree; the editor will not save a day marked open without its times. A range may cross midnight (22:00–02:00) and is shown as written.
+- A social media link names its `network` from a fixed list, `LINK_NETWORKS` in the model: website, instagram, facebook, tiktok, x and linkedin (issue [#2224]). X replaced Twitter: a link stored as `twitter` is read as `x` everywhere it is shown, and becomes `x` the next time its Restaurant's links are saved. The consumer page shows each network's logo, a globe for a website, and the network's own spelling.
 - Creating a Restaurant can update selected Bites with the new `restaurantId`.
 - Verifying a Restaurant candidate creates the Restaurant through the backend, creates its initial Menu from the candidate Bites, updates every candidate Bite that does not already name a Restaurant with the new `restaurantId`, and records the verification on the candidate. A candidate Bite that already names one - picked by its Bite Creator after clustering - is left untouched, kept out of the initial Menu and listed in the candidate's `skippedBiteIds` (issue [#1498]). The full flow, its rules and its failure modes are in [UC - Verify Restaurant Candidate](../use-cases/uc-verify-restaurant-candidate.md).
-- The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Bites` category the business user edits afterwards.
+- The initial Menu is a draft built from evidence, not a claim about the real menu: one item per distinct Bite dish name, priced with the average of the prices users reported, in a single `Dishes` category the business user edits afterwards. Not `Bites`, which it was called until [#2214]: a Bite is a guest's experience of a dish, a menu item is what the restaurant offers, and the category holds menu items. Menus created before then keep `Bites` until their owner renames it.
 - Candidate-backed Restaurant creation should be idempotent: repeated verification of an already verified or merged candidate must return the existing verified Restaurant instead of creating another one.
 - Verified versus unverified restaurant behavior is an active product area.
 - A Restaurant records its owners and a claim state. The owner field and `claimStatus` exist on the model as of issue [#1074] and are written by an operator as of issue [#1077]; a missing `claimStatus` means `unclaimed`. The owner field is the set `ownerUserIds` since epic [#1614]. Ownership, assignment, and authorization are specified in [UC - Own And Claim Restaurants](../use-cases/uc-own-and-claim-restaurants.md) and are the prerequisite for every operational restaurant capability.
@@ -78,8 +80,14 @@ Current model fields:
 - `distance`
 - `image`
 - `imagePath`
-- `imageStatus`, `imageUploadStartedAtTimestamp` - where a photo the business
-  app is uploading has got to, as on a Bite and a profile (issue [#2126])
+- `imageStatus`, `imageUploadStartedAtTimestamp` - where a photo being
+  uploaded has got to, as on a Bite and a profile (issue [#2126]): `pending`,
+  `failed`, or the image check's `uploaded` or `refused` (issue [#2141])
+- `imageRefusalCategory` - why the image check refused the latest photo,
+  while `imageStatus` is `refused` (issue [#2141])
+- `imageCheckAttempts`, `imageCheckNextAt`, `imageCheckPath` - the wait on a
+  photo whose image check could not run, until `recheckPendingImages` checks
+  it again; written by the backend alone (issue [#2142])
 - `address`
 - `menuId`
 - `menuReviewedAt`, `menuReviewedAtTimestamp` - when an account holding the
@@ -154,7 +162,7 @@ Current implementation notes:
 - If `biteIds` are provided during creation, those Bites are updated with the new `restaurantId`.
 - Candidate-backed creation uses `verifyRestaurantCandidate` so restaurant creation, menu creation, Bite linking, and candidate status changes happen in one backend transaction.
 - Candidate verification stores `verifiedRestaurantId`, `verifiedAt`, `verifiedAtTimestamp`, and `verifiedByUserId` on `/restaurantCandidates/{candidateId}`.
-- Restaurant image upload stores an `imagePath`.
+- A Restaurant's `imagePath` after an upload is written only by `setRestaurantImagePathOnUpload`, once the image check passed the photo (issue [#2141]). A refused photo is deleted and the Restaurant keeps the photo it had. A photo the check could not judge stays `pending` and is checked again by `recheckPendingImages`, which publishes or refuses it the same way, or marks it `failed` after about 16 hours (issue [#2142]). A photo stored before the image check is checked once by the `image-moderation-backfill` migration, which takes a refused one down with its `imagePath`, so the Restaurant has no photo until one is chosen (issue [#2143]). `firestore.rules` refuses a holder's write of `imagePath`, `imageRefusalCategory`, `image`, the `imageCheck*` fields, and any `imageStatus` but `pending` and `failed`; an operator's write stays open. The admin app's new-restaurant page writes the Restaurant `pending` before it uploads, so the trigger has a document to publish on, and removes it again if the upload fails.
 - Ownership is assigned and revoked through `assignRestaurantOwner` and `revokeRestaurantOwner`, both admin-only, both transactional, and both logging through `logOperatorAction`. The operator surface is `restaurant-ownership` in the admin app, which reuses the account list issue [#1476] built rather than adding a second way to find an account.
 - Staff is `addRestaurantStaff`, `removeRestaurantStaff` and `listRestaurantStaff`, admitting `business` or `admin` and then reading `ownerUserIds` to decide which Restaurant the caller reaches. They write `/restaurantStaff/{uid}` and the `staff` claim together, and log through `logOperatorAction` like the ownership pair. The surfaces are `restaurant/:restaurantId/staff` in the business app and the staff card on `restaurant-ownership` in the admin app.
 - Live table state is `transitionTableState`, admitting `staff`, `business` or `admin` and then reaching its Restaurant through `/restaurantStaff/{uid}` for a staff account and through `ownerUserIds` for the other two. It writes `/restaurants/{id}/tableStates/{tableId}` and one append-only entry under `/restaurants/{id}/tableStateTransitions` in a single transaction, and is the only writer of either - `firestore.rules` refuses every client write to both. It is deliberately outside `logOperatorAction`: a seating happens hundreds of times a service and its record belongs to the restaurant, not to the operator trail. No surface calls it yet ([#1092]).
@@ -208,7 +216,7 @@ Related future or expanding use cases:
 ## Related Epics
 
 - Restaurant menu
-- Menu items linked to Bites
+- Menu items linked to Bites — shipped in [#1113]
 - Search
 - BiteTrail packages
 - Issue [#735] - Restaurant Interaction Platform, the umbrella for ownership, floor plans, table management, QR ordering, and Bites from orders
@@ -300,6 +308,7 @@ images/restaurants/{restaurantId}/{filename}
 [#1100]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1100
 [#1102]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1102
 [#1103]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1103
+[#1113]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1113
 [#1389]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1389
 [#1476]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1476
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
@@ -315,3 +324,9 @@ images/restaurants/{restaurantId}/{filename}
 [#2129]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2129
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
 [#2134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2134
+[#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
+[#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
+[#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
+[#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227

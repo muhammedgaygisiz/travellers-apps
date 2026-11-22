@@ -28,6 +28,13 @@
     }
   }
 
+  .photo-refused {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
   .photo-actions {
     display: flex;
     justify-content: flex-end;

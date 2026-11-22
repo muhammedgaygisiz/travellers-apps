@@ -1,10 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { provideIonicAngular } from '@ionic/angular/standalone';
+import {
+  AlertController,
+  provideIonicAngular,
+} from '@ionic/angular/standalone';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { getIonicConfig } from 'utils';
+import { addNecessaryIcons, getIonicConfig } from 'utils';
 import type { Menu } from 'model';
 import { EditMenuPage } from '../edit-menu-page.component';
+
+addNecessaryIcons();
 
 /**
  * The currency a menu states (GitHub issue #1102).
@@ -132,5 +137,267 @@ describe(EditMenuPage.name, () => {
 
     expect(offered.length).toBeGreaterThan(1);
     expect(new Set(offered.map((c) => c.code)).size).toBe(offered.length);
+  });
+
+  /** One editor at a time over the list (GitHub issue #2182). */
+  describe('editing', () => {
+    const FULL: Menu = {
+      id: 'menu-1',
+      currency: 'CHF',
+      categories: [
+        {
+          id: 'c1',
+          title: 'Pizza',
+          items: [{ id: 'd1', name: 'Margherita', description: '', price: 11 }],
+        },
+      ],
+    };
+
+    let saved: jest.Mock;
+
+    beforeEach(() => {
+      saved = jest.fn();
+      component.saveMenu.subscribe(saved);
+      withMenu(FULL);
+    });
+
+    it('opens the dish that was tapped, with its category', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      expect(component.editingDish()?.name).toBe('Margherita');
+      expect(component.editingCategory()?.title).toBe('Pizza');
+      expect(component.selectedId()).toBe('d1');
+    });
+
+    it('opens an empty dish editor to add one', () => {
+      component.addDish('c1');
+
+      expect(component.editing()).toEqual({ kind: 'dish', categoryId: 'c1' });
+      expect(component.editingDish()).toBeUndefined();
+    });
+
+    it('saves a dish into the whole menu and closes once it is read back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onSaveDish({
+        id: 'd1',
+        name: 'Marinara',
+        description: '',
+        price: 9,
+      });
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: [
+            expect.objectContaining({
+              items: [expect.objectContaining({ name: 'Marinara', price: 9 })],
+            }),
+          ],
+        }),
+      );
+      // Still open until the saved menu comes back...
+      expect(component.editing()).toBeTruthy();
+
+      withMenu({ ...FULL });
+
+      // ...and closed once it has.
+      expect(component.editing()).toBeUndefined();
+    });
+
+    /** See GitHub issue #2181. */
+    it('deletes the open dish and closes once the menu is read back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onDeleteDish();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: [expect.objectContaining({ id: 'c1', items: [] })],
+        }),
+      );
+      expect(component.editing()).toBeTruthy();
+
+      withMenu({ ...FULL, categories: [{ ...FULL.categories[0], items: [] }] });
+
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('deletes the open category with its dishes', () => {
+      component.openCategory('c1');
+
+      component.onDeleteCategory();
+
+      expect(saved).toHaveBeenCalledWith(
+        expect.objectContaining({ categories: [] }),
+      );
+    });
+
+    it('deletes nothing for an editor that holds a new dish or category', () => {
+      component.addDish('c1');
+      component.onDeleteDish();
+      component.addCategory();
+      component.onDeleteCategory();
+
+      expect(saved).not.toHaveBeenCalled();
+    });
+
+    it('keeps the editor open when the save is refused and nothing comes back', () => {
+      component.openDish({ categoryId: 'c1', itemId: 'd1' });
+
+      component.onSaveDish({
+        id: 'd1',
+        name: 'Marinara',
+        description: '',
+        price: 9,
+      });
+      fixture.detectChanges();
+
+      expect(component.editing()).toBeTruthy();
+    });
+
+    it('adds a category and saves its details', () => {
+      component.addCategory();
+      component.onSaveCategory({ title: 'Pasta', subtitle: '' });
+
+      expect(
+        saved.mock.calls[0][0].categories.map(
+          (c: { title: string }) => c.title,
+        ),
+      ).toEqual(['Pizza', 'Pasta']);
+    });
+
+    it('keeps the category editor open while extras are saved', () => {
+      component.openCategory('c1');
+      component.onSaveExtras({ description: 'Toppings', extras: [] });
+      withMenu({ ...FULL });
+
+      expect(component.editing()).toEqual({
+        kind: 'category',
+        categoryId: 'c1',
+      });
+      expect(saved).toHaveBeenCalled();
+    });
+
+    it('switches availability from the list without opening anything', () => {
+      component.onAvailabilityChange({
+        ref: { categoryId: 'c1', itemId: 'd1' },
+        available: false,
+      });
+
+      expect(saved.mock.calls[0][0].categories[0].items[0].isAvailable).toBe(
+        false,
+      );
+      expect(component.editing()).toBeUndefined();
+    });
+
+    it('saves a reordered menu', () => {
+      component.onMoveCategory({ from: 0, to: 0 });
+      component.onMoveDish({ categoryId: 'c1', from: 0, to: 0 });
+
+      expect(saved).toHaveBeenCalledTimes(2);
+    });
+
+    it('closes without saving', () => {
+      component.openCategory('c1');
+      component.closeEditor();
+
+      expect(component.editing()).toBeUndefined();
+      expect(saved).not.toHaveBeenCalled();
+    });
+
+    it('saves nothing while there is no menu', () => {
+      withMenu(undefined);
+      component.addDish('c1');
+      component.onSaveDish({ id: 'x', name: 'X', description: '', price: 1 });
+
+      expect(saved).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * A menu verification built from Bites (GitHub issue #2214). The owner takes
+   * it as their own on purpose, once; an edit is not that.
+   */
+  describe('menu built from Bites', () => {
+    type AlertOptions = Parameters<AlertController['create']>[0];
+    let alertOptions: AlertOptions | undefined;
+    let present: jest.Mock;
+    let confirmed: jest.Mock;
+
+    const notice = (): Element | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="menu-derived-notice"]',
+      );
+
+    beforeEach(() => {
+      alertOptions = undefined;
+      present = jest.fn();
+      jest
+        .spyOn(TestBed.inject(AlertController), 'create')
+        .mockImplementation(async (options) => {
+          alertOptions = options;
+
+          return { present } as unknown as HTMLIonAlertElement;
+        });
+      confirmed = jest.fn();
+      component.confirmAsOwn.subscribe(confirmed);
+    });
+
+    it('shows the notice and its button on a menu built from Bites', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      expect(notice()).not.toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('[data-testid="confirm-menu-own"]'),
+      ).not.toBeNull();
+    });
+
+    it('shows nothing on a menu the restaurant wrote', () => {
+      withMenu(MENU);
+
+      expect(notice()).toBeNull();
+    });
+
+    it('asks before confirming, and confirms only on the confirm button', async () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
+
+      const buttons = alertOptions?.buttons as {
+        role?: string;
+        handler?: () => void;
+      }[];
+      expect(buttons.find(({ role }) => role === 'cancel')?.handler).toBe(
+        undefined,
+      );
+      buttons.find(({ role }) => role === 'confirm')?.handler?.();
+
+      expect(confirmed).toHaveBeenCalledTimes(1);
+    });
+
+    it('asks nothing on a menu that is already the restaurant’s', async () => {
+      withMenu(MENU);
+
+      await component.confirmMenuAsOwn();
+
+      expect(present).not.toHaveBeenCalled();
+    });
+
+    it('never confirms through a menu save', () => {
+      withMenu({ ...MENU, derivedFromBites: true });
+      const saved = jest.fn();
+      component.saveMenu.subscribe(saved);
+
+      component.openCategory('c1');
+      component.onSaveCategory({ title: 'Pizze', subtitle: '' });
+      component.currency.set('CHF');
+      component.saveCurrency();
+
+      expect(saved).toHaveBeenCalled();
+      expect(confirmed).not.toHaveBeenCalled();
+    });
   });
 });

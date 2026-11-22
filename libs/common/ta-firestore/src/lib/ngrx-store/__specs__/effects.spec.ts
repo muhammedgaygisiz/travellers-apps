@@ -12,6 +12,7 @@ import { NavController } from '@ionic/angular';
 import { BiteTribeRole, isAuthEntryPage, REQUIRED_ROLES } from 'utils';
 import { RequestedUrlService } from '../../requested-url.service';
 import { AppCheckReadinessService } from '../../app-check-readiness.service';
+import { AuthStorageHealthService } from '../../auth-storage-health.service';
 
 jest.mock('utils', () => ({
   ...jest.requireActual('utils'),
@@ -158,6 +159,26 @@ describe(AuthEffects.name, () => {
     });
 
     describe('given a sign-in that never settles', () => {
+      it('should ask whether the browser storage is stuck (#2253)', () => {
+        const check = jest
+          .spyOn(TestBed.inject(AuthStorageHealthService), 'check')
+          .mockResolvedValue('stuck');
+        AuthServiceMock.loginWithUsernameAndPassword.mockReturnValue(
+          new Promise(() => undefined),
+        );
+
+        scheduler.run(({ cold, expectObservable }) => {
+          const authCreds = { email: 'q@q.de', password: 'password' };
+          actions$ = cold('-a', { a: AuthActions.login({ authCreds }) });
+
+          expectObservable(effects.loginEffect$).toBe('30001ms b', {
+            b: AuthActions.loginFailed(),
+          });
+        });
+
+        expect(check).toHaveBeenCalledTimes(1);
+      });
+
       it('should dispatch loginFailed once the timeout elapses', () => {
         AuthServiceMock.loginWithUsernameAndPassword.mockReturnValue(
           new Promise(() => undefined),
@@ -178,6 +199,25 @@ describe(AuthEffects.name, () => {
     });
 
     describe('given an error is thrown', () => {
+      it('should not ask the browser storage about a refused sign-in', async () => {
+        const check = jest.spyOn(
+          TestBed.inject(AuthStorageHealthService),
+          'check',
+        );
+        AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
+          new Error('auth/invalid-credential'),
+        );
+        actions$ = of(
+          AuthActions.login({
+            authCreds: { email: 'q@q.de', password: 'password' },
+          }),
+        );
+
+        await firstValueFrom(effects.loginEffect$);
+
+        expect(check).not.toHaveBeenCalled();
+      });
+
       it('should dispatch loginFailed action', () => {
         AuthServiceMock.loginWithUsernameAndPassword.mockRejectedValue(
           new Error('Login error'),

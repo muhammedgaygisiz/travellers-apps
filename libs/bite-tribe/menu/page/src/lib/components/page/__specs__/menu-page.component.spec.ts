@@ -74,6 +74,10 @@ describe(MenuPage.name, () => {
         remove: { imports: [TranslocoPipe] },
         add: { imports: [MockTranslocoPipe] },
       })
+      .overrideComponent(MenuPage, {
+        remove: { imports: [TranslocoPipe] },
+        add: { imports: [MockTranslocoPipe] },
+      })
       .compileComponents();
 
     fixture = TestBed.createComponent(MenuPage);
@@ -385,6 +389,54 @@ describe(MenuPage.name, () => {
       fixture.detectChanges();
 
       expect(query('ion-img')).toBeNull();
+    });
+  });
+
+  /**
+   * A menu verification put together from guests' Bites says so above the
+   * categories, because its prices are guest averages (GitHub issue #1511).
+   */
+  describe('given a menu derived from Bites', () => {
+    const DERIVED = {
+      id: 'menu-1',
+      derivedFromBites: true,
+      categories: [
+        {
+          id: 'category-bites',
+          title: 'Dishes',
+          items: [{ id: 'item-1', name: 'Margherita', price: 12 }],
+        },
+      ],
+    } as unknown as Menu;
+
+    const notice = (): Element | null =>
+      query('[data-testid="derived-menu-notice"]');
+
+    it('should show the notice when the menu has an item', () => {
+      componentRef.setInput('menu', DERIVED);
+      fixture.detectChanges();
+
+      expect(notice()?.textContent).toContain('menu-derived-from-bites-notice');
+    });
+
+    it('should show no notice when the derived menu has no items', () => {
+      componentRef.setInput('menu', {
+        ...DERIVED,
+        categories: [{ id: 'category-bites', title: 'Dishes', items: [] }],
+      } as unknown as Menu);
+      fixture.detectChanges();
+
+      expect(notice()).toBeNull();
+    });
+
+    it('should show no notice on a menu that does not carry the flag', () => {
+      componentRef.setInput('menu', {
+        ...DERIVED,
+        derivedFromBites: undefined,
+      } as Menu);
+      fixture.detectChanges();
+
+      expect(notice()).toBeNull();
     });
   });
 });

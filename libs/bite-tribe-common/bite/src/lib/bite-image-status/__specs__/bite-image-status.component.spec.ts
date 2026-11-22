@@ -356,4 +356,89 @@ describe(BiteImageStatusComponent.name, () => {
       expect(queryFailed()).toBeNull();
     },
   );
+
+  /** A photo the image check refused, GitHub issue #2139. */
+  describe('refused', () => {
+    const queryRefused = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector('[data-testid="bite-image-refused"]');
+    const queryChooseDifferent = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="bite-image-choose-different"]',
+      );
+    const queryReason = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="bite-image-refused-reason"]',
+      );
+    const reasonKey = (): string => component['refusalReasonKey']();
+
+    const setUpRefusedOwnBite = (category = 'violence'): void => {
+      componentRef.setInput(
+        'bite',
+        bite({
+          imageStatus: 'refused',
+          imageRefusalCategory: category,
+          userId: 'user1',
+        }),
+      );
+      componentRef.setInput('userId', 'user1');
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+    };
+
+    it('should tell the creator the photo was refused, and why', () => {
+      setUpRefusedOwnBite();
+
+      expect(queryRefused()).toBeTruthy();
+      expect(queryReason()).toBeTruthy();
+      expect(reasonKey()).toBe('photo-refused-reason-violence');
+      expect(querySpinner()).toBeNull();
+      expect(queryFailed()).toBeNull();
+    });
+
+    it('should name an unknown or sample category with the generic line', () => {
+      setUpRefusedOwnBite('sample');
+
+      expect(reasonKey()).toBe('photo-refused-reason-other');
+    });
+
+    it('should offer the creator a different photo through the surface', () => {
+      setUpRefusedOwnBite();
+      const emitted: Bite[] = [];
+      component.retryImageUpload.subscribe((value) => emitted.push(value));
+
+      (queryChooseDifferent() as HTMLElement).click();
+
+      expect(emitted).toEqual([
+        expect.objectContaining({ id: 'bite1', imageStatus: 'refused' }),
+      ]);
+      expect(queryRetryButton()).toBeNull();
+    });
+
+    it('should say so offline instead of offering a photo it cannot send', () => {
+      setUpRefusedOwnBite();
+      networkStatus.set({ connected: false, connectionType: 'none' });
+      fixture.detectChanges();
+
+      expect(queryChooseDifferent()).toBeNull();
+      expect(queryOfflineHint()).toBeTruthy();
+    });
+
+    it('should tell nobody else the reason or offer them anything', () => {
+      componentRef.setInput(
+        'bite',
+        bite({
+          imageStatus: 'refused',
+          imageRefusalCategory: 'violence',
+          userId: 'someone-else',
+        }),
+      );
+      componentRef.setInput('userId', 'user1');
+      componentRef.setInput('enableRetry', true);
+      fixture.detectChanges();
+
+      expect(queryRefused()).toBeTruthy();
+      expect(queryReason()).toBeNull();
+      expect(queryChooseDifferent()).toBeNull();
+    });
+  });
 });

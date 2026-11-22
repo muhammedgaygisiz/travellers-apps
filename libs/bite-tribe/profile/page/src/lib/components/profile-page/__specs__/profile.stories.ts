@@ -207,6 +207,26 @@ export const OwnProfilePhotoFailedWithoutLocalCopy: Story = {
   },
 };
 
+/**
+ * The image check refused the new photo (GitHub issue #2140). It is never
+ * shown: the avatar keeps the photo everybody else sees, unblurred, with a
+ * mark that opens the photo picker.
+ */
+export const OwnProfilePhotoRefused: Story = {
+  args: {
+    user: {
+      ...baseUser,
+      userId: currentUserId,
+      photoStatus: 'refused',
+      photoRefusalCategory: 'violence',
+    },
+    pendingPhoto: 'assets/demo/bite-demo.png',
+    userId: currentUserId,
+    profileMetadata,
+    bites: [bite],
+  },
+};
+
 /** Somebody else's photo upload is nobody else's business (#1953). */
 export const OtherProfilePhotoFailed: Story = {
   args: {
@@ -227,6 +247,15 @@ export const OwnPrivateProfile: Story = {
     userId: currentUserId,
     profileMetadata,
     bites: [bite],
+  },
+};
+
+// The own private profile with requests waiting: a Follow requests row with
+// the pending count sits under the visibility status (issue #2165).
+export const OwnPrivateProfileWithFollowRequests: Story = {
+  args: {
+    ...OwnPrivateProfile.args,
+    followRequestCount: 3,
   },
 };
 

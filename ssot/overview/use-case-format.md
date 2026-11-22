@@ -505,6 +505,7 @@ X5 SYS <action>
 | `UC-MBR` | Manage A Bite's Restaurant Assignment                  | [UC - Manage A Bite's Restaurant Assignment](../use-cases/uc-manage-a-bites-restaurant-assignment.md)                                    |
 | `UC-SBS` | Share A Bite To Social Media                           | [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md)                                                     |
 | `UC-CLP` | Find BiteTribe Through A City Landing Page             | [UC - Find BiteTribe Through A City Landing Page](../use-cases/uc-find-bitetribe-through-a-city-landing-page.md)                         |
+| `UC-FDC` | Find Dishes That Fit A Dietary Choice                  | [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md)                                   |
 
 Codes whose `Page` cell reads `none` have no page yet. They are referenced by `UC-VRC`
 and `UC-DRC` for rules those flows depend on, which makes writing them visible work

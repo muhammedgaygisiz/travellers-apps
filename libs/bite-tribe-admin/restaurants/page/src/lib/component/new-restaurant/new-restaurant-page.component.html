@@ -97,21 +97,12 @@
                     interface="popover"
                     formControlName="network"
                   >
-                    <ion-select-option value="facebook"
-                      >Facebook</ion-select-option
-                    >
-                    <ion-select-option value="instagram"
-                      >Instagram</ion-select-option
-                    >
-                    <ion-select-option value="twitter"
-                      >Twitter</ion-select-option
-                    >
-                    <ion-select-option value="linkedin"
-                      >LinkedIn</ion-select-option
-                    >
-                    <ion-select-option value="website"
-                      >Website</ion-select-option
-                    >
+                    <!-- The same networks as the business app (#2224). -->
+                    @for (option of linkNetworks; track option.network) {
+                      <ion-select-option [value]="option.network">{{
+                        option.name
+                      }}</ion-select-option>
+                    }
                   </ion-select>
                   <ion-input
                     placeholder="Link"

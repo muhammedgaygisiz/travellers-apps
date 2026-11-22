@@ -80,18 +80,67 @@ export default {
 type Story = StoryObj<EditRestaurantComponent>;
 
 /**
- * A restaurant with everything filled in: photo, social links, address,
- * opening hours across two service windows, and a menu to edit.
+ * One section at a time (GitHub issue #2183). `Default` is the About text of
+ * a restaurant with everything filled in; the stories below each open one
+ * other section of it.
  */
-export const Default: Story = {};
+export const Default: Story = { args: { section: 'about' } };
+
+export const Photo: Story = { args: { section: 'photo' } };
+
+export const KindOfPlace: Story = { args: { section: 'categories' } };
+
+export const Links: Story = { args: { section: 'links' } };
+
+export const Address: Story = { args: { section: 'address' } };
+
+/** Opening hours across two service windows and two closed days. */
+export const OpeningHours: Story = { args: { section: 'opening-hours' } };
 
 /**
- * A restaurant an operator has just handed over. There is no photo, no social
- * link, no schedule and no menu, so every affordance is the empty one - which
- * is the state a new owner actually meets.
+ * The opening hours on a phone (GitHub issue #2234): one line per day and
+ * each range full width under it, so both times and the remove button are on
+ * screen. The header shows the whole name at this width too (#2233).
+ *
+ * Business stories are baselined at `chrome.laptop` only (#1547); these two
+ * set the phone's size themselves, which a story's `loki` parameters can do
+ * within that configuration.
+ */
+export const OpeningHoursPhone: Story = {
+  args: { section: 'opening-hours' },
+  parameters: { loki: { width: 375, height: 812 } },
+};
+
+/** The narrowest phone a restaurant owner is likely to hold. */
+export const OpeningHoursNarrowPhone: Story = {
+  args: { section: 'opening-hours' },
+  parameters: { loki: { width: 320, height: 640 } },
+};
+
+export const Facilities: Story = { args: { section: 'facilities' } };
+
+export const TableOrdering: Story = { args: { section: 'table-ordering' } };
+
+export const MenuCode: Story = { args: { section: 'menu-code' } };
+
+/**
+ * What Print code puts on paper (GitHub issue #2230): the code, the
+ * restaurant's name and nothing of the page around it. Captured in print
+ * media, so a change that blanks the printout fails the visual suite; it
+ * printed one empty page once the code moved into its own section view.
+ */
+export const MenuCodePrinted: Story = {
+  args: { section: 'menu-code' },
+  parameters: { loki: { media: 'print' } },
+};
+
+/**
+ * The links of a restaurant an operator has just handed over: there are none
+ * yet, so the section shows its empty state.
  */
 export const Empty: Story = {
   args: {
+    section: 'links',
     restaurant: {
       id: 'restaurant-new',
       name: 'Osteria Vecchia',
@@ -100,9 +149,10 @@ export const Empty: Story = {
   },
 };
 
-/** A menu already exists, but the rest of the profile is still unfinished. */
+/** The menu code of a restaurant whose menu exists but nothing else does. */
 export const WithMenuOnly: Story = {
   args: {
+    section: 'menu-code',
     restaurant: {
       id: 'restaurant-new',
       name: 'Osteria Vecchia',
@@ -119,6 +169,7 @@ export const WithMenuOnly: Story = {
  */
 export const PhotoUploading: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'pending',
     pendingPhoto: RESTAURANT_IMAGE,
   },
@@ -130,6 +181,7 @@ export const PhotoUploading: Story = {
  */
 export const PhotoFailed: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'failed',
     canRetryPhoto: true,
   },
@@ -142,7 +194,49 @@ export const PhotoFailed: Story = {
  */
 export const PhotoFailedInAnEarlierSession: Story = {
   args: {
+    section: 'photo',
     photoStatus: 'failed',
     canRetryPhoto: false,
+  },
+};
+
+/**
+ * The transfer is done and the image check has not answered yet (GitHub
+ * issue #2141): the new photo stays blurred, and the box says it is being
+ * checked rather than uploaded.
+ */
+export const PhotoChecking: Story = {
+  args: {
+    section: 'photo',
+    photoStatus: 'pending',
+    pendingPhoto: RESTAURANT_IMAGE,
+    photoChecking: true,
+  },
+};
+
+/**
+ * The image check refused the new photo (GitHub issue #2141). The restaurant
+ * keeps its previous photo, the reason is said below the box, and a different
+ * photo can be chosen at once.
+ */
+export const PhotoRefused: Story = {
+  args: {
+    section: 'photo',
+    photoStatus: 'refused',
+    photoRefusalCategory: 'violence',
+  },
+};
+
+/**
+ * The check of stored photos refused the photo the restaurant showed (GitHub
+ * issue #2143). It was taken down with `imagePath`, so the restaurant has no
+ * photo until a different one is chosen, and the line below the box says so.
+ */
+export const StoredPhotoRefused: Story = {
+  args: {
+    section: 'photo',
+    restaurant: { ...trattoria, imagePath: undefined },
+    photoStatus: 'refused',
+    photoRefusalCategory: 'violence',
   },
 };

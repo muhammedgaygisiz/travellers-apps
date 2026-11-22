@@ -32,14 +32,13 @@ export type ExtrasBlock = Category['extrasBlock'];
  * Folding them in would have made one component the place three unrelated
  * edits are merged; here the category merges one output.
  *
- * ## Committing on blur rather than on keystroke
+ * ## Emitting on blur, and nothing is saved here
  *
- * The title and subtitle above debounce, because they are one field each and
- * a debounce there costs one timer. A grid of rows would need a form instance
- * per row, recreated whenever a row is added or removed - and a row rebuilt
- * mid-edit is the `linkedSignal` problem `withMenuIds` exists to avoid, one
- * layer up. `ionChange` fires when a field is left, which is also when an
- * owner editing a price grid has finished with a cell.
+ * A row reports its change when a field is left (`ionChange`), because a grid
+ * of rows would otherwise need a form instance per row, recreated whenever a
+ * row is added or removed. What it reports is a draft: the category editor
+ * holds it and writes it with the category's Save, and Cancel discards it
+ * (GitHub issue #2258). This component never writes the menu itself.
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +55,7 @@ export class BusinessCategoryExtrasComponent {
 
   /**
    * The block as it now stands, or `undefined` once the last extra is gone.
+   * A draft for the category editor, not a save (#2258).
    *
    * `undefined` rather than an empty list, because the field is optional on
    * the model and absent means "this section offers no extras". Keeping an
@@ -171,9 +171,9 @@ export class BusinessCategoryExtrasComponent {
   }
 
   /**
-   * Moves an extra one place (GitHub issue #2256). Saved at once, like every
-   * other change to the extras, and guests read them in this order on the
-   * menu and when ordering.
+   * Moves an extra one place (GitHub issue #2256). Written by the category's
+   * Save, like every other change to the extras (#2258), and guests read them
+   * in this order on the menu and when ordering.
    */
   protected moveExtra(from: number, to: number): void {
     const extras = [...this.extras()];

@@ -45,7 +45,6 @@ import {
   removeDish,
   saveCategoryDetails,
   saveDish,
-  saveExtras,
   setAvailability,
 } from '../../utils/menu-edits';
 import { CategoryEditorComponent } from '../category-editor/category-editor.component';
@@ -376,16 +375,6 @@ export class EditMenuPage {
       this.write((menu) =>
         saveCategoryDetails(menu, editing.categoryId, details),
       );
-    }
-  }
-
-  /** Extras keep the category editor open: they are added one at a time. */
-  onSaveExtras(extrasBlock: Category['extrasBlock']): void {
-    const editing = this.editing();
-
-    if (editing?.kind === 'category' && editing.categoryId) {
-      const categoryId = editing.categoryId;
-      this.write((menu) => saveExtras(menu, categoryId, extrasBlock), false);
     }
   }
 

@@ -230,6 +230,22 @@ describe(BusinessCategoryExtrasComponent.name, () => {
     });
   });
 
+  /** Prices as the list writes them, 2.50 rather than 2.5 (#2258). */
+  it('shows each price with two decimals', () => {
+    withBlock(blockOf(MOZZARELLA, NDUJA));
+
+    const prices = [MOZZARELLA, NDUJA].map(
+      ({ id }) =>
+        (
+          (fixture.nativeElement as HTMLElement).querySelector(
+            `[data-testid="category-extra-price-${id}"]`,
+          ) as HTMLIonInputElement | null
+        )?.value,
+    );
+
+    expect(prices).toEqual(['2.00', '2.50']);
+  });
+
   /** Extras in the owner's order (GitHub issue #2256). */
   describe('moving', () => {
     const button = (testId: string): HTMLIonButtonElement | null =>

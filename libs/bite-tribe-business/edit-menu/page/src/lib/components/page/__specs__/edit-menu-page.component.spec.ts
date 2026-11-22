@@ -397,16 +397,22 @@ describe(EditMenuPage.name, () => {
       ).toEqual(['Pizza', 'Pasta']);
     });
 
-    it('keeps the category editor open while extras are saved', () => {
+    /** Extras are written by the category's Save (GitHub issue #2258). */
+    it('writes the extras with the category, and closes the editor', () => {
+      const extrasBlock = {
+        description: 'Toppings',
+        extras: [{ id: 'e1', name: 'Olives', price: 1.5 }],
+      };
       component.openCategory('c1');
-      component.onSaveExtras({ description: 'Toppings', extras: [] });
+      component.onSaveCategory({ title: 'Pizza', subtitle: '', extrasBlock });
+
+      expect(saved.mock.calls[0][0].categories[0].extrasBlock).toEqual(
+        extrasBlock,
+      );
+
       withMenu({ ...FULL });
 
-      expect(component.editing()).toEqual({
-        kind: 'category',
-        categoryId: 'c1',
-      });
-      expect(saved).toHaveBeenCalled();
+      expect(component.editing()).toBeUndefined();
     });
 
     it('switches availability from the list without opening anything', () => {

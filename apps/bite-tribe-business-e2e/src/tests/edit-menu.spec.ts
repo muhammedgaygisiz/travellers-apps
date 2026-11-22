@@ -19,6 +19,9 @@ const POSITION = { latitude: 48.137154, longitude: 11.576124 };
  */
 const LONGER_THAN_THE_OLD_AUTOSAVE = 1_200;
 
+/** The one extra the seed gives a category, when asked to (issue #2258). */
+const EXTRA_ID = 'extra-mozzarella';
+
 interface MenuFixture {
   restaurantId: string;
   restaurantName: string;
@@ -38,7 +41,7 @@ interface MenuFixture {
 const seedMenu = async (
   page: Page,
   runId: string,
-  { derivedFromBites = false } = {},
+  { derivedFromBites = false, withExtras = false } = {},
 ): Promise<MenuFixture> => {
   const fixture = {
     restaurantId: `menu-restaurant-${runId}`,
@@ -67,6 +70,34 @@ const seedMenu = async (
               fields: {
                 id: { stringValue: `category-${runId}` },
                 title: { stringValue: 'Pizza' },
+                ...(withExtras
+                  ? {
+                      extrasBlock: {
+                        mapValue: {
+                          fields: {
+                            description: { stringValue: 'Add to any pizza' },
+                            extras: {
+                              arrayValue: {
+                                values: [
+                                  {
+                                    mapValue: {
+                                      fields: {
+                                        id: { stringValue: EXTRA_ID },
+                                        name: {
+                                          stringValue: 'Extra mozzarella',
+                                        },
+                                        price: { doubleValue: 2 },
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }
+                  : {}),
                 items: {
                   arrayValue: {
                     values: [
@@ -145,7 +176,11 @@ type StoredItem = {
   isAvailable?: boolean;
   variants?: StoredItem[];
 };
-type StoredCategory = { title: string; items: StoredItem[] };
+type StoredCategory = {
+  title: string;
+  items: StoredItem[];
+  extrasBlock?: { extras: { name: string; price: number }[] };
+};
 
 const storedCategories = async (
   page: Page,
@@ -200,7 +235,7 @@ test.describe('Edit a menu in the business app', () => {
 
   const start = async (
     page: Page,
-    options: { derivedFromBites?: boolean } = {},
+    options: { derivedFromBites?: boolean; withExtras?: boolean } = {},
   ): Promise<{
     fixture: MenuFixture;
     editMenu: EditMenuPage;
@@ -251,6 +286,78 @@ test.describe('Edit a menu in the business app', () => {
         timeout: 15_000,
       })
       .toBe('Pizze napoletane');
+  });
+
+  /**
+   * An extra is saved with its category, like every other menu change, and
+   * Cancel throws an edit away (GitHub issue #2258). It used to save itself
+   * the moment a field was left.
+   */
+  test('saves an edited extra only with the category', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { withExtras: true });
+    const storedExtraPrice = async (): Promise<number | undefined> =>
+      (await storedCategory(page, fixture.menuId))?.extrasBlock?.extras[0]
+        ?.price;
+
+    await editMenu.openCategory(fixture.categoryId);
+    await expect(editMenu.extraPrice(EXTRA_ID)).toHaveValue('2.00');
+    await editMenu.expectDisabled(editMenu.saveCategory);
+
+    // Leaving the field saves nothing, and offers the category's Save.
+    await editMenu.extraPrice(EXTRA_ID).fill('2.2');
+    await editMenu.extraPrice(EXTRA_ID).blur();
+    await editMenu.expectEnabled(editMenu.saveCategory);
+    await editMenu.expectStaysOpen(LONGER_THAN_THE_OLD_AUTOSAVE);
+    expect(await storedExtraPrice()).toBe(2);
+
+    await editMenu.saveCategory.click();
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect.poll(storedExtraPrice, { timeout: 15_000 }).toBe(2.2);
+  });
+
+  /**
+   * The last extra removed leaves no extras field at all: a field written as
+   * `undefined` is refused by Firestore, and the whole menu save with it.
+   */
+  test('removes the last extra with the category', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { withExtras: true });
+
+    await editMenu.openCategory(fixture.categoryId);
+    await page.getByTestId(`category-extra-remove-${EXTRA_ID}`).click();
+    await editMenu.expectEnabled(editMenu.saveCategory);
+    await editMenu.saveCategory.click();
+
+    await editMenu.expectSaved(fixture.restaurantId, fixture.menuId);
+    await expect
+      .poll(
+        async () =>
+          (await storedCategory(page, fixture.menuId))?.extrasBlock ?? null,
+        { timeout: 15_000 },
+      )
+      .toBeNull();
+  });
+
+  test('throws an edited extra away on Cancel', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { fixture, editMenu } = await start(page, { withExtras: true });
+
+    await editMenu.openCategory(fixture.categoryId);
+    await editMenu.extraPrice(EXTRA_ID).fill('3');
+    await editMenu.extraPrice(EXTRA_ID).blur();
+    await editMenu.expectEnabled(editMenu.saveCategory);
+
+    await editMenu.cancelCategory.click();
+    await expect(editMenu.editorPanel).toHaveCount(0);
+    expect(
+      (await storedCategory(page, fixture.menuId))?.extrasBlock?.extras[0]
+        ?.price,
+    ).toBe(2);
+
+    await editMenu.openCategory(fixture.categoryId);
+    await expect(editMenu.extraPrice(EXTRA_ID)).toHaveValue('2.00');
   });
 
   /**

@@ -56,18 +56,21 @@
     <ion-button
       type="submit"
       data-testid="save-category"
-      [disabled]="form.invalid || (!form.dirty && !!category())"
+      [disabled]="!canSave()"
     >
       {{ 'save' | transloco }}
     </ion-button>
   </div>
 </form>
 
-@if (category(); as existing) {
+@if (category()) {
+  <!--
+    A draft until the category's Save, like the fields above (issue #2258).
+  -->
   <business-category-extras
     class="extras"
-    [extrasBlock]="existing.extrasBlock"
+    [extrasBlock]="extrasDraft()"
     [currencySymbol]="currency() ?? ''"
-    (extrasBlockChanged)="saveExtras.emit($event)"
+    (extrasBlockChanged)="extrasDraft.set($event)"
   />
 }

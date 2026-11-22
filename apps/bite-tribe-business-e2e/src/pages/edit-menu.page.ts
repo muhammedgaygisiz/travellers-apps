@@ -104,6 +104,17 @@ export class EditMenuPage {
       .locator('input');
   }
 
+  /** An existing extra's price field in the category editor (issue #2258). */
+  extraPrice(extraId: string): Locator {
+    return this.page
+      .getByTestId(`category-extra-price-${extraId}`)
+      .locator('input');
+  }
+
+  get cancelCategory(): Locator {
+    return this.page.getByTestId('cancel-category');
+  }
+
   variantToggle(variantId: string): Locator {
     return this.page
       .getByTestId(`menu-variant-${variantId}`)

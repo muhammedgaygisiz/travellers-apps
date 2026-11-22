@@ -69,7 +69,22 @@ describe(CategoryEditorComponent.name, () => {
     component.form.patchValue({ title: 'Pizze', subtitle: '' });
     component.saveCategory();
 
-    expect(saved).toHaveBeenCalledWith({ title: 'Pizze', subtitle: '' });
+    expect(saved).toHaveBeenCalledWith({
+      title: 'Pizze',
+      subtitle: '',
+      extrasBlock: PIZZA.extrasBlock,
+    });
+  });
+
+  it('saves a new category without extras', () => {
+    const { component } = setup(undefined);
+    const saved = jest.fn();
+    component.save.subscribe(saved);
+
+    component.form.patchValue({ title: 'Dolci' });
+    component.saveCategory();
+
+    expect(saved).toHaveBeenCalledWith({ title: 'Dolci', subtitle: '' });
   });
 
   it('saves no category without a title', () => {
@@ -83,17 +98,107 @@ describe(CategoryEditorComponent.name, () => {
     expect(component.form.controls.title.touched).toBe(true);
   });
 
-  it('shows the extras of a category that exists, and passes their changes on', () => {
-    const { fixture, component } = setup(PIZZA);
-    const extras = jest.fn();
-    component.saveExtras.subscribe(extras);
-    const el = fixture.nativeElement as HTMLElement;
+  /**
+   * The extras are a draft until the category's Save, like its title
+   * (GitHub issue #2258).
+   */
+  describe('the extras', () => {
+    const CHANGED = {
+      description: 'Toppings',
+      extras: [{ id: 'e1', name: 'Olives', price: 1.8 }],
+    };
 
-    expect(el.querySelector('business-category-extras')).toBeTruthy();
+    const saveButton = (
+      fixture: ComponentFixture<CategoryEditorComponent>,
+    ): HTMLIonButtonElement | null =>
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelector<HTMLIonButtonElement>('[data-testid="save-category"]');
 
-    const block = { description: 'Toppings', extras: [] };
-    component.saveExtras.emit(block);
-    expect(extras).toHaveBeenCalledWith(block);
+    const editExtras = (
+      fixture: ComponentFixture<CategoryEditorComponent>,
+      block: Category['extrasBlock'],
+    ): void => {
+      fixture.debugElement
+        .query((node) => node.name === 'business-category-extras')
+        .triggerEventHandler('extrasBlockChanged', block);
+      fixture.detectChanges();
+    };
+
+    it('shows the extras of a category that exists', () => {
+      const { fixture } = setup(PIZZA);
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'business-category-extras',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('saves nothing when an extra is edited, and offers Save', () => {
+      const { fixture, component } = setup(PIZZA);
+      const saved = jest.fn();
+      component.save.subscribe(saved);
+
+      expect(saveButton(fixture)?.disabled).toBe(true);
+
+      editExtras(fixture, CHANGED);
+
+      expect(saved).not.toHaveBeenCalled();
+      expect(component.extrasChanged()).toBe(true);
+      expect(saveButton(fixture)?.disabled).toBe(false);
+    });
+
+    it('writes the edited extras with the category', () => {
+      const { fixture, component } = setup(PIZZA);
+      const saved = jest.fn();
+      component.save.subscribe(saved);
+
+      editExtras(fixture, CHANGED);
+      component.saveCategory();
+
+      expect(saved).toHaveBeenCalledWith({
+        title: 'Pizza',
+        subtitle: 'Wood-fired',
+        extrasBlock: CHANGED,
+      });
+    });
+
+    it('writes no extras block once the last extra is removed', () => {
+      const { fixture, component } = setup(PIZZA);
+      const saved = jest.fn();
+      component.save.subscribe(saved);
+
+      editExtras(fixture, undefined);
+      component.saveCategory();
+
+      expect(saved).toHaveBeenCalledWith({
+        title: 'Pizza',
+        subtitle: 'Wood-fired',
+        extrasBlock: undefined,
+      });
+    });
+
+    it('throws the edit away when the stored category is read again', () => {
+      const { fixture, component } = setup(PIZZA);
+
+      editExtras(fixture, CHANGED);
+      fixture.componentRef.setInput('category', { ...PIZZA });
+      fixture.detectChanges();
+
+      expect(component.extrasDraft()).toEqual(PIZZA.extrasBlock);
+      expect(component.extrasChanged()).toBe(false);
+    });
+
+    it('takes no edit back to unchanged as a change', () => {
+      const { fixture, component } = setup(PIZZA);
+
+      editExtras(fixture, CHANGED);
+      editExtras(fixture, PIZZA.extrasBlock);
+
+      expect(component.extrasChanged()).toBe(false);
+      expect(saveButton(fixture)?.disabled).toBe(true);
+    });
   });
 
   it('offers no extras on a category that does not exist yet', () => {

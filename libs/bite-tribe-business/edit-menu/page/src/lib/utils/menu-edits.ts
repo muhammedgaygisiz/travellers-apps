@@ -21,6 +21,13 @@ export interface DishRef {
 export interface CategoryDetails {
   readonly title: string;
   readonly subtitle?: string;
+  /**
+   * The category's extras as the editor holds them, written by the same Save
+   * as the title (GitHub issue #2258). Present only for a stored category,
+   * whose editor shows them; `undefined` then means the last extra was
+   * removed. Absent leaves the stored extras alone.
+   */
+  readonly extrasBlock?: Category['extrasBlock'];
 }
 
 const withCategories = (menu: Menu, categories: Category[]): Menu => ({
@@ -123,18 +130,23 @@ export const saveCategoryDetails = (
     ]);
   }
 
-  return mapCategory(menu, categoryId, (category) => ({
-    ...category,
-    ...fields,
-  }));
-};
+  return mapCategory(menu, categoryId, (category) => {
+    const next: Category = { ...category, ...fields };
 
-export const saveExtras = (
-  menu: Menu,
-  categoryId: string,
-  extrasBlock: Category['extrasBlock'],
-): Menu =>
-  mapCategory(menu, categoryId, (category) => ({ ...category, extrasBlock }));
+    if (!('extrasBlock' in details)) {
+      return next;
+    }
+
+    // No extras is a missing field, never `extrasBlock: undefined`: Firestore
+    // refuses to write an undefined value, and the whole menu save fails
+    // with it (issue #2258).
+    const { extrasBlock: _stored, ...rest } = next;
+
+    return details.extrasBlock
+      ? { ...rest, extrasBlock: details.extrasBlock }
+      : rest;
+  });
+};
 
 /**
  * Takes a dish, with its variants, off the menu (GitHub issue #2181).

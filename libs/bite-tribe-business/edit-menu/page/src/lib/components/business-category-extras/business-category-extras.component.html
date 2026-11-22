@@ -40,7 +40,7 @@
             [attr.data-testid]="'category-extra-price-' + extra.id"
             [label]="'price' | transloco"
             labelPlacement="floating"
-            [value]="extra.price"
+            [value]="extra.price.toFixed(2)"
             (ionChange)="repriceExtra(index, +($event.detail.value ?? 0))"
           >
             <span slot="end">{{ currencySymbol() }}</span>

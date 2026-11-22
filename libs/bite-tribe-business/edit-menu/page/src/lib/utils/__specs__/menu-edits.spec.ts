@@ -8,7 +8,6 @@ import {
   removeDish,
   saveCategoryDetails,
   saveDish,
-  saveExtras,
   setAvailability,
 } from '../menu-edits';
 
@@ -137,12 +136,41 @@ describe('menu edits', () => {
     });
   });
 
-  it('writes a category’s extras', () => {
+  /** The extras are written by the category's Save (GitHub issue #2258). */
+  it('writes a category’s extras with its title', () => {
     const extrasBlock = { description: 'Toppings', extras: [] };
 
-    expect(saveExtras(MENU, 'c1', extrasBlock).categories[0].extrasBlock).toBe(
+    expect(
+      saveCategoryDetails(MENU, 'c1', { title: 'Pizze', extrasBlock })
+        .categories[0].extrasBlock,
+    ).toBe(extrasBlock);
+  });
+
+  it('removes the extras when the last one was taken off', () => {
+    const withExtras = saveCategoryDetails(MENU, 'c1', {
+      title: 'Pizze',
+      extrasBlock: { description: 'Toppings', extras: [] },
+    });
+
+    expect(
+      saveCategoryDetails(withExtras, 'c1', {
+        title: 'Pizze',
+        extrasBlock: undefined,
+      }).categories[0].extrasBlock,
+    ).toBeUndefined();
+  });
+
+  it('leaves the extras alone when the details carry none', () => {
+    const extrasBlock = { description: 'Toppings', extras: [] };
+    const withExtras = saveCategoryDetails(MENU, 'c1', {
+      title: 'Pizze',
       extrasBlock,
-    );
+    });
+
+    expect(
+      saveCategoryDetails(withExtras, 'c1', { title: 'Pizzas' }).categories[0]
+        .extrasBlock,
+    ).toBe(extrasBlock);
   });
 
   /** See GitHub issue #2181. */

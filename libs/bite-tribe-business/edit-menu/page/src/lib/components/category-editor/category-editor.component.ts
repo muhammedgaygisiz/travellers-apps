@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
@@ -66,7 +67,6 @@ export class CategoryEditorComponent {
   readonly currency = input<string>();
 
   readonly save = output<CategoryDetails>();
-  readonly saveExtras = output<Category['extrasBlock']>();
   readonly cancelEdit = output<void>();
   /** The owner confirmed deleting the stored category (GitHub issue #2181). */
   readonly deleteCategory = output<void>();
@@ -79,6 +79,25 @@ export class CategoryEditorComponent {
     subtitle: [''],
   });
 
+  /**
+   * The extras as the owner is editing them (GitHub issue #2258).
+   *
+   * A draft, like the title and subtitle above: adding, editing, removing and
+   * moving an extra all land here, the category's Save writes them with the
+   * title, and Cancel throws them away. They used to be written the moment a
+   * field was left, which made them the one thing in the menu editor that
+   * saved itself (#1377 removed saving on a pause) and that Cancel could not
+   * take back.
+   */
+  readonly extrasDraft = signal<Category['extrasBlock']>(undefined);
+
+  /** Whether the draft differs from the stored extras. */
+  readonly extrasChanged = computed(
+    () =>
+      JSON.stringify(this.extrasDraft() ?? null) !==
+      JSON.stringify(this.category()?.extrasBlock ?? null),
+  );
+
   readonly load = effect(() => {
     const category = this.category();
 
@@ -86,7 +105,17 @@ export class CategoryEditorComponent {
       title: category?.title ?? '',
       subtitle: category?.subtitle ?? '',
     });
+    this.extrasDraft.set(category?.extrasBlock);
   });
+
+  /**
+   * Save is offered while anything differs from what is stored - the title,
+   * the subtitle or the extras - so an extras edit never sits under a
+   * disabled Save.
+   */
+  readonly canSave = (): boolean =>
+    this.form.valid &&
+    (!this.category() || this.form.dirty || this.extrasChanged());
 
   saveCategory(): void {
     if (this.form.invalid) {
@@ -94,7 +123,11 @@ export class CategoryEditorComponent {
       return;
     }
 
-    this.save.emit(this.form.getRawValue());
+    this.save.emit(
+      this.category()
+        ? { ...this.form.getRawValue(), extrasBlock: this.extrasDraft() }
+        : this.form.getRawValue(),
+    );
   }
 
   /**

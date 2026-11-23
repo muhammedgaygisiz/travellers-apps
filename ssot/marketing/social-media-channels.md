@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026) and Hamburg (22 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026), Lucerne (20 November 2026), Sousse (21 November 2026) and Hamburg (22 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1711,6 +1711,34 @@ cover photo is Wat Arun at dusk. Leela's cover line is "Bangkok's best bites
 are on the street, not in the mall". The city page `/eat/bangkok` went up the
 same evening, with no aliases, and its Instagram and Facebook post links were
 added once both posts were live.
+
+**Lucerne** (20 November 2026, scheduled for 22:00) uses the German name on
+the post: the cover and the caption say "Luzern", and the location is
+"Luzern, Switzerland". It tags four of five dish slides:
+`@weisseskreuzpizzeria` (entrecôte «Weisses Kreuz»), `@tibits_restaurants`
+(vegetarian buffet), `@laderach.official` (Swiss chocolate) and
+`@bachmannconfiserie` (macarons). Schönau in Meggen (cotoletta di vitello) is
+named in the caption only. Leela is a Fasnacht Guggenmusik player, with a
+jester's hat, a ruff, face paint and a trumpet; the cover photo is the Chapel
+Bridge and the Water Tower, with Pilatus behind. Leela's cover line is
+"Lakeside steaks, then chocolate and macarons in the old town". The city page
+`/eat/lucerne` has `luzern` as an alias.
+
+**Sousse** (21 November 2026, scheduled for 22:00) tags three of five dish
+slides: `@restaurant_du_peuple` (mloukhia), `@khemais_food` (shakshuka) and
+`@cafe.ajdad` (Turkish coffee with orange blossom water and samsa). Restaurant
+Wahida (mixed fish platter) and the fricassé stall in the medina are named in
+the caption only. Leela wears a red chechia and a white blouse with blue
+embroidery and holds a Turkish coffee; the cover photo is the Ribat of Sousse,
+framed by palms and flowers. Leela's cover line is "In Sousse I followed the
+fish from the market to the grill". The city page `/eat/sousse` has no
+aliases.
+
+Both were made in another agent session and recorded here afterwards, from the
+live posts and pages, on 23 November 2026: how each tag was confirmed and the
+country's Bite counts were not kept. Both city pages had their Instagram and
+Facebook post links added once the posts were live; Sousse's were added two
+days late.
 
 **Hamburg** (22 November 2026, scheduled for 22:00) tags all five dish
 slides: `@langosliebe_` (langos; a pop-up stall that travels the fairs, with

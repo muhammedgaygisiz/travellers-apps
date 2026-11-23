@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026) and Bangkok (19 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026) and Hamburg (22 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1711,6 +1711,27 @@ cover photo is Wat Arun at dusk. Leela's cover line is "Bangkok's best bites
 are on the street, not in the mall". The city page `/eat/bangkok` went up the
 same evening, with no aliases, and its Instagram and Facebook post links were
 added once both posts were live.
+
+**Hamburg** (22 November 2026, scheduled for 22:00) tags all five dish
+slides: `@langosliebe_` (langos; a pop-up stall that travels the fairs, with
+posts located at the Hamburger DOM, where the Bite was bought),
+`@schweinske_official` (pulled pork burger; schweinske.de links it and lists
+the Neugraben branch, where the pin is), `@honestkebab.de` (döner; the Maps
+pin is the Ballindamm 40 branch, and honest-kebab.com gives that address and
+links the account) and `@yoji1.2345` on two slides (com sot lac with crispy
+duck, and tom gha kai). Yoji's website shows an Instagram icon that links
+nowhere, so its account was confirmed by the name "Yoji Restaurant" and posts
+naming "YOJI aus Hamburg-Neugraben", at Cuxhavener Str. 292. Germany had
+1,013 Bites, 49 of them in Hamburg and nearly all by one author; none is a
+classic Hamburg dish, so the post leans on the Dom fair and Schweinske, the
+city's own chain. Leela wears an Elbsegler cap, a striped fisherman's shirt
+and a navy pea jacket and holds a Franzbrötchen; the cover photo is the
+Speicherstadt's Wasserschloss at dusk, with the Elbphilharmonie behind.
+Leela's cover line is "Moin! Hamburg's best bites, from the Dom fair to the
+harbour". The city page `/eat/hamburg` went up the same afternoon, with no
+aliases. A scheduled job was to add the post links at 22:07, but it lived only
+in the agent session, which restarted before then; the links were added the
+next day.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

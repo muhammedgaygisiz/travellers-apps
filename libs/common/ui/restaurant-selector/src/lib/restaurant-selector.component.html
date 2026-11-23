@@ -33,25 +33,34 @@
     data-testid="restaurant-search"
   />
 
-  <ion-list [inset]="true">
-    @if (showCustomOption()) {
-      <ion-item
-        [detail]="false"
-        (click)="selectCustomRestaurant()"
-        data-testid="restaurant-custom-option"
-      >
-        <ion-label>
-          <h2>
-            {{
-              'restaurant-selector-use-custom'
-                | transloco: { searchTerm: rawSearchTerm() }
-            }}
-          </h2>
-          <p>{{ 'restaurant-selector-add-as-new' | transloco }}</p>
-        </ion-label>
-      </ion-item>
-    }
+  <!--
+    Typing a name that matches nothing offers the name itself. It is styled as
+    an action, apart from the result rows, because as a plain first row testers
+    read it as one more search hit and never saw it. See GitHub issue #2296.
+  -->
+  @if (showCustomOption()) {
+    <ion-item
+      button
+      lines="none"
+      [detail]="false"
+      class="add-place"
+      (click)="selectCustomRestaurant()"
+      data-testid="restaurant-custom-option"
+    >
+      <ion-icon slot="start" name="add-circle-outline" color="primary" />
+      <ion-label class="ion-text-wrap">
+        <h2>
+          {{
+            'restaurant-selector-use-custom'
+              | transloco: { searchTerm: rawSearchTerm() }
+          }}
+        </h2>
+        <p>{{ 'restaurant-selector-add-as-new' | transloco }}</p>
+      </ion-label>
+    </ion-item>
+  }
 
+  <ion-list [inset]="true">
     @for (restaurant of filteredRestaurants(); track restaurant.name) {
       <ion-item [detail]="false" (click)="selectRestaurant(restaurant.name)">
         <ion-label>

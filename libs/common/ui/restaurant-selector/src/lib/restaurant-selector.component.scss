@@ -1,3 +1,20 @@
 @use 'globals';
 
 @include globals.modal-header-title;
+
+// The offer to use the typed name, set apart from the result rows as an action.
+.add-place {
+  --background: rgba(var(--ion-color-primary-rgb), 0.08);
+  --background-hover: rgba(var(--ion-color-primary-rgb), 0.14);
+  --background-activated: rgba(var(--ion-color-primary-rgb), 0.18);
+
+  margin: 8px 16px 0;
+  border: 1px dashed var(--ion-color-primary);
+  border-radius: 10px;
+  overflow: hidden;
+
+  h2 {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+}

@@ -153,6 +153,49 @@ describe('RestaurantSelectorComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(customText);
   });
 
+  describe('adding an unlisted place by name (#2296)', () => {
+    const customOption = (): HTMLElement | null =>
+      fixture.nativeElement.querySelector(
+        '[data-testid="restaurant-custom-option"]',
+      );
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('restaurants', [
+        { name: 'Restaurant A' },
+        { name: 'Restaurant B' },
+      ]);
+    });
+
+    it('renders the offer as an action card ahead of the result list', () => {
+      component.rawSearchTerm.set('Food stand');
+      fixture.detectChanges();
+
+      const option = customOption();
+      expect(option?.classList).toContain('add-place');
+      expect(option?.parentElement?.tagName).not.toBe('ION-LIST');
+      expect(option?.querySelector('ion-icon')?.getAttribute('name')).toBe(
+        'add-circle-outline',
+      );
+    });
+
+    it('selects the typed name in one tap', () => {
+      const emitSpy = jest.spyOn(component.restaurantSelected, 'emit');
+      component.rawSearchTerm.set('Food stand');
+      fixture.detectChanges();
+
+      customOption()?.click();
+
+      expect(emitSpy).toHaveBeenCalledWith('Food stand');
+    });
+
+    it('is not offered when the name matches a listed restaurant exactly', () => {
+      component.rawSearchTerm.set('restaurant a');
+      fixture.detectChanges();
+
+      expect(customOption()).toBeNull();
+    });
+  });
+
   it('should emit selectionCancel when cancel is called', () => {
     const emitSpy = jest.spyOn(component.selectionCancel, 'emit');
 

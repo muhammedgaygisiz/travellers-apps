@@ -104,6 +104,17 @@ export class EditRestaurantService {
       this.dataAccess.countBitesAwaitingMenuLink(params).catch(() => 0),
   });
 
+  /**
+   * Whether the menu was built from guests' Bites, so the checklist names it
+   * (GitHub issue #2302). Read again when the menu changes; a failed read
+   * counts as the owner's own menu, which only changes a label.
+   */
+  readonly menuBuiltFromBites = resource({
+    params: () => this.restaurant()?.menuId,
+    loader: ({ params }) =>
+      this.dataAccess.isMenuBuiltFromBites(params).catch(() => false),
+  });
+
   /** This session's photo upload, when it is for the restaurant on screen. */
   private readonly ownUpload = computed(() => {
     const upload = this.photoUpload.upload();

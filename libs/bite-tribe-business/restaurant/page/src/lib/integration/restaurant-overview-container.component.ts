@@ -10,6 +10,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
       class="ion-page"
       [restaurant]="service.restaurant()"
       [guestBitesToLink]="service.guestBitesToLink.value() ?? 0"
+      [menuBuiltFromBites]="service.menuBuiltFromBites.value() ?? false"
       (openGuestBites)="service.gotoGuestBites($event.id, $event.menuId)"
       (openSection)="service.gotoSection($event)"
       (createMenu)="service.createMenu()"

@@ -9,6 +9,7 @@ export const RESTAURANT_COLLECTION = 'restaurants';
 /** The field listing every account a restaurant is assigned to (epic #1614). */
 export const RESTAURANT_OWNERS_FIELD = 'ownerUserIds';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
+export const MENU_COLLECTION = 'menus';
 
 @Injectable({
   providedIn: 'root',
@@ -130,6 +131,51 @@ export class DashboardDataAccessService {
   // would otherwise take the whole binding update with it. See issue #1232.
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
   biteTrailsValue = resourceValue(this.biteTrails, [] as BiteTrail[]);
+
+  /**
+   * The ids of the held restaurants whose menu was built from guests' Bites
+   * and not yet confirmed, so the setup checklist names that menu (GitHub
+   * issue #2302). One read per menu: an owner holds a restaurant or two. A
+   * menu that fails to read counts as the owner's own, which only changes a
+   * label.
+   */
+  menusBuiltFromBitesLoader: ResourceLoader<
+    ReadonlySet<string>,
+    { restaurants: readonly Restaurant[] }
+  > = async ({ params }) => {
+    const built = await Promise.all(
+      params.restaurants.map(async (restaurant) => {
+        const menuId = restaurant.menuId?.split('/').filter(Boolean).pop();
+
+        if (!menuId || !restaurant.id) {
+          return undefined;
+        }
+
+        try {
+          const { snapshot } = await FirebaseFirestore.getDocument({
+            reference: `${MENU_COLLECTION}/${menuId}`,
+          });
+
+          return snapshot?.data?.['derivedFromBites'] === true
+            ? restaurant.id
+            : undefined;
+        } catch {
+          return undefined;
+        }
+      }),
+    );
+
+    return new Set(built.filter((id): id is string => !!id));
+  };
+
+  menusBuiltFromBites = resource({
+    params: () => ({ restaurants: this.restaurantsValue() }),
+    loader: this.menusBuiltFromBitesLoader.bind(this),
+  });
+  menusBuiltFromBitesValue = resourceValue(
+    this.menusBuiltFromBites,
+    new Set<string>() as ReadonlySet<string>,
+  );
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,

@@ -117,6 +117,47 @@ describe('restaurantSetupChecklist', () => {
       'menu-reviewed',
     ]);
   });
+
+  /** GitHub issue #2302. */
+  describe('names the menu the restaurant has', () => {
+    const menuLabel = (
+      restaurant: Restaurant,
+      context?: Parameters<typeof restaurantSetupChecklist>[1],
+    ): string | undefined =>
+      restaurantSetupChecklist(restaurant, context).find(
+        (item) => item.key === 'menu-reviewed',
+      )?.labelKey;
+
+    it('asks for a menu when there is none, whatever the context says', () => {
+      expect(menuLabel(BARE)).toBe('setup-checklist-menu-create');
+      expect(menuLabel(BARE, { menuBuiltFromBites: true })).toBe(
+        'setup-checklist-menu-create',
+      );
+    });
+
+    it("asks to check a menu built from guests' Bites", () => {
+      expect(
+        menuLabel({ ...BARE, menuId: 'm-1' }, { menuBuiltFromBites: true }),
+      ).toBe('setup-checklist-menu-reviewed');
+    });
+
+    it("asks to review the owner's own menu, and when it is unknown which", () => {
+      expect(
+        menuLabel({ ...BARE, menuId: 'm-1' }, { menuBuiltFromBites: false }),
+      ).toBe('setup-checklist-menu-review');
+      expect(menuLabel({ ...BARE, menuId: 'm-1' })).toBe(
+        'setup-checklist-menu-review',
+      );
+    });
+
+    it('keeps the label key of every other item', () => {
+      expect(
+        restaurantSetupChecklist(BARE)
+          .filter((item) => item.key !== 'menu-reviewed')
+          .every((item) => item.labelKey === `setup-checklist-${item.key}`),
+      ).toBe(true);
+    });
+  });
 });
 
 describe('isRestaurantSection', () => {

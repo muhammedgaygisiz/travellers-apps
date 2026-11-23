@@ -157,9 +157,30 @@ describe('EditMenuService', () => {
       await service.confirmMenuAsOwn();
 
       expect(dataAccessMock.retryMenuLoad).not.toHaveBeenCalled();
+      expect(dataAccessMock.markMenuReviewed).not.toHaveBeenCalled();
       expect(toastMock.present).toHaveBeenCalledWith({
         messageKey: 'something-went-wrong-please-try-again',
         outcome: 'failure',
+      });
+    });
+
+    /** See GitHub issue #2302. */
+    it('ticks "menu reviewed" once the confirmation lands', async () => {
+      await service.confirmMenuAsOwn();
+
+      expect(dataAccessMock.markMenuReviewed).toHaveBeenCalledTimes(1);
+    });
+
+    it('still says the menu is confirmed when the tick is refused', async () => {
+      dataAccessMock.markMenuReviewed = jest
+        .fn()
+        .mockRejectedValue(new Error('permission-denied'));
+
+      await service.confirmMenuAsOwn();
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'menu-confirmed-as-own',
+        outcome: 'success',
       });
     });
   });

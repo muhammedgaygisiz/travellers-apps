@@ -49,9 +49,15 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   see the same state on every device; the dashboard re-reads the Restaurants
   each time it is shown, so returning from an edit shows it ticked. A
   Restaurant whose every item is ticked drops out, and the checklist goes
-  with it. "Menu reviewed" is ticked by the owner's first menu save, because
-  a menu built from Bite evidence is a draft only the owner can correct; an
-  operator's save from the admin app does not count.
+  with it. "Menu reviewed" is ticked by the owner's first menu save, or by
+  confirming a menu built from Bites with "This is our menu", because a menu
+  built from Bite evidence is a draft only the owner can correct; an
+  operator's save from the admin app does not count. Its label names the menu
+  the Restaurant has (issue [#2302]): "Create your menu" without one, "Check
+  the menu we built from guests' Bites" for a menu still marked as built from
+  Bites, and "Review your menu" for the owner's own. Only the menu records
+  where it came from, so the overview and the dashboard read it for the label;
+  every item's tick still comes from the stored Restaurant.
 - The Restaurant Owner sets the Restaurant's photo in its photo section (issue
   [#2126]). The business app could not before: a photo came from candidate
   verification or not at all. The photo is one box, the way Create Bite's is: the shared
@@ -303,4 +309,5 @@ all be reviewed for the first time.
 [#2279]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2279
 [#2280]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2280
 [#2281]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2281
+[#2302]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2302
 [#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957

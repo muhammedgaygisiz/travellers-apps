@@ -83,6 +83,11 @@ export class DashboardComponent {
   gpsPosition = input<Geopoint | null | undefined>();
   restaurants = input<Restaurant[]>([]);
   /**
+   * Held restaurants whose menu was built from guests' Bites, so the setup
+   * checklist names that menu (GitHub issue #2302).
+   */
+  menusBuiltFromBites = input<ReadonlySet<string>>(new Set());
+  /**
    * The restaurants read has finished. Until then an empty list means nothing,
    * so the empty state waits for it rather than flashing on every sign-in.
    */
@@ -128,7 +133,10 @@ export class DashboardComponent {
   readonly setups = computed<RestaurantSetup[]>(() =>
     (this.restaurants() ?? [])
       .map((restaurant) => {
-        const items = restaurantSetupChecklist(restaurant);
+        const items = restaurantSetupChecklist(restaurant, {
+          menuBuiltFromBites:
+            !!restaurant.id && this.menusBuiltFromBites().has(restaurant.id),
+        });
         const doneCount = items.filter((item) => item.done).length;
 
         return { restaurant, items, doneCount };

@@ -8,6 +8,7 @@ import {
 import { startGuard } from '../start.guard';
 import { AuthService } from '../auth.service';
 import { RequestedUrlService } from '../requested-url.service';
+import { AFTER_LOGIN_PAGE } from 'utils';
 
 describe('startGuard', () => {
   let getMember: jest.Mock;
@@ -45,6 +46,21 @@ describe('startGuard', () => {
     getMember.mockReturnValue({ uid: 'user-1' });
 
     expect(runGuard()).toEqual({ url: '/home' });
+  });
+
+  /** See GitHub issue #2305. */
+  it("forwards a signed-in visitor to the app's own landing page", () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { getMember } },
+        { provide: Router, useValue: { parseUrl } },
+        { provide: AFTER_LOGIN_PAGE, useValue: '/dashboard' },
+      ],
+    });
+    getMember.mockReturnValue({ uid: 'owner-1' });
+
+    expect(runGuard()).toEqual({ url: '/dashboard' });
   });
 
   it('forwards a signed-in visitor to the URL they originally asked for', () => {

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
-import { authGuard, roleGuard } from 'ta-firestore';
+import { authGuard, roleGuard, startGuard } from 'ta-firestore';
 import { PATH } from 'utils';
 
 /**
@@ -14,7 +14,9 @@ import { PATH } from 'utils';
  * on the outcome (issue #1469).
  *
  * `start` and the auth routes stay ungated: they are where a visitor who fails
- * those checks is sent.
+ * those checks is sent. `start` carries `startGuard` alone, which sends a
+ * signed-in account on to the dashboard (issue #2305) and lets everybody else
+ * through.
  *
  * Sign-in itself refuses an account without the role, so these guards are the
  * backstop for a restored session or a revoked role rather than the primary
@@ -27,6 +29,7 @@ export const ROUTES: Routes = withAuthRoutes(
       path: PATH.START,
       loadComponent: () =>
         import('bite-tribe-admin/start').then((m) => m.AdminStart),
+      canActivate: [startGuard],
     },
     {
       path: 'dashboard',

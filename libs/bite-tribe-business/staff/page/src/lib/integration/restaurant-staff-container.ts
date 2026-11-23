@@ -11,11 +11,13 @@ import { RestaurantStaffService } from './restaurant-staff.service';
       [staff]="service.staff()"
       [restaurantName]="service.restaurantName()"
       [loading]="service.loading()"
+      [loadFailed]="service.loadFailed()"
       [saving]="service.saving()"
       [isAuthenticated]="service.isAuthenticated()"
       (addStaff)="service.addStaff($event)"
       (removeStaff)="service.removeStaff($event)"
       (logoutClick)="service.logout()"
+      (retryLoad)="service.retryLoad()"
     />
   `,
 })

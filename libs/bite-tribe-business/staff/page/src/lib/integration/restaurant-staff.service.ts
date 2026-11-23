@@ -26,6 +26,13 @@ export class RestaurantStaffService {
 
   readonly staff = this.dataAccess.staffValue;
   readonly loading = computed(() => this.dataAccess.staff.isLoading());
+  /**
+   * The staff list could not be read (GitHub issue #2306). The list falls
+   * back to empty, which would otherwise read as "nobody works here".
+   */
+  readonly loadFailed = computed(
+    () => this.dataAccess.staff.status() === 'error',
+  );
   readonly saving = this.pending.asReadonly();
   readonly restaurantName = computed(
     () => this.dataAccess.restaurantValue()?.name ?? '',
@@ -34,6 +41,11 @@ export class RestaurantStaffService {
   readonly isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
     initialValue: false,
   });
+
+  /** Reads the staff list again after a failed read (GitHub issue #2306). */
+  retryLoad(): void {
+    this.dataAccess.staff.reload();
+  }
 
   /**
    * The toast distinguishes the grant from the idempotent repeat.

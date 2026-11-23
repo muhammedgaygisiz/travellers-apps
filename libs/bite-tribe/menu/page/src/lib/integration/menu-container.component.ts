@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   inject,
-  OnInit,
+  untracked,
 } from '@angular/core';
 import { MenuPage } from '../components/page/menu-page.component';
 import { MenuService } from './menu.service';
@@ -31,13 +33,25 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
   imports: [MenuPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MenuContainer implements OnInit {
+export class MenuContainer {
   service = inject(MenuService);
 
-  ngOnInit(): void {
+  /** Keyed on the id, so a restaurant document that changes in place is not read again. */
+  private readonly restaurantId = computed(() => this.service.restaurant()?.id);
+
+  constructor() {
     // One read for the whole menu's aggregates, and a failure is an empty map
-    // rather than a menu that does not load (issue #1113).
-    void this.service.loadStats();
+    // rather than a menu that does not load (issue #1113). Read once the
+    // restaurant is known rather than on init: a menu opened by link or
+    // reload initialises before its restaurant has loaded, and an init-time
+    // read found no id and showed no ratings at all (issue #2309).
+    effect(() => {
+      const restaurantId = this.restaurantId();
+
+      if (restaurantId) {
+        untracked(() => void this.service.loadStats());
+      }
+    });
   }
 
   ionViewDidEnter(): void {

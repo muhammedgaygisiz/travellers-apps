@@ -204,4 +204,5 @@ tools/check-ssot.mjs (DEPLOY)
 - [Implementation - Release And Build Workflow](../implementation/release-and-build-workflow.md)
 - [Release Workflow](../overview/release-workflow.md)
 - [Current State - Open Questions](../current-state/open-questions.md)
-  [#2293]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2293
+
+[#2293]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2293

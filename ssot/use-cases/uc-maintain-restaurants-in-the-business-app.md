@@ -120,6 +120,18 @@ the position and ordering at the table show none (issue [#2221]). Below the rows
 (edit, or create when there is none), the menu code, the staff, the floor plan
 and the live tables.
 
+Ordering at the table is "Coming soon" where guests cannot order yet (issue
+[#2307]): a guest orders through an anonymous session, and anonymous sign-in is
+not enabled in production. Its overview row says "Coming soon" and does not
+open, its section shows "Coming soon" instead of the switch (which also covers
+a link straight to it), and the floor plan's "Print QR codes" is disabled with
+"Coming soon" beside it, so no table code goes out that every guest would fail
+to scan. The floor plan, the tables and the staff stay, so owners see what is
+coming and can set it up. It is offered where
+`NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED` is `true` (QA, through
+`qa.web.json`) or the build targets the emulators (`NX_APP_BITE_TRIBE_IS_DEV`);
+unset, as in production, it is not.
+
 Each row opens `restaurant/:restaurantId/edit/:section`, which holds only that
 section's fields and its one Save. While a save runs, the section is covered by the same "Saving…" overlay as the menu editor's save, so Save cannot be pressed twice (issue [#2225]). The position section says how the pin moves (a tap places it, nothing changes until Save) and opens at street level on the stored position, or on the device's position for a Restaurant that has none (`0, 0` counts as none), before the world view (issue [#2226]). Save stays disabled while the fields still
 hold what is stored, as in the menu editor, and enables again only when they
@@ -311,3 +323,4 @@ all be reviewed for the first time.
 [#2281]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2281
 [#2302]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2302
 [#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957
+[#2307]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2307

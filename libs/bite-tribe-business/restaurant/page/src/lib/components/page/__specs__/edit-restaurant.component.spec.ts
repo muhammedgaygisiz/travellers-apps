@@ -221,6 +221,25 @@ describe('EditRestaurantComponent', () => {
       expect(component.unchanged().tableOrdering).toBe(false);
     });
 
+    /** See GitHub issue #2307. */
+    it('shows "Coming soon" instead of the form while ordering is not offered', () => {
+      show({ position: MUNICH });
+      componentRef.setInput('section', 'table-ordering');
+      componentRef.setInput('tableOrderingAvailable', false);
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(
+        el.querySelector('[data-testid="table-ordering-coming-soon"]'),
+      ).toBeTruthy();
+      expect(
+        el.querySelector('[data-testid="table-ordering-enabled"]'),
+      ).toBeNull();
+      expect(
+        el.querySelector('[data-testid="save-table-ordering"]'),
+      ).toBeNull();
+    });
+
     it('says where an offered zone came from, before it is saved', () => {
       show({ position: MUNICH });
       componentRef.setInput('section', 'table-ordering');

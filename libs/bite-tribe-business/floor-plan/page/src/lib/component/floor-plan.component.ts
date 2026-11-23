@@ -262,6 +262,8 @@ export class FloorPlanComponent {
    */
   readonly loadFailed = input(false);
   readonly saving = input(false);
+  /** Table codes can be printed; otherwise "Coming soon" (#2307). */
+  readonly tableOrderingAvailable = input(true);
 
   /**
    * What the editor is doing about the draft (GitHub issue #1088).

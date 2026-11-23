@@ -484,6 +484,8 @@
   "qr-sheets-rotate-failed": "We couldn't replace the codes. The ones on screen are still the current ones.",
   "table-ordering": "Ordering at the table",
   "table-ordering-enabled": "Take orders from the table",
+  "table-ordering-coming-soon": "Coming soon",
+  "table-ordering-coming-soon-hint": "Guests will soon order from their table by scanning its code. You can already set up your floor plan and tables.",
   "table-ordering-enabled-hint": "Guests who scan a table code can read your menu and send you an order from their phone.",
   "table-ordering-menu-only-hint": "Guests who scan a table code can read your menu. Orders still come to you the way they do now.",
   "table-ordering-time-zone": "Time zone",

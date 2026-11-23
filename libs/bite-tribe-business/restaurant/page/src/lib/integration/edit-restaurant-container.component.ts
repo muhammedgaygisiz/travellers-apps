@@ -24,6 +24,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
     <edit-restaurant
       class="ion-page"
       [section]="section()"
+      [tableOrderingAvailable]="service.tableOrderingAvailable"
       [restaurant]="service.restaurant()"
       [photoStatus]="service.photoStatus()"
       [gpsPosition]="service.gpsPosition()"

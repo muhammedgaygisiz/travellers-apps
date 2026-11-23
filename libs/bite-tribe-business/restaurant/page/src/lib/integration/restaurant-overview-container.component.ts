@@ -9,6 +9,7 @@ import { EditRestaurantService } from './edit-restaurant.service';
     <bt-restaurant-overview
       class="ion-page"
       [restaurant]="service.restaurant()"
+      [tableOrderingAvailable]="service.tableOrderingAvailable"
       [guestBitesToLink]="service.guestBitesToLink.value() ?? 0"
       [menuBuiltFromBites]="service.menuBuiltFromBites.value() ?? false"
       (openGuestBites)="service.gotoGuestBites($event.id, $event.menuId)"

@@ -200,6 +200,17 @@ describe(FloorPlanComponent.name, () => {
       }),
     );
 
+    /** See GitHub issue #2307. */
+    it('offers the table codes only while ordering at the table is', () => {
+      expect(buttonDisabled('floor-plan-qr-codes')).toBe(false);
+      expect(query('floor-plan-qr-codes-coming-soon')).toBeNull();
+
+      setInputs({ tableOrderingAvailable: false });
+
+      expect(buttonDisabled('floor-plan-qr-codes')).toBe(true);
+      expect(query('floor-plan-qr-codes-coming-soon')).not.toBeNull();
+    });
+
     it('shows the room and its canvas', () => {
       expect(query('floor-plan-room-list')).not.toBeNull();
       expect(query('floor-plan-canvas')).not.toBeNull();

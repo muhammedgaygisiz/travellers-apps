@@ -10,8 +10,8 @@
  * regenerated, the use-case format rules in ssot/overview/use-case-format.md, a
  * workspace directory the building block view does not name, a Hosting target or
  * workflow the deployment view does not name, a signal of an external system the
- * context view does not name, and the word budgets of what every agent reads before
- * its task.
+ * context view does not name, the word budgets of what every agent reads before
+ * its task, and the links through which agent tools discover the skills in skills/.
  *
  * Exits non-zero when any rule fails, listing every failure. Warnings are listed
  * too but never change the exit code.
@@ -20,7 +20,7 @@
  * rewrites tools/check-ssot-baseline.json; see check-ssot-context.mjs.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { lstatSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { join, dirname, relative, resolve, sep } from 'node:path';
 import { MAP, regenerate } from './generate-traceability-map.mjs';
 import { checkContext } from './check-ssot-context.mjs';
@@ -412,6 +412,66 @@ try {
       'ENTRY',
       `always-read documents total ${total} words, over the budget of ${ENTRY_BUDGET_WORDS} (${counts.join(', ')}) - see tools/README.md`,
     );
+  }
+}
+
+// ---- skill discovery (.claude/skills, .agents/skills -> skills/) ----
+// Agent tools find the repository skills through links, not through the folder itself:
+// Claude Code reads .claude/skills, Codex and Gemini read .agents/skills. A broken link
+// raises no error anywhere, only agent sessions that quietly work without the skills,
+// so it fails here. Every skill needs a SKILL.md whose frontmatter names it after its
+// folder and describes it, or the tools skip it just as quietly.
+{
+  const SKILLS = 'skills';
+  const restore = (link) =>
+    `restore it with \`rm -f ${link} && ln -s ../${SKILLS} ${link}\` (on Windows, see the symlink steps in README.md)`;
+  for (const link of ['.claude/skills', '.agents/skills']) {
+    let stat;
+    try {
+      stat = lstatSync(link);
+    } catch {
+      fail(link, 'SKILLS', `missing, so agent tools cannot discover \`${SKILLS}/\`; ${restore(link)}`);
+      continue;
+    }
+    if (!stat.isSymbolicLink()) {
+      fail(link, 'SKILLS', `not a link to \`${SKILLS}/\`; ${restore(link)}`);
+      continue;
+    }
+    let target = null;
+    try {
+      target = realpathSync(link);
+    } catch {
+      // a dangling link resolves to nothing
+    }
+    if (target !== realpathSync(SKILLS)) {
+      fail(link, 'SKILLS', `does not resolve to \`${SKILLS}/\`; ${restore(link)}`);
+    }
+  }
+  for (const entry of readdirSync(SKILLS, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const file = join(SKILLS, entry.name, 'SKILL.md');
+    if (!exists(file)) {
+      fail(file, 'SKILLS', `skill \`${entry.name}\` has no SKILL.md; add one with \`name: ${entry.name}\` and a \`description\` in its frontmatter`);
+      continue;
+    }
+    const front = /^---\r?\n([\s\S]*?)\r?\n---\s*$/m.exec(readFileSync(file, 'utf8'));
+    const yaml = front && front.index === 0 ? front[1] : null;
+    if (yaml === null) {
+      fail(file, 'SKILLS', `no frontmatter; open the file with \`---\`, \`name: ${entry.name}\`, a \`description\` and \`---\``);
+      continue;
+    }
+    const name = /^name:[ \t]*(.*?)[ \t]*$/m.exec(yaml)?.[1].replace(/^(['"])(.*)\1$/, '$2');
+    if (!name) fail(file, 'SKILLS', `frontmatter has no \`name\`; add \`name: ${entry.name}\``);
+    else if (name !== entry.name) {
+      fail(file, 'SKILLS', `\`name: ${name}\` differs from its folder; set \`name: ${entry.name}\` or rename the folder`);
+    }
+    // a value on the line, or a block scalar (`>`, `|`) followed by indented lines
+    const description = /^description:[ \t]*(\S.*)?$(\n[ \t]+\S.*)?/m.exec(yaml);
+    const value = description?.[1]?.trim() ?? '';
+    const indented = Boolean(description?.[2]);
+    const empty =
+      !description || /^(['"])\1$/.test(value) || ((!value || /^[>|][+-]?$/.test(value)) && !indented);
+    if (empty) fail(file, 'SKILLS', 'frontmatter has no `description`; add one saying when the skill is used');
   }
 }
 

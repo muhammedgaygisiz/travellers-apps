@@ -24,6 +24,16 @@ The SSOT is the shared source for:
 
 Tool-specific files such as `AGENTS.md`, `CLAUDE.md`, IDE rules, or agent skills are adapters. They may explain how a tool should discover the workflow, but they must not define a separate product or implementation truth.
 
+## Skill Discovery
+
+The repository skills live in `skills/`. Agent tools discover them only through two
+links: `.claude/skills` for Claude Code and `.agents/skills` for Codex and Gemini, each
+pointing to `../skills`. A tool reads a skill by the `name` and `description` in its
+`SKILL.md` frontmatter. A broken link raises no error, only sessions that quietly work
+without the skills, so the `SKILLS` rule of `npm run check:ssot` fails CI when a link is
+missing or resolves elsewhere, or a skill's frontmatter is incomplete. Removing either
+link is never part of an unrelated change.
+
 ## Required Intake
 
 Before editing code or SSOT content, an agent must:

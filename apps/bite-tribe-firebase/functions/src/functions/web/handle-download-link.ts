@@ -1,6 +1,6 @@
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
-import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import { linkOrigin } from '../shared/utils/bite-tribe-origin';
 import { APP_STORE_URL, PLAY_STORE_URL } from '../shared/utils/store-urls';
 
 /**
@@ -22,9 +22,10 @@ export { APP_STORE_URL, PLAY_STORE_URL } from '../shared/utils/store-urls';
 
 /**
  * Neither store has anything to offer a desktop visitor, so they get the web
- * app's start page, which carries the store QR codes from issue #1453.
+ * app's start page, which carries the store QR codes from issue #1453. On QA
+ * that is the QA site (issue #2304).
  */
-export const WEB_FALLBACK_URL = `${BITE_TRIBE_ORIGIN}/`;
+export const WEB_FALLBACK_URL = `${linkOrigin()}/`;
 
 /**
  * `iPad` and `iPod` are listed next to `iPhone` because the App Store listing

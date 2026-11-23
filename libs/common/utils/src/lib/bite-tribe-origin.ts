@@ -12,3 +12,34 @@
  * the host of the three that both surfaces name.
  */
 export const BITE_TRIBE_ORIGIN = 'https://bitetribe.app';
+
+/** A plain `https://host`, nothing after it. */
+const PLAIN_HTTPS_ORIGIN = /^https:\/\/[a-z0-9.-]+$/;
+
+/**
+ * The origin of the links this build hands out to be opened elsewhere: menu
+ * codes, table codes and shared Bites (GitHub issue #2304).
+ *
+ * {@link BITE_TRIBE_ORIGIN} in production. A QA build sets
+ * `NX_APP_BITE_TRIBE_LINK_ORIGIN` (in `backends/qa.web.json`) to the QA site,
+ * so a code printed or a link shared on QA opens QA rather than production,
+ * where the QA restaurant does not exist. Canonical URLs stay on
+ * {@link BITE_TRIBE_ORIGIN} everywhere, so search engines never index QA.
+ *
+ * Production first: anything but a plain `https://host` - unset, empty, a
+ * typo - is the production origin. The read is guarded because only an app
+ * build inlines `process.env`; Storybook has no `process` at all.
+ */
+export const linkOrigin = (): string => {
+  let configured: string | undefined;
+
+  try {
+    configured = process.env['NX_APP_BITE_TRIBE_LINK_ORIGIN'];
+  } catch {
+    configured = undefined;
+  }
+
+  return configured && PLAIN_HTTPS_ORIGIN.test(configured)
+    ? configured
+    : BITE_TRIBE_ORIGIN;
+};

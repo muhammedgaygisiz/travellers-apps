@@ -34,6 +34,9 @@ const SCANNED_EXTENSIONS = new Set([
   '.webmanifest',
 ]);
 
+/** The QA Firebase project; its sites are `bite-tribe-qa*.web.app`. */
+const QA_PROJECT_ID = 'bite-tribe-qa';
+
 const REQUIRED_ENTRY = {
   key: 'NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED',
   value: 'true',
@@ -65,6 +68,7 @@ if (files.length === 0) {
 const problems = [
   ...DEV_ONLY_ENV_KEYS.flatMap((key) => findForbiddenKey(key, files)),
   ...findRequiredEntry(files),
+  ...findQaReference(files),
 ];
 
 console.log(
@@ -83,6 +87,7 @@ for (const key of DEV_ONLY_ENV_KEYS) {
 console.log(
   `  ok  ${REQUIRED_ENTRY.key} is inlined as ${REQUIRED_ENTRY.value}`,
 );
+console.log('  ok  no QA site or QA project is inlined');
 
 /**
  * A dev-only key is a finding only when it is inlined as an object key.
@@ -126,6 +131,31 @@ function findRequiredEntry(files) {
     '  The App Check gate defaults to off, so a build without the variable',
     '  wraps native artifacts with enforcement disabled (issue #1177).',
   ];
+}
+
+/**
+ * A production bundle carries nothing of QA (GitHub issue #2304).
+ *
+ * QA builds hand out QA links through `NX_APP_BITE_TRIBE_LINK_ORIGIN` and talk
+ * to the QA project. Either reaching a production bundle would send real
+ * guests to QA - a printed menu code most of all. So a QA site address, or the
+ * QA project inlined as the project id, is a finding. The bare project id is
+ * not: every build names it once, to tell the stages apart.
+ */
+function findQaReference(files) {
+  const patterns = [
+    /bite-tribe-qa[a-z-]*\.web\.app/,
+    new RegExp(
+      `NX_APP_BITE_TRIBE_PROJECT_ID${QUOTE}?\\s*:\\s*${QUOTE}${QA_PROJECT_ID}${QUOTE}`,
+    ),
+  ];
+
+  return files
+    .filter(({ content }) => patterns.some((pattern) => pattern.test(content)))
+    .map(
+      ({ path }) =>
+        `  ${relative(BUNDLE_DIR, path)} carries a QA site or the QA project`,
+    );
 }
 
 function* textFiles(directory) {

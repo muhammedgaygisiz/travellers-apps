@@ -1,4 +1,4 @@
-import { BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
+import { linkOrigin } from './bite-tribe-origin';
 
 /**
  * The address a shared Bite is sent as (GitHub issue #345).
@@ -10,10 +10,13 @@ import { BITE_TRIBE_ORIGIN } from './bite-tribe-origin';
  * still handled by `handleSharedLinkToBite`, and is still a verified App Link
  * on both platforms.
  *
+ * On QA the link names the QA site instead ({@link linkOrigin}, issue #2304),
+ * so a Bite shared there opens there.
+ *
  * The link share and the QR code on a share image both use this, so the two
  * can never point at different places. Only the Bite's id goes into it - no
  * text a user wrote - which is what keeps the QR code from being turned into a
  * phishing link (`UC-SBS` `R-23`).
  */
 export const sharedBiteUrl = (biteId: string): string =>
-  `${BITE_TRIBE_ORIGIN}/s/bite/${encodeURIComponent(biteId)}`;
+  `${linkOrigin()}/s/bite/${encodeURIComponent(biteId)}`;

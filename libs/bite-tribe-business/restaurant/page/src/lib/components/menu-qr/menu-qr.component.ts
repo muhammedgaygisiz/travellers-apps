@@ -8,7 +8,7 @@ import {
 import { IonButton, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { QrCodeComponent } from 'common/ui/qr-code';
-import { BITE_TRIBE_ORIGIN, PATH } from 'utils';
+import { linkOrigin, PATH } from 'utils';
 
 /** How long the copy button reports that it copied, in milliseconds. */
 const COPIED_FEEDBACK_MS = 2000;
@@ -61,8 +61,9 @@ export class MenuQrComponent {
 
   protected readonly copied = signal(false);
 
+  /** On QA it names the QA site, so a QA code opens QA (#2304). */
   protected readonly url = computed(
-    () => `${BITE_TRIBE_ORIGIN}/${PATH.PUBLIC_MENU}/${this.restaurantId()}`,
+    () => `${linkOrigin()}/${PATH.PUBLIC_MENU}/${this.restaurantId()}`,
   );
 
   protected async copy(): Promise<void> {

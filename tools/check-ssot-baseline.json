@@ -76,5 +76,5 @@
     "www.instagram.com"
   ],
   "actions": [],
-  "keys": ["NX_APP_BITE_TRIBE_IS_DEV"]
+  "keys": ["NX_APP_BITE_TRIBE_IS_DEV", "NX_APP_BITE_TRIBE_LINK_ORIGIN"]
 }

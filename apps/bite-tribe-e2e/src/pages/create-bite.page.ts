@@ -196,8 +196,11 @@ export class CreateBitePage {
   ): Promise<void> {
     await this.openRestaurantSelector();
     await this.restaurantSearch.fill(searchTerm);
+    // The "Search Google" row, not the "add as a new place" row that also
+    // echoes the search term and is an ion-item[button] since #2296.
     await this.page
       .locator('lib-restaurant-selector ion-item[button]')
+      .filter({ has: this.page.locator('ion-icon[name="logo-google"]') })
       .filter({ hasText: searchTerm })
       .click();
     await this.page

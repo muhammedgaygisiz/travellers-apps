@@ -127,6 +127,35 @@ export const NearbyGooglePlacesLoading: Story = {
 };
 
 /**
+ * A name that matches nothing listed, such as a food stand that is not on
+ * Google Maps either. The offer to use the typed name sits above the results
+ * as an action card, so it is not read as one more search hit. See GitHub
+ * issue #2296.
+ */
+export const AddUnlistedPlace: Story = {
+  args: {
+    restaurants: [
+      { name: 'Burger Joint', distance: '2.1' },
+      { name: 'Pizza Place', distance: '0.4' },
+    ],
+    selectedRestaurant: '',
+    googlePlaces: [],
+    googlePlacesLoading: false,
+  },
+  play: async ({ canvasElement }) => {
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    );
+    const searchbar = canvasElement.querySelector('ion-searchbar');
+    if (!searchbar) {
+      return;
+    }
+    searchbar.value = 'Food stand';
+    searchbar.dispatchEvent(new CustomEvent('ionInput'));
+  },
+};
+
+/**
  * The `Posting later` case from GitHub issue #1269: the device is in Bern and
  * the Bite carries a position in Ronda, so every candidate is ~1539 km away and
  * only the distance from the Bite separates them. Both origins are named, and

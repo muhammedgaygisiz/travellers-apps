@@ -1142,7 +1142,7 @@ export class BitePage {
     );
 
     // Mirror the Google place selection: patch the position of the selected
-    // restaurant when we know it. The custom `Use: "abc"` fallback has no match,
+    // restaurant when we know it. The custom `Add "abc" as a new place` fallback has no match,
     // so it keeps the current form position. Only verified restaurants carry a
     // restaurantId; unverified/local and fallback picks clear it.
     this.biteFormGroup.patchValue({

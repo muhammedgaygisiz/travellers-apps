@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026), Lucerne (20 November 2026), Sousse (21 November 2026) and Hamburg (22 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026), Lucerne (20 November 2026), Sousse (21 November 2026), Hamburg (22 November 2026) and Sydney (23 November 2026) were scheduled the same way.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1760,6 +1760,26 @@ harbour". The city page `/eat/hamburg` went up the same afternoon, with no
 aliases. A scheduled job was to add the post links at 22:07, but it lived only
 in the agent session, which restarted before then; the links were added the
 next day.
+
+**Sydney** (23 November 2026, scheduled for 22:00) tags all five dish slides:
+`@searockgrill` (crocodile pie; searock.com.au links it, and its bio gives
+Shop 15, East Circular Quay, where the pin is), `@themeatandwineco`
+(blackcurrant kangaroo; themeatandwineco.com links it; it is the chain's
+account, and the Bite is from the Castlereagh St branch), `@hotelbondi` (creamy
+garlic mussels; maloneyhotels.com.au/hotel-bondi links it, and its bio gives
+178 Campbell Parade), `@brickfieldsbakery` (chicken sandwich on sourdough; its
+bio links brickfields.com.au, the website on the Chippendale Maps listing) and
+`@fourfrogscreperie` (smoked salmon galette; fourfrogs.com.au links it, and the
+Maps pin matches the Circular Quay crêperie). Australia had 89 Bites, 29 of
+them in Sydney and 28 of those by one author. Leela wears a summer look, a
+wide straw sun hat with sunglasses and a white eyelet summer dress, and holds
+an Aussie meat pie, since Adelaide had already used the surf lifesaver; the
+cover photo is the Opera House at dusk with the CBD behind. Leela's cover line
+is "G'day! Crocodile pie by the Harbour, mussels at Bondi". The Bite names in
+the app keep their typos ("Mussles", "Sourdough breed", "Crepe La Saumon
+Fume"), so the admin search used them, while the slides corrected them. The
+city page `/eat/sydney` went up the same afternoon, with no aliases, and its
+Instagram and Facebook post links were added once the posts were live.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

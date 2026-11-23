@@ -22,6 +22,7 @@
     "sync-native-version": "node tools/sync-native-version.mjs",
     "release:android": "node tools/build-android-release.mjs",
     "release:verify-bundle": "node tools/assert-release-bundle.mjs",
+    "build:web:qa": "node tools/build-web-qa.mjs",
     "release:provenance": "node tools/write-build-provenance.mjs",
     "firestore:assert-indexes-ready": "node tools/assert-firestore-indexes-ready.mjs",
     "analytics:report": "node tools/analytics/report.mjs",

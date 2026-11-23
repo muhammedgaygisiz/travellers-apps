@@ -252,6 +252,8 @@
   "staff-manage": "Manage Staff",
   "staff-title": "Staff",
   "staff-empty": "Nobody works at this restaurant on BiteTribe yet.",
+  "staff-load-failed": "We couldn't load your staff. Please try again.",
+  "staff-load-retry": "Try again",
   "staff-add-title": "Add someone",
   "staff-add": "Add to staff",
   "staff-add-placeholder": "name@example.com",

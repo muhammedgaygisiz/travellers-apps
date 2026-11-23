@@ -65,6 +65,11 @@ export const Loading: Story = {
  * button lock, because either would otherwise queue a second write against a
  * list that is about to change.
  */
+/** The list could not be read, so it says so rather than "nobody" (#2306). */
+export const LoadFailed: Story = {
+  args: { staff: [], loadFailed: true },
+};
+
 export const Saving: Story = {
   args: { saving: true },
 };

@@ -28,6 +28,8 @@ describe(RestaurantStaffService.name, () => {
   let present: jest.Mock;
   let addStaff: jest.Mock;
   let removeStaff: jest.Mock;
+  const staffStatus = signal<string>('resolved');
+  const reload = jest.fn();
   const restaurantId = signal<string | undefined>('restaurant-1');
 
   const messageKeys = (): string[] =>
@@ -47,7 +49,11 @@ describe(RestaurantStaffService.name, () => {
           provide: RestaurantStaffDataAccessService,
           useValue: {
             restaurantId,
-            staff: { isLoading: (): boolean => false },
+            staff: {
+              isLoading: (): boolean => false,
+              status: staffStatus,
+              reload,
+            },
             staffValue: signal([]),
             restaurantValue: signal({ id: 'restaurant-1', name: 'Pizza' }),
             addStaff,
@@ -66,6 +72,18 @@ describe(RestaurantStaffService.name, () => {
   });
 
   afterEach(() => jest.restoreAllMocks());
+
+  /** See GitHub issue #2306. */
+  it('tells a failed read apart from an empty list, and reads again on retry', () => {
+    staffStatus.set('resolved');
+    expect(service.loadFailed()).toBe(false);
+
+    staffStatus.set('error');
+    expect(service.loadFailed()).toBe(true);
+
+    service.retryLoad();
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
 
   it('names the restaurant the page is about', () => {
     expect(service.restaurantName()).toBe('Pizza');

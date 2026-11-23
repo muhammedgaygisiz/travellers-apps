@@ -80,12 +80,15 @@ export class RestaurantStaffComponent {
   readonly staff = input<RestaurantStaffMember[]>([]);
   readonly restaurantName = input('');
   readonly loading = input(false);
+  /** The list could not be read; it is unknown, not empty (#2306). */
+  readonly loadFailed = input(false);
   readonly saving = input(false);
   readonly isAuthenticated = input(false);
 
   readonly addStaff = output<string>();
   readonly removeStaff = output<RestaurantStaffMember>();
   readonly logoutClick = output<void>();
+  readonly retryLoad = output<void>();
 
   readonly email = signal('');
 

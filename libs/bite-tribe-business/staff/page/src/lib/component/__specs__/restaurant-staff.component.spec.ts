@@ -119,6 +119,24 @@ describe(RestaurantStaffComponent.name, () => {
     expect(query('restaurant-staff-empty')).toBeNull();
   });
 
+  /** See GitHub issue #2306. */
+  it('says a failed read failed, rather than that nobody works here', () => {
+    setInputs({ staff: [], loadFailed: true });
+
+    expect(query('restaurant-staff-failed')).not.toBeNull();
+    expect(query('restaurant-staff-empty')).toBeNull();
+  });
+
+  it('asks for the list again from the retry button', () => {
+    const retried: unknown[] = [];
+    component.retryLoad.subscribe(() => retried.push(true));
+    setInputs({ staff: [], loadFailed: true });
+
+    (query('restaurant-staff-retry') as HTMLElement).click();
+
+    expect(retried).toHaveLength(1);
+  });
+
   it('names the restaurant the staff belong to', () => {
     setInputs({ staff: [], restaurantName: 'Pizza Palace' });
 

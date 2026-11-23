@@ -20,6 +20,25 @@
             <div class="restaurant-staff__loading">
               <ion-spinner name="crescent" />
             </div>
+          } @else if (loadFailed()) {
+            <!--
+              A failed read is not an empty list (issue #2306): saying nobody
+              works here would invite adding the same person again.
+            -->
+            <div
+              class="restaurant-staff__failed"
+              data-testid="restaurant-staff-failed"
+            >
+              <ion-note>{{ 'staff-load-failed' | transloco }}</ion-note>
+              <ion-button
+                fill="outline"
+                size="small"
+                data-testid="restaurant-staff-retry"
+                (click)="retryLoad.emit()"
+              >
+                {{ 'staff-load-retry' | transloco }}
+              </ion-button>
+            </div>
           } @else {
             <ion-list lines="full" data-testid="restaurant-staff-list">
               @for (member of staff(); track member.uid) {

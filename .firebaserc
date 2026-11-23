@@ -7,7 +7,7 @@
           "my-cv-5f65d"
         ]
       }
-     },
+    },
     "bite-tribe": {
       "hosting": {
         "bite-tribe": [
@@ -23,6 +23,19 @@
           "bite-tribe-storybook"
         ]
       }
-   }
+    },
+    "bite-tribe-qa": {
+      "hosting": {
+        "bite-tribe": [
+          "bite-tribe-qa"
+        ],
+        "bite-tribe-business": [
+          "bite-tribe-qa-business"
+        ],
+        "bite-tribe-admin": [
+          "bite-tribe-qa-admin"
+        ]
+      }
+    }
   }
 }

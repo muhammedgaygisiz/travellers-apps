@@ -109,6 +109,14 @@ ROLES=(
   roles/firebase.viewer
 )
 
+# QA only (issue 2293): the QA account also deploys the three web apps to the
+# QA hosting sites, from `deploy-qa-web`. Production's web apps deploy with the
+# production hosting credential, so its functions account gains no hosting
+# right here.
+if [ "$PROJECT" = "bite-tribe-qa" ]; then
+  ROLES+=(roles/firebasehosting.admin)
+fi
+
 main() {
   require_gcloud
   require_gh

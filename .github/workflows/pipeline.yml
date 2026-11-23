@@ -1334,6 +1334,64 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/qa-deploy-key.json"
 
+  # The consumer, business and admin web apps on the QA project (issue 2293),
+  # so the real builds can be tried against `bite-tribe-qa` before production
+  # gets them, and a release smoke test (issue 2294) has something to run on.
+  #
+  # After `deploy-qa-backend`, so a QA page never runs ahead of the QA
+  # functions and rules it calls. Each app is built with the production
+  # configuration and only the values of `backends/qa.json` and
+  # `qa.web.json`; `build:web:qa` refuses a bundle that names production.
+  #
+  # The same QA deploy account as the backend, which also holds
+  # `roles/firebasehosting.admin` on `bite-tribe-qa`. It has no rights on
+  # `bite-tribe`.
+  deploy-qa-web:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - deploy-qa-backend
+
+    concurrency:
+      group: deploy-web-bite-tribe-qa
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Build the three web apps for QA
+        run: npm run build:web:qa
+
+      - name: Write the deploy credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA }}
+        run: |
+          umask 077
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE_QA" > "$RUNNER_TEMP/qa-web-deploy-key.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/qa-web-deploy-key.json" >> "$GITHUB_ENV"
+
+      - name: Deploy the web apps to QA hosting
+        run: npx --no-install firebase deploy --only hosting:bite-tribe,hosting:bite-tribe-business,hosting:bite-tribe-admin --project bite-tribe-qa --non-interactive
+
+      - name: Record the deployed commit
+        run: |
+          {
+            echo '### QA web apps deployed'
+            echo
+            echo "Commit \`${GITHUB_SHA}\` to \`bite-tribe-qa\`:"
+            echo '- consumer: https://bite-tribe-qa.web.app'
+            echo '- business: https://bite-tribe-qa-business.web.app'
+            echo '- admin: https://bite-tribe-qa-admin.web.app'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the deploy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/qa-web-deploy-key.json"
+
   # BiteTribe Storybook
 
   # Gated on `loki` as well as `tests`, so the published Storybook is always one

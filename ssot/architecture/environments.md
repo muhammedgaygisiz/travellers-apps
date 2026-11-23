@@ -8,11 +8,11 @@ functions themselves are in [Architecture - Firebase](firebase.md).
 
 ## The Three Stages
 
-| Stage      | Backend                          | How a build gets there                                                                         |
-| ---------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Dev        | the local Firebase emulators     | a development build (`nx serve`, `nx run bite-tribe-ios:dev`), `NX_APP_BITE_TRIBE_IS_DEV=true` |
-| QA         | `bite-tribe-qa`, disposable data | `npm run ios:simulator -- --backend=qa`, `npm run android:qa`                                  |
-| Production | `bite-tribe`                     | CI deploys, `native-release.yml`, or `--backend=production` for capture work                   |
+| Stage      | Backend                          | How a build gets there                                                                                   |
+| ---------- | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Dev        | the local Firebase emulators     | a development build (`nx serve`, `nx run bite-tribe-ios:dev`), `NX_APP_BITE_TRIBE_IS_DEV=true`           |
+| QA         | `bite-tribe-qa`, disposable data | the QA web apps CI deploys from `develop`, `npm run ios:simulator -- --backend=qa`, `npm run android:qa` |
+| Production | `bite-tribe`                     | CI deploys, `native-release.yml`, or `--backend=production` for capture work                             |
 
 There is no separate staging project. QA is the one place to rehearse a
 production-shaped change, such as App Check enforcement, before production.
@@ -30,11 +30,11 @@ under the production IDs, `com.bitetribe.app`, so App Attest and Play Integrity
 attest the build TestFlight and Play ship, and no second App ID or signing setup
 exists. Nothing else varies:
 
-| Layer        | Production                                                       | QA                                                                                                      |
-| ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Web bundle   | `--configuration=production`, values from `apps/bite-tribe/.env` | the same configuration, values only from `apps/bite-tribe-firebase/backends/qa.json`                    |
-| iOS plist    | `App/App/GoogleService-Info.plist`                               | `ios/firebase/qa/GoogleService-Info.plist`, chosen by the `BITETRIBE_FIREBASE_BACKEND=qa` build setting |
-| Android json | `app/google-services.json`                                       | `app/src/qa/google-services.json`, used by the `qa` build type (`npm run android:qa`)                   |
+| Layer        | Production                                                       | QA                                                                                                                                |
+| ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Web bundle   | `--configuration=production`, values from `apps/bite-tribe/.env` | the same configuration, values only from `apps/bite-tribe-firebase/backends/qa.json` (plus `qa.web.json` for the hosted web apps) |
+| iOS plist    | `App/App/GoogleService-Info.plist`                               | `ios/firebase/qa/GoogleService-Info.plist`, chosen by the `BITETRIBE_FIREBASE_BACKEND=qa` build setting                           |
+| Android json | `app/google-services.json`                                       | `app/src/qa/google-services.json`, used by the `qa` build type (`npm run android:qa`)                                             |
 
 The **Select Firebase Backend** build phase in the App target copies the right
 plist into the bundle on every build, the production one included. That way a
@@ -44,6 +44,23 @@ The QA web build runs with `NX_LOAD_DOT_ENV_FILES=false`, so nothing from
 `apps/bite-tribe/.env` leaks in. An empty shell value is not enough to blank a
 `.env` key, because dotenv-expand treats an empty value as unset. The first
 QA build shipped the production reCAPTCHA site key that way.
+
+### The QA Web Apps
+
+Since issue [#2293] the consumer, business and admin web apps run on QA too, rebuilt and redeployed by `deploy-qa-web` in `pipeline.yml` after every QA backend deploy from `develop`:
+
+| App      | QA URL                                 | Hosting target on `bite-tribe-qa`                |
+| -------- | -------------------------------------- | ------------------------------------------------ |
+| Consumer | https://bite-tribe-qa.web.app          | `bite-tribe` → `bite-tribe-qa`                   |
+| Business | https://bite-tribe-qa-business.web.app | `bite-tribe-business` → `bite-tribe-qa-business` |
+| Admin    | https://bite-tribe-qa-admin.web.app    | `bite-tribe-admin` → `bite-tribe-qa-admin`       |
+
+- **Build:** `npm run build:web:qa` (`tools/build-web-qa.mjs`) builds each app with the production configuration and only `qa.json` plus `qa.web.json`, with `.env` loading off. It then refuses a bundle that does not name `bite-tribe-qa` and the QA site key, or that names production. The same target names map to the QA sites in the root `.firebaserc`, so `firebase.json` is shared with production.
+- **`qa.web.json`** holds what only the hosted web apps need: the reCAPTCHA Enterprise site key of the QA key "Bite Tribe QA Web" and the business and admin auth domains. It stays out of `qa.json` because the native QA builds must carry no site key: they get App Check tokens from App Attest and Play Integrity, and `capacitor://localhost` is no reCAPTCHA domain.
+- **App Check:** the key is allowed on the three QA sites (`.web.app` and `.firebaseapp.com`) and registered in App Check for the QA web app, which all three apps share. The client gate is on, as in production.
+- **Auth:** the three sites are QA's authorized domains. All three apps use `bite-tribe-qa.firebaseapp.com` as their auth domain, as production's apps share `bite-tribe.firebaseapp.com`.
+- **Credential:** the QA deploy account also holds `roles/firebasehosting.admin` on `bite-tribe-qa`, granted by `tools/set-functions-deploy-service-account.sh` for QA only.
+- **Purpose:** QA test runs of the real builds (the launch test [#1957]), and the smoke test before a release ([#2294]).
 
 There is deliberately no simulator-specific Angular configuration. Issue
 1219 lived only in the production bundle, so a separate bundle would rebuild
@@ -223,3 +240,6 @@ tools/set-functions-deploy-service-account.sh
 - [Implementation - iOS Simulator Testing](../implementation/ios-simulator-testing.md)
 
 [#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
+[#2293]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2293
+[#2294]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2294
+[#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957

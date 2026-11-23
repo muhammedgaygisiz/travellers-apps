@@ -141,6 +141,11 @@ export class EditMenuService {
 
     this.dataAccess.retryMenuLoad();
 
+    // Confirming is the owner checking the menu, so it ticks "menu reviewed"
+    // on the setup checklist the way a save does (GitHub issue #2302). The
+    // same best-effort write: the confirmation landed either way.
+    this.dataAccess.markMenuReviewed().catch(() => undefined);
+
     await this.toast.present({
       messageKey: 'menu-confirmed-as-own',
       outcome: 'success',

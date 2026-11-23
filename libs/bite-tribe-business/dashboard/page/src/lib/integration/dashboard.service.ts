@@ -20,6 +20,8 @@ export class DashboardService {
   // Read guarded: `value()` throws once a read has failed (#1232).
   restaurantsValue = this.dataAccess.restaurantsValue;
   biteTrailsValue = this.dataAccess.biteTrailsValue;
+  /** Held restaurants whose menu was built from Bites (GitHub issue #2302). */
+  menusBuiltFromBites = this.dataAccess.menusBuiltFromBitesValue;
   /**
    * The restaurants read has settled at least once. A failed read is not "no
    * restaurant", so only a resolved read lets the empty state show (GitHub

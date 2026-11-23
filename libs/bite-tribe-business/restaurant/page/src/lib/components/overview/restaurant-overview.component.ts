@@ -229,6 +229,8 @@ export class RestaurantOverviewComponent {
   readonly restaurant = input<Restaurant>();
   /** Bites waiting for a link to a dish (GitHub issue #2216). */
   readonly guestBitesToLink = input(0);
+  /** The menu was built from guests' Bites (GitHub issue #2302). */
+  readonly menuBuiltFromBites = input(false);
 
   readonly openSection = output<RestaurantSection>();
   readonly createMenu = output<void>();
@@ -241,7 +243,11 @@ export class RestaurantOverviewComponent {
   private readonly checklist = computed(() => {
     const restaurant = this.restaurant();
 
-    return restaurant ? restaurantSetupChecklist(restaurant) : [];
+    return restaurant
+      ? restaurantSetupChecklist(restaurant, {
+          menuBuiltFromBites: this.menuBuiltFromBites(),
+        })
+      : [];
   });
 
   protected readonly rows = computed(() => {

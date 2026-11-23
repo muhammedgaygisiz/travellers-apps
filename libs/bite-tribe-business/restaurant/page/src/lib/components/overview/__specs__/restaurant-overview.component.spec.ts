@@ -341,6 +341,26 @@ describe(RestaurantOverviewComponent.name, () => {
     ).toBeNull();
   });
 
+  /** See GitHub issue #2302. */
+  it('names the menu the restaurant has as the next step', () => {
+    const onlyMenuMissing = {
+      ...COMPLETE,
+      menuId: 'm-1',
+      menuReviewedAtTimestamp: undefined,
+    } as Restaurant;
+    const nextKey = (): string | undefined => component['progress']()?.nextKey;
+
+    show(onlyMenuMissing);
+    expect(nextKey()).toBe('setup-checklist-menu-review');
+
+    fixture.componentRef.setInput('menuBuiltFromBites', true);
+    fixture.detectChanges();
+    expect(nextKey()).toBe('setup-checklist-menu-reviewed');
+
+    show({ ...onlyMenuMissing, menuId: undefined } as Restaurant);
+    expect(nextKey()).toBe('setup-checklist-menu-create');
+  });
+
   it('opens the section of the row that was tapped', () => {
     show(COMPLETE);
     const opened = jest.fn();

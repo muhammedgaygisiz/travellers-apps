@@ -99,6 +99,8 @@ export const NewOwnerChecklist: Story = {
         menuId: '/menus/menu-trattoria',
       } as Restaurant,
     ],
+    // The menu came built from Bites, so the checklist names it (#2302).
+    menusBuiltFromBites: new Set([trattoria.id as string]),
   },
 };
 

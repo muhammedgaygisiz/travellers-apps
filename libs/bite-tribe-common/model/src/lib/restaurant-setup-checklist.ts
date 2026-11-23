@@ -50,6 +50,34 @@ export interface SetupItem {
 const hasText = (value: string | undefined): boolean => !!value?.trim();
 
 /**
+ * What the checklist knows beyond the restaurant document: whether its menu
+ * was built from guests' Bites, which only the menu records (GitHub issue
+ * #2302). Unknown reads as a menu of the owner's own.
+ */
+export interface SetupChecklistContext {
+  readonly menuBuiltFromBites?: boolean;
+}
+
+/**
+ * The menu item's label, by the menu the restaurant actually has (GitHub
+ * issue #2302): none yet, one built from guests' Bites, or its own. Always
+ * naming the Bite-built menu told an owner with no menu, or one they wrote
+ * themselves, to check something that did not exist.
+ */
+const menuLabelKey = (
+  restaurant: Restaurant,
+  { menuBuiltFromBites }: SetupChecklistContext,
+): string => {
+  if (!restaurant.menuId) {
+    return 'setup-checklist-menu-create';
+  }
+
+  return menuBuiltFromBites
+    ? 'setup-checklist-menu-reviewed'
+    : 'setup-checklist-menu-review';
+};
+
+/**
  * What a restaurant still lacks for guests to see a complete page, read from
  * the stored restaurant and nothing else (GitHub issue #2126).
  *
@@ -62,12 +90,14 @@ const hasText = (value: string | undefined): boolean => !!value?.trim();
  */
 export const restaurantSetupChecklist = (
   restaurant: Restaurant,
+  context: SetupChecklistContext = {},
 ): readonly SetupItem[] => {
   const item = (
     key: SetupItemKey,
     done: boolean,
     target: SetupItem['target'],
-  ): SetupItem => ({ key, labelKey: `setup-checklist-${key}`, done, target });
+    labelKey = `setup-checklist-${key}`,
+  ): SetupItem => ({ key, labelKey, done, target });
 
   const address = restaurant.address;
 
@@ -107,6 +137,7 @@ export const restaurantSetupChecklist = (
       'menu-reviewed',
       typeof restaurant.menuReviewedAtTimestamp === 'number',
       'edit-menu',
+      menuLabelKey(restaurant, context),
     ),
   ];
 };

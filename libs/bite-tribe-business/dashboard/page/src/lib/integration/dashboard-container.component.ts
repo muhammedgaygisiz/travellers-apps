@@ -16,6 +16,7 @@ import { DashboardService } from './dashboard.service';
       [isAuthenticated]="service.isAuthenticated()"
       [gpsPosition]="service.gpsPosition()"
       [restaurants]="service.restaurantsValue()"
+      [menusBuiltFromBites]="service.menusBuiltFromBites()"
       [restaurantsLoaded]="service.restaurantsLoaded()"
       (checkAgainClick)="service.refreshRestaurants()"
       (logoutClick)="service.logout()"

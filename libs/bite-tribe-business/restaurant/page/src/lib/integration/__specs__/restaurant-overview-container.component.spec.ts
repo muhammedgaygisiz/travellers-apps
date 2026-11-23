@@ -21,6 +21,7 @@ describe(RestaurantOverviewContainer.name, () => {
           useValue: {
             restaurant: signal(undefined),
             guestBitesToLink: { value: signal(undefined) },
+            menuBuiltFromBites: { value: signal(undefined) },
           },
         },
         {

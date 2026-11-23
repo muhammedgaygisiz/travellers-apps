@@ -5,10 +5,11 @@ import { BiteTribeStoreService } from 'bite-tribe/store';
 import {
   BITE_TRAIL_COLLECTION,
   DashboardDataAccessService,
+  MENU_COLLECTION,
   RESTAURANT_COLLECTION,
   RESTAURANT_OWNERS_FIELD,
 } from '../dashboard-data-access.service';
-import { BiteTrail } from 'model';
+import { BiteTrail, Restaurant } from 'model';
 import { signal } from '@angular/core';
 
 jest.mock('@capacitor-firebase/firestore');
@@ -177,6 +178,75 @@ describe(DashboardDataAccessService.name, () => {
       service.logout();
 
       expect(storeServiceMock.logout).toHaveBeenCalled();
+    });
+  });
+
+  /** See GitHub issue #2302. */
+  describe('menusBuiltFromBitesLoader', () => {
+    const load = (
+      restaurants: Partial<Restaurant>[],
+    ): Promise<ReadonlySet<string>> =>
+      TestBed.inject(DashboardDataAccessService).menusBuiltFromBitesLoader({
+        params: { restaurants: restaurants as Restaurant[] },
+      } as never) as Promise<ReadonlySet<string>>;
+
+    const menus = (derived: Record<string, boolean>): void => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockImplementation(async ({ reference }) => {
+          const id = reference.split('/').pop() ?? '';
+
+          if (id === 'broken') {
+            throw new Error('unavailable');
+          }
+
+          return {
+            snapshot: {
+              id,
+              path: reference,
+              data: id in derived ? { derivedFromBites: derived[id] } : {},
+              metadata: { hasPendingWrites: false, fromCache: false },
+            },
+          } as never;
+        });
+    };
+
+    it('names the restaurants whose menu was built from Bites', async () => {
+      menus({ 'm-1': true, 'm-2': false });
+
+      const built = await load([
+        { id: 'r-1', menuId: 'm-1' },
+        { id: 'r-2', menuId: 'm-2' },
+        { id: 'r-3' },
+      ]);
+
+      expect([...built]).toEqual(['r-1']);
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledTimes(2);
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: `${MENU_COLLECTION}/m-1`,
+      });
+    });
+
+    it('reads a menu id stored as a path', async () => {
+      menus({ 'm-1': true });
+
+      const built = await load([{ id: 'r-1', menuId: '/menus/m-1' }]);
+
+      expect([...built]).toEqual(['r-1']);
+      expect(FirebaseFirestore.getDocument).toHaveBeenCalledWith({
+        reference: `${MENU_COLLECTION}/m-1`,
+      });
+    });
+
+    it("counts a menu that fails to read as the owner's own", async () => {
+      menus({ 'm-1': true });
+
+      const built = await load([
+        { id: 'r-1', menuId: 'broken' },
+        { id: 'r-2', menuId: 'm-1' },
+      ]);
+
+      expect([...built]).toEqual(['r-2']);
     });
   });
 });

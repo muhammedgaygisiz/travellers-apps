@@ -35,6 +35,21 @@ export class RestaurantDataAccessService {
     return bites.filter(awaitsMenuLink).length;
   }
 
+  /**
+   * Whether the restaurant's menu was built from guests' Bites and not yet
+   * confirmed, which only the menu records (GitHub issue #2302). `menuId`
+   * may be stored as a path; the last segment is the id.
+   */
+  async isMenuBuiltFromBites(menuId: string): Promise<boolean> {
+    const id = menuId.split('/').filter(Boolean).pop();
+
+    if (!id) {
+      return false;
+    }
+
+    return !!(await this.api.loadMenu(id))?.derivedFromBites;
+  }
+
   createMenuForRestaurant(restaurantId: string): Promise<string> {
     return this.api.createMenuForRestaurant(restaurantId);
   }

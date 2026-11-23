@@ -1,6 +1,5 @@
 import { Route } from '@angular/router';
-import { authGuard } from 'ta-firestore';
-import { PATH } from 'utils';
+import { authGuard, startGuard } from 'ta-firestore';
 import { ROUTES } from '../routes';
 
 /**
@@ -9,7 +8,7 @@ import { ROUTES } from '../routes';
  * than shipping open (issue #1469).
  */
 // No `registration`: the admin app drops that route entirely.
-const UNGATED_PATHS = [PATH.START, 'login', 'forgot-password', ''];
+const UNGATED_PATHS = ['login', 'forgot-password', ''];
 
 const isAuthenticated = (route: Route): boolean =>
   (route.canActivate ?? []).includes(authGuard);
@@ -29,6 +28,13 @@ describe('admin ROUTES', () => {
     );
 
     expect(open.sort()).toEqual([...UNGATED_PATHS].sort());
+  });
+
+  /** See GitHub issue #2305. */
+  it('sends a signed-in account from the start page and nobody else', () => {
+    const start = ROUTES.find((route) => route.path === 'start');
+
+    expect(start?.canActivate).toEqual([startGuard]);
   });
 
   // The admin app has no marketing surface, so a signed-in operator lands on

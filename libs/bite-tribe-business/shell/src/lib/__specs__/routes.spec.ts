@@ -10,7 +10,7 @@ import {
 import { Store } from '@ngrx/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { ToastService } from 'toast';
-import { authGuard, AuthService } from 'ta-firestore';
+import { authGuard, AuthService, startGuard } from 'ta-firestore';
 import { BiteTribeRole } from 'utils';
 import { ROUTES } from '../routes';
 
@@ -23,7 +23,7 @@ jest.mock('@capacitor-firebase/firestore');
  * forgets the role guard fails here instead of shipping an ungated operator
  * surface (issue #1469).
  */
-const UNGATED_PATHS = ['start', 'login', 'registration', 'forgot-password', ''];
+const UNGATED_PATHS = ['login', 'registration', 'forgot-password', ''];
 
 const isAuthenticated = (route: Route): boolean =>
   (route.canActivate ?? []).includes(authGuard);
@@ -43,6 +43,13 @@ describe('business ROUTES', () => {
     );
 
     expect(open.sort()).toEqual([...UNGATED_PATHS].sort());
+  });
+
+  /** See GitHub issue #2305. */
+  it('sends a signed-in account from the start page and nobody else', () => {
+    const start = ROUTES.find((route) => route.path === 'start');
+
+    expect(start?.canActivate).toEqual([startGuard]);
   });
 
   // The BiteTribe-internal surfaces left for the admin app with issue #1473.

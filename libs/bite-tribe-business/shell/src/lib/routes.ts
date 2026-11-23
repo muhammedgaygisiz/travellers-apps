@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
 import { withAuthRoutes } from 'auth';
-import { authGuard, documentOwnerGuard, roleGuard } from 'ta-firestore';
+import {
+  authGuard,
+  documentOwnerGuard,
+  roleGuard,
+  startGuard,
+} from 'ta-firestore';
 import { restaurantAccessGuard } from './restaurant-access.guard';
 import { staffEntryGuard } from './staff-entry.guard';
 import { staffRestaurantIdOf } from './restaurant-staff-association';
@@ -67,7 +72,9 @@ const ownedRestaurantGuard = documentOwnerGuard({
  * oversight - see the rollout decision on the issue.
  *
  * `start` and the auth routes stay ungated: they are where a visitor who fails
- * those checks is sent.
+ * those checks is sent. `start` carries `startGuard` alone, which sends a
+ * signed-in account on to the dashboard (issue #2305) and lets everybody else
+ * through.
  *
  * Sign-in itself refuses an account without the role, so these guards are the
  * backstop for a restored session or a revoked role rather than the primary
@@ -79,6 +86,7 @@ export const ROUTES: Routes = withAuthRoutes([
     path: 'start',
     loadComponent: () =>
       import('bite-tribe-business/start').then((m) => m.Start),
+    canActivate: [startGuard],
   },
   /**
    * Where a sign-in lands, and where a staff account does not stay

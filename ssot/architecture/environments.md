@@ -62,6 +62,22 @@ Since issue [#2293] the consumer, business and admin web apps run on QA too, reb
 - **Credential:** the QA deploy account also holds `roles/firebasehosting.admin` on `bite-tribe-qa`, granted by `tools/set-functions-deploy-service-account.sh` for QA only.
 - **Purpose:** QA test runs of the real builds (the launch test [#1957]), and the smoke test before a release ([#2294]).
 
+### QA Test Data
+
+`npm run seed:qa` (`tools/seed-qa.mjs`, issue [#2294]) puts the QA project into the state a test run starts from. It is idempotent: every run updates the same accounts and overwrites the same documents, so it also resets QA after a run.
+
+| What       | Id                                               | Notes                                                                                       |
+| ---------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Owner      | `qa-owner`, `qa-owner@bitetribe.app`             | claim `business`, owns QA Trattoria                                                         |
+| Staff      | `qa-staff`, `qa-staff@bitetribe.app`             | claim `staff`, `restaurantStaff/qa-staff` points to QA Trattoria                            |
+| Guest      | `qa-guest`, `qa-guest@bitetribe.app`             | no role, onboarding marked done                                                             |
+| Admin      | `qa-admin`, `qa-admin@bitetribe.app`             | claim `admin`                                                                               |
+| Restaurant | `qa-trattoria`, menu `qa-menu-trattoria`         | EUR menu with variants, a required option group, an extra and dietary labels; open all week |
+| Table      | `qa-table-1`, token `QAQAQAQAQAQAQAQAQAQAQAQA01` | table ordering on, an open visit, so `/t/<token>` can order right away                      |
+
+- **Credentials:** `GOOGLE_APPLICATION_CREDENTIALS` when set (CI), otherwise the local `gcloud` login. It talks to the Identity Toolkit and Firestore admin REST APIs, which App Check does not gate.
+- **Passwords:** the QA sites are public, so the accounts get generated passwords, not the emulator's shared one. The script writes them to `apps/bite-tribe-firebase/.qa-accounts.env` (gitignored) on its first run and reuses them; `QA_<ROLE>_PASSWORD` variables override the file, which is how CI will pass them. It never prints them.
+
 There is deliberately no simulator-specific Angular configuration. Issue
 1219 lived only in the production bundle, so a separate bundle would rebuild
 that blind spot.
@@ -229,6 +245,7 @@ tools/firebase-backend-env.mjs
 tools/generate-stage-icons.mjs
 tools/run-android-qa.mjs
 tools/run-ios-simulator.mjs
+tools/seed-qa.mjs
 tools/set-functions-deploy-service-account.sh
 .github/workflows/pipeline.yml (deploy-qa-backend)
 ```

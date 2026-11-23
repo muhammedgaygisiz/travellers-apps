@@ -66,17 +66,21 @@ Since issue [#2293] the consumer, business and admin web apps run on QA too, reb
 
 `npm run seed:qa` (`tools/seed-qa.mjs`, issue [#2294]) puts the QA project into the state a test run starts from. It is idempotent: every run updates the same accounts and overwrites the same documents, so it also resets QA after a run.
 
-| What       | Id                                               | Notes                                                                                       |
-| ---------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Owner      | `qa-owner`, `qa-owner@bitetribe.app`             | claim `business`, owns QA Trattoria                                                         |
-| Staff      | `qa-staff`, `qa-staff@bitetribe.app`             | claim `staff`, `restaurantStaff/qa-staff` points to QA Trattoria                            |
-| Guest      | `qa-guest`, `qa-guest@bitetribe.app`             | no role, onboarding marked done                                                             |
-| Admin      | `qa-admin`, `qa-admin@bitetribe.app`             | claim `admin`                                                                               |
-| Restaurant | `qa-trattoria`, menu `qa-menu-trattoria`         | EUR menu with variants, a required option group, an extra and dietary labels; open all week |
-| Table      | `qa-table-1`, token `QAQAQAQAQAQAQAQAQAQAQAQA01` | table ordering on, an open visit, so `/t/<token>` can order right away                      |
+| What       | Id                                               | Notes                                                                                               |
+| ---------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Owner      | `qa-owner`, `qa-owner@bitetribe.app`             | claim `business`, owns QA Trattoria; display name `qaowner`                                         |
+| Staff      | `qa-staff`, `qa-staff@bitetribe.app`             | claim `staff`, `restaurantStaff/qa-staff` points to QA Trattoria; display name `qastaff`            |
+| Guest      | `qa-guest`, `qa-guest@bitetribe.app`             | no role, private profile; display name `qaguest`                                                    |
+| Friend     | `qa-friend`, `qa-friend@bitetribe.app`           | no role, public profile with two Bites at QA Trattoria, to like and follow; display name `qafriend` |
+| Admin      | `qa-admin`, `qa-admin@bitetribe.app`             | claim `admin`; display name `qaadmin`                                                               |
+| Restaurant | `qa-trattoria`, menu `qa-menu-trattoria`         | EUR menu with variants, a required option group, an extra and dietary labels; open all week         |
+| Table      | `qa-table-1`, token `QAQAQAQAQAQAQAQAQAQAQAQA01` | table ordering on, an open visit, so `/t/<token>` can order right away                              |
 
+- **Profiles:** accounts made through the admin API never reach `beforeUserCreated`, so the script writes each account's `/users` profile and `/displayNames` claim itself, the way sign-up and onboarding would, with onboarding marked done. Without them the consumer profile page never loads and Edit Profile cannot save.
+- **Friend's Bites:** each gets a photo uploaded to `images/bites/{biteId}/` with a download token, so `setBiteImagePathOnUpload` checks it and writes `imageStatus: uploaded`; a Bite without that status is shown to its author only (issue [#1717]). They carry a `geohash` too, which the feed's location query needs. The feed's radius is 10 km, so they reach the feed only of somebody near Marienplatz; search finds them from anywhere.
+- **Not reset:** follows, likes and reactions, and anything a run posts (Bites, bucket lists). A repeat run finds the guest already following qa-friend.
 - **Credentials:** `GOOGLE_APPLICATION_CREDENTIALS` when set (CI), otherwise the local `gcloud` login. It talks to the Identity Toolkit and Firestore admin REST APIs, which App Check does not gate.
-- **Passwords:** the QA sites are public, so the accounts get generated passwords, not the emulator's shared one. The script writes them to `apps/bite-tribe-firebase/.qa-accounts.env` (gitignored) on its first run and reuses them; `QA_<ROLE>_PASSWORD` variables override the file, which is how CI will pass them. It never prints them.
+- **Passwords:** the QA sites are public, so the accounts get generated passwords, not the emulator's shared one. The script writes them to `apps/bite-tribe-firebase/.qa-accounts.env` (gitignored) on its first run and reuses them. A password is set only when the account is created, because setting one ends the account's sessions and a re-run would sign out whoever is testing; `QA_<ROLE>_PASSWORD` variables (`OWNER`, `STAFF`, `GUEST`, `FRIEND`, `ADMIN`) override the file when all five are set, which is how CI will pass them. It never prints them.
 
 There is deliberately no simulator-specific Angular configuration. Issue
 1219 lived only in the production bundle, so a separate bundle would rebuild
@@ -258,5 +262,6 @@ tools/set-functions-deploy-service-account.sh
 
 [#1221]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1221
 [#2293]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2293
+[#1717]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1717
 [#2294]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2294
 [#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957

@@ -16,20 +16,26 @@
 // creates on its first run and reads on every later one; in CI they come from
 // the environment. Nothing here prints them.
 import { execFileSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { geohashForLocation } from 'geofire-common';
 
 const PROJECT = 'bite-tribe-qa';
 const ACCOUNTS_FILE = resolve('apps/bite-tribe-firebase/.qa-accounts.env');
 
-/** Fixed ids, so every run updates the same accounts and documents. */
+/**
+ * Fixed ids, so every run updates the same accounts and documents.
+ * `displayName` is the claimed, unique name a profile shows; `public` decides
+ * whether following the account needs an approval.
+ */
 const ACCOUNTS = [
   {
     key: 'OWNER',
     localId: 'qa-owner',
     email: 'qa-owner@bitetribe.app',
     name: 'QA Owner',
+    displayName: 'qaowner',
     roles: ['business'],
   },
   {
@@ -37,6 +43,7 @@ const ACCOUNTS = [
     localId: 'qa-staff',
     email: 'qa-staff@bitetribe.app',
     name: 'QA Staff',
+    displayName: 'qastaff',
     roles: ['staff'],
   },
   {
@@ -44,6 +51,18 @@ const ACCOUNTS = [
     localId: 'qa-guest',
     email: 'qa-guest@bitetribe.app',
     name: 'QA Guest',
+    displayName: 'qaguest',
+    roles: [],
+  },
+  {
+    // A second guest with Bites of their own, so a run can like a Bite and
+    // follow somebody other than itself.
+    key: 'FRIEND',
+    localId: 'qa-friend',
+    email: 'qa-friend@bitetribe.app',
+    name: 'QA Friend',
+    displayName: 'qafriend',
+    public: true,
     roles: [],
   },
   {
@@ -51,6 +70,7 @@ const ACCOUNTS = [
     localId: 'qa-admin',
     email: 'qa-admin@bitetribe.app',
     name: 'QA Admin',
+    displayName: 'qaadmin',
     roles: ['admin'],
   },
 ];
@@ -207,13 +227,64 @@ const upsertAccount = async ({ localId, email, name, roles }, password) => {
     });
   }
 
+  // No password here: setting one ends every session of the account, so a
+  // re-run would sign out whoever is testing. It is set once, on creation.
   await call(`${IDENTITY}/accounts:update`, {
     localId,
     email,
-    password,
     displayName: name,
     emailVerified: true,
     customAttributes: JSON.stringify(roles.length ? { roles } : {}),
+  });
+};
+
+/**
+ * The profile a sign-up gets, and the display name onboarding claims.
+ *
+ * Accounts made through the admin API never reach `beforeUserCreated`, which
+ * only runs for sign-ups from a client, so without this they have no profile:
+ * the consumer's profile page loads forever, Edit Profile cannot save, and
+ * user search finds nobody. Mirrors `buildNewUserProfile` and the two writes
+ * of `claimDisplayName`. Merged, so what the app wrote since (coach marks,
+ * last seen) survives a re-run.
+ */
+const seedProfile = async ({
+  localId,
+  email,
+  name,
+  displayName,
+  public: isPublic = false,
+}) => {
+  const now = new Date();
+  const normalizedDisplayName = displayName.toLowerCase();
+  const stamp = {
+    createdAt: now.toISOString(),
+    createdAtTimestamp: now.getTime(),
+  };
+
+  await merge(`users/${localId}`, {
+    userId: localId,
+    displayName,
+    normalizedDisplayName,
+    fullName: name,
+    email,
+    photoUrl: '',
+    public: isPublic,
+    subscriptionTier: 0,
+    emailVerified: true,
+    emailVerificationRequired: false,
+    emailVerificationProvider: 'password',
+    emailVerificationReminderCount: 0,
+    // Onboarding is done, so a run reaches the app rather than the wizard.
+    onboardingCompletedAt: now.toISOString(),
+    onboardingCompletedAtTimestamp: now.getTime(),
+    ...stamp,
+  });
+  await put(`displayNames/${normalizedDisplayName}`, {
+    userId: localId,
+    displayName,
+    normalizedDisplayName,
+    ...stamp,
   });
 };
 
@@ -333,10 +404,15 @@ const seedRestaurant = async () => {
 
   await put(`restaurantStaff/qa-staff`, { restaurantId: RESTAURANT_ID });
 
+  // Every field `Room` requires: without `objects` the Tables view throws on
+  // `room.objects.map` and never leaves "Connecting".
   await put(`restaurants/${RESTAURANT_ID}/rooms/${ROOM_ID}`, {
     id: ROOM_ID,
     name: 'Main room',
     order: 0,
+    size: { width: 8000, height: 6000 },
+    objects: [],
+    version: 1,
   });
   await put(`restaurants/${RESTAURANT_ID}/tables/${TABLE_ID}`, {
     label: '1',
@@ -375,6 +451,95 @@ const seedRestaurant = async () => {
   });
 };
 
+const BUCKET = `${PROJECT}.firebasestorage.app`;
+const BITE_PHOTO = resolve('apps/bite-tribe-e2e/src/fixtures/bite.jpg');
+
+/**
+ * Uploads a Bite's photo where the app does, `images/bites/{biteId}/`. The
+ * Storage trigger `setBiteImagePathOnUpload` then checks it and writes
+ * `imagePath` and `imageStatus: uploaded`, exactly as for a real post. Without
+ * that status a Bite is shown to its own author only (issue #1717), so the
+ * guest would never see the friend's Bites.
+ */
+const uploadBitePhoto = async (biteId) => {
+  // A download token in the metadata, as every client SDK upload carries:
+  // the trigger builds the download URL from it, and without one the URL is
+  // refused with a 401 and the card shows a broken image.
+  const boundary = `seed-qa-${randomUUID()}`;
+  const metadata = JSON.stringify({
+    name: `images/bites/${biteId}/seed.jpg`,
+    contentType: 'image/jpeg',
+    metadata: { firebaseStorageDownloadTokens: randomUUID() },
+  });
+  const body = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n` +
+        `--${boundary}\r\nContent-Type: image/jpeg\r\n\r\n`,
+    ),
+    readFileSync(BITE_PHOTO),
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ]);
+  const response = await fetch(
+    `https://storage.googleapis.com/upload/storage/v1/b/${BUCKET}/o?uploadType=multipart`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+        'x-goog-user-project': PROJECT,
+      },
+      body,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `upload ${biteId} ${response.status}: ${await response.text()}`,
+    );
+  }
+};
+
+/**
+ * Two Bites by qa-friend at the QA restaurant, so the guest has somebody
+ * else's Bite to like and a profile with Bites to follow. Each gets a photo,
+ * which is what makes it visible to anybody but its author.
+ */
+const seedFriendBites = async () => {
+  const now = Date.now();
+  const bites = [
+    ['qa-friend-bite-diavola', 'Diavola', 11.5, 5],
+    ['qa-friend-bite-burrata', 'Burrata', 11.5, 4],
+  ];
+
+  for (const [index, [id, name, price, rating]] of bites.entries()) {
+    const at = now - index * 3_600_000;
+
+    await put(`bites/${id}`, {
+      id,
+      userId: 'qa-friend',
+      name,
+      description: 'Seeded by npm run seed:qa.',
+      place: 'QA Trattoria',
+      restaurantId: RESTAURANT_ID,
+      price,
+      currency: 'EUR',
+      rating,
+      position: { latitude: 48.137154, longitude: 11.576124 },
+      // The feed reads Bites by geohash range, so without one a Bite exists
+      // but never reaches anybody's feed.
+      geohash: geohashForLocation([48.137154, 11.576124]),
+      city: 'München',
+      country: 'Germany',
+      countryCode: 'DE',
+      tags: [],
+      taggedUserIds: [],
+      createdAt: new Date(at).toISOString(),
+      createdAtTimestamp: at,
+    });
+    await uploadBitePhoto(id);
+  }
+};
+
 // --- run --------------------------------------------------------------------
 
 token = await accessToken();
@@ -382,19 +547,14 @@ const secrets = passwords();
 
 for (const account of ACCOUNTS) {
   await upsertAccount(account, secrets[account.key]);
+  await seedProfile(account);
   console.log(
     `account ${account.email} (${account.roles.join(', ') || 'guest'})`,
   );
 }
 
-// The guest skips onboarding, so a run reaches the app rather than the wizard.
-// Merged, because the user-creation trigger writes the rest of the profile.
-await merge('users/qa-guest', {
-  onboardingCompletedAt: new Date().toISOString(),
-  onboardingCompletedAtTimestamp: Date.now(),
-});
-
 await seedRestaurant();
+await seedFriendBites();
 
 console.log(`restaurant ${RESTAURANT_ID}, menu ${MENU_ID}, table ${TABLE_ID}`);
 console.log('Consumer menu: https://bite-tribe-qa.web.app/m/qa-trattoria');

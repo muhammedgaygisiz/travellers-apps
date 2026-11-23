@@ -23,6 +23,7 @@
     "release:android": "node tools/build-android-release.mjs",
     "release:verify-bundle": "node tools/assert-release-bundle.mjs",
     "build:web:qa": "node tools/build-web-qa.mjs",
+    "seed:qa": "node tools/seed-qa.mjs",
     "release:provenance": "node tools/write-build-provenance.mjs",
     "firestore:assert-indexes-ready": "node tools/assert-firestore-indexes-ready.mjs",
     "analytics:report": "node tools/analytics/report.mjs",

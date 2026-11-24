@@ -44,7 +44,11 @@ import { ProfileHeader } from './components/profile-header';
 import { CountryFlags } from './components/country-flags';
 import { ProfileSkeleton } from './components/profile-skeleton';
 import { ProfileVisibility } from './components/profile-visibility';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import {
+  TranslocoPipe,
+  TranslocoService,
+  translateSignal,
+} from '@jsverse/transloco';
 import { totalBiteCount } from 'utils';
 
 const UNFOLLOW = 'unfollow';
@@ -115,18 +119,22 @@ export class ProfileComponent {
       this.user()?.public !== true &&
       (this.followRequestCount() ?? 0) > 0,
   );
+  /**
+   * Signals rather than `transloco.translate()`, which answers once: a
+   * profile built before the catalogue has loaded, as in Storybook or when
+   * opened by its URL, kept the raw key for good (issue #1868 fixed the
+   * heading's "anonymous" alone). These follow the load and a language change.
+   */
+  private readonly anonymousLabel = translateSignal('anonymous');
+  private readonly noDisplayNameLabel = translateSignal('no-display-name');
   displayName = computed((): string => {
     if (this.user() && !this.showsProfileContent()) {
-      return this.transloco.translate('anonymous');
+      return this.anonymousLabel();
     }
 
-    return (
-      this.user()?.displayName || this.transloco.translate('no-display-name')
-    );
+    return this.user()?.displayName || this.noDisplayNameLabel();
   });
-  emptyBitesMessage = computed((): string => {
-    return this.transloco.translate('no-bites-yet');
-  });
+  emptyBitesMessage = translateSignal('no-bites-yet');
   /**
    * The real name, shown only when it says something the heading does not.
    *

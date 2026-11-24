@@ -41,6 +41,11 @@ export type NotificationMessageKey =
   | 'followRequest.body'
   | 'followRequestAccepted.title'
   | 'followRequestAccepted.body'
+  // A guest started following the restaurant (GitHub issue #2318). Sent to
+  // its owners, and never names the guest: owners see how many follow, never
+  // who (#2132).
+  | 'restaurantFollower.title'
+  | 'restaurantFollower.body'
   | 'biteTagged.title'
   | 'biteTagged.body'
   | 'newLike.title'

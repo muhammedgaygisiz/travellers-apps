@@ -28,6 +28,8 @@ export const th: NotificationMessages = {
   'followRequest.body': '{{requester}} ขอติดตามคุณ',
   'followRequestAccepted.title': 'คำขอติดตามได้รับการยอมรับแล้ว',
   'followRequestAccepted.body': '{{owner}} ยอมรับคำขอติดตามของคุณแล้ว',
+  'restaurantFollower.title': 'ผู้ติดตามใหม่',
+  'restaurantFollower.body': '{{restaurant}} มีผู้ติดตามใหม่',
   'biteTagged.title': 'คุณถูกแท็กใน Bite',
   'biteTagged.body': '{{creator}} แท็กคุณใน Bite: {{bite}}',
   'newLike.title': 'มีคนถูกใจ Bite ของคุณ!',

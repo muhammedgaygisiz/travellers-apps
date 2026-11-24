@@ -2970,6 +2970,18 @@ describe('identity-provider avatars waiting for the check', () => {
   });
 });
 
+/** GitHub issue #2318: the backend's record of the owners' daily push. */
+describe('restaurant follower pushes', () => {
+  it('refuses every client, reading or writing', async () => {
+    for (const db of [asConsumer(), asOwner(), asOperator()]) {
+      const ref = doc(db, 'restaurantFollowerPushes', OWNED_RESTAURANT);
+
+      await assertFails(getDoc(ref));
+      await assertFails(setDoc(ref, { lastSentAtTimestamp: 0 }));
+    }
+  });
+});
+
 describe('scan rate limits', () => {
   const counter = (db: Firestore): DocumentReference =>
     doc(db, 'scanRateLimits', 'token_ABCDEFGH_1789030860000');

@@ -139,6 +139,7 @@ export {
   decrementRestaurantFollowersOnUnfollow,
   incrementRestaurantFollowersOnFollow,
 } from './functions/restaurants/update-restaurant-followers-count';
+export { notifyOwnersOnRestaurantFollow } from './functions/restaurants/notify-owners-on-restaurant-follow';
 export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
 export { dismissScanAnomaly } from './functions/restaurants/dismiss-scan-anomaly';

@@ -26,6 +26,8 @@ export const am: NotificationMessages = {
   'followRequest.body': '{{requester}} ሊከተሉዎት ጠይቀዋል።',
   'followRequestAccepted.title': 'የመከተል ጥያቄዎ ተቀባይነት አግኝቷል',
   'followRequestAccepted.body': '{{owner}} የመከተል ጥያቄዎን ተቀብለዋል።',
+  'restaurantFollower.title': 'አዲስ ተከታይ',
+  'restaurantFollower.body': '{{restaurant}} አዲስ ተከታይ አግኝቷል።',
   'biteTagged.title': 'በBite ውስጥ መለያ ተሰጥቶዎታል',
   'biteTagged.body': '{{creator}} በBite ውስጥ መለያ ሰጥተውዎታል፦ {{bite}}',
   'newLike.title': 'በBite ላይ አዲስ ውዴታ!',

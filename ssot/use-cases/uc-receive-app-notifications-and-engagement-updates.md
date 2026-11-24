@@ -270,6 +270,28 @@ Contract` in [UC - Manage Profile And Social Graph](uc-manage-profile-and-social
 - The copy is `followRequest` and `followRequestAccepted` and follows the Localization
   Contract.
 
+## Restaurant Follower Contract
+
+Issue [#2318] gives a restaurant's owners the one push about following a restaurant
+([#2132]). Followers themselves receive nothing: no push for a new Bite at the restaurant
+and none for a changed menu.
+
+- **What.** `notifyOwnersOnRestaurantFollow`, on the create of
+  `/users/{uid}/followedRestaurants/{restaurantId}`, sends `RESTAURANT_NEW_FOLLOWER`,
+  carrying `restaurantId`, to every account in the restaurant's `ownerUserIds`. Staff are
+  not told. An owner following their own restaurant tells nobody about it.
+- **How often.** At most one push per restaurant in 24 hours. The window is claimed in a
+  transaction on `/restaurantFollowerPushes/{restaurantId}`, which the rules refuse to every
+  client, so two follows landing together send one push. It is claimed only when there is
+  an owner to tell, so a follow of an unheld restaurant does not use up the day.
+- **Who is named.** The restaurant, never the guest: owners see how many follow, never
+  who. The copy is `restaurantFollower` and follows the Localization Contract.
+- **Where it lands.** The business app is web-only and registers no push, so the push
+  reaches an owner through the BiteTribe phone app signed in with the same account. It
+  opens the restaurant's own page, `restaurant/:restaurantId` ([#2320]), which is also its
+  surface: the key is `RESTAURANT_NEW_FOLLOWER:<restaurantId>`, so the next day's push
+  replaces the last and opening the restaurant clears it.
+
 ## Installation Contract
 
 Issue [#1184]
@@ -396,3 +418,6 @@ Relevant.
 [#2166]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2166
 [#2167]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2167
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
+[#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
+[#2320]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2320

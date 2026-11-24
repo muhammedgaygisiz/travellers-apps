@@ -100,6 +100,12 @@ export const toNotificationTarget = (
         ? { commands: [PATH.PROFILE, data['ownerUid']] }
         : undefined;
 
+    case 'RESTAURANT_NEW_FOLLOWER':
+      // The restaurant's own page, which needs no Bite (issues #2318, #2320).
+      return data['restaurantId']
+        ? { commands: [PATH.RESTAURANT, data['restaurantId']] }
+        : undefined;
+
     case 'LEADERBOARD_RANK_CHANGE':
       // A Bite's move on the Most liked board opens that tab (issue #2028).
       return data['board'] === 'mostLiked'

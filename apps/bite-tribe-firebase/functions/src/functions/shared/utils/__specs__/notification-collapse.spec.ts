@@ -52,6 +52,16 @@ describe('buildCollapseKey', () => {
     ).toBe('NEW_FOLLOWER:follower1');
   });
 
+  it("should collapse a restaurant's new-follower push on the restaurant", () => {
+    // A later day's push replaces the earlier one (issue #2318).
+    expect(
+      buildCollapseKey({ type: 'RESTAURANT_NEW_FOLLOWER', restaurantId: 'r1' }),
+    ).toBe('RESTAURANT_NEW_FOLLOWER:r1');
+    expect(
+      buildCollapseKey({ type: 'RESTAURANT_NEW_FOLLOWER' }),
+    ).toBeUndefined();
+  });
+
   it('should collapse a follow request per requester on the requests page', () => {
     // A request withdrawn and sent again replaces the first (issue #2166).
     const key = buildCollapseKey({

@@ -2,6 +2,7 @@ import { toNotificationTarget } from './notification-target';
 
 jest.mock('utils', () => ({
   PATH: {
+    RESTAURANT: 'restaurant',
     BITE: 'bite',
     PROFILE: 'profile',
     MY_PROFILE: 'my-profile',
@@ -84,6 +85,19 @@ describe(toNotificationTarget.name, () => {
         RECIPIENT,
       ),
     ).toEqual({ commands: ['profile', 'user-2'] });
+  });
+
+  it("opens the restaurant's own page for its owners' new-follower push", () => {
+    // Issues #2318 and #2320: a route without a Bite.
+    expect(
+      toNotificationTarget(
+        { type: 'RESTAURANT_NEW_FOLLOWER', restaurantId: 'r-1' },
+        RECIPIENT,
+      ),
+    ).toEqual({ commands: ['restaurant', 'r-1'] });
+    expect(
+      toNotificationTarget({ type: 'RESTAURANT_NEW_FOLLOWER' }, RECIPIENT),
+    ).toBeUndefined();
   });
 
   it('opens the follow-requests page for a follow request', () => {

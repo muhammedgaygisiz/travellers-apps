@@ -273,6 +273,15 @@ service cloud.firestore {
       allow delete: if isOperator();
     }
 
+    /**
+     * When a restaurant's owners were last told about a new follower (GitHub
+     * issue #2318). Written by `notifyOwnersOnRestaurantFollow` alone and read
+     * by nobody else.
+     */
+    match /restaurantFollowerPushes/{restaurantId} {
+      allow read, write: if false;
+    }
+
     // ------------------------------------------------------------------ menus
 
     /**

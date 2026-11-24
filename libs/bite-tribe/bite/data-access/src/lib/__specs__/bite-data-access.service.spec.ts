@@ -11,7 +11,9 @@ import type {
   Bucketlist,
   CreateAndUploadImageCallbackParams,
   Geopoint,
+  NearbyRestaurant,
   PublicUser,
+  Restaurant,
   UploadParams,
 } from 'model';
 import { BehaviorSubject, of } from 'rxjs';
@@ -66,7 +68,10 @@ describe(BiteDataAccessService.name, () => {
     hasBitesByUser: jest.Mock;
     saveBitePhotoPosition: jest.Mock;
     loadBitePhotoPosition: jest.Mock;
+    loadRestaurantsNear: jest.Mock;
   };
+  let position$: BehaviorSubject<Geopoint | undefined>;
+  let nearbyFromBites$: BehaviorSubject<NearbyRestaurant[] | undefined>;
   let store: {
     saveNewBite: jest.Mock;
     savedNewBite: jest.Mock;
@@ -110,6 +115,7 @@ describe(BiteDataAccessService.name, () => {
       getCurrencyByPosition: jest.fn().mockResolvedValue(undefined),
       hasBitesByUser: jest.fn().mockResolvedValue(false),
       saveBitePhotoPosition: jest.fn().mockResolvedValue(undefined),
+      loadRestaurantsNear: jest.fn().mockResolvedValue([]),
       loadBitePhotoPosition: jest.fn().mockResolvedValue(undefined),
     };
     store = {
@@ -125,6 +131,10 @@ describe(BiteDataAccessService.name, () => {
     analytics = { logEvent: jest.fn() };
     profileApi = { fetchFollowingWithDetails: jest.fn().mockResolvedValue([]) };
     blockedUserIds$ = new BehaviorSubject<string[]>([]);
+    position$ = new BehaviorSubject<Geopoint | undefined>(undefined);
+    nearbyFromBites$ = new BehaviorSubject<NearbyRestaurant[] | undefined>(
+      undefined,
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -144,10 +154,10 @@ describe(BiteDataAccessService.name, () => {
             biteIdFromUrl,
             currencyFromSettings$: of(undefined),
             favCurrenciesFromSettings$: of(undefined),
-            position$: of(undefined),
+            position$,
             cachedBite$: of(undefined),
             bucketlists$,
-            nearbyRestaurants$: of(undefined),
+            nearbyRestaurants$: nearbyFromBites$,
             tagSuggestionsForEditingBite$: of(undefined),
             publicUser$,
             blockedUserIds$,
@@ -163,6 +173,63 @@ describe(BiteDataAccessService.name, () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  /** See GitHub issue #2308. */
+  describe('nearbyRestaurants', () => {
+    // The spec runs on fake timers, so the resource is settled by flushing
+    // microtasks between change-detection ticks rather than by a timeout.
+    const settle = async (): Promise<void> => {
+      for (let round = 0; round < 5; round += 1) {
+        TestBed.tick();
+        await Promise.resolve();
+      }
+    };
+    const trattoria = {
+      id: 'qa-trattoria',
+      name: 'QA Trattoria',
+      position: { latitude: 48.1371, longitude: 11.5761 },
+    } as Restaurant;
+
+    it('reads no restaurants until the guest has a position', async () => {
+      nearbyFromBites$.next([{ name: 'Zum Franziskaner' }]);
+      await settle();
+
+      expect(api.loadRestaurantsNear).not.toHaveBeenCalled();
+      expect(service.nearbyRestaurants().map((entry) => entry.name)).toEqual([
+        'Zum Franziskaner',
+      ]);
+    });
+
+    it('adds the stored restaurants near the guest, read once per kilometre', async () => {
+      api.loadRestaurantsNear.mockResolvedValue([trattoria]);
+      position$.next({ latitude: 48.13712, longitude: 11.57619 });
+      await settle();
+
+      expect(api.loadRestaurantsNear).toHaveBeenCalledWith(
+        { latitude: 48.14, longitude: 11.58 },
+        15_000,
+      );
+      expect(service.nearbyRestaurants()).toEqual([
+        expect.objectContaining({ restaurantId: 'qa-trattoria' }),
+      ]);
+
+      position$.next({ latitude: 48.13714, longitude: 11.57621 });
+      await settle();
+
+      expect(api.loadRestaurantsNear).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the Bite-derived list when the read fails', async () => {
+      api.loadRestaurantsNear.mockRejectedValue(new Error('offline'));
+      nearbyFromBites$.next([{ name: 'Zum Franziskaner' }]);
+      position$.next({ latitude: 48.1371, longitude: 11.5761 });
+      await settle();
+
+      expect(service.nearbyRestaurants().map((entry) => entry.name)).toEqual([
+        'Zum Franziskaner',
+      ]);
+    });
   });
 
   // Issue #2018: posting a copy ticks its source off in the poster's lists.

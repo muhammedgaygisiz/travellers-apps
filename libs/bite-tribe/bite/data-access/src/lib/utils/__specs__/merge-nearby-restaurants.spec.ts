@@ -50,6 +50,28 @@ describe('mergeNearbyRestaurants', () => {
     expect(entry.restaurantId).toBe('qa-trattoria');
   });
 
+  it('gives no distance when the guest has no position or the restaurant none', () => {
+    const [noGuest] = mergeNearbyRestaurants([], [trattoria], undefined);
+    const [noPlace] = mergeNearbyRestaurants(
+      [],
+      [{ ...trattoria, position: undefined } as unknown as Restaurant],
+      HERE,
+    );
+
+    expect(noGuest.distance).toBeUndefined();
+    expect(noPlace.distance).toBeUndefined();
+  });
+
+  it('keeps the id a Bite-derived entry already has', () => {
+    const [entry] = mergeNearbyRestaurants(
+      [{ name: 'QA Trattoria', restaurantId: 'older-id' }],
+      [trattoria],
+      HERE,
+    );
+
+    expect(entry.restaurantId).toBe('older-id');
+  });
+
   it('lists in name order and skips a stored restaurant without a name', () => {
     const merged = mergeNearbyRestaurants(
       [{ name: 'Zum Franziskaner' }],

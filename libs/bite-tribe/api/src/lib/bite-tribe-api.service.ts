@@ -41,6 +41,7 @@ import {
   WeeklyBites,
   WithdrawFollowRequestResult,
 } from 'model';
+import { loadRestaurantsNear } from './restaurant-api/utils/load-restaurants-near';
 import { MenuApiService } from './menu-api/menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
 import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
@@ -249,6 +250,14 @@ export class BiteTribeApiService {
     >,
   ): Promise<string> {
     return this.biteTrailApiService.createBiteTrail(trailData);
+  }
+
+  /** Restaurants near a position, with or without Bites (issue #2308). */
+  loadRestaurantsNear(
+    center: Geopoint,
+    radiusInM: number,
+  ): Promise<Restaurant[]> {
+    return loadRestaurantsNear(center, radiusInM);
   }
 
   loadRestaurant(restaurantId: string): Promise<Restaurant | undefined> {

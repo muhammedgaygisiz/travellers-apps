@@ -66,16 +66,16 @@ Launch-critical product events are defined once as a typed taxonomy and emitted
 through `AnalyticsService` from the owning integration layer (not from UI
 components). The service wraps `FirebaseAnalytics.logEvent` and never throws.
 
-| Category   | Event                | Trigger                         |
-| ---------- | -------------------- | ------------------------------- |
-| Activation | `sign_up`            | Successful registration         |
-| Creation   | `bite_created`       | New Bite persisted              |
-| Creation   | `bucketlist_created` | Bucket list created             |
-| Creation   | `bucketlist_rated`   | BiteTrail rating submitted      |
-| Discovery  | `search_performed`   | Search query becomes meaningful |
-| Discovery  | `restaurant_viewed`  | Restaurant / place page entered |
-| Discovery  | `bite_viewed`        | Bite details page entered       |
-| Table ops  | `table_*` (7 events) | Staff change a table or a visit |
+| Category   | Event                | Trigger                                                               |
+| ---------- | -------------------- | --------------------------------------------------------------------- |
+| Activation | `sign_up`            | Successful registration, email/password or a new Google/Apple account |
+| Creation   | `bite_created`       | New Bite persisted                                                    |
+| Creation   | `bucketlist_created` | Bucket list created                                                   |
+| Creation   | `bucketlist_rated`   | BiteTrail rating submitted                                            |
+| Discovery  | `search_performed`   | Search query becomes meaningful                                       |
+| Discovery  | `restaurant_viewed`  | Restaurant / place page entered                                       |
+| Discovery  | `bite_viewed`        | Bite details page entered                                             |
+| Table ops  | `table_*` (7 events) | Staff change a table or a visit                                       |
 
 Retention and launch monitoring rely on GA4 auto-collected events
 (`first_open`, `session_start`) plus the existing `exception` event, so they

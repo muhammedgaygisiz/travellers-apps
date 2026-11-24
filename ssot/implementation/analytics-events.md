@@ -43,7 +43,7 @@ See [Architecture - Analytics](../architecture/analytics.md) for how this fits t
 
 | Category     | Event                                 | Params                                                                                                     | Trigger                                                                                             | Owner                                                                                                       |
 | ------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Activation   | `sign_up`                             | `method: string` (`'password'`)                                                                            | Registration succeeds                                                                               | `libs/common/ui/auth/.../registration/registration.service.ts`                                              |
+| Activation   | `sign_up`                             | `method: 'password' \| 'google' \| 'apple'`                                                                | Registration succeeds, or a Google/Apple sign-in creates the account ([#2324])                      | `registration.service.ts` (password); `libs/common/ta-firestore/.../ngrx-store/effects.ts` (providers)      |
 | Activation   | `password_reset_requested`            | –                                                                                                          | Forgot-password form submitted                                                                      | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
 | Activation   | `password_reset_request_failed`       | `code: string`                                                                                             | Firebase rejects a forgot-password request                                                          | `libs/common/ui/auth/.../forgot-password/forgot-password.service.ts`                                        |
 | Activation   | `email_verification_prompt_shown`     | `surface: 'home' \| 'settings' \| 'profile_edit'`                                                          | Eligible unverified user enters a prompt surface                                                    | Home, settings, and profile integration services                                                            |
@@ -824,7 +824,8 @@ can check metrics without opening the console:
 - Web: analytics debug is visible via the `google-analytics`/`g/collect`
   network calls; use the GA4 DebugView with the debug extension if needed. 3. Open Firebase console → Analytics → DebugView and select the debug device. 4. Exercise each flow and confirm the matching event appears with expected
   parameters:
-- Register a new account → `sign_up`.
+- Register a new account → `sign_up` (`method: 'password'`). Continue with Google or Apple on a
+  new account → `sign_up` with that method; on an existing account → no `sign_up`.
 - Create a Bite → `bite_created`.
 - Create a bucket list → `bucketlist_created`; rate a BiteTrail →
   `bucketlist_rated`.
@@ -1010,3 +1011,4 @@ Then, on one table, and confirming each event carries `restaurant_id`,
 [#2034]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2034
 [#2150]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2150
 [#2164]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2164
+[#2324]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2324

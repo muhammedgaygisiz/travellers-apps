@@ -109,6 +109,12 @@ export interface Restaurant {
    */
   imageCheckNextAt?: number;
   position: Geopoint;
+  /**
+   * The geohash of `position`, kept in step by the `keepRestaurantGeohash`
+   * trigger, so Create Bite can find restaurants near a guest by range
+   * (GitHub issue #2308). Never written by the apps.
+   */
+  geohash?: string;
   address?: Address;
 
   menuId?: string;

@@ -28,6 +28,10 @@ import {
 import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
 import { resourceFailed, resourceValue } from 'utils';
 import { withGooglePlaceDistance } from './utils/with-google-place-distance';
+import { mergeNearbyRestaurants } from './utils/merge-nearby-restaurants';
+
+/** The same 15 km the Bite-derived nearby list uses (#2308). */
+const NEARBY_RESTAURANT_RADIUS_IN_M = 15_000;
 import { toUploadErrorCode } from './utils/to-upload-error-code';
 
 const MIN_GOOGLE_PLACE_SEARCH_TEXT_LENGTH = 2;
@@ -149,7 +153,56 @@ export class BiteDataAccessService {
   });
   position = toSignal(this.storeService.position$);
   cachedBite = toSignal(this.storeService.cachedBite$);
-  nearbyRestaurants = toSignal(this.storeService.nearbyRestaurants$);
+  private readonly nearbyRestaurantsFromBites = toSignal(
+    this.storeService.nearbyRestaurants$,
+  );
+
+  /**
+   * The guest's position rounded to about a kilometre, so GPS jitter does not
+   * read the restaurants again (GitHub issue #2308).
+   */
+  private readonly nearbyCenter = computed(
+    () => {
+      const position = this.position();
+
+      return position
+        ? {
+            latitude: Math.round(position.latitude * 100) / 100,
+            longitude: Math.round(position.longitude * 100) / 100,
+          }
+        : undefined;
+    },
+    {
+      equal: (a, b) =>
+        a?.latitude === b?.latitude && a?.longitude === b?.longitude,
+    },
+  );
+
+  /**
+   * Stored restaurants near the guest, with or without Bites (#2308). A failed
+   * read leaves the Bite-derived list as it was.
+   */
+  private readonly restaurantsNear = resource({
+    params: () => this.nearbyCenter(),
+    loader: ({ params }) =>
+      this.api
+        .loadRestaurantsNear(params, NEARBY_RESTAURANT_RADIUS_IN_M)
+        .catch(() => []),
+  });
+
+  /**
+   * What Create Bite offers by name: the restaurants of nearby Bites, and the
+   * stored restaurants near the guest that have none yet (#2308).
+   */
+  nearbyRestaurants = computed(() =>
+    mergeNearbyRestaurants(
+      this.nearbyRestaurantsFromBites() ?? [],
+      this.restaurantsNear.hasValue()
+        ? (this.restaurantsNear.value() ?? [])
+        : [],
+      this.position(),
+    ),
+  );
   tagSuggestionsForEditingBite = toSignal(
     this.storeService.tagSuggestionsForEditingBite$,
   );

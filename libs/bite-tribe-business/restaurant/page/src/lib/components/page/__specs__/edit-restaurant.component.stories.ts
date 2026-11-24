@@ -121,6 +121,11 @@ export const Facilities: Story = { args: { section: 'facilities' } };
 
 export const TableOrdering: Story = { args: { section: 'table-ordering' } };
 
+/** Ordering at the table while guests cannot order yet (#2307). */
+export const TableOrderingComingSoon: Story = {
+  args: { section: 'table-ordering', tableOrderingAvailable: false },
+};
+
 export const MenuCode: Story = { args: { section: 'menu-code' } };
 
 /**

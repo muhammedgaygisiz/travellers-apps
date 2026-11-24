@@ -361,6 +361,25 @@ describe(RestaurantOverviewComponent.name, () => {
     expect(nextKey()).toBe('setup-checklist-menu-create');
   });
 
+  /** See GitHub issue #2307. */
+  it('shows ordering at the table as "Coming soon", and does not open it', () => {
+    const opened: string[] = [];
+    component.openSection.subscribe((section) => opened.push(section));
+    fixture.componentRef.setInput('tableOrderingAvailable', false);
+    show(COMPLETE);
+    const row = el().querySelector(
+      '[data-testid="restaurant-section-table-ordering"]',
+    ) as HTMLElement;
+
+    expect(row.getAttribute('aria-disabled')).toBe('true');
+    row.click();
+
+    expect(opened).toEqual([]);
+    expect(
+      component['rows']().find((r) => r.section === 'table-ordering')?.valueKey,
+    ).toBe('table-ordering-coming-soon');
+  });
+
   it('opens the section of the row that was tapped', () => {
     show(COMPLETE);
     const opened = jest.fn();

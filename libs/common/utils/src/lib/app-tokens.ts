@@ -71,3 +71,26 @@ export const BEFORE_ROUTING_AFTER_SIGN_IN = new InjectionToken<
 export const REQUIRED_ROLES = new InjectionToken<BiteTribeRole[]>(
   'required-roles',
 );
+
+/**
+ * Whether ordering at the table is offered to owners (GitHub issue #2307).
+ *
+ * Off unless the build says otherwise. Guests order through an anonymous
+ * session, and anonymous sign-in is not enabled in production, so every table
+ * code an owner printed would fail for every guest who scanned it. Until it
+ * is, the business app shows ordering at the table as "Coming soon".
+ *
+ * On in QA (`NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED` in
+ * `backends/qa.web.json`) and against the emulators (`NX_APP_BITE_TRIBE_IS_DEV`,
+ * which a production build strips), so the feature stays testable. Unset is
+ * off, so a production build without the key stays safe.
+ */
+export const TABLE_ORDERING_AVAILABLE = new InjectionToken<boolean>(
+  'table-ordering-available',
+  {
+    providedIn: 'root',
+    factory: (): boolean =>
+      process.env['NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED'] === 'true' ||
+      process.env['NX_APP_BITE_TRIBE_IS_DEV'] === 'true',
+  },
+);

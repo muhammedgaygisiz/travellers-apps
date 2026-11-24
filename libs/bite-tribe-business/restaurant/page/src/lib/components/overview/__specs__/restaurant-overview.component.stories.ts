@@ -80,6 +80,11 @@ type Story = StoryObj<RestaurantOverviewComponent>;
  */
 export const SetUp: Story = {};
 
+/** Ordering at the table listed, but not offered yet (#2307). */
+export const TableOrderingComingSoon: Story = {
+  args: { tableOrderingAvailable: false },
+};
+
 /**
  * A restaurant an operator has just handed over: the progress says what to do
  * next, and every row it still counts is marked "Not set yet".

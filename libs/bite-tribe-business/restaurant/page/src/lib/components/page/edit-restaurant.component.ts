@@ -205,6 +205,8 @@ export class EditRestaurantComponent {
   restaurant = input<Restaurant>();
   /** The one part of the restaurant this page edits (GitHub issue #2183). */
   section = input<RestaurantSection>('about');
+  /** Ordering at the table is offered; otherwise "Coming soon" (#2307). */
+  tableOrderingAvailable = input(true);
   /** The photo upload's status for this restaurant (GitHub issue #2126). */
   photoStatus = input<RestaurantPhotoStatus>();
   pendingPhoto = input<string>();

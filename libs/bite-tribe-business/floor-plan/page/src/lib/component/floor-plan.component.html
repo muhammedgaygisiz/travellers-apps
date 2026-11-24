@@ -173,12 +173,27 @@
               <ion-button
                 class="ion-margin-top"
                 fill="outline"
-                [disabled]="saving() || unpublishedChanges()"
+                [disabled]="
+                  saving() || unpublishedChanges() || !tableOrderingAvailable()
+                "
                 data-testid="floor-plan-qr-codes"
                 (click)="printQrCodes.emit()"
               >
                 {{ 'floor-plan-qr-codes' | transloco }}
               </ion-button>
+
+              @if (!tableOrderingAvailable()) {
+                <!--
+                  A printed code is for ordering at the table, which guests
+                  cannot do yet (#2307).
+                -->
+                <ion-note
+                  class="floor-plan__hint"
+                  data-testid="floor-plan-qr-codes-coming-soon"
+                >
+                  {{ 'table-ordering-coming-soon' | transloco }}
+                </ion-note>
+              }
 
               @if (unpublishedChanges()) {
                 <ion-note

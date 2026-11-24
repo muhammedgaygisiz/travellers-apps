@@ -49,6 +49,11 @@ export interface OverviewRow {
   readonly counted: boolean;
   /** `true` while the setup checklist still counts the section as missing. */
   readonly missing: boolean;
+  /**
+   * Shown but not offered yet: ordering at the table while it is "Coming
+   * soon" (GitHub issue #2307). The row cannot be opened.
+   */
+  readonly comingSoon?: boolean;
 }
 
 /**
@@ -231,6 +236,8 @@ export class RestaurantOverviewComponent {
   readonly guestBitesToLink = input(0);
   /** The menu was built from guests' Bites (GitHub issue #2302). */
   readonly menuBuiltFromBites = input(false);
+  /** Ordering at the table is offered; otherwise "Coming soon" (#2307). */
+  readonly tableOrderingAvailable = input(true);
 
   readonly openSection = output<RestaurantSection>();
   readonly createMenu = output<void>();
@@ -256,7 +263,13 @@ export class RestaurantOverviewComponent {
 
     return restaurant
       ? ROW_SECTIONS.map((section) =>
-          overviewRow(restaurant, section, checklist),
+          section === 'table-ordering' && !this.tableOrderingAvailable()
+            ? {
+                ...overviewRow(restaurant, section, checklist),
+                valueKey: 'table-ordering-coming-soon',
+                comingSoon: true,
+              }
+            : overviewRow(restaurant, section, checklist),
         )
       : [];
   });

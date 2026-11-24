@@ -16,7 +16,7 @@ import {
 import { LoadingController, NavController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
-import { isContentRefused } from 'utils';
+import { isContentRefused, TABLE_ORDERING_AVAILABLE } from 'utils';
 
 /**
  * The sections of the restaurant page that save from a form. The photo has an
@@ -91,6 +91,8 @@ export class EditRestaurantService {
 
   restaurant = this.dataAccess.restaurant;
   gpsPosition = this.dataAccess.gpsPosition;
+  /** Ordering at the table is offered, or shown as "Coming soon" (#2307). */
+  readonly tableOrderingAvailable = inject(TABLE_ORDERING_AVAILABLE);
 
   /**
    * The Bites waiting for a link to a dish (GitHub issue #2216). Read again

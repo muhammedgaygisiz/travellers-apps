@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FloorPlanComponent } from '../component/floor-plan.component';
+import { TABLE_ORDERING_AVAILABLE } from 'utils';
 import { FloorPlanService } from './floor-plan.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { FloorPlanService } from './floor-plan.service';
       [loading]="service.loading()"
       [loadFailed]="service.loadFailed()"
       [saving]="service.saving()"
+      [tableOrderingAvailable]="tableOrderingAvailable"
       [gridSpacing]="service.gridSpacing()"
       [snapEnabled]="service.snapEnabled()"
       [snapSpacing]="service.snapSpacing()"
@@ -66,4 +68,5 @@ import { FloorPlanService } from './floor-plan.service';
 })
 export class FloorPlanContainer {
   service = inject(FloorPlanService);
+  protected readonly tableOrderingAvailable = inject(TABLE_ORDERING_AVAILABLE);
 }

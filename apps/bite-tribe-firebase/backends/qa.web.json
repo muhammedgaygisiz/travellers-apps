@@ -3,5 +3,6 @@
   "NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY": "6LfGwi4uAAAAAHCplsoOTpsanjvRHIhqRNtejqXN",
   "NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
   "NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
-  "NX_APP_BITE_TRIBE_LINK_ORIGIN": "https://bite-tribe-qa.web.app"
+  "NX_APP_BITE_TRIBE_LINK_ORIGIN": "https://bite-tribe-qa.web.app",
+  "NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED": "true"
 }

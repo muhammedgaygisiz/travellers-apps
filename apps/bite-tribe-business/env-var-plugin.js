@@ -13,6 +13,8 @@ module.exports = createEnvVarPlugin({
     'NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN',
     // The QA site in QA builds; unset, links name bitetribe.app (#2304).
     'NX_APP_BITE_TRIBE_LINK_ORIGIN',
+    // Ordering at the table, "Coming soon" unless set to 'true' (#2307).
+    'NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED',
   ],
   // Compiled in rather than supplied per environment: the flag identifies the
   // bundle, not the deployment. It is what `AnalyticsService` routes events by

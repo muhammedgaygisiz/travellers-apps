@@ -28,11 +28,16 @@
 
     <ion-list lines="full" class="sections">
       @for (row of rows(); track row.section) {
+        <!--
+          A "Coming soon" row is shown so owners know it exists, and cannot
+          be opened (#2307).
+        -->
         <ion-item
-          button
-          detail
+          [button]="!row.comingSoon"
+          [detail]="!row.comingSoon"
           [attr.data-testid]="'restaurant-section-' + row.section"
-          (click)="openSection.emit(row.section)"
+          [attr.aria-disabled]="row.comingSoon ? 'true' : null"
+          (click)="row.comingSoon || openSection.emit(row.section)"
         >
           <!--
             A row the setup progress does not count shows no status, so the

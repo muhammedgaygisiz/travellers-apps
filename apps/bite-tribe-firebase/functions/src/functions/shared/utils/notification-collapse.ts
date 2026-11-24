@@ -84,6 +84,11 @@ export const buildCollapseKey = (
       // that profile clears it, as `NEW_FOLLOWER` does (issue #2166).
       return buildKey(type, data['ownerUid']);
 
+    case 'RESTAURANT_NEW_FOLLOWER':
+      // The restaurant is the surface, so a later day's push replaces the
+      // earlier one and opening the restaurant clears it (issue #2318).
+      return buildKey(type, data['restaurantId']);
+
     case 'NEW_TABLE_ORDER':
       // The restaurant is the surface - one queue per restaurant - and the
       // table is the variant, so a second round from table 12 replaces the

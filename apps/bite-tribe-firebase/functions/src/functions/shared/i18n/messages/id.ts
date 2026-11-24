@@ -29,6 +29,8 @@ export const id: NotificationMessages = {
   'followRequest.body': '{{requester}} ingin mengikutimu.',
   'followRequestAccepted.title': 'Permintaan mengikuti diterima',
   'followRequestAccepted.body': '{{owner}} menerima permintaan mengikutimu.',
+  'restaurantFollower.title': 'Pengikut baru',
+  'restaurantFollower.body': '{{restaurant}} punya pengikut baru.',
   'biteTagged.title': 'Kamu ditandai di sebuah Bite',
   'biteTagged.body': '{{creator}} menandaimu di sebuah Bite: {{bite}}',
   'newLike.title': 'Suka baru untuk Bite-mu!',

@@ -26,6 +26,8 @@ export const ko: NotificationMessages = {
   'followRequest.body': '{{requester}}님이 팔로우를 요청했어요',
   'followRequestAccepted.title': '팔로우 요청이 수락됐어요',
   'followRequestAccepted.body': '{{owner}}님이 팔로우 요청을 수락했어요',
+  'restaurantFollower.title': '새 팔로워',
+  'restaurantFollower.body': '{{restaurant}}에 새 팔로워가 생겼어요.',
   'biteTagged.title': 'Bite에 태그되었어요',
   'biteTagged.body': '{{creator}}님이 Bite에 나를 태그했어요: {{bite}}',
   'newLike.title': '누군가 내 Bite를 좋아해요!',

@@ -29,6 +29,8 @@ export const ja: NotificationMessages = {
   'followRequestAccepted.title': 'フォローリクエストが承認されました',
   'followRequestAccepted.body':
     '{{owner}}さんがフォローリクエストを承認しました。',
+  'restaurantFollower.title': '新しいフォロワー',
+  'restaurantFollower.body': '{{restaurant}}に新しいフォロワーがつきました。',
   'biteTagged.title': 'Biteでタグ付けされました',
   'biteTagged.body':
     '{{creator}}さんがBiteであなたをタグ付けしました: {{bite}}',

@@ -79,6 +79,11 @@ export const toNotificationSurface = (
     case PATH.PROFILE:
       return id;
 
+    case PATH.RESTAURANT:
+      // The restaurant's own page (issue #2320) is the surface its owners'
+      // new-follower push names (issue #2318).
+      return id;
+
     case PATH.MY_PROFILE:
       return ownUid;
 

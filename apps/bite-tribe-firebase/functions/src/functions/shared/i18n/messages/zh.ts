@@ -25,6 +25,8 @@ export const zh: NotificationMessages = {
   'followRequest.body': '{{requester}}请求关注你。',
   'followRequestAccepted.title': '关注请求已被接受',
   'followRequestAccepted.body': '{{owner}}接受了你的关注请求。',
+  'restaurantFollower.title': '新关注者',
+  'restaurantFollower.body': '{{restaurant}} 有了新的关注者。',
   'biteTagged.title': '你在一个 Bite 中被标记了',
   'biteTagged.body': '{{creator}}在 Bite 中标记了你：{{bite}}',
   'newLike.title': '你的Bite收到了点赞！',

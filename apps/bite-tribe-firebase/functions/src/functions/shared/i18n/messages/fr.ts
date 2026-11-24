@@ -30,6 +30,8 @@ export const fr: NotificationMessages = {
   'followRequest.body': '{{requester}} demande à te suivre.',
   'followRequestAccepted.title': 'Demande d’abonnement acceptée',
   'followRequestAccepted.body': '{{owner}} a accepté ta demande d’abonnement.',
+  'restaurantFollower.title': 'Nouvel abonné',
+  'restaurantFollower.body': '{{restaurant}} a un nouvel abonné.',
   'biteTagged.title': 'Nouvelle identification dans un Bite',
   'biteTagged.body': '{{creator}} a ajouté ton nom à un Bite : {{bite}}',
   'newLike.title': 'Nouveau like sur ton Bite !',

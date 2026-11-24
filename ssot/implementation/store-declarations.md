@@ -331,6 +331,16 @@ existed ([#2143]). Checked against the table rather than assumed:
   only brings the Gemini line, which the policy already named one use at a
   time, up to the uses the code has.
 
+### The Restaurant Follower Push Changes No Declaration
+
+Following a restaurant (issue [#2132]) and the push its owners get for it
+(issue [#2318]) add no new kind of data. The follow is an app interaction, which
+is declared. The push goes through the push tokens that are already declared as
+device IDs. Its text names the restaurant and never the guest, so nothing about
+the follower reaches the owner but the fact that somebody followed. FCM delivers
+it as a processor, so `Data shared` stays none. The permission prompt is
+unchanged. Neither the Apple nutrition labels nor Play's Data safety form change.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -414,3 +424,5 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#2086]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2086
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
+[#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318

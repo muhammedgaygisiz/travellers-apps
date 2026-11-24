@@ -28,6 +28,8 @@ export const tr: NotificationMessages = {
   'followRequest.body': '{{requester}} seni takip etmek istiyor.',
   'followRequestAccepted.title': 'Takip isteğin kabul edildi',
   'followRequestAccepted.body': '{{owner}} takip isteğini kabul etti.',
+  'restaurantFollower.title': 'Yeni takipçi',
+  'restaurantFollower.body': '{{restaurant}} yeni bir takipçi kazandı.',
   'biteTagged.title': "Bir Bite'ta etiketlendin",
   'biteTagged.body': "{{creator}} seni bir Bite'ta etiketledi: {{bite}}",
   'newLike.title': "Bite'ına yeni beğeni!",

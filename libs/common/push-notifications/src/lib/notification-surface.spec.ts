@@ -5,6 +5,7 @@ import {
 
 jest.mock('utils', () => ({
   PATH: {
+    RESTAURANT: 'restaurant',
     BITE: 'bite',
     PROFILE: 'profile',
     MY_PROFILE: 'my-profile',
@@ -67,6 +68,12 @@ describe('toNotificationSurface', () => {
     expect(
       toNotificationSurface('/bite/bite1/restaurant/restaurant1', 'me'),
     ).toBe('bite1');
+  });
+
+  it("reads the restaurant a restaurant's own page is showing", () => {
+    // Opening it clears its owners' new-follower push (issue #2318).
+    expect(toNotificationSurface('/restaurant/r1', 'me')).toBe('r1');
+    expect(toNotificationSurface('/restaurant/r1/bites', 'me')).toBe('r1');
   });
 
   it('reads the profile a profile page is showing', () => {

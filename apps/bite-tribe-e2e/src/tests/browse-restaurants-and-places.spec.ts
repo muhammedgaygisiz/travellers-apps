@@ -6,7 +6,10 @@ import { RestaurantPage } from '../pages/restaurant.page';
 import { SearchPage } from '../pages/search.page';
 import { loginAsTestUser } from '../support/auth';
 import { dismissCoachMarks } from '../support/coach-marks';
-import { seedFirestoreDocument } from '../support/firestore';
+import {
+  getFirestoreDocument,
+  seedFirestoreDocument,
+} from '../support/firestore';
 import { completeOnboardingIfNeeded } from '../support/onboarding';
 import { TEST_USERS } from '../support/test-users';
 
@@ -102,6 +105,12 @@ test.describe('Browse Restaurants and Places', () => {
       seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
         id: { stringValue: restaurantId },
         name: { stringValue: restaurantName },
+        // An owner to tell about a new follower (GitHub issue #2318).
+        ownerUserIds: {
+          arrayValue: {
+            values: [{ stringValue: TEST_USERS.organisation.uid }],
+          },
+        },
         description: {
           stringValue:
             'A verified neighborhood restaurant for memorable Bites.',
@@ -206,6 +215,29 @@ test.describe('Browse Restaurants and Places', () => {
     // deletes it again.
     await restaurant.expectFollowState('Follow');
     await restaurant.toggleFollow('Following');
+    // The backend counts the follow and claims the owners' daily push
+    // (GitHub issues #2132 and #2318).
+    await expect
+      .poll(
+        async () =>
+          (await getFirestoreDocument(page, `restaurants/${restaurantId}`))?.[
+            'followersCount'
+          ],
+        { timeout: 15_000 },
+      )
+      .toBe(1);
+    await expect
+      .poll(
+        async () =>
+          (
+            await getFirestoreDocument(
+              page,
+              `restaurantFollowerPushes/${restaurantId}`,
+            )
+          )?.['restaurantId'],
+        { timeout: 15_000 },
+      )
+      .toBe(restaurantId);
     await page.reload();
     await restaurant.expectFollowState('Following');
     await restaurant.toggleFollow('Follow');

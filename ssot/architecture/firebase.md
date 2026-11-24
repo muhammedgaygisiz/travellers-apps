@@ -18,7 +18,8 @@ Firebase provides backend persistence, authentication integration, storage, func
 
 ```text
 bites               bites/{id}/likes
-users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens
+users               users/{id}/followers, users/{id}/following, users/{id}/pushTokens,
+                    users/{id}/followedRestaurants
 restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
                     restaurants/{id}/tableStates,
                     restaurants/{id}/tableStateTransitions,
@@ -28,6 +29,7 @@ restaurants         restaurants/{id}/rooms, restaurants/{id}/tables,
                     restaurants/{id}/assistanceRequests,
                     restaurants/{id}/scanAnomalies
 restaurantStaff
+restaurantFollowerPushes
 tableTokens
 scanRateLimits
 menus

@@ -27,6 +27,8 @@ export const ar: NotificationMessages = {
   'followRequest.body': 'طلب متابعة جديد من {{requester}}.',
   'followRequestAccepted.title': 'تم قبول طلب المتابعة',
   'followRequestAccepted.body': 'تم قبول طلبك لمتابعة {{owner}}.',
+  'restaurantFollower.title': 'متابِع جديد',
+  'restaurantFollower.body': 'لدى {{restaurant}} متابِع جديد.',
   'biteTagged.title': 'تمت الإشارة إليك في Bite',
   'biteTagged.body': 'أشار {{creator}} إليك في Bite: {{bite}}',
   'newLike.title': 'إعجاب جديد على Bite الخاص بك!',

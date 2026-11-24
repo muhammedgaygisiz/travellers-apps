@@ -29,6 +29,8 @@ export const es: NotificationMessages = {
   'followRequest.body': '{{requester}} quiere seguirte.',
   'followRequestAccepted.title': 'Solicitud de seguimiento aceptada',
   'followRequestAccepted.body': '{{owner}} aceptó tu solicitud de seguimiento.',
+  'restaurantFollower.title': 'Nuevo seguidor',
+  'restaurantFollower.body': '{{restaurant}} tiene un nuevo seguidor.',
   'biteTagged.title': 'Te etiquetaron en un Bite',
   'biteTagged.body': '{{creator}} te etiquetó en un Bite: {{bite}}',
   'newLike.title': '¡Nuevo me gusta en tu Bite!',

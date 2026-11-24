@@ -1045,5 +1045,7 @@
   "show-whole-globe": "แสดงลูกโลกทั้งหมด",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "เลือกภาษา",
-  "account-language-prompt-message": "บัญชีของคุณตั้งค่าภาษาเป็น {{accountLanguage}} แต่แอปแสดงภาษา {{currentLanguage}} คุณต้องการใช้ภาษาใด"
+  "account-language-prompt-message": "บัญชีของคุณตั้งค่าภาษาเป็น {{accountLanguage}} แต่แอปแสดงภาษา {{currentLanguage}} คุณต้องการใช้ภาษาใด",
+  "restaurant-follow-failed": "ไม่สามารถติดตามร้านอาหารนี้ได้ ลองอีกครั้ง",
+  "restaurant-unfollow-failed": "ไม่สามารถเลิกติดตามร้านอาหารนี้ได้ ลองอีกครั้ง"
 }

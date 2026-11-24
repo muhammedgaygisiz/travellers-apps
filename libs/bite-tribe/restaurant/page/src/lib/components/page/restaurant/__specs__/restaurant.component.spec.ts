@@ -499,6 +499,62 @@ describe('RestaurantComponent', () => {
     );
   });
 
+  /** GitHub issue #2132. */
+  describe('the follow button', () => {
+    beforeEach(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TranslocoTestingModule.forRoot({
+            langs: { en: { follow: 'Follow', following: 'Following' } },
+            translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+            preloadLangs: true,
+          }),
+        ],
+        providers: [provideIonicAngular(getIonicConfig())],
+      });
+
+      fixture = TestBed.createComponent(RestaurantComponent);
+      component = fixture.componentInstance;
+      componentRef = fixture.componentRef;
+    });
+
+    const button = (following: boolean | undefined): HTMLElement | null => {
+      componentRef.setInput('restaurant', createRestaurant());
+      componentRef.setInput('following', following);
+      componentRef.changeDetectorRef.detectChanges();
+
+      return (fixture.nativeElement as HTMLElement).querySelector(
+        '[data-testid="restaurant-follow-button"]',
+      );
+    };
+
+    it('is hidden while it is not known whether the guest follows', () => {
+      expect(button(undefined)).toBeNull();
+    });
+
+    it('offers to follow, and shows when the guest does', () => {
+      const offer = button(false);
+      expect(offer?.textContent?.trim()).toBe('Follow');
+      expect(offer?.getAttribute('aria-pressed')).toBe('false');
+      expect((offer as unknown as { fill: string }).fill).toBe('outline');
+
+      const followed = button(true);
+      expect(followed?.textContent?.trim()).toBe('Following');
+      expect(followed?.getAttribute('aria-pressed')).toBe('true');
+      expect((followed as unknown as { fill: string }).fill).toBe('solid');
+    });
+
+    it('asks the page to toggle the follow', () => {
+      const clicks = jest.fn();
+      component.followClick.subscribe(clicks);
+
+      button(false)?.click();
+
+      expect(clicks).toHaveBeenCalledTimes(1);
+    });
+  });
+
   /**
    * What the restaurant says about its whole kitchen (issue #2194), shown as
    * declared by the restaurant.

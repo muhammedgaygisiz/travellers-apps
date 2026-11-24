@@ -245,3 +245,19 @@ export const WithDietaryStatements: Story = {
     } as Restaurant,
   },
 };
+
+/** A guest who does not follow the restaurant yet (GitHub issue #2132). */
+export const NotFollowed: Story = {
+  args: {
+    ...Registered.args,
+    following: false,
+  },
+};
+
+/** A guest who follows the restaurant (GitHub issue #2132). */
+export const Followed: Story = {
+  args: {
+    ...Registered.args,
+    following: true,
+  },
+};

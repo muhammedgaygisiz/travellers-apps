@@ -42,6 +42,11 @@ import {
   WithdrawFollowRequestResult,
 } from 'model';
 import { loadRestaurantsNear } from './restaurant-api/utils/load-restaurants-near';
+import {
+  followRestaurant,
+  isFollowingRestaurant,
+  unfollowRestaurant,
+} from './restaurant-api/utils/restaurant-follow';
 import { MenuApiService } from './menu-api/menu-api.service';
 import { LikeApiService } from './like-api/like-api.service';
 import { BucketlistApiService } from './bucketlist-api/bucketlist-api.service';
@@ -258,6 +263,24 @@ export class BiteTribeApiService {
     radiusInM: number,
   ): Promise<Restaurant[]> {
     return loadRestaurantsNear(center, radiusInM);
+  }
+
+  /** Whether the account follows the restaurant (issue #2132). */
+  isFollowingRestaurant(
+    userId: string,
+    restaurantId: string,
+  ): Promise<boolean> {
+    return isFollowingRestaurant(userId, restaurantId);
+  }
+
+  /** Follows a restaurant (issue #2132). Errors are left to the caller. */
+  followRestaurant(userId: string, restaurantId: string): Promise<void> {
+    return followRestaurant(userId, restaurantId);
+  }
+
+  /** Unfollows a restaurant (issue #2132). Errors are left to the caller. */
+  unfollowRestaurant(userId: string, restaurantId: string): Promise<void> {
+    return unfollowRestaurant(userId, restaurantId);
   }
 
   loadRestaurant(restaurantId: string): Promise<Restaurant | undefined> {

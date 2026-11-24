@@ -135,6 +135,10 @@ export {
 } from './functions/restaurants/maintain-menu-item-stats';
 export { remindAboutVisitSummariesDaily } from './functions/restaurants/remind-about-visit-summaries';
 export { keepRestaurantGeohash } from './functions/restaurants/keep-restaurant-geohash';
+export {
+  decrementRestaurantFollowersOnUnfollow,
+  incrementRestaurantFollowersOnFollow,
+} from './functions/restaurants/update-restaurant-followers-count';
 export { requestTableAssistance } from './functions/restaurants/request-table-assistance';
 export { acknowledgeTableAssistance } from './functions/restaurants/acknowledge-table-assistance';
 export { dismissScanAnomaly } from './functions/restaurants/dismiss-scan-anomaly';

@@ -65,6 +65,8 @@ const SETTINGS_COLLECTION = 'settings';
 
 const FOLLOWERS_SUBCOLLECTION = 'followers';
 const FOLLOWING_SUBCOLLECTION = 'following';
+/** Spelled out: importing it would pull the restaurant modules in here. */
+const FOLLOWED_RESTAURANTS_SUBCOLLECTION = 'followedRestaurants';
 const PUSH_TOKENS_SUBCOLLECTION = 'pushTokens';
 
 export const ACCOUNT_DELETIONS_COLLECTION = 'accountDeletions';
@@ -306,6 +308,29 @@ export const deleteFollowEdgesForUser = async (
   await deleteRefs(db, refs);
 
   return refs.length;
+};
+
+/**
+ * Deletes every restaurant the user follows (GitHub issue #2132). The unfollow
+ * trigger lowers each restaurant's `followersCount`, the way the user follow
+ * triggers keep the user counts.
+ */
+export const deleteRestaurantFollowsForUser = async (
+  db: Firestore,
+  uid: string,
+): Promise<number> => {
+  const follows = await db
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(FOLLOWED_RESTAURANTS_SUBCOLLECTION)
+    .get();
+
+  await deleteRefs(
+    db,
+    follows.docs.map((follow) => follow.ref),
+  );
+
+  return follows.size;
 };
 
 /**
@@ -599,6 +624,10 @@ export const deleteAccountForUser = async (
     const anonymizedSales = await anonymizeBiteTrailSalesByUser(db, uid);
     const deletedFollowEdges = await deleteFollowEdgesForUser(db, uid);
     const deletedBlockEdges = await deleteBlockEdgesForUser(db, uid);
+    const deletedRestaurantFollows = await deleteRestaurantFollowsForUser(
+      db,
+      uid,
+    );
     const deletedFollowRequests = await deleteFollowRequestsForUser(db, uid);
     const deletedPushTokens = await deletePushTokensForUser(db, uid);
     const deletedRestaurantStaff = await deleteRestaurantStaffForUser(db, uid);
@@ -633,6 +662,7 @@ export const deleteAccountForUser = async (
         anonymizedSales,
         deletedFollowEdges,
         deletedBlockEdges,
+        deletedRestaurantFollows,
         deletedFollowRequests,
         deletedPushTokens,
         deletedRestaurantStaff,
@@ -657,6 +687,7 @@ export const deleteAccountForUser = async (
       anonymizedSales,
       deletedFollowEdges,
       deletedBlockEdges,
+      deletedRestaurantFollows,
       deletedFollowRequests,
       deletedPushTokens,
       deletedRestaurantStaff,

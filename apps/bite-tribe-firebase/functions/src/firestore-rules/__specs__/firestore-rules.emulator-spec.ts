@@ -973,6 +973,105 @@ describe('restaurants', () => {
 });
 
 /**
+ * Following a restaurant (GitHub issue #2132). The follow is kept under the
+ * guest and read by the guest alone; the count on the restaurant is the
+ * backend's.
+ */
+describe('restaurant follows', () => {
+  const follow = (
+    as: Firestore,
+    uid: string,
+    restaurantId: string,
+  ): ReturnType<typeof doc> =>
+    doc(as, 'users', uid, 'followedRestaurants', restaurantId);
+
+  const FOLLOW = {
+    restaurantId: OWNED_RESTAURANT,
+    createdAt: '2026-11-24T12:00:00.000Z',
+    createdAtTimestamp: 1795000000000,
+  };
+
+  it('lets a guest follow a restaurant, read the follow and unfollow it', async () => {
+    const ref = follow(asConsumer(), CONSUMER, OWNED_RESTAURANT);
+
+    await assertSucceeds(setDoc(ref, FOLLOW));
+    await assertSucceeds(getDoc(ref));
+    await assertSucceeds(deleteDoc(ref));
+  });
+
+  it('refuses following a place that is not a restaurant', async () => {
+    await assertFails(
+      setDoc(follow(asConsumer(), CONSUMER, 'unverified-place'), {
+        ...FOLLOW,
+        restaurantId: 'unverified-place',
+      }),
+    );
+  });
+
+  it('refuses a follow written for somebody else', async () => {
+    await assertFails(
+      setDoc(follow(asStranger(), CONSUMER, OWNED_RESTAURANT), FOLLOW),
+    );
+  });
+
+  it('refuses a follow naming another restaurant, or carrying more', async () => {
+    await assertFails(
+      setDoc(follow(asConsumer(), CONSUMER, OWNED_RESTAURANT), {
+        ...FOLLOW,
+        restaurantId: FOREIGN_RESTAURANT,
+      }),
+    );
+    await assertFails(
+      setDoc(follow(asConsumer(), CONSUMER, OWNED_RESTAURANT), {
+        ...FOLLOW,
+        note: 'extra',
+      }),
+    );
+  });
+
+  it('refuses an anonymous table guest', async () => {
+    await assertFails(
+      setDoc(follow(asTableGuest(), CONSUMER, OWNED_RESTAURANT), FOLLOW),
+    );
+  });
+
+  it("keeps a guest's follows from the restaurant's owner", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        follow(context.firestore(), CONSUMER, OWNED_RESTAURANT),
+        FOLLOW,
+      );
+    });
+
+    await assertFails(getDoc(follow(asOwner(), CONSUMER, OWNED_RESTAURANT)));
+    await assertFails(
+      getDocs(collection(asOwner(), 'users', CONSUMER, 'followedRestaurants')),
+    );
+  });
+
+  it.each([
+    ['the owner', (): Firestore => asOwner()],
+    ['an operator', (): Firestore => asOperator()],
+    ['a consumer', (): Firestore => asConsumer()],
+  ])('refuses %s writing the follower count', async (_who, as) => {
+    await assertFails(
+      updateDoc(doc(as(), 'restaurants', OWNED_RESTAURANT), {
+        followersCount: 99,
+      }),
+    );
+  });
+
+  it('refuses an operator creating a restaurant that carries a follower count', async () => {
+    await assertFails(
+      setDoc(doc(asOperator(), 'restaurants', 'counted-restaurant'), {
+        name: 'New',
+        followersCount: 5,
+      }),
+    );
+  });
+});
+
+/**
  * Ownership as a set (epic #1614, issue #1750).
  *
  * A restaurant held only through `ownerUserIds` - the shape the migration of

@@ -1045,5 +1045,7 @@
   "show-whole-globe": "地球全体を表示",
   "country-bite-count": "Bite: {{count}}件",
   "account-language-prompt-header": "言語の選択",
-  "account-language-prompt-message": "アカウントの言語は{{accountLanguage}}ですが、アプリは{{currentLanguage}}で表示されています。どちらの言語を使いますか？"
+  "account-language-prompt-message": "アカウントの言語は{{accountLanguage}}ですが、アプリは{{currentLanguage}}で表示されています。どちらの言語を使いますか？",
+  "restaurant-follow-failed": "このレストランをフォローできませんでした。もう一度お試しください。",
+  "restaurant-unfollow-failed": "このレストランのフォローを解除できませんでした。もう一度お試しください。"
 }

@@ -1045,5 +1045,7 @@
   "show-whole-globe": "显示整个地球",
   "country-bite-count": "Bite：{{count}}个",
   "account-language-prompt-header": "选择语言",
-  "account-language-prompt-message": "你的账户语言是{{accountLanguage}}，但应用当前显示的是{{currentLanguage}}。你想使用哪种语言？"
+  "account-language-prompt-message": "你的账户语言是{{accountLanguage}}，但应用当前显示的是{{currentLanguage}}。你想使用哪种语言？",
+  "restaurant-follow-failed": "无法关注这家餐厅，请重试。",
+  "restaurant-unfollow-failed": "无法取消关注这家餐厅，请重试。"
 }

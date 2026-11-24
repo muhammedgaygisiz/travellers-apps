@@ -195,6 +195,11 @@ export interface Restaurant {
    */
   crossContaminationNote?: string;
 
+  /**
+   * How many guests follow the restaurant (GitHub issue #2132). Kept by the
+   * backend alone; the rules refuse it from every client.
+   */
+  followersCount?: number;
   createdAt?: string;
   createdAtTimestamp?: number;
   updatedAt?: string;

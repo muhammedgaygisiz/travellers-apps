@@ -400,6 +400,13 @@ const seedRestaurant = async () => {
       timeRanges: [{ from: '00:00', to: '23:59' }],
     })),
     tableOrdering: { enabled: true, timeZone: 'Europe/Berlin' },
+    // A fresh stamp on every run, so the write is never identical to what is
+    // stored. Firestore treats an identical write as a no-op and raises no
+    // event, so keepRestaurantGeohash (issue #2308) would not run and a
+    // restaurant seeded before the trigger existed would stay without a
+    // geohash - invisible to Create Bite's restaurant list.
+    updatedAt: new Date(now).toISOString(),
+    updatedAtTimestamp: now,
   });
 
   await put(`restaurantStaff/qa-staff`, { restaurantId: RESTAURANT_ID });

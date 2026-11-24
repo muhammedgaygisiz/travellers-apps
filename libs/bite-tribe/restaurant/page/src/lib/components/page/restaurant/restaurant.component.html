@@ -262,6 +262,30 @@
           } @else {
             <span class="text-small text-secondary">{{ ratingLabel }}</span>
           }
+
+          <!-- Following the restaurant (GitHub issue #2132). Offered only
+          once it is known whether the guest already follows, so the button
+          never says "Follow" to somebody who does. -->
+          @let followingData = following();
+          @if (followingData !== undefined) {
+            <ion-button
+              class="follow-button"
+              size="small"
+              shape="round"
+              [fill]="followingData ? 'solid' : 'outline'"
+              [disabled]="followPending()"
+              [attr.aria-pressed]="followingData"
+              data-testid="restaurant-follow-button"
+              (click)="followClick.emit()"
+            >
+              <ion-icon
+                slot="start"
+                [name]="followingData ? 'checkmark-outline' : 'add-outline'"
+                aria-hidden="true"
+              />
+              {{ (followingData ? 'following' : 'follow') | transloco }}
+            </ion-button>
+          }
         </div>
 
         <div class="seperator"></div>

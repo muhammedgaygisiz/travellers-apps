@@ -88,6 +88,14 @@ screen before the state backing them existed.
   gender-neutral restroom" for no. A restaurant that has not said shows
   nothing, because an absent value is never read as no. The line belongs to
   the loaded page, so it cannot appear before the restaurant has.
+- A signed-in guest can follow the restaurant from the right end of the
+  rating line (issue [#2132]): an outline "Follow" button that turns into a
+  filled "Following" and back. The button shows the new state at once; a
+  write that is refused puts the old state back with a toast. It appears only
+  once it is known whether the guest already follows, so it never says
+  "Follow" to somebody who does. A place known only from its Bites, the place
+  page, has no button: only a stored restaurant can be followed. What a
+  follower receives is [#2318].
 
 ## Place Page State Contract
 
@@ -144,6 +152,8 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
 - Issue [#2131] added the category line under the restaurant's name. Part of epic [#2123].
 - Issue [#2194] added the restaurant's dietary statements under it. Part of epic [#2193].
+- Issue [#2132] added following a restaurant, without notifications, which are
+  [#2318]. Part of [#2123].
 - Issue [#2124] made the page wait for its Bites as well as its document, and
   gave it the not-found state. Part of [#2123].
 - Issue [#2125] gave the unverified place page its loading and not-found
@@ -177,3 +187,5 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#2131]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2131
 [#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
 [#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
+[#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318

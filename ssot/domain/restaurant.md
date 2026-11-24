@@ -65,6 +65,8 @@ Restaurant context should support dish-first discovery rather than becoming a ge
 
 - **A Restaurant states what fits a diet, and says so as its own claim.** Since issue [#2194] it declares dietary labels on each menu item and on each variant (`dietaryLabels`), the labels a dish _can be made_ to fit on request (`dietaryOptions`), and statements about its whole kitchen (`dietaryStatements`: fully plant-based, fully vegetarian, fully halal, fully kosher, a dedicated gluten-free kitchen) with a free `crossContaminationNote`. The vocabulary and each label's class are owned by [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) (`R-1`); an unknown stored value is dropped on read, and every reader shows the claim as declared by the restaurant (`RD-DC-1`). The menu item labels are written with the menu by the account holding the Restaurant or an operator. The statements and the note are written only by the `saveRestaurantDietaryStatements` callable, which checks the note before another account can read it (`RD-UR-11`), and the rules refuse a client write of either. They are not tags: a `#vegan` on a Bite stays as typed.
 
+- **A guest can follow a Restaurant; the Restaurant sees how many, never who.** Since issue [#2132] a member account follows a stored Restaurant from its page. The follow is `/users/{uid}/followedRestaurants/{restaurantId}` (`restaurantId`, `createdAt`, `createdAtTimestamp`), kept under the guest and readable by the guest alone. `followersCount` on the Restaurant is kept by the `incrementRestaurantFollowersOnFollow` and `decrementRestaurantFollowersOnUnfollow` triggers, never below 0, and `firestore.rules` refuses it from every client, the holder and the operator included. The rules refuse a follow of a place with no Restaurant document, and an anonymous table guest's follow. Deleting an account deletes its follows, which lowers the counts. A follow of a Restaurant that is later deleted stays under the guest and counts nothing. What a follower receives is [#2318]; the owner's view of the count is [#2133].
+
 - Restaurant tags are derived from the Bites at the place and are not stored on the Restaurant. Bites keep tags exactly as they were typed, so the derived list compares them with a leading `#` stripped and case folded, shows the first spelling that survives that folding, and never shows the `#`. See issue [#1389] and [issue-1389](../history/records/issue-1389.md).
 
 ## Required Data
@@ -108,6 +110,8 @@ Current model fields:
 - `tableOrdering`
 - `facilities`
 - `categories`
+- `followersCount` - how many guests follow the Restaurant; written by the
+  backend alone (issue [#2132])
 - `dietaryStatements`
 - `crossContaminationNote`
 - `createdAt`
@@ -178,6 +182,7 @@ Current implementation notes:
   - Guest behavior is not the main authenticated app flow today.
 - Registered user
   - View restaurant and place context through Bite flows.
+  - Follow and unfollow a Restaurant (issue [#2132]).
   - Browse restaurant Bites and menu pages.
 - Business user or admin
   - Create Restaurant.
@@ -198,6 +203,7 @@ Supported today:
 - Open unverified place from Bite.
 - View all Bites of a Restaurant.
 - View Restaurant menu.
+- Follow a Restaurant.
 - Search Restaurants.
 - Create Restaurant in business app.
 - Verify Restaurant candidate in admin app.
@@ -335,3 +341,6 @@ images/restaurants/{restaurantId}/{filename}
 [#2214]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2214
 [#2224]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2224
 [#2227]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2227
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
+[#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
+[#2133]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2133

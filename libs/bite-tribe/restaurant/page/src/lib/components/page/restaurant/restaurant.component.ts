@@ -75,9 +75,17 @@ export class RestaurantComponent {
   bitesLoading = input(false);
   /** The route's restaurant id resolved to nothing, or could not be read. */
   notFound = input(false);
+  /**
+   * Whether the guest follows the restaurant, or `undefined` while that is not
+   * known, which hides the button (GitHub issue #2132).
+   */
+  following = input<boolean>();
+  /** A follow or unfollow is being written. */
+  followPending = input(false);
 
   readonly createBiteClick = output<MenuItem>();
   readonly showMenuClick = output<Restaurant | undefined>();
+  readonly followClick = output<void>();
   readonly showBitesClick = output<Restaurant | undefined>();
   readonly biteClick = output<Bite>();
   readonly likeButtonClick = output<LikeClick>();

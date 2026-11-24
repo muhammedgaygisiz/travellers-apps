@@ -1045,5 +1045,7 @@
   "show-whole-globe": "ሙሉውን የምድር ሉል ያሳዩ",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "ቋንቋ ይምረጡ",
-  "account-language-prompt-message": "የመለያዎ ቋንቋ {{accountLanguage}} ነው፣ መተግበሪያው ግን {{currentLanguage}} እያሳየ ነው። የትኛውን ቋንቋ መጠቀም ይፈልጋሉ?"
+  "account-language-prompt-message": "የመለያዎ ቋንቋ {{accountLanguage}} ነው፣ መተግበሪያው ግን {{currentLanguage}} እያሳየ ነው። የትኛውን ቋንቋ መጠቀም ይፈልጋሉ?",
+  "restaurant-follow-failed": "ይህን ምግብ ቤት መከተል አልተቻለም። እንደገና ይሞክሩ።",
+  "restaurant-unfollow-failed": "ይህን ምግብ ቤት መከተል ማቆም አልተቻለም። እንደገና ይሞክሩ።"
 }

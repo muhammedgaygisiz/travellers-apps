@@ -1045,5 +1045,7 @@
   "show-whole-globe": "Tüm küreyi göster",
   "country-bite-count": "Bite: {{count}}",
   "account-language-prompt-header": "Dil seçimi",
-  "account-language-prompt-message": "Hesabının dili {{accountLanguage}}, uygulamanın dili ise şu anda {{currentLanguage}}. Hangi dili kullanmak istersin?"
+  "account-language-prompt-message": "Hesabının dili {{accountLanguage}}, uygulamanın dili ise şu anda {{currentLanguage}}. Hangi dili kullanmak istersin?",
+  "restaurant-follow-failed": "Bu restoran takip edilemedi. Tekrar dene.",
+  "restaurant-unfollow-failed": "Bu restoranın takibi bırakılamadı. Tekrar dene."
 }

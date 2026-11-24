@@ -234,6 +234,15 @@ service cloud.firestore {
       return ['dietaryStatements', 'crossContaminationNote'];
     }
 
+    /**
+     * How many guests follow the restaurant (GitHub issue #2132). Kept by the
+     * `restaurantFollow` triggers alone, so no client sets it: not the holder,
+     * whose own count it is, and not the operator either.
+     */
+    function backendOwnedRestaurantFields() {
+      return ['followersCount'];
+    }
+
     match /restaurants/{restaurantId} {
       allow read: if isMember();
 
@@ -248,7 +257,8 @@ service cloud.firestore {
        */
       allow create: if isOperator()
         && absentAll(ownershipFields())
-        && absentAll(dietaryStatementFields());
+        && absentAll(dietaryStatementFields())
+        && absentAll(backendOwnedRestaurantFields());
 
       /**
        * A holder edits the restaurant but never its published photo, which
@@ -257,6 +267,7 @@ service cloud.firestore {
        */
       allow update: if unchangedAll(ownershipFields())
         && unchangedAll(dietaryStatementFields())
+        && unchangedAll(backendOwnedRestaurantFields())
         && (isOperator() || (holds(resource.data) && keepsPublishedFolderPhoto()));
 
       allow delete: if isOperator();
@@ -1403,6 +1414,34 @@ service cloud.firestore {
       match /following/{followedId} {
         allow read: if isMember();
         allow create, update: if isSelf(userId) && isPublicProfileOf(followedId);
+        allow delete: if isSelf(userId);
+      }
+
+      /**
+       * A restaurant this account follows (GitHub issue #2132), one document
+       * named by the restaurant's id:
+       *
+       * ```text
+       * /users/{userId}/followedRestaurants/{restaurantId}
+       * ```
+       *
+       * Kept under the guest rather than the restaurant, and read by the guest
+       * alone, because the owner sees how many follow, never who. Only a
+       * restaurant that exists can be followed, which is what keeps an
+       * unverified place (a candidate, or a place known only from its Bites)
+       * out. A member account only: an anonymous table guest has nothing to
+       * follow with. The document holds the restaurant's id and when the follow
+       * began, nothing else, so a follower cannot smuggle data under it. Update
+       * is held to create's condition, because a `setDocument` onto a follow
+       * that exists is an update.
+       */
+      match /followedRestaurants/{restaurantId} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && isMember()
+          && restaurantExists(restaurantId)
+          && request.resource.data.keys().hasOnly(['restaurantId', 'createdAt', 'createdAtTimestamp'])
+          && request.resource.data.restaurantId == restaurantId;
         allow delete: if isSelf(userId);
       }
 

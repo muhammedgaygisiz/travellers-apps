@@ -4,6 +4,7 @@ import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
 import { Bite, LikeClick, Restaurant } from 'model';
 import { NavController } from '@ionic/angular/standalone';
 import { PATH } from 'utils';
+import { ToastService } from 'toast';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class RestaurantService {
   dataAccess = inject(RestaurantDataAccessService);
   private readonly homeDataAccess = inject(HomeDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly toast = inject(ToastService);
 
   bites = this.homeDataAccess.restaurantBites;
   bite = computed(
@@ -20,6 +22,26 @@ export class RestaurantService {
   userId = this.dataAccess.userId;
   restaurant = this.dataAccess.restaurant;
   restaurantNotFound = this.dataAccess.restaurantNotFound;
+  following = this.dataAccess.following;
+  followPending = this.dataAccess.followPending;
+
+  /**
+   * Follows or unfollows the restaurant (GitHub issue #2132). The button
+   * shows the new state at once; a refused write puts it back and says so.
+   */
+  async toggleFollow(): Promise<void> {
+    const wasFollowing = this.following();
+    const landed = await this.dataAccess.toggleFollow();
+
+    if (!landed) {
+      await this.toast.present({
+        messageKey: wasFollowing
+          ? 'restaurant-unfollow-failed'
+          : 'restaurant-follow-failed',
+        outcome: 'failure',
+      });
+    }
+  }
 
   /**
    * The route's Bites have not arrived yet. Only a first load counts: a

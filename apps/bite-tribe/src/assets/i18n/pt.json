@@ -1045,5 +1045,7 @@
   "show-whole-globe": "Ver o globo inteiro",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "Escolher idioma",
-  "account-language-prompt-message": "A tua conta está definida para {{accountLanguage}}, mas a app está em {{currentLanguage}}. Que idioma queres usar?"
+  "account-language-prompt-message": "A tua conta está definida para {{accountLanguage}}, mas a app está em {{currentLanguage}}. Que idioma queres usar?",
+  "restaurant-follow-failed": "Não foi possível seguir este restaurante. Tente novamente.",
+  "restaurant-unfollow-failed": "Não foi possível deixar de seguir este restaurante. Tente novamente."
 }

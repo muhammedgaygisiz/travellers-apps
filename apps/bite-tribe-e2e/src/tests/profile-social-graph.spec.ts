@@ -102,7 +102,7 @@ test.describe('Manage Profile and Social Graph', () => {
     });
 
     await profile.follow.click();
-    await expect(profile.stopFollowing).toBeVisible();
+    await expect(profile.following).toBeVisible();
     await expect(profile.socialCount('Followers')).toHaveText('1', {
       timeout: AGGREGATE_PROPAGATION_TIMEOUT_MS,
     });

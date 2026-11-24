@@ -66,6 +66,7 @@ import {
   deleteFollowEdgesForUser,
   deleteFollowRequestsForUser,
   deleteOwnAccountHandler,
+  deleteRestaurantFollowsForUser,
   refreshLeaderboardsAfterDeletion,
   REAUTH_MAX_AGE_SECONDS,
 } from '../delete-own-account';
@@ -147,6 +148,26 @@ describe('deleteFollowEdgesForUser', () => {
     expect(db.exists(`users/follower-1/following/${UID}`)).toBe(false);
     expect(db.exists(`users/${UID}/following/followed-1`)).toBe(false);
     expect(db.exists(`users/followed-1/followers/${UID}`)).toBe(false);
+  });
+});
+
+/** GitHub issue #2132. */
+describe('deleteRestaurantFollowsForUser', () => {
+  beforeEach(() => {
+    db = createFakeFirestore();
+  });
+
+  it("deletes the user's restaurant follows and nobody else's", async () => {
+    db.seed(`users/${UID}/followedRestaurants/r-1`, { restaurantId: 'r-1' });
+    db.seed(`users/${UID}/followedRestaurants/r-2`, { restaurantId: 'r-2' });
+    db.seed('users/other/followedRestaurants/r-1', { restaurantId: 'r-1' });
+
+    const deleted = await deleteRestaurantFollowsForUser(asFirestore(db), UID);
+
+    expect(deleted).toBe(2);
+    expect(db.exists(`users/${UID}/followedRestaurants/r-1`)).toBe(false);
+    expect(db.exists(`users/${UID}/followedRestaurants/r-2`)).toBe(false);
+    expect(db.exists('users/other/followedRestaurants/r-1')).toBe(true);
   });
 });
 
@@ -249,6 +270,9 @@ describe('deleteAccountForUser', () => {
     db.seed('displayNames/gone user', { userId: UID });
     db.seed(`settings/${UID}`, { theme: 'dark' });
     db.seed(`users/${UID}/pushTokens/token-1`, { enabled: true });
+    db.seed(`users/${UID}/followedRestaurants/restaurant-1`, {
+      restaurantId: 'restaurant-1',
+    });
     db.seed('bites/bite-1', { userId: UID, name: 'Ramen' });
     db.seed('bites/bite-2', { userId: 'someone-else', name: 'Pizza' });
     db.seed(`bites/bite-2/likes/${UID}`, { userId: UID, likeType: 'thumbup' });
@@ -650,6 +674,7 @@ describe('deleteAccountForUser', () => {
       anonymizedSales: 1,
       deletedFollowEdges: 0,
       deletedBlockEdges: 0,
+      deletedRestaurantFollows: 1,
       deletedFollowRequests: 0,
       deletedPushTokens: 1,
       deletedRestaurantStaff: 1,

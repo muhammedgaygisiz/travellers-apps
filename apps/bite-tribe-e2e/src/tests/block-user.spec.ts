@@ -96,8 +96,8 @@ test.describe('Block another user', () => {
     const profile = new ProfilePage(page);
     await expect(profile.displayName).toHaveText(other.displayName);
     // Follow is the one prominent action; Block is behind the header menu.
-    // The test user follows this account, so that action is Stop following.
-    await expect(profile.stopFollowing).toBeVisible();
+    // The test user follows this account, so that action is Following.
+    await expect(profile.following).toBeVisible();
     await expect(profile.block).toHaveCount(0);
 
     await profile.confirmBlock(other.displayName);
@@ -176,7 +176,7 @@ test.describe('Block another user', () => {
     const profile = new ProfilePage(page);
     await expect(profile.displayName).toHaveText(other.displayName);
 
-    await profile.stopFollowing.click();
+    await profile.following.click();
     const unfollow = page.getByRole('alertdialog', {
       name: 'Stop following',
       exact: true,

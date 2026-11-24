@@ -1045,5 +1045,7 @@
   "show-whole-globe": "Ganzen Globus zeigen",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "Sprache wählen",
-  "account-language-prompt-message": "Dein Konto ist auf {{accountLanguage}} eingestellt, die App zeigt aber {{currentLanguage}}. Welche Sprache möchtest du verwenden?"
+  "account-language-prompt-message": "Dein Konto ist auf {{accountLanguage}} eingestellt, die App zeigt aber {{currentLanguage}}. Welche Sprache möchtest du verwenden?",
+  "restaurant-follow-failed": "Folgen hat nicht geklappt. Bitte versuche es noch einmal.",
+  "restaurant-unfollow-failed": "Entfolgen hat nicht geklappt. Bitte versuche es noch einmal."
 }

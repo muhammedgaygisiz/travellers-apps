@@ -1045,5 +1045,7 @@
   "show-whole-globe": "عرض الكرة الأرضية كاملة",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "اختيار اللغة",
-  "account-language-prompt-message": "لغة حسابك هي {{accountLanguage}}، لكن التطبيق يعرض {{currentLanguage}}. أيّ اللغتين تُستخدم؟"
+  "account-language-prompt-message": "لغة حسابك هي {{accountLanguage}}، لكن التطبيق يعرض {{currentLanguage}}. أيّ اللغتين تُستخدم؟",
+  "restaurant-follow-failed": "تعذّرت متابعة هذا المطعم. يُرجى إعادة المحاولة.",
+  "restaurant-unfollow-failed": "تعذّر إلغاء متابعة هذا المطعم. يُرجى إعادة المحاولة."
 }

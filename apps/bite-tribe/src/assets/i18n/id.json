@@ -1045,5 +1045,7 @@
   "show-whole-globe": "Tampilkan seluruh globe",
   "country-bite-count": "Bites: {{count}}",
   "account-language-prompt-header": "Pilih bahasa",
-  "account-language-prompt-message": "Akunmu diatur ke {{accountLanguage}}, tetapi aplikasi menampilkan {{currentLanguage}}. Bahasa mana yang ingin kamu gunakan?"
+  "account-language-prompt-message": "Akunmu diatur ke {{accountLanguage}}, tetapi aplikasi menampilkan {{currentLanguage}}. Bahasa mana yang ingin kamu gunakan?",
+  "restaurant-follow-failed": "Tidak dapat mengikuti restoran ini. Coba lagi.",
+  "restaurant-unfollow-failed": "Tidak dapat berhenti mengikuti restoran ini. Coba lagi."
 }

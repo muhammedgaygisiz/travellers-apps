@@ -4,10 +4,11 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 import { getIonicConfig } from 'utils';
 import { ComponentRef } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
-import { of } from 'rxjs';
+import { map, Observable, of, Subject } from 'rxjs';
 
 const MockTranslocoService = {
   translate: jest.fn((key: string): string => key),
+  selectTranslate: jest.fn((key: string) => of(key)),
   config: {
     reRenderOnLangChange: jest.fn(),
   },
@@ -977,5 +978,46 @@ describe('ProfileComponent', () => {
 
       expect(opened).toEqual(['u1']);
     });
+  });
+});
+
+/**
+ * A profile built before the catalogue has loaded, as in Storybook or when
+ * opened by its URL, used to keep the raw key (issue #2132's Loki review).
+ */
+describe('ProfileComponent before its translations have loaded', () => {
+  it('shows the fallback name and the empty text once they arrive', () => {
+    const loaded = new Subject<void>();
+    const late: Record<string, string> = {
+      'no-display-name': 'No name',
+      'no-bites-yet': 'No bites yet.',
+    };
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideIonicAngular(getIonicConfig()),
+        {
+          provide: TranslocoService,
+          useValue: {
+            ...MockTranslocoService,
+            selectTranslate: (key: string): Observable<string> =>
+              loaded.pipe(map(() => late[key] ?? key)),
+          },
+        },
+      ],
+    });
+    const lateFixture = TestBed.createComponent(ProfileComponent);
+    lateFixture.componentRef.setInput('user', { public: true, userId: 'u1' });
+    lateFixture.componentRef.setInput('bites', []);
+    lateFixture.detectChanges();
+
+    loaded.next();
+    lateFixture.detectChanges();
+
+    expect(lateFixture.componentInstance.displayName()).toBe('No name');
+    expect(lateFixture.componentInstance.emptyBitesMessage()).toBe(
+      'No bites yet.',
+    );
   });
 });

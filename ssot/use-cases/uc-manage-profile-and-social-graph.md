@@ -155,6 +155,10 @@ can refuse a follower without blocking them. A public profile is followed in one
 before. A profile without a saved visibility choice is private here too, as everywhere
 else.
 
+**The profile's follow button** ([#2132]) has the restaurant page's shape: a small
+round button, an outline `Follow` with a plus, an outline `Requested` with a clock, and
+a filled `Following` with a tick. Tapping `Following` still asks before it unfollows.
+
 **The requester's side** ([#2164]):
 
 - On another account's private profile, Follow sends a request through `requestFollow`
@@ -163,7 +167,7 @@ else.
   `withdrawFollowRequest`, with no confirmation, and the button reads `Follow` again.
 - The button reads the request from `/followRequests/{ownerUid}_{viewerUid}` beside the
   follow state, so a pending request still reads `Requested` after a reload, and an
-  accepted one reads `Stop following`, as any follow does.
+  accepted one reads `Following`, as any follow does.
 - The store learns of a request or a withdrawal once the callable has answered, so no
   follower count moves and a refusal leaves the button as it was, says so, and reloads
   its state. A request is not a follow: it raises no first-follow celebration and is not
@@ -719,3 +723,4 @@ It changes no declaration: the data collected and its purpose are the same.
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132

@@ -200,6 +200,18 @@ test.describe('Browse Restaurants and Places', () => {
       ratingCount: 2,
       tags: ['italian', 'truffle', 'vegetarian'],
     });
+
+    // Following the restaurant (GitHub issue #2132): the state is read back
+    // from the follow document, so it survives a reload, and unfollowing
+    // deletes it again.
+    await restaurant.expectFollowState('Follow');
+    await restaurant.toggleFollow('Following');
+    await page.reload();
+    await restaurant.expectFollowState('Following');
+    await restaurant.toggleFollow('Follow');
+    await page.reload();
+    await restaurant.expectFollowState('Follow');
+
     await restaurant.openBites();
 
     const home = new HomePage(page);
@@ -261,6 +273,8 @@ test.describe('Browse Restaurants and Places', () => {
       ratingCount: 2,
       tags: ['local', 'sandwich', 'soup'],
     });
+    // Only a stored restaurant can be followed (GitHub issue #2132).
+    await expect(page.getByTestId('restaurant-follow-button')).toHaveCount(0);
     await restaurant.openBites();
 
     const home = new HomePage(page);

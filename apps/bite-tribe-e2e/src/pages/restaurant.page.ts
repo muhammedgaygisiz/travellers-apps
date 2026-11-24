@@ -12,6 +12,28 @@ export class RestaurantPage {
     this.unverified = page.locator('bite-place:visible');
   }
 
+  /** The Follow / Following button (GitHub issue #2132). */
+  followButton(): Locator {
+    return this.verified.getByTestId('restaurant-follow-button');
+  }
+
+  /** Taps the button and waits for the state it should land in. */
+  async toggleFollow(expected: 'Follow' | 'Following'): Promise<void> {
+    await this.followButton().click();
+    await this.expectFollowState(expected);
+  }
+
+  async expectFollowState(expected: 'Follow' | 'Following'): Promise<void> {
+    await expect(this.followButton()).toHaveText(expected);
+    // ion-button hands aria-pressed to the native button inside it, so the
+    // state is read where a screen reader reads it.
+    await expect(
+      this.followButton().getByRole('button', {
+        pressed: expected === 'Following',
+      }),
+    ).toBeVisible();
+  }
+
   async expectVerifiedRestaurant(options: {
     name: string;
     description: string;

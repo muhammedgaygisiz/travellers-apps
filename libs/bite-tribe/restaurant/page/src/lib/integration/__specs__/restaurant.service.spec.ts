@@ -4,6 +4,7 @@ import { NavController } from '@ionic/angular/standalone';
 import { TestBed } from '@angular/core/testing';
 import { HomeDataAccessService } from 'bite-tribe/home-data-access';
 import { RestaurantDataAccessService } from 'bite-tribe/restaurant-data-access';
+import { ToastService } from 'toast';
 import { RestaurantService } from '../restaurant.service';
 
 const mockBite: Bite = {
@@ -23,6 +24,9 @@ interface MockRestaurantDataAccess {
   biteIdFromUrl: WritableSignal<string | undefined>;
   bites: WritableSignal<Bite[]>;
   restaurant: WritableSignal<Restaurant | undefined>;
+  following: WritableSignal<boolean | undefined>;
+  followPending: WritableSignal<boolean>;
+  toggleFollow: jest.Mock;
   submitLikeClick: jest.Mock;
 }
 
@@ -39,6 +43,9 @@ const createMockDataAccess = (
     biteIdFromUrl: signal(mockBite.id),
     bites: signal([mockBite]),
     restaurant: signal(mockRestaurant),
+    following: signal<boolean | undefined>(false),
+    followPending: signal(false),
+    toggleFollow: jest.fn().mockResolvedValue(true),
     submitLikeClick: jest.fn(),
   };
   return { ...base, ...overrides };
@@ -59,12 +66,14 @@ describe('RestaurantService', () => {
   let mockDataAccessService: MockRestaurantDataAccess;
   let mockHomeDataAccessService: MockHomeDataAccess;
   let mockNavController: Partial<NavController>;
+  let toast: { present: jest.Mock };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     mockDataAccessService = createMockDataAccess();
     mockHomeDataAccessService = createMockHomeDataAccess();
     mockNavController = createNavControllerMock();
+    toast = { present: jest.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       providers: [
@@ -81,10 +90,38 @@ describe('RestaurantService', () => {
           provide: NavController,
           useValue: mockNavController,
         },
+        { provide: ToastService, useValue: toast },
       ],
     });
 
     service = TestBed.inject(RestaurantService);
+  });
+
+  /** GitHub issue #2132. */
+  describe('following the restaurant', () => {
+    it('says nothing when the follow lands', async () => {
+      await service.toggleFollow();
+
+      expect(mockDataAccessService.toggleFollow).toHaveBeenCalled();
+      expect(toast.present).not.toHaveBeenCalled();
+    });
+
+    it('says which write failed', async () => {
+      mockDataAccessService.toggleFollow.mockResolvedValue(false);
+
+      await service.toggleFollow();
+      expect(toast.present).toHaveBeenLastCalledWith({
+        messageKey: 'restaurant-follow-failed',
+        outcome: 'failure',
+      });
+
+      mockDataAccessService.following.set(true);
+      await service.toggleFollow();
+      expect(toast.present).toHaveBeenLastCalledWith({
+        messageKey: 'restaurant-unfollow-failed',
+        outcome: 'failure',
+      });
+    });
   });
 
   it('should be created', () => {

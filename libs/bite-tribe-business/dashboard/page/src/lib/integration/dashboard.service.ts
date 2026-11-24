@@ -22,6 +22,8 @@ export class DashboardService {
   biteTrailsValue = this.dataAccess.biteTrailsValue;
   /** Held restaurants whose menu was built from Bites (GitHub issue #2302). */
   menusBuiltFromBites = this.dataAccess.menusBuiltFromBitesValue;
+  /** Each held restaurant's figures (GitHub issue #2133). */
+  figures = this.dataAccess.figuresValue;
   /**
    * The restaurants read has settled at least once. A failed read is not "no
    * restaurant", so only a resolved read lets the empty state show (GitHub

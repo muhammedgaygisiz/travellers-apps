@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeApiService } from 'bite-tribe/api';
 import {
   BITE_TRAIL_COLLECTION,
   DashboardDataAccessService,
@@ -16,6 +17,11 @@ jest.mock('@capacitor-firebase/firestore');
 jest.mock('bite-tribe/store', () => ({
   BiteTribeStoreService: class BiteTribeStoreService {},
 }));
+jest.mock('bite-tribe/api', () => ({
+  BiteTribeApiService: class BiteTribeApiService {},
+}));
+
+const apiMock = { bitesByPosition: jest.fn() };
 
 type FirestoreCollection = Awaited<
   ReturnType<typeof FirebaseFirestore.getCollection>
@@ -45,6 +51,7 @@ describe(DashboardDataAccessService.name, () => {
           provide: BiteTribeStoreService,
           useValue: storeServiceMock,
         },
+        { provide: BiteTribeApiService, useValue: apiMock },
       ],
     });
   });
@@ -182,6 +189,79 @@ describe(DashboardDataAccessService.name, () => {
   });
 
   /** See GitHub issue #2302. */
+  /** GitHub issue #2133. */
+  describe('figuresLoader', () => {
+    const TRATTORIA = {
+      id: 'r-1',
+      name: 'Trattoria Roma',
+      position: { latitude: 48.137, longitude: 11.575 },
+      followersCount: 7,
+    } as Restaurant;
+    const load = (
+      restaurants: Restaurant[],
+    ): ReturnType<DashboardDataAccessService['figuresLoader']> =>
+      TestBed.inject(DashboardDataAccessService).figuresLoader({
+        params: { restaurants },
+      } as never);
+
+    it('counts the Bites the consumer page shows, their rating and the followers', async () => {
+      apiMock.bitesByPosition.mockResolvedValue([
+        { place: 'Trattoria Roma', rating: 4, position: TRATTORIA.position },
+        {
+          place: 'Elsewhere',
+          restaurantId: '/restaurants/r-1',
+          rating: 5,
+          position: TRATTORIA.position,
+        },
+        { place: 'Trattoria Roma', position: TRATTORIA.position },
+        { place: 'Burger Bar', rating: 1, position: TRATTORIA.position },
+        {
+          place: 'Trattoria Roma',
+          rating: 1,
+          position: { latitude: 48.2, longitude: 11.7 },
+        },
+      ]);
+
+      const figures = await load([TRATTORIA]);
+
+      expect(apiMock.bitesByPosition).toHaveBeenCalledWith({
+        coords: TRATTORIA.position,
+      });
+      expect(figures?.get('r-1')).toEqual({
+        bites: 3,
+        ratings: 2,
+        averageRating: 4.5,
+        followers: 7,
+      });
+    });
+
+    it('counts no followers on a restaurant nobody has followed', async () => {
+      apiMock.bitesByPosition.mockResolvedValue([]);
+
+      const figures = await load([{ ...TRATTORIA, followersCount: undefined }]);
+
+      expect(figures?.get('r-1')).toEqual({
+        bites: 0,
+        ratings: 0,
+        averageRating: 0,
+        followers: 0,
+      });
+    });
+
+    it('has no figures for a restaurant it cannot place or read', async () => {
+      apiMock.bitesByPosition.mockRejectedValue(new Error('offline'));
+
+      const figures = await load([
+        TRATTORIA,
+        { ...TRATTORIA, id: 'r-2', position: {} } as Restaurant,
+        { ...TRATTORIA, id: undefined } as unknown as Restaurant,
+      ]);
+
+      expect(figures?.size).toBe(0);
+      expect(apiMock.bitesByPosition).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('menusBuiltFromBitesLoader', () => {
     const load = (
       restaurants: Partial<Restaurant>[],

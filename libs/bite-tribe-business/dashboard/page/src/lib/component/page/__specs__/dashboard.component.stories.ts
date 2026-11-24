@@ -140,3 +140,33 @@ export const NoRestaurantYet: Story = {
     restaurantsLoaded: true,
   },
 };
+
+/**
+ * How each held restaurant is doing (GitHub issue #2133): the Bites its
+ * consumer page shows, their average rating and the followers. A restaurant
+ * whose Bites carry no rating says so rather than showing 0.
+ */
+export const WithFigures: Story = {
+  args: {
+    ...SetUp.args,
+    restaurants: [
+      ...(SetUp.args?.restaurants ?? []),
+      {
+        ...osteria,
+        ...SetUp.args?.restaurants?.[0],
+        id: osteria.id,
+        name: osteria.name,
+      } as Restaurant,
+    ],
+    figures: new Map([
+      [
+        trattoria.id as string,
+        { bites: 12, ratings: 9, averageRating: 4.3, followers: 7 },
+      ],
+      [
+        osteria.id as string,
+        { bites: 2, ratings: 0, averageRating: 0, followers: 0 },
+      ],
+    ]),
+  },
+};

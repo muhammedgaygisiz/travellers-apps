@@ -36,6 +36,7 @@ import { DistanceComponent } from 'common/distance';
 import { uniqueBitesByName } from '../../../utils/unique-bites-by-name';
 import { uniqueTagsFromBites } from '../../../utils/unique-tags-from-bites';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { averageRatingOf, ratedBitesOf } from 'utils';
 import { TagsInputComponent } from 'common/ui/tags';
 
 @Component({
@@ -117,23 +118,14 @@ export class RestaurantComponent {
    */
   hasMenu = computed(() => !!this.restaurant()?.menuId);
 
-  ratedBites = computed(() =>
-    (this.bites() || []).filter(
-      (bite): bite is Bite & { rating: number } =>
-        bite.rating !== undefined && bite.rating !== null && bite.rating !== 0,
-    ),
-  );
+  /** The shared rule the owner's dashboard reads too (GitHub issue #2133). */
+  ratedBites = computed(() => ratedBitesOf(this.bites() || []));
 
   ratedBiteCount = computed(() => this.ratedBites().length);
 
   bitesCount = computed(() => this.uniqueBites().length);
 
-  averageBiteRating = computed(() => {
-    const ratedBites = this.ratedBites();
-    const totalRating = ratedBites.reduce((acc, bite) => acc + bite.rating, 0);
-    const average = ratedBites.length > 0 ? totalRating / ratedBites.length : 0;
-    return Math.round(average * 10) / 10;
-  });
+  averageBiteRating = computed(() => averageRatingOf(this.bites() || []));
 
   placeName = computed(() => {
     const bite = this.bite();

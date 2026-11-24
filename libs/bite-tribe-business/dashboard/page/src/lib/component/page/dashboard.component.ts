@@ -24,6 +24,7 @@ import {
 } from 'model';
 import { MapComponent } from 'bite-tribe-common/map';
 import { TranslocoPipe } from '@jsverse/transloco';
+import type { RestaurantFigures } from 'bite-tribe-business/dashboard-data-access';
 
 /** A checklist item an owner tapped, with the restaurant it belongs to. */
 export interface SetupItemClick {
@@ -88,6 +89,11 @@ export class DashboardComponent {
    */
   menusBuiltFromBites = input<ReadonlySet<string>>(new Set());
   /**
+   * Each held restaurant's figures, keyed by its id (GitHub issue #2133). A
+   * restaurant missing from it gets no figures card.
+   */
+  figures = input<ReadonlyMap<string, RestaurantFigures>>(new Map());
+  /**
    * The restaurants read has finished. Until then an empty list means nothing,
    * so the empty state waits for it rather than flashing on every sign-in.
    */
@@ -117,6 +123,17 @@ export class DashboardComponent {
     (this.restaurants() ?? []).length === 0
       ? 'dashboard-map-placeholder'
       : 'dashboard-map-placeholder-no-position',
+  );
+
+  /** The held restaurants whose figures have loaded, in the list's order. */
+  readonly restaurantFigures = computed(() =>
+    (this.restaurants() ?? []).flatMap((restaurant) => {
+      const figures = restaurant.id
+        ? this.figures().get(restaurant.id)
+        : undefined;
+
+      return figures ? [{ restaurant, figures }] : [];
+    }),
   );
 
   readonly showNoRestaurant = computed(

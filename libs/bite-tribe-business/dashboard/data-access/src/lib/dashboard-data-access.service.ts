@@ -3,7 +3,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { BiteTrail, Restaurant } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
-import { resourceValue } from 'utils';
+import { BiteTribeApiService } from 'bite-tribe/api';
+import {
+  averageRatingOf,
+  closeTo,
+  matchRestaurantBites,
+  ratedBitesOf,
+  resourceValue,
+} from 'utils';
 
 export const RESTAURANT_COLLECTION = 'restaurants';
 /** The field listing every account a restaurant is assigned to (epic #1614). */
@@ -11,11 +18,24 @@ export const RESTAURANT_OWNERS_FIELD = 'ownerUserIds';
 export const BITE_TRAIL_COLLECTION = 'biteTrails';
 export const MENU_COLLECTION = 'menus';
 
+/**
+ * How a restaurant is doing, as guests see it (GitHub issue #2133): the Bites
+ * its consumer page shows, their average rating and how many of them carry
+ * one, and its followers.
+ */
+export interface RestaurantFigures {
+  bites: number;
+  ratings: number;
+  averageRating: number;
+  followers: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
+  private readonly api = inject(BiteTribeApiService);
 
   /**
    * The restaurants assigned to the signed-in account, and nothing else.
@@ -175,6 +195,81 @@ export class DashboardDataAccessService {
   menusBuiltFromBitesValue = resourceValue(
     this.menusBuiltFromBites,
     new Set<string>() as ReadonlySet<string>,
+  );
+
+  /**
+   * Each held restaurant's figures, keyed by its id (GitHub issue #2133).
+   *
+   * Worked out exactly as the consumer restaurant page opened without a Bite
+   * does (#2320): the Bites near the restaurant's own position that the shared
+   * rule in `utils` matches to it, so an owner reads the numbers a guest sees.
+   * Those numbers are public in the consumer app already, which is why this is
+   * the client's read rather than an owner-only callable. The follower count
+   * is the restaurant's backend-kept `followersCount`.
+   *
+   * A restaurant without a position, or whose nearby read fails, has no
+   * figures, so the dashboard leaves its card out rather than claiming 0.
+   */
+  figuresLoader: ResourceLoader<
+    ReadonlyMap<string, RestaurantFigures>,
+    { restaurants: readonly Restaurant[] }
+  > = async ({ params }) => {
+    const entries = await Promise.all(
+      params.restaurants.map(
+        async (
+          restaurant,
+        ): Promise<[string, RestaurantFigures] | undefined> => {
+          const position = restaurant.position;
+
+          if (
+            !restaurant.id ||
+            !Number.isFinite(position?.latitude) ||
+            !Number.isFinite(position?.longitude)
+          ) {
+            return undefined;
+          }
+
+          try {
+            const nearby = await this.api.bitesByPosition({
+              coords: {
+                latitude: position.latitude,
+                longitude: position.longitude,
+              },
+            } as GeolocationPosition);
+            const bites = matchRestaurantBites(
+              closeTo(nearby, position),
+              restaurant,
+              restaurant.id,
+            );
+
+            return [
+              restaurant.id,
+              {
+                bites: bites.length,
+                ratings: ratedBitesOf(bites).length,
+                averageRating: averageRatingOf(bites),
+                followers: restaurant.followersCount ?? 0,
+              },
+            ];
+          } catch {
+            return undefined;
+          }
+        },
+      ),
+    );
+
+    return new Map(
+      entries.filter((entry): entry is [string, RestaurantFigures] => !!entry),
+    );
+  };
+
+  figures = resource({
+    params: () => ({ restaurants: this.restaurantsValue() }),
+    loader: this.figuresLoader.bind(this),
+  });
+  figuresValue = resourceValue(
+    this.figures,
+    new Map() as ReadonlyMap<string, RestaurantFigures>,
   );
 
   isAuthenticated = toSignal(this.storeService.isAuthenticated$, {

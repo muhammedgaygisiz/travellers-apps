@@ -1,6 +1,6 @@
 import { inject, Injectable, resource, ResourceLoader } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BiteTrail, Restaurant } from 'model';
+import { Restaurant } from 'model';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { BiteTribeApiService } from 'bite-tribe/api';
@@ -15,7 +15,6 @@ import {
 export const RESTAURANT_COLLECTION = 'restaurants';
 /** The field listing every account a restaurant is assigned to (epic #1614). */
 export const RESTAURANT_OWNERS_FIELD = 'ownerUserIds';
-export const BITE_TRAIL_COLLECTION = 'biteTrails';
 export const MENU_COLLECTION = 'menus';
 
 /**
@@ -105,52 +104,10 @@ export class DashboardDataAccessService {
     loader: this.restaurantsLoader.bind(this),
   });
 
-  // Scoped to the signed-in account: a BiteTrail is owned by the user who
-  // created it, now that the organisation concept is gone (issue #1371).
-  biteTrailsLoader: ResourceLoader<
-    BiteTrail[] | undefined,
-    { userId: string | undefined }
-  > = async ({ params }) => {
-    const { userId } = params;
-
-    if (!userId) {
-      return [];
-    }
-
-    const docs = await FirebaseFirestore.getCollection({
-      reference: BITE_TRAIL_COLLECTION,
-      compositeFilter: {
-        type: 'and',
-        queryConstraints: [
-          {
-            type: 'where',
-            fieldPath: 'ownerId',
-            opStr: '==',
-            value: userId,
-          },
-        ],
-      },
-    });
-
-    if (!docs?.snapshots?.length) {
-      return [];
-    }
-
-    return docs.snapshots.map(
-      (doc) => ({ ...doc.data, id: doc.id }) as BiteTrail,
-    );
-  };
-
-  biteTrails = resource({
-    params: () => ({ userId: this.storeService.user()?.uid }),
-    loader: this.biteTrailsLoader.bind(this),
-  });
-
-  // Both of these read Firestore and can reject. `value()` throws in that
-  // state, and the pages bind them directly, so one failed collection read
-  // would otherwise take the whole binding update with it. See issue #1232.
+  // This reads Firestore and can reject. `value()` throws in that state, and
+  // the pages bind it directly, so one failed collection read would otherwise
+  // take the whole binding update with it. See issue #1232.
   restaurantsValue = resourceValue(this.restaurants, [] as Restaurant[]);
-  biteTrailsValue = resourceValue(this.biteTrails, [] as BiteTrail[]);
 
   /**
    * The ids of the held restaurants whose menu was built from guests' Bites

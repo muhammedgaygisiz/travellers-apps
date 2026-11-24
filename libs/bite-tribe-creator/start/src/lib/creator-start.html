@@ -1,0 +1,34 @@
+<div class="ion-page">
+  <ion-content class="ion-padding">
+    <div class="container">
+      <div class="ion-text-center logo-text-container">
+        <img src="assets/icons/logo.svg" alt="BiteTribe Logo" class="logo" />
+        <span class="company-name"
+          >{{ 'creator-start-title' | transloco }}</span
+        >
+        <span class="tagline">{{ 'creator-start-tagline' | transloco }}</span>
+      </div>
+
+      <div class="ion-padding-top buttons-container">
+        <ion-button
+          expand="block"
+          color="primary"
+          data-testid="creator-start-login"
+          [routerLink]="loginPath"
+        >
+          {{ 'log-in' | transloco }}
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="ion-margin-top"
+          data-testid="creator-start-registration"
+          [routerLink]="registrationPath"
+        >
+          {{ 'sign-up' | transloco }}
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>
+</div>

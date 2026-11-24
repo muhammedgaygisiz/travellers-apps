@@ -77,7 +77,7 @@ to find the pages it touches; `AGENTS.md` routes every other kind of task.
 - [UC - Use Account And Legal Flows](use-cases/uc-use-account-and-legal-flows.md)
 - [UC - Receive App Notifications And Engagement Updates](use-cases/uc-receive-app-notifications-and-engagement-updates.md)
 - [UC - Maintain Restaurants In The Business App](use-cases/uc-maintain-restaurants-in-the-business-app.md)
-- [UC - Create And Operate BiteTrails In The Business App](use-cases/uc-create-and-operate-bitetrails-in-the-business-app.md)
+- [UC - Create A BiteTrail](use-cases/uc-create-a-bitetrail.md)
 - [UC - Run Operational Migrations](use-cases/uc-run-operational-migrations.md)
 - [UC - Operate BiteTribe In The Admin App](use-cases/uc-operate-bitetribe-in-the-admin-app.md)
 - [UC - Harden Platform And Backend Trust](use-cases/uc-harden-platform-and-backend-trust.md)
@@ -95,7 +95,6 @@ to find the pages it touches; `AGENTS.md` routes every other kind of task.
 
 ### Next to implement
 
-- [UC - Create A BiteTrail](use-cases/uc-create-a-bitetrail.md)
 - [UC - Complete Universal Search](use-cases/uc-complete-universal-search.md)
 - [UC - Contact A Restaurant And Plan A Visit](use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)
 - [UC - Price A BiteTrail For Sale](use-cases/uc-price-a-bitetrail-for-sale.md)

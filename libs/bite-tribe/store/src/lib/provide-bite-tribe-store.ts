@@ -52,27 +52,29 @@ interface SanitizableState {
 }
 
 /**
- * Whether this bundle is the consumer app rather than one of the two internal
- * ones.
+ * Whether this bundle is the consumer app rather than one of the three web
+ * tools.
  *
  * It gates product analytics and the effect set. An operator using the admin
  * app is not a BiteTribe user having an experience worth measuring, and
  * counting operator sessions as user sessions would quietly corrupt every
  * engagement metric derived from them - which is precisely why the business app
- * already opts out (issue #1469).
+ * already opts out (issue #1469). The Bite Creator app opts out with them for
+ * now: what a creator does there is measured by the BiteTrails it publishes,
+ * which the consumer app's own events already see (issue #2130).
  */
 const isConsumerApp = (environment: Environment): boolean =>
-  !environment.isBusiness && !environment.isAdmin;
+  !environment.isBusiness && !environment.isAdmin && !environment.isCreator;
 
 /**
  * Each app reads its own `authDomain` variable.
  *
- * All three currently resolve to the project's shared
- * `bite-tribe.firebaseapp.com` OAuth handler, so the three keys are one value
+ * All four currently resolve to the project's shared
+ * `bite-tribe.firebaseapp.com` OAuth handler, so the four keys are one value
  * today. They are kept separate because `authDomain` is what Firebase builds
  * the Google and Apple redirect from: the day one app needs its own handler
  * domain — a custom domain, or a separate OAuth consent screen — it can be
- * pointed at one without moving the other two with it.
+ * pointed at one without moving the others with it.
  */
 const toAuthDomain = (environment: Environment): string | undefined => {
   if (environment.isAdmin) {
@@ -81,6 +83,10 @@ const toAuthDomain = (environment: Environment): string | undefined => {
 
   if (environment.isBusiness) {
     return process.env['NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN'];
+  }
+
+  if (environment.isCreator) {
+    return process.env['NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN'];
   }
 
   return process.env['NX_APP_BITE_TRIBE_AUTH_DOMAIN'];

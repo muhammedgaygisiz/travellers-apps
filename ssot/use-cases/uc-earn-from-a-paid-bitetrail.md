@@ -22,7 +22,7 @@ decides the amount, the record each sale writes, and the balances and payouts th
 Buying the trail is [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md). Pricing and publishing it are
 [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md), which shows the creator what a sale will yield
 but takes that quantity from here. Making the trail in the first place is
-[UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md).
+[UC - Create A BiteTrail](uc-create-a-bitetrail.md).
 
 ## Actors
 
@@ -66,8 +66,8 @@ Not implemented, and unlike its siblings there is nothing yet to point at: `stri
 touch are:
 
 - `apps/bite-tribe-firebase/functions` for the purchase webhook, the ledger and the payout job
-- `libs/bite-tribe-business/create-bite-trail` for the net-proceeds disclosure at publish
-- a creator earnings surface in the business app, which does not exist
+- `libs/bite-tribe-creator/create-bite-trail` for the net-proceeds disclosure at publish
+- a creator earnings surface in the Bite Creator app, which does not exist
 
 ## Related GitHub Scope
 
@@ -93,7 +93,7 @@ touch are:
 - [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md) - the purchase that produces a sale
 - [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md) - pricing and publishing, and the gate that
   reads this page's onboarding
-- [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md) - making the BiteTrail at all
+- [UC - Create A BiteTrail](uc-create-a-bitetrail.md) - making the BiteTrail at all
 - [Current State - Roadmap](../current-state/roadmap.md) - where Monetization sits relative to launch
 
 [#1121]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1121

@@ -115,9 +115,8 @@ Current implementation notes:
   - Open BiteTrail detail and map.
   - Save BiteTrail as Bucket List.
   - Rate a BiteTrail once.
-- Business user
-  - Create BiteTrail.
-  - Curate Bites into a BiteTrail.
+  - Create a BiteTrail from its own Bites, in the Bite Creator app (`RD-UR-11`). No role is
+    required for now; a creator role is issue [#2328].
 - Admin
   - Moderation and publishing control are future or operational capabilities, not clearly modeled today.
 
@@ -125,7 +124,7 @@ Current implementation notes:
 
 Supported today:
 
-- Create BiteTrail in business app.
+- Create BiteTrail in the Bite Creator app ([UC - Create A BiteTrail](../use-cases/uc-create-a-bitetrail.md)).
 - View BiteTrails in Marketplace.
 - Open BiteTrail detail.
 - Open BiteTrail map.
@@ -170,7 +169,7 @@ libs/bite-tribe/api/src/lib/bite-trail-api/bite-trail-api.service.ts
 libs/bite-tribe/bite-trail/data-access
 libs/bite-tribe/bite-trail/page
 libs/bite-tribe-common/bite-trail
-libs/bite-tribe-business/create-bite-trail
+libs/bite-tribe-creator/create-bite-trail
 ```
 
 Cloud Functions:
@@ -218,3 +217,4 @@ images/biteTrails/{biteTrailId}/{filename}
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2328

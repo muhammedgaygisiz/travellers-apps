@@ -1,6 +1,6 @@
 // Builds the web apps for the QA project, bite-tribe-qa (issue 2293).
 //
-//   node tools/build-web-qa.mjs                    # consumer, business, admin
+//   node tools/build-web-qa.mjs                    # consumer, business, admin, creator
 //   node tools/build-web-qa.mjs bite-tribe-business
 //
 // Each app is built with the production configuration - the same optimised
@@ -15,7 +15,12 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 import { backendEnv } from './firebase-backend-env.mjs';
 
-const APPS = ['bite-tribe', 'bite-tribe-business', 'bite-tribe-admin'];
+const APPS = [
+  'bite-tribe',
+  'bite-tribe-business',
+  'bite-tribe-admin',
+  'bite-tribe-creator',
+];
 
 /** Values that only a production bundle carries. */
 const PRODUCTION_MARKERS = ['bite-tribe.firebaseapp.com', '"bite-tribe"'];

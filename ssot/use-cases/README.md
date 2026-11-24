@@ -21,7 +21,7 @@ Part of the [SSOT index](../README.md).
 - [UC - Use Account And Legal Flows](uc-use-account-and-legal-flows.md)
 - [UC - Receive App Notifications And Engagement Updates](uc-receive-app-notifications-and-engagement-updates.md)
 - [UC - Maintain Restaurants In The Business App](uc-maintain-restaurants-in-the-business-app.md)
-- [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md)
+- [UC - Create A BiteTrail](uc-create-a-bitetrail.md)
 - [UC - Run Operational Migrations](uc-run-operational-migrations.md)
 - [UC - Operate BiteTribe In The Admin App](uc-operate-bitetribe-in-the-admin-app.md)
 - [UC - Harden Platform And Backend Trust](uc-harden-platform-and-backend-trust.md)
@@ -39,7 +39,6 @@ Part of the [SSOT index](../README.md).
 
 ## Next to implement
 
-- [UC - Create A BiteTrail](uc-create-a-bitetrail.md)
 - [UC - Complete Universal Search](uc-complete-universal-search.md)
 - [UC - Contact A Restaurant And Plan A Visit](uc-contact-a-restaurant-and-plan-a-visit.md)
 - [UC - Price A BiteTrail For Sale](uc-price-a-bitetrail-for-sale.md)

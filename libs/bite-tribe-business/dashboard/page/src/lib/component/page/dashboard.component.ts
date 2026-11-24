@@ -195,17 +195,10 @@ export class DashboardComponent {
   );
 
   /**
-   * BiteTrails first: creating one is the action a restaurant comes here for,
-   * where its restaurants are already there to be maintained.
+   * Only what a restaurant maintains. BiteTrails are made in the Bite Creator
+   * web app since issue #2130, so they have no section here.
    */
   readonly sections: readonly DashboardSection[] = [
-    {
-      titleKey: 'bite-trails',
-      descriptionKey: 'dashboard-bite-trails-description',
-      icon: 'footsteps-outline',
-      path: '/bite-trails',
-      testId: 'dashboard-section-bite-trails',
-    },
     {
       titleKey: 'restaurants',
       descriptionKey: 'dashboard-restaurants-description',

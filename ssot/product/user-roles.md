@@ -77,7 +77,8 @@ Granted today: yes. Target state, not implemented: **target**. Not granted: no.
 | Run the operational migrations                                                              | yes                       | no               | no                       |
 | Cluster a Bite into a Candidate on demand                                                   | yes                       | no               | no                       |
 | Maintain a Restaurant's menu, hours, address, links                                         | **target**, all of them ¹ | yes, own only ²  | no                       |
-| **Create and publish a BiteTrail**                                                          | no                        | yes, today ³     | **target** ³             |
+| Sign into the Bite Creator App                                                              | yes ³                     | yes ³            | yes ³                    |
+| **Create and publish a BiteTrail**                                                          | yes ³                     | yes ³            | yes ³                    |
 | Acquire a BiteTrail as a Bucketlist                                                         | yes                       | yes              | yes                      |
 | Write `bite.restaurantId`                                                                   | yes, via verification     | no               | yes, via the Bite form ⁴ |
 | Report a Bite                                                                               | yes ⁵                     | yes ⁵            | yes ⁵                    |
@@ -102,10 +103,10 @@ the write is authorised by ownership alone rather than by ownership _and_ the `b
 so an account whose role was revoked while it still held a restaurant keeps write access
 through the API. [#1539] removes that state at the source.
 
-³ `RD-UR-4`, final in keeping BiteTrail creation out of the Business App and otherwise not yet final ([#1615]): publishing moves to the consumer app behind `authGuard` only, so it becomes a
-Bite Creator capability and the Business App route is retired. Implementation is issue
-[#1519], sequenced behind content reporting - see footnote ⁵. `RD-UR-5` covers launch content
-without code.
+³ `RD-UR-11`: BiteTrails are created in the Bite Creator App, behind `authGuard` only, by any
+signed-in member account, whatever role it holds or lacks ([#2130]). The Business App no longer
+creates them. This is interim: a creator role will gate the app and the rules together, issue
+[#2328]. `RD-UR-5` still describes how the launch content was seeded.
 
 ⁴ Set when the creator picks a verified nearby Restaurant, on create **and** on edit.
 This puts the Bite Creator behind two of the four writers of that field, the create and
@@ -171,7 +172,7 @@ from CI on every push to `develop` since [#1567]. The detail is owned by [Curren
 | Privacy-conscious participant | A settings choice (`PublicUser.public`), not a permission                                                                                                                                                                                                                                                                                                                                                           |
 | **Public / Private Profile**  | The same visibility choice, not a capability                                                                                                                                                                                                                                                                                                                                                                        |
 | **BiteTribe Pro**             | An entitlement on `PublicUser.subscriptionTier`: `0` = Free, `>= 1` = Pro. Orthogonal to every role. No purchase path exists. See [Subscription](../domain/subscription.md)                                                                                                                                                                                                                                         |
-| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission. Publishing a BiteTrail becomes a Bite Creator capability under `RD-UR-4`, tracked by issue [#1519]; the proposed `curator` claim is retired. `RD-UR-4` is final only in keeping BiteTrail creation out of the Business App; issue [#1615] settles the rest                                                                                  |
+| **BiteTrail Creator**         | An activity of the _Food curator or vlogger_ persona, not a permission, for now. Publishing a BiteTrail is a Bite Creator capability in the Bite Creator App under `RD-UR-11`; a creator role is planned, issue [#2328], which answers [#1615]                                                                                                                                                                      |
 | **Moderator**                 | Does not exist. There is no moderation role: content reports are acted on by the Operator under `RD-UR-7`. Stated here rather than in [Glossary](glossary.md), which carries the terms the product _has_                                                                                                                                                                                                            |
 | **Table Guest**               | **Moved into the roles table above by issue [#1629].** It was listed here for as long as it carried no claim; it now carries `tableGuest`, written by the scan that mints the session. What has not changed is everything else about it: it leaves no `/users` document, it passes no route guard, and it opens nothing - which is why the decision that made it a role also narrowed what a role means (`RD-UR-9`) |
 | **Unauthenticated visitor**   | Reaches the open routes and nothing else: the privacy policy, the account-deletion notice, support, a scanned table code and the order screen behind it, a published menu, and a published city landing page under `/eat/**`                                                                                                                                                                                        |
@@ -284,7 +285,7 @@ others.
 | Edit the floor plan, or print its QR codes                    | no                     |
 | Maintain the restaurant profile, menu, hours, address, links  | no                     |
 | Grant or revoke `staff`, or see the staff list                | no                     |
-| Create and publish a BiteTrail                                | no                     |
+| Create and publish a BiteTrail                                | yes ³                  |
 
 ⁷ And lands in the room it works at rather than on the owner dashboard ([#1097]):
 `staffEntryGuard` reads `/restaurantStaff/{uid}` on `/dashboard` and redirects to
@@ -377,7 +378,6 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#1471]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1471
 [#1474]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1474
 [#1475]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1475
-[#1519]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1519
 [#1537]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1537
 [#1539]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1539
 [#1546]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1546
@@ -399,3 +399,5 @@ The decisions binding this page are `RD-UR-1` to `RD-UR-8`. They are held in
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
 [#2232]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2232
+[#2130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2130
+[#2328]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2328

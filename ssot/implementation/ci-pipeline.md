@@ -45,6 +45,7 @@ setup
                 +-- e2e-shard (x3) -- e2e --------------------+-- report (pull requests only)
                 +-- business-e2e -----------------------------+
                 +-- admin-e2e --------------------------------+
+                +-- creator-e2e ------------------------------+
                 |
                 +-- firestore-rules ----------- deploy-firestore-rules       (develop only)
                 +-- functions-emulator
@@ -54,6 +55,7 @@ setup
                 +-- build ---------------------+- deploy-bite-tribe          (develop only)
                                                +- deploy-bite-tribe-business (develop only)
                                                +- deploy-bite-tribe-admin    (develop only)
+                                               +- deploy-bite-tribe-creator  (develop only)
                                                +- deploy-functions           (develop only)
 ```
 
@@ -67,16 +69,16 @@ red unit test still keeps a commit out of production.
 Not every test in this repository runs on a pull request, and the difference is
 worth stating rather than inferring from a workflow file.
 
-| Suite                         | Command                 | Gates a merge                                      |
-| ----------------------------- | ----------------------- | -------------------------------------------------- |
-| Unit tests                    | `nx run-many -t test`   | Yes, `tests` (4 shards), for the affected ones     |
-| App and functions builds      | `nx run-many -t build`  | Yes, `build`, for the affected ones                |
-| Lint, Stylelint               | `nx affected -t lint`   | Yes                                                |
-| SSOT structure                | `npm run check:ssot`    | Yes, inside `lint`                                 |
-| Visual regression             | `npm run loki:test`     | Yes, `loki`, when a story is affected              |
-| Consumer, business, admin e2e | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e`, `admin-e2e` |
-| Firestore rules               | `npm run test:rules`    | Yes, `firestore-rules`                             |
-| Firebase Functions emulator   | `npm run test:emulator` | Yes, `functions-emulator`                          |
+| Suite                                  | Command                 | Gates a merge                                                     |
+| -------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| Unit tests                             | `nx run-many -t test`   | Yes, `tests` (4 shards), for the affected ones                    |
+| App and functions builds               | `nx run-many -t build`  | Yes, `build`, for the affected ones                               |
+| Lint, Stylelint                        | `nx affected -t lint`   | Yes                                                               |
+| SSOT structure                         | `npm run check:ssot`    | Yes, inside `lint`                                                |
+| Visual regression                      | `npm run loki:test`     | Yes, `loki`, when a story is affected                             |
+| Consumer, business, admin, creator e2e | `nx e2e …`              | Yes, `e2e` (3 shards), `business-e2e`, `admin-e2e`, `creator-e2e` |
+| Firestore rules                        | `npm run test:rules`    | Yes, `firestore-rules`                                            |
+| Firebase Functions emulator            | `npm run test:emulator` | Yes, `functions-emulator`                                         |
 
 **Coverage Is Informational.** `codecov/project` is reported on every pull
 request and never fails one: `codecov.yml` sets it `informational`. Each
@@ -133,13 +135,13 @@ reaches `tsc` as a project path. Nx runs every selected build even when one
 fails, so one red app still reports the others.
 
 The price is that the deploys share a gate. A failed build of one app on
-`develop` now holds back all four deploys, not only its own. That push has
+`develop` now holds back all five deploys, not only its own. That push has
 already built green on its pull request, so the case is rare, and it fails
 closed.
 
-The three web apps still deploy through three independent deploy jobs to three
-hosting sites. They are not one job with three targets: a failure deploying one
-app must not hold the other two back, and the consumer app is the only one under
+The four web apps still deploy through four independent deploy jobs to four
+hosting sites. They are not one job with four targets: a failure deploying one
+app must not hold the others back, and the consumer app is the only one under
 release-candidate scope, so it is the only one that sets
 `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` and runs `release:verify-bundle`.
 
@@ -266,7 +268,7 @@ Loki, which run to the end on that commit.
 | `.github/actions/install-if-missing`     | `build`                                                                                 | `npm ci` when the restored `node_modules` is unusable                                       |
 | `.github/actions/setup-env-for-affected` | `lint`, `stylelint`, `test-shard`, `loki-build`, `build`                                | Derive `NX_BASE` and `NX_HEAD` through `nrwl/nx-set-shas`                                   |
 | `.github/actions/nx-cache`               | `lint`, `stylelint`, `test-shard`, `build`, `loki-build`, `deploy-bite-tribe-storybook` | Persist and restore the Nx computation cache; `key-suffix` separates the legs of a matrix   |
-| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`, `admin-e2e`                                                | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
+| `.github/actions/playwright-chromium`    | `e2e-shard`, `business-e2e`, `admin-e2e`, `creator-e2e`                                 | Restore Playwright's Chromium by version; install system packages only if it cannot launch  |
 
 `setup` reads `cache-hit` from `restore-cache` through the step id `cache`. On a hit it skips `npm ci` and the save, and sets up Node.js without the npm download cache, which only `npm ci` uses. Node.js itself is still set up from `.nvmrc` because the deploy jobs build through this action. Before [#1811] the step had no id, so the guards were always true and every run reinstalled the `node_modules` it had just restored.
 
@@ -561,11 +563,11 @@ under the same `unittests` flag and the report covers every affected project.
 
 Nx task hashes do **not** include the `NX_APP_*` build-time variables. They are not declared as `env` inputs in `nx.json`, so two builds that differ only in those values share a task hash and Nx will replay either artifact for the other.
 
-This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business` and `deploy-bite-tribe-admin` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `build` be replayed into a deploy, or the reverse. It is also why a deploy still runs when `build` skipped its app as unaffected: the deploy never used that artifact.
+This is why the `deploy-bite-tribe`, `deploy-bite-tribe-business`, `deploy-bite-tribe-admin` and `deploy-bite-tribe-creator` jobs rebuild through the `setup` action instead of restoring the Nx cache: they are the only jobs that build with the production secrets, and a shared cache would let the secret-free bundle from `build` be replayed into a deploy, or the reverse. It is also why a deploy still runs when `build` skipped its app as unaffected: the deploy never used that artifact.
 
-Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`. All three hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
+Each app reads its own `authDomain` secret — `NX_APP_BITE_TRIBE_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN`, `NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN`. All four hold the same value today, the project's shared `bite-tribe.firebaseapp.com` OAuth handler. They are separate secrets because `authDomain` is what Firebase builds the Google and Apple redirect from, so one app can later be moved to its own handler domain without moving the other two.
 
-The three deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` reaches `deploy-bite-tribe` and the native release, and reached `deploy-bite-tribe-business` only from issue [#1588] - the table operations of [#1098] are the first events that app sends, and until then it had no analytics to need one. `deploy-bite-tribe-admin` still omits it deliberately: nothing in the admin app emits a product event, and `AnalyticsService` initializes analytics lazily on the first one, so it initializes none.
+The four deploy jobs do **not** pass the same set. `NX_APP_BITE_TRIBE_MEASSUREMENT_ID` reaches `deploy-bite-tribe` and the native release, and reached `deploy-bite-tribe-business` only from issue [#1588] - the table operations of [#1098] are the first events that app sends, and until then it had no analytics to need one. `deploy-bite-tribe-admin` and `deploy-bite-tribe-creator` still omit it deliberately: nothing in either app emits a product event, and `AnalyticsService` initializes analytics lazily on the first one, so it initializes none.
 
 The failure mode is worth knowing, because it is silent. Without `measurementId` in the Firebase options the web SDK recovers one from a runtime `webConfig` fetch keyed on the app id, and if that fetch does not answer, `getAnalytics()` throws inside `AnalyticsService.emit`, which swallows it by design - tracking must never break a user flow. So the app works, the events do not arrive, and nothing says so. An app that emits events states the value rather than trusting the recovery.
 

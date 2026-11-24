@@ -111,29 +111,11 @@ export const ROUTES: Routes = withAuthRoutes([
     canActivate: [authGuard, roleGuard('business', 'staff'), staffEntryGuard()],
   },
   {
-    path: 'bite-trails',
-    title: 'BiteTrails',
-    loadComponent: () =>
-      import('bite-tribe-business/dashboard').then(
-        (m) => m.BiteTrailsContainer,
-      ),
-    canActivate: [authGuard, roleGuard('business', 'staff')],
-  },
-  {
     path: 'restaurants',
     title: 'Restaurants',
     loadComponent: () =>
       import('bite-tribe-business/dashboard').then(
         (m) => m.RestaurantsContainer,
-      ),
-    canActivate: [authGuard, roleGuard('business', 'staff')],
-  },
-  {
-    path: 'create-bite-trail',
-    title: 'New BiteTrail',
-    loadComponent: () =>
-      import('bite-tribe-business/create-bite-trail').then(
-        (m) => m.CreateBiteTrailContainer,
       ),
     canActivate: [authGuard, roleGuard('business', 'staff')],
   },

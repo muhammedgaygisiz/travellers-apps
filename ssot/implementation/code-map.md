@@ -11,12 +11,15 @@ The code map helps contributors find the right implementation surface quickly.
 | `apps/bite-tribe`                    | Consumer BiteTribe app shell, assets, app configuration, and locale files |
 | `apps/bite-tribe-business`           | Business-facing app shell and assets                                      |
 | `apps/bite-tribe-admin`              | Internal operations app shell and assets                                  |
+| `apps/bite-tribe-creator`            | Bite Creator web app shell and assets, where BiteTrails are made          |
 | `apps/bite-tribe-firebase/functions` | Firebase backend functions, callable APIs, triggers, and scheduled jobs   |
 | `apps/bite-tribe-ios`                | Capacitor iOS wrapper                                                     |
 | `apps/bite-tribe-android`            | Capacitor Android wrapper                                                 |
 | `apps/storybook-host`                | Storybook host for shared and feature UI states                           |
 | `apps/bite-tribe-e2e`                | Consumer app Playwright end-to-end tests                                  |
 | `apps/bite-tribe-business-e2e`       | Business app Playwright end-to-end tests                                  |
+| `apps/bite-tribe-admin-e2e`          | Admin app Playwright end-to-end tests                                     |
+| `apps/bite-tribe-creator-e2e`        | Bite Creator app Playwright end-to-end tests                              |
 
 ## Consumer Feature Libraries
 
@@ -50,8 +53,6 @@ Examples:
 
 - `libs/bite-tribe-business/restaurant/page`
 - `libs/bite-tribe-business/restaurant/data-access`
-- `libs/bite-tribe-business/create-bite-trail/page`
-- `libs/bite-tribe-business/create-bite-trail/data-access`
 - `libs/bite-tribe-business/dashboard/page`
 - `libs/bite-tribe-business/dashboard/data-access`
 - `libs/bite-tribe-business/staff/page`
@@ -140,6 +141,26 @@ Examples:
 `migrations/page` holds one page per migration rather than one page listing all
 of them, because each is its own entry on the admin dashboard (issue [#1473]).
 
+## Creator Feature Libraries
+
+```text
+libs/bite-tribe-creator/<feature>/page
+libs/bite-tribe-creator/<feature>/data-access
+```
+
+The Bite Creator app (issue [#2130]) is where BiteTrails are made. Creation
+moved here from the business app with that issue, so the business app holds
+only what a restaurant does to its own data.
+
+Examples:
+
+- `libs/bite-tribe-creator/shell`
+- `libs/bite-tribe-creator/start`
+- `libs/bite-tribe-creator/bite-trails/page`
+- `libs/bite-tribe-creator/bite-trails/data-access`
+- `libs/bite-tribe-creator/create-bite-trail/page`
+- `libs/bite-tribe-creator/create-bite-trail/data-access`
+
 ## Shared Libraries
 
 | Path                                   | Purpose                                                                                                    |
@@ -184,3 +205,4 @@ Function files are named after the behavior they expose, such as `search-bites.t
 [#1093]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1093
 [#1096]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1096
 [#1473]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1473
+[#2130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2130

@@ -19,6 +19,9 @@
         "bite-tribe-admin": [
           "bite-tribe-admin"
         ],
+        "bite-tribe-creator": [
+          "bite-tribe-creator"
+        ],
         "bite-tribe-storybook": [
           "bite-tribe-storybook"
         ]
@@ -34,6 +37,9 @@
         ],
         "bite-tribe-admin": [
           "bite-tribe-qa-admin"
+        ],
+        "bite-tribe-creator": [
+          "bite-tribe-qa-creator"
         ]
       }
     }

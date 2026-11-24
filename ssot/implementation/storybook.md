@@ -88,28 +88,29 @@ componentWrapperDecorator((story) => `<div style="${inset}">${story}</div>`);
 They resolve to `0px` in a desktop browser, so a story that never declares them
 cannot show whether a full-screen surface clears the system bars.
 
-## The Admin And Business Apps Are Baselined At Desktop Only
+## The Admin, Business And Creator Apps Are Baselined At Desktop Only
 
-Storybook hosts all three apps. Their stories are separated by the top-level
+Storybook hosts all four apps. Their stories are separated by the top-level
 story title, and the namespace is also the mechanism that keeps the two
-privileged apps off the phone configuration:
+web-only apps off the phone configuration:
 
 ```text
 Pages/*, Components/*   the consumer app and the shared UI
 Admin/*                 bite-tribe-admin
 Business/*              bite-tribe-business
+Creator/*               bite-tribe-creator
 ```
 
-`loki.config.js` carries `skipStories: '^(Admin|Business)/'` on the
+`loki.config.js` carries `skipStories: '^(Admin|Business|Creator)/'` on the
 `chrome.iphone7` configuration. Loki matches that regex per configuration
-against `kind + ' ' + name`, so the two apps baseline at `chrome.laptop` and
-nowhere else. Both are opened on a laptop by an operator or a restaurant, and
-neither ships as a native build, so a phone reference asserts a layout nobody
+against `kind + ' ' + name`, so the three apps baseline at `chrome.laptop` and
+nowhere else. They are opened on a laptop by an operator, a restaurant or a
+creator, and none ships as a native build, so a phone reference asserts a layout nobody
 uses. This is **not** `parameters.loki.skip`, which drops a story from every
 configuration including the laptop one.
 
-Give an `Admin/*` or `Business/*` story the app's own `APP_TITLE` -
-`'BiteTribe Admin'` or `'Bite Tribe Business'` - or the page header renders
+Give an `Admin/*`, `Business/*` or `Creator/*` story the app's own `APP_TITLE` -
+`'BiteTribe Admin'`, `'Bite Tribe Business'` or `'BiteTribe Creator'` - or the page header renders
 without a title, which no build of either app does.
 
 ### A Story-Level Viewport Does Not Reach Loki
@@ -158,12 +159,13 @@ a variable it does not name here renders light inside the wrapper, so the list
 is part of the assertion. It is worth writing the story only for a surface
 whose colours all resolve from a handful of variables.
 
-## Storybook Serves Three Translation Catalogues
+## Storybook Serves Four Translation Catalogues
 
-Each app ships its own Transloco catalogue, and all three are named `en.json`,
+Each app ships its own Transloco catalogue, and all four are named `en.json`,
 so they cannot share one served path. `main.ts` maps them to `/assets/i18n`,
-`/assets/i18n-admin` and `/assets/i18n-business`, and `transloco-loader.ts`
-fetches all three and merges them with the **consumer catalogue last**, so it
+`/assets/i18n-admin`, `/assets/i18n-business` and `/assets/i18n-creator`, and
+`transloco-loader.ts` fetches all four and merges them with the creator
+catalogue first and the **consumer catalogue last**, so it
 wins the handful of keys that exist in more than one app with different wording
 (`app-check-blocked-message`, the language names,
 `restaurant-selector-nearby-google`). That ordering is what keeps every

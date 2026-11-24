@@ -32,6 +32,7 @@ apps/bite-tribe-firebase/functions/src/**/*.spec.ts
 apps/bite-tribe-e2e/src/tests
 apps/bite-tribe-business-e2e/src/tests
 apps/bite-tribe-admin-e2e/src/tests
+apps/bite-tribe-creator-e2e/src/tests
 apps/storybook-host/.storybook
 ```
 
@@ -55,6 +56,7 @@ apps/bite-tribe-firebase/functions
 apps/bite-tribe-e2e
 apps/bite-tribe-business-e2e
 apps/bite-tribe-admin-e2e
+apps/bite-tribe-creator-e2e
 libs/common/ui
 ```
 

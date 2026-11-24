@@ -79,6 +79,7 @@ Since issue [#2293] the consumer, business and admin web apps run on QA too, reb
 
 - **Profiles:** accounts made through the admin API never reach `beforeUserCreated`, so the script writes each account's `/users` profile and `/displayNames` claim itself, the way sign-up and onboarding would, with onboarding marked done. Without them the consumer profile page never loads and Edit Profile cannot save.
 - **Friend's Bites:** each gets a photo uploaded to `images/bites/{biteId}/` with a download token, so `setBiteImagePathOnUpload` checks it and writes `imageStatus: uploaded`; a Bite without that status is shown to its author only (issue [#1717]). They carry a `geohash` too, which the feed's location query needs. The feed's radius is 10 km, so they reach the feed only of somebody near Marienplatz; search finds them from anywhere.
+- **Restaurant geohash:** the seed stamps QA Trattoria's `updatedAt` on every run, so the write always differs from what is stored and `keepRestaurantGeohash` (issue [#2308]) writes its `geohash`. Firestore raises no event for an identical write, so without the stamp a restaurant seeded before the trigger existed stayed without one and Create Bite could not list it.
 - **Not reset:** follows, likes and reactions, and anything a run posts (Bites, bucket lists). A repeat run finds the guest already following qa-friend.
 - **Credentials:** `GOOGLE_APPLICATION_CREDENTIALS` when set (CI), otherwise the local `gcloud` login. It talks to the Identity Toolkit and Firestore admin REST APIs, which App Check does not gate.
 - **Passwords:** the QA sites are public, so the accounts get generated passwords, not the emulator's shared one. The script writes them to `apps/bite-tribe-firebase/.qa-accounts.env` (gitignored) on its first run and reuses them. A password is set only when the account is created, because setting one ends the account's sessions and a re-run would sign out whoever is testing; `QA_<ROLE>_PASSWORD` variables (`OWNER`, `STAFF`, `GUEST`, `FRIEND`, `ADMIN`) override the file when all five are set, which is how CI will pass them. It never prints them.
@@ -268,3 +269,4 @@ tools/set-functions-deploy-service-account.sh
 [#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957
 [#2304]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2304
 [#2307]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2307
+[#2308]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2308

@@ -1,5 +1,5 @@
 export const dataUrlToBlob = async (
-  dataUrl: string
+  dataUrl: string,
 ): Promise<{
   contentType: string;
   bytes: Uint8Array<ArrayBuffer>;

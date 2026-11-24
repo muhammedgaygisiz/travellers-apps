@@ -342,4 +342,56 @@ describe(DashboardComponent.name, () => {
       expect(emitSpy).toHaveBeenCalled();
     });
   });
+
+  /** GitHub issue #2133. */
+  describe("each restaurant's figures", () => {
+    const card = (id: string): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector(
+        `[data-testid="restaurant-figures-${id}"]`,
+      );
+    const text = (element: Element | null | undefined): string =>
+      element?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+
+    it('shows the Bites, the rating and the followers of a restaurant with figures', () => {
+      compRef.setInput('restaurants', [
+        restaurant({ id: 'r-1', name: 'Trattoria Roma' }),
+        restaurant({ id: 'r-2', name: 'Osteria' }),
+      ]);
+      compRef.setInput(
+        'figures',
+        new Map([
+          ['r-1', { bites: 12, ratings: 9, averageRating: 4.3, followers: 7 }],
+        ]),
+      );
+      fixture.detectChanges();
+
+      const figures = card('r-1');
+      expect(text(figures?.querySelector('h2'))).toBe('Trattoria Roma');
+      expect(
+        text(figures?.querySelector('[data-testid="figure-bites"] dd')),
+      ).toBe('12');
+      expect(
+        text(figures?.querySelector('[data-testid="figure-rating"] dd')),
+      ).toBe('4.3 dashboard-figure-ratings:{"count":9}');
+      expect(
+        text(figures?.querySelector('[data-testid="figure-followers"] dd')),
+      ).toBe('7');
+      expect(card('r-2')).toBeNull();
+    });
+
+    it('says there is no rating rather than showing 0', () => {
+      compRef.setInput('restaurants', [restaurant({ id: 'r-1' })]);
+      compRef.setInput(
+        'figures',
+        new Map([
+          ['r-1', { bites: 2, ratings: 0, averageRating: 0, followers: 0 }],
+        ]),
+      );
+      fixture.detectChanges();
+
+      expect(
+        text(card('r-1')?.querySelector('[data-testid="figure-rating"] dd')),
+      ).toBe('dashboard-figure-no-ratings');
+    });
+  });
 });

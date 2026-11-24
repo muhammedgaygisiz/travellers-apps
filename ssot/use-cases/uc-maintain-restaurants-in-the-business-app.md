@@ -38,6 +38,16 @@ is [UC - Verify Restaurant Candidate](uc-verify-restaurant-candidate.md).
   resolve, and a failed read is not shown as "no restaurant". A staff account
   with no restaurant record falls through `staffEntryGuard` to the same page
   and the same state.
+- For each Restaurant the account holds, the dashboard shows how it is doing (issue
+  [#2133]): its Bites, their average rating with how many ratings it comes from ("No
+  ratings yet" without one), and its followers. The Bites are the ones the consumer
+  restaurant page shows when opened without a Bite ([#2320]): those near the Restaurant's
+  own position that the shared rule in `utils` (`closeTo`, `matchRestaurantBites`,
+  `averageRatingOf`) matches to it, so the owner reads the numbers a guest sees. The
+  followers are the Restaurant's backend-kept `followersCount` ([#2132]). The figures are
+  computed in the business app, because the consumer app already shows them to every
+  member; there is no owner-only read. A Restaurant without a position, or whose nearby
+  read fails, gets no figures card rather than zeros. There is no trend over time.
 - While a Restaurant the account holds still lacks something guests see, the
   dashboard shows it a checklist (issue [#2126]): photo, category (issue
   [#2131]), address, opening hours, description, a link, facilities, and
@@ -238,6 +248,7 @@ all be reviewed for the first time.
 - Issue [#2229] dropped the menu code card's own heading, which repeated the section's title. Part of epic [#2123].
 - Issue [#2230] fixed printing the menu code, which came out as one blank page once the code moved into its own section view ([#2183]), and added print-media Loki stories for it and the table sticker sheet so a blank printout fails the visual suite. Part of epic [#2123].
 - Issue [#2231] loaded the Restaurant on the menu editor and Guest Bites when they are opened by URL, so a reload or a shared link keeps the Restaurant's name above the menu. Part of epic [#2123].
+- Issue [#2133] added each held Restaurant's Bites, rating and followers to the dashboard. Part of epic [#2123].
 - Issue [#2232] sent a staff account refused by an owner route back to its own tables, told the page is the owner's, instead of to the owner's empty restaurant list. Part of epic [#2123].
 - Issue [#2233] made the shared header show the whole logo and app name at phone width: the title's button reserve fits the buttons, and a long name is sized to the space it has. Part of epic [#2123].
 - Issue [#2234] laid the opening hours out as a list at phone width, one line per day and its ranges under it, so both times and the remove button are on screen; phone-width stories guard it. Part of epic [#2123].
@@ -324,3 +335,6 @@ all be reviewed for the first time.
 [#2302]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2302
 [#1957]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1957
 [#2307]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2307
+[#2133]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2133
+[#2320]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2320
+[#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132

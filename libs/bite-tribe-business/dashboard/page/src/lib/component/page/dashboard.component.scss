@@ -50,3 +50,30 @@ ion-item.is-done ion-label {
     max-width: 280px;
   }
 }
+
+// The restaurant's figures (GitHub issue #2133): three numbers side by side.
+.figures {
+  display: flex;
+  gap: 24px;
+  margin: 12px 0 0;
+}
+
+.figure {
+  dt {
+    color: var(--ion-color-medium);
+    font-size: 0.875rem;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    color: var(--ion-text-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.figure-note {
+  color: var(--ion-color-medium);
+  font-size: 0.875rem;
+  font-weight: 400;
+}

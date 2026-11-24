@@ -67,6 +67,44 @@
           </ion-card>
         }
 
+        <!-- How each held restaurant is doing, as guests see it (GitHub
+        issue #2133): the numbers its consumer page shows, and its followers. -->
+        @for (entry of restaurantFigures(); track entry.restaurant.id) {
+          <ion-card
+            [attr.data-testid]="'restaurant-figures-' + entry.restaurant.id"
+          >
+            <ion-card-content>
+              <h2 class="setup-title">{{ entry.restaurant.name }}</h2>
+              <dl class="figures">
+                <div class="figure" data-testid="figure-bites">
+                  <dt>{{ 'dashboard-figure-bites' | transloco }}</dt>
+                  <dd>{{ entry.figures.bites }}</dd>
+                </div>
+                <div class="figure" data-testid="figure-rating">
+                  <dt>{{ 'dashboard-figure-rating' | transloco }}</dt>
+                  <dd>
+                    @if (entry.figures.ratings) {
+                      {{ entry.figures.averageRating }}
+                      <span class="figure-note">{{
+                        'dashboard-figure-ratings'
+                          | transloco: { count: entry.figures.ratings }
+                      }}</span>
+                    } @else {
+                      <span class="figure-note">{{
+                        'dashboard-figure-no-ratings' | transloco
+                      }}</span>
+                    }
+                  </dd>
+                </div>
+                <div class="figure" data-testid="figure-followers">
+                  <dt>{{ 'dashboard-figure-followers' | transloco }}</dt>
+                  <dd>{{ entry.figures.followers }}</dd>
+                </div>
+              </dl>
+            </ion-card-content>
+          </ion-card>
+        }
+
         @for (setup of setups(); track setup.restaurant.id) {
           <ion-card
             [attr.data-testid]="'setup-checklist-' + setup.restaurant.id"

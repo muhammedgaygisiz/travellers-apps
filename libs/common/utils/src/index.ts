@@ -40,6 +40,15 @@ export {
 } from './lib/get-currency-for-device';
 export { getSimilarityScore } from './lib/get-similarity-score';
 export { haversineDistance } from './lib/haversine-distance';
+export {
+  averageRatingOf,
+  closeTo,
+  matchRestaurantBites,
+  MAX_RESTAURANT_DISTANCE_METERS,
+  ratedBitesOf,
+  type RestaurantBiteLike,
+  type RestaurantLike,
+} from './lib/restaurant-bites';
 export { getNormalizedPriceInEur } from './lib/get-normalized-price-in-eur';
 
 export {

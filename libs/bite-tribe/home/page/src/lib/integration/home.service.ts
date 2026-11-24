@@ -45,6 +45,7 @@ export class HomeService {
   isBitesLoading = this.dataAccess.isBitesLoading;
   isOwnBitesLoading = this.dataAccess.isOwnBitesLoading;
   biteById = this.dataAccess.biteById;
+  routeRestaurant = this.dataAccess.routeRestaurant;
 
   selectedBucketlist = this.dataAccess.selectedBucketlist;
   triedOutBiteIds = this.dataAccess.triedOutBiteIds;

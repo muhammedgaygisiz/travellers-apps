@@ -53,6 +53,23 @@ export class RestaurantService {
   );
 
   navigateToMenu(restaurant: Restaurant | undefined): void {
+    // Opened without a Bite (GitHub issue #2320): the restaurant's own menu
+    // route, which needs none.
+    if (!this.dataAccess.biteIdFromUrl()) {
+      const menuId = this.normaliseMenuId(restaurant, restaurant?.menuId);
+
+      if (restaurant?.id && menuId) {
+        void this.navController.navigateForward([
+          PATH.RESTAURANT,
+          restaurant.id,
+          PATH.MENU,
+          menuId,
+        ]);
+      }
+
+      return;
+    }
+
     const bite = this.bite();
     const biteId = this.currentBiteId();
     const menuId = this.normaliseMenuId(restaurant, restaurant?.menuId);
@@ -91,6 +108,19 @@ export class RestaurantService {
   };
 
   navigateToRestaurantBites(restaurant: Restaurant | undefined): void {
+    // Opened without a Bite (GitHub issue #2320).
+    if (!this.dataAccess.biteIdFromUrl()) {
+      if (restaurant?.id) {
+        void this.navController.navigateForward([
+          PATH.RESTAURANT,
+          restaurant.id,
+          PATH.BITES,
+        ]);
+      }
+
+      return;
+    }
+
     const bite = this.bite();
     if (!bite) {
       return;

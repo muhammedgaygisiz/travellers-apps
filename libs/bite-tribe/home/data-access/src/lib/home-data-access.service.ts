@@ -9,6 +9,7 @@ import { BiteTribeStoreService, sortByCriteria } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type {
   Bite,
+  Geopoint,
   Like,
   LikeClick,
   Restaurant,
@@ -48,6 +49,65 @@ const EMPTY_WEEKLY_BITES: WeeklyBites = {
   weekStart: 0,
   weekEnd: 0,
   bites: [],
+};
+
+/** The Bites close enough to `center` to have been eaten at one place. */
+const closeTo = (bites: Bite[], center: Geopoint): Bite[] =>
+  bites.filter((bite) => {
+    if (!bite.position) {
+      return false;
+    }
+
+    const dist = Number(
+      haversineDistance(
+        center.latitude,
+        center.longitude,
+        bite.position.latitude,
+        bite.position.longitude,
+        'm',
+      ),
+    );
+
+    return dist <= MAX_RESTAURANT_DISTANCE_METERS;
+  });
+
+/**
+ * Which of the close Bites belong to the place: linked to the restaurant or
+ * named like it, or named like `fallbackName` when no restaurant was read.
+ */
+const matchRestaurantBites = (
+  closeBites: Bite[],
+  restaurant: Restaurant | undefined,
+  fallbackName: string | undefined,
+): Bite[] => {
+  if (restaurant?.name) {
+    const normalizedName = normalize(restaurant.name);
+    const restaurantId = restaurant.id;
+
+    return closeBites.filter((bite) => {
+      const score = getSimilarityScore(normalize(bite.place), normalizedName);
+      return (
+        (restaurantId !== undefined &&
+          bite.restaurantId?.includes(restaurantId)) ||
+        score.length > 0
+      );
+    });
+  }
+
+  if (fallbackName) {
+    const normalizedName = normalize(decodeURIComponent(fallbackName));
+
+    return closeBites.filter((bite) => {
+      const normalizedBitePlace = normalize(bite.place);
+      if (normalizedBitePlace === normalizedName) {
+        return true;
+      }
+      const score = getSimilarityScore(normalizedBitePlace, normalizedName);
+      return bite.restaurantId?.includes(normalizedName) || score.length > 0;
+    });
+  }
+
+  return closeBites;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -149,6 +209,8 @@ export class HomeDataAccessService {
     this.storeService.locationPermissionState$,
   );
   biteById = toSignal(this.storeService.bite$);
+  /** The route's restaurant, which names its Bites list without a Bite (#2320). */
+  routeRestaurant = toSignal(this.storeService.restaurant$);
   private readonly gpsPosition = toSignal(this.storeService.position$);
   private readonly likes = toSignal(this.storeService.likes$, {
     initialValue: [] as Like[],
@@ -171,7 +233,7 @@ export class HomeDataAccessService {
     const { sourceBiteId, restaurantIdOrName } = params;
 
     if (!sourceBiteId) {
-      return [];
+      return this.loadBitesAroundRestaurant(restaurantIdOrName);
     }
 
     let sourceBite: Bite | undefined;
@@ -203,24 +265,6 @@ export class HomeDataAccessService {
       return [sourceBite];
     }
 
-    const closeBites = nearbyBites.filter((bite) => {
-      if (!bite.position) {
-        return false;
-      }
-
-      const dist = Number(
-        haversineDistance(
-          sourcePosition.latitude,
-          sourcePosition.longitude,
-          bite.position.latitude,
-          bite.position.longitude,
-          'm',
-        ),
-      );
-
-      return dist <= MAX_RESTAURANT_DISTANCE_METERS;
-    });
-
     let restaurant: Restaurant | undefined;
     try {
       if (restaurantIdOrName) {
@@ -230,34 +274,11 @@ export class HomeDataAccessService {
       // fall through to name-based matching below
     }
 
-    let matchedBites: Bite[];
-
-    if (restaurant?.name) {
-      const normalizedName = normalize(restaurant.name);
-      const restaurantId = restaurant.id;
-      matchedBites = closeBites.filter((bite) => {
-        const score = getSimilarityScore(normalize(bite.place), normalizedName);
-        return (
-          (restaurantId !== undefined &&
-            bite.restaurantId?.includes(restaurantId)) ||
-          score.length > 0
-        );
-      });
-    } else if (restaurantIdOrName || sourceBite?.place) {
-      const normalizedName = normalize(
-        decodeURIComponent(restaurantIdOrName || sourceBite.place),
-      );
-      matchedBites = closeBites.filter((bite) => {
-        const normalizedBitePlace = normalize(bite.place);
-        if (normalizedBitePlace === normalizedName) {
-          return true;
-        }
-        const score = getSimilarityScore(normalizedBitePlace, normalizedName);
-        return bite.restaurantId?.includes(normalizedName) || score.length > 0;
-      });
-    } else {
-      matchedBites = closeBites;
-    }
+    const matchedBites = matchRestaurantBites(
+      closeTo(nearbyBites, sourcePosition),
+      restaurant,
+      restaurantIdOrName || sourceBite.place,
+    );
 
     if (!matchedBites.find((b) => b.id === loadedSourceBiteId)) {
       return [sourceBite, ...matchedBites];
@@ -265,6 +286,48 @@ export class HomeDataAccessService {
 
     return matchedBites;
   };
+
+  /**
+   * A restaurant's Bites when its page was opened without a Bite (GitHub issue
+   * #2320), as from a notification about the restaurant. The same matching as
+   * the Bite route, centred on the restaurant's own position instead of a
+   * source Bite's. Without a stored restaurant there is nothing to centre on.
+   */
+  private async loadBitesAroundRestaurant(
+    restaurantId: string | undefined,
+  ): Promise<Bite[]> {
+    if (!restaurantId) {
+      return [];
+    }
+
+    let restaurant: Restaurant | undefined;
+    try {
+      restaurant = await this.api.loadRestaurant(restaurantId);
+    } catch {
+      return [];
+    }
+
+    const position = restaurant?.position;
+
+    if (position?.latitude === undefined || position?.longitude === undefined) {
+      return [];
+    }
+
+    let nearbyBites: Bite[];
+    try {
+      nearbyBites = await this.api.bitesByPosition({
+        coords: { latitude: position.latitude, longitude: position.longitude },
+      } as GeolocationPosition);
+    } catch {
+      return [];
+    }
+
+    return matchRestaurantBites(
+      closeTo(nearbyBites, position),
+      restaurant,
+      restaurantId,
+    );
+  }
 
   private seedUserLikes(bites: Bite[]): void {
     const userId = this.userId();

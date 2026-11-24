@@ -113,6 +113,7 @@ class StoreMock {
   clearGpsError = (): null => null;
   setBiteTriedOutStatus = (): null => null;
   bite$ = of(undefined);
+  restaurant$ = of(undefined);
 }
 
 const ApiMock = {
@@ -495,6 +496,93 @@ describe('HomeDataAccessService', () => {
         });
 
         expect(service.triedOutBiteIds()).toEqual(['bite-1', 'bite-2']);
+      },
+    ));
+  });
+
+  /** Opened without a Bite (GitHub issue #2320). */
+  describe('restaurantBitesLoader without a source Bite', () => {
+    const RESTAURANT = {
+      id: 'r-1',
+      name: 'Trattoria Roma',
+      position: { latitude: 48.137, longitude: 11.575 },
+    };
+    const load = (
+      service: HomeDataAccessService,
+      restaurantIdOrName: string | undefined,
+    ): Promise<Bite[] | undefined> =>
+      service.restaurantBitesLoader(
+        createLoaderParams({
+          params: { sourceBiteId: undefined, restaurantIdOrName },
+        }),
+      ) as Promise<Bite[] | undefined>;
+
+    it("centres on the restaurant's own position and keeps its Bites", inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        const linked = {
+          id: 'b-1',
+          place: 'Somewhere else',
+          restaurantId: '/restaurants/r-1',
+          position: { latitude: 48.137, longitude: 11.575 },
+        } as Bite;
+        const named = {
+          id: 'b-2',
+          place: 'Trattoria Roma',
+          position: { latitude: 48.1371, longitude: 11.5751 },
+        } as Bite;
+        const unrelated = {
+          id: 'b-3',
+          place: 'Burger Bar',
+          position: { latitude: 48.137, longitude: 11.575 },
+        } as Bite;
+        const far = {
+          id: 'b-4',
+          place: 'Trattoria Roma',
+          position: { latitude: 48.2, longitude: 11.7 },
+        } as Bite;
+        ApiMock.loadRestaurant.mockResolvedValue(RESTAURANT);
+        ApiMock.bitesByPosition.mockResolvedValue([
+          linked,
+          named,
+          unrelated,
+          far,
+        ]);
+
+        const result = await load(service, 'r-1');
+
+        expect(ApiMock.biteById).not.toHaveBeenCalled();
+        expect(ApiMock.bitesByPosition).toHaveBeenCalledWith({
+          coords: RESTAURANT.position,
+        });
+        expect(result?.map((bite) => bite.id)).toEqual(['b-1', 'b-2']);
+      },
+    ));
+
+    it('has nothing to centre on without a stored restaurant', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        expect(await load(service, undefined)).toEqual([]);
+
+        ApiMock.loadRestaurant.mockResolvedValue(undefined);
+        expect(await load(service, 'unknown')).toEqual([]);
+
+        ApiMock.loadRestaurant.mockRejectedValue(new Error('offline'));
+        expect(await load(service, 'r-1')).toEqual([]);
+
+        ApiMock.loadRestaurant.mockResolvedValue({ id: 'r-1', name: 'X' });
+        expect(await load(service, 'r-1')).toEqual([]);
+        expect(ApiMock.bitesByPosition).not.toHaveBeenCalled();
+      },
+    ));
+
+    it('shows no Bites when the nearby read fails', inject(
+      [HomeDataAccessService],
+      async (service: HomeDataAccessService) => {
+        ApiMock.loadRestaurant.mockResolvedValue(RESTAURANT);
+        ApiMock.bitesByPosition.mockRejectedValue(new Error('offline'));
+
+        expect(await load(service, 'r-1')).toEqual([]);
       },
     ));
   });

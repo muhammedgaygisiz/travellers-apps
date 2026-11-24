@@ -29,6 +29,13 @@ selector that attaches a place to a Bite in the first place to
 ## Flow
 
 - User navigates from a Bite to a verified Restaurant or unverified place page.
+- A verified Restaurant page also opens without a Bite, at `restaurant/:restaurantId`
+  (issue [#2320]), for what is about the restaurant itself, such as a notification to its
+  owners. Its Bites are the ones near the restaurant's own position that match it, by the
+  same rule as through a Bite. Its menu button opens `restaurant/:restaurantId/menu/:menuId`
+  and its rating link `restaurant/:restaurantId/bites`, whose list is titled with the
+  restaurant's name. An unknown id ends in the same not-found state, whose way out goes
+  to the feed.
 - During Bite creation, user selects a nearby verified restaurant, unverified restaurant, Google Place, or explicit custom place through the selector before saving.
 - User can inspect restaurant-related Bites by following the rating count on either page.
 - Restaurant pages can show ratings derived from Bites, tags, menu entry points, and verification distinctions.
@@ -152,6 +159,7 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 - Issue [#1830] added the facility line to the restaurant page. Part of epic [#1823].
 - Issue [#2131] added the category line under the restaurant's name. Part of epic [#2123].
 - Issue [#2194] added the restaurant's dietary statements under it. Part of epic [#2193].
+- Issue [#2320] opened the restaurant page without a Bite. Part of [#2123].
 - Issue [#2132] added following a restaurant, without notifications, which are
   [#2318]. Part of [#2123].
 - Issue [#2124] made the page wait for its Bites as well as its document, and
@@ -189,3 +197,4 @@ a source [Implementation - Store Declarations](../implementation/store-declarati
 [#2194]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2194
 [#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
 [#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
+[#2320]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2320

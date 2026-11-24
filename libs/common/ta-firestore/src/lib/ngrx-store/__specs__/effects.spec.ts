@@ -13,6 +13,8 @@ import { BiteTribeRole, isAuthEntryPage, REQUIRED_ROLES } from 'utils';
 import { RequestedUrlService } from '../../requested-url.service';
 import { AppCheckReadinessService } from '../../app-check-readiness.service';
 import { AuthStorageHealthService } from '../../auth-storage-health.service';
+import { AnalyticsService } from '../../analytics/analytics.service';
+import { AnalyticsEvent } from '../../analytics/analytics-events';
 
 jest.mock('utils', () => ({
   ...jest.requireActual('utils'),
@@ -37,6 +39,10 @@ const AuthServiceMock = {
   setupAnalyticsAndCrashlytics: jest.fn(),
   hasAnyRole: jest.fn(() => Promise.resolve(true)),
   endRejectedSession: jest.fn(() => Promise.resolve()),
+};
+
+const AnalyticsServiceMock = {
+  logEvent: jest.fn(),
 };
 
 const MockNavController = {
@@ -84,6 +90,7 @@ describe(AuthEffects.name, () => {
         { provide: AuthService, useValue: AuthServiceMock },
         provideMockStore(),
         { provide: NavController, useValue: MockNavController },
+        { provide: AnalyticsService, useValue: AnalyticsServiceMock },
       ],
     });
 
@@ -346,6 +353,58 @@ describe(AuthEffects.name, () => {
       expect(result).toEqual(AuthActions.loginSucceeded());
       expect(MockNavController.navigateBack).not.toHaveBeenCalled();
       expect(MockNavController.navigateRoot).not.toHaveBeenCalled();
+    });
+  });
+
+  // The provider buttons create the account inside the sign-in call, so a
+  // sign-up there is only visible as Firebase's `isNewUser` (issue #2324).
+  describe.each([
+    [
+      'google',
+      AuthActions.loginWithGoogleAccount(),
+      AuthServiceMock.signInWithGoogleAccount,
+      (): Observable<Action> => effects.loginWithGoogleAccountEffect$,
+    ],
+    [
+      'apple',
+      AuthActions.loginWithAppleAccount(),
+      AuthServiceMock.signInWithAppleAccount,
+      (): Observable<Action> => effects.loginWithAppleAccountEffect$,
+    ],
+  ])('given a %s sign-in', (method, action, signIn, effect) => {
+    it('should log a sign-up when it created the account', async () => {
+      signIn.mockResolvedValue({
+        user: { uid: '123' },
+        additionalUserInfo: { isNewUser: true, providerId: method },
+      });
+      actions$ = of(action);
+
+      await firstValueFrom(effect());
+
+      expect(AnalyticsServiceMock.logEvent).toHaveBeenCalledWith(
+        AnalyticsEvent.SignUp,
+        { method },
+      );
+    });
+
+    it('should not log a sign-up for a returning account', async () => {
+      signIn.mockResolvedValue({
+        user: { uid: '123' },
+        additionalUserInfo: { isNewUser: false, providerId: method },
+      });
+      actions$ = of(action);
+
+      await firstValueFrom(effect());
+
+      expect(AnalyticsServiceMock.logEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not log a sign-up when the result carries no user info', async () => {
+      actions$ = of(action);
+
+      await firstValueFrom(effect());
+
+      expect(AnalyticsServiceMock.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -850,6 +909,7 @@ describe(`${AuthEffects.name} with a required role`, () => {
         { provide: AuthService, useValue: AuthServiceMock },
         provideMockStore(),
         { provide: NavController, useValue: MockNavController },
+        { provide: AnalyticsService, useValue: AnalyticsServiceMock },
         ...(requiredRoles
           ? [{ provide: REQUIRED_ROLES, useValue: requiredRoles }]
           : []),
@@ -929,6 +989,34 @@ describe(`${AuthEffects.name} with a required role`, () => {
       configure(['business']);
       AuthServiceMock.hasAnyRole.mockResolvedValue(false);
     });
+
+    // A provider account the app turns away is not a member of it, even when
+    // the sign-in just created it (issue #2324).
+    it.each([
+      ['google', AuthActions.loginWithGoogleAccount()],
+      ['apple', AuthActions.loginWithAppleAccount()],
+    ] as const)(
+      'does not count a new %s account as a sign-up',
+      async (method, action) => {
+        const signIn =
+          method === 'google'
+            ? AuthServiceMock.signInWithGoogleAccount
+            : AuthServiceMock.signInWithAppleAccount;
+        signIn.mockResolvedValue({
+          user: { uid: '123' },
+          additionalUserInfo: { isNewUser: true, providerId: method },
+        });
+        const effect$ =
+          method === 'google'
+            ? effects.loginWithGoogleAccountEffect$
+            : effects.loginWithAppleAccountEffect$;
+
+        const result = await emitted(effect$, action);
+
+        expect(result).toEqual(AuthActions.loginFailed());
+        expect(AnalyticsServiceMock.logEvent).not.toHaveBeenCalled();
+      },
+    );
 
     it('fails the login instead of succeeding it', async () => {
       const result = await emitted(

@@ -157,7 +157,14 @@ in a window; these two count **people**, followed from the day they arrived.
   → sign-up → first Bite, per arrival day and per platform. The two conversion
   steps are `sign_up` and `bite_created`, which are GA4 key events registered
   by `provision-ga4.mjs`, so the funnel and the GA4 console agree on what a
-  conversion is.
+  conversion is. Until
+  [issue 2324](https://github.com/muhammedgaygisiz/travellers-apps/issues/2324)
+  only the email/password form logged `sign_up`. A Google or Apple sign-up
+  logged nothing, so from app 1.1.1 on, when the start page offered those
+  buttons, the sign-up step and `New activated users` read close to zero while
+  people kept joining. Installs older than the release that carries the fix
+  still under-report. For those weeks, use `onboarding_assistant_completed` as
+  the count of new members.
 - **Acquisition source and store hand-offs** — since
   [issue 1759](https://github.com/muhammedgaygisiz/travellers-apps/issues/1759)
   each arrival also carries the source and medium of its own arrival event,

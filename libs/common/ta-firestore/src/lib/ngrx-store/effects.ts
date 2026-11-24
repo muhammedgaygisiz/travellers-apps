@@ -25,6 +25,8 @@ import { AuthService } from '../auth.service';
 import { AppCheckReadinessService } from '../app-check-readiness.service';
 import { AuthStorageHealthService } from '../auth-storage-health.service';
 import { isAppCheckRefusal } from '../initialize-firebase-app-check';
+import { AnalyticsEvent } from '../analytics/analytics-events';
+import { AnalyticsService } from '../analytics/analytics.service';
 import {
   getSignInErrorCode,
   isSignInCancellation,
@@ -76,6 +78,7 @@ export class AuthEffects {
   private readonly requestedUrlService = inject(RequestedUrlService);
   private readonly appCheckReadiness = inject(AppCheckReadinessService);
   private readonly authStorageHealth = inject(AuthStorageHealthService);
+  private readonly analytics = inject(AnalyticsService);
 
   private hasRoutedAfterSignIn = false;
 
@@ -172,7 +175,11 @@ export class AuthEffects {
       ofType(AuthActions.loginWithGoogleAccount),
       exhaustMap(() =>
         from(this.signInWithGoogleAccount()).pipe(
-          switchMap(() => from(this.assertRequiredRole())),
+          switchMap((result) =>
+            from(this.assertRequiredRole()).pipe(
+              tap(() => this.reportProviderSignUp(result, 'google')),
+            ),
+          ),
           // No navigation here: `successFulLogin$` routes every sign-in made
           // from an entry page. A second one to `/` superseded it, and from
           // `/start` that is the page already shown, so the visitor stayed
@@ -189,7 +196,11 @@ export class AuthEffects {
       ofType(AuthActions.loginWithAppleAccount),
       exhaustMap(() =>
         from(this.signInWithAppleAccount()).pipe(
-          switchMap(() => from(this.assertRequiredRole())),
+          switchMap((result) =>
+            from(this.assertRequiredRole()).pipe(
+              tap(() => this.reportProviderSignUp(result, 'apple')),
+            ),
+          ),
           // Routed by `successFulLogin$`, as for Google (issue #1850).
           map(() => AuthActions.loginSucceeded()),
           catchError((err) => of(this.toProviderFailure(err))),
@@ -385,6 +396,27 @@ export class AuthEffects {
 
   private login(authCreds: AuthCredentials): Promise<SignInResult> {
     return this.authService.loginWithUsernameAndPassword(authCreds);
+  }
+
+  /**
+   * A Google or Apple sign-in that created the account is a sign-up, and is
+   * counted as one.
+   *
+   * The email/password form logs `sign_up` itself. The provider buttons create
+   * the account inside the sign-in call, so Firebase's `isNewUser` is the only
+   * place that tells a first sign-in from a returning one. Without it every
+   * provider account went uncounted, and once the start page offered those
+   * buttons (#1714) new members stopped showing up in the digest at all
+   * (issue #2324). Logged after the role check, so an account the app
+   * rejects is not counted.
+   */
+  private reportProviderSignUp(
+    result: SignInResult | undefined,
+    method: 'google' | 'apple',
+  ): void {
+    if (result?.additionalUserInfo?.isNewUser) {
+      this.analytics.logEvent(AnalyticsEvent.SignUp, { method });
+    }
   }
 
   private signInWithGoogleAccount(): Promise<SignInResult> {

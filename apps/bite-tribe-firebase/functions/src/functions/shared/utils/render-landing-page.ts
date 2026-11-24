@@ -133,6 +133,22 @@ export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
   `${BITE_TRIBE_ORIGIN}/eat/${encodeURIComponent(page.city)}`;
 
 /**
+ * A Bite photo's `alt` (issue #2326): the dish, where it was eaten and where
+ * that is, e.g. "Poulet Cordon Bleu at Restaurant Tramway in Bern", so an image
+ * search can tell what and where the photo shows. Built only from the stored
+ * snapshot: a part that is not stored is left out rather than guessed, and the
+ * page's city stands in for a missing locality.
+ */
+export const photoAlt = (item: LandingPageItem, cityName: string): string => {
+  const place = item.place?.trim();
+  const where = item.locality?.trim() || cityName;
+
+  return [item.name, place && `at ${place}`, where && `in ${where}`]
+    .filter(Boolean)
+    .join(' ');
+};
+
+/**
  * One Bite. The whole entry links to the Bite in the app: a member lands on
  * it, and a signed-out visitor is sent to sign up by `authGuard`, which
  * remembers the Bite and opens it once they have (decided on #1487).
@@ -144,20 +160,20 @@ export const landingPageUrl = (page: Pick<LandingPage, 'city'>): string =>
  * included, to `/bite/<id>` on the canonical host.
  */
 const renderItem =
-  (city: string) =>
+  (page: Pick<LandingPage, 'city' | 'cityName'>) =>
   (item: LandingPageItem, index: number): string => {
     const name = escapeHtml(item.name);
     const location = [item.place, item.locality].filter(Boolean).join(' · ');
     const href = appLink(
       `/s/bite/${encodeURIComponent(item.biteId)}`,
-      city,
+      page.city,
       APP_LINK_ORIGIN,
     );
 
     return `
       <li>
         <a class="entry" href="${escapeHtml(href)}">
-          <img src="${escapeHtml(item.imageUrl)}" alt="${name}" loading="${index === 0 ? 'eager' : 'lazy'}" width="800" height="800" />
+          <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(photoAlt(item, page.cityName))}" loading="${index === 0 ? 'eager' : 'lazy'}" width="800" height="800" />
           <h2>${name}</h2>
           <p class="loc">${escapeHtml(location)}</p>
         </a>
@@ -326,7 +342,7 @@ export const renderLandingPage = (page: LandingPage): string => {
     <p class="intro">${escapeHtml(page.intro)}</p>
     ${renderPostLinks(page)}
     ${renderCallToAction(page.city)}
-    <ol>${page.items.map(renderItem(page.city)).join('')}
+    <ol>${page.items.map(renderItem(page)).join('')}
     </ol>
     <p class="more"><a href="${CITY_INDEX_URL}">More cities →</a></p>
   </main>

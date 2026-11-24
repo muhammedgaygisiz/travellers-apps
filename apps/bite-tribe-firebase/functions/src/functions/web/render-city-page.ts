@@ -67,6 +67,22 @@ const isoDate = (value: unknown): string | undefined =>
     : undefined;
 
 /**
+ * The page's Bite photos as image sitemap entries (issue #2326), so Google
+ * Images finds them without crawling the page first. Only `image:loc`: Google
+ * dropped the extension's caption, title, geo and licence tags in 2022. A photo
+ * used twice on a page is listed once.
+ */
+const sitemapImages = (page: LandingPage): string =>
+  [...new Set(page.items.map((item) => item.imageUrl).filter(Boolean))]
+    .map(
+      (url) => `
+    <image:image>
+      <image:loc>${escapeHtml(url)}</image:loc>
+    </image:image>`,
+    )
+    .join('');
+
+/**
  * The published set plus `/eat` itself (issue #2091), whose last change is the
  * newest publication among them.
  */
@@ -86,13 +102,13 @@ export const renderSitemap = (pages: LandingPage[]): string => {
       const lastmod = isoDate(page.publishedAt);
 
       return `  <url>
-    <loc>${escapeHtml(landingPageUrl(page))}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}
+    <loc>${escapeHtml(landingPageUrl(page))}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}${sitemapImages(page)}
   </url>`;
     })
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${index}${urls}
 </urlset>
 `;

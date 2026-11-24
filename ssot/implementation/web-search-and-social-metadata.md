@@ -202,10 +202,10 @@ Both live in `apps/bite-tribe/public`, which the `public` asset entry in
 
 There are two sitemaps, and each owns its own URLs:
 
-| Sitemap                                 | Owns                                                                  | Written by                                           |
-| --------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- |
-| `https://bitetribe.app/sitemap.xml`     | The four Angular routes that render without a session, and `/imprint` | Hand, as the static file in `apps/bite-tribe/public` |
-| `https://bitetribe.app/eat/sitemap.xml` | Every published city landing page, with `lastmod` from `publishedAt`  | `renderCityPage`, from the published set             |
+| Sitemap                                 | Owns                                                                                                      | Written by                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `https://bitetribe.app/sitemap.xml`     | The four Angular routes that render without a session, and `/imprint`                                     | Hand, as the static file in `apps/bite-tribe/public` |
+| `https://bitetribe.app/eat/sitemap.xml` | Every published city landing page, with `lastmod` from `publishedAt` and its Bite photos as image entries | `renderCityPage`, from the published set             |
 
 The static `sitemap.xml` lists the root, `/support`, `/privacy` and
 `/account-deletion`. Those are the Angular routes that render without a
@@ -409,6 +409,13 @@ fixed once saved; an alias is how a second name is added.
   `/assets/social/instagram-glyph-*.svg` of the web build. No embed, script or
   tracking; nothing is loaded from an Instagram host. The gradient glyph was
   not used, because Meta ships it as a 10 MB SVG.
+- Each Bite photo is an `<img>` whose `alt` names the dish, the restaurant and
+  where it is, e.g. "Poulet Cordon Bleu at Restaurant Tramway in Bern"
+  ([#2326]). `photoAlt` builds it from the stored snapshot only: a missing
+  `place` is left out and a missing `locality` falls back to the page's
+  `cityName`. The same photos are listed as `<image:image>` entries under the
+  page's `<url>` in `/eat/sitemap.xml`, once each, with `image:loc` only; the
+  caption, title, geo and licence tags were deprecated by Google in 2022.
 - One JSON-LD block: an `ItemList` of the Bites in order. Each entry is the
   `Restaurant` the Bite was eaten at, with a city-level `PostalAddress` (a Bite
   carries no street), holding the dish as a `MenuItem` on its `Menu`. The JSON
@@ -701,3 +708,4 @@ so both properties have the same two owners.
 [#2091]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2091
 [#2101]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2101
 [#1977]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1977
+[#2326]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2326

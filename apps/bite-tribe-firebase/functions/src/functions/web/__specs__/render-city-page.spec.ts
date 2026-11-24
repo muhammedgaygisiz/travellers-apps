@@ -147,6 +147,48 @@ describe('renderCityPage', () => {
     expect(headers['Cache-Control']).toBe(PUBLISHED_CACHE_CONTROL);
   });
 
+  describe('photo alt text (#2326)', () => {
+    const alts = (body: string): string[] =>
+      [
+        ...body.matchAll(
+          /<img src="https:\/\/example\.test[^"]*" alt="([^"]*)"/g,
+        ),
+      ].map((match) => match[1]);
+
+    it('names the dish, the restaurant and where it is', async () => {
+      mockGet.mockResolvedValue(snapshot(page));
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(alts(body)).toEqual([
+        'Dish 1 at Place 1 in Mitte, Berlin',
+        'Dish 2 at Place 2 in Mitte, Berlin',
+        'Dish 3 at Place 3 in Mitte, Berlin',
+      ]);
+    });
+
+    it('falls back to the city and leaves out what is not stored', async () => {
+      mockGet.mockResolvedValue(
+        snapshot({
+          ...page,
+          items: [
+            item(1, { locality: undefined }),
+            item(2, { place: '', locality: '  ' }),
+            item(3, { name: 'Fish & "Chips"', place: undefined }),
+          ],
+        }),
+      );
+
+      const { body } = await respond('/eat/berlin');
+
+      expect(alts(body)).toEqual([
+        'Dish 1 at Place 1 in Berlin',
+        'Dish 2 in Berlin',
+        'Fish &amp; &quot;Chips&quot; in Mitte, Berlin',
+      ]);
+    });
+  });
+
   it('links the header to the Instagram account with its own glyph', async () => {
     mockGet.mockResolvedValue(snapshot(page));
 
@@ -370,6 +412,53 @@ describe('renderCityPage', () => {
         '<loc>https://bitetribe.app/eat</loc>\n    <lastmod>2026-11-12</lastmod>',
       );
       expect(body.match(/<url>/g)).toHaveLength(3);
+    });
+
+    it('lists each page photo once, escaped, under its own page (#2326)', async () => {
+      const tokened = 'https://example.test/o/a.jpg?alt=media&token=t1';
+      mockQueryGet.mockResolvedValue({
+        docs: [
+          doc('berlin', {
+            ...page,
+            publishedAt: new Timestamp(Date.UTC(2026, 10, 12)),
+            items: [
+              item(1, { imageUrl: tokened }),
+              item(2),
+              item(3, { imageUrl: tokened }),
+            ],
+          }),
+          doc('hamburg', { ...page, items: [item(4)] }),
+        ],
+      });
+
+      const { body } = await respond('/eat/sitemap.xml');
+
+      expect(body).toContain(
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
+      );
+      expect(body).toContain(`  <url>
+    <loc>https://bitetribe.app/eat/berlin</loc>
+    <lastmod>2026-11-12</lastmod>
+    <image:image>
+      <image:loc>https://example.test/o/a.jpg?alt=media&amp;token=t1</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://example.test/2.jpg</image:loc>
+    </image:image>
+  </url>`);
+      expect(body).toContain(`  <url>
+    <loc>https://bitetribe.app/eat/hamburg</loc>
+    <image:image>
+      <image:loc>https://example.test/4.jpg</image:loc>
+    </image:image>
+  </url>`);
+      // The index carries no photo of its own, and nothing raw slips through.
+      expect(body).toContain(
+        '<loc>https://bitetribe.app/eat</loc>\n    <lastmod>2026-11-12</lastmod>\n  </url>',
+      );
+      expect(body.match(/<image:image>/g)).toHaveLength(3);
+      expect(body).not.toMatch(/&(?!amp;|lt;|gt;|quot;|#039;)/);
+      expect(body).not.toMatch(/image:(caption|title|geo_location|license)/);
     });
 
     it('is an empty urlset when nothing is published', async () => {

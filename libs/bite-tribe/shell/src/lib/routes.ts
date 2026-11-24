@@ -125,6 +125,25 @@ const APP_ROUTES: Routes = [
     canActivate: [authGuard],
   },
   /**
+   * A restaurant's page without a Bite in front of it (GitHub issue #2320),
+   * for what is about the restaurant itself, such as a notification to its
+   * owners. Its Bites are the ones near the restaurant's own position, and
+   * its menu and Bites links stay off the Bite routes too.
+   */
+  {
+    path: `${PATH.RESTAURANT}/:restaurantId`,
+    loadComponent: () =>
+      import('bite-tribe/restaurant').then((m) => m.RestaurantContainer),
+    canActivate: [authGuard],
+  },
+  {
+    path: `${PATH.RESTAURANT}/:restaurantId/${PATH.BITES}`,
+    loadComponent: () =>
+      import('bite-tribe/home').then((m) => m.RestaurantBitesContainer),
+    title: 'Restaurant Bites',
+    canActivate: [authGuard],
+  },
+  /**
    * A restaurant's menu, in the app, without a Bite in front of it
    * (GitHub issue #370).
    *

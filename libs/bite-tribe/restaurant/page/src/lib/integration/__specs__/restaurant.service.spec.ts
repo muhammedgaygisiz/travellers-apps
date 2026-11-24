@@ -97,6 +97,44 @@ describe('RestaurantService', () => {
     service = TestBed.inject(RestaurantService);
   });
 
+  /** Opened as restaurant/:restaurantId (GitHub issue #2320). */
+  describe('without a Bite in the route', () => {
+    beforeEach(() => {
+      mockDataAccessService.biteIdFromUrl.set(undefined);
+      mockDataAccessService.bite.set(undefined);
+      mockHomeDataAccessService.restaurantBites.set([]);
+    });
+
+    it("opens the restaurant's own menu route", () => {
+      service.navigateToMenu(mockRestaurant);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'restaurant123',
+        'menu',
+        'menu456',
+      ]);
+    });
+
+    it("opens the restaurant's own Bites route", () => {
+      service.navigateToRestaurantBites(mockRestaurant);
+
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'restaurant123',
+        'bites',
+      ]);
+    });
+
+    it('goes nowhere for a restaurant without an id or a menu', () => {
+      service.navigateToMenu({ ...mockRestaurant, menuId: undefined });
+      service.navigateToMenu(undefined);
+      service.navigateToRestaurantBites(undefined);
+
+      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+    });
+  });
+
   /** GitHub issue #2132. */
   describe('following the restaurant', () => {
     it('says nothing when the follow lands', async () => {
@@ -207,13 +245,20 @@ describe('RestaurantService', () => {
       ]);
     });
 
-    it('should not navigate to a restaurant-only menu route when the bite id is unavailable', () => {
+    // Without a Bite in the route the restaurant's own menu route is used
+    // since issue #2320; it did not exist when the Bite route was the only one.
+    it('should navigate to the restaurant-only menu route when the bite id is unavailable', () => {
       service.bite = signal(undefined);
       mockDataAccessService.biteIdFromUrl.set(undefined);
 
       service.navigateToMenu(mockRestaurant);
 
-      expect(mockNavController.navigateForward).not.toHaveBeenCalled();
+      expect(mockNavController.navigateForward).toHaveBeenCalledWith([
+        'restaurant',
+        'restaurant123',
+        'menu',
+        'menu456',
+      ]);
     });
 
     it('should navigate to dynamic menu if no menuId', () => {

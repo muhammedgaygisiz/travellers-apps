@@ -223,6 +223,97 @@ test.describe('Browse Restaurants and Places', () => {
     ).toBeVisible();
   });
 
+  /**
+   * A restaurant's page opened by its own address, with no Bite in front of
+   * it (GitHub issue #2320): the route a notification about the restaurant
+   * opens.
+   */
+  test('opens a restaurant without a Bite, with its rating, menu and Bites', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+
+    const runId = Date.now();
+    const restaurantId = `biteless-restaurant-${runId}`;
+    const restaurantName = `Biteless Bistro ${runId}`;
+    const menuId = `biteless-menu-${runId}`;
+    const firstBite = { id: `biteless-one-${runId}`, name: `Ravioli ${runId}` };
+    const secondBite = {
+      id: `biteless-two-${runId}`,
+      name: `Tiramisu ${runId}`,
+    };
+
+    await Promise.all([
+      seedFirestoreDocument(page, `restaurants/${restaurantId}`, {
+        id: { stringValue: restaurantId },
+        name: { stringValue: restaurantName },
+        menuId: { stringValue: menuId },
+        position: {
+          mapValue: {
+            fields: {
+              latitude: { doubleValue: POSITION.latitude },
+              longitude: { doubleValue: POSITION.longitude },
+            },
+          },
+        },
+      }),
+      seedFirestoreDocument(page, `menus/${menuId}`, {
+        id: { stringValue: menuId },
+        restaurantId: { stringValue: restaurantId },
+        categories: { arrayValue: { values: [] } },
+      }),
+      seedRestaurantBite(page, {
+        ...firstBite,
+        place: restaurantName,
+        rating: 4,
+        tags: ['pasta'],
+        restaurantId,
+      }),
+      seedRestaurantBite(page, {
+        ...secondBite,
+        place: restaurantName,
+        rating: 5,
+        tags: ['dessert'],
+        restaurantId,
+        latitudeOffset: 0.0001,
+      }),
+    ]);
+
+    await loginAsTestUser(page);
+    await completeOnboardingIfNeeded(page);
+    await dismissCoachMarks(page);
+
+    await page.goto(`/restaurant/${restaurantId}`);
+
+    const restaurant = new RestaurantPage(page);
+    await expect(
+      restaurant.verified.getByRole('heading', {
+        name: restaurantName,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(restaurant.verified.locator('.rating')).toHaveText('4.5');
+    await expect(restaurant.verified).toContainText('(2 ratings)');
+
+    await restaurant.verified
+      .getByRole('button', { name: 'Menu', exact: true })
+      .click();
+    await page.waitForURL(
+      new RegExp(`/restaurant/${restaurantId}/menu/${menuId}$`),
+    );
+    await page.goBack();
+
+    await restaurant.verified.getByTestId('restaurant-bites-link').click();
+    await page.waitForURL(new RegExp(`/restaurant/${restaurantId}/bites$`));
+
+    const home = new HomePage(page);
+    await expect(home.biteCard(firstBite.name)).toBeVisible();
+    await expect(home.biteCard(secondBite.name)).toBeVisible();
+
+    await page.goto(`/restaurant/no-such-restaurant-${runId}`);
+    await expect(page.getByTestId('restaurant-not-found')).toBeVisible();
+  });
+
   test('shows an empty search state, then opens an unverified place and its Bites', async ({
     page,
   }) => {

@@ -1,3 +1,8 @@
+import {
+  type DeploymentStage,
+  resolveDeploymentStage,
+} from './deployment-stage';
+
 /**
  * The public origin BiteTribe is served from, for the Functions package.
  *
@@ -27,3 +32,22 @@ export const BITE_TRIBE_ORIGIN = 'https://bitetribe.app';
  * is installed and the same web page when it is not.
  */
 export const APP_LINK_ORIGIN = 'https://bite-tribe.web.app';
+
+/** Where the QA consumer app is served (issue #2293). */
+export const QA_ORIGIN = 'https://bite-tribe-qa.web.app';
+
+/**
+ * The origin of the links these Functions hand out to be opened: links in
+ * mails, where a shared-Bite link sends its reader, the download page's web
+ * fallback (GitHub issue #2304).
+ *
+ * {@link QA_ORIGIN} in the QA project, so a QA mail or share opens QA rather
+ * than production, where its Bite or account does not exist. Production and
+ * the emulators get {@link BITE_TRIBE_ORIGIN}, so production stays exactly as
+ * it was. Canonical URLs and the landing and city pages stay on
+ * {@link BITE_TRIBE_ORIGIN} everywhere, so search engines never index QA. The
+ * stage is the one mails are marked with, `resolveDeploymentStage`.
+ */
+export const linkOrigin = (
+  stage: DeploymentStage = resolveDeploymentStage(),
+): string => (stage === 'qa' ? QA_ORIGIN : BITE_TRIBE_ORIGIN);

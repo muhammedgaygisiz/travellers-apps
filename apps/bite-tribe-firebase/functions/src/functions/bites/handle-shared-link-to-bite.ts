@@ -2,7 +2,10 @@ import { onRequest } from 'firebase-functions/https';
 import { Bite } from '../shared/model/bite';
 import { getFirestore } from 'firebase-admin/firestore';
 import { renderShareStub } from '../shared/utils/render-html';
-import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import {
+  BITE_TRIBE_ORIGIN,
+  linkOrigin,
+} from '../shared/utils/bite-tribe-origin';
 import { isListableBite } from '../shared/utils/bite-listability';
 import {
   CITY_PAGE_PARAM,
@@ -73,7 +76,9 @@ export const handleSharedLinkToBite = onRequest(async (req, res) => {
     // wanted and could not do while the verified App Link host was the other
     // one. The function still answers on every host it always did.
     const canonicalUrl = `${BITE_TRIBE_ORIGIN}/s/bite/${encodeURIComponent(biteId)}`;
-    const redirectUrl = `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}${cityPageQuery(req.query?.[CITY_PAGE_PARAM])}`;
+    // The canonical URL stays production so QA is never indexed; the reader
+    // is sent on to the site they are on, QA on QA (issue #2304).
+    const redirectUrl = `${linkOrigin()}/bite/${encodeURIComponent(biteId)}${cityPageQuery(req.query?.[CITY_PAGE_PARAM])}`;
 
     res.status(200).send(
       renderShareStub({

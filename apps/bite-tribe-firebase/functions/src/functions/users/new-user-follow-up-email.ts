@@ -1,6 +1,6 @@
 import { SupportedLanguage } from '../shared/i18n/supported-languages';
 import { createTranslate } from '../shared/i18n/translate';
-import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import { linkOrigin } from '../shared/utils/bite-tribe-origin';
 import { escapeHtml } from '../shared/utils/render-html';
 import { RenderedEmail } from './google-workspace-email';
 import { FollowUpPicks } from './new-user-follow-up-picks';
@@ -21,13 +21,13 @@ const FOLLOW_UP_QUERY = new URLSearchParams({
 }).toString();
 
 export const followUpBiteUrl = (biteId: string): string =>
-  `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}?${FOLLOW_UP_QUERY}`;
+  `${linkOrigin()}/bite/${encodeURIComponent(biteId)}?${FOLLOW_UP_QUERY}`;
 
 export const followUpProfileUrl = (uid: string): string =>
-  `${BITE_TRIBE_ORIGIN}/profile/${encodeURIComponent(uid)}?${FOLLOW_UP_QUERY}`;
+  `${linkOrigin()}/profile/${encodeURIComponent(uid)}?${FOLLOW_UP_QUERY}`;
 
 export const unsubscribeUrl = (token: string): string =>
-  `${BITE_TRIBE_ORIGIN}/unsubscribe/${encodeURIComponent(token)}`;
+  `${linkOrigin()}/unsubscribe/${encodeURIComponent(token)}`;
 
 export interface FollowUpEmailParams {
   to: string;

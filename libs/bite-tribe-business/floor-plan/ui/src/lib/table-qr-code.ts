@@ -1,5 +1,5 @@
 import { qrCode, type QrCode, type QrSegment } from 'common/ui/qr-code';
-import { BITE_TRIBE_ORIGIN, PATH } from 'utils';
+import { linkOrigin, PATH } from 'utils';
 
 /**
  * The path a scanned table code lands on (GitHub issue \#1087).
@@ -18,8 +18,11 @@ import { BITE_TRIBE_ORIGIN, PATH } from 'utils';
  */
 export const TABLE_SCAN_PATH = `/${PATH.TABLE_SCAN}/`;
 
-/** The full prefix every printed code carries, before the token. */
-export const TABLE_SCAN_PREFIX = `${BITE_TRIBE_ORIGIN}${TABLE_SCAN_PATH}`;
+/**
+ * The full prefix every printed code carries, before the token. On QA it names
+ * the QA site, so a QA code opens QA (issue #2304).
+ */
+export const TABLE_SCAN_PREFIX = `${linkOrigin()}${TABLE_SCAN_PATH}`;
 
 /** The alphanumeric set QR encodes in 11 bits per two characters. */
 const ALPHANUMERIC = /^[0-9A-Z $%*+\-./:]*$/;

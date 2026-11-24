@@ -1,6 +1,6 @@
 import { SupportedLanguage } from '../shared/i18n/supported-languages';
 import { createTranslate } from '../shared/i18n/translate';
-import { BITE_TRIBE_ORIGIN } from '../shared/utils/bite-tribe-origin';
+import { linkOrigin } from '../shared/utils/bite-tribe-origin';
 import { escapeHtml } from '../shared/utils/render-html';
 import { RenderedEmail } from './google-workspace-email';
 import { card, unsubscribeUrl } from './new-user-follow-up-email';
@@ -43,13 +43,11 @@ export const weekFollowUpBiteUrl = (
   biteId: string,
   campaign: string = WEEK_FOLLOW_UP_CAMPAIGN,
 ): string =>
-  `${BITE_TRIBE_ORIGIN}/bite/${encodeURIComponent(biteId)}?${new URLSearchParams(
-    {
-      utm_source: 'bitetribe',
-      utm_medium: 'email',
-      utm_campaign: campaign,
-    },
-  ).toString()}`;
+  `${linkOrigin()}/bite/${encodeURIComponent(biteId)}?${new URLSearchParams({
+    utm_source: 'bitetribe',
+    utm_medium: 'email',
+    utm_campaign: campaign,
+  }).toString()}`;
 
 export interface WeekFollowUpEmailParams {
   to: string;

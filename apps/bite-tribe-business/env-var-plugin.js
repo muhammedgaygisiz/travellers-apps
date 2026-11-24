@@ -8,7 +8,12 @@ const workspaceRoot = join(__dirname, '../..');
 
 module.exports = createEnvVarPlugin({
   workspaceRoot,
-  allowedKeys: [...FIREBASE_ENV_KEYS, 'NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN'],
+  allowedKeys: [
+    ...FIREBASE_ENV_KEYS,
+    'NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN',
+    // The QA site in QA builds; unset, links name bitetribe.app (#2304).
+    'NX_APP_BITE_TRIBE_LINK_ORIGIN',
+  ],
   // Compiled in rather than supplied per environment: the flag identifies the
   // bundle, not the deployment. It is what `AnalyticsService` routes events by
   // - the consumer taxonomy is dropped here and the table operations of issue

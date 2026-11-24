@@ -8,7 +8,7 @@ export class ProfilePage {
   readonly about: Locator;
   readonly editProfile: Locator;
   readonly follow: Locator;
-  readonly stopFollowing: Locator;
+  readonly following: Locator;
   readonly actionsMenu: Locator;
   readonly block: Locator;
   readonly report: Locator;
@@ -29,8 +29,10 @@ export class ProfilePage {
       exact: true,
     });
     this.follow = page.getByRole('button', { name: 'Follow', exact: true });
-    this.stopFollowing = page.getByRole('button', {
-      name: 'Stop following',
+    // "Following" since the button took the restaurant page's shape (GitHub
+    // issue #2132); tapping it asks before it unfollows.
+    this.following = page.getByRole('button', {
+      name: 'Following',
       exact: true,
     });
     // Found by its accessible name, which is also what proves it has one.
@@ -122,7 +124,7 @@ export class ProfilePage {
   }
 
   async confirmUnfollow(): Promise<void> {
-    await this.stopFollowing.click();
+    await this.following.click();
     await this.page
       .getByRole('alertdialog', { name: 'Stop following', exact: true })
       .getByRole('button', { name: 'Yes, unfollow', exact: true })

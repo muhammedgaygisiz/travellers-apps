@@ -83,22 +83,61 @@
                 >{{ 'unblock' | transloco }}
               </ion-button>
             } @else {
+              <!-- Shaped like the restaurant page's follow button (GitHub
+              issue #2132): round, an outline "Follow" with a plus, a filled
+              "Following" with a tick. Tapping "Following" still asks before
+              it unfollows. -->
               @if (this.profileMetadata()?.isFollowedByMe) {
-                <ion-button fill="outline" (click)="openConfirmationDialog()"
-                  >{{ 'stop-following' | transloco }}
+                <ion-button
+                  class="follow-button"
+                  size="small"
+                  shape="round"
+                  fill="solid"
+                  [attr.aria-pressed]="true"
+                  data-testid="profile-following"
+                  (click)="openConfirmationDialog()"
+                >
+                  <ion-icon
+                    slot="start"
+                    name="checkmark-outline"
+                    aria-hidden="true"
+                  />
+                  {{ 'following' | transloco }}
                 </ion-button>
               } @else if (this.profileMetadata()?.isRequestedByMe) {
                 <!-- A pending request to a private profile (issue #2164).
                 One tap withdraws it, as one tap sent it. -->
                 <ion-button
+                  class="follow-button"
+                  size="small"
+                  shape="round"
                   fill="outline"
                   data-testid="profile-follow-requested"
                   (click)="withdrawFollowRequest()"
-                  >{{ 'follow-requested' | transloco }}
+                >
+                  <ion-icon
+                    slot="start"
+                    name="time-outline"
+                    aria-hidden="true"
+                  />
+                  {{ 'follow-requested' | transloco }}
                 </ion-button>
               } @else {
-                <ion-button fill="outline" (click)="onFollow()"
-                  >{{ 'follow' | transloco }}
+                <ion-button
+                  class="follow-button"
+                  size="small"
+                  shape="round"
+                  fill="outline"
+                  [attr.aria-pressed]="false"
+                  data-testid="profile-follow"
+                  (click)="onFollow()"
+                >
+                  <ion-icon
+                    slot="start"
+                    name="add-outline"
+                    aria-hidden="true"
+                  />
+                  {{ 'follow' | transloco }}
                 </ion-button>
               }
             }

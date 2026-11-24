@@ -15,8 +15,8 @@ import { ProfileComponent } from '../profile.component';
 /** Copied from `en.json`. */
 const TRANSLATIONS: Translation = {
   follow: 'Follow',
+  following: 'Following',
   'follow-requested': 'Requested',
-  'stop-following': 'Stop following',
 };
 
 @Injectable()
@@ -144,10 +144,31 @@ describe(`${ProfileComponent.name} follow request`, () => {
     expect(followed).toEqual([PRIVATE_USER]);
   });
 
-  it('shows Stop following once the request was accepted', () => {
+  it('shows Following once the request was accepted', () => {
     render({ ...METADATA, isFollowedByMe: true });
 
     expect(requestedButton()).toBeNull();
-    expect(actionLabels()).toContain('Stop following');
+    expect(actionLabels()).toContain('Following');
   });
+
+  /** Shaped like the restaurant page's follow button (GitHub issue #2132). */
+  it.each([
+    [{}, 'profile-follow', 'outline'],
+    [{ isRequestedByMe: true }, 'profile-follow-requested', 'outline'],
+    [{ isFollowedByMe: true }, 'profile-following', 'solid'],
+  ])(
+    'draws the follow state %j as a round %s button',
+    (state, testId, fill) => {
+      render({ ...METADATA, ...state });
+
+      const button = (fixture.nativeElement as HTMLElement).querySelector(
+        `[data-testid="${testId}"]`,
+      ) as unknown as { fill: string; shape: string; size: string } | null;
+
+      expect(button).not.toBeNull();
+      expect(button?.fill).toBe(fill);
+      expect(button?.shape).toBe('round');
+      expect(button?.size).toBe('small');
+    },
+  );
 });

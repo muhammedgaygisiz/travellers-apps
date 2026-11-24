@@ -81,6 +81,17 @@ export const Default: Story = {
  * A weekly top-3 finisher (issue #2031): one badge per list under the globe
  * button, gold and bronze, each opening the standings it was won in.
  */
+/**
+ * Another account the viewer follows: the filled "Following" button, shaped
+ * like the restaurant page's (GitHub issue #2132).
+ */
+export const Following: Story = {
+  args: {
+    ...Default.args,
+    profileMetadata: { ...profileMetadata, isFollowedByMe: true },
+  },
+};
+
 export const WithWeeklyBadges: Story = {
   args: {
     user: {

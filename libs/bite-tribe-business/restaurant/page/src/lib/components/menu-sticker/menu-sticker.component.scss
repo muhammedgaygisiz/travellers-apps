@@ -1,0 +1,257 @@
+/**
+ * Every length inside the sticker is in `cqw`, a hundredth of the host's
+ * width, so the on-screen preview is the printout scaled down. The host is the
+ * container rather than `.sticker` itself because a container's own `cqw`
+ * resolves against the container above it.
+ *
+ * On paper the door sticker is 100 mm wide, so there `1cqw` is 1 mm; the table
+ * tent is 105 mm wide, so `1cqw` is 1.05 mm.
+ */
+:host {
+  display: block;
+  container-type: inline-size;
+  width: 100%;
+  max-width: 280px;
+}
+
+/* An A6 sheet is 148 mm tall, so each folded face is 148 / 105 / 2 of the
+ * width: 70.48cqw. */
+$tent-face-height: 70.48cqw;
+
+$ink: #263341;
+$muted: #5b6878;
+$brand: #4a90d9;
+
+.sticker {
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+  color: $ink;
+  font-family: var(--ion-font-family, sans-serif);
+  line-height: 1.15;
+
+  /* Paper, not screen: the preview shows where the sheet ends. */
+  border: 1px solid #d5dae0;
+
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+
+  p {
+    margin: 0;
+  }
+}
+
+.face {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+}
+
+.brand-logo {
+  display: block;
+  height: 7cqw;
+  width: auto;
+}
+
+.brand-name {
+  font-size: 5.2cqw;
+  font-weight: 700;
+  color: $brand;
+}
+
+.name {
+  font-weight: 700;
+
+  /* A long name wraps once and is then cut, rather than pushing the code off
+   * the sheet. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.call-to-action {
+  font-weight: 600;
+}
+
+.download {
+  color: $muted;
+  overflow-wrap: anywhere;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 1.5cqw;
+}
+
+/* The same drawn height for both, with the clear space a tenth of it. Apple's
+ * SVG is the badge alone, so its margin is added here; Google's PNG is a
+ * 646x250 canvas around a 564x168 badge and carries its own, which is why its
+ * box is the taller of the two (see `store-links.component.scss`). */
+.badge {
+  display: block;
+  width: auto;
+}
+
+/* Door sticker: one column, centred. */
+.sticker-door {
+  aspect-ratio: 1;
+
+  .face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5cqw 6cqw;
+    text-align: center;
+  }
+
+  .name {
+    font-size: 5cqw;
+  }
+
+  /* The code gives way first when a two-line name needs the room. */
+  .code {
+    flex: 0 1 44cqw;
+    min-height: 34cqw;
+    aspect-ratio: 1;
+  }
+
+  .call-to-action {
+    font-size: 4.2cqw;
+  }
+
+  .download {
+    font-size: 3.2cqw;
+  }
+
+  .badge-app-store {
+    height: 6cqw;
+    margin: 0.6cqw 0;
+  }
+
+  .badge-google-play {
+    height: 9cqw;
+  }
+}
+
+/* Table tent: two landscape faces, the code beside the text. */
+.sticker-tent {
+  display: flex;
+  flex-direction: column;
+
+  .tent-face {
+    box-sizing: border-box;
+    height: $tent-face-height;
+  }
+
+  /* Where to fold. On the upper face, because the lower one is turned over
+   * and would carry its top border to the bottom of the sheet. */
+  .tent-face:first-child {
+    border-bottom: 0.25cqw dashed #b7bec7;
+  }
+
+  .tent-face-lower {
+    transform: rotate(180deg);
+  }
+
+  .face {
+    display: grid;
+    grid-template-columns: 40cqw 1fr;
+    grid-template-rows: repeat(5, auto);
+    align-content: center;
+    column-gap: 4cqw;
+    row-gap: 1.6cqw;
+    padding: 4cqw 5cqw;
+  }
+
+  .code {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-self: center;
+    width: 40cqw;
+  }
+
+  .brand,
+  .name,
+  .call-to-action,
+  .download,
+  .badges {
+    grid-column: 2;
+  }
+
+  .name {
+    font-size: 4.8cqw;
+  }
+
+  .call-to-action {
+    font-size: 3.8cqw;
+  }
+
+  .download {
+    font-size: 3cqw;
+  }
+
+  .badge-app-store {
+    height: 5.2cqw;
+    margin: 0.52cqw 0;
+  }
+
+  .badge-google-play {
+    height: 7.8cqw;
+  }
+}
+
+/**
+ * The printed sizes.
+ *
+ * Each format prints on a page of its own size and nothing else, through a
+ * named page: `bt-business-menu-qr` shows only the format being printed, and
+ * the `page` property here picks the sheet. A named page leaves the plain menu
+ * code's print job on the browser's default paper.
+ *
+ * The margins are zero because the sticker is the sheet. Its own padding is
+ * the clear space.
+ */
+@page menu-door-sticker {
+  size: 100mm 100mm;
+  margin: 0;
+}
+
+/* A6 spelled out: Chrome ignores the `A6` keyword and falls back to Letter. */
+@page menu-table-tent {
+  size: 105mm 148mm;
+  margin: 0;
+}
+
+@media print {
+  :host {
+    max-width: none;
+    width: 100mm;
+  }
+
+  :host([data-format='tent']) {
+    width: 105mm;
+  }
+
+  .sticker {
+    border: 0;
+    break-inside: avoid;
+  }
+
+  .sticker-door {
+    page: menu-door-sticker;
+  }
+
+  .sticker-tent {
+    page: menu-table-tent;
+  }
+}

@@ -66,4 +66,18 @@
     height: auto !important;
     contain: none !important;
   }
+
+  /* A door sticker or table tent is the whole sheet, with no page margin
+   * (#2273), so the content padding around it would push it onto a second
+   * page. */
+  :host:has(bt-business-menu-qr[data-print='door']),
+  :host:has(bt-business-menu-qr[data-print='tent']) {
+    ::ng-deep ion-content {
+      --padding-top: 0;
+      --padding-bottom: 0;
+      --padding-start: 0;
+      --padding-end: 0;
+      padding: 0 !important;
+    }
+  }
 }

@@ -129,11 +129,35 @@ export interface MenuItemDietary {
 }
 
 /** The dish on a menu that a Bite is linked to (#2195). */
-interface MenuItemLink {
+export interface MenuItemLink {
   restaurantId: string;
   menuItemId: string;
   variantId?: string;
 }
+
+/**
+ * The dish a Bite is linked to, or nothing for a Bite without a menu link -
+ * which is most of them, and costs no read.
+ */
+export const menuItemLinkOf = (
+  bite: Bite | undefined,
+): MenuItemLink | undefined =>
+  bite?.menuItemId && bite.restaurantId
+    ? {
+        restaurantId: bite.restaurantId,
+        menuItemId: bite.menuItemId,
+        variantId: bite.variantId,
+      }
+    : undefined;
+
+/** Whether two links name the same dish, so a reload reads no menu again. */
+export const sameMenuItemLink = (
+  a: MenuItemLink | undefined,
+  b: MenuItemLink | undefined,
+): boolean =>
+  a?.restaurantId === b?.restaurantId &&
+  a?.menuItemId === b?.menuItemId &&
+  a?.variantId === b?.variantId;
 
 const NO_MENU_ITEM_DIETARY: MenuItemDietary = { labels: [], options: [] };
 
@@ -425,23 +449,8 @@ export class DetailsDataAccessService {
    * a Bite without a menu link - which is most of them, and costs no read.
    */
   private readonly menuItemLink = computed(
-    (): MenuItemLink | undefined => {
-      const bite = this.biteValue();
-
-      return bite?.menuItemId && bite.restaurantId
-        ? {
-            restaurantId: bite.restaurantId,
-            menuItemId: bite.menuItemId,
-            variantId: bite.variantId,
-          }
-        : undefined;
-    },
-    {
-      equal: (a, b) =>
-        a?.restaurantId === b?.restaurantId &&
-        a?.menuItemId === b?.menuItemId &&
-        a?.variantId === b?.variantId,
-    },
+    () => menuItemLinkOf(this.biteValue()),
+    { equal: sameMenuItemLink },
   );
 
   /**

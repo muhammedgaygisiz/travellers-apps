@@ -1,5 +1,7 @@
 import {
   DetailsDataAccessService,
+  menuItemLinkOf,
+  sameMenuItemLink,
   visibleTaggedUsers,
 } from '../details-data-access.service';
 import { BiteNotFoundError } from '../bite-not-found-error';
@@ -746,6 +748,45 @@ describe(DetailsDataAccessService.name, () => {
           ['blocked-1'],
         ).map((user) => user.userId),
       ).toEqual(['anna', 'ben']);
+    });
+  });
+
+  /** Which dish a Bite is linked to (GitHub issue #2195). */
+  describe('menuItemLinkOf', () => {
+    it('names the restaurant, the dish and the variant', () => {
+      expect(
+        menuItemLinkOf({
+          id: 'b1',
+          restaurantId: 'r1',
+          menuItemId: 'falafel',
+          variantId: 'large',
+        } as Bite),
+      ).toEqual({
+        restaurantId: 'r1',
+        menuItemId: 'falafel',
+        variantId: 'large',
+      });
+    });
+
+    it('is nothing without a dish, a restaurant or a Bite', () => {
+      expect(
+        menuItemLinkOf({ id: 'b1', restaurantId: 'r1' } as Bite),
+      ).toBeUndefined();
+      expect(
+        menuItemLinkOf({ id: 'b1', menuItemId: 'falafel' } as Bite),
+      ).toBeUndefined();
+      expect(menuItemLinkOf(undefined)).toBeUndefined();
+    });
+
+    it('tells the same dish from another', () => {
+      const link = { restaurantId: 'r1', menuItemId: 'falafel' };
+
+      expect(sameMenuItemLink(link, { ...link })).toBe(true);
+      expect(sameMenuItemLink(undefined, undefined)).toBe(true);
+      expect(sameMenuItemLink(link, { ...link, variantId: 'large' })).toBe(
+        false,
+      );
+      expect(sameMenuItemLink(link, undefined)).toBe(false);
     });
   });
 

@@ -122,12 +122,55 @@ describe('MenuQrComponent', () => {
     expect(query('menu-qr-copy')?.textContent).toContain('Copy link');
   });
 
-  it('prints', () => {
-    const print = jest.spyOn(window, 'print').mockImplementation(() => 0);
+  describe('printing', () => {
+    let printedAs: (string | undefined)[];
 
-    query('menu-qr-print')?.click();
+    beforeEach(() => {
+      printedAs = [];
+      jest
+        .spyOn(window, 'print')
+        .mockImplementation(() =>
+          printedAs.push(fixture.nativeElement.dataset.print),
+        );
+    });
 
-    expect(print).toHaveBeenCalled();
+    afterEach(() => jest.restoreAllMocks());
+
+    /**
+     * The print stylesheets keep only the format named on the host, so the
+     * attribute has to be there while the print job lays the page out.
+     */
+    it.each([
+      ['menu-qr-print', 'code'],
+      ['menu-qr-print-door', 'door'],
+      ['menu-qr-print-tent', 'tent'],
+    ])('%s prints the %s format', (button, format) => {
+      query(button)?.click();
+
+      expect(printedAs).toEqual([format]);
+    });
+
+    /** Afterwards the browser's own print command prints the plain code. */
+    it('forgets the format once the print job is done', () => {
+      query('menu-qr-print-door')?.click();
+      window.dispatchEvent(new Event('afterprint'));
+
+      expect(fixture.nativeElement.dataset.print).toBeUndefined();
+    });
+  });
+
+  it('shows the door sticker and the table tent for the same address', () => {
+    const stickers = Array.from(
+      fixture.nativeElement.querySelectorAll('bt-business-menu-sticker'),
+    ) as HTMLElement[];
+
+    expect(stickers.map((sticker) => sticker.dataset.format)).toEqual([
+      'door',
+      'tent',
+    ]);
+    expect(
+      fixture.nativeElement.querySelectorAll('[data-testid="qr-code"]'),
+    ).toHaveLength(4);
   });
 
   /**
@@ -146,6 +189,14 @@ describe('MenuQrComponent', () => {
     it('offers neither the address nor the print button', () => {
       expect(query('menu-qr-url')).toBeNull();
       expect(query('menu-qr-print')).toBeNull();
+    });
+
+    it('offers no sticker and no table tent', () => {
+      expect(
+        fixture.nativeElement.querySelector('bt-business-menu-sticker'),
+      ).toBeNull();
+      expect(query('menu-qr-print-door')).toBeNull();
+      expect(query('menu-qr-print-tent')).toBeNull();
     });
   });
 });

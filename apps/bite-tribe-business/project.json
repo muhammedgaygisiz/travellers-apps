@@ -25,6 +25,11 @@
             "output": "assets"
           },
           {
+            "glob": "{app-store-badge-black.svg,google-play-badge.png}",
+            "input": "apps/bite-tribe/src/assets/store",
+            "output": "assets/store"
+          },
+          {
             "input": "node_modules/leaflet/dist/images",
             "glob": "**/*",
             "output": "assets/leaflet"

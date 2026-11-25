@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
+  inject,
   input,
   signal,
 } from '@angular/core';
@@ -9,6 +11,13 @@ import { IonButton, IonText } from '@ionic/angular/standalone';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { QrCodeComponent } from 'common/ui/qr-code';
 import { linkOrigin, PATH } from 'utils';
+import { MenuStickerComponent } from '../menu-sticker/menu-sticker.component';
+
+/**
+ * What a print button puts on paper: the bare code (#370), the door sticker or
+ * the table tent (#2273).
+ */
+export type MenuPrintFormat = 'code' | 'door' | 'tent';
 
 /** How long the copy button reports that it copied, in milliseconds. */
 const COPIED_FEEDBACK_MS = 2000;
@@ -39,11 +48,19 @@ const COPIED_FEEDBACK_MS = 2000;
 @Component({
   selector: 'bt-business-menu-qr',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonButton, IonText, TranslocoPipe, QrCodeComponent],
+  imports: [
+    IonButton,
+    IonText,
+    TranslocoPipe,
+    QrCodeComponent,
+    MenuStickerComponent,
+  ],
   templateUrl: 'menu-qr.component.html',
   styleUrl: 'menu-qr.component.scss',
 })
 export class MenuQrComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
   readonly restaurantId = input.required<string>();
 
   /** Named in the code's accessible label, and printed under it. */
@@ -79,7 +96,23 @@ export class MenuQrComponent {
     }
   }
 
-  protected print(): void {
+  /**
+   * Prints one format and nothing else.
+   *
+   * The host carries the format as `data-print` while the job runs, and the
+   * print stylesheets keep only that format. It is set on the element directly
+   * rather than through a binding because `window.print()` lays the page out
+   * at once, before Angular would have rendered a changed signal. Without the
+   * attribute - the browser's own print command - the plain code prints, as it
+   * always has.
+   */
+  protected print(format: MenuPrintFormat): void {
+    const host = this.host.nativeElement;
+
+    host.dataset['print'] = format;
+    window.addEventListener('afterprint', () => delete host.dataset['print'], {
+      once: true,
+    });
     window.print();
   }
 }

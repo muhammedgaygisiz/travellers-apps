@@ -1,0 +1,68 @@
+@if (format() === 'door') {
+  <div class="sticker sticker-door" data-testid="menu-sticker-door">
+    <ng-container *ngTemplateOutlet="face" />
+  </div>
+} @else {
+  <!--
+    One A6 sheet, folded across the middle. The lower face is the upper one
+    turned upside down, so each reads right side up from its side of the table.
+    It is hidden from screen readers because it says nothing the upper one
+    does not.
+  -->
+  <div class="sticker sticker-tent" data-testid="menu-sticker-tent">
+    <div class="tent-face" data-testid="menu-sticker-tent-face">
+      <ng-container *ngTemplateOutlet="face" />
+    </div>
+    <div
+      class="tent-face tent-face-lower"
+      data-testid="menu-sticker-tent-face"
+      aria-hidden="true"
+    >
+      <ng-container *ngTemplateOutlet="face" />
+    </div>
+  </div>
+}
+
+<ng-template #face>
+  <div class="face">
+    <div class="brand">
+      <img class="brand-logo" src="assets/icons/logo.svg" alt="" />
+      <span class="brand-name">{{ 'menu-sticker-brand' | transloco }}</span>
+    </div>
+
+    @if (restaurantName()) {
+      <p class="name" data-testid="menu-sticker-name">{{ restaurantName() }}</p>
+    }
+
+    <bt-qr-code
+      class="code"
+      [payload]="url()"
+      [label]="'menu-qr-code-label' | transloco: { name: restaurantName() }"
+    />
+
+    <p class="call-to-action">
+      {{ 'menu-sticker-call-to-action' | transloco }}
+    </p>
+
+    <p class="download" data-testid="menu-sticker-download">
+      {{
+        'menu-sticker-get-the-app' | transloco: { address: downloadAddress() }
+      }}
+    </p>
+
+    <!-- Apple's and Google's own badges, drawn the way their guidelines ask:
+      unaltered, and the same drawn height. -->
+    <div class="badges">
+      <img
+        class="badge badge-app-store"
+        src="assets/store/app-store-badge-black.svg"
+        [alt]="'menu-sticker-app-store' | transloco"
+      />
+      <img
+        class="badge badge-google-play"
+        src="assets/store/google-play-badge.png"
+        [alt]="'menu-sticker-google-play' | transloco"
+      />
+    </div>
+  </div>
+</ng-template>

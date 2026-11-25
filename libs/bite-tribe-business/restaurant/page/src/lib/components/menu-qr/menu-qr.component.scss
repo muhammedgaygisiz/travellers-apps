@@ -41,6 +41,33 @@
   gap: 0.5rem;
 }
 
+.menu-qr-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  margin-top: 2rem;
+}
+
+.menu-qr-format {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 280px;
+  max-width: 100%;
+}
+
+.menu-qr-format-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.menu-qr-format-hint {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 /**
  * Printing one code and nothing else.
  *
@@ -66,5 +93,49 @@
   .menu-qr-actions,
   .note {
     display: none;
+  }
+
+  /* The two formats print only when their own button asked for them
+   * (`print()` sets `data-print`), and then alone: no title, hint or button,
+   * and not the plain code either. The wrapper goes too, or its margin
+   * lengthens the plain code's printout. */
+  .menu-qr-formats,
+  .menu-qr-format {
+    display: none;
+  }
+
+  :host([data-print='door']),
+  :host([data-print='tent']) {
+    .menu-qr-code-block {
+      display: none;
+    }
+
+    .menu-qr-formats {
+      display: block;
+      margin: 0;
+    }
+
+    .menu-qr-format > :not(bt-business-menu-sticker) {
+      display: none;
+    }
+  }
+
+  /* The page name goes on `body`, not only on the sticker. Named on the
+   * sticker alone, whatever follows it in the document - however empty - is
+   * on the default page, and Chrome adds a second, Letter-sized sheet for it.
+   * Every box without a name of its own takes its ancestor's. */
+  ::ng-deep body:has(bt-business-menu-qr[data-print='door']) {
+    page: menu-door-sticker;
+  }
+
+  ::ng-deep body:has(bt-business-menu-qr[data-print='tent']) {
+    page: menu-table-tent;
+  }
+
+  :host([data-print='door']) .menu-qr-format-door,
+  :host([data-print='tent']) .menu-qr-format-tent {
+    display: block;
+    width: auto;
+    max-width: none;
   }
 }

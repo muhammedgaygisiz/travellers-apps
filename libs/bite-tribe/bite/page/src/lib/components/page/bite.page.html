@@ -120,6 +120,12 @@
         (selectedIdsChange)="setTaggedUserIds($event)"
       />
 
+      <bt-dietary-label-picker
+        class="ion-padding-top"
+        [selected]="biteFormGroup.controls['dietaryLabels'].value || []"
+        (selectedChange)="setDietaryLabels($event)"
+      />
+
       <div class="ion-padding-top">
         <ion-label class="ion-display-block map-label">
           {{ 'location-label' | transloco }}

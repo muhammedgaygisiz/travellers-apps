@@ -829,6 +829,41 @@ describe('DetailsPage', () => {
       });
     });
 
+    /** The creator's and the restaurant's dietary labels (issue #2195). */
+    describe('dietary labels', () => {
+      const dietary = (): HTMLElement | null =>
+        fixture.nativeElement.querySelector('bt-bite-dietary');
+
+      it("hands the block the creator's labels and the restaurant's declaration", () => {
+        componentRef.setInput('bite', {
+          id: '1',
+          name: 'Falafel',
+          dietaryLabels: ['vegan'],
+        } as Bite);
+        componentRef.setInput('menuItemDietary', {
+          labels: ['halal'],
+          options: [],
+        });
+        componentRef.changeDetectorRef.detectChanges();
+
+        const element = dietary();
+        expect(
+          element?.querySelector(
+            '[data-testid="bite-dietary-creator-label-vegan"]',
+          ),
+        ).toBeTruthy();
+        expect(
+          element?.querySelector(
+            '[data-testid="bite-dietary-restaurant-label-halal"]',
+          ),
+        ).toBeTruthy();
+      });
+
+      it('is not there while the bite is loading', () => {
+        expect(dietary()).toBeNull();
+      });
+    });
+
     it('should show a review field skeleton while bite is loading', () => {
       const nativeElement = fixture.debugElement.nativeElement as HTMLElement;
 

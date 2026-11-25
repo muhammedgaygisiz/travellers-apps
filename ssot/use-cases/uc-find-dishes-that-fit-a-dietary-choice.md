@@ -7,9 +7,10 @@
 Partly built, under epic [#2193]. The vocabulary and the restaurant's declarations of
 [#2194] exist: an owner declares labels on menu items and statements for the whole
 Restaurant, and the consumer menu and restaurant page show them as declared by the
-restaurant. Nothing else in the flow exists yet - no creator labels, no votes, no choices,
-no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that nothing filters
-on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
+restaurant. The creator's labels on a Bite of [#2195] exist too, shown beside the
+restaurant's labels for a linked dish. Nothing else in the flow exists yet - no votes, no
+choices, no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
+nothing filters on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
 it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
 thresholds it depends on are open in `Dietary Choice Questions` in
 [Current State - Open Questions](../current-state/open-questions.md).
@@ -58,9 +59,13 @@ Once the behaviour has succeeded:
   restaurant-wide statements, such as fully plant-based or a dedicated gluten-free kitchen,
   and a free cross-contamination note, in the restaurant's `Dietary` section, and the note is
   checked before it is published (`RD-UR-11`). Readers of the menu and of the restaurant page
-  see each as declared by the restaurant ([#2194]). The rest of this flow is intended.
-- A Bite Creator creating or editing a Bite picks dietary label chips beside the tags
-  ([#2195]). A Bite linked to a menu item shows the restaurant's label for it too.
+  see each as declared by the restaurant ([#2194]).
+- Built: a Bite Creator creating or editing a Bite picks dietary label chips, apart from
+  the tags, and can clear them again; the field is optional and never blocks Post, offline
+  included. The Bite's detail page shows them as what the creator says, and a Bite linked
+  to a menu item also shows what the restaurant declares for that dish and its variant,
+  each under its own source line, with neither replacing the other ([#2195]). The rest of
+  this flow is intended.
 - A Bite Creator sets their dietary choices in settings, and gives consent before the first
   religious or health-related one is saved ([#2196]).
 - A Bite Creator reading a Bite or a menu item confirms or disputes a label, with a reason
@@ -97,7 +102,8 @@ The boundary as this page understands it: a menu item's labels are written with 
 whose rules admit only an account holding the Restaurant or an Operator. The Restaurant's
 statements and note are written only by the `saveRestaurantDietaryStatements` callable,
 which admits the same two and checks the note, and the rules refuse every client write of
-them. The Bite's labels are creator-scoped like the rest of the Bite, votes go
+them. The Bite's labels are creator-scoped like the rest of the Bite, and the rules
+refuse a value outside the vocabulary (`hasValidDietaryLabels()`), votes go
 through a callable that checks eligibility, every count and the removal state are
 backend-only, and restoration is an Operator action. A member's dietary choices live in
 their private settings and no other account reads them. The per-step enforcement is written
@@ -136,9 +142,22 @@ Built by [#2194]:
 - `libs/bite-tribe/menu/page` (`menu-item`) and `libs/bite-tribe/restaurant/page` - the
   labels and statements as declared by the restaurant
 
+Built by [#2195]:
+
+- `Bite.dietaryLabels` in `libs/bite-tribe-common/model/src/lib/bite.ts`,
+  `needsConfirmWithRestaurantNotice` in `dietary-label.ts` and `linkedMenuItemDietaryOf`
+  in `menu.ts`, which combines a dish's labels with its variant's
+- `libs/bite-tribe/bite/page` (`dietary-labels`) - the Bite form's chips
+- `libs/bite-tribe/details/data-access` - the linked dish's labels, read off the
+  restaurant's current menu - and `libs/bite-tribe/details/page` (`bite-dietary`), which
+  shows both sources and the notice
+- `apps/bite-tribe-firebase/firestore.rules` - `hasValidDietaryLabels()` on `bites`, kept
+  in step with the vocabulary by `dietary-labels-parity.spec.ts`
+- `explain-bite.spec.ts` - `explainBite` is given no dietary label (`UC-IBD` `R-2`)
+
 Not implemented yet, the surfaces the later stories will touch:
 
-- `libs/bite-tribe/bite`, `libs/bite-tribe/home/page` and `libs/bite-tribe/settings`
+- `libs/bite-tribe/home/page` and `libs/bite-tribe/settings`
 - `apps/bite-tribe-firebase/functions` - the vote callable and the removal trigger
 - `firestore.indexes.json`
 

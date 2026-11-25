@@ -168,6 +168,7 @@ export class DetailsService {
   biteValue = this.dataAccess.biteValue;
   biteCreatorValue = this.dataAccess.biteCreatorValue;
   taggedUsers = this.dataAccess.taggedUsers;
+  menuItemDietary = this.dataAccess.menuItemDietary;
   reviewThreads = this.dataAccess.reviewThreads;
   highlightedThreadId = this.dataAccess.highlightedThreadId;
   bucketlists = this.dataAccess.bucketlists;
@@ -347,8 +348,9 @@ export class DetailsService {
    * The restaurant's menu, not the dish: `restaurant/:restaurantId/menu`
    * resolves which menu that is and redirects, so this works for a Bite whose
    * dish has since been deleted - which is the case the issue asks to survive.
-   * Nothing is read off the menu to render the Bite, so a rename changes what
-   * the guest finds on arrival and nothing about the page they left.
+   * The Bite's own text is not read off the menu, so a rename changes what
+   * the guest finds on arrival and nothing about the page they left - only
+   * the restaurant's dietary labels for the dish are read live (#2195).
    */
   onMenuItemClick(bite: Bite): void {
     if (!bite.restaurantId) {

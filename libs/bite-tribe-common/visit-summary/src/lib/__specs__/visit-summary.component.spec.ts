@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, provideZonelessChangeDetection } from '@angular/core';
-import { TranslocoTestingModule } from '@jsverse/transloco';
-import type { VisitSummary } from 'model';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
+import type { TableVisitBillLine, VisitSummary } from 'model';
 import { VisitSummaryComponent } from '../visit-summary.component';
 
 /**
@@ -142,6 +142,32 @@ describe(VisitSummaryComponent.name, () => {
     render(MEAL, false);
 
     expect(has('visit-summary-not-a-receipt')).toBe(false);
+  });
+
+  /** A line without extras has nothing to list, rather than failing. */
+  it('lists no extras for a line that has none', () => {
+    const lineExtras = (
+      fixture.componentInstance as unknown as {
+        lineExtras(line: TableVisitBillLine): string;
+      }
+    ).lineExtras.bind(fixture.componentInstance);
+
+    expect(lineExtras(MEAL.lines[0])).toBe('');
+  });
+
+  /** Prices are written in English until a language is known (#2261). */
+  it('writes prices in English while no language is active', () => {
+    jest
+      .spyOn(TestBed.inject(TranslocoService), 'getActiveLang')
+      .mockReturnValue('');
+    // The language is read when the component is made, so make a new one.
+    fixture.destroy();
+    fixture = TestBed.createComponent(VisitSummaryComponent);
+    ref = fixture.componentRef;
+
+    render(MEAL);
+
+    expect(text()).toContain('Total €24.00');
   });
 
   it('falls back to the currency code where no symbol is known', () => {

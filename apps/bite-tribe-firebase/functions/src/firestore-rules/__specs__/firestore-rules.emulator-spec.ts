@@ -3262,6 +3262,50 @@ describe('bites', () => {
     );
   });
 
+  /** The creator's dietary labels, GitHub issue #2195. */
+  it('lets the creator set and clear dietary labels from the vocabulary', async () => {
+    await assertSucceeds(
+      setDoc(doc(asConsumer(), 'bites', 'labelled-bite'), {
+        userId: CONSUMER,
+        name: 'Falafel',
+        dietaryLabels: ['vegan', 'gluten-free'],
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        dietaryLabels: ['halal'],
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        dietaryLabels: [],
+      }),
+    );
+  });
+
+  it('refuses a dietary label outside the vocabulary, or labels that are not a list', async () => {
+    await assertFails(
+      setDoc(doc(asConsumer(), 'bites', 'keto-bite'), {
+        userId: CONSUMER,
+        name: 'Falafel',
+        dietaryLabels: ['vegan', 'keto'],
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(asConsumer(), 'bites', 'consumer-bite'), {
+        dietaryLabels: 'vegan',
+      }),
+    );
+  });
+
+  it("refuses another account writing a Bite's dietary labels", async () => {
+    await assertFails(
+      updateDoc(doc(asOwner(), 'bites', 'consumer-bite'), {
+        dietaryLabels: ['vegan'],
+      }),
+    );
+  });
+
   /**
    * The photo is published only by `setBiteImagePathOnUpload`, after the image
    * check (GitHub issue #2139). The client keeps the two statuses its upload

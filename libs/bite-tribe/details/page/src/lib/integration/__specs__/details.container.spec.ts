@@ -55,6 +55,7 @@ describe(DetailsContainer.name, () => {
             biteValue: biteSignal,
             biteCreatorValue: signal(undefined),
             taggedUsers: signal([]),
+            menuItemDietary: signal({ labels: [], options: [] }),
             position: {
               value: signal(undefined),
               error: signal(undefined),

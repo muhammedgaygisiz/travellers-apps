@@ -1,0 +1,31 @@
+<div id="dietary-labels-label" class="ion-margin-bottom">
+  {{ 'bite-dietary-labels-label' | transloco }}
+</div>
+
+<div
+  class="labels"
+  role="group"
+  aria-labelledby="dietary-labels-label"
+  data-testid="bite-dietary-labels"
+>
+  @for (label of labels; track label) {
+    <bt-chip
+      [label]="'dietary-label-' + label | transloco"
+      [selected]="isSelected(label)"
+      [icon]="isSelected(label) ? 'checkmark-outline' : undefined"
+      [attr.aria-pressed]="isSelected(label)"
+      [attr.data-testid]="'bite-dietary-label-' + label"
+      (chipClick)="toggle(label)"
+    />
+  }
+</div>
+
+<ion-note class="hint" data-testid="bite-dietary-labels-hint">
+  {{ 'bite-dietary-labels-hint' | transloco }}
+</ion-note>
+
+@if (showsNotice()) {
+  <ion-note class="hint notice" data-testid="bite-dietary-labels-notice">
+    {{ 'dietary-confirm-with-restaurant' | transloco }}
+  </ion-note>
+}

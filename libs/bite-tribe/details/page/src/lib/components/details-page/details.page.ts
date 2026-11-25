@@ -17,6 +17,7 @@ import {
   BITE_REPORT_REASONS,
   BiteReportReason,
   Bucketlist,
+  DietaryLabel,
   isListableBite,
   LikeClick,
   PublicUser,
@@ -62,6 +63,7 @@ import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { TaggedUsersComponent } from '../tagged-users/tagged-users.component';
+import { BiteDietaryComponent } from '../bite-dietary/bite-dietary.component';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
@@ -108,6 +110,7 @@ const DESKTOP_MEDIA_QUERY = '(width >= 1024px)';
     StarRatingComponent,
     TagsInputComponent,
     TaggedUsersComponent,
+    BiteDietaryComponent,
     RoundDistancePipe,
     CalcDistancePipe,
     ConvertToPreferredCurrencyPipe,
@@ -147,6 +150,15 @@ export class DetailsPage {
    * see (GitHub issue #1918). Empty hides the row.
    */
   taggedUsers = input<PublicUser[]>([]);
+
+  /**
+   * What the restaurant declares for the dish this Bite is linked to (GitHub
+   * issue #2195), shown beside the creator's own labels and never merged in.
+   */
+  menuItemDietary = input<{
+    labels: DietaryLabel[];
+    options: DietaryLabel[];
+  }>({ labels: [], options: [] });
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();

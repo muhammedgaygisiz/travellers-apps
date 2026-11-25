@@ -56,6 +56,15 @@ export const dietaryLabelsOf = (values: unknown): DietaryLabel[] => {
 };
 
 /**
+ * Whether labels whose only source is a diner or the Bite's creator need the
+ * fixed notice to confirm with the restaurant (`R-4`, `RD-DC-5`): any one of
+ * them is high-risk. The restaurant's own declaration never needs it.
+ */
+export const needsConfirmWithRestaurantNotice = (
+  labels: readonly DietaryLabel[],
+): boolean => labels.some((label) => dietaryLabelClass(label) === 'high-risk');
+
+/**
  * What a restaurant says about its whole kitchen (GitHub issue #2194): a fixed
  * list, as the restaurant states it. A statement covers every dish, which a
  * label on each dish cannot say - "fully halal" is about the kitchen, not about

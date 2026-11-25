@@ -50,8 +50,10 @@ import {
   requestMediaLocationPermission,
   type MediaLocationPermissionState,
 } from 'media-location';
+import { dietaryLabelsOf } from 'model';
 import type {
   Bite,
+  DietaryLabel,
   Geopoint,
   GooglePlace,
   NearbyRestaurant,
@@ -76,6 +78,7 @@ import {
   AteWithPickerComponent,
   MAX_TAGGED_USERS,
 } from './ate-with/ate-with-picker.component';
+import { DietaryLabelPickerComponent } from './dietary-labels/dietary-label-picker.component';
 import {
   POSITION_SOURCE_COLORS,
   POSITION_SOURCE_LABEL_KEYS,
@@ -102,6 +105,7 @@ import {
     StarRatingComponent,
     TagsInputComponent,
     AteWithPickerComponent,
+    DietaryLabelPickerComponent,
     IonTextarea,
     IonModal,
     PriceInputComponent,
@@ -257,6 +261,10 @@ export class BitePage {
       // A real control, because the form value is what reaches Firestore: a
       // Bite field outside the form group is silently dropped (issue #1917).
       taggedUserIds: [[] as string[], Validators.maxLength(MAX_TAGGED_USERS)],
+      // The creator's claim, from the fixed vocabulary (issue #2195). A form
+      // control for the reason above, and never validated: an optional field
+      // must not stand between the creator and Post (`RD-QG-1`).
+      dietaryLabels: [[] as DietaryLabel[]],
       position: [this.position(), Validators.required],
       // Null rather than undefined: the whole form value is handed to Firestore,
       // which rejects an undefined field and takes the Bite down with it. That
@@ -298,6 +306,9 @@ export class BitePage {
       ...(bite.currency ? { currency: bite.currency } : {}),
       tags: bite.tags || [],
       taggedUserIds: bite.taggedUserIds || [],
+      // Known values only, so a label a later version dropped is not written
+      // back on the next save (`R-1`).
+      dietaryLabels: dietaryLabelsOf(bite.dietaryLabels),
       position: bite.position,
       positionSource: bite.positionSource ?? null,
       restaurantId: bite.restaurantId || '',
@@ -916,6 +927,8 @@ export class BitePage {
       price: null,
       rating: 0,
       tags: [],
+      // What the creator says about one dish, so the next one starts without.
+      dietaryLabels: [],
     });
     this.biteFormGroup.markAsPristine();
     this.biteFormGroup.markAsUntouched();
@@ -1104,6 +1117,11 @@ export class BitePage {
 
   setTaggedUserIds(taggedUserIds: string[]): void {
     this.biteFormGroup.controls['taggedUserIds'].setValue(taggedUserIds);
+  }
+
+  setDietaryLabels(dietaryLabels: DietaryLabel[]): void {
+    this.biteFormGroup.controls['dietaryLabels'].setValue(dietaryLabels);
+    this.biteFormGroup.controls['dietaryLabels'].markAsDirty();
   }
 
   resetImagePath(): void {

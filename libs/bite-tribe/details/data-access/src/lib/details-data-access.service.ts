@@ -7,7 +7,7 @@ import {
   ResourceLoader,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeStoreService, menuIdOfRestaurant } from 'bite-tribe/store';
 import {
   BiteTribeApiService,
   loadVisibleProfile,
@@ -19,6 +19,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
   BiteReportReason,
+  DietaryLabel,
+  linkedMenuItemDietaryOf,
   Like,
   LikeClick,
   PublicUser,
@@ -119,6 +121,45 @@ export const visibleTaggedUsers = (
     (user) => user.public === true && !blocked.has(user.userId),
   );
 };
+
+/** A dish's dietary labels as the restaurant declares them (#2195). */
+export interface MenuItemDietary {
+  labels: DietaryLabel[];
+  options: DietaryLabel[];
+}
+
+/** The dish on a menu that a Bite is linked to (#2195). */
+export interface MenuItemLink {
+  restaurantId: string;
+  menuItemId: string;
+  variantId?: string;
+}
+
+/**
+ * The dish a Bite is linked to, or nothing for a Bite without a menu link -
+ * which is most of them, and costs no read.
+ */
+export const menuItemLinkOf = (
+  bite: Bite | undefined,
+): MenuItemLink | undefined =>
+  bite?.menuItemId && bite.restaurantId
+    ? {
+        restaurantId: bite.restaurantId,
+        menuItemId: bite.menuItemId,
+        variantId: bite.variantId,
+      }
+    : undefined;
+
+/** Whether two links name the same dish, so a reload reads no menu again. */
+export const sameMenuItemLink = (
+  a: MenuItemLink | undefined,
+  b: MenuItemLink | undefined,
+): boolean =>
+  a?.restaurantId === b?.restaurantId &&
+  a?.menuItemId === b?.menuItemId &&
+  a?.variantId === b?.variantId;
+
+const NO_MENU_ITEM_DIETARY: MenuItemDietary = { labels: [], options: [] };
 
 @Injectable({
   providedIn: 'root',
@@ -401,6 +442,50 @@ export class DetailsDataAccessService {
    */
   taggedUsers = computed((): PublicUser[] =>
     visibleTaggedUsers(this.loadedTaggedUsers(), this.blockedUserIds()),
+  );
+
+  /**
+   * The dish on the menu this Bite is linked to, as an address, or nothing for
+   * a Bite without a menu link - which is most of them, and costs no read.
+   */
+  private readonly menuItemLink = computed(
+    () => menuItemLinkOf(this.biteValue()),
+    { equal: sameMenuItemLink },
+  );
+
+  /**
+   * What the restaurant declares about the linked dish (GitHub issue #2195),
+   * read off its current menu: the restaurant, then the menu it points at.
+   * A failed read, a deleted dish or a restaurant without a menu declares
+   * nothing, and the Bite still shows its creator's own labels.
+   */
+  menuItemDietaryLoader: ResourceLoader<
+    MenuItemDietary,
+    MenuItemLink | undefined
+  > = async ({ params }) => {
+    try {
+      const menuId = menuIdOfRestaurant(
+        await this.api.loadRestaurant(params.restaurantId),
+      );
+      const menu = menuId ? await this.api.loadMenu(menuId) : undefined;
+
+      return linkedMenuItemDietaryOf(menu, params.menuItemId, params.variantId);
+    } catch (error) {
+      console.error('Error loading the dish dietary labels:', error);
+
+      return NO_MENU_ITEM_DIETARY;
+    }
+  };
+
+  private readonly menuItemDietaryResource = resource({
+    params: () => this.menuItemLink(),
+    loader: this.menuItemDietaryLoader.bind(this),
+  });
+
+  /** The restaurant's labels and options for the linked dish (#2195). */
+  menuItemDietary = resourceValue(
+    this.menuItemDietaryResource,
+    NO_MENU_ITEM_DIETARY,
   );
 
   /**

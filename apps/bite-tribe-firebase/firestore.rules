@@ -1103,6 +1103,32 @@ service cloud.firestore {
       }
 
       /**
+       * What the creator says the dish fits (GitHub issue #2195): a list
+       * drawn from the dietary vocabulary of `dietary-label.ts`, which
+       * `dietary-labels-parity.spec.ts` keeps this copy of. Only the Bite's
+       * creator writes it, which the create and update clauses already say.
+       * Absent on most Bites; an empty list is a creator who cleared them.
+       */
+      function hasValidDietaryLabels() {
+        let data = request.resource.data;
+
+        return !('dietaryLabels' in data)
+          || (data.dietaryLabels is list
+            && data.dietaryLabels.size() <= 9
+            && data.dietaryLabels.hasOnly([
+              'vegan',
+              'vegetarian',
+              'pescatarian',
+              'alcohol-free',
+              'gluten-free',
+              'lactose-free',
+              'nut-free',
+              'halal',
+              'kosher'
+            ]));
+      }
+
+      /**
        * The photo is published only by `setBiteImagePathOnUpload`, once the
        * image check has passed it (GitHub issue #2139): it alone writes
        * `imagePath`, `imageRefusalCategory`, and the `uploaded` and `refused`
@@ -1142,6 +1168,7 @@ service cloud.firestore {
 
       allow create: if owns(request.resource.data, 'userId')
         && hasValidTaggedUsers()
+        && hasValidDietaryLabels()
         && createsUnpublishedPhoto();
 
       /**
@@ -1158,7 +1185,8 @@ service cloud.firestore {
        */
       allow update: if (isOperator()
           || (owns(resource.data, 'userId') && keepsPublishedPhoto()))
-        && hasValidTaggedUsers();
+        && hasValidTaggedUsers()
+        && hasValidDietaryLabels();
 
       allow delete: if isOperator() || owns(resource.data, 'userId');
 

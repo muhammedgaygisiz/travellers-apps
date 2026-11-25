@@ -1,0 +1,53 @@
+@if (creator().length) {
+  <div class="dietary" data-testid="bite-dietary-creator">
+    <span class="dietary-source" data-testid="bite-dietary-creator-source">{{
+      'dietary-claimed-by-creator' | transloco
+    }}</span>
+    <ul class="dietary-labels">
+      @for (label of creator(); track label) {
+        <li
+          class="dietary-label"
+          [class.dietary-label-high-risk]="isHighRisk(label)"
+          [attr.data-testid]="'bite-dietary-creator-label-' + label"
+        >
+          {{ 'dietary-label-' + label | transloco }}
+        </li>
+      }
+    </ul>
+    @if (showsNotice()) {
+      <p class="dietary-notice" data-testid="bite-dietary-notice">
+        {{ 'dietary-confirm-with-restaurant' | transloco }}
+      </p>
+    }
+  </div>
+}
+
+@if (hasRestaurant()) {
+  <div class="dietary" data-testid="bite-dietary-restaurant">
+    <span class="dietary-source" data-testid="bite-dietary-restaurant-source">{{
+      'dietary-declared-by-restaurant' | transloco
+    }}</span>
+    <ul class="dietary-labels">
+      @for (label of restaurant(); track label) {
+        <li
+          class="dietary-label"
+          [class.dietary-label-high-risk]="isHighRisk(label)"
+          [attr.data-testid]="'bite-dietary-restaurant-label-' + label"
+        >
+          {{ 'dietary-label-' + label | transloco }}
+        </li>
+      }
+      @for (option of options(); track option) {
+        <li
+          class="dietary-label dietary-option"
+          [attr.data-testid]="'bite-dietary-restaurant-option-' + option"
+        >
+          {{
+            'dietary-option'
+              | transloco: { label: ('dietary-label-' + option | transloco) }
+          }}
+        </li>
+      }
+    </ul>
+  </div>
+}

@@ -523,7 +523,7 @@ Any pipeline or runbook that brings up a **new** project (a staging project, say
 firebase hosting:sites:create <site-id> --project=<project-id>
 ```
 
-The project ID is normally usable as the site ID; if that subdomain is already taken by another project, pick a unique one. The REST equivalent is `POST https://firebasehosting.googleapis.com/v1beta1/projects/<project-id>/sites?siteId=<site-id>`. Extra sites (`bite-tribe-business`, `bite-tribe-admin`, `bite-tribe-storybook`) are created the same way and mapped to targets in `.firebaserc`. The allowlists below still apply to every site created this way.
+The project ID is normally usable as the site ID; if that subdomain is already taken by another project, pick a unique one. The REST equivalent is `POST https://firebasehosting.googleapis.com/v1beta1/projects/<project-id>/sites?siteId=<site-id>`. Extra sites (`bite-tribe-business`, `bite-tribe-admin`, `bite-tribe-creator`, `bite-tribe-storybook`) are created the same way and mapped to targets in `.firebaserc`. The allowlists below still apply to every site created this way.
 
 Creating a Firebase Hosting site does **not** authorise the new domain anywhere else. Three separate allowlists have to be edited by hand, in three different consoles, and none of them is mentioned when the site is created. Verified on 5 September 2026 while bringing up `bite-tribe-admin` (issue [#1469]).
 

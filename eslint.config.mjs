@@ -152,6 +152,21 @@ export default [
                 'type:ui',
               ],
             },
+            // The Bite Creator app (issue #2130) is a fourth scope on the same
+            // terms: the shared platform layers and nothing else. BiteTrail
+            // creation moved here out of the business scope, so neither app
+            // may reach into the other's features.
+            {
+              sourceTag: 'scope:bite-tribe-creator',
+              onlyDependOnLibsWithTags: [
+                'scope:bite-tribe-creator',
+                'scope:common',
+                'type:api',
+                'type:store',
+                'type:model',
+                'type:ui',
+              ],
+            },
           ],
         },
       ],

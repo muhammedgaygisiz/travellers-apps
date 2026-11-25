@@ -9,7 +9,7 @@ surfaces this page was written for - the business dashboard listing a creator's 
 BiteTrails, free BiteTrails reaching the Market Place, the sold counter derived from each
 trail's `sells` subcollection, and the tap from a listing to the creator's profile - and
 those surfaces are now owned by
-[UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md) and
+[UC - Create A BiteTrail](uc-create-a-bitetrail.md) and
 [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md). Setting a price is built too, in the
 create form, and there is no publish step anywhere. Nothing this page owns is built; issue
 [#1125] owns it, as stage 3 of the monetization umbrella [#1121].
@@ -21,7 +21,7 @@ Creators and Restaurant Owners should be able to package Bites into credible mar
 This page owns the step between having a priced BiteTrail and having one that can be sold: the
 bands a price has to fall within, what the creator is shown about their share before they
 commit to it, and the gate that stops an unpayable creator selling. Making the trail and
-setting its price is [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md); what a buyer
+setting its price is [UC - Create A BiteTrail](uc-create-a-bitetrail.md); what a buyer
 then sees in the Market Place is [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md); the purchase
 itself is [UC - Buy A Paid BiteTrail](uc-buy-a-paid-bitetrail.md); and the money that follows a sale is
 [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md).
@@ -43,7 +43,7 @@ post-launch.
 
 Not on this page: the marketplace surfaces issue [#266] already delivered, which belong to
 [UC - Discover BiteTrails In The Marketplace](uc-discover-bitetrails-in-the-marketplace.md) and
-[UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md).
+[UC - Create A BiteTrail](uc-create-a-bitetrail.md).
 
 ## App Store Review Area
 
@@ -51,7 +51,7 @@ Relevant only through the price. A paid BiteTrail is sold as a store product, so
 creator picks has to be one the store will actually sell at - which is the whole reason for
 bands, and why the free-text amount the create form takes today is not enough - and the net
 proceeds displayed depend on the commission the store takes. The surface itself is never
-reviewed: it is in the business app, which is web-only, and only `apps/bite-tribe-ios` and
+reviewed: it is in the Bite Creator app, which is web-only, and only `apps/bite-tribe-ios` and
 `apps/bite-tribe-android` carry a native project. The price-point mechanism on each store was not verified at source; check it
 when issue [#1125] starts.
 
@@ -60,12 +60,12 @@ when issue [#1125] starts.
 Nothing this page owns is built. What issue [#266] delivered belongs to the sibling pages
 Status and Related GitHub Scope already name, not to this one:
 
-- `libs/bite-tribe-business/create-bite-trail/page/src/lib/components/page/create-bite-trail.component.ts`
+- `libs/bite-tribe-creator/create-bite-trail/page/src/lib/components/page/create-bite-trail.component.ts`
   takes a price with `Validators.min(0)` only - no bands, no per-currency floor or ceiling -
   and any of `currencyCodes` may be picked; that free-text amount is what the bands this page
   adds would replace.
 - The same create-form surface has no publish step and no net-proceeds disclosure: nothing
-  under `libs/bite-tribe-business/create-bite-trail` renders a split or a commission, and
+  under `libs/bite-tribe-creator/create-bite-trail` renders a split or a commission, and
   neither `stripe`, `payout` nor `onboarding` appears anywhere in it - there is no gate to
   wire the payable-creator check into yet.
 - `libs/bite-tribe-common/model/src/lib/bite-trail.ts` carries `price` and `currency` with no
@@ -97,7 +97,7 @@ Status and Related GitHub Scope already name, not to this one:
   renders. A product page, not a domain
 - [epic-1121][#1121] - the monetization umbrella
 - [epic-1125][#1125] - this page's stage epic
-- [UC - Create And Operate BiteTrails In The Business App](uc-create-and-operate-bitetrails-in-the-business-app.md) - making the BiteTrail and setting
+- [UC - Create A BiteTrail](uc-create-a-bitetrail.md) - making the BiteTrail and setting
   the price these rules would constrain
 - [UC - Earn From A Paid BiteTrail](uc-earn-from-a-paid-bitetrail.md) - the split behind the number this flow shows, and the
   onboarding behind its publish gate

@@ -26,7 +26,6 @@ describe('DashboardService', () => {
 
     dataAccessMock = {
       restaurants: mockResource,
-      biteTrails: mockResource,
       isAuthenticated: signal(false),
       gpsPosition: signal(null),
       logout: jest.fn(),
@@ -95,16 +94,6 @@ describe('DashboardService', () => {
           'Testaurant',
         ]);
       });
-    });
-  });
-
-  describe('createBiteTrailClicked', () => {
-    it('should navigate forward to create-bite-trail', () => {
-      service.createBiteTrailClicked();
-
-      expect(navControllerMock.navigateForward).toHaveBeenCalledWith([
-        'create-bite-trail',
-      ]);
     });
   });
 

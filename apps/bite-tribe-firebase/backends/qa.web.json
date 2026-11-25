@@ -1,8 +1,9 @@
 {
-  "$comment": "Web-only values for the QA web apps (issue 2293), merged over qa.json by tools/build-web-qa.mjs. Kept apart from qa.json because the native QA builds must not carry a reCAPTCHA site key: they get App Check tokens from App Attest and Play Integrity, and capacitor://localhost is no reCAPTCHA domain. The site key is the bite-tribe-qa reCAPTCHA Enterprise key 'Bite Tribe QA Web', allowed on the three QA hosting sites. Public config only.",
+  "$comment": "Web-only values for the QA web apps (issue 2293), merged over qa.json by tools/build-web-qa.mjs. Kept apart from qa.json because the native QA builds must not carry a reCAPTCHA site key: they get App Check tokens from App Attest and Play Integrity, and capacitor://localhost is no reCAPTCHA domain. The site key is the bite-tribe-qa reCAPTCHA Enterprise key 'Bite Tribe QA Web', allowed on the four QA hosting sites. Public config only.",
   "NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY": "6LfGwi4uAAAAAHCplsoOTpsanjvRHIhqRNtejqXN",
   "NX_APP_BITE_TRIBE_BUSINESS_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
   "NX_APP_BITE_TRIBE_ADMIN_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
+  "NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN": "bite-tribe-qa.firebaseapp.com",
   "NX_APP_BITE_TRIBE_LINK_ORIGIN": "https://bite-tribe-qa.web.app",
   "NX_APP_BITE_TRIBE_TABLE_ORDERING_ENABLED": "true"
 }

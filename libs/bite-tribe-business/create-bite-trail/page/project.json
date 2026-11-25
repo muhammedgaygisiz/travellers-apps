@@ -1,8 +1,0 @@
-{
-  "name": "bite-tribe-business/create-bite-trail",
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/bite-tribe-business/create-bite-trail/page/src",
-  "prefix": "lib",
-  "projectType": "library",
-  "tags": ["scope:bite-tribe-business", "type:feature"]
-}

@@ -492,7 +492,6 @@ X5 SYS <action>
 | `UC-SAF` | See Ads As A Free User                                 | [UC - See Ads As A Free User](../use-cases/uc-see-ads-as-a-free-user.md)                                                                 |
 | `UC-BPB` | Buy A Paid BiteTrail                                   | [UC - Buy A Paid BiteTrail](../use-cases/uc-buy-a-paid-bitetrail.md)                                                                     |
 | `UC-CRV` | Contact A Restaurant And Plan A Visit                  | [UC - Contact A Restaurant And Plan A Visit](../use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)                                   |
-| `UC-CBT` | Create And Operate BiteTrails In The Business App      | [UC - Create And Operate BiteTrails In The Business App](../use-cases/uc-create-and-operate-bitetrails-in-the-business-app.md)           |
 | `UC-CAB` | Create A BiteTrail                                     | [UC - Create A BiteTrail](../use-cases/uc-create-a-bitetrail.md)                                                                         |
 | `UC-EPB` | Earn From A Paid BiteTrail                             | [UC - Earn From A Paid BiteTrail](../use-cases/uc-earn-from-a-paid-bitetrail.md)                                                         |
 | `UC-PBS` | Price A BiteTrail For Sale                             | [UC - Price A BiteTrail For Sale](../use-cases/uc-price-a-bitetrail-for-sale.md)                                                         |

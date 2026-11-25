@@ -22,12 +22,14 @@ library.
 | `apps/bite-tribe`              | The consumer app: the web app, and the bundle the native wrappers ship                                           | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-business`     | The business app, where restaurant owners and staff maintain their restaurants and run the service floor         | `scope:bite-tribe-business`                          |
 | `apps/bite-tribe-admin`        | The admin app, the internal operations tool of the BiteTribe Operator                                            | `scope:bite-tribe-admin`                             |
+| `apps/bite-tribe-creator`      | The Bite Creator app, the web-only app where any signed-in account makes BiteTrails (issue [#2130])              | `scope:bite-tribe-creator`                           |
 | `apps/bite-tribe-firebase`     | The backend: Firestore and Storage rules, indexes and emulator setup, and the Cloud Functions under `functions/` | none on the project; `scope:firebase` on `functions` |
 | `apps/bite-tribe-ios`          | The Capacitor iOS wrapper of the consumer app                                                                    | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-android`      | The Capacitor Android wrapper of the consumer app                                                                | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-e2e`          | Playwright end-to-end tests of the consumer app                                                                  | `scope:bite-tribe`                                   |
 | `apps/bite-tribe-business-e2e` | Playwright end-to-end tests of the business app                                                                  | `scope:bite-tribe-business`                          |
 | `apps/bite-tribe-admin-e2e`    | Playwright end-to-end tests of the admin app (issue [#1952])                                                     | `scope:bite-tribe-admin`                             |
+| `apps/bite-tribe-creator-e2e`  | Playwright end-to-end tests of the Bite Creator app (issue [#2130])                                              | `scope:bite-tribe-creator`                           |
 | `apps/storybook-host`          | Storybook for the shared and feature UI states, and the visual regression baseline                               | `scope:bite-tribe`                                   |
 
 ### Library Families
@@ -37,6 +39,7 @@ library.
 | `libs/bite-tribe`          | The consumer features, and the platform layers every app shares: `libs/bite-tribe/api`, `libs/bite-tribe/store` | `scope:bite-tribe`          |
 | `libs/bite-tribe-business` | The business app's features                                                                                     | `scope:bite-tribe-business` |
 | `libs/bite-tribe-admin`    | The admin app's features                                                                                        | `scope:bite-tribe-admin`    |
+| `libs/bite-tribe-creator`  | The Bite Creator app's features                                                                                 | `scope:bite-tribe-creator`  |
 | `libs/bite-tribe-common`   | The domain model and the BiteTribe UI more than one app uses: Bites, BiteTrails, the map, opening hours         | `scope:bite-tribe`          |
 | `libs/common`              | Services and UI that know nothing of BiteTribe: Firebase bootstrap, toasts, haptics, sounds, geolocation        | `scope:common`              |
 
@@ -59,6 +62,7 @@ flowchart TB
     android["bite-tribe-android"]
     business["bite-tribe-business"]
     admin["bite-tribe-admin"]
+    creator["bite-tribe-creator"]
     functions["bite-tribe-firebase<br/>Cloud Functions, rules"]
   end
 
@@ -67,6 +71,7 @@ flowchart TB
     platform["libs/bite-tribe api and store<br/>shared platform layers"]
     libBusiness["libs/bite-tribe-business"]
     libAdmin["libs/bite-tribe-admin"]
+    libCreator["libs/bite-tribe-creator"]
     libCommonDomain["libs/bite-tribe-common<br/>model, shared BiteTribe UI"]
     libCommon["libs/common<br/>app-agnostic services and UI"]
   end
@@ -78,9 +83,10 @@ flowchart TB
   consumer --> libConsumer
   business --> libBusiness
   admin --> libAdmin
-  libConsumer & libBusiness & libAdmin --> platform
-  libConsumer & libBusiness & libAdmin --> libCommonDomain
-  libConsumer & libBusiness & libAdmin --> libCommon
+  creator --> libCreator
+  libConsumer & libBusiness & libAdmin & libCreator --> platform
+  libConsumer & libBusiness & libAdmin & libCreator --> libCommonDomain
+  libConsumer & libBusiness & libAdmin & libCreator --> libCommon
   platform --> libCommon
   platform --> firebase
   functions --> firebase
@@ -161,6 +167,7 @@ When adding or changing behavior, put the change in the smallest layer that owns
 apps/bite-tribe
 apps/bite-tribe-business
 apps/bite-tribe-admin
+apps/bite-tribe-creator
 apps/bite-tribe-firebase/functions
 libs/bite-tribe
 libs/bite-tribe-business
@@ -187,3 +194,4 @@ tools/check-ssot.mjs
 [#1487]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1487
 [#1567]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1567
 [#1952]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1952
+[#2130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2130

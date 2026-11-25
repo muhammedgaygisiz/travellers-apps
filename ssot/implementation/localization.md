@@ -37,6 +37,12 @@ Admin app:
 apps/bite-tribe-admin/src/assets/i18n/en.json
 ```
 
+Bite Creator app:
+
+```text
+apps/bite-tribe-creator/src/assets/i18n/en.json
+```
+
 Both internal apps are English-only on purpose. Their audience is restaurants
 we onboard by phone and BiteTribe Operators, and a locale list kept in step for
 no reader is cost without benefit. Copy added to a shared `scope:common`
@@ -44,9 +50,15 @@ component that only these two render therefore belongs in these two files, not
 in the consumer app's fourteen — an English string dropped into `de.json` is
 permanently English there, which is worse than a key that is absent.
 
-The converse holds for a `scope:common` component that all three apps render,
+The Bite Creator app is English-only for now, not on principle: its audience is
+any BiteTribe account, so its catalogue is a candidate for the consumer app's
+locales once the app grows beyond its first pages (issue [#2130]). Its
+`en.json` was cut from the business app's when BiteTrail creation moved, so it
+carries the auth, page-chrome and shared-component keys that catalogue had.
+
+The converse holds for a `scope:common` component that every app renders,
 such as `image-upload`: its keys go into the consumer app's fourteen files **and**
-both internal `en.json` files. Each app loads only its own catalog, so a key
+the business, admin and creator `en.json` files. Each app loads only its own catalog, so a key
 missing from one of them renders as the raw key in that app; see issue [#1613].
 
 Push notifications:
@@ -273,3 +285,4 @@ ls -d /tmp/bt-ios/Build/Products/Debug-iphonesimulator/App.app/*.lproj
 [#1882]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1882
 [#1880]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1880
 [#2104]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2104
+[#2130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2130

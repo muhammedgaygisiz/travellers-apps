@@ -49,7 +49,7 @@ Prefer existing library boundaries over new abstractions. Add a new abstraction 
 
 ## Scope Boundaries Between The Apps
 
-`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. `scope:bite-tribe`, `scope:bite-tribe-business` and `scope:bite-tribe-admin` each have an entry; a scope with no entry is unconstrained, not restricted.
+`depConstraints` in `eslint.config.mjs` is what actually holds the app boundary. `scope:bite-tribe`, `scope:bite-tribe-business`, `scope:bite-tribe-admin` and `scope:bite-tribe-creator` each have an entry; a scope with no entry is unconstrained, not restricted.
 
 The apps share the **platform** layers and nothing else:
 
@@ -71,7 +71,10 @@ Adding the constraint found all three in one lint run. Two known crossings remai
 `scope:bite-tribe-admin` was given its entry in the same change that created
 the scope, rather than afterwards, precisely because of the three drifts above:
 an operator surface able to reach into either app's feature libraries would make
-the split it exists for cosmetic.
+the split it exists for cosmetic. `scope:bite-tribe-creator` was created the
+same way with issue [#2130], when BiteTrail creation moved out of the business
+scope into it: a move, not a retag, because a feature cannot be shared between
+two app scopes.
 
 **A tag that disagrees with the directory is a defect.** Nothing derives the scope tag from the path, so `libs/bite-tribe-business/**` carrying `scope:bite-tribe` lints clean and quietly opts that library out of the boundary.
 
@@ -163,3 +166,4 @@ libs/bite-tribe-business/shell/src/lib/routes.ts
 
 [#1317]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1317
 [#1379]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1379
+[#2130]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2130

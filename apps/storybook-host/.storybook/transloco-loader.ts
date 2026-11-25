@@ -4,9 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 /**
- * The three Transloco catalogues Storybook serves, lowest precedence first.
+ * The four Transloco catalogues Storybook serves, lowest precedence first.
  *
- * Storybook hosts stories from all three apps in one preview, and each app
+ * Storybook hosts stories from all four apps in one preview, and each app
  * ships its own catalogue. Loading only the consumer app's left every
  * `Admin/*` and `Business/*` story rendering raw keys - visible in the
  * `New Restaurant` reference image, which read `about-restaurant` and
@@ -17,8 +17,13 @@ import { catchError, forkJoin, map, Observable, of } from 'rxjs';
  * `app-check-blocked-message` and the language names. That keeps every
  * committed consumer reference byte-identical; the two privileged apps are the
  * ones gaining coverage here, not the one being rebaselined.
+ *
+ * The creator catalogue (issue #2130) is applied first. It was cut from the
+ * business one, so where the two share a key they share its wording, and
+ * putting it lowest leaves every existing reference as it was.
  */
 const CATALOGUES = [
+  '/assets/i18n-creator',
   '/assets/i18n-business',
   '/assets/i18n-admin',
   '/assets/i18n',
@@ -37,13 +42,13 @@ export class TranslocoHttpLoader implements TranslocoLoader {
   /**
    * A catalogue that is not there resolves to nothing rather than failing.
    *
-   * The admin and business apps ship `en.json` only, so switching the locale
-   * toolbar to any other language 404s two of the three requests. Without this
+   * The admin, business and creator apps ship `en.json` only, so switching the
+   * locale toolbar to any other language 404s three of the four requests. Without this
    * the whole `forkJoin` errors and the story loses the consumer catalogue too,
    * so picking German would leave every story rendering raw keys.
    *
    * This is a manual-browsing concern only. Loki renders each story at the
-   * default locale, `en`, which all three apps ship - and it would fail a story
+   * default locale, `en`, which all four apps ship - and it would fail a story
    * on the 404 regardless of what the caller does with the error, because it
    * counts any response of 400 or above to the served Storybook build as a
    * failed request (`fetchFailIgnore` in `loki.config.js` forgives external

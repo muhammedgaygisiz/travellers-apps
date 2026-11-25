@@ -62,6 +62,15 @@ describe('business ROUTES', () => {
     expect(paths).not.toContain('new-restaurant');
   });
 
+  // BiteTrails are made in the Bite Creator web app (issue #2130). Holding
+  // `business` does not bring them back: there is no route to guard.
+  it('routes no BiteTrail creation', () => {
+    const paths = ROUTES.map((route) => route.path);
+
+    expect(paths).not.toContain('bite-trails');
+    expect(paths).not.toContain('create-bite-trail');
+  });
+
   /**
    * The role guard is a closure, so the route table cannot say which roles it
    * admits — the assertions above only prove that a second guard is present.

@@ -15,12 +15,12 @@ const config: StorybookConfig = {
       from: '../../../apps/bite-tribe/src/assets/',
       to: '/assets/',
     },
-    // The admin and business apps keep their own Transloco catalogues, and an
-    // `Admin/*` or `Business/*` story renders raw keys without them. All three
-    // catalogues are named `en.json`, so they cannot share `/assets/i18n/`:
-    // whichever entry is served last would win the path and leave the other two
-    // apps untranslated. Each gets its own prefix and `TranslocoHttpLoader`
-    // merges the three. See issue #1547.
+    // The admin, business and creator apps keep their own Transloco
+    // catalogues, and an `Admin/*`, `Business/*` or `Creator/*` story renders
+    // raw keys without them. All four catalogues are named `en.json`, so they
+    // cannot share `/assets/i18n/`: whichever entry is served last would win
+    // the path and leave the others untranslated. Each gets its own prefix and
+    // `TranslocoHttpLoader` merges them. See issues #1547 and #2130.
     {
       from: '../../../apps/bite-tribe-admin/src/assets/i18n/',
       to: '/assets/i18n-admin/',
@@ -28,6 +28,10 @@ const config: StorybookConfig = {
     {
       from: '../../../apps/bite-tribe-business/src/assets/i18n/',
       to: '/assets/i18n-business/',
+    },
+    {
+      from: '../../../apps/bite-tribe-creator/src/assets/i18n/',
+      to: '/assets/i18n-creator/',
     },
     // The brand characters are versioned as SSOT material rather than app
     // assets, because nothing in the product references them yet and Angular's

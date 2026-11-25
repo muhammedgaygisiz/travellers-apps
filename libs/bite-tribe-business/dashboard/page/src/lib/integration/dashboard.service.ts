@@ -15,11 +15,9 @@ export class DashboardService {
   private readonly navController = inject(NavController);
 
   restaurants = this.dataAccess.restaurants;
-  biteTrails = this.dataAccess.biteTrails;
 
   // Read guarded: `value()` throws once a read has failed (#1232).
   restaurantsValue = this.dataAccess.restaurantsValue;
-  biteTrailsValue = this.dataAccess.biteTrailsValue;
   /** Held restaurants whose menu was built from Bites (GitHub issue #2302). */
   menusBuiltFromBites = this.dataAccess.menusBuiltFromBitesValue;
   /** Each held restaurant's figures (GitHub issue #2133). */
@@ -97,9 +95,5 @@ export class DashboardService {
       ]);
       return;
     }
-  }
-
-  createBiteTrailClicked(): void {
-    void this.navController.navigateForward(['create-bite-trail']);
   }
 }

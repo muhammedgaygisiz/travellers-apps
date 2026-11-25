@@ -77,12 +77,12 @@ describe(DashboardComponent.name, () => {
   });
 
   // Restaurant-candidate verification and the unmatched Bite places are
-  // BiteTribe-internal and moved to the admin app with issue #1473. A section
-  // for either reappearing here would put them back in front of every
+  // BiteTribe-internal and moved to the admin app with issue #1473, and
+  // BiteTrails moved to the Bite Creator app with issue #2130. A section for
+  // any of them reappearing here would put it back in front of every
   // restaurant that signs in.
   it('offers a restaurant only its own surfaces', () => {
     expect(component.sections.map((section) => section.path)).toEqual([
-      '/bite-trails',
       '/restaurants',
     ]);
   });

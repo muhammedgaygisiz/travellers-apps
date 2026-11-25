@@ -636,6 +636,60 @@ jobs:
           path: dist/.playwright/apps/bite-tribe-admin-e2e
           retention-days: 7
 
+  # The Bite Creator suite (issue #2130), on a runner of its own for the same
+  # reason as business-e2e: all four suites drive the same Firebase emulator
+  # ports.
+  creator-e2e:
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - stylelint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 'Restore Cache'
+        uses: ./.github/actions/restore-cache
+
+      - name: 'Install dependencies when the cache is unavailable'
+        uses: ./.github/actions/install-if-missing
+
+      # The Firebase emulators require a JVM; firebase-tools needs JDK 21+.
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: 'Playwright Chromium'
+        uses: ./.github/actions/playwright-chromium
+
+      # Boots the Firebase emulators + creator Angular dev server (see
+      # apps/bite-tribe-creator-e2e/playwright.config.ts) and runs the suite.
+      #
+      # Same throwaway emulator configuration as the other e2e jobs; only the
+      # auth domain differs, because the creator bundle reads
+      # NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN.
+      - name: Run Creator E2E Tests
+        run: npm run nx -- e2e bite-tribe-creator-e2e
+        env:
+          NX_APP_BITE_TRIBE_IS_DEV: 'true'
+          NX_APP_BITE_TRIBE_PROJECT_ID: bite-tribe
+          NX_APP_BITE_TRIBE_API_KEY: demo-api-key
+          NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN: bite-tribe.firebaseapp.com
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: bite-tribe.appspot.com
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: '000000000000'
+          NX_APP_BITE_TRIBE_APP_ID: demo-app-id
+
+      - name: Upload Creator Playwright report
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: creator-playwright-report
+          path: dist/.playwright/apps/bite-tribe-creator-e2e
+          retention-days: 7
+
   # Surfaces the e2e and Loki outcomes on the PR as a single sticky comment.
   # Runs after all of them regardless of their result so a failure is still
   # reported.
@@ -646,6 +700,7 @@ jobs:
       - e2e
       - business-e2e
       - admin-e2e
+      - creator-e2e
       - loki
 
     permissions:
@@ -663,6 +718,7 @@ jobs:
               // `needs.business-e2e` as a subtraction.
               businessE2e: '${{ needs['business-e2e'].result }}',
               adminE2e: '${{ needs['admin-e2e'].result }}',
+              creatorE2e: '${{ needs['creator-e2e'].result }}',
               loki: '${{ needs.loki.result }}',
             };
             const icon = (r) =>
@@ -682,6 +738,7 @@ jobs:
               `| E2E (Playwright) | ${icon(results.e2e)} |`,
               `| Business E2E (Playwright) | ${icon(results.businessE2e)} |`,
               `| Admin E2E (Playwright) | ${icon(results.adminE2e)} |`,
+              `| Creator E2E (Playwright) | ${icon(results.creatorE2e)} |`,
               `| Visual regression (Loki) | ${icon(results.loki)} |`,
               '',
               `Artifacts on the [workflow run](${runUrl}): \`playwright-report-<shard>\` for each of the three consumer shards, \`business-playwright-report\`, plus \`loki-diffs-<configuration>\` for each Loki configuration that finds visual changes.`,
@@ -710,7 +767,7 @@ jobs:
 
   # Builds
 
-  # One job builds the three web apps and compiles the Firebase functions, and
+  # One job builds the four web apps and compiles the Firebase functions, and
   # only the ones the change affects (issue #1819). Four jobs of their own spent
   # 25 to 40 seconds each on checkout and cache restore, and a pull request that
   # fans out to that many runners queues behind itself.
@@ -727,7 +784,7 @@ jobs:
   #
   # Nx runs every selected build even when one fails, so one app's compile
   # error still reports the others. The deploys below need this job, so on
-  # `develop` a failed build holds back all four deploys, not only its own.
+  # `develop` a failed build holds back all five deploys, not only its own.
   build:
     runs-on: ubuntu-latest
     needs:
@@ -752,18 +809,18 @@ jobs:
       - name: 'Nx cache'
         uses: ./.github/actions/nx-cache
 
-      # `nx affected` has no filter that keeps only these four projects - a
+      # `nx affected` has no filter that keeps only these five projects - a
       # `-p` is forwarded to the build and reaches `tsc` as its project path -
-      # so the affected four are listed first and built with `run-many`. As in
+      # so the affected five are listed first and built with `run-many`. As in
       # `loki-build`, the list is read outside a condition so a failing Nx
       # fails the step rather than reading as "nothing affected".
       - name: Build the affected apps and functions
         shell: bash
         run: |
-          affected=$(npm run --silent nx -- show projects --affected --projects bite-tribe,bite-tribe-business,bite-tribe-admin,functions --json)
+          affected=$(npm run --silent nx -- show projects --affected --projects bite-tribe,bite-tribe-business,bite-tribe-admin,bite-tribe-creator,functions --json)
           projects=$(jq -r 'join(",")' <<< "$affected")
           if [ -z "$projects" ]; then
-            echo 'None of bite-tribe, bite-tribe-business, bite-tribe-admin and functions is affected. Builds skipped.' | tee -a "$GITHUB_STEP_SUMMARY"
+            echo 'None of bite-tribe, bite-tribe-business, bite-tribe-admin, bite-tribe-creator and functions is affected. Builds skipped.' | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           echo "Building $projects" | tee -a "$GITHUB_STEP_SUMMARY"
@@ -921,6 +978,51 @@ jobs:
           channelId: live
           projectId: bite-tribe
           target: bite-tribe-admin
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+
+  # BiteTribe Creator
+
+  # The web-only Bite Creator app (issue #2130), where BiteTrails are made. It
+  # mirrors the admin deploy above for the same reason: its own hosting site,
+  # and a failed deploy of one must not hold another back. Like the business
+  # and admin apps it is out of release-candidate scope, so
+  # `NX_APP_BITE_TRIBE_APP_CHECK_ENFORCED` is absent and `release:verify-bundle`
+  # is not run here.
+
+  deploy-bite-tribe-creator:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup action
+        uses: ./.github/actions/setup
+
+      - name: Build BiteTribe Creator App
+        run: npm run nx -- build bite-tribe-creator
+        env:
+          NX_APP_BITE_TRIBE_API_KEY: ${{ secrets.NX_APP_BITE_TRIBE_API_KEY }}
+          NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN: ${{ secrets.NX_APP_BITE_TRIBE_CREATOR_AUTH_DOMAIN }}
+          NX_APP_BITE_TRIBE_PROJECT_ID: ${{ secrets.NX_APP_BITE_TRIBE_PROJECT_ID }}
+          NX_APP_BITE_TRIBE_STORAGE_BUCKET: ${{ secrets.NX_APP_BITE_TRIBE_STORAGE_BUCKET }}
+          NX_APP_BITE_TRIBE_MESSAGING_SENDER_ID: ${{ secrets.NX_APP_BITE_TRIBE_MESSAGINX_SENDER_ID }}
+          NX_APP_BITE_TRIBE_APP_ID: ${{ secrets.NX_APP_BITE_TRIBE_APP_ID }}
+          NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY: ${{ secrets.NX_APP_BITE_TRIBE_APP_CHECK_SITE_KEY }}
+
+      - name: BiteTribe Creator Publish to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0.11.0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BITE_TRIBE }}'
+          channelId: live
+          projectId: bite-tribe
+          target: bite-tribe-creator
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
@@ -1363,7 +1465,7 @@ jobs:
       - name: Setup action
         uses: ./.github/actions/setup
 
-      - name: Build the three web apps for QA
+      - name: Build the four web apps for QA
         run: npm run build:web:qa
 
       - name: Write the deploy credentials
@@ -1375,7 +1477,7 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/qa-web-deploy-key.json" >> "$GITHUB_ENV"
 
       - name: Deploy the web apps to QA hosting
-        run: npx --no-install firebase deploy --only hosting:bite-tribe,hosting:bite-tribe-business,hosting:bite-tribe-admin --project bite-tribe-qa --non-interactive
+        run: npx --no-install firebase deploy --only hosting:bite-tribe,hosting:bite-tribe-business,hosting:bite-tribe-admin,hosting:bite-tribe-creator --project bite-tribe-qa --non-interactive
 
       - name: Record the deployed commit
         run: |
@@ -1386,6 +1488,7 @@ jobs:
             echo '- consumer: https://bite-tribe-qa.web.app'
             echo '- business: https://bite-tribe-qa-business.web.app'
             echo '- admin: https://bite-tribe-qa-admin.web.app'
+            echo '- creator: https://bite-tribe-qa-creator.web.app'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove the deploy credentials

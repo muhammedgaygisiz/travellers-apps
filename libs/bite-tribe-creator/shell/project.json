@@ -1,0 +1,8 @@
+{
+  "name": "bite-tribe-creator/shell",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe-creator/shell/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:shell", "scope:bite-tribe-creator", "framework:ionic"]
+}

@@ -5,6 +5,7 @@ import { SettingsDataAccessService } from 'bite-tribe/settings-data-access';
 import { EmailVerificationService } from 'bite-tribe/email-verification-data-access';
 import type { PushInstallation } from 'push-notifications';
 import { signal } from '@angular/core';
+import type { Settings } from 'model';
 import { SettingsService } from '../settings.service';
 
 const CURRENT_INSTALLATION = 'installation-a';
@@ -27,6 +28,8 @@ describe(SettingsService.name, () => {
   const hapticsEnabled = signal(true);
   let setSoundsEnabled: jest.Mock;
   const soundsEnabled = signal(true);
+  let saveDietaryChoices: jest.Mock;
+  const settings = signal<Partial<Settings> | undefined>(undefined);
 
   const installation = (
     overrides: Partial<PushInstallation> = {},
@@ -58,6 +61,8 @@ describe(SettingsService.name, () => {
     presentToast = jest.fn().mockResolvedValue(undefined);
     setHapticsEnabled = jest.fn().mockResolvedValue(undefined);
     setSoundsEnabled = jest.fn().mockResolvedValue(undefined);
+    saveDietaryChoices = jest.fn().mockResolvedValue(undefined);
+    settings.set(undefined);
 
     TestBed.configureTestingModule({
       providers: [
@@ -66,7 +71,7 @@ describe(SettingsService.name, () => {
           provide: SettingsDataAccessService,
           useValue: {
             user: signal(undefined),
-            settings: signal(undefined),
+            settings,
             publicUser: signal(undefined),
             loadPushInstallations,
             setPushInstallationEnabled,
@@ -84,6 +89,7 @@ describe(SettingsService.name, () => {
             soundsEnabled,
             soundsSupported: true,
             setSoundsEnabled,
+            saveDietaryChoices,
           },
         },
         {
@@ -117,6 +123,66 @@ describe(SettingsService.name, () => {
       expect(setHapticsEnabled).toHaveBeenCalledWith(false);
       expect(saveSettings).not.toHaveBeenCalled();
       expect(presentToast).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dietary choices (issue #2196)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00.000Z') });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('stores lifestyle choices without a consent', async () => {
+      await service.saveDietaryChoices({ choices: ['vegan'], consent: false });
+
+      expect(saveDietaryChoices).toHaveBeenCalledWith(['vegan'], null);
+      expect(saveSettings).not.toHaveBeenCalled();
+      expect(presentToast).not.toHaveBeenCalled();
+    });
+
+    it('timestamps a consent the moment it is given', async () => {
+      await service.saveDietaryChoices({ choices: ['halal'], consent: true });
+
+      expect(saveDietaryChoices).toHaveBeenCalledWith(
+        ['halal'],
+        '2026-11-25T10:00:00.000Z',
+      );
+    });
+
+    it('keeps the time of a consent already given', async () => {
+      settings.set({ dietaryConsentAt: '2026-11-01T08:00:00.000Z' });
+
+      await service.saveDietaryChoices({
+        choices: ['halal', 'kosher'],
+        consent: true,
+      });
+
+      expect(saveDietaryChoices).toHaveBeenCalledWith(
+        ['halal', 'kosher'],
+        '2026-11-01T08:00:00.000Z',
+      );
+    });
+
+    it('writes a withdrawn consent as null', async () => {
+      settings.set({ dietaryConsentAt: '2026-11-01T08:00:00.000Z' });
+
+      await service.saveDietaryChoices({ choices: ['vegan'], consent: false });
+
+      expect(saveDietaryChoices).toHaveBeenCalledWith(['vegan'], null);
+    });
+
+    it('announces a write that did not land', async () => {
+      saveDietaryChoices.mockRejectedValue(new Error('offline'));
+
+      await service.saveDietaryChoices({ choices: ['vegan'], consent: false });
+
+      expect(presentToast).toHaveBeenCalledWith({
+        messageKey: 'dietary-choices-change-failed',
+        outcome: 'failure',
+      });
     });
   });
 

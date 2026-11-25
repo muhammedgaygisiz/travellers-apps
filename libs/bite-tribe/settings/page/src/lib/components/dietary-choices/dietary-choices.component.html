@@ -1,0 +1,99 @@
+<p class="copy" data-testid="settings-dietary-explanation">
+  {{ 'dietary-choices-explanation' | transloco }}
+</p>
+
+<div id="dietary-choices-lifestyle" class="group-label">
+  {{ 'dietary-choices-lifestyle' | transloco }}
+</div>
+<div
+  class="choices"
+  role="group"
+  aria-labelledby="dietary-choices-lifestyle"
+  data-testid="settings-dietary-lifestyle"
+>
+  @for (choice of lifestyleChoices; track choice) {
+    <bt-chip
+      [label]="labelKey(choice) | transloco"
+      [selected]="isSelected(choice)"
+      [icon]="isSelected(choice) ? 'checkmark-outline' : undefined"
+      [attr.aria-pressed]="isSelected(choice)"
+      [attr.data-testid]="'settings-dietary-choice-' + choice"
+      (chipClick)="toggle(choice)"
+    />
+  }
+</div>
+
+<div id="dietary-choices-sensitive" class="group-label">
+  {{ 'dietary-choices-sensitive' | transloco }}
+</div>
+<div
+  class="choices"
+  role="group"
+  aria-labelledby="dietary-choices-sensitive"
+  data-testid="settings-dietary-sensitive"
+>
+  @for (choice of sensitiveChoices; track choice) {
+    <bt-chip
+      [label]="labelKey(choice) | transloco"
+      [selected]="isSelected(choice)"
+      [icon]="isSelected(choice) ? 'checkmark-outline' : undefined"
+      [attr.aria-pressed]="isSelected(choice)"
+      [attr.data-testid]="'settings-dietary-choice-' + choice"
+      (chipClick)="toggle(choice)"
+    />
+  }
+</div>
+
+@if (consentGiven()) {
+  <ion-note class="hint" data-testid="settings-dietary-consent-given">
+    {{ 'dietary-choices-consent-given' | transloco }}
+  </ion-note>
+} @else {
+  <ion-note class="hint" data-testid="settings-dietary-consent-needed">
+    {{ 'dietary-choices-sensitive-hint' | transloco }}
+  </ion-note>
+}
+
+<div class="actions">
+  @if (consentGiven()) {
+    <ion-button
+      fill="clear"
+      size="small"
+      color="danger"
+      data-testid="settings-dietary-withdraw-consent"
+      (click)="withdrawConsent()"
+      >{{ 'dietary-choices-withdraw-consent' | transloco }}
+    </ion-button>
+  }
+  @if (hasChoices()) {
+    <ion-button
+      fill="clear"
+      size="small"
+      data-testid="settings-dietary-clear"
+      (click)="clear()"
+      >{{ 'dietary-choices-clear' | transloco }}
+    </ion-button>
+  }
+</div>
+
+@if (pendingChoice()) {
+  <ion-alert
+    data-testid="settings-dietary-consent"
+    [isOpen]="true"
+    header="{{ 'dietary-choices-consent-header' | transloco }}"
+    message="{{ 'dietary-choices-consent-message' | transloco }}"
+    [buttons]="consentButtons()"
+    (didDismiss)="onConsentDismiss($event)"
+  />
+}
+
+@if (confirmingWithdrawal()) {
+  <ion-alert
+    data-testid="settings-dietary-withdraw"
+    [isOpen]="true"
+    header="{{ 'dietary-choices-withdraw-header' | transloco }}"
+    message="{{ 'dietary-choices-withdraw-message' | transloco }}"
+    [buttons]="withdrawButtons()"
+    (didDismiss)="onWithdrawDismiss($event)"
+  />
+}

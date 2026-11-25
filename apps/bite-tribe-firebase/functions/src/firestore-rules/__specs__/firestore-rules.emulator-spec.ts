@@ -4344,6 +4344,73 @@ describe('settings', () => {
       setDoc(doc(asStranger(), 'settings', CONSUMER), { theme: 'light' }),
     );
   });
+
+  describe('dietary choices (issue #2196)', () => {
+    const settingsOf = (): DocumentReference<DocumentData> =>
+      doc(asConsumer(), 'settings', CONSUMER);
+
+    it('stores lifestyle choices without consent, and religion or health ones only with it', async () => {
+      await assertSucceeds(
+        setDoc(settingsOf(), { dietaryChoices: ['vegan', 'alcohol-free'] }),
+      );
+      await assertSucceeds(
+        setDoc(settingsOf(), {
+          dietaryChoices: ['vegan', 'halal', 'avoids-pork'],
+          dietaryConsentAt: '2026-11-25T10:00:00.000Z',
+        }),
+      );
+      await assertSucceeds(setDoc(settingsOf(), { dietaryChoices: [] }));
+
+      await assertFails(setDoc(settingsOf(), { dietaryChoices: ['halal'] }));
+      await assertFails(
+        setDoc(settingsOf(), {
+          dietaryChoices: ['gluten-free'],
+          dietaryConsentAt: null,
+        }),
+      );
+    });
+
+    it('refuses a sensitive choice kept behind a withdrawn consent', async () => {
+      await assertSucceeds(
+        setDoc(settingsOf(), {
+          theme: 'dark',
+          dietaryChoices: ['vegan', 'kosher'],
+          dietaryConsentAt: '2026-11-25T10:00:00.000Z',
+        }),
+      );
+
+      await assertFails(
+        setDoc(settingsOf(), { dietaryConsentAt: null }, { merge: true }),
+      );
+      await assertSucceeds(
+        setDoc(
+          settingsOf(),
+          { dietaryChoices: ['vegan'], dietaryConsentAt: null },
+          { merge: true },
+        ),
+      );
+    });
+
+    it('refuses a value outside the choices, or a list that is not one', async () => {
+      await assertFails(
+        setDoc(settingsOf(), { dietaryChoices: ['vegan', 'keto'] }),
+      );
+      await assertFails(setDoc(settingsOf(), { dietaryChoices: 'vegan' }));
+    });
+
+    it('lets no other account read them', async () => {
+      await assertSucceeds(
+        setDoc(settingsOf(), {
+          dietaryChoices: ['halal'],
+          dietaryConsentAt: '2026-11-25T10:00:00.000Z',
+        }),
+      );
+
+      await assertSucceeds(getDoc(settingsOf()));
+      await assertFails(getDoc(doc(asStranger(), 'settings', CONSUMER)));
+      await assertFails(getDoc(doc(asOperator(), 'settings', CONSUMER)));
+    });
+  });
 });
 
 describe('backend-owned collections', () => {

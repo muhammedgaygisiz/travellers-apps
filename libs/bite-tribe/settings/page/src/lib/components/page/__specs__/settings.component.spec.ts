@@ -134,6 +134,47 @@ describe(PageSettings.name, () => {
       );
     });
 
+    it('should keep the dietary choices and consent their section saved (#2196)', () => {
+      compRef.setInput('settings', {
+        location: false,
+        emailUpdates: false,
+        theme: 'dark',
+        currency: 'USD',
+        favoriteCurrencies: [],
+        language: 'de',
+        dietaryChoices: ['vegan', 'halal'],
+        dietaryConsentAt: '2026-11-25T10:00:00.000Z',
+      } satisfies Settings);
+      fixture.detectChanges();
+
+      component.saveSettings();
+
+      expect(submitSettingsEmitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dietaryChoices: ['vegan', 'halal'],
+          dietaryConsentAt: '2026-11-25T10:00:00.000Z',
+        }),
+      );
+    });
+
+    it('should write no dietary fields for an account that never set any', () => {
+      compRef.setInput('settings', {
+        location: false,
+        emailUpdates: false,
+        theme: 'dark',
+        currency: 'USD',
+        favoriteCurrencies: [],
+        language: 'de',
+      } satisfies Settings);
+      fixture.detectChanges();
+
+      component.saveSettings();
+
+      const saved = submitSettingsEmitSpy.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('dietaryChoices');
+      expect(saved).not.toHaveProperty('dietaryConsentAt');
+    });
+
     // Email updates has no switch until there is a newsletter (#1879), so a
     // save must hand back whatever is stored rather than a default.
     it.each([true, false])(

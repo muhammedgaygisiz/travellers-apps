@@ -1,3 +1,5 @@
+import type { DietaryChoice } from './dietary-choice';
+
 /**
  * Account-wide preferences.
  *
@@ -21,5 +23,19 @@ export interface Settings {
    * for a week after that (GitHub issue #1708).
    */
   followSuggestionsDismissedAt?: string;
+  /**
+   * What the member eats or avoids, set by the member only and never inferred
+   * (GitHub issue #2196, `RD-DC-3`). Private, as the whole document is: no
+   * other account reads it, and it reaches neither analytics nor an ad network.
+   * Read it through `dietaryChoicesOf`, which drops a religion or health choice
+   * that has no consent behind it.
+   */
+  dietaryChoices?: DietaryChoice[];
+  /**
+   * When the member consented to religion and health choices being stored, or
+   * `null` once they withdrew it. The rules refuse a sensitive choice without
+   * it, and withdrawing it removes those choices in the same write.
+   */
+  dietaryConsentAt?: string | null;
   updatedAt?: string;
 }

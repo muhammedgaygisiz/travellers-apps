@@ -27,7 +27,12 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import { CurrencySelectorComponent } from 'currency-selector';
-import { PublicUser, Settings } from 'model';
+import {
+  dietaryChoicesOf,
+  hasDietaryConsent,
+  PublicUser,
+  Settings,
+} from 'model';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { currencyCodes } from 'utils';
@@ -35,6 +40,10 @@ import { User } from '@capacitor-firebase/authentication';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { PushPermissionState } from 'push-notifications';
 import type { MediaLocationPermissionState } from 'media-location';
+import {
+  DietaryChoicesComponent,
+  type DietaryChoicesChange,
+} from '../dietary-choices/dietary-choices.component';
 
 /**
  * One registered app installation, as the settings list shows it.
@@ -77,6 +86,7 @@ export interface PushInstallationView {
     IonNote,
     IonSpinner,
     TranslocoPipe,
+    DietaryChoicesComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -143,6 +153,15 @@ export class PageSettings {
    * and is not part of the saved preferences form (issue #1844).
    */
   soundsEnabledChange = output<boolean>();
+  /**
+   * The member changed their dietary choices or their consent. It applies at
+   * once and is not part of the preferences form (issue #2196).
+   */
+  dietaryChoicesChange = output<DietaryChoicesChange>();
+
+  /** The stored choices, without a sensitive one that lacks consent. */
+  dietaryChoices = computed(() => dietaryChoicesOf(this.settings()));
+  dietaryConsentGiven = computed(() => hasDietaryConsent(this.settings()));
 
   private readonly formBuilder = inject(FormBuilder);
 
@@ -349,7 +368,26 @@ export class PageSettings {
       theme,
       currency: newSettings.currency || 'EUR',
       favoriteCurrencies,
+      // Saved by their own section as they change (issue #2196), and carried
+      // through for the same reason as the two above.
+      ...this.dietaryFields(),
     });
+  }
+
+  private dietaryFields(): Pick<
+    Settings,
+    'dietaryChoices' | 'dietaryConsentAt'
+  > {
+    const settings = this.settings();
+
+    return {
+      ...(settings?.dietaryChoices !== undefined && {
+        dietaryChoices: dietaryChoicesOf(settings),
+      }),
+      ...(settings?.dietaryConsentAt !== undefined && {
+        dietaryConsentAt: settings.dietaryConsentAt,
+      }),
+    };
   }
 
   /**

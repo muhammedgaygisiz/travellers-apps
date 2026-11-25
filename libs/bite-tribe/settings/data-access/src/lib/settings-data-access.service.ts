@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Settings } from 'model';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import type { DietaryChoice, Settings } from 'model';
+import { BiteTribeApiService, SettingsApiService } from 'bite-tribe/api';
 import { Preferences } from '@capacitor/preferences';
 import { TranslocoService } from '@jsverse/transloco';
 import { Platform } from '@ionic/angular';
@@ -35,6 +35,7 @@ import {
 export class SettingsDataAccessService {
   private readonly storeService = inject(BiteTribeStoreService);
   private readonly api = inject(BiteTribeApiService);
+  private readonly settingsApi = inject(SettingsApiService);
   private readonly transloco = inject(TranslocoService);
   private readonly platform = inject(Platform);
   private readonly haptics = inject(HapticsService);
@@ -171,6 +172,36 @@ export class SettingsDataAccessService {
     this.storeService.notifySavedSettings(settings);
 
     await this.setLanguage(settings.language);
+  }
+
+  /**
+   * Writes the dietary choices and the consent, and nothing else, so the rest
+   * of the document stays as it is (issue #2196).
+   *
+   * The store is told first and put back if the write fails, so the chip
+   * moves under the member's finger instead of after the round trip.
+   */
+  async saveDietaryChoices(
+    dietaryChoices: DietaryChoice[],
+    dietaryConsentAt: string | null,
+  ): Promise<void> {
+    const previous = this.settings();
+    const changes = { dietaryChoices, dietaryConsentAt };
+
+    this.storeService.notifySavedSettings({
+      ...(previous as Settings),
+      ...changes,
+    });
+
+    try {
+      await this.settingsApi.mergeSettings(changes);
+    } catch (error) {
+      if (previous) {
+        this.storeService.notifySavedSettings(previous);
+      }
+
+      throw error;
+    }
   }
 
   private saveLanguageToPreferences(language = 'en'): Promise<void> {

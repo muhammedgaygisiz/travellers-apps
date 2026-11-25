@@ -113,7 +113,7 @@ export class DietaryChoicesComponent {
     const choice = this.pendingChoice();
     this.pendingChoice.set(undefined);
 
-    if (choice && event?.detail?.role === AGREE) {
+    if (choice && event.detail.role === AGREE) {
       this.emit([...this.choices(), choice], true);
     }
   }
@@ -128,7 +128,7 @@ export class DietaryChoicesComponent {
   onWithdrawDismiss(event: { detail: { role?: string } }): void {
     this.confirmingWithdrawal.set(false);
 
-    if (event?.detail?.role === WITHDRAW) {
+    if (event.detail.role === WITHDRAW) {
       this.emit(
         this.choices().filter((choice) => !isSensitiveDietaryChoice(choice)),
         false,

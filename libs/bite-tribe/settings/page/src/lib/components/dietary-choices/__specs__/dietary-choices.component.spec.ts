@@ -109,6 +109,12 @@ describe(DietaryChoicesComponent.name, () => {
     },
   );
 
+  it('stores nothing for a consent dismissed with no choice waiting', () => {
+    component.onConsentDismiss({ detail: { role: 'agree' } });
+
+    expect(changes).toEqual([]);
+  });
+
   it('does not ask again once consent is given', () => {
     compRef.setInput('choices', ['halal']);
     compRef.setInput('consentGiven', true);

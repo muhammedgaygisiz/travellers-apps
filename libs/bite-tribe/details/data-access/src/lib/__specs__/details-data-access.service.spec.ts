@@ -6,7 +6,7 @@ import { BiteNotFoundError } from '../bite-not-found-error';
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeStoreService, menuIdOfRestaurant } from 'bite-tribe/store';
 import { BiteTribeApiService, loadVisibleProfile } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { of, throwError } from 'rxjs';
@@ -17,7 +17,7 @@ import {
 } from '@capacitor-firebase/firestore';
 import { Geolocation } from '@capacitor/geolocation';
 import { getCurrentPosition } from 'geolocation';
-import { Bite, LikeClick, PublicUser } from 'model';
+import { Bite, LikeClick, Menu, PublicUser, Restaurant } from 'model';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem } from '@capacitor/filesystem';
@@ -162,6 +162,8 @@ describe(DetailsDataAccessService.name, () => {
             deleteReview: jest.fn(),
             saveNewReview: jest.fn(),
             saveReviewReply: jest.fn(),
+            loadRestaurant: jest.fn(),
+            loadMenu: jest.fn(),
           },
         },
         {
@@ -744,6 +746,75 @@ describe(DetailsDataAccessService.name, () => {
           ['blocked-1'],
         ).map((user) => user.userId),
       ).toEqual(['anna', 'ben']);
+    });
+  });
+
+  /** The restaurant's labels for the linked dish (GitHub issue #2195). */
+  describe('menuItemDietaryLoader', () => {
+    const menu = {
+      id: 'menu-1',
+      categories: [
+        {
+          name: 'Mains',
+          items: [
+            {
+              id: 'falafel',
+              name: 'Falafel',
+              description: '',
+              price: 9,
+              dietaryLabels: ['vegan'],
+              dietaryOptions: ['gluten-free'],
+            },
+          ],
+        },
+      ],
+    } as unknown as Menu;
+
+    const api = (): { loadRestaurant: jest.Mock; loadMenu: jest.Mock } =>
+      TestBed.inject(BiteTribeApiService) as unknown as {
+        loadRestaurant: jest.Mock;
+        loadMenu: jest.Mock;
+      };
+
+    beforeEach(() => {
+      jest
+        .mocked(menuIdOfRestaurant)
+        .mockImplementation(
+          (restaurant: Restaurant | undefined) => restaurant?.menuId,
+        );
+    });
+
+    it("reads the restaurant's menu and answers the dish's declaration", async () => {
+      api().loadRestaurant.mockResolvedValue({ menuId: 'menu-1' });
+      api().loadMenu.mockResolvedValue(menu);
+
+      await expect(
+        service.menuItemDietaryLoader(
+          loaderParams({ restaurantId: 'r1', menuItemId: 'falafel' }),
+        ),
+      ).resolves.toEqual({ labels: ['vegan'], options: ['gluten-free'] });
+      expect(api().loadRestaurant).toHaveBeenCalledWith('r1');
+      expect(api().loadMenu).toHaveBeenCalledWith('menu-1');
+    });
+
+    it('declares nothing for a restaurant without a menu, or a failed read', async () => {
+      api().loadRestaurant.mockResolvedValueOnce({});
+
+      await expect(
+        service.menuItemDietaryLoader(
+          loaderParams({ restaurantId: 'r1', menuItemId: 'falafel' }),
+        ),
+      ).resolves.toEqual({ labels: [], options: [] });
+      expect(api().loadMenu).not.toHaveBeenCalled();
+
+      api().loadRestaurant.mockRejectedValueOnce(new Error('offline'));
+      jest.spyOn(console, 'error').mockImplementationOnce(() => undefined);
+
+      await expect(
+        service.menuItemDietaryLoader(
+          loaderParams({ restaurantId: 'r1', menuItemId: 'falafel' }),
+        ),
+      ).resolves.toEqual({ labels: [], options: [] });
     });
   });
 

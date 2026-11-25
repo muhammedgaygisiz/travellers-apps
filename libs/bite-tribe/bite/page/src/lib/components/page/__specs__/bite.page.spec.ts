@@ -418,6 +418,7 @@ describe('BitePage', () => {
         place: 'Test Place',
         tags: ['fish healthy'],
         taggedUserIds: [],
+        dietaryLabels: [],
         price: '9.99',
         rating: 0,
         currency: 'EUR',
@@ -569,6 +570,71 @@ describe('BitePage', () => {
       });
     });
 
+    // Issue #2195: the creator's dietary labels travel in the form value too.
+    describe('dietary labels', () => {
+      const fillValidBite = (): void => {
+        component.biteFormGroup.patchValue({
+          image: 'data:image/jpeg;base64,test',
+          name: 'Falafel wrap',
+          place: 'Test Place',
+          price: '9.99',
+          currency: 'EUR',
+          position: { latitude: 0, longitude: 0 },
+        });
+      };
+
+      it('posts a new Bite with none, or with the labels picked', () => {
+        fillValidBite();
+        const emitSpy = jest.spyOn(component.submitBite, 'emit');
+
+        component.saveBite();
+        component.setDietaryLabels(['vegan', 'gluten-free']);
+        component.saveBite();
+
+        expect(emitSpy).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ dietaryLabels: [] }),
+        );
+        expect(emitSpy).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ dietaryLabels: ['vegan', 'gluten-free'] }),
+        );
+      });
+
+      it('loads the labels of an edited Bite, dropping unknown values, and clears them', () => {
+        componentRef.setInput('bite', {
+          id: 'bite-1',
+          name: 'Falafel wrap',
+          place: 'Test Place',
+          image: 'data:image/jpeg;base64,test',
+          price: 9.99,
+          currency: 'EUR',
+          position: { latitude: 0, longitude: 0 },
+          dietaryLabels: ['halal', 'keto', 'vegan'],
+        });
+        componentRef.changeDetectorRef.detectChanges();
+
+        expect(component.biteFormGroup.controls['dietaryLabels'].value).toEqual(
+          ['vegan', 'halal'],
+        );
+
+        component.setDietaryLabels([]);
+        const emitSpy = jest.spyOn(component.submitBite, 'emit');
+        component.saveBite();
+
+        expect(emitSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ dietaryLabels: [] }),
+        );
+      });
+
+      it('never keeps a Bite from being posted', () => {
+        fillValidBite();
+        component.setDietaryLabels(['nut-free']);
+
+        expect(component.biteFormGroup.valid).toBe(true);
+      });
+    });
+
     it('should not emit form value on saveBite when invalid', () => {
       const emitSpy = jest.spyOn(component.submitBite, 'emit');
       component.saveBite();
@@ -591,6 +657,7 @@ describe('BitePage', () => {
         place: 'Test Place',
         tags: ['fish healthy'],
         taggedUserIds: [],
+        dietaryLabels: [],
         price: '9.99',
         rating: 0,
         currency: 'EUR',
@@ -878,6 +945,7 @@ describe('BitePage', () => {
       place: 'Test Place',
       tags: ['fish', 'healthy'],
       taggedUserIds: [],
+      dietaryLabels: ['vegan'],
       price: '9.99',
       rating: 4,
       currency: 'CHF',
@@ -935,6 +1003,7 @@ describe('BitePage', () => {
           price: null,
           rating: 0,
           tags: [],
+          dietaryLabels: [],
         }),
       );
     });
@@ -1057,6 +1126,7 @@ describe('BitePage', () => {
         description: '',
         tags: ['test', 'food'],
         taggedUserIds: [],
+        dietaryLabels: [],
         position: { latitude: 42, longitude: 24 },
         // A Bite stored before the source was recorded carries none.
         positionSource: null,

@@ -5,6 +5,7 @@ import {
   findMenuItemById,
   isMenuItemAvailable,
   isMenuVariantAvailable,
+  linkedMenuItemDietaryOf,
   menuExtrasForItem,
   orderLineUnitPrice,
   withMenuIds,
@@ -538,5 +539,54 @@ describe('menus', () => {
         expect(orderLineUnitPrice(line)).toBe(14);
       });
     });
+  });
+});
+
+/** The restaurant's labels for the dish a Bite is linked to (issue #2195). */
+describe('linkedMenuItemDietaryOf', () => {
+  const pizza: MenuItem = {
+    id: 'pizza',
+    name: 'Pizza',
+    description: '',
+    price: 0,
+    dietaryLabels: ['vegetarian'],
+    dietaryOptions: ['gluten-free'],
+    variants: [
+      {
+        id: 'large',
+        name: 'Large',
+        description: '',
+        price: 14,
+        dietaryLabels: ['halal', 'keto' as never],
+        dietaryOptions: ['vegan', 'vegetarian'],
+      },
+      { id: 'small', name: 'Small', description: '', price: 9 },
+    ],
+  };
+  const menu = {
+    id: 'm1',
+    categories: [{ name: 'Mains', items: [pizza] }],
+  } as unknown as Menu;
+
+  it("combines the dish's labels with its variant's, dropping unknown values", () => {
+    expect(linkedMenuItemDietaryOf(menu, 'pizza', 'large')).toEqual({
+      labels: ['vegetarian', 'halal'],
+      options: ['vegan', 'gluten-free'],
+    });
+  });
+
+  it("is the dish's own labels without a variant, or for a variant that declares none", () => {
+    const dishOnly = { labels: ['vegetarian'], options: ['gluten-free'] };
+
+    expect(linkedMenuItemDietaryOf(menu, 'pizza')).toEqual(dishOnly);
+    expect(linkedMenuItemDietaryOf(menu, 'pizza', 'small')).toEqual(dishOnly);
+  });
+
+  it('declares nothing for a deleted dish, an unlinked Bite or no menu', () => {
+    const none = { labels: [], options: [] };
+
+    expect(linkedMenuItemDietaryOf(menu, 'gone')).toEqual(none);
+    expect(linkedMenuItemDietaryOf(menu, undefined)).toEqual(none);
+    expect(linkedMenuItemDietaryOf(undefined, 'pizza')).toEqual(none);
   });
 });

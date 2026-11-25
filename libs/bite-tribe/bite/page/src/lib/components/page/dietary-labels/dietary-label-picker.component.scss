@@ -1,0 +1,28 @@
+:host {
+  display: block;
+
+  .labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  bt-chip {
+    cursor: pointer;
+  }
+
+  .hint {
+    display: block;
+    font-size: 0.875rem;
+  }
+
+  // The warning colour, not tertiary: this theme's tertiary is a light grey
+  // surface, which made the notice unreadable on white.
+  .notice {
+    margin-top: 0.25rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--ion-color-warning);
+    color: var(--ion-text-color);
+  }
+}

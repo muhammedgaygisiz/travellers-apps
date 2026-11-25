@@ -32,6 +32,14 @@ A good Bite makes one concrete dish understandable enough that another person ca
   leaving the field, and by submitting the form. The field is live state that
   nothing else drains, so a tag left in it used to be posted as nothing at all.
   See issue [#1391] and [issue-1391](../history/records/issue-1391.md).
+- **A Bite can carry the creator's dietary labels** - what the creator says the
+  dish fitted, stored as `dietaryLabels` from the fixed vocabulary that
+  [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) owns (issue [#2195]).
+  They are not the free-text `tags`, and a `#vegan` tag stays a tag. They are
+  the creator's claim and are always shown as theirs; a linked menu item's
+  labels are the restaurant's and stay a separate source. Only the creator
+  writes them, `firestore.rules` refuses a value outside the vocabulary, and
+  `explainBite` is never given them.
 - **A Bite can name the BiteTribe users its creator ate with** - its _tagged
   users_, stored as uids in `taggedUserIds`. They are not the free-text `tags`
   above, and the two are never named interchangeably. See epic [#1915].
@@ -162,6 +170,7 @@ Required by product intent, but optional or not strictly enforced in the shared 
 - `description`
 - `tags`
 - `taggedUserIds` - the users the creator ate with (epic [#1915])
+- `dietaryLabels` - what the creator says the dish fitted (issue [#2195])
 - `restaurantId`
 - `geohash`
 - `imagePath`
@@ -184,9 +193,10 @@ Required by product intent, but optional or not strictly enforced in the shared 
 - `menuItemId` and `variantId` - the dish it was ordered as, on a Bite made from
   an order (issue [#1113]). Both, because a large and a small Margherita are one
   dish on the menu and two different things to eat, and a rating belongs to what
-  was eaten. Nothing is resolved off the menu to render a Bite, so a dish that is
-  renamed or deleted leaves every Bite of it intact and readable under the name
-  copied onto it at creation (`RD-TS-53`)
+  was eaten. The Bite's own content is copied onto it at creation, so a dish that
+  is renamed or deleted leaves every Bite of it intact and readable under that
+  name (`RD-TS-53`). The detail page reads only the restaurant's dietary labels
+  for the dish off the current menu (issue [#2195])
 - `menuItemLinkedBy` - who set `menuItemId` (issue [#2216]): `guest` when the
   Bite's author chose the dish, from an order or from a dish's Create Bite
   button; `verification` when candidate verification grouped the Bite into the
@@ -465,4 +475,5 @@ images/bites/{biteId}/{filename}
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
+[#2195]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2195
 [#2216]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2216

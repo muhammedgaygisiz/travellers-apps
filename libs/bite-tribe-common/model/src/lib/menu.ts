@@ -1,4 +1,4 @@
-import type { DietaryLabel } from './dietary-label';
+import { menuItemDietaryOf, type DietaryLabel } from './dietary-label';
 
 /**
  * A restaurant's menu, and the identity an order line hangs from
@@ -541,3 +541,38 @@ export const findMenuExtraForItem = (
   extraId: string,
 ): ExtraItem | undefined =>
   menuExtrasForItem(menu, itemId).find((extra) => extra.id === extraId);
+
+/**
+ * What the restaurant declares about the dish a Bite is linked to (GitHub
+ * issue #2195), so the Bite can show it beside the creator's own labels.
+ *
+ * A dish with variants declares what holds for every version on the dish and
+ * adds the rest per variant (issue #2194), so a Bite of one variant gets both.
+ * A dish that has since been deleted, or a menu that cannot be read, declares
+ * nothing - the Bite still shows its creator's labels.
+ */
+export const linkedMenuItemDietaryOf = (
+  menu: Menu | undefined,
+  menuItemId: string | undefined,
+  variantId?: string,
+): { labels: DietaryLabel[]; options: DietaryLabel[] } => {
+  const dish = menuItemId ? findMenuItemById(menu, menuItemId) : undefined;
+  const variant = variantId
+    ? dish?.variants?.find((candidate) => candidate.id === variantId)
+    : undefined;
+
+  // Stored data, so a field that is not a list contributes nothing.
+  const listOf = (value: unknown): unknown[] =>
+    Array.isArray(value) ? value : [];
+
+  return menuItemDietaryOf({
+    dietaryLabels: [
+      ...listOf(dish?.dietaryLabels),
+      ...listOf(variant?.dietaryLabels),
+    ],
+    dietaryOptions: [
+      ...listOf(dish?.dietaryOptions),
+      ...listOf(variant?.dietaryOptions),
+    ],
+  });
+};

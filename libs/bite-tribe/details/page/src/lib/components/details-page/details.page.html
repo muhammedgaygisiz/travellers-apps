@@ -240,7 +240,15 @@
           <div class="description">
             <p>{{ biteData.description }}</p>
           </div>
-          } @if (biteData.tags?.length) {
+          }
+          <!-- What the creator says the dish fits, and what the restaurant
+          declares for the linked dish, each naming its source (issue #2195). -->
+          <bt-bite-dietary
+            [creatorLabels]="biteData.dietaryLabels"
+            [restaurantLabels]="menuItemDietary().labels"
+            [restaurantOptions]="menuItemDietary().options"
+          />
+          @if (biteData.tags?.length) {
           <bt-tags-input [readonly]="true" [tags]="biteData.tags" />
           }
         </div>
@@ -486,7 +494,8 @@
       <!-- Where this Bite came from, when it came from a menu (issue #1113).
       The dish's own name is already the heading above, which is the fallback
       the issue asks for: a menu item that has since been deleted or renamed
-      leaves this Bite readable, because nothing here is resolved off the menu.
+      leaves this Bite readable, because its own text is not resolved off the menu
+      - only the restaurant's dietary labels for the dish are (issue #2195).
       The link goes to the restaurant's menu rather than to the item, because
       the menu route resolves itself from the restaurant and a dish that is
       gone would otherwise be a dead address. -->
@@ -600,6 +609,14 @@
       <div class="description ion-margin-vertical">
         <p>{{ biteData?.description }}</p>
       </div>
+      } @if (biteData) {
+      <!-- Each dietary claim names its source (issue #2195). -->
+      <bt-bite-dietary
+        class="ion-margin-bottom"
+        [creatorLabels]="biteData.dietaryLabels"
+        [restaurantLabels]="menuItemDietary().labels"
+        [restaurantOptions]="menuItemDietary().options"
+      />
       }
 
       <div class="map ion-margin-bottom">

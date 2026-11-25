@@ -1,0 +1,59 @@
+/* After the menu's dietary labels (issue #2194). High-risk is marked in the
+   warning colour rather than tertiary, which this theme uses as a light grey
+   surface and which left the chip and the notice unreadable on white. */
+:host {
+  display: block;
+
+  &:empty {
+    display: none;
+  }
+
+  .dietary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.5rem 0;
+  }
+
+  .dietary-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dietary-label {
+    border: 1px solid var(--ion-color-success);
+    border-radius: var(--border-radius);
+    color: var(--ion-color-success-shade);
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .dietary-label-high-risk {
+    border-color: var(--ion-color-warning-shade);
+    color: var(--ion-text-color);
+  }
+
+  .dietary-option {
+    border-style: dashed;
+    border-color: var(--ion-color-medium);
+    color: var(--ion-color-medium-shade);
+  }
+
+  .dietary-source {
+    color: var(--ion-color-medium);
+    font-size: 0.75rem;
+  }
+
+  .dietary-notice {
+    margin: 0;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--ion-color-warning);
+    color: var(--ion-text-color);
+    font-size: 0.8rem;
+  }
+}

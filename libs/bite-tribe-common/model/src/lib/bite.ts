@@ -1,3 +1,4 @@
+import type { DietaryLabel } from './dietary-label';
 import type { Geopoint } from './geopoint';
 import type { Like } from './like';
 import type { PositionSource } from './position-source';
@@ -121,6 +122,17 @@ export interface Bite {
    * first two, `validateBiteTaggedUsersOnWrite` the rest. Absent on most Bites.
    */
   taggedUserIds?: string[];
+  /**
+   * What the creator says the dish they ate fits (GitHub issue #2195), from
+   * the vocabulary in `dietary-label.ts`. Not the free-text {@link tags}:
+   * `#vegan` there stays a tag as typed. It is the creator's claim and is
+   * always shown as theirs, never as fact (`RD-DC-1`); a linked menu item's
+   * own labels are the restaurant's and are shown beside it, not merged in.
+   * Read through `dietaryLabelsOf`, which drops a value the vocabulary does
+   * not know. Written only by the Bite's creator, and never sent to
+   * `explainBite`. Absent or empty on most Bites.
+   */
+  dietaryLabels?: DietaryLabel[];
   rating?: number;
   description?: string;
 

@@ -283,6 +283,24 @@ export const WithTaggedUsers: Story = {
   },
 };
 
+/**
+ * The creator says what the dish fitted, and the restaurant declares its own
+ * labels for the linked dish (issue #2195). Each group names its source, and
+ * the creator's high-risk label carries the confirm-with-the-restaurant notice.
+ */
+export const WithDietaryLabels: Story = {
+  args: {
+    ...Default.args,
+    bite: {
+      ...(Default.args?.bite as Bite),
+      menuItemId: 'item-1',
+      restaurantId: 'restaurant-1',
+      dietaryLabels: ['vegetarian', 'gluten-free'],
+    },
+    menuItemDietary: { labels: ['vegetarian'], options: ['vegan'] },
+  },
+};
+
 /** Past the second name the rest fold into "+N more". */
 export const WithManyTaggedUsers: Story = {
   args: {

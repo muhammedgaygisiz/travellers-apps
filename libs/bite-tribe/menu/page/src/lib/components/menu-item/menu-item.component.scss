@@ -55,9 +55,11 @@
         padding: 0.25rem 0.4rem;
       }
 
+      /* The warning colour, not tertiary: this theme's tertiary is a light
+         grey surface, which left a high-risk label unreadable on white. */
       .dietary-label-high-risk {
-        border-color: var(--ion-color-tertiary);
-        color: var(--ion-color-tertiary-shade);
+        border-color: var(--ion-color-warning-shade);
+        color: var(--ion-text-color);
       }
 
       .dietary-option {

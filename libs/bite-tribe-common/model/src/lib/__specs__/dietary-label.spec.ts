@@ -5,6 +5,7 @@ import {
   isDietaryLabel,
   isRestaurantDietaryStatement,
   menuItemDietaryOf,
+  needsConfirmWithRestaurantNotice,
   RESTAURANT_DIETARY_STATEMENTS,
   restaurantDietaryStatementsOf,
 } from '../dietary-label';
@@ -82,5 +83,22 @@ describe('restaurant dietary statements', () => {
       ]),
     ).toEqual(['fully-plant-based', 'fully-halal']);
     expect(restaurantDietaryStatementsOf(undefined)).toEqual([]);
+  });
+});
+
+/** The confirm-with-the-restaurant notice (GitHub issue #2195, `R-4`). */
+describe('needsConfirmWithRestaurantNotice', () => {
+  it('asks for the notice when any label is high-risk', () => {
+    expect(needsConfirmWithRestaurantNotice(['vegan', 'gluten-free'])).toBe(
+      true,
+    );
+    expect(needsConfirmWithRestaurantNotice(['halal'])).toBe(true);
+  });
+
+  it('needs none for lifestyle labels alone, or for none', () => {
+    expect(needsConfirmWithRestaurantNotice(['vegan', 'vegetarian'])).toBe(
+      false,
+    );
+    expect(needsConfirmWithRestaurantNotice([])).toBe(false);
   });
 });

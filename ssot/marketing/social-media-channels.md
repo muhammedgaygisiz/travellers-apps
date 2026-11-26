@@ -1396,7 +1396,7 @@ generated with ChatGPT. Adelaide (12 November 2026) followed with a surf
 lifesaver Leela, and was the first post whose city page went up with it.
 Zurich (13 November 2026) followed. Cusco (14 November 2026) was the first
 scheduled rather than shared at once: made earlier that evening and set for 22:00
-on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026), Lucerne (20 November 2026), Sousse (21 November 2026), Hamburg (22 November 2026) and Sydney (23 November 2026) were scheduled the same way.
+on Instagram and on the Facebook Page. Phuket (15 November 2026), Porto (16 November 2026), Amman (17 November 2026), Diyarbakır (18 November 2026), Bangkok (19 November 2026), Lucerne (20 November 2026), Sousse (21 November 2026), Hamburg (22 November 2026), Sydney (23 November 2026), Kastamonu (24 November 2026) and Málaga (25 November 2026) were scheduled the same way. Pai (26 November 2026) went up at once, because it was ready only after 22:00.
 The
 [`instagram-city-top5`](../../skills/instagram-city-top5/SKILL.md) skill is how
 an agent makes one: it takes a city, asking for one if none is given, and
@@ -1780,6 +1780,58 @@ the app keep their typos ("Mussles", "Sourdough breed", "Crepe La Saumon
 Fume"), so the admin search used them, while the slides corrected them. The
 city page `/eat/sydney` went up the same afternoon, with no aliases, and its
 Instagram and Facebook post links were added once the posts were live.
+
+**Kastamonu** (24 November 2026, scheduled for 22:00) tags four of five dish
+slides: `@penbehanrestaurant` (a spread of traditional Kastamonu dishes; its
+bio gives the old inn's address in İplikçiler Çarşısı), `@canlilarpastirma`
+(pastırma; canlilarpastirma.com links it and lists the Kastamonu Merkez
+branch, while `@tarihicanlilarpastirma_1923` gives an Istanbul address and was
+left out), `@safranboluzencefil` (zencefilin ekşili kebabı; its posts are
+located at Safranbolu Zencefil Yöresel Lezzetler, the Bite's place) and
+`@bakbiryoresel` (salep ice cream; its bio gives Kastamonu's Bakırcılar
+Çarşısı and sells salep and ice cream). Tabakoğlu Simit Fırını (sade simit)
+has no account and is named in the caption only. Kastamonu itself had only five Bites, so the fourth slide, which the user asked to replace, is a Bite from Safranbolu in the next province. Leela wears an embroidered dark red
+velvet vest over a white blouse and an oya-lace headscarf, and holds a plain
+Kastamonu simit; the cover photo is Nasrullah Square. Leela's cover line is
+"Kastamonu does simit its own way: no sesame, all crunch". The city page
+`/eat/kastamonu` has no aliases, and its post links were added once the posts
+were live.
+
+**Málaga** (25 November 2026, scheduled for 22:00) tags four of five dish
+slides: `@lapecha_2020` (pulguita of oxtail; its bio gives Taberna La Pechá at
+Calle San Lorenzo 21, where the pin is, while `@lapechamalaga` is an unrelated
+Málaga tips account), `@canasytapas` (fried seafood platter; the chain's
+account, whose bio lists Málaga, and its Málaga branch at Calle Granada 51
+matches the pin), `@streetfood_burger` (Gamberra 2.0; the chain's account,
+which lists Málaga and has a Gamberra 2.0 highlight) and `@cortescafemarbella`
+(five tapas; its bio gives Calle Peral 1, Marbella, where the pin is). Carbón
+Carbón (cabezal ibérico) has no account and is named in the caption only.
+Spain had 151 Bites, 25 of them in Málaga. Three of the first five were from
+La Pechá, so two were swapped out; the sangria went for the one Marbella
+Bite; and Cister Catorce's paella was dropped after a Süddeutsche Zeitung
+story named it Europe's worst-reviewed restaurant. The fried seafood platter
+that replaced it is rated three stars, so its slide shows no star row
+(`stars: 0`), at the user's call. Leela wears a red polka-dot flamenco dress
+with a fringed mantón and holds a biznaga, Málaga's jasmine posy; the cover
+photo is the cathedral above a taberna terrace. Leela's cover line is "In
+Málaga I ate my way from tapa to tapa, all the way to Marbella". The city page
+`/eat/malaga` has no aliases, and its post links were added once the posts
+were live.
+
+**Pai** (26 November 2026, posted at once) tags one of five dish slides:
+`@pambokcafe.pai` (mango sticky rice; its bio gives the café by Pambok
+Waterfall and links its Google listing, which matches the Bite's place in
+Thung Yao). Three dishes are from night-market stalls, which have no
+accounts, and Dang's Thai Food (pad thai) has only an Instagram location page.
+Thailand had 209 Bites, 18 of them in Pai; Pai
+was picked over Bari, the strongest Italian city not yet posted, for its
+local street food. No Bite had reactions, so no slide shows any. Leela wears a
+Northern Thai (Lanna) outfit, a white blouse with a woven sash and a frangipani
+in her hair, and holds a grilled sausage on a skewer; the first images showed
+a single tooth, and ChatGPT redrew both without it. The cover photo is Pai
+Canyon at sunset. Leela's cover line is "In Pai I ate my way through the night
+market, one stick at a time". The city page `/eat/pai` went up with both post
+links, and has no aliases.
 
 **Scheduling works from the web.** Instagram web's create dialog has a
 **Schedule content** switch, under the location, that takes a date and a time;

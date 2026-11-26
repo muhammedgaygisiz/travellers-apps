@@ -341,6 +341,27 @@ the follower reaches the owner but the fact that somebody followed. FCM delivers
 it as a processor, so `Data shared` stays none. The permission prompt is
 unchanged. Neither the Apple nutrition labels nor Play's Data safety form change.
 
+### Dietary Choices Change Two Declarations
+
+Since [#2196] a member can store dietary choices on their private `settings/{uid}`
+([UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md)). Some of them - halal, kosher, avoiding pork or
+alcohol, gluten-free, lactose-free, nut-free - reveal religion or health, which GDPR Art. 9
+treats as special-category data, so they are stored only with the member's consent. **The
+two console answers below are not given yet**, and a build that ships the settings section
+needs them first:
+
+| Store | Data type                                                                                                                                         | Answer                                                                                                                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Apple | `Sensitive Info` for the religious choices, `Health` for the intolerances; the lifestyle choices are `Other Data Types`                           | Linked to identity, not used for tracking, App Functionality. Product Personalization joins it with the filters of [#2200]                                     |
+| Play  | `Personal info - Religious or philosophical beliefs`, `Health and fitness - Health info`, and `Personal info - Other info` for the lifestyle ones | Collected, not shared, not ephemeral, optional, App functionality; Personalization with [#2200]. Never Analytics or Advertising, because neither receives them |
+
+What backs those answers: the rules let no other account read the document, no analytics
+event or user property carries a choice (`RD-DC-3`), and `deleteOwnAccount` deletes the
+document. The privacy policy describes the choices in its section `1.5 Dietary Choices`, in
+all fourteen languages. The ad exclusion of [#2201] must keep the `Not shared` answer true
+by never sending the choices to the ad network; whether using them to pick ad categories on
+the device counts as an advertising purpose is a question for that story.
+
 ## The DSA Trader Decision
 
 Declared **non-trader** on 30 August 2026, at account level, covering the 27 EU
@@ -426,3 +447,6 @@ Apple's guidance says to consult a legal advisor where the status is uncertain.
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143
 [#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
 [#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
+[#2196]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2196
+[#2200]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2200
+[#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201

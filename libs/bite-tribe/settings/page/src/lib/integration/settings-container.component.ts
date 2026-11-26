@@ -42,6 +42,7 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       (openPhotoLocationSettings)="service.openPhotoLocationSettings()"
       (hapticsEnabledChange)="service.setHapticsEnabled($event)"
       (soundsEnabledChange)="service.setSoundsEnabled($event)"
+      (dietaryChoicesChange)="service.saveDietaryChoices($event)"
     />
   `,
   imports: [PageSettings],

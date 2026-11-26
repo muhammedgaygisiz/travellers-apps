@@ -1540,7 +1540,47 @@ service cloud.firestore {
     // --------------------------------------------------------------- settings
 
     match /settings/{userId} {
-      allow read, write: if isSelf(userId);
+      /**
+       * The member's dietary choices (issue #2196): known values only, and a
+       * religion or health choice only with the consent timestamp beside it
+       * (`UC - Find Dishes That Fit A Dietary Choice` `R-10`). Withdrawing
+       * consent writes `dietaryConsentAt: null`, which this then refuses
+       * together with any sensitive choice left behind. Kept in step with
+       * `dietary-choice.ts` by `dietary-choices-parity.spec.ts`.
+       */
+      function hasValidDietaryChoices() {
+        let data = request.resource.data;
+
+        return !('dietaryChoices' in data)
+          || (data.dietaryChoices is list
+            && data.dietaryChoices.size() <= 11
+            && data.dietaryChoices.hasOnly([
+              'vegan',
+              'vegetarian',
+              'pescatarian',
+              'alcohol-free',
+              'gluten-free',
+              'lactose-free',
+              'nut-free',
+              'halal',
+              'kosher',
+              'avoids-pork',
+              'avoids-alcohol'
+            ])
+            && (data.get('dietaryConsentAt', null) is string
+              || !data.dietaryChoices.hasAny([
+                'gluten-free',
+                'lactose-free',
+                'nut-free',
+                'halal',
+                'kosher',
+                'avoids-pork',
+                'avoids-alcohol'
+              ])));
+      }
+
+      allow read, delete: if isSelf(userId);
+      allow create, update: if isSelf(userId) && hasValidDietaryChoices();
     }
 
     // ------------------------------------------------- push token index

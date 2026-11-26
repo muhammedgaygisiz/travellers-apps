@@ -8,6 +8,8 @@ export * from './lib/restaurant';
  * business editor, the consumer renderers and the callable alike (issue #2194).
  */
 export * from './lib/dietary-label';
+/** A value export, for the same reason: settings and the rules' parity spec read it (issue #2196). */
+export * from './lib/dietary-choice';
 export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';

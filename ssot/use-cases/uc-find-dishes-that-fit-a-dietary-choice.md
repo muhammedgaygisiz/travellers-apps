@@ -8,8 +8,9 @@ Partly built, under epic [#2193]. The vocabulary and the restaurant's declaratio
 [#2194] exist: an owner declares labels on menu items and statements for the whole
 Restaurant, and the consumer menu and restaurant page show them as declared by the
 restaurant. The creator's labels on a Bite of [#2195] exist too, shown beside the
-restaurant's labels for a linked dish. Nothing else in the flow exists yet - no votes, no
-choices, no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
+restaurant's labels for a linked dish. A member's own dietary choices of [#2196] exist, set in
+settings with consent for the religious and health ones, and nothing reads them yet. Nothing
+else in the flow exists yet - no votes, no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
 nothing filters on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
 it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
 thresholds it depends on are open in `Dietary Choice Questions` in
@@ -64,10 +65,17 @@ Once the behaviour has succeeded:
   the tags, and can clear them again; the field is optional and never blocks Post, offline
   included. The Bite's detail page shows them as what the creator says, and a Bite linked
   to a menu item also shows what the restaurant declares for that dish and its variant,
-  each under its own source line, with neither replacing the other ([#2195]). The rest of
-  this flow is intended.
-- A Bite Creator sets their dietary choices in settings, and gives consent before the first
-  religious or health-related one is saved ([#2196]).
+  each under its own source line, with neither replacing the other ([#2195]).
+- Built: a Bite Creator sets their dietary choices in the `Dietary choices` section of
+  settings, which says what they are used for. A choice is a label of the vocabulary or one of
+  two avoidances without a dish label, avoiding pork and avoiding alcohol. Lifestyle choices
+  are stored as soon as they are tapped. Religion and health choices - every high-risk label
+  and both avoidances - are behind a consent dialog the first time, and nothing is stored if
+  the member does not agree. Withdrawing the consent, from the same section, removes those
+  choices and keeps the lifestyle ones; clearing removes every choice and keeps the consent.
+  Each change is written at once, apart from the preferences form, and a failed write is
+  announced and undone ([#2196]). Onboarding does not offer the section. The rest of this flow
+  is intended.
 - A Bite Creator reading a Bite or a menu item confirms or disputes a label, with a reason
   ([#2197]). The counts update for every reader.
 - When a restaurant's label reaches the dispute threshold, the backend removes it, locks it,
@@ -106,7 +114,10 @@ them. The Bite's labels are creator-scoped like the rest of the Bite, and the ru
 refuse a value outside the vocabulary (`hasValidDietaryLabels()`), votes go
 through a callable that checks eligibility, every count and the removal state are
 backend-only, and restoration is an Operator action. A member's dietary choices live in
-their private settings and no other account reads them. The per-step enforcement is written
+their private settings and no other account reads them: `settings/{uid}` is readable and
+writable by that account alone, and `hasValidDietaryChoices()` refuses a value outside the
+choices and a religion or health choice without `dietaryConsentAt` beside it, so a withdrawn
+consent cannot leave one behind. The per-step enforcement is written
 when the page reaches L2.
 
 ## MVP Classification
@@ -119,7 +130,9 @@ is strictly required for the initial release.
 Relevant in two places. Dietary choices that reveal religion or health are special-category
 data under GDPR Art. 9, so the privacy policy, the App Store privacy nutrition label and the
 Play data-safety form are checked against
-[Implementation - Store Declarations](../implementation/store-declarations.md) before [#2196] ships. The ad
+[Implementation - Store Declarations](../implementation/store-declarations.md) before [#2196] ships. The
+privacy policy says so since [#2196]; the two store forms are console answers, and that page
+records what they must say and that they are still to be given. The ad
 exclusion of [#2201] must hold the ad declarations that epic [#1123] writes, by never sending
 the choices to the ad network. A label from diners about a medical property carries the
 high-risk notice so that it never reads as medical advice.
@@ -155,9 +168,25 @@ Built by [#2195]:
   in step with the vocabulary by `dietary-labels-parity.spec.ts`
 - `explain-bite.spec.ts` - `explainBite` is given no dietary label (`UC-IBD` `R-2`)
 
+Built by [#2196]:
+
+- `libs/bite-tribe-common/model/src/lib/dietary-choice.ts` - the choices, which of them are
+  religion or health, and `dietaryChoicesOf`, which drops a sensitive one without consent;
+  `Settings.dietaryChoices` and `dietaryConsentAt` in `settings.ts`
+- `libs/bite-tribe/settings/page` (`dietary-choices`) - the section, the consent and the
+  withdrawal; `settings.component.ts` carries both fields through a preferences save, which
+  replaces the document
+- `libs/bite-tribe/settings/data-access` - `saveDietaryChoices`, a merge write of the two
+  fields alone; no analytics call anywhere on the path (`R-9`)
+- `apps/bite-tribe-firebase/firestore.rules` - `hasValidDietaryChoices()` on `settings`, kept
+  in step with the model by `dietary-choices-parity.spec.ts`, and its allow and deny cases in
+  `firestore-rules.emulator-spec.ts`
+- `deleteOwnAccount` deletes `settings/{uid}`, and the choices with it
+- `libs/bite-tribe/privacy-policy` - section `1.5 Dietary Choices`, in all fourteen languages
+
 Not implemented yet, the surfaces the later stories will touch:
 
-- `libs/bite-tribe/home/page` and `libs/bite-tribe/settings`
+- `libs/bite-tribe/home/page`, and the readers of the choices
 - `apps/bite-tribe-firebase/functions` - the vote callable and the removal trigger
 - `firestore.indexes.json`
 

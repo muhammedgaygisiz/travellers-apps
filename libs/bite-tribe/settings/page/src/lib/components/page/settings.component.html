@@ -411,6 +411,16 @@
       </form>
     </section>
 
+    <section class="dietary-section" data-testid="settings-dietary">
+      <h2>{{ 'dietary-choices' | transloco }}</h2>
+
+      <bt-dietary-choices
+        [choices]="dietaryChoices()"
+        [consentGiven]="dietaryConsentGiven()"
+        (choicesChange)="dietaryChoicesChange.emit($event)"
+      />
+    </section>
+
     <section class="account-section">
       <h2>{{ 'account' | transloco }}</h2>
 

@@ -11,6 +11,7 @@ import { ToastService } from 'toast';
 import type { PushInstallation, PushPermissionState } from 'push-notifications';
 import type { MediaLocationPermissionState } from 'media-location';
 import type { PushInstallationView } from '../components/page/settings.component';
+import type { DietaryChoicesChange } from '../components/dietary-choices/dietary-choices.component';
 
 @Injectable({
   providedIn: 'root',
@@ -73,6 +74,38 @@ export class SettingsService {
     });
 
     void this.navController.navigateBack(['home']);
+  }
+
+  /**
+   * Stores the member's dietary choices and consent, at once (issue #2196).
+   *
+   * A consent being given is timestamped here, and an existing one keeps its
+   * time; withdrawing writes `null` beside choices that no longer hold a
+   * religion or health one, which the rules require. Success stays silent like
+   * a switch, since the chip moving is the confirmation; a failure is
+   * announced, because the store is put back and the chip moves back too.
+   *
+   * Nothing here reaches analytics: a choice is never an event parameter or a
+   * user property (`RD-DC-3`).
+   */
+  async saveDietaryChoices({
+    choices,
+    consent,
+  }: DietaryChoicesChange): Promise<void> {
+    const consentAt = consent
+      ? (this.settings()?.dietaryConsentAt ?? new Date().toISOString())
+      : null;
+
+    try {
+      await this.dataAccess.saveDietaryChoices(choices, consentAt);
+    } catch (error) {
+      console.warn('Failed to save the dietary choices:', error);
+
+      await this.toast.present({
+        messageKey: 'dietary-choices-change-failed',
+        outcome: 'failure',
+      });
+    }
   }
 
   /**

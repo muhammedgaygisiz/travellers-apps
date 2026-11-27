@@ -10,6 +10,8 @@ export * from './lib/restaurant';
 export * from './lib/dietary-label';
 /** A value export, for the same reason: settings and the rules' parity spec read it (issue #2196). */
 export * from './lib/dietary-choice';
+/** A value export: the vote rules are read by the details page, the menu and the parity spec (issue #2197). */
+export * from './lib/dietary-vote';
 export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';

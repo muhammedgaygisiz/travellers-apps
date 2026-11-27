@@ -23,6 +23,11 @@ import type { Bite, Menu, MenuItem, MenuItemStats, Restaurant } from 'model';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { MenuComponent } from '../menu/menu.component';
+import {
+  NO_MENU_DIETARY_VOTES,
+  type MenuDietaryVoteClick,
+  type MenuDietaryVotes,
+} from '../menu-item/menu-item.component';
 
 @Component({
   selector: 'menu-page',
@@ -75,6 +80,11 @@ export class MenuPage {
 
   biteSignalClick = output<MenuItem>();
   closeBites = output<void>();
+
+  /** What diners said about the dishes' dietary labels (issue #2197). */
+  dietaryVotes = input<MenuDietaryVotes>(NO_MENU_DIETARY_VOTES);
+
+  dietaryVoteClick = output<MenuDietaryVoteClick>();
   readonly goBack = output();
   readonly retryLoad = output();
 

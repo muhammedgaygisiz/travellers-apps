@@ -55,6 +55,35 @@
         padding: 0.25rem 0.4rem;
       }
 
+      .dietary-entry {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* A label diners voted on (issue #2197) takes a row of its own: the
+         chip, then how they split, so the line never wraps beside another
+         label. */
+      .dietary-labels:has(.dietary-entry-voted) {
+        flex: 1 1 100%;
+      }
+
+      .dietary-entry-voted {
+        flex: 1 1 100%;
+
+        bt-dietary-agreement {
+          flex: 1;
+        }
+      }
+
+      /* A label a member can vote on (issue #2197), still read as a chip. */
+      .dietary-label-votable {
+        background: none;
+        font: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
       /* The warning colour, not tertiary: this theme's tertiary is a light
          grey surface, which left a high-risk label unreadable on white. */
       .dietary-label-high-risk {

@@ -301,6 +301,25 @@ export const WithDietaryLabels: Story = {
   },
 };
 
+/**
+ * Diners' votes on the creator's labels (issue #2197): three confirmations
+ * and no dispute move vegetarian under "Reported by diners", a disputed
+ * gluten-free stays the creator's claim with its notice, and the viewer,
+ * not the creator, is offered a vote.
+ */
+export const WithDietaryVotes: Story = {
+  args: {
+    ...WithDietaryLabels.args,
+    userId: 'viewer',
+    menuItemDietary: { labels: [], options: [] },
+    dietaryTallies: {
+      vegetarian: { confirm: 3, dispute: 0 },
+      'gluten-free': { confirm: 2, dispute: 1 },
+    },
+    ownDietaryVotes: { 'gluten-free': 'dispute' },
+  },
+};
+
 /** Past the second name the rest fold into "+N more". */
 export const WithManyTaggedUsers: Story = {
   args: {

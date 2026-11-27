@@ -27,6 +27,9 @@ describe(BiteDietaryComponent.name, () => {
     creatorLabels?: unknown;
     restaurantLabels?: string[];
     restaurantOptions?: string[];
+    tallies?: Record<string, { confirm: number; dispute: number }>;
+    ownVotes?: Record<string, string>;
+    canVote?: boolean;
   }): HTMLElement => {
     Object.entries(inputs).forEach(([name, value]) =>
       fixture.componentRef.setInput(name, value),
@@ -113,6 +116,120 @@ describe(BiteDietaryComponent.name, () => {
         }),
       ),
     ).toBeNull();
+  });
+
+  describe('votes (GitHub issue #2197)', () => {
+    const REPORTED = { confirm: 3, dispute: 0 };
+
+    it('moves a label with three confirmations and no dispute to the diners', () => {
+      const element = render({
+        creatorLabels: ['vegan', 'vegetarian'],
+        tallies: { vegan: REPORTED, vegetarian: { confirm: 2, dispute: 0 } },
+      });
+
+      expect(testIds(element, 'bite-dietary-diners-label-')).toEqual([
+        'bite-dietary-diners-label-vegan',
+      ]);
+      expect(testIds(element, 'bite-dietary-creator-label-')).toEqual([
+        'bite-dietary-creator-label-vegetarian',
+      ]);
+      expect(
+        element.querySelector('[data-testid="bite-dietary-diners-source"]')
+          ?.textContent,
+      ).toContain('dietary-reported-by-diners');
+    });
+
+    it('keeps a disputed label as the creator claim, whatever its count', () => {
+      const element = render({
+        creatorLabels: ['vegan'],
+        tallies: { vegan: { confirm: 9, dispute: 1 } },
+      });
+
+      expect(testIds(element, 'bite-dietary-diners-label-')).toEqual([]);
+      expect(testIds(element, 'bite-dietary-creator-label-')).toEqual([
+        'bite-dietary-creator-label-vegan',
+      ]);
+      expect(element.querySelector('.dietary-rows-plain')).toBeNull();
+      expect(
+        element.querySelector(
+          '[data-testid="bite-dietary-creator-votes-vegan"]',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('keeps the notice on a high-risk label reported by diners', () => {
+      const element = render({
+        creatorLabels: ['gluten-free'],
+        tallies: { 'gluten-free': { confirm: 12, dispute: 0 } },
+      });
+
+      expect(
+        element.querySelector('[data-testid="bite-dietary-diners-notice"]')
+          ?.textContent,
+      ).toContain('dietary-confirm-with-restaurant');
+    });
+
+    it('reports halal only where the restaurant declares it too', () => {
+      expect(
+        testIds(
+          render({ creatorLabels: ['halal'], tallies: { halal: REPORTED } }),
+          'bite-dietary-diners-label-',
+        ),
+      ).toEqual([]);
+      expect(
+        testIds(
+          render({
+            creatorLabels: ['halal'],
+            tallies: { halal: REPORTED },
+            restaurantLabels: ['halal'],
+          }),
+          'bite-dietary-diners-label-',
+        ),
+      ).toEqual(['bite-dietary-diners-label-halal']);
+    });
+
+    it('offers a vote as a thumb on the label row, and says which label and which vote', () => {
+      const clicked: { label: string; vote: string }[] = [];
+
+      fixture.componentInstance.voteClick.subscribe((click) =>
+        clicked.push(click),
+      );
+      const element = render({
+        creatorLabels: ['vegan'],
+        canVote: true,
+        ownVotes: { vegan: 'confirm' },
+      });
+      const row = element.querySelector(
+        '[data-testid="bite-dietary-creator-votes-vegan"]',
+      );
+
+      row
+        ?.querySelector<HTMLButtonElement>(
+          '[data-testid="dietary-vote-dispute"]',
+        )
+        ?.click();
+
+      expect(clicked).toEqual([{ label: 'vegan', vote: 'dispute' }]);
+      expect(element.querySelector('.dietary-rows-plain')).toBeNull();
+      expect(
+        element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
+      ).not.toBeNull();
+      expect(
+        row
+          ?.querySelector('[data-testid="dietary-vote-confirm"]')
+          ?.getAttribute('aria-pressed'),
+      ).toBe('true');
+    });
+
+    it('offers no vote where the viewer may not cast one', () => {
+      const element = render({ creatorLabels: ['vegan'] });
+
+      expect(element.querySelector('button')).toBeNull();
+      expect(element.querySelector('.dietary-rows-plain')).not.toBeNull();
+      expect(
+        element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
+      ).toBeNull();
+    });
   });
 
   it('renders nothing when neither source has a label', () => {

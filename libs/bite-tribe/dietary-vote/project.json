@@ -1,0 +1,8 @@
+{
+  "name": "bite-tribe/dietary-vote",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bite-tribe/dietary-vote/src",
+  "prefix": "bt",
+  "projectType": "library",
+  "tags": ["scope:bite-tribe", "type:ui"]
+}

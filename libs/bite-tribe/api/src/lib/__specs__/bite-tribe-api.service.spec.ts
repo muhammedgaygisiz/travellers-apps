@@ -11,6 +11,7 @@ import { BiteApiService } from '../bite-api/bite-api.service';
 import { SettingsApiService } from '../settings-api/settings-api.service';
 import { ExchangeRatesApiService } from '../exchange-rates-api.service';
 import { BiteTrailApiService } from '../bite-trail-api/bite-trail-api.service';
+import { DietaryVoteApiService } from '../dietary-vote-api/dietary-vote-api.service';
 import { of } from 'rxjs';
 import { BiteTrail, Like } from 'model';
 
@@ -112,6 +113,12 @@ class ExchangeRatesApiMock {
   getExchangeRates = jest.fn();
 }
 
+class DietaryVoteApiMock {
+  voteDietaryLabel = jest.fn().mockResolvedValue({ status: 'saved' });
+  tallies$ = jest.fn().mockReturnValue(of({}));
+  loadOwnVotes = jest.fn().mockResolvedValue({});
+}
+
 class BiteTrailApiMock {
   createBiteTrail = jest.fn().mockResolvedValue(undefined);
   photoVerdict$ = jest.fn();
@@ -132,6 +139,7 @@ describe(BiteTribeApiService.name, () => {
         { provide: SettingsApiService, useClass: SettingsApiMock },
         { provide: ExchangeRatesApiService, useClass: ExchangeRatesApiMock },
         { provide: BiteTrailApiService, useClass: BiteTrailApiMock },
+        { provide: DietaryVoteApiService, useClass: DietaryVoteApiMock },
         provideMockStore(),
       ],
     }).compileComponents();
@@ -182,6 +190,28 @@ describe(BiteTribeApiService.name, () => {
           .mockReturnValue(Promise.resolve({ USD: 1, EUR: 0.85 }));
         service.getExchangeRates();
         expect(getExchangeRatesSpy).toHaveBeenCalledTimes(1);
+      },
+    ));
+  });
+
+  /** Diners' votes on dietary labels (GitHub issue #2197). */
+  describe('dietary votes', () => {
+    it('passes the vote, the counts and the own votes through', inject(
+      [BiteTribeApiService, DietaryVoteApiService],
+      async (service: BiteTribeApiService, votes: DietaryVoteApiMock) => {
+        const request = {
+          target: { type: 'bite', biteId: 'b1' },
+          label: 'vegan',
+          vote: 'confirm',
+        } as const;
+
+        await service.voteDietaryLabel(request);
+        service.dietaryLabelTallies$('bite__b1');
+        await service.loadOwnDietaryVotes('bite__b1', 'u1');
+
+        expect(votes.voteDietaryLabel).toHaveBeenCalledWith(request);
+        expect(votes.tallies$).toHaveBeenCalledWith('bite__b1');
+        expect(votes.loadOwnVotes).toHaveBeenCalledWith('bite__b1', 'u1');
       },
     ));
   });

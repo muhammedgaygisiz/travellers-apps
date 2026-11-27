@@ -10,7 +10,12 @@ import {
 import type { Menu, MenuItem, MenuItemStats } from 'model';
 import { IonReorderGroup } from '@ionic/angular/standalone';
 import { CategoryComponent } from '../category/category.component';
-import type { MenuItemSelection } from '../menu-item/menu-item.component';
+import {
+  NO_MENU_DIETARY_VOTES,
+  type MenuDietaryVoteClick,
+  type MenuDietaryVotes,
+  type MenuItemSelection,
+} from '../menu-item/menu-item.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
@@ -72,6 +77,14 @@ export class MenuComponent {
 
   /** Somebody wants to read what people said about one dish. */
   biteSignalClick = output<MenuItem>();
+
+  /**
+   * What diners said about the dishes' dietary labels (issue #2197). Off by
+   * default, so the public menu and the ordering screen offer no vote.
+   */
+  dietaryVotes = input<MenuDietaryVotes>(NO_MENU_DIETARY_VOTES);
+
+  dietaryVoteClick = output<MenuDietaryVoteClick>();
 
   /** The dish, and the size where the guest chose one. */
   addToCartClick = output<MenuItemSelection>();

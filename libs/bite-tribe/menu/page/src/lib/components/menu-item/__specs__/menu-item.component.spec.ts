@@ -681,5 +681,86 @@ describe('MenuItemComponent', () => {
         'menu-item-dietary-label-vegan',
       ]);
     });
+
+    describe('votes (GitHub issue #2197)', () => {
+      it('shows what diners said, and offers no vote by default', () => {
+        fixture.componentRef.setInput('dietaryVotes', {
+          tallies: { d1: { vegan: { confirm: 4, dispute: 1 } } },
+          own: {},
+          canVote: false,
+        });
+        const element = render({ dietaryLabels: ['vegan'] });
+
+        expect(element.querySelector('button.dietary-label')).toBeNull();
+        expect(
+          element.querySelector('[data-testid="dietary-agreement-text"]'),
+        ).not.toBeNull();
+        expect(element.querySelector('.dietary-entry-voted')).not.toBeNull();
+      });
+
+      it('keeps a label nobody voted on as a plain chip', () => {
+        const element = render({ dietaryLabels: ['vegan'] });
+
+        expect(element.querySelector('.dietary-entry-voted')).toBeNull();
+        expect(
+          element.querySelector('[data-testid="dietary-agreement-text"]'),
+        ).toBeNull();
+      });
+
+      it('emits the dish and the label a member taps, a variant included', () => {
+        const clicks: { item: MenuItem; label: string }[] = [];
+
+        fixture.componentInstance.dietaryVoteClick.subscribe((click) =>
+          clicks.push(click),
+        );
+        fixture.componentRef.setInput('dietaryVotes', {
+          tallies: { v1: { vegan: { confirm: 0, dispute: 1 } } },
+          own: { v1: { vegan: 'dispute' } },
+          canVote: true,
+        });
+        const element = render({
+          dietaryLabels: ['halal'],
+          variants: [
+            {
+              id: 'v1',
+              name: 'Tofu',
+              description: '',
+              price: 12,
+              dietaryLabels: ['vegan'],
+            },
+          ],
+        });
+
+        element
+          .querySelector<HTMLButtonElement>(
+            'button[data-testid="menu-item-dietary-label-halal"]',
+          )
+          ?.click();
+        element
+          .querySelector<HTMLButtonElement>(
+            'button[data-testid="menu-item-dietary-label-vegan"]',
+          )
+          ?.click();
+
+        expect(clicks.map(({ item, label }) => [item.id, label])).toEqual([
+          ['d1', 'halal'],
+          ['v1', 'vegan'],
+        ]);
+        expect(
+          element.querySelector('[data-testid="dietary-agreement-own"]'),
+        ).not.toBeNull();
+      });
+
+      it('offers no vote on a row without an id', () => {
+        fixture.componentRef.setInput('dietaryVotes', {
+          tallies: {},
+          own: {},
+          canVote: true,
+        });
+        const element = render({ id: '', dietaryLabels: ['vegan'] });
+
+        expect(element.querySelector('button.dietary-label')).toBeNull();
+      });
+    });
   });
 });

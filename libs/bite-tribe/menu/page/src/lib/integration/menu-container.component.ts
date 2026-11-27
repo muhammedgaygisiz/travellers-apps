@@ -20,6 +20,8 @@ import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
       [isMenuLoading]="service.isMenuLoading()"
       [isMenuUnavailable]="service.isMenuUnavailable()"
       [stats]="service.stats()"
+      [dietaryVotes]="service.dietaryVotes()"
+      (dietaryVoteClick)="service.voteDietaryLabel($event)"
       [selectedDish]="service.selectedDish()"
       [dishBites]="service.bitesForDish()"
       [isLoadingBites]="service.isLoadingBites()"
@@ -49,7 +51,10 @@ export class MenuContainer {
       const restaurantId = this.restaurantId();
 
       if (restaurantId) {
-        untracked(() => void this.service.loadStats());
+        untracked(() => {
+          void this.service.loadStats();
+          void this.service.loadOwnDietaryVotes();
+        });
       }
     });
   }

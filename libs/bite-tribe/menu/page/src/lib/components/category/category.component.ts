@@ -15,6 +15,9 @@ import { formatMoney } from 'utils';
 import type { Category, ExtraItem, MenuItem, MenuItemStats } from 'model';
 import {
   MenuItemComponent,
+  NO_MENU_DIETARY_VOTES,
+  type MenuDietaryVoteClick,
+  type MenuDietaryVotes,
   type MenuItemSelection,
 } from '../menu-item/menu-item.component';
 
@@ -53,6 +56,11 @@ export class CategoryComponent {
 
   /** Somebody wants to read what people said about one dish. */
   biteSignalClick = output<MenuItem>();
+
+  /** Threaded to the items (issue #2197). */
+  dietaryVotes = input<MenuDietaryVotes>(NO_MENU_DIETARY_VOTES);
+
+  dietaryVoteClick = output<MenuDietaryVoteClick>();
 
   addToCartClick = output<MenuItemSelection>();
 

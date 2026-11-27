@@ -26,6 +26,8 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       [biteCreator]="service.biteCreatorValue()"
       [taggedUsers]="service.taggedUsers()"
       [menuItemDietary]="service.menuItemDietary()"
+      [dietaryTallies]="service.dietaryTallies()"
+      [ownDietaryVotes]="service.ownDietaryVotes()"
       [biteNotFound]="service.biteNotFound()"
       [biteUnavailable]="service.biteUnavailable()"
       (goBack)="service.goBack()"
@@ -51,6 +53,7 @@ import { CoachMarkComponent } from 'bite-tribe/coach-mark';
       (reportReview)="service.reportReview($event)"
       (removeSelfFromTags)="service.removeSelfFromBiteTags($event)"
       (explainBite)="service.explainBite($event)"
+      (dietaryVoteClick)="service.voteDietaryLabel($event)"
     />
 
     <bt-coach-mark

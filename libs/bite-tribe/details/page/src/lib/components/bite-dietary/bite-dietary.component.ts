@@ -3,14 +3,28 @@ import {
   Component,
   computed,
   input,
+  output,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { DietaryVoteButtonsComponent } from 'bite-tribe/dietary-vote';
 import {
+  creatorLabelsBySource,
   dietaryLabelClass,
   dietaryLabelsOf,
   needsConfirmWithRestaurantNotice,
   type DietaryLabel,
+  type DietaryLabelTallies,
+  type DietaryLabelTally,
+  type DietaryOwnVotes,
+  type DietaryVote,
 } from 'model';
+
+/** A thumb tapped on one of the creator's labels (issue #2197). */
+export interface DietaryVoteClick {
+  label: DietaryLabel;
+  vote: DietaryVote;
+}
 
 /**
  * The dietary labels on a Bite's detail page (GitHub issue #2195), one group
@@ -23,13 +37,20 @@ import {
  * notice to confirm with the restaurant (`R-4`, `RD-DC-5`). The restaurant's
  * own declaration does not.
  *
+ * Diners confirm or dispute the creator's labels (GitHub issue #2197). A
+ * label with enough confirmations and no dispute moves out of the creator's
+ * group into one reported by diners, and a high-risk one there still carries
+ * the notice, whatever its count. Each of those labels is a row with a thumb
+ * up and a thumb down and their counts, and a viewer offered a vote taps one
+ * to cast it.
+ *
  * Renders nothing when neither source has a label (`Absent Field Contract`).
  */
 @Component({
   selector: 'bt-bite-dietary',
   templateUrl: './bite-dietary.component.html',
   styleUrl: './bite-dietary.component.scss',
-  imports: [TranslocoPipe],
+  imports: [DietaryVoteButtonsComponent, NgTemplateOutlet, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteDietaryComponent {
@@ -41,12 +62,44 @@ export class BiteDietaryComponent {
 
   restaurantOptions = input<readonly DietaryLabel[]>([]);
 
-  protected readonly creator = computed(() =>
-    dietaryLabelsOf(this.creatorLabels()),
-  );
+  /** What diners said about the creator's labels (issue #2197). */
+  tallies = input<DietaryLabelTallies>({});
+
+  /** The viewer's own votes on them. */
+  ownVotes = input<DietaryOwnVotes>({});
+
+  /** Whether the viewer is offered a vote on the creator's labels. */
+  canVote = input(false);
+
+  /** The viewer tapped a thumb to confirm or dispute a label. */
+  readonly voteClick = output<DietaryVoteClick>();
 
   protected readonly restaurant = computed(() =>
     dietaryLabelsOf(this.restaurantLabels()),
+  );
+
+  private readonly bySource = computed(() =>
+    creatorLabelsBySource(
+      this.creatorLabels(),
+      this.tallies(),
+      this.restaurant(),
+    ),
+  );
+
+  /** The creator's labels diners have reported, as reported by diners. */
+  protected readonly reported = computed(() => this.bySource().reported);
+
+  /** The creator's labels that are still only their claim. */
+  protected readonly creator = computed(() => this.bySource().creator);
+
+  /**
+   * Diners' high-risk labels the restaurant does not declare carry the
+   * notice however many diners confirm them (`R-4`).
+   */
+  protected readonly showsDinersNotice = computed(() =>
+    needsConfirmWithRestaurantNotice(
+      this.reported().filter((label) => !this.restaurant().includes(label)),
+    ),
   );
 
   protected readonly options = computed(() =>
@@ -68,6 +121,29 @@ export class BiteDietaryComponent {
       this.creator().filter((label) => !this.restaurant().includes(label)),
     ),
   );
+
+  /**
+   * Whether the labels get their rows: once there is a thumb to tap or a
+   * count to show. Until then they stay plain chips, as before any vote.
+   */
+  protected readonly showsVoteRows = computed(
+    () =>
+      this.canVote() ||
+      [...this.reported(), ...this.creator()].some(
+        (label) =>
+          (this.tallies()[label]?.confirm ?? 0) +
+            (this.tallies()[label]?.dispute ?? 0) >
+          0,
+      ),
+  );
+
+  protected tallyOf(label: DietaryLabel): DietaryLabelTally | undefined {
+    return this.tallies()[label];
+  }
+
+  protected ownVoteOf(label: DietaryLabel): DietaryVote | undefined {
+    return this.ownVotes()[label];
+  }
 
   protected isHighRisk(label: DietaryLabel): boolean {
     return dietaryLabelClass(label) === 'high-risk';

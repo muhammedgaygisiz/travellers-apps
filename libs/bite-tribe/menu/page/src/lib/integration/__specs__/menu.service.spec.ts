@@ -1,11 +1,16 @@
 jest.mock('bite-tribe/menu-data-access', () => ({
   MenuDataAccessService: jest.fn(),
 }));
+jest.mock('bite-tribe/dietary-vote', () => ({
+  DietaryVotePromptService: jest.fn(),
+}));
 
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavController } from '@ionic/angular';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
+import { DietaryVotePromptService } from 'bite-tribe/dietary-vote';
+import { BehaviorSubject } from 'rxjs';
 import type { Bite, Menu, MenuItem, Restaurant } from 'model';
 import { MenuService } from '../menu.service';
 
@@ -26,6 +31,8 @@ describe(MenuService.name, () => {
   let back: jest.Mock;
   let restaurant: ReturnType<typeof signal<Restaurant | undefined>>;
   let dataAccess: Record<string, unknown>;
+  let tallies: BehaviorSubject<Record<string, unknown>>;
+  let prompt: { run: jest.Mock };
 
   beforeEach(() => {
     menu = signal<Menu | undefined>(undefined);
@@ -46,6 +53,20 @@ describe(MenuService.name, () => {
       loadBitesForMenuItem: jest.fn().mockResolvedValue([{ id: 'b-1' }]),
       saveMenu: jest.fn().mockResolvedValue(undefined),
       retryMenuLoad: jest.fn(),
+      isAuthenticated: signal(true),
+      dietaryLabelTallies$: jest.fn(() => tallies),
+      loadOwnDietaryVotes: jest
+        .fn()
+        .mockResolvedValue({ 'item-1': { vegan: 'confirm' } }),
+      voteDietaryLabel: jest.fn().mockResolvedValue({ status: 'saved' }),
+    };
+    tallies = new BehaviorSubject<Record<string, unknown>>({
+      'item-1': { vegan: { confirm: 2, dispute: 0 } },
+    });
+    prompt = {
+      run: jest.fn(async (_label, _own, send) =>
+        send({ vote: 'dispute', reason: 'animal-product' }),
+      ),
     };
 
     TestBed.configureTestingModule({
@@ -53,6 +74,7 @@ describe(MenuService.name, () => {
         MenuService,
         { provide: MenuDataAccessService, useValue: dataAccess },
         { provide: NavController, useValue: { navigateForward, back } },
+        { provide: DietaryVotePromptService, useValue: prompt },
       ],
     });
     service = TestBed.inject(MenuService);
@@ -160,5 +182,64 @@ describe(MenuService.name, () => {
       }),
     );
     expect(preparedBite()).not.toHaveProperty('menuItemId');
+  });
+
+  /** Diners' votes on the dishes' dietary labels (GitHub issue #2197). */
+  describe('dietary votes', () => {
+    it("carries the restaurant's counts, the own votes and the offer to vote", async () => {
+      await service.loadOwnDietaryVotes();
+      TestBed.tick();
+
+      expect(dataAccess['dietaryLabelTallies$']).toHaveBeenCalledWith('r-1');
+      expect(service.dietaryVotes()).toEqual({
+        tallies: { 'item-1': { vegan: { confirm: 2, dispute: 0 } } },
+        own: { 'item-1': { vegan: 'confirm' } },
+        canVote: true,
+      });
+    });
+
+    it('sends a vote on the dish and reads the own votes again', async () => {
+      await service.loadOwnDietaryVotes();
+
+      await service.voteDietaryLabel({ item: ITEM, label: 'vegan' });
+
+      expect(prompt.run).toHaveBeenCalledWith(
+        'vegan',
+        'confirm',
+        expect.any(Function),
+      );
+      expect(dataAccess['voteDietaryLabel']).toHaveBeenCalledWith({
+        target: { type: 'menuItem', restaurantId: 'r-1', menuItemId: 'item-1' },
+        label: 'vegan',
+        vote: 'dispute',
+        reason: 'animal-product',
+      });
+      expect(dataAccess['loadOwnDietaryVotes']).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not read the votes again when the vote did not count', async () => {
+      prompt.run.mockResolvedValue({
+        status: 'ineligible',
+        reason: 'own-bite',
+      });
+
+      await service.voteDietaryLabel({ item: ITEM, label: 'vegan' });
+
+      expect(dataAccess['loadOwnDietaryVotes']).not.toHaveBeenCalled();
+    });
+
+    it('offers nothing without a restaurant or a dish id', async () => {
+      await service.voteDietaryLabel({
+        item: { name: 'No id' } as MenuItem,
+        label: 'vegan',
+      });
+      restaurant.set(undefined);
+      await service.voteDietaryLabel({ item: ITEM, label: 'vegan' });
+      await service.loadOwnDietaryVotes();
+
+      expect(prompt.run).not.toHaveBeenCalled();
+      expect(dataAccess['loadOwnDietaryVotes']).not.toHaveBeenCalled();
+      expect(service.dietaryVotes().own).toEqual({});
+    });
   });
 });

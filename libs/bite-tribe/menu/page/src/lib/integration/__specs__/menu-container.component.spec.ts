@@ -17,6 +17,7 @@ import { MenuService } from '../menu.service';
 describe(MenuContainer.name, () => {
   let restaurant: ReturnType<typeof signal<Restaurant | undefined>>;
   let loadStats: jest.Mock;
+  let loadOwnDietaryVotes: jest.Mock;
 
   const create = (): ComponentFixture<MenuContainer> => {
     const fixture = TestBed.createComponent(MenuContainer);
@@ -28,10 +29,14 @@ describe(MenuContainer.name, () => {
   beforeEach(() => {
     restaurant = signal<Restaurant | undefined>(undefined);
     loadStats = jest.fn().mockResolvedValue(undefined);
+    loadOwnDietaryVotes = jest.fn().mockResolvedValue(undefined);
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: MenuService, useValue: { restaurant, loadStats } },
+        {
+          provide: MenuService,
+          useValue: { restaurant, loadStats, loadOwnDietaryVotes },
+        },
       ],
     });
     TestBed.overrideComponent(MenuContainer, {
@@ -48,6 +53,8 @@ describe(MenuContainer.name, () => {
     fixture.detectChanges();
 
     expect(loadStats).toHaveBeenCalledTimes(1);
+    // The member's own dietary votes are read with them (issue #2197).
+    expect(loadOwnDietaryVotes).toHaveBeenCalledTimes(1);
   });
 
   it('reads them straight away when the restaurant is already loaded', () => {

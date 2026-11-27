@@ -18,6 +18,8 @@ import {
   BiteReportReason,
   Bucketlist,
   DietaryLabel,
+  DietaryLabelTallies,
+  DietaryOwnVotes,
   isListableBite,
   LikeClick,
   PublicUser,
@@ -63,7 +65,10 @@ import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { TaggedUsersComponent } from '../tagged-users/tagged-users.component';
-import { BiteDietaryComponent } from '../bite-dietary/bite-dietary.component';
+import {
+  BiteDietaryComponent,
+  type DietaryVoteClick,
+} from '../bite-dietary/bite-dietary.component';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
@@ -159,6 +164,24 @@ export class DetailsPage {
     labels: DietaryLabel[];
     options: DietaryLabel[];
   }>({ labels: [], options: [] });
+
+  /** What diners said about the creator's labels (issue #2197). */
+  dietaryTallies = input<DietaryLabelTallies>({});
+
+  /** The viewer's own votes on them. */
+  ownDietaryVotes = input<DietaryOwnVotes>({});
+
+  /**
+   * Whether the viewer is offered a vote: a signed-in member reading
+   * somebody else's Bite. The callable decides the rest of who may.
+   */
+  protected readonly canVoteDietary = computed(() => {
+    const bite = this.bite();
+
+    return (
+      this.isAuthenticated() && !!bite?.id && bite.userId !== this.userId()
+    );
+  });
   position = input<Position>();
   exchangeRates = input<Record<string, number>>();
   preferredCurrency = input<string>();
@@ -218,6 +241,9 @@ export class DetailsPage {
 
   /** Opens the AI explanation of the Bite's dish (issue #2106). */
   readonly explainBite = output<Bite>();
+
+  /** The viewer confirms or disputes one of the creator's labels (#2197). */
+  readonly dietaryVoteClick = output<DietaryVoteClick>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);

@@ -533,7 +533,7 @@ export class DetailsDataAccessService {
   /** The viewer's own votes on one Bite's labels, none when unread. */
   ownDietaryVotesLoader: ResourceLoader<
     DietaryOwnVotes,
-    { biteId: string; uid: string }
+    { biteId: string; uid: string } | undefined
   > = async ({ params }) => {
     const votes = await this.api.loadOwnDietaryVotes(
       dietaryVoteScopeKey({ type: 'bite', biteId: params.biteId }),

@@ -16,6 +16,7 @@ import { deleteUserReportsForUser } from './user-report';
 import { removeReviewsByAuthor } from '../reviews/delete-review';
 import { deleteReviewReportsForAccount } from '../reviews/review-report';
 import { deleteHiddenReviewsForAccount } from '../reviews/hidden-review';
+import { deleteDietaryLabelVotesByUser } from '../dietary/dietary-votes';
 import { RESTAURANT_STAFF_COLLECTION } from '../restaurants/restaurant-authority';
 import { releaseRestaurantsOwnedBy } from '../restaurants/restaurant-ownership';
 import { onAppCheck } from '../shared/callable-options';
@@ -636,6 +637,8 @@ export const deleteAccountForUser = async (
     const deletedUserReports = await deleteUserReportsForUser(db, uid);
     const deletedReviewReports = await deleteReviewReportsForAccount(db, uid);
     const deletedHiddenReviews = await deleteHiddenReviewsForAccount(db, uid);
+    // Votes on dietary labels, with the counts corrected (issue #2197).
+    const deletedDietaryVotes = await deleteDietaryLabelVotesByUser(db, uid);
 
     await deleteSettingsForUser(db, uid);
     await deleteFollowUpRecordsForUser(db, uid);
@@ -671,6 +674,7 @@ export const deleteAccountForUser = async (
         deletedUserReports,
         deletedReviewReports,
         deletedHiddenReviews,
+        deletedDietaryVotes,
       },
       { merge: true },
     );
@@ -696,6 +700,7 @@ export const deleteAccountForUser = async (
       deletedUserReports,
       deletedReviewReports,
       deletedHiddenReviews,
+      deletedDietaryVotes,
     });
 
     return { status: 'completed' };

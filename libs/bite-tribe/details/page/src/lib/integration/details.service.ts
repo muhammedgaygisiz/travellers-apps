@@ -28,6 +28,7 @@ import {
   Bite,
   BiteReportReason,
   Bucketlist,
+  DietaryLabel,
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
@@ -40,6 +41,7 @@ import {
 } from '@ionic/angular/standalone';
 import { isContentRefused, PATH } from 'utils';
 import { ToastService } from 'toast';
+import { DietaryVotePromptService } from 'bite-tribe/dietary-vote';
 import {
   BiteExplanationComponent,
   type BiteExplanationState,
@@ -155,6 +157,7 @@ export class DetailsService {
   private readonly modalController = inject(ModalController);
   private readonly transloco = inject(TranslocoService);
   private readonly analytics = inject(AnalyticsService);
+  private readonly dietaryVotePrompt = inject(DietaryVotePromptService);
   private readonly explanationDataAccess = inject(
     BiteExplanationDataAccessService,
   );
@@ -169,6 +172,8 @@ export class DetailsService {
   biteCreatorValue = this.dataAccess.biteCreatorValue;
   taggedUsers = this.dataAccess.taggedUsers;
   menuItemDietary = this.dataAccess.menuItemDietary;
+  dietaryTallies = this.dataAccess.biteDietaryTallies;
+  ownDietaryVotes = this.dataAccess.ownDietaryVotes;
   reviewThreads = this.dataAccess.reviewThreads;
   highlightedThreadId = this.dataAccess.highlightedThreadId;
   bucketlists = this.dataAccess.bucketlists;
@@ -466,6 +471,19 @@ export class DetailsService {
 
     await modal.present();
     await ask();
+  }
+
+  /**
+   * Confirms or disputes one of the creator's labels (GitHub issue #2197):
+   * asks, sends and says what came of it, including why an ineligible
+   * account was refused.
+   */
+  async voteDietaryLabel(label: DietaryLabel): Promise<void> {
+    await this.dietaryVotePrompt.run(
+      label,
+      this.ownDietaryVotes()[label],
+      (choice) => this.dataAccess.voteDietaryLabel({ label, ...choice }),
+    );
   }
 
   async reportBite(report: {

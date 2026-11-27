@@ -17,6 +17,9 @@ describe(MenuDataAccessService.name, () => {
     loadBitesForMenuItem: jest.Mock;
     loadBitesForRestaurant: jest.Mock;
     linkBiteToMenuItem: jest.Mock;
+    dietaryLabelTallies$: jest.Mock;
+    loadOwnDietaryVotes: jest.Mock;
+    voteDietaryLabel: jest.Mock;
   };
   let storeMock: {
     bite$: Observable<unknown>;
@@ -27,6 +30,8 @@ describe(MenuDataAccessService.name, () => {
     restaurantIdFromUrl: jest.Mock;
     cacheBite: jest.Mock;
     retryMenuLoad: jest.Mock;
+    userId$: Observable<string>;
+    isAuthenticated$: Observable<boolean>;
   };
 
   beforeEach(() => {
@@ -37,6 +42,9 @@ describe(MenuDataAccessService.name, () => {
       loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
       loadBitesForRestaurant: jest.fn().mockResolvedValue([]),
       linkBiteToMenuItem: jest.fn().mockResolvedValue({}),
+      dietaryLabelTallies$: jest.fn().mockReturnValue(of({})),
+      loadOwnDietaryVotes: jest.fn().mockResolvedValue({ m1: {} }),
+      voteDietaryLabel: jest.fn().mockResolvedValue({ status: 'saved' }),
     };
     storeMock = {
       bite$: of(),
@@ -47,6 +55,8 @@ describe(MenuDataAccessService.name, () => {
       restaurantIdFromUrl: jest.fn().mockReturnValue('restaurant-1'),
       cacheBite: jest.fn(),
       retryMenuLoad: jest.fn(),
+      userId$: of('member-1'),
+      isAuthenticated$: of(true),
     };
 
     TestBed.configureTestingModule({
@@ -234,6 +244,37 @@ describe(MenuDataAccessService.name, () => {
         biteId: 'b1',
         notOnMenu: true,
       });
+    });
+  });
+
+  /** Diners' votes on the dishes' dietary labels (GitHub issue #2197). */
+  describe('dietary votes', () => {
+    it("reads the restaurant's menu scope, live", () => {
+      service.dietaryLabelTallies$('r1');
+
+      expect(apiMock.dietaryLabelTallies$).toHaveBeenCalledWith('menu__r1');
+    });
+
+    it("reads the member's own votes in that scope", async () => {
+      await expect(service.loadOwnDietaryVotes('r1')).resolves.toEqual({
+        m1: {},
+      });
+      expect(apiMock.loadOwnDietaryVotes).toHaveBeenCalledWith(
+        'menu__r1',
+        'member-1',
+      );
+    });
+
+    it('passes a vote through to the api', async () => {
+      const request = {
+        target: { type: 'menuItem', restaurantId: 'r1', menuItemId: 'm1' },
+        label: 'vegan',
+        vote: 'confirm',
+      } as const;
+
+      await service.voteDietaryLabel(request);
+
+      expect(apiMock.voteDietaryLabel).toHaveBeenCalledWith(request);
     });
   });
 });

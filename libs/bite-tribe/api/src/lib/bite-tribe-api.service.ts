@@ -12,6 +12,8 @@ import {
   CreateAndUploadImageCallbackParams,
   CreateBucketListFromBiteTrailParams,
   DaySchedule,
+  DietaryLabelTallies,
+  DietaryOwnVotes,
   FolderPhotoVerdict,
   Geopoint,
   GooglePlace,
@@ -36,6 +38,8 @@ import {
   Settings,
   TableOrderingSettings,
   UserReportReason,
+  VoteDietaryLabelRequest,
+  VoteDietaryLabelResult,
   ReviewReportReason,
   WeekRange,
   WeeklyBites,
@@ -60,6 +64,7 @@ import {
 import { ExchangeRatesApiService } from './exchange-rates-api.service';
 import { BiteTrailApiService } from './bite-trail-api/bite-trail-api.service';
 import { LeaderboardApiService } from './leaderboard-api/leaderboard-api.service';
+import { DietaryVoteApiService } from './dietary-vote-api/dietary-vote-api.service';
 import type { LocalImageFile } from './utils/local-image-file';
 import { Observable } from 'rxjs';
 
@@ -79,11 +84,34 @@ export class BiteTribeApiService {
   private readonly exchangeRatesApiService = inject(ExchangeRatesApiService);
   private readonly biteTrailApiService = inject(BiteTrailApiService);
   private readonly leaderboardApiService = inject(LeaderboardApiService);
+  private readonly dietaryVoteApiService = inject(DietaryVoteApiService);
 
   publicProfile$ = this.profileApiService.publicProfile$;
 
   /** The running week's leaderboard, live; see `LeaderboardApiService`. */
   weeklyLeaderboard$ = this.leaderboardApiService.weeklyLeaderboard$;
+
+  /** Confirms or disputes a dietary label (issue #2197). */
+  voteDietaryLabel(
+    request: VoteDietaryLabelRequest,
+  ): Promise<VoteDietaryLabelResult> {
+    return this.dietaryVoteApiService.voteDietaryLabel(request);
+  }
+
+  /** A Bite's or a menu's dietary label counts, live (issue #2197). */
+  dietaryLabelTallies$(
+    scopeKey: string,
+  ): Observable<Record<string, DietaryLabelTallies>> {
+    return this.dietaryVoteApiService.tallies$(scopeKey);
+  }
+
+  /** The caller's own dietary votes in a scope (issue #2197). */
+  loadOwnDietaryVotes(
+    scopeKey: string,
+    uid: string,
+  ): Promise<Record<string, DietaryOwnVotes>> {
+    return this.dietaryVoteApiService.loadOwnVotes(scopeKey, uid);
+  }
 
   loadSettings(): Promise<Settings> {
     return this.settingsApiService.loadSettingsByUserId();

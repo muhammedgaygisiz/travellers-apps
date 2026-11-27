@@ -15,11 +15,15 @@ import {
 } from 'bite-tribe/api';
 import { CrashReportingService } from 'ta-firestore';
 import { resourceValue, sharedBiteUrl } from 'utils';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   Bite,
   BiteReportReason,
   DietaryLabel,
+  DietaryLabelTallies,
+  DietaryOwnVotes,
+  dietaryVoteScopeKey,
+  DietaryVoteTarget,
   linkedMenuItemDietaryOf,
   Like,
   LikeClick,
@@ -29,13 +33,15 @@ import {
   ReportReviewResult,
   ReviewReportReason,
   SaveToBucketListParams,
+  VoteDietaryLabelRequest,
+  VoteDietaryLabelResult,
 } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { Position } from '@capacitor/geolocation';
 import { Share } from '@capacitor/share';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { lastValueFrom } from 'rxjs';
+import { distinctUntilChanged, lastValueFrom, of, switchMap } from 'rxjs';
 import { getCurrentPosition } from 'geolocation';
 import { retry, withTimeout } from './async-retry';
 import { BiteNotFoundError } from './bite-not-found-error';
@@ -487,6 +493,88 @@ export class DetailsDataAccessService {
     this.menuItemDietaryResource,
     NO_MENU_ITEM_DIETARY,
   );
+
+  /** The Bite on screen as a vote target, or nothing (issue #2197). */
+  private readonly voteTarget = computed<
+    Extract<DietaryVoteTarget, { type: 'bite' }> | undefined
+  >(
+    () => {
+      const biteId = this.biteValue()?.id;
+
+      return biteId ? { type: 'bite', biteId } : undefined;
+    },
+    { equal: (a, b) => a?.biteId === b?.biteId },
+  );
+
+  /**
+   * What diners said about the creator's labels (GitHub issue #2197), live,
+   * so a vote anybody casts reaches this page while it is open. A Bite
+   * nobody voted on, and a failed listener, have no counts.
+   */
+  dietaryTallies = toSignal(
+    toObservable(this.voteTarget).pipe(
+      distinctUntilChanged((a, b) => a?.biteId === b?.biteId),
+      switchMap((target) =>
+        target
+          ? this.api.dietaryLabelTallies$(dietaryVoteScopeKey(target))
+          : of({} as Record<string, DietaryLabelTallies>),
+      ),
+    ),
+    { initialValue: {} as Record<string, DietaryLabelTallies> },
+  );
+
+  /** The counts for this Bite's labels alone. */
+  biteDietaryTallies = computed<DietaryLabelTallies>(() => {
+    const biteId = this.voteTarget()?.biteId;
+
+    return (biteId && this.dietaryTallies()[biteId]) || {};
+  });
+
+  private readonly ownDietaryVotesResource = resource({
+    params: () => {
+      const target = this.voteTarget();
+      const uid = this.userId();
+
+      return target && uid ? { target, uid } : undefined;
+    },
+    loader: async ({ params }): Promise<DietaryOwnVotes> => {
+      const votes = await this.api.loadOwnDietaryVotes(
+        dietaryVoteScopeKey(params.target),
+        params.uid,
+      );
+
+      return votes[params.target.biteId] ?? {};
+    },
+  });
+
+  /** The viewer's own votes on this Bite's labels (issue #2197). */
+  ownDietaryVotes = resourceValue(
+    this.ownDietaryVotesResource,
+    {} as DietaryOwnVotes,
+  );
+
+  /**
+   * Confirms or disputes one of this Bite's labels through
+   * `voteDietaryLabel`, and reads the viewer's votes again once it counted.
+   * Rejects when the call fails.
+   */
+  async voteDietaryLabel(
+    request: Omit<VoteDietaryLabelRequest, 'target'>,
+  ): Promise<VoteDietaryLabelResult> {
+    const target = this.voteTarget();
+
+    if (!target) {
+      throw new Error('No Bite to vote on.');
+    }
+
+    const result = await this.api.voteDietaryLabel({ ...request, target });
+
+    if (result.status === 'saved') {
+      this.ownDietaryVotesResource.reload();
+    }
+
+    return result;
+  }
 
   /**
    * Writes a review through the `saveReview` callable and puts the reloaded

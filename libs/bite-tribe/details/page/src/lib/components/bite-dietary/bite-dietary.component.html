@@ -1,3 +1,58 @@
+<!-- One chip of a group diners can vote on (issue #2197): a button for a
+viewer offered a vote, plain text for everybody else, and the counts beside. -->
+<ng-template #votable let-label let-group="group">
+  <li class="dietary-entry">
+    @if (canVote()) {
+      <button
+        type="button"
+        class="dietary-label dietary-label-votable"
+        [class.dietary-label-high-risk]="isHighRisk(label)"
+        [attr.data-testid]="'bite-dietary-' + group + '-label-' + label"
+        [attr.aria-label]="
+          'dietary-vote-on'
+            | transloco: { label: ('dietary-label-' + label | transloco) }
+        "
+        (click)="voteClick.emit(label)"
+      >
+        {{ 'dietary-label-' + label | transloco }}
+      </button>
+    } @else {
+      <span
+        class="dietary-label"
+        [class.dietary-label-high-risk]="isHighRisk(label)"
+        [attr.data-testid]="'bite-dietary-' + group + '-label-' + label"
+      >
+        {{ 'dietary-label-' + label | transloco }}
+      </span>
+    }
+    <bt-dietary-label-votes
+      [tally]="tallyOf(label)"
+      [ownVote]="ownVoteOf(label)"
+    />
+  </li>
+</ng-template>
+
+@if (reported().length) {
+  <div class="dietary" data-testid="bite-dietary-diners">
+    <span class="dietary-source" data-testid="bite-dietary-diners-source">{{
+      'dietary-reported-by-diners' | transloco
+    }}</span>
+    <ul class="dietary-labels">
+      @for (label of reported(); track label) {
+        <ng-container
+          [ngTemplateOutlet]="votable"
+          [ngTemplateOutletContext]="{ $implicit: label, group: 'diners' }"
+        />
+      }
+    </ul>
+    @if (showsDinersNotice()) {
+      <p class="dietary-notice" data-testid="bite-dietary-diners-notice">
+        {{ 'dietary-confirm-with-restaurant' | transloco }}
+      </p>
+    }
+  </div>
+}
+
 @if (creator().length) {
   <div class="dietary" data-testid="bite-dietary-creator">
     <span class="dietary-source" data-testid="bite-dietary-creator-source">{{
@@ -5,13 +60,10 @@
     }}</span>
     <ul class="dietary-labels">
       @for (label of creator(); track label) {
-        <li
-          class="dietary-label"
-          [class.dietary-label-high-risk]="isHighRisk(label)"
-          [attr.data-testid]="'bite-dietary-creator-label-' + label"
-        >
-          {{ 'dietary-label-' + label | transloco }}
-        </li>
+        <ng-container
+          [ngTemplateOutlet]="votable"
+          [ngTemplateOutletContext]="{ $implicit: label, group: 'creator' }"
+        />
       }
     </ul>
     @if (showsNotice()) {
@@ -20,6 +72,12 @@
       </p>
     }
   </div>
+}
+
+@if (canVote() && (reported().length || creator().length)) {
+  <p class="dietary-vote-hint" data-testid="bite-dietary-vote-hint">
+    {{ 'dietary-vote-hint' | transloco }}
+  </p>
 }
 
 @if (hasRestaurant()) {

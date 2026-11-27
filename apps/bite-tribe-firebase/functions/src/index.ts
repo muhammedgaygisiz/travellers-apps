@@ -77,6 +77,8 @@ export {
 } from './functions/restaurants/search-places';
 export { getPlaceDetails } from './functions/restaurants/get-place-details';
 export { saveRestaurantDietaryStatements } from './functions/restaurants/save-restaurant-dietary-statements';
+export { voteDietaryLabel } from './functions/dietary/vote-dietary-label';
+export { deleteDietaryLabelVotesOnBiteDelete } from './functions/dietary/delete-dietary-label-votes-on-bite-delete';
 export { countUsers } from './functions/users/count-users';
 export { updateLastSeen } from './functions/users/update-last-seen';
 export { updateUserMetadata } from './functions/users/update-user-metadata';

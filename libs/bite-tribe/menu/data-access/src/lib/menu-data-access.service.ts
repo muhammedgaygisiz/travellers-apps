@@ -1,14 +1,19 @@
 import { computed, inject, Injectable, Signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { withMenuIds } from 'model';
+import { dietaryVoteScopeKey, withMenuIds } from 'model';
 import type {
   Bite,
+  DietaryLabelTallies,
+  DietaryOwnVotes,
   LinkBiteToMenuItemRequest,
   LinkBiteToMenuItemResult,
   Menu,
   MenuItemStats,
+  VoteDietaryLabelRequest,
+  VoteDietaryLabelResult,
 } from 'model';
+import type { Observable } from 'rxjs';
 import { BiteTribeApiService } from 'bite-tribe/api';
 import { createEntityId } from 'utils';
 
@@ -21,6 +26,10 @@ export class MenuDataAccessService {
 
   bite = toSignal(this.storeService.bite$);
   restaurant = toSignal(this.storeService.restaurant$);
+  userId = toSignal(this.storeService.userId$, { initialValue: '' });
+  isAuthenticated = toSignal(this.storeService.isAuthenticated$, {
+    initialValue: false,
+  });
 
   private readonly storedMenu = toSignal(this.storeService.menu$);
 
@@ -118,6 +127,43 @@ export class MenuDataAccessService {
     restaurantId: string,
   ): Promise<Record<string, MenuItemStats>> {
     return this.api.loadMenuItemStats(restaurantId);
+  }
+
+  /**
+   * The dietary label counts of a restaurant's dishes, by menu item id, live
+   * (GitHub issue #2197).
+   */
+  dietaryLabelTallies$(
+    restaurantId: string,
+  ): Observable<Record<string, DietaryLabelTallies>> {
+    return this.api.dietaryLabelTallies$(
+      dietaryVoteScopeKey({ type: 'menuItem', restaurantId, menuItemId: '' }),
+    );
+  }
+
+  /** The signed-in member's own votes on a restaurant's dishes, by id. */
+  loadOwnDietaryVotes(
+    restaurantId: string,
+  ): Promise<Record<string, DietaryOwnVotes>> {
+    const uid = this.userId();
+
+    return uid
+      ? this.api.loadOwnDietaryVotes(
+          dietaryVoteScopeKey({
+            type: 'menuItem',
+            restaurantId,
+            menuItemId: '',
+          }),
+          uid,
+        )
+      : Promise.resolve({});
+  }
+
+  /** Confirms or disputes a dish's label through `voteDietaryLabel`. */
+  voteDietaryLabel(
+    request: VoteDietaryLabelRequest,
+  ): Promise<VoteDietaryLabelResult> {
+    return this.api.voteDietaryLabel(request);
   }
 
   /** The Bites written about one dish, newest first. */

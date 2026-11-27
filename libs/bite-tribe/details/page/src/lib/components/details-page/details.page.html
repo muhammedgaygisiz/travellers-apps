@@ -247,6 +247,10 @@
             [creatorLabels]="biteData.dietaryLabels"
             [restaurantLabels]="menuItemDietary().labels"
             [restaurantOptions]="menuItemDietary().options"
+            [tallies]="dietaryTallies()"
+            [ownVotes]="ownDietaryVotes()"
+            [canVote]="canVoteDietary()"
+            (voteClick)="dietaryVoteClick.emit($event)"
           />
           @if (biteData.tags?.length) {
           <bt-tags-input [readonly]="true" [tags]="biteData.tags" />
@@ -616,6 +620,10 @@
         [creatorLabels]="biteData.dietaryLabels"
         [restaurantLabels]="menuItemDietary().labels"
         [restaurantOptions]="menuItemDietary().options"
+        [tallies]="dietaryTallies()"
+        [ownVotes]="ownDietaryVotes()"
+        [canVote]="canVoteDietary()"
+        (voteClick)="dietaryVoteClick.emit($event)"
       />
       }
 

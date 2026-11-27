@@ -9,8 +9,9 @@ Partly built, under epic [#2193]. The vocabulary and the restaurant's declaratio
 Restaurant, and the consumer menu and restaurant page show them as declared by the
 restaurant. The creator's labels on a Bite of [#2195] exist too, shown beside the
 restaurant's labels for a linked dish. A member's own dietary choices of [#2196] exist, set in
-settings with consent for the religious and health ones, and nothing reads them yet. Nothing
-else in the flow exists yet - no votes, no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
+settings with consent for the religious and health ones, and nothing reads them yet. Diners
+confirm and dispute labels since [#2197]. Nothing else in the flow exists yet - no removal,
+no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
 nothing filters on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
 it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
 thresholds it depends on are open in `Dietary Choice Questions` in
@@ -74,10 +75,16 @@ Once the behaviour has succeeded:
   the member does not agree. Withdrawing the consent, from the same section, removes those
   choices and keeps the lifestyle ones; clearing removes every choice and keeps the consent.
   Each change is written at once, apart from the preferences form, and a failed write is
-  announced and undone ([#2196]). Onboarding does not offer the section. The rest of this flow
-  is intended.
-- A Bite Creator reading a Bite or a menu item confirms or disputes a label, with a reason
-  ([#2197]). The counts update for every reader.
+  announced and undone ([#2196]). Onboarding does not offer the section.
+- Built: a Bite Creator reading somebody else's Bite taps one of the creator's labels, or on
+  a restaurant's menu one of a dish's labels, and confirms or disputes it. A dispute takes a
+  reason from a fixed list - an animal product, gluten, the staff said it does not fit, I got
+  sick, other - and an optional note, checked before it is stored (`RD-UR-11`). A second vote
+  replaces the first. An ineligible account is told why. Every reader sees how many diners
+  confirm and how many dispute each label, and the counts change for every open page as a
+  vote lands. A creator's label with 3 confirmations and no dispute moves from what the
+  creator says to what diners report, and halal and kosher do so only where the restaurant
+  declares them too ([#2197], `RD-DC-6`). The rest of this flow is intended.
 - When a restaurant's label reaches the dispute threshold, the backend removes it, locks it,
   and tells the owner ([#2198]). The dish shows that the label was removed after diner reports.
 - The Restaurant Owner asks for the removed label back with evidence, and an Operator restores
@@ -89,20 +96,20 @@ Once the behaviour has succeeded:
 
 ## Rules And Invariants
 
-| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                       |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **R-1**  | Dietary labels come from one fixed vocabulary, used by the restaurant, the creator, the votes, the choices and the filters alike. Each label is `lifestyle` (vegan, vegetarian, pescatarian, alcohol-free) or `high-risk` (gluten-free, lactose-free, nut-free, halal, kosher). An unknown stored value is not shown. Free-text tags are not labels and are left as typed |
-| **R-2**  | No label is shown as plain fact. Each names its source, `RD-DC-1`                                                                                                                                                                                                                                                                                                         |
-| **R-3**  | Only an account holding the Restaurant, or an Operator, writes the Restaurant's labels and statements. Only the Bite's creator writes the Bite's labels                                                                                                                                                                                                                   |
-| **R-4**  | A high-risk label whose only sources are diners or the creator is always shown with the fixed, translated notice to confirm with the restaurant, whatever its count, `RD-DC-5`                                                                                                                                                                                            |
-| **R-5**  | An account votes once per label on a target and may change its vote. The creator does not vote on their own Bite, and an account holding the Restaurant does not vote on its labels. Counts and removal state are written by the backend only                                                                                                                             |
-| **R-6**  | A restaurant's label is removed automatically once eligible disputes reach the threshold within the window and outnumber confirmations. A high-risk label has a lower threshold, `RD-DC-4`                                                                                                                                                                                |
-| **R-7**  | A removed label is locked: the owner cannot set it again, and only an Operator restores it. Restoring discards the disputes that removed it                                                                                                                                                                                                                               |
-| **R-8**  | A Restaurant that reaches the strike limit of confirmed removals publishes no new label without Operator approval                                                                                                                                                                                                                                                         |
-| **R-9**  | A member's dietary choices are only what the member sets. They are never inferred, never readable by another account, never an analytics attribute, and never sent to an ad network as an attribute of the member, `RD-DC-3`                                                                                                                                              |
-| **R-10** | A religious or health-related choice is not stored without the member's consent, and withdrawing consent removes it                                                                                                                                                                                                                                                       |
-| **R-11** | No ad and no promoted content conflicts with the member's dietary choices, by a fixed mapping from each choice to the ad categories it excludes, `RD-DC-2`                                                                                                                                                                                                                |
-| **R-12** | A removed label matches no dietary filter                                                                                                                                                                                                                                                                                                                                 |
+| ID       | Normative statement                                                                                                                                                                                                                                                                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R-1**  | Dietary labels come from one fixed vocabulary, used by the restaurant, the creator, the votes, the choices and the filters alike. Each label is `lifestyle` (vegan, vegetarian, pescatarian, alcohol-free) or `high-risk` (gluten-free, lactose-free, nut-free, halal, kosher). An unknown stored value is not shown. Free-text tags are not labels and are left as typed                                     |
+| **R-2**  | No label is shown as plain fact. Each names its source, `RD-DC-1`                                                                                                                                                                                                                                                                                                                                             |
+| **R-3**  | Only an account holding the Restaurant, or an Operator, writes the Restaurant's labels and statements. Only the Bite's creator writes the Bite's labels                                                                                                                                                                                                                                                       |
+| **R-4**  | A high-risk label whose only sources are diners or the creator is always shown with the fixed, translated notice to confirm with the restaurant, whatever its count, `RD-DC-5`                                                                                                                                                                                                                                |
+| **R-5**  | An account votes once per label on a target and may change its vote. The creator does not vote on their own Bite, and an account holding the Restaurant does not vote on its labels or on a Bite at it. Only an account at least 14 days old with a Bite of its own votes, `RD-DC-6`. Counts and removal state are written by the backend only. Deleting an account removes its votes and corrects the counts |
+| **R-6**  | A restaurant's label is removed automatically once eligible disputes reach the threshold within the window and outnumber confirmations. A high-risk label has a lower threshold, `RD-DC-4`                                                                                                                                                                                                                    |
+| **R-7**  | A removed label is locked: the owner cannot set it again, and only an Operator restores it. Restoring discards the disputes that removed it                                                                                                                                                                                                                                                                   |
+| **R-8**  | A Restaurant that reaches the strike limit of confirmed removals publishes no new label without Operator approval                                                                                                                                                                                                                                                                                             |
+| **R-9**  | A member's dietary choices are only what the member sets. They are never inferred, never readable by another account, never an analytics attribute, and never sent to an ad network as an attribute of the member, `RD-DC-3`                                                                                                                                                                                  |
+| **R-10** | A religious or health-related choice is not stored without the member's consent, and withdrawing consent removes it                                                                                                                                                                                                                                                                                           |
+| **R-11** | No ad and no promoted content conflicts with the member's dietary choices, by a fixed mapping from each choice to the ad categories it excludes, `RD-DC-2`                                                                                                                                                                                                                                                    |
+| **R-12** | A removed label matches no dietary filter                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## Authorization
 
@@ -113,7 +120,10 @@ which admits the same two and checks the note, and the rules refuse every client
 them. The Bite's labels are creator-scoped like the rest of the Bite, and the rules
 refuse a value outside the vocabulary (`hasValidDietaryLabels()`), votes go
 through a callable that checks eligibility, every count and the removal state are
-backend-only, and restoration is an Operator action. A member's dietary choices live in
+backend-only, and restoration is an Operator action. The votes are written only by the
+`voteDietaryLabel` callable, which admits a member and checks eligibility itself: the rules
+refuse every client write of `dietaryLabelTallies` and `dietaryLabelVotes`, let a member read
+the counts, and let an account `get` only the vote document whose id ends in its own uid. A member's dietary choices live in
 their private settings and no other account reads them: `settings/{uid}` is readable and
 writable by that account alone, and `hasValidDietaryChoices()` refuses a value outside the
 choices and a religion or health choice without `dietaryConsentAt` beside it, so a withdrawn
@@ -184,10 +194,25 @@ Built by [#2196]:
 - `deleteOwnAccount` deletes `settings/{uid}`, and the choices with it
 - `libs/bite-tribe/privacy-policy` - section `1.5 Dietary Choices`, in all fourteen languages
 
+Built by [#2197]:
+
+- `libs/bite-tribe-common/model/src/lib/dietary-vote.ts` - the votes, the dispute reasons,
+  the scope keys, `isReportedByDiners` and `creatorLabelsBySource`
+- `apps/bite-tribe-firebase/functions/src/functions/dietary/vote-dietary-label.ts` - the
+  callable, its eligibility and the note check; `dietary-votes.ts` - the stored shape and the
+  cascades `deleteOwnAccount` and `deleteDietaryLabelVotesOnBiteDelete` run; kept in step with
+  the model by `dietary-votes-parity.spec.ts`
+- `apps/bite-tribe-firebase/firestore.rules` - `dietaryLabelTallies` and `dietaryLabelVotes`,
+  with their cases in `firestore-rules.emulator-spec.ts`
+- `libs/bite-tribe/api/src/lib/dietary-vote-api` - the call, the live counts and the own votes
+- `libs/bite-tribe/dietary-vote` - the vote prompt and the counts under a label, shared by
+  `libs/bite-tribe/details/page` (`bite-dietary`) and `libs/bite-tribe/menu/page`
+  (`menu-item`)
+
 Not implemented yet, the surfaces the later stories will touch:
 
 - `libs/bite-tribe/home/page`, and the readers of the choices
-- `apps/bite-tribe-firebase/functions` - the vote callable and the removal trigger
+- `apps/bite-tribe-firebase/functions` - the removal trigger
 - `firestore.indexes.json`
 
 ## Related GitHub Scope

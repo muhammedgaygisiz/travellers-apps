@@ -19,6 +19,8 @@ export type ContentSurface =
   | 'profile'
   /** A restaurant's cross-contamination note (issue #2194). */
   | 'restaurantDietaryNote'
+  /** A diner's note on a dietary vote (issue #2197). */
+  | 'dietaryVoteNote'
   | ImageSurface;
 
 /** Why something was refused, as a check reports it. */

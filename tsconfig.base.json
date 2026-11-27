@@ -99,6 +99,9 @@
       ],
       "bite-tribe/api": ["./libs/bite-tribe/api/src/index.ts"],
       "bite-tribe/coach-mark": ["./libs/bite-tribe/coach-mark/src/index.ts"],
+      "bite-tribe/dietary-vote": [
+        "./libs/bite-tribe/dietary-vote/src/index.ts"
+      ],
       "bite-tribe/onboarding": [
         "./libs/bite-tribe/onboarding/page/src/index.ts"
       ],

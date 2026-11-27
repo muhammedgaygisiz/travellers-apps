@@ -33,6 +33,27 @@
     padding: 0.25rem 0.4rem;
   }
 
+  .dietary-entry {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* A label a viewer can vote on is a button that still reads as a chip. */
+  .dietary-label-votable {
+    background: none;
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .dietary-vote-hint {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 0.75rem;
+  }
+
   .dietary-label-high-risk {
     border-color: var(--ion-color-warning-shade);
     color: var(--ion-text-color);

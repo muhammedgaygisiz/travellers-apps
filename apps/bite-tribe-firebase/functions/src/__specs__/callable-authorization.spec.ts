@@ -226,6 +226,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // A signed-in account reporting a review or reply (issue #2117), for the
   // same reasons as `reportBite`.
   reportReview: 'member',
+  // A diner confirming or disputing a dietary label (issue #2197). A vote is
+  // weighed by who cast it, so a table guest's anonymous uid cannot cast one.
+  voteDietaryLabel: 'member',
   // A tagged user taking themselves off a Bite (issue #1920). Acts for the
   // caller alone, and a table guest is never tagged.
   removeSelfFromBiteTags: 'member',

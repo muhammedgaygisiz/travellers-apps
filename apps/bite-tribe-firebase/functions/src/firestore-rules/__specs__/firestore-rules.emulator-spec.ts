@@ -665,6 +665,19 @@ beforeEach(async () => {
     await setDoc(doc(db, 'restaurantCandidates', 'candidate-1'), {
       status: 'pending',
     });
+    await setDoc(doc(db, 'dietaryLabelTallies', 'bite__consumer-bite'), {
+      scopeKey: 'bite__consumer-bite',
+      biteId: 'consumer-bite',
+      items: { 'consumer-bite': { vegan: { confirm: 1, dispute: 0 } } },
+    });
+    await setDoc(
+      doc(db, 'dietaryLabelVotes', `bite__consumer-bite__${STRANGER}`),
+      {
+        uid: STRANGER,
+        scopeKey: 'bite__consumer-bite',
+        items: { 'consumer-bite': { vegan: { vote: 'confirm' } } },
+      },
+    );
     await setDoc(doc(db, 'biteReports', `consumer-bite_${STRANGER}`), {
       biteId: 'consumer-bite',
       reporterUid: STRANGER,
@@ -4462,6 +4475,61 @@ describe('backend-owned collections', () => {
    * The reported author must never learn who reported them, and the reporter
    * files through `reportBite` rather than by writing here (issue #1608).
    */
+  it('lets members read dietary label counts and no client write them', async () => {
+    const tally = 'bite__consumer-bite';
+
+    await assertSucceeds(
+      getDoc(doc(asConsumer(), 'dietaryLabelTallies', tally)),
+    );
+    await assertSucceeds(
+      getDoc(doc(asStranger(), 'dietaryLabelTallies', tally)),
+    );
+    await assertFails(getDoc(doc(signedOut(), 'dietaryLabelTallies', tally)));
+    await assertFails(
+      getDoc(doc(asTableGuest(), 'dietaryLabelTallies', tally)),
+    );
+    // Issue #2197: the counts are the backend's alone, an operator included.
+    for (const db of [asConsumer(), asStranger(), asOperator()]) {
+      await assertFails(
+        updateDoc(doc(db, 'dietaryLabelTallies', tally), {
+          'items.consumer-bite.vegan.confirm': 99,
+        }),
+      );
+      await assertFails(
+        setDoc(doc(db, 'dietaryLabelTallies', 'bite__other-bite'), {
+          items: { 'other-bite': { vegan: { confirm: 5, dispute: 0 } } },
+        }),
+      );
+    }
+  });
+
+  it('lets an account read only its own dietary votes, and write none', async () => {
+    const own = `bite__consumer-bite__${STRANGER}`;
+
+    await assertSucceeds(getDoc(doc(asStranger(), 'dietaryLabelVotes', own)));
+    // A vote not cast yet is still the caller's to look for.
+    await assertSucceeds(
+      getDoc(doc(asConsumer(), 'dietaryLabelVotes', `menu__r1__${CONSUMER}`)),
+    );
+    await assertFails(getDoc(doc(asConsumer(), 'dietaryLabelVotes', own)));
+    await assertFails(getDoc(doc(asOperator(), 'dietaryLabelVotes', own)));
+    await assertFails(getDocs(collection(asStranger(), 'dietaryLabelVotes')));
+    await assertFails(
+      setDoc(
+        doc(
+          asConsumer(),
+          'dietaryLabelVotes',
+          `bite__consumer-bite__${CONSUMER}`,
+        ),
+        { uid: CONSUMER, items: {} },
+      ),
+    );
+    await assertFails(
+      updateDoc(doc(asStranger(), 'dietaryLabelVotes', own), { items: {} }),
+    );
+    await assertFails(deleteDoc(doc(asStranger(), 'dietaryLabelVotes', own)));
+  });
+
   it('lets only an operator read a Bite report, and nobody write one', async () => {
     const report = `consumer-bite_${STRANGER}`;
 

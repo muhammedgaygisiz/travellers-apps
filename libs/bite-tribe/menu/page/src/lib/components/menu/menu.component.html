@@ -9,6 +9,8 @@
             [canCreateBite]="canCreateBite()"
             [canAddToCart]="canAddToCart()"
             [stats]="stats()"
+            [dietaryVotes]="dietaryVotes()"
+            (dietaryVoteClick)="dietaryVoteClick.emit($event)"
             (biteSignalClick)="biteSignalClick.emit($event)"
             (createBiteClick)="createBiteClick.emit($event)"
             (addToCartClick)="addToCartClick.emit($event)"

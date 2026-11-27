@@ -55,6 +55,21 @@
         padding: 0.25rem 0.4rem;
       }
 
+      .dietary-entry {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      /* A label a member can vote on (issue #2197), still read as a chip. */
+      .dietary-label-votable {
+        background: none;
+        font: inherit;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
       /* The warning colour, not tertiary: this theme's tertiary is a light
          grey surface, which left a high-risk label unreadable on white. */
       .dietary-label-high-risk {

@@ -1648,6 +1648,37 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ------------------------------------------------------- dietary votes
+
+    /**
+     * Diners confirming or disputing a dietary label (GitHub issue #2197).
+     *
+     * ```text
+     * /dietaryLabelTallies/{scopeKey}         bite__{biteId} or menu__{restaurantId}
+     * /dietaryLabelVotes/{scopeKey}__{uid}
+     * ```
+     *
+     * **Every write goes through `voteDietaryLabel`, through the Admin SDK.**
+     * Who may vote needs the Bite, the restaurant, the account's age and its
+     * own Bites, which no rule can read, and the counts are backend-only
+     * (`UC - Find Dishes That Fit A Dietary Choice` `R-5`), so no client
+     * writes either collection, an operator included.
+     *
+     * The counts carry no voter and are read by any member, as the Bite and
+     * the menu they describe are. An account reads its own votes and nobody
+     * else's: the id ends in the voter's uid, which a `get` of a document
+     * that does not exist yet can still be checked against.
+     */
+    match /dietaryLabelTallies/{scopeKey} {
+      allow read: if isMember();
+      allow write: if false;
+    }
+
+    match /dietaryLabelVotes/{voteId} {
+      allow get: if isMember() && voteId.matches('.+__' + uid());
+      allow list, write: if false;
+    }
+
     // ------------------------------------------------------------ bite reports
 
     /**

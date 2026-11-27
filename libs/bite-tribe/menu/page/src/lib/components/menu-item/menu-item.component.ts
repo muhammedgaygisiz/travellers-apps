@@ -31,6 +31,8 @@ import type {
   MenuOptionGroup,
   MenuOptionSelection,
 } from 'model';
+import type { DietaryLabelTallies, DietaryOwnVotes } from 'model';
+import { DietaryLabelVotesComponent } from 'bite-tribe/dietary-vote';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { formatMoney } from 'utils';
@@ -44,6 +46,30 @@ import { formatMoney } from 'utils';
  * one depending on each other - which the Nx boundary rules would refuse in one
  * direction and which nothing needs in the other.
  */
+/**
+ * What diners said about the dishes' dietary labels (GitHub issue #2197),
+ * threaded from the page to every row as one value: the counts and the
+ * member's own votes by menu item id, and whether the reader is offered a
+ * vote at all. Off on every surface but the member's menu.
+ */
+export interface MenuDietaryVotes {
+  tallies: Record<string, DietaryLabelTallies>;
+  own: Record<string, DietaryOwnVotes>;
+  canVote: boolean;
+}
+
+export const NO_MENU_DIETARY_VOTES: MenuDietaryVotes = {
+  tallies: {},
+  own: {},
+  canVote: false,
+};
+
+/** A reader taps a dish's label to confirm or dispute it (issue #2197). */
+export interface MenuDietaryVoteClick {
+  item: MenuItem;
+  label: DietaryLabel;
+}
+
 export interface MenuItemSelection {
   item: MenuItem;
   variant?: MenuItem;
@@ -73,6 +99,7 @@ export interface MenuItemSelection {
     IonRadioGroup,
     NgTemplateOutlet,
     TranslocoPipe,
+    DietaryLabelVotesComponent,
   ],
 })
 export class MenuItemComponent {
@@ -125,6 +152,35 @@ export class MenuItemComponent {
 
     return labels.length > 0 || options.length > 0;
   });
+
+  /** The dishes' dietary votes (issue #2197); see {@link MenuDietaryVotes}. */
+  dietaryVotes = input<MenuDietaryVotes>(NO_MENU_DIETARY_VOTES);
+
+  /** The reader taps one of this row's labels to vote on it. */
+  readonly dietaryVoteClick = output<MenuDietaryVoteClick>();
+
+  /** The counts for this row's own labels. */
+  protected readonly dietaryTallies = computed<DietaryLabelTallies>(
+    () => this.dietaryVotes().tallies[this.item()?.id ?? ''] ?? {},
+  );
+
+  /** The reader's own votes on them. */
+  protected readonly dietaryOwnVotes = computed<DietaryOwnVotes>(
+    () => this.dietaryVotes().own[this.item()?.id ?? ''] ?? {},
+  );
+
+  /** Only a row with an id can be voted on: the vote names it. */
+  protected readonly canVoteDietary = computed(
+    () => this.dietaryVotes().canVote && !!this.item()?.id,
+  );
+
+  protected onDietaryVoteClick(label: DietaryLabel): void {
+    const item = this.item();
+
+    if (item?.id) {
+      this.dietaryVoteClick.emit({ item, label });
+    }
+  }
 
   protected isHighRisk(label: DietaryLabel): boolean {
     return dietaryLabelClass(label) === 'high-risk';

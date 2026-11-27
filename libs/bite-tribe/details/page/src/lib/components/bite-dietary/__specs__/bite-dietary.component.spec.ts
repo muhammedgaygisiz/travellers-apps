@@ -27,6 +27,9 @@ describe(BiteDietaryComponent.name, () => {
     creatorLabels?: unknown;
     restaurantLabels?: string[];
     restaurantOptions?: string[];
+    tallies?: Record<string, { confirm: number; dispute: number }>;
+    ownVotes?: Record<string, string>;
+    canVote?: boolean;
   }): HTMLElement => {
     Object.entries(inputs).forEach(([name, value]) =>
       fixture.componentRef.setInput(name, value),
@@ -113,6 +116,109 @@ describe(BiteDietaryComponent.name, () => {
         }),
       ),
     ).toBeNull();
+  });
+
+  describe('votes (GitHub issue #2197)', () => {
+    const REPORTED = { confirm: 3, dispute: 0 };
+
+    it('moves a label with three confirmations and no dispute to the diners', () => {
+      const element = render({
+        creatorLabels: ['vegan', 'vegetarian'],
+        tallies: { vegan: REPORTED, vegetarian: { confirm: 2, dispute: 0 } },
+      });
+
+      expect(testIds(element, 'bite-dietary-diners-label-')).toEqual([
+        'bite-dietary-diners-label-vegan',
+      ]);
+      expect(testIds(element, 'bite-dietary-creator-label-')).toEqual([
+        'bite-dietary-creator-label-vegetarian',
+      ]);
+      expect(
+        element.querySelector('[data-testid="bite-dietary-diners-source"]')
+          ?.textContent,
+      ).toContain('dietary-reported-by-diners');
+    });
+
+    it('keeps a disputed label as the creator claim, whatever its count', () => {
+      const element = render({
+        creatorLabels: ['vegan'],
+        tallies: { vegan: { confirm: 9, dispute: 1 } },
+      });
+
+      expect(testIds(element, 'bite-dietary-diners-label-')).toEqual([]);
+      expect(testIds(element, 'bite-dietary-creator-label-')).toEqual([
+        'bite-dietary-creator-label-vegan',
+      ]);
+      expect(
+        element.querySelector('[data-testid="dietary-votes-disputed"]'),
+      ).not.toBeNull();
+    });
+
+    it('keeps the notice on a high-risk label reported by diners', () => {
+      const element = render({
+        creatorLabels: ['gluten-free'],
+        tallies: { 'gluten-free': { confirm: 12, dispute: 0 } },
+      });
+
+      expect(
+        element.querySelector('[data-testid="bite-dietary-diners-notice"]')
+          ?.textContent,
+      ).toContain('dietary-confirm-with-restaurant');
+    });
+
+    it('reports halal only where the restaurant declares it too', () => {
+      expect(
+        testIds(
+          render({ creatorLabels: ['halal'], tallies: { halal: REPORTED } }),
+          'bite-dietary-diners-label-',
+        ),
+      ).toEqual([]);
+      expect(
+        testIds(
+          render({
+            creatorLabels: ['halal'],
+            tallies: { halal: REPORTED },
+            restaurantLabels: ['halal'],
+          }),
+          'bite-dietary-diners-label-',
+        ),
+      ).toEqual(['bite-dietary-diners-label-halal']);
+    });
+
+    it('offers a vote as a tap on the label, and says which label', () => {
+      const clicked: string[] = [];
+
+      fixture.componentInstance.voteClick.subscribe((label) =>
+        clicked.push(label),
+      );
+      const element = render({
+        creatorLabels: ['vegan'],
+        canVote: true,
+        ownVotes: { vegan: 'confirm' },
+      });
+      const chip = element.querySelector<HTMLButtonElement>(
+        'button[data-testid="bite-dietary-creator-label-vegan"]',
+      );
+
+      chip?.click();
+
+      expect(clicked).toEqual(['vegan']);
+      expect(
+        element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
+      ).not.toBeNull();
+      expect(
+        element.querySelector('[data-testid="dietary-votes-own"]'),
+      ).not.toBeNull();
+    });
+
+    it('offers no vote where the viewer may not cast one', () => {
+      const element = render({ creatorLabels: ['vegan'] });
+
+      expect(element.querySelector('button')).toBeNull();
+      expect(
+        element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
+      ).toBeNull();
+    });
   });
 
   it('renders nothing when neither source has a label', () => {

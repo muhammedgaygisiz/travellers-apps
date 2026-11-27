@@ -166,6 +166,14 @@ describe(DetailsDataAccessService.name, () => {
             saveReviewReply: jest.fn(),
             loadRestaurant: jest.fn(),
             loadMenu: jest.fn(),
+            dietaryLabelTallies$: jest.fn(() =>
+              of({ 'bite-1': { vegan: { confirm: 3, dispute: 0 } } }),
+            ),
+            loadOwnDietaryVotes: jest.fn().mockResolvedValue({}),
+            voteDietaryLabel: jest.fn().mockResolvedValue({
+              status: 'saved',
+              tally: { confirm: 4, dispute: 0 },
+            }),
           },
         },
         {
@@ -1401,6 +1409,78 @@ describe(DetailsDataAccessService.name, () => {
     it('should call cacheBite on store service', () => {
       service.cacheBite({} as Bite);
       expect(cacheBiteSpy).toHaveBeenCalled();
+    });
+  });
+
+  /** Diners' votes on the creator's labels (GitHub issue #2197). */
+  describe('dietary votes', () => {
+    const settle = async (): Promise<void> => {
+      for (let round = 0; round < 3; round++) {
+        TestBed.flushEffects();
+
+        for (let tick = 0; tick < 20; tick++) {
+          await Promise.resolve();
+        }
+      }
+    };
+
+    const api = (): Record<string, jest.Mock> =>
+      TestBed.inject(BiteTribeApiService) as unknown as Record<
+        string,
+        jest.Mock
+      >;
+
+    it('refuses a vote while no Bite is on screen, and has no counts', async () => {
+      await expect(
+        service.voteDietaryLabel({ label: 'vegan', vote: 'confirm' }),
+      ).rejects.toThrow('No Bite to vote on.');
+      expect(service.biteDietaryTallies()).toEqual({});
+      expect(service.ownDietaryVotes()).toEqual({});
+    });
+
+    it("listens to the Bite's counts and votes on that Bite", async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(
+          getDocumentResult({ name: 'Bowl', userId: 'creator' }, 'bite-1'),
+        );
+      biteIdFromUrl.set('bite-1');
+      await settle();
+
+      expect(api()['dietaryLabelTallies$']).toHaveBeenCalledWith(
+        'bite__bite-1',
+      );
+      expect(service.biteDietaryTallies()).toEqual({
+        vegan: { confirm: 3, dispute: 0 },
+      });
+
+      await expect(
+        service.voteDietaryLabel({ label: 'vegan', vote: 'confirm' }),
+      ).resolves.toEqual({
+        status: 'saved',
+        tally: { confirm: 4, dispute: 0 },
+      });
+      expect(api()['voteDietaryLabel']).toHaveBeenCalledWith({
+        target: { type: 'bite', biteId: 'bite-1' },
+        label: 'vegan',
+        vote: 'confirm',
+      });
+    });
+
+    it('passes a refusal through', async () => {
+      jest
+        .spyOn(FirebaseFirestore, 'getDocument')
+        .mockResolvedValue(getDocumentResult({ name: 'Bowl' }, 'bite-1'));
+      api()['voteDietaryLabel'].mockResolvedValue({
+        status: 'ineligible',
+        reason: 'own-bite',
+      });
+      biteIdFromUrl.set('bite-1');
+      await settle();
+
+      await expect(
+        service.voteDietaryLabel({ label: 'vegan', vote: 'confirm' }),
+      ).resolves.toEqual({ status: 'ineligible', reason: 'own-bite' });
     });
   });
 });

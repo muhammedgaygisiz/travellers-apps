@@ -1,7 +1,21 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
-import type { Bite, Menu, MenuItem, MenuItemStats } from 'model';
+import { DietaryVotePromptService } from 'bite-tribe/dietary-vote';
+import type {
+  Bite,
+  DietaryLabelTallies,
+  DietaryOwnVotes,
+  Menu,
+  MenuItem,
+  MenuItemStats,
+} from 'model';
 import { NavController } from '@ionic/angular';
+import { distinctUntilChanged, of, switchMap } from 'rxjs';
+import type {
+  MenuDietaryVoteClick,
+  MenuDietaryVotes,
+} from '../components/menu-item/menu-item.component';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +23,7 @@ import { NavController } from '@ionic/angular';
 export class MenuService {
   dataAccess = inject(MenuDataAccessService);
   private readonly navController = inject(NavController);
+  private readonly dietaryVotePrompt = inject(DietaryVotePromptService);
 
   bite = this.dataAccess.bite;
   restaurant = this.dataAccess.restaurant;
@@ -20,6 +35,35 @@ export class MenuService {
   private readonly dishBites = signal<Bite[]>([]);
   private readonly openDish = signal<MenuItem | undefined>(undefined);
   private readonly loadingBites = signal(false);
+
+  private readonly restaurantId = computed(() => this.restaurant()?.id);
+
+  /**
+   * What diners said about the dishes' dietary labels, by menu item id, live
+   * (GitHub issue #2197): a vote anybody casts reaches every open menu.
+   */
+  private readonly dietaryTallies = toSignal(
+    toObservable(this.restaurantId).pipe(
+      distinctUntilChanged(),
+      switchMap((restaurantId) =>
+        restaurantId
+          ? this.dataAccess.dietaryLabelTallies$(restaurantId)
+          : of({} as Record<string, DietaryLabelTallies>),
+      ),
+    ),
+    { initialValue: {} as Record<string, DietaryLabelTallies> },
+  );
+
+  private readonly ownDietaryVotes = signal<Record<string, DietaryOwnVotes>>(
+    {},
+  );
+
+  /** The counts, the member's own votes, and whether a vote is offered. */
+  readonly dietaryVotes = computed<MenuDietaryVotes>(() => ({
+    tallies: this.dietaryTallies(),
+    own: this.ownDietaryVotes(),
+    canVote: this.dataAccess.isAuthenticated(),
+  }));
 
   /** What people thought of each dish, keyed by menu item id (issue #1113). */
   readonly stats = computed(() => this.itemStats());
@@ -47,6 +91,45 @@ export class MenuService {
     }
 
     this.itemStats.set(await this.dataAccess.loadMenuItemStats(restaurantId));
+  }
+
+  /** The member's own votes on this restaurant's dishes (issue #2197). */
+  async loadOwnDietaryVotes(): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    this.ownDietaryVotes.set(
+      restaurantId
+        ? await this.dataAccess.loadOwnDietaryVotes(restaurantId)
+        : {},
+    );
+  }
+
+  /**
+   * Confirms or disputes one of a dish's labels (GitHub issue #2197): asks,
+   * sends and says what came of it, and reads the member's votes again once
+   * it counted.
+   */
+  async voteDietaryLabel({ item, label }: MenuDietaryVoteClick): Promise<void> {
+    const restaurantId = this.restaurantId();
+
+    if (!restaurantId || !item.id) {
+      return;
+    }
+
+    const result = await this.dietaryVotePrompt.run(
+      label,
+      this.ownDietaryVotes()[item.id]?.[label],
+      (choice) =>
+        this.dataAccess.voteDietaryLabel({
+          target: { type: 'menuItem', restaurantId, menuItemId: item.id },
+          label,
+          ...choice,
+        }),
+    );
+
+    if (result?.status === 'saved') {
+      await this.loadOwnDietaryVotes();
+    }
   }
 
   /** Opens what people said about one dish. */

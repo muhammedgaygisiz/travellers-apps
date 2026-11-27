@@ -1,6 +1,6 @@
 # Current State - Open Questions
 
-**Last verified:** 2026-11-16
+**Last verified:** 2026-11-26
 
 ## Purpose
 
@@ -260,14 +260,15 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
   ratio?** The proposal is 3 eligible disputes within 90 days for a lifestyle label, 2 for a
   high-risk one, and one "I got sick" dispute for a high-risk one, each only while disputes
   outnumber confirmations. Gates [#2198].
-- **Who is eligible to vote?** Having a Bite at that restaurant, a minimum account age and
-  activity, or both. Without a bar, throwaway accounts can remove a competitor's labels.
-  Gates [#2197].
-- **How many confirmations turn a creator's label into "reported by diners"?** The proposal
-  is 3, with no open dispute. Gates [#2197].
-- **Are halal and kosher shown from diner reports at all**, or only once the restaurant has
-  declared them? Both carry the high-risk notice either way (`RD-DC-5`). Gates [#2195] and
-  [#2197].
+- **Who is eligible to vote? Settled 26 November 2026 by `RD-DC-6`, delivered by
+  [#2197]:** an account at least 14 days old with a Bite of its own, never the Bite's
+  creator and never an account holding the Restaurant. Having a Bite at that restaurant was
+  not required, since a Bite without a restaurant could then never be voted on.
+- **How many confirmations turn a creator's label into "reported by diners"? Settled
+  26 November 2026 by `RD-DC-6`:** 3, with no dispute at all.
+- **Are halal and kosher shown from diner reports at all? Settled 26 November 2026 by
+  `RD-DC-6`:** only where the restaurant declares them too. Their votes are still counted and
+  shown, and they carry the high-risk notice either way (`RD-DC-5`).
 - **How many confirmed removals, over what period, cost a restaurant self-declaration?** The
   proposal is 3 in 12 months. Gates [#2198].
 - **Can the ad network exclude categories per request, without the member's choices leaving

@@ -325,3 +325,24 @@ export const WithDietaryLabels: Story = {
     },
   },
 };
+
+/**
+ * What diners said about the labels, on the member's menu (issue #2197):
+ * counts under a label, the member's own vote, and each label a button.
+ */
+export const WithDietaryVotes: Story = {
+  args: {
+    ...WithDietaryLabels.args,
+    dietaryVotes: {
+      tallies: {
+        'item-vegan-shoyu': {
+          vegan: { confirm: 7, dispute: 0 },
+          halal: { confirm: 1, dispute: 3 },
+        },
+        'variant-tonkotsu-veggie': { vegetarian: { confirm: 2, dispute: 0 } },
+      },
+      own: { 'item-vegan-shoyu': { vegan: 'confirm' } },
+      canVote: true,
+    },
+  },
+};

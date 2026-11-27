@@ -1467,6 +1467,29 @@ describe(DetailsDataAccessService.name, () => {
       });
     });
 
+    it("reads the viewer's own votes on that Bite alone", async () => {
+      api()['loadOwnDietaryVotes'].mockResolvedValue({
+        'bite-1': { vegan: 'dispute' },
+      });
+
+      await expect(
+        service.ownDietaryVotesLoader(
+          loaderParams({ biteId: 'bite-1', uid: 'viewer' }),
+        ),
+      ).resolves.toEqual({ vegan: 'dispute' });
+      expect(api()['loadOwnDietaryVotes']).toHaveBeenCalledWith(
+        'bite__bite-1',
+        'viewer',
+      );
+
+      api()['loadOwnDietaryVotes'].mockResolvedValue({});
+      await expect(
+        service.ownDietaryVotesLoader(
+          loaderParams({ biteId: 'bite-1', uid: 'viewer' }),
+        ),
+      ).resolves.toEqual({});
+    });
+
     it('passes a refusal through', async () => {
       jest
         .spyOn(FirebaseFirestore, 'getDocument')

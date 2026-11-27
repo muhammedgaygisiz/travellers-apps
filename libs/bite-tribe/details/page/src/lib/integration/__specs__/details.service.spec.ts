@@ -26,6 +26,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { ShareImageComposerComponent } from 'bite-tribe/share-image-ui';
 import { BiteExplanationComponent } from '../../components/bite-explanation/bite-explanation.component';
 import { ToastService } from 'toast';
+import { DietaryVotePromptService } from 'bite-tribe/dietary-vote';
 import { ContentRefusedError } from 'utils';
 import { Capacitor } from '@capacitor/core';
 import { AnalyticsService } from 'ta-firestore';
@@ -84,6 +85,9 @@ const createMockDataAccess = (
     reportReview: jest.fn().mockResolvedValue({ reported: true }),
     removeSelfFromBiteTags: jest.fn().mockResolvedValue(undefined),
     ownBites: jest.fn().mockResolvedValue([]),
+    biteDietaryTallies: signal({}),
+    ownDietaryVotes: signal({ vegan: 'confirm' as const }),
+    voteDietaryLabel: jest.fn().mockResolvedValue({ status: 'saved' }),
   };
   return { ...base, ...overrides } as MockDetailsDataAccessService;
 };
@@ -139,7 +143,18 @@ const mockAnalytics = {
   logEvent: jest.fn(),
 };
 
+const mockDietaryVotePrompt = {
+  run: jest.fn(
+    async (
+      _label: string,
+      _own: string | undefined,
+      send: (choice: { vote: string }) => Promise<unknown>,
+    ) => send({ vote: 'dispute' }),
+  ),
+};
+
 const shareProviders = [
+  { provide: DietaryVotePromptService, useValue: mockDietaryVotePrompt },
   { provide: AnalyticsService, useValue: mockAnalytics },
   { provide: ActionSheetController, useValue: mockActionSheetController },
   { provide: ModalController, useValue: mockModalController },
@@ -1658,6 +1673,23 @@ describe('DetailsService', () => {
       (modalProps()['closed'] as { emit: () => void }).emit();
 
       expect(mockModal.dismiss).toHaveBeenCalled();
+    });
+  });
+
+  /** Diners' votes on the creator's labels (GitHub issue #2197). */
+  describe('voteDietaryLabel', () => {
+    it("asks with the viewer's own vote and sends the choice for that label", async () => {
+      await service.voteDietaryLabel('vegan');
+
+      expect(mockDietaryVotePrompt.run).toHaveBeenCalledWith(
+        'vegan',
+        'confirm',
+        expect.any(Function),
+      );
+      expect(service.dataAccess.voteDietaryLabel).toHaveBeenCalledWith({
+        label: 'vegan',
+        vote: 'dispute',
+      });
     });
   });
 

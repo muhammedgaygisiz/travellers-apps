@@ -106,6 +106,16 @@ describe(DietaryVotePromptService.name, () => {
     });
   });
 
+  it('reads a note alert confirmed without any input as no note', async () => {
+    sheets.push({ data: 'dispute' }, { data: 'gluten' });
+    alerts.push({ role: 'confirm' });
+
+    await expect(service.ask('gluten-free', undefined)).resolves.toEqual({
+      vote: 'dispute',
+      reason: 'gluten',
+    });
+  });
+
   it.each([
     [[{ role: 'cancel' }], []],
     [[{ role: 'backdrop' }], []],

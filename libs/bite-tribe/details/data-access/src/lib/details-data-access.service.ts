@@ -530,21 +530,27 @@ export class DetailsDataAccessService {
     return (biteId && this.dietaryTallies()[biteId]) || {};
   });
 
+  /** The viewer's own votes on one Bite's labels, none when unread. */
+  ownDietaryVotesLoader: ResourceLoader<
+    DietaryOwnVotes,
+    { biteId: string; uid: string }
+  > = async ({ params }) => {
+    const votes = await this.api.loadOwnDietaryVotes(
+      dietaryVoteScopeKey({ type: 'bite', biteId: params.biteId }),
+      params.uid,
+    );
+
+    return votes[params.biteId] ?? {};
+  };
+
   private readonly ownDietaryVotesResource = resource({
     params: () => {
-      const target = this.voteTarget();
+      const biteId = this.voteTarget()?.biteId;
       const uid = this.userId();
 
-      return target && uid ? { target, uid } : undefined;
+      return biteId && uid ? { biteId, uid } : undefined;
     },
-    loader: async ({ params }): Promise<DietaryOwnVotes> => {
-      const votes = await this.api.loadOwnDietaryVotes(
-        dietaryVoteScopeKey(params.target),
-        params.uid,
-      );
-
-      return votes[params.target.biteId] ?? {};
-    },
+    loader: this.ownDietaryVotesLoader.bind(this),
   });
 
   /** The viewer's own votes on this Bite's labels (issue #2197). */

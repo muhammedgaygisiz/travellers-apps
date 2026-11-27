@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { DietaryLabelVotesComponent } from 'bite-tribe/dietary-vote';
+import { DietaryVoteButtonsComponent } from 'bite-tribe/dietary-vote';
 import {
   creatorLabelsBySource,
   dietaryLabelClass,
@@ -19,6 +19,12 @@ import {
   type DietaryOwnVotes,
   type DietaryVote,
 } from 'model';
+
+/** A thumb tapped on one of the creator's labels (issue #2197). */
+export interface DietaryVoteClick {
+  label: DietaryLabel;
+  vote: DietaryVote;
+}
 
 /**
  * The dietary labels on a Bite's detail page (GitHub issue #2195), one group
@@ -34,8 +40,9 @@ import {
  * Diners confirm or dispute the creator's labels (GitHub issue #2197). A
  * label with enough confirmations and no dispute moves out of the creator's
  * group into one reported by diners, and a high-risk one there still carries
- * the notice, whatever its count. Every label shows its counts, and a viewer
- * offered a vote taps a label to cast one.
+ * the notice, whatever its count. Each of those labels is a row with a thumb
+ * up and a thumb down and their counts, and a viewer offered a vote taps one
+ * to cast it.
  *
  * Renders nothing when neither source has a label (`Absent Field Contract`).
  */
@@ -43,7 +50,7 @@ import {
   selector: 'bt-bite-dietary',
   templateUrl: './bite-dietary.component.html',
   styleUrl: './bite-dietary.component.scss',
-  imports: [DietaryLabelVotesComponent, NgTemplateOutlet, TranslocoPipe],
+  imports: [DietaryVoteButtonsComponent, NgTemplateOutlet, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BiteDietaryComponent {
@@ -64,8 +71,8 @@ export class BiteDietaryComponent {
   /** Whether the viewer is offered a vote on the creator's labels. */
   canVote = input(false);
 
-  /** The viewer tapped a label to confirm or dispute it. */
-  readonly voteClick = output<DietaryLabel>();
+  /** The viewer tapped a thumb to confirm or dispute a label. */
+  readonly voteClick = output<DietaryVoteClick>();
 
   protected readonly restaurant = computed(() =>
     dietaryLabelsOf(this.restaurantLabels()),
@@ -113,6 +120,21 @@ export class BiteDietaryComponent {
     needsConfirmWithRestaurantNotice(
       this.creator().filter((label) => !this.restaurant().includes(label)),
     ),
+  );
+
+  /**
+   * Whether the labels get their rows: once there is a thumb to tap or a
+   * count to show. Until then they stay plain chips, as before any vote.
+   */
+  protected readonly showsVoteRows = computed(
+    () =>
+      this.canVote() ||
+      [...this.reported(), ...this.creator()].some(
+        (label) =>
+          (this.tallies()[label]?.confirm ?? 0) +
+            (this.tallies()[label]?.dispute ?? 0) >
+          0,
+      ),
   );
 
   protected tallyOf(label: DietaryLabel): DietaryLabelTally | undefined {

@@ -57,9 +57,23 @@
 
       .dietary-entry {
         display: inline-flex;
-        flex-wrap: wrap;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+      }
+
+      /* A label diners voted on (issue #2197) takes a row of its own: the
+         chip, then how they split, so the line never wraps beside another
+         label. */
+      .dietary-labels:has(.dietary-entry-voted) {
+        flex: 1 1 100%;
+      }
+
+      .dietary-entry-voted {
+        flex: 1 1 100%;
+
+        bt-dietary-agreement {
+          flex: 1;
+        }
       }
 
       /* A label a member can vote on (issue #2197), still read as a chip. */

@@ -65,7 +65,10 @@ import { AppLauncher } from '@capacitor/app-launcher';
 import { StarRatingComponent } from 'common/ui/star-rating';
 import { TagsInputComponent } from 'common/ui/tags';
 import { TaggedUsersComponent } from '../tagged-users/tagged-users.component';
-import { BiteDietaryComponent } from '../bite-dietary/bite-dietary.component';
+import {
+  BiteDietaryComponent,
+  type DietaryVoteClick,
+} from '../bite-dietary/bite-dietary.component';
 import { Position } from '@capacitor/geolocation';
 import { CalcDistancePipe } from './pipes/calc-distance.pipe';
 import { ConvertToPreferredCurrencyPipe } from './pipes/convert-to-preferred-currency.pipe';
@@ -240,7 +243,7 @@ export class DetailsPage {
   readonly explainBite = output<Bite>();
 
   /** The viewer confirms or disputes one of the creator's labels (#2197). */
-  readonly dietaryVoteClick = output<DietaryLabel>();
+  readonly dietaryVoteClick = output<DietaryVoteClick>();
 
   private readonly formBuilder = inject(FormBuilder);
   private popoverController = inject(PopoverController);

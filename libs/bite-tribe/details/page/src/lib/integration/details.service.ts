@@ -24,11 +24,11 @@ import {
 import { TranslocoService } from '@jsverse/transloco';
 import type { SocialShareTarget } from 'social-share';
 import { Capacitor } from '@capacitor/core';
+import type { DietaryVoteClick } from '../components/bite-dietary/bite-dietary.component';
 import {
   Bite,
   BiteReportReason,
   Bucketlist,
-  DietaryLabel,
   LikeClick,
   PublicUser,
   RemoveBiteFromBucketlistParams,
@@ -474,15 +474,17 @@ export class DetailsService {
   }
 
   /**
-   * Confirms or disputes one of the creator's labels (GitHub issue #2197):
-   * asks, sends and says what came of it, including why an ineligible
+   * Confirms or disputes one of the creator's labels (GitHub issue #2197),
+   * as the thumb tapped says: a confirmation is sent at once, and a dispute
+   * asks why first. Sends and says what came of it, including why an ineligible
    * account was refused.
    */
-  async voteDietaryLabel(label: DietaryLabel): Promise<void> {
+  async voteDietaryLabel({ label, vote }: DietaryVoteClick): Promise<void> {
     await this.dietaryVotePrompt.run(
       label,
       this.ownDietaryVotes()[label],
       (choice) => this.dataAccess.voteDietaryLabel({ label, ...choice }),
+      vote,
     );
   }
 

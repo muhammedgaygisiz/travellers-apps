@@ -33,19 +33,37 @@
     padding: 0.25rem 0.4rem;
   }
 
-  .dietary-entry {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.25rem;
+  /* The labels diners vote on (issue #2197): one row each, the chip on the
+     left and the thumbs on the right. */
+  .dietary-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  /* A label a viewer can vote on is a button that still reads as a chip. */
-  .dietary-label-votable {
-    background: none;
-    font: inherit;
-    font-size: 0.75rem;
-    cursor: pointer;
+  .dietary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    border-top: 1px solid var(--ion-color-light-shade);
+
+    &:last-child {
+      border-bottom: 1px solid var(--ion-color-light-shade);
+    }
+  }
+
+  /* Nothing to tap and nothing counted yet: the labels stay chips. */
+  .dietary-rows-plain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+
+    .dietary-row {
+      min-height: 0;
+      border: 0;
+    }
   }
 
   .dietary-vote-hint {

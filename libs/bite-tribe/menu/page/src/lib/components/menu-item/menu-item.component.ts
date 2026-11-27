@@ -32,7 +32,7 @@ import type {
   MenuOptionSelection,
 } from 'model';
 import type { DietaryLabelTallies, DietaryOwnVotes } from 'model';
-import { DietaryLabelVotesComponent } from 'bite-tribe/dietary-vote';
+import { DietaryAgreementComponent } from 'bite-tribe/dietary-vote';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { formatMoney } from 'utils';
@@ -99,7 +99,7 @@ export interface MenuItemSelection {
     IonRadioGroup,
     NgTemplateOutlet,
     TranslocoPipe,
-    DietaryLabelVotesComponent,
+    DietaryAgreementComponent,
   ],
 })
 export class MenuItemComponent {
@@ -180,6 +180,13 @@ export class MenuItemComponent {
     if (item?.id) {
       this.dietaryVoteClick.emit({ item, label });
     }
+  }
+
+  /** Whether diners voted on a label at all, which gives it a row. */
+  protected hasDietaryVotes(label: DietaryLabel): boolean {
+    const tally = this.dietaryTallies()[label];
+
+    return (tally?.confirm ?? 0) + (tally?.dispute ?? 0) > 0;
   }
 
   protected isHighRisk(label: DietaryLabel): boolean {

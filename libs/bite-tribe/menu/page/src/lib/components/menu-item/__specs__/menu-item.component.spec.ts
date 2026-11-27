@@ -693,11 +693,18 @@ describe('MenuItemComponent', () => {
 
         expect(element.querySelector('button.dietary-label')).toBeNull();
         expect(
-          element.querySelector('[data-testid="dietary-votes-confirmed"]'),
+          element.querySelector('[data-testid="dietary-agreement-text"]'),
         ).not.toBeNull();
+        expect(element.querySelector('.dietary-entry-voted')).not.toBeNull();
+      });
+
+      it('keeps a label nobody voted on as a plain chip', () => {
+        const element = render({ dietaryLabels: ['vegan'] });
+
+        expect(element.querySelector('.dietary-entry-voted')).toBeNull();
         expect(
-          element.querySelector('[data-testid="dietary-votes-disputed"]'),
-        ).not.toBeNull();
+          element.querySelector('[data-testid="dietary-agreement-text"]'),
+        ).toBeNull();
       });
 
       it('emits the dish and the label a member taps, a variant included', () => {
@@ -707,7 +714,7 @@ describe('MenuItemComponent', () => {
           clicks.push(click),
         );
         fixture.componentRef.setInput('dietaryVotes', {
-          tallies: {},
+          tallies: { v1: { vegan: { confirm: 0, dispute: 1 } } },
           own: { v1: { vegan: 'dispute' } },
           canVote: true,
         });
@@ -740,7 +747,7 @@ describe('MenuItemComponent', () => {
           ['v1', 'vegan'],
         ]);
         expect(
-          element.querySelector('[data-testid="dietary-votes-own"]'),
+          element.querySelector('[data-testid="dietary-agreement-own"]'),
         ).not.toBeNull();
       });
 

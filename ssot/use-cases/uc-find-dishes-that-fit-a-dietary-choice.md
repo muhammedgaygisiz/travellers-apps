@@ -76,12 +76,14 @@ Once the behaviour has succeeded:
   choices and keeps the lifestyle ones; clearing removes every choice and keeps the consent.
   Each change is written at once, apart from the preferences form, and a failed write is
   announced and undone ([#2196]). Onboarding does not offer the section.
-- Built: a Bite Creator reading somebody else's Bite taps one of the creator's labels, or on
-  a restaurant's menu one of a dish's labels, and confirms or disputes it. A dispute takes a
+- Built: a Bite Creator reading somebody else's Bite taps the thumb up or thumb down on the
+  row of one of the creator's labels, or on a restaurant's menu taps one of a dish's labels
+  and chooses, and confirms or disputes it. A confirmation by thumb is sent at once. A dispute takes a
   reason from a fixed list - an animal product, gluten, the staff said it does not fit, I got
   sick, other - and an optional note, checked before it is stored (`RD-UR-11`). A second vote
   replaces the first. An ineligible account is told why. Every reader sees how many diners
-  confirm and how many dispute each label, and the counts change for every open page as a
+  confirm and how many dispute each label - on a Bite as counts beside the thumbs, on the menu
+  as how many of the voters agree with a bar of how they split - and the counts change for every open page as a
   vote lands. A creator's label with 3 confirmations and no dispute moves from what the
   creator says to what diners report, and halal and kosher do so only where the restaurant
   declares them too ([#2197], `RD-DC-6`). The rest of this flow is intended.
@@ -205,7 +207,8 @@ Built by [#2197]:
 - `apps/bite-tribe-firebase/firestore.rules` - `dietaryLabelTallies` and `dietaryLabelVotes`,
   with their cases in `firestore-rules.emulator-spec.ts`
 - `libs/bite-tribe/api/src/lib/dietary-vote-api` - the call, the live counts and the own votes
-- `libs/bite-tribe/dietary-vote` - the vote prompt and the counts under a label, shared by
+- `libs/bite-tribe/dietary-vote` - the vote prompt, the thumbs on a Bite's label rows and the
+  agreement bar on the menu, shared by
   `libs/bite-tribe/details/page` (`bite-dietary`) and `libs/bite-tribe/menu/page`
   (`menu-item`)
 

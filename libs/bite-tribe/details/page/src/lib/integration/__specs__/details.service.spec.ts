@@ -1678,13 +1678,14 @@ describe('DetailsService', () => {
 
   /** Diners' votes on the creator's labels (GitHub issue #2197). */
   describe('voteDietaryLabel', () => {
-    it("asks with the viewer's own vote and sends the choice for that label", async () => {
-      await service.voteDietaryLabel('vegan');
+    it("passes the thumb tapped and the viewer's own vote, and sends the choice for that label", async () => {
+      await service.voteDietaryLabel({ label: 'vegan', vote: 'dispute' });
 
       expect(mockDietaryVotePrompt.run).toHaveBeenCalledWith(
         'vegan',
         'confirm',
         expect.any(Function),
+        'dispute',
       );
       expect(service.dataAccess.voteDietaryLabel).toHaveBeenCalledWith({
         label: 'vegan',

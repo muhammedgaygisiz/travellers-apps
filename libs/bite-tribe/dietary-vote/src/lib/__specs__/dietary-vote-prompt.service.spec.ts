@@ -59,6 +59,32 @@ describe(DietaryVotePromptService.name, () => {
     service = TestBed.inject(DietaryVotePromptService);
   });
 
+  it('skips the first question when the vote is already chosen', async () => {
+    const send = jest.fn(async () => ({
+      status: 'saved' as const,
+      tally: { confirm: 1, dispute: 0 },
+    }));
+
+    await service.run('vegan', undefined, send, 'confirm');
+
+    expect(sheetOptions).toEqual([]);
+    expect(send).toHaveBeenCalledWith({ vote: 'confirm' });
+  });
+
+  it('still asks why for a dispute already chosen', async () => {
+    sheets.push({ data: 'gluten' });
+    alerts.push({ role: 'confirm', data: { values: { note: '' } } });
+    const send = jest.fn(async () => ({
+      status: 'saved' as const,
+      tally: { confirm: 0, dispute: 1 },
+    }));
+
+    await service.run('gluten-free', 'confirm', send, 'dispute');
+
+    expect(sheetOptions).toHaveLength(1);
+    expect(send).toHaveBeenCalledWith({ vote: 'dispute', reason: 'gluten' });
+  });
+
   it('sends a confirmation straight away and says it counted', async () => {
     sheets.push({ data: 'confirm' });
     const send = jest.fn(async () => ({

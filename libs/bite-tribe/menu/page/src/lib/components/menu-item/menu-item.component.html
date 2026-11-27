@@ -22,8 +22,12 @@
         <ul class="dietary-labels">
           @for (label of dietary().labels; track label) {
             <!-- A member taps a label to confirm or dispute it, and every
-            reader sees what diners said (issue #2197). -->
-            <li class="dietary-entry">
+            reader sees how diners split on it, as a line and a bar beside
+            the label on a row of its own (issue #2197). -->
+            <li
+              class="dietary-entry"
+              [class.dietary-entry-voted]="hasDietaryVotes(label)"
+            >
               @if (canVoteDietary()) {
                 <button
                   type="button"
@@ -48,7 +52,7 @@
                   {{ 'dietary-label-' + label | transloco }}
                 </span>
               }
-              <bt-dietary-label-votes
+              <bt-dietary-agreement
                 [tally]="dietaryTallies()[label]"
                 [ownVote]="dietaryOwnVotes()[label]"
               />

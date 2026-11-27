@@ -58,13 +58,18 @@ export class DietaryVotePromptService {
   /**
    * Asks, sends and says what came of it. Answers the result, or nothing
    * when the diner cancelled at any step.
+   *
+   * A `vote` already chosen - a thumb tapped on the Bite details page - skips
+   * the first question: a confirmation is sent as it is, and a dispute still
+   * asks why.
    */
   async run(
     label: DietaryLabel,
     ownVote: DietaryVote | undefined,
     send: (choice: DietaryVoteChoice) => Promise<VoteDietaryLabelResult>,
+    vote?: DietaryVote,
   ): Promise<VoteDietaryLabelResult | undefined> {
-    const choice = await this.ask(label, ownVote);
+    const choice = await this.ask(label, ownVote, vote);
 
     if (!choice) {
       return undefined;
@@ -90,17 +95,9 @@ export class DietaryVotePromptService {
   async ask(
     label: DietaryLabel,
     ownVote: DietaryVote | undefined,
+    chosen?: DietaryVote,
   ): Promise<DietaryVoteChoice | undefined> {
-    const vote = await this.pick<DietaryVote>(
-      this.t('dietary-vote-header', {
-        label: this.t(`dietary-label-${label}`),
-      }),
-      ownVote ? this.t(`dietary-vote-own-${ownVote}`) : undefined,
-      [
-        ['confirm', this.t('dietary-vote-confirm')],
-        ['dispute', this.t('dietary-vote-dispute')],
-      ],
-    );
+    const vote = chosen ?? (await this.pickVote(label, ownVote));
 
     if (vote !== 'dispute') {
       return vote ? { vote } : undefined;
@@ -126,6 +123,22 @@ export class DietaryVotePromptService {
     }
 
     return { vote, reason, ...(note ? { note } : {}) };
+  }
+
+  private pickVote(
+    label: DietaryLabel,
+    ownVote: DietaryVote | undefined,
+  ): Promise<DietaryVote | undefined> {
+    return this.pick<DietaryVote>(
+      this.t('dietary-vote-header', {
+        label: this.t(`dietary-label-${label}`),
+      }),
+      ownVote ? this.t(`dietary-vote-own-${ownVote}`) : undefined,
+      [
+        ['confirm', this.t('dietary-vote-confirm')],
+        ['dispute', this.t('dietary-vote-dispute')],
+      ],
+    );
   }
 
   private async pick<T extends string>(

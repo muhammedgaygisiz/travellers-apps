@@ -149,8 +149,11 @@ describe(BiteDietaryComponent.name, () => {
       expect(testIds(element, 'bite-dietary-creator-label-')).toEqual([
         'bite-dietary-creator-label-vegan',
       ]);
+      expect(element.querySelector('.dietary-rows-plain')).toBeNull();
       expect(
-        element.querySelector('[data-testid="dietary-votes-disputed"]'),
+        element.querySelector(
+          '[data-testid="bite-dietary-creator-votes-vegan"]',
+        ),
       ).not.toBeNull();
     });
 
@@ -185,36 +188,44 @@ describe(BiteDietaryComponent.name, () => {
       ).toEqual(['bite-dietary-diners-label-halal']);
     });
 
-    it('offers a vote as a tap on the label, and says which label', () => {
-      const clicked: string[] = [];
+    it('offers a vote as a thumb on the label row, and says which label and which vote', () => {
+      const clicked: { label: string; vote: string }[] = [];
 
-      fixture.componentInstance.voteClick.subscribe((label) =>
-        clicked.push(label),
+      fixture.componentInstance.voteClick.subscribe((click) =>
+        clicked.push(click),
       );
       const element = render({
         creatorLabels: ['vegan'],
         canVote: true,
         ownVotes: { vegan: 'confirm' },
       });
-      const chip = element.querySelector<HTMLButtonElement>(
-        'button[data-testid="bite-dietary-creator-label-vegan"]',
+      const row = element.querySelector(
+        '[data-testid="bite-dietary-creator-votes-vegan"]',
       );
 
-      chip?.click();
+      row
+        ?.querySelector<HTMLButtonElement>(
+          '[data-testid="dietary-vote-dispute"]',
+        )
+        ?.click();
 
-      expect(clicked).toEqual(['vegan']);
+      expect(clicked).toEqual([{ label: 'vegan', vote: 'dispute' }]);
+      expect(element.querySelector('.dietary-rows-plain')).toBeNull();
       expect(
         element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
       ).not.toBeNull();
       expect(
-        element.querySelector('[data-testid="dietary-votes-own"]'),
-      ).not.toBeNull();
+        row
+          ?.querySelector('[data-testid="dietary-vote-confirm"]')
+          ?.getAttribute('aria-pressed'),
+      ).toBe('true');
     });
 
     it('offers no vote where the viewer may not cast one', () => {
       const element = render({ creatorLabels: ['vegan'] });
 
       expect(element.querySelector('button')).toBeNull();
+      expect(element.querySelector('.dietary-rows-plain')).not.toBeNull();
       expect(
         element.querySelector('[data-testid="bite-dietary-vote-hint"]'),
       ).toBeNull();

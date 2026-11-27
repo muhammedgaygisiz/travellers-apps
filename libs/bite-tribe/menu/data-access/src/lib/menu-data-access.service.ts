@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal } from '@angular/core';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { dietaryVoteScopeKey, withMenuIds } from 'model';
+import { dietaryVoteScopeKey, menuDietaryLabelsOf, withMenuIds } from 'model';
 import type {
   Bite,
   DietaryLabelTallies,
@@ -10,6 +10,7 @@ import type {
   LinkBiteToMenuItemResult,
   Menu,
   MenuItemStats,
+  SaveMenuDietaryLabelsResult,
   VoteDietaryLabelRequest,
   VoteDietaryLabelResult,
 } from 'model';
@@ -71,8 +72,17 @@ export class MenuDataAccessService {
    * declined the location permission. The rules that authorise the write read
    * this id (issue #1078), so the route stays the source either way.
    */
-  saveMenu(menu: Menu): Promise<void> {
-    return this.api.saveMenu(menu, this.storeService.restaurantIdFromUrl());
+  async saveMenu(menu: Menu): Promise<SaveMenuDietaryLabelsResult> {
+    const restaurantId = this.storeService.restaurantIdFromUrl();
+
+    await this.api.saveMenu(menu, restaurantId);
+
+    // The labels go second, through the callable, once the dishes they name
+    // are stored (issue #2198). The menu write carries none of them.
+    return this.api.saveMenuDietaryLabels({
+      restaurantId: restaurantId ?? '',
+      items: menuDietaryLabelsOf(menu),
+    });
   }
 
   /**

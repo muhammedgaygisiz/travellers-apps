@@ -30,6 +30,7 @@ import {
   StoredDietaryVote,
   tallyOf,
 } from './dietary-votes';
+import { menuDietaryMapOf, publishedLabelsOf } from './menu-dietary';
 
 const BITES_COLLECTION = 'bites';
 const MENUS_COLLECTION = 'menus';
@@ -237,7 +238,11 @@ const resolveTarget = async (target: Target): Promise<ResolvedTarget> => {
   return {
     scopeKey: menuScopeKey(target.restaurantId),
     subjectId: target.menuItemId,
-    claimedLabels: labelsOf(row['dietaryLabels']),
+    // The restaurant's labels as it publishes them (#2198): from the menu's
+    // `dietary` map once it has one, and never a removed label.
+    claimedLabels: publishedLabelsOf(
+      menuDietaryMapOf(menu).dietary[target.menuItemId],
+    ),
     restaurantId: target.restaurantId,
     restaurant: restaurant.data(),
   };

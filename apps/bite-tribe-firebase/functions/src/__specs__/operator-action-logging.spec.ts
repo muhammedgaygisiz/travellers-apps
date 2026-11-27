@@ -36,6 +36,9 @@ const READ_ONLY_OPERATOR_ENDPOINTS = [
   'listUserReports',
   'listUsersWithRoles',
   'listRestaurantStaff',
+  // The dietary labels waiting for an operator (issue #2198); answering one is
+  // logged by `answerDietaryLabelApproval`.
+  'listDietaryLabelApprovals',
   // City landing pages (issue #1490): the list the editor opens on, and a
   // preview rendered from the editor's own fields. Neither writes anything.
   'listLandingPages',

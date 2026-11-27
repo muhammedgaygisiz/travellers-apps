@@ -10,11 +10,12 @@ Restaurant, and the consumer menu and restaurant page show them as declared by t
 restaurant. The creator's labels on a Bite of [#2195] exist too, shown beside the
 restaurant's labels for a linked dish. A member's own dietary choices of [#2196] exist, set in
 settings with consent for the religious and health ones, and nothing reads them yet. Diners
-confirm and dispute labels since [#2197]. Nothing else in the flow exists yet - no removal,
-no filters - and a free-text tag such as `#vegan` on a Bite stays a tag that
+confirm and dispute labels since [#2197], and a restaurant's label they dispute is removed,
+locked and counted as a strike since [#2198]. Restoration and the filters do not exist yet,
+and a free-text tag such as `#vegan` on a Bite stays a tag that
 nothing filters on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
 it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
-thresholds it depends on are open in `Dietary Choice Questions` in
+questions still open are `Dietary Choice Questions` in
 [Current State - Open Questions](../current-state/open-questions.md).
 
 ## Goal
@@ -47,12 +48,12 @@ exclusion it applies.
 
 Once the behaviour has succeeded:
 
-| #   | Guarantee                                                                                                                    |
-| --- | ---------------------------------------------------------------------------------------------------------------------------- |
-| G1  | Every dietary label a reader sees names its source: the restaurant, the diners, or the creator of that Bite                  |
-| G2  | A restaurant's label that reached the dispute threshold is on no surface and matches no filter until an operator restores it |
-| G3  | A member with a dietary choice can filter the feed, search, map and menus by it                                              |
-| G4  | No ad and no promoted content shown to a member conflicts with that member's dietary choices                                 |
+| #   | Guarantee                                                                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G1  | Every dietary label a reader sees names its source: the restaurant, the diners, or the creator of that Bite                                                     |
+| G2  | A restaurant's label that reached the dispute threshold is shown as a label on no surface, only as removed, and matches no filter until an operator restores it |
+| G3  | A member with a dietary choice can filter the feed, search, map and menus by it                                                                                 |
+| G4  | No ad and no promoted content shown to a member conflicts with that member's dietary choices                                                                    |
 
 ## Flow
 
@@ -86,9 +87,18 @@ Once the behaviour has succeeded:
   as how many of the voters agree with a bar of how they split - and the counts change for every open page as a
   vote lands. A creator's label with 3 confirmations and no dispute moves from what the
   creator says to what diners report, and halal and kosher do so only where the restaurant
-  declares them too ([#2197], `RD-DC-6`). The rest of this flow is intended.
-- When a restaurant's label reaches the dispute threshold, the backend removes it, locks it,
-  and tells the owner ([#2198]). The dish shows that the label was removed after diner reports.
+  declares them too ([#2197], `RD-DC-6`).
+- Built: when a diner's vote takes a restaurant's label to the dispute threshold, the backend
+  removes it with nobody acting, keeps it as removed with its disputes, and counts it as a
+  strike on the Restaurant ([#2198], `RD-DC-7`). The dish shows the label struck through as
+  removed after diner reports, on the member's, the published and the ordering menu, and a
+  linked Bite no longer shows it as declared by the restaurant. The owners are told by push
+  at a label's first dispute and at its removal. In the business app's dish editor the
+  removed label is not offered again, and a note says it was removed; a save that sends it
+  anyway is told it stayed removed. Once a Restaurant has 3 strikes within 12 months, a label
+  a dish does not publish yet waits for an Operator, and the save says so. The Operator
+  approves or refuses each waiting label in the admin app's `Dietary label approvals`, and an
+  approved one is published on the dish. The rest of this flow is intended.
 - The Restaurant Owner asks for the removed label back with evidence, and an Operator restores
   it or confirms the removal ([#2199]).
 - A Bite Creator with dietary choices sees the feed, search, map and menus filtered by them,
@@ -115,8 +125,17 @@ Once the behaviour has succeeded:
 
 ## Authorization
 
-The boundary as this page understands it: a menu item's labels are written with the menu,
-whose rules admit only an account holding the Restaurant or an Operator. The Restaurant's
+The boundary as this page understands it: a menu item's labels are kept in the menu's
+`dietary` field since [#2198], which the rules refuse to every client write, the Operator's
+included, because a menu's dishes sit in arrays no rule can look into. They are written only
+by the `saveMenuDietaryLabels` callable, which admits an account holding the Restaurant or an
+Operator, refuses a removed label and holds a new one for approval at the strike limit; by
+the `removeDisputedDietaryLabels` trigger; and by the operator-only
+`answerDietaryLabelApproval`. A menu last saved before [#2198] keeps its labels on its items
+until the first of those writes the field; from then on the item fields are not read. The
+Restaurant's `dietaryStrikes` are refused to every client like its follower count, and the
+waiting labels in `dietaryLabelApprovals` are read only through the operator-only
+`listDietaryLabelApprovals`. The Restaurant's
 statements and note are written only by the `saveRestaurantDietaryStatements` callable,
 which admits the same two and checks the note, and the rules refuse every client write of
 them. The Bite's labels are creator-scoped like the rest of the Bite, and the rules
@@ -212,10 +231,34 @@ Built by [#2197]:
   `libs/bite-tribe/details/page` (`bite-dietary`) and `libs/bite-tribe/menu/page`
   (`menu-item`)
 
+Built by [#2198]:
+
+- `libs/bite-tribe-common/model/src/lib/dietary-removal.ts` - the thresholds, the strike
+  limit, `Menu.dietary` and `withMenuDietary`, which every menu read applies, so a removed
+  label is never among a dish's labels (`R-12`); `MenuItem.removedDietaryLabels` and
+  `Restaurant.dietaryStrikes`
+- `apps/bite-tribe-firebase/functions/src/functions/dietary/remove-disputed-dietary-labels.ts`
+  - the trigger on `dietaryLabelTallies`, which counts disputes within the window from the
+    votes, one per account; `menu-dietary.ts` - the stored shape, kept in step with the model
+    by `menu-dietary-parity.spec.ts`
+- `save-menu-dietary-labels.ts`, `list-dietary-label-approvals.ts` and
+  `answer-dietary-label-approval.ts` beside it - the only writers of the labels and the
+  operator's queue
+- `apps/bite-tribe-firebase/firestore.rules` - `dietary` on `menus`, `dietaryStrikes` on
+  `restaurants` and `dietaryLabelApprovals`, with their cases in
+  `firestore-rules.emulator-spec.ts`
+- `libs/bite-tribe/api/src/lib/menu-api` - the menu write, which leaves the item labels out once the map exists, the call, and the
+  overlay on both menu reads; `libs/bite-tribe/menu/data-access` sends the labels after the
+  menu
+- `libs/bite-tribe-business/edit-menu/page` (`dish-editor`) - the locked label and its note;
+  `libs/bite-tribe/menu/page` (`menu-item`) - the removed label
+- `libs/bite-tribe-admin/restaurants/page` (`dietary-label-approvals`) - the Operator's queue
+- the `dietaryLabelDisputed` and `dietaryLabelRemoved` pushes in the Functions notification
+  catalog, in all fourteen languages
+
 Not implemented yet, the surfaces the later stories will touch:
 
 - `libs/bite-tribe/home/page`, and the readers of the choices
-- `apps/bite-tribe-firebase/functions` - the removal trigger
 - `firestore.indexes.json`
 
 ## Related GitHub Scope

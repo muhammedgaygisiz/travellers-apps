@@ -1074,6 +1074,20 @@ describe('restaurant follows', () => {
     );
   });
 
+  it.each([
+    ['the owner', (): Firestore => asOwner()],
+    ['an operator', (): Firestore => asOperator()],
+  ])(
+    'refuses %s writing the dietary strikes (issue #2198)',
+    async (_who, as) => {
+      await assertFails(
+        updateDoc(doc(as(), 'restaurants', OWNED_RESTAURANT), {
+          dietaryStrikes: [],
+        }),
+      );
+    },
+  );
+
   it('refuses an operator creating a restaurant that carries a follower count', async () => {
     await assertFails(
       setDoc(doc(asOperator(), 'restaurants', 'counted-restaurant'), {
@@ -1294,6 +1308,67 @@ describe('restaurants held through the owner set (epic #1614)', () => {
 });
 
 describe('menus', () => {
+  /**
+   * The restaurant's labels live in `dietary`, refused to every client so a
+   * label diners' disputes removed stays removed (issue #2198). Only the
+   * `saveMenuDietaryLabels` callable and the backend write it.
+   */
+  describe('the dietary labels (issue #2198)', () => {
+    it.each([
+      ['the owner', (): Firestore => asOwner()],
+      ['an operator', (): Firestore => asOperator()],
+    ])('refuses %s writing them from a client', async (_who, as) => {
+      await assertFails(
+        updateDoc(doc(as(), 'menus', OWNED_MENU), {
+          restaurantId: OWNED_RESTAURANT,
+          dietary: { m1: { labels: ['vegan'] } },
+        }),
+      );
+    });
+
+    it('refuses the owner setting a removed label again by a direct write', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await updateDoc(doc(context.firestore(), 'menus', OWNED_MENU), {
+          dietary: {
+            m1: {
+              removed: { vegan: { removedAt: '2026-11-27T00:00:00.000Z' } },
+            },
+          },
+        });
+      });
+
+      await assertFails(
+        updateDoc(doc(asOwner(), 'menus', OWNED_MENU), {
+          restaurantId: OWNED_RESTAURANT,
+          'dietary.m1.labels': ['vegan'],
+        }),
+      );
+      await assertFails(
+        updateDoc(doc(asOwner(), 'menus', OWNED_MENU), {
+          restaurantId: OWNED_RESTAURANT,
+          dietary: {},
+        }),
+      );
+      // The rest of the menu stays the owner's to save.
+      await assertSucceeds(
+        updateDoc(doc(asOwner(), 'menus', OWNED_MENU), {
+          restaurantId: OWNED_RESTAURANT,
+          categories: [{ title: 'Mains', items: [] }],
+        }),
+      );
+    });
+
+    it('refuses a menu created with labels in it', async () => {
+      await assertFails(
+        setDoc(doc(asOwner(), 'menus', 'new-dietary-menu'), {
+          restaurantId: OWNED_RESTAURANT,
+          categories: [],
+          dietary: { m1: { labels: ['vegan'] } },
+        }),
+      );
+    });
+  });
+
   it('lets the restaurant owner save its menu', async () => {
     await assertSucceeds(
       updateDoc(doc(asOwner(), 'menus', OWNED_MENU), {
@@ -4498,6 +4573,19 @@ describe('backend-owned collections', () => {
       await assertFails(
         setDoc(doc(db, 'dietaryLabelTallies', 'bite__other-bite'), {
           items: { 'other-bite': { vegan: { confirm: 5, dispute: 0 } } },
+        }),
+      );
+    }
+  });
+
+  it('keeps the dietary label approvals from every client (issue #2198)', async () => {
+    for (const db of [asOwner(), asOperator(), asConsumer()]) {
+      await assertFails(
+        getDoc(doc(db, 'dietaryLabelApprovals', OWNED_RESTAURANT)),
+      );
+      await assertFails(
+        setDoc(doc(db, 'dietaryLabelApprovals', OWNED_RESTAURANT), {
+          items: {},
         }),
       );
     }

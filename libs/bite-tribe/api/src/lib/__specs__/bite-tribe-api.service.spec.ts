@@ -37,6 +37,7 @@ class RestaurantApiMock {
 class MenuApiMock {
   loadMenu = jest.fn();
   saveMenu = jest.fn();
+  saveMenuDietaryLabels = jest.fn();
 }
 
 class LikeApiMock {
@@ -532,6 +533,19 @@ describe(BiteTribeApiService.name, () => {
         const menu = { id: 'menu-id', items: [] } as any;
         service.saveMenu(menu, 'restaurant-id');
         expect(saveMenuSpy).toHaveBeenCalledWith(menu, 'restaurant-id');
+      },
+    ));
+  });
+
+  describe('saveMenuDietaryLabels', () => {
+    it('should call saveMenuDietaryLabels on MenuApiService', inject(
+      [BiteTribeApiService, MenuApiService],
+      (service: BiteTribeApiService, menuApiService: MenuApiService) => {
+        const request = { restaurantId: 'r1', items: {} };
+        service.saveMenuDietaryLabels(request);
+        expect(menuApiService.saveMenuDietaryLabels).toHaveBeenCalledWith(
+          request,
+        );
       },
     ));
   });

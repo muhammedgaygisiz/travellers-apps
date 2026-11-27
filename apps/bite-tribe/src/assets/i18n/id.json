@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "Dapur khusus bebas gluten",
   "dietary-option": "{{label}} atas permintaan",
   "dietary-declared-by-restaurant": "Dinyatakan oleh restoran",
+  "dietary-removed-after-reports": "{{label}}: dihapus setelah laporan pengunjung",
   "bite-dietary-labels-label": "Label makanan",
   "bite-dietary-labels-hint": "Opsional. Orang lain melihatnya sebagai pernyataanmu tentang hidangan ini.",
   "dietary-claimed-by-creator": "Menurut pembuatnya, ini",

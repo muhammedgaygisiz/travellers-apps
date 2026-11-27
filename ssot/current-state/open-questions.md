@@ -1,6 +1,6 @@
 # Current State - Open Questions
 
-**Last verified:** 2026-11-26
+**Last verified:** 2026-11-27
 
 ## Purpose
 
@@ -257,9 +257,12 @@ These belong to [#2086]. Each is settled with the maintainer before the privacy 
 These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it gates.
 
 - **How many disputes remove a restaurant's label, over what window, and is it a count or a
-  ratio?** The proposal is 3 eligible disputes within 90 days for a lifestyle label, 2 for a
-  high-risk one, and one "I got sick" dispute for a high-risk one, each only while disputes
-  outnumber confirmations. Gates [#2198].
+  ratio? Settled 27 November 2026 by `RD-DC-7`, delivered by [#2198]:** the proposal as it
+  stood - 3 eligible disputes within 90 days for a lifestyle label, 2 for a high-risk one,
+  and one "I got sick" dispute for a high-risk one, each only while disputes outnumber
+  confirmations. A count, not a ratio; the confirmations decide only that last condition.
+  Disputes are counted once per account; no check links two accounts, and the eligibility
+  of `RD-DC-6` is the only bar against a ring of them.
 - **Who is eligible to vote? Settled 26 November 2026 by `RD-DC-6`, delivered by
   [#2197]:** an account at least 14 days old with a Bite of its own, never the Bite's
   creator and never an account holding the Restaurant. Having a Bite at that restaurant was
@@ -269,8 +272,10 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
 - **Are halal and kosher shown from diner reports at all? Settled 26 November 2026 by
   `RD-DC-6`:** only where the restaurant declares them too. Their votes are still counted and
   shown, and they carry the high-risk notice either way (`RD-DC-5`).
-- **How many confirmed removals, over what period, cost a restaurant self-declaration?** The
-  proposal is 3 in 12 months. Gates [#2198].
+- **How many confirmed removals, over what period, cost a restaurant self-declaration?
+  Settled 27 November 2026 by `RD-DC-7`, delivered by [#2198]:** 3 in 12 months. Every
+  removal counts as a strike when it happens; what an Operator's restoration does to the
+  strike is [#2199]'s to decide.
 - **Can the ad network exclude categories per request, without the member's choices leaving
   BiteTribe?** If not, the options are to block the sensitive categories for every member,
   to show members with dietary choices only house or direct-sold ads, or to show them none.
@@ -341,6 +346,7 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
 [#2195]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2195
 [#2197]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2197
 [#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
+[#2199]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2199
 [#2201]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2201
 [#1134]: https://github.com/muhammedgaygisiz/travellers-apps/issues/1134
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140

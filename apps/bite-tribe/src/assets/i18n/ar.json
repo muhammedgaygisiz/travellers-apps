@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "مطبخ مخصص خالٍ من الغلوتين",
   "dietary-option": "{{label}} عند الطلب",
   "dietary-declared-by-restaurant": "بحسب تصريح المطعم",
+  "dietary-removed-after-reports": "{{label}}: أزيل بعد بلاغات الزبائن",
   "bite-dietary-labels-label": "التصنيفات الغذائية",
   "bite-dietary-labels-hint": "اختياري. يراها الآخرون على أنها ما تقوله أنت عن هذا الطبق.",
   "dietary-claimed-by-creator": "يقول ناشر الطبق إنه كان",

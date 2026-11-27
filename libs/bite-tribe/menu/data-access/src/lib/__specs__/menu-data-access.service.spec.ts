@@ -12,6 +12,7 @@ describe(MenuDataAccessService.name, () => {
   let service: MenuDataAccessService;
   let apiMock: {
     saveMenu: jest.Mock;
+    saveMenuDietaryLabels: jest.Mock;
     confirmMenuAsOwn: jest.Mock;
     loadMenuItemStats: jest.Mock;
     loadBitesForMenuItem: jest.Mock;
@@ -36,7 +37,10 @@ describe(MenuDataAccessService.name, () => {
 
   beforeEach(() => {
     apiMock = {
-      saveMenu: jest.fn(),
+      saveMenu: jest.fn().mockResolvedValue(undefined),
+      saveMenuDietaryLabels: jest
+        .fn()
+        .mockResolvedValue({ status: 'saved', locked: [], pending: [] }),
       confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
       loadMenuItemStats: jest.fn().mockResolvedValue({}),
       loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
@@ -149,12 +153,51 @@ describe(MenuDataAccessService.name, () => {
      * until the restaurants have loaded — reading the id off it would fail the
      * save whenever it had not.
      */
-    it('should call saveMenu on BiteTribeApiService with the restaurant from the route', () => {
+    it('should call saveMenu on BiteTribeApiService with the restaurant from the route', async () => {
       const menu = { id: 'menu-1', categories: [] } as unknown as Menu;
 
-      service.saveMenu(menu);
+      await service.saveMenu(menu);
 
       expect(apiMock.saveMenu).toHaveBeenCalledWith(menu, 'restaurant-1');
+    });
+
+    /**
+     * The labels go through the callable once the menu is stored (issue
+     * #2198), and its answer is what the editor reports.
+     */
+    it('sends every dish’s labels to the callable after the menu, and returns its answer', async () => {
+      const menu = {
+        id: 'menu-1',
+        categories: [
+          {
+            id: 'c1',
+            title: 'Mains',
+            items: [{ id: 'm1', name: 'Pad Thai', dietaryLabels: ['vegan'] }],
+          },
+        ],
+      } as unknown as Menu;
+      apiMock.saveMenu.mockImplementation(async () => {
+        expect(apiMock.saveMenuDietaryLabels).not.toHaveBeenCalled();
+      });
+
+      await expect(service.saveMenu(menu)).resolves.toEqual({
+        status: 'saved',
+        locked: [],
+        pending: [],
+      });
+      expect(apiMock.saveMenuDietaryLabels).toHaveBeenCalledWith({
+        restaurantId: 'restaurant-1',
+        items: { m1: { labels: ['vegan'], options: [] } },
+      });
+    });
+
+    it('sends no labels when the menu save is refused', async () => {
+      apiMock.saveMenu.mockRejectedValue(new Error('permission-denied'));
+
+      await expect(
+        service.saveMenu({ id: 'menu-1', categories: [] } as unknown as Menu),
+      ).rejects.toThrow('permission-denied');
+      expect(apiMock.saveMenuDietaryLabels).not.toHaveBeenCalled();
     });
   });
 

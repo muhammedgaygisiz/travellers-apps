@@ -44,6 +44,7 @@ import { BiteTribeRole, rolesOf } from './roles';
  */
 export const OPERATOR_ACTIONS = [
   'addRestaurantStaff',
+  'answerDietaryLabelApproval',
   'assignRestaurantOwner',
   'backfillBiteAddress',
   'backfillBiteImageStatus',
@@ -65,6 +66,7 @@ export const OPERATOR_ACTIONS = [
   'removeRestaurantStaff',
   'revokeRestaurantOwner',
   'saveLandingPage',
+  'saveMenuDietaryLabels',
   'saveRestaurantDietaryStatements',
   'rotateTableQrToken',
   'rotateTableQrTokens',

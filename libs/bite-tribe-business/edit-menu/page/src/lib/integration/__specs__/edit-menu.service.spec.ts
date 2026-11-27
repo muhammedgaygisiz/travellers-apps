@@ -22,7 +22,9 @@ describe('EditMenuService', () => {
     dataAccessMock = {
       restaurant: signal(undefined),
       menu: signal({ id: 'menu1', categories: [] }),
-      saveMenu: jest.fn().mockResolvedValue(undefined),
+      saveMenu: jest
+        .fn()
+        .mockResolvedValue({ status: 'saved', locked: [], pending: [] }),
       retryMenuLoad: jest.fn(),
       markMenuReviewed: jest.fn().mockResolvedValue(undefined),
       confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
@@ -84,12 +86,47 @@ describe('EditMenuService', () => {
         expect(loading.present).toHaveBeenCalled();
         expect(loading.dismiss).not.toHaveBeenCalled();
 
-        return Promise.resolve();
+        return Promise.resolve({ status: 'saved', locked: [], pending: [] });
       });
 
       await service.saveMenu(menu);
 
       expect(dataAccessMock.saveMenu).toHaveBeenCalled();
+    });
+
+    /**
+     * A label diners removed is locked, and a restaurant at the strike limit
+     * waits for an operator before a new label shows (issue #2198). The menu
+     * is saved either way, and the toast says which labels were not.
+     */
+    it.each([
+      [
+        'a locked label',
+        {
+          locked: [{ menuItemId: 'm1', label: 'vegan', kind: 'label' }],
+          pending: [],
+        },
+        'menu-saved-dietary-locked',
+      ],
+      [
+        'a label waiting for an operator',
+        {
+          locked: [],
+          pending: [{ menuItemId: 'm1', label: 'vegan', kind: 'label' }],
+        },
+        'menu-saved-dietary-pending',
+      ],
+    ])('should say when %s was not published', async (_what, outcome, key) => {
+      dataAccessMock.saveMenu = jest
+        .fn()
+        .mockResolvedValue({ status: 'saved', ...outcome });
+
+      await service.saveMenu(menu);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: key,
+        outcome: 'success',
+      });
     });
 
     /**

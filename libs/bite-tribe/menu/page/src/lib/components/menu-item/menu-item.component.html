@@ -70,6 +70,19 @@
               }}
             </li>
           }
+          <!-- A label diners' disputes removed (issue #2198): said so, never
+          shown as a label, and matched by no filter. -->
+          @for (label of dietary().removed; track label) {
+            <li
+              class="dietary-label dietary-removed"
+              [attr.data-testid]="'menu-item-dietary-removed-' + label"
+            >
+              {{
+                'dietary-removed-after-reports'
+                  | transloco: { label: ('dietary-label-' + label | transloco) }
+              }}
+            </li>
+          }
         </ul>
         <span class="dietary-source" data-testid="menu-item-dietary-source">{{
           'dietary-declared-by-restaurant' | transloco

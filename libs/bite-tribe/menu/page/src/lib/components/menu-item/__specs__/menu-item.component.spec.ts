@@ -639,6 +639,31 @@ describe('MenuItemComponent', () => {
       ).toBe('dietary-declared-by-restaurant');
     });
 
+    /** Removed after diner reports (issue #2198): said so, never a label. */
+    it('shows a removed label as removed after diner reports', () => {
+      const element = render({
+        dietaryLabels: ['vegetarian'],
+        removedDietaryLabels: ['vegan'],
+      });
+
+      expect(testIds(element, 'menu-item-dietary-label-')).toEqual([
+        'menu-item-dietary-label-vegetarian',
+      ]);
+      expect(
+        element
+          .querySelector('[data-testid="menu-item-dietary-removed-vegan"]')
+          ?.textContent?.trim(),
+      ).toBe('dietary-removed-after-reports');
+    });
+
+    it('shows the dietary block for a row whose only label was removed', () => {
+      const element = render({ removedDietaryLabels: ['halal'] });
+
+      expect(
+        element.querySelector('[data-testid="menu-item-dietary"]'),
+      ).not.toBeNull();
+    });
+
     it('marks a high-risk label apart from a lifestyle one', () => {
       const element = render({ dietaryLabels: ['vegan', 'gluten-free'] });
 

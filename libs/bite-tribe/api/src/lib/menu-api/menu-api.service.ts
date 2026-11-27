@@ -4,6 +4,8 @@ import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import {
   MENU_ITEM_STATS_COLLECTION,
+  withMenuDietary,
+  withoutMenuItemDietary,
   type Bite,
   type LinkBiteToMenuItemRequest,
   type LinkBiteToMenuItemResult,
@@ -11,6 +13,8 @@ import {
   type Menu,
   type MenuItemStats,
   type PublicMenuResult,
+  type SaveMenuDietaryLabelsRequest,
+  type SaveMenuDietaryLabelsResult,
 } from 'model';
 import { getMenuById } from './utils/get-menu-by-id';
 
@@ -172,6 +176,23 @@ export class MenuApiService {
     return result.data;
   }
 
+  /**
+   * Publishes a menu's dietary labels (GitHub issue #2198). A callable,
+   * because the rules refuse the labels to every client write: that is what
+   * keeps a label diners removed from being set again. The answer names the
+   * labels it did not publish - locked, or waiting for an operator.
+   */
+  async saveMenuDietaryLabels(
+    request: SaveMenuDietaryLabelsRequest,
+  ): Promise<SaveMenuDietaryLabelsResult> {
+    const result = await FirebaseFunctions.callByName<
+      SaveMenuDietaryLabelsRequest,
+      SaveMenuDietaryLabelsResult
+    >({ name: 'saveMenuDietaryLabels', data: request });
+
+    return result.data;
+  }
+
   handleError(err: unknown): typeof EMPTY {
     console.error('Error fetching menu:', err);
     this.errorHandler.handleError(err);
@@ -202,7 +223,14 @@ export class MenuApiService {
       reference: `${MENU_COLLECTION}/${menu.id}`,
       data: {
         restaurantId,
-        categories: menu.categories,
+        // The labels travel through `saveMenuDietaryLabels` (issue #2198).
+        // Once the menu has its `dietary` map the item fields are not read,
+        // so they are left out; a menu without the map keeps them until the
+        // callable has written it, so a failed call loses no label.
+        categories:
+          menu.dietary && menu.categories
+            ? withoutMenuItemDietary(menu.categories)
+            : menu.categories,
         updatedAt: new Date().toISOString(),
         updatedAtTimestamp: Date.now(), // numeric timestamp for easier queries
       },
@@ -304,7 +332,11 @@ export class MenuApiService {
         PublicMenuResult
       >({ name: 'loadPublicMenu', data: { restaurantId } });
 
-      return result.data;
+      // The labels as the restaurant publishes them, as for a member's read
+      // (issue #2198).
+      return result.data?.ok
+        ? { ...result.data, menu: withMenuDietary(result.data.menu) }
+        : result.data;
     } catch {
       // The transport failed rather than the menu being unreadable, and the
       // two get different sentences. `undefined` is the caller's signal to say

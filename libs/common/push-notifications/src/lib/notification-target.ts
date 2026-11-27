@@ -106,6 +106,14 @@ export const toNotificationTarget = (
         ? { commands: [PATH.RESTAURANT, data['restaurantId']] }
         : undefined;
 
+    case 'DIETARY_LABEL_DISPUTED':
+    case 'DIETARY_LABEL_REMOVED':
+      // Told to a restaurant's owners (issue #2198); its page is where the
+      // menu and its labels are.
+      return data['restaurantId']
+        ? { commands: [PATH.RESTAURANT, data['restaurantId']] }
+        : undefined;
+
     case 'LEADERBOARD_RANK_CHANGE':
       // A Bite's move on the Most liked board opens that tab (issue #2028).
       return data['board'] === 'mostLiked'

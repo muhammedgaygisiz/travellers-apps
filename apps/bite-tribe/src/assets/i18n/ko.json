@@ -364,6 +364,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "글루텐 프리 전용 주방",
   "dietary-option": "요청 시 {{label}} 가능",
   "dietary-declared-by-restaurant": "레스토랑 표시",
+  "dietary-removed-after-reports": "{{label}}: 손님 신고로 삭제됨",
   "bite-dietary-labels-label": "식단 라벨",
   "bite-dietary-labels-hint": "선택 사항. 다른 사람에게는 이 요리에 대한 내 설명으로 표시됩니다.",
   "dietary-claimed-by-creator": "작성자에 따르면 이 요리는",

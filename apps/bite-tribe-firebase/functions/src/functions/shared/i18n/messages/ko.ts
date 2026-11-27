@@ -28,6 +28,12 @@ export const ko: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}}님이 팔로우 요청을 수락했어요',
   'restaurantFollower.title': '새 팔로워',
   'restaurantFollower.body': '{{restaurant}}에 새 팔로워가 생겼어요.',
+  'dietaryLabelDisputed.title': '식단 라벨에 이의가 제기되었어요',
+  'dietaryLabelDisputed.body':
+    '{{restaurant}}의 {{dish}} 식단 라벨에 손님이 이의를 제기했어요.',
+  'dietaryLabelRemoved.title': '식단 라벨이 삭제되었어요',
+  'dietaryLabelRemoved.body':
+    '손님 신고에 따라 {{restaurant}}의 {{dish}} 식단 라벨이 삭제되었어요.',
   'biteTagged.title': 'Bite에 태그되었어요',
   'biteTagged.body': '{{creator}}님이 Bite에 나를 태그했어요: {{bite}}',
   'newLike.title': '누군가 내 Bite를 좋아해요!',

@@ -12,6 +12,8 @@ export * from './lib/dietary-label';
 export * from './lib/dietary-choice';
 /** A value export: the vote rules are read by the details page, the menu and the parity spec (issue #2197). */
 export * from './lib/dietary-vote';
+/** A value export: removal, the lock and the strikes are read by both apps and the parity spec (issue #2198). */
+export * from './lib/dietary-removal';
 export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';

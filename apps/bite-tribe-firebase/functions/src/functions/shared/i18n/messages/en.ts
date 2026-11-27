@@ -31,6 +31,12 @@ export const en: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} accepted your follow request.',
   'restaurantFollower.title': 'New follower',
   'restaurantFollower.body': 'Someone new is following {{restaurant}}.',
+  'dietaryLabelDisputed.title': 'A diner disputes a dietary label',
+  'dietaryLabelDisputed.body':
+    'A diner disputes a dietary label on {{dish}} at {{restaurant}}.',
+  'dietaryLabelRemoved.title': 'Dietary label removed',
+  'dietaryLabelRemoved.body':
+    'A dietary label on {{dish}} at {{restaurant}} was removed after diner reports.',
   'biteTagged.title': 'You were tagged in a Bite',
   'biteTagged.body': '{{creator}} tagged you in a Bite: {{bite}}',
   'newLike.title': 'New Like on Your Bite!',

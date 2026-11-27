@@ -435,6 +435,58 @@ describe(DishEditorComponent.name, () => {
       expect(component.variants.at(1).value.dietaryLabels).toEqual([]);
     });
 
+    /**
+     * A label diners' disputes removed is locked (issue #2198): neither
+     * picker offers it on that row, and a note says why.
+     */
+    it('offers no removed label and says it was removed', () => {
+      open({
+        ...PAD_THAI,
+        removedDietaryLabels: ['vegan'],
+        variants: [
+          { ...PAD_THAI.variants![0], removedDietaryLabels: ['halal'] },
+          PAD_THAI.variants![1],
+        ],
+      });
+
+      expect(component.removedLabelsOf(PAD_THAI.id)).toEqual(['vegan']);
+      expect(component.removedLabelsOf('v1')).toEqual(['halal']);
+      expect(component.removedLabelsOf('v2')).toEqual([]);
+      expect(component.removedLabelsOf(undefined)).toEqual([]);
+
+      const element = fixture.nativeElement as HTMLElement;
+      const disabled = (testId: string): string[] =>
+        Array.from(
+          element.querySelectorAll<HTMLIonSelectOptionElement>(
+            `[data-testid="${testId}"] ion-select-option`,
+          ),
+        )
+          .filter((option) => option.disabled)
+          .map((option) => option.value as string);
+
+      expect(
+        element.querySelector('[data-testid="dish-dietary-removed"]'),
+      ).not.toBeNull();
+      expect(
+        element.querySelector('[data-testid="dish-variant-0-dietary-removed"]'),
+      ).not.toBeNull();
+      expect(
+        element.querySelector('[data-testid="dish-variant-1-dietary-removed"]'),
+      ).toBeNull();
+      expect(component.removedLabelNames(['vegan', 'halal'])).toBe(
+        'dietary-label-vegan, dietary-label-halal',
+      );
+      expect(disabled('dish-dietary-labels')).toEqual(['vegan']);
+      expect(disabled('dish-dietary-options')).toEqual(['vegan']);
+      expect(disabled('dish-variant-0-dietary-labels')).toEqual(['halal']);
+
+      component.saveDish();
+
+      const dish = saved.mock.calls[0][0];
+      expect(dish.removedDietaryLabels).toEqual(['vegan']);
+      expect(dish.variants[0].removedDietaryLabels).toEqual(['halal']);
+    });
+
     it('saves the labels and options on the dish and each variant', () => {
       open(PAD_THAI);
       component.form.patchValue({

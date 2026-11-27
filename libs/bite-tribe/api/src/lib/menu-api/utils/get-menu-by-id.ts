@@ -1,4 +1,4 @@
-import type { Menu } from 'model';
+import { withMenuDietary, type Menu } from 'model';
 import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { MENU_COLLECTION } from '../menu-api.service';
 
@@ -12,10 +12,12 @@ export const getMenuById = async (
 
     const data = doc.snapshot.data;
     if (data) {
-      return {
+      // The restaurant's labels come from `dietary` once the menu has it
+      // (issue #2198), so every reader sees removed labels as removed.
+      return withMenuDietary({
         id: data['id'] ?? menuId,
         ...data,
-      } as Menu;
+      } as Menu);
     }
 
     return undefined;

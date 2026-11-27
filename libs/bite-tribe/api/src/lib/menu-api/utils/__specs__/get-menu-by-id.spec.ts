@@ -25,6 +25,32 @@ describe('getMenuById', () => {
     expect(getDocumentSpy).toHaveBeenCalledTimes(1);
   });
 
+  /** The labels come from the menu's `dietary` map (issue #2198). */
+  describe('given a dietary map', () => {
+    it('takes the labels from the map and ignores the item fields', async () => {
+      jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({
+        snapshot: {
+          data: {
+            categories: [
+              {
+                id: 'c1',
+                title: 'Mains',
+                items: [
+                  { id: 'm1', name: 'Pad Thai', dietaryLabels: ['vegan'] },
+                ],
+              },
+            ],
+            dietary: { m1: { labels: ['halal'] } },
+          },
+        },
+      } as any);
+
+      const result = await getMenuById('menuId');
+
+      expect(result?.categories[0].items[0].dietaryLabels).toEqual(['halal']);
+    });
+  });
+
   describe('given no data returned', () => {
     it('should return undefined', async () => {
       jest.spyOn(FirebaseFirestore, 'getDocument').mockResolvedValue({

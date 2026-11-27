@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "Cocina exclusiva sin gluten",
   "dietary-option": "{{label}} bajo pedido",
   "dietary-declared-by-restaurant": "Declarado por el restaurante",
+  "dietary-removed-after-reports": "{{label}}: retirado tras avisos de comensales",
   "bite-dietary-labels-label": "Etiquetas dietéticas",
   "bite-dietary-labels-hint": "Opcional. Los demás las verán como lo que tú dices de este plato.",
   "dietary-claimed-by-creator": "Según quien lo publicó, era",

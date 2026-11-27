@@ -238,9 +238,13 @@ service cloud.firestore {
      * How many guests follow the restaurant (GitHub issue #2132). Kept by the
      * `restaurantFollow` triggers alone, so no client sets it: not the holder,
      * whose own count it is, and not the operator either.
+     *
+     * The labels diners' disputes removed, counted as strikes (GitHub issue
+     * #2198), are kept by `removeDisputedDietaryLabels` alone on the same
+     * terms: a holder who could edit them could undo the strike limit.
      */
     function backendOwnedRestaurantFields() {
-      return ['followersCount'];
+      return ['followersCount', 'dietaryStrikes'];
     }
 
     match /restaurants/{restaurantId} {
@@ -311,10 +315,21 @@ service cloud.firestore {
        * create can only check ownership of the named restaurant, and the
        * `menuId` half of the check starts holding from the first update.
        */
-      allow create: if isOperator()
-        || ownsRestaurant(request.resource.data.get('restaurantId', ''));
+      /**
+       * `dietary` - the restaurant's labels, by menu item id (GitHub issue
+       * #2198) - is refused to every client, the operator included. A menu's
+       * dishes sit in nested arrays the rules cannot look into, so the labels
+       * live in this one field instead, and the `saveMenuDietaryLabels`
+       * callable is the only way a client changes them. That is what locks a
+       * label diners' disputes removed: the owner cannot set it again from
+       * the business app or by a direct write.
+       */
+      allow create: if absentAll(['dietary'])
+        && (isOperator()
+          || ownsRestaurant(request.resource.data.get('restaurantId', '')));
 
-      allow update: if isOperator() || ownsMenu(menuId);
+      allow update: if unchangedAll(['dietary'])
+        && (isOperator() || ownsMenu(menuId));
 
       allow delete: if isOperator();
     }
@@ -1677,6 +1692,17 @@ service cloud.firestore {
     match /dietaryLabelVotes/{voteId} {
       allow get: if isMember() && voteId.matches('.+__' + uid());
       allow list, write: if false;
+    }
+
+    /**
+     * The labels a restaurant at the strike limit asked to publish, waiting
+     * for an operator (GitHub issue #2198). Written by `saveMenuDietaryLabels`
+     * and `answerDietaryLabelApproval`, read through
+     * `listDietaryLabelApprovals`; no client reads or writes it, so a waiting
+     * label is shown nowhere.
+     */
+    match /dietaryLabelApprovals/{restaurantId} {
+      allow read, write: if false;
     }
 
     // ------------------------------------------------------------ bite reports

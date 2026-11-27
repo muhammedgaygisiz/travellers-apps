@@ -364,6 +364,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "グルテンフリー専用キッチン",
   "dietary-option": "ご要望で{{label}}に対応",
   "dietary-declared-by-restaurant": "レストランによる表示",
+  "dietary-removed-after-reports": "{{label}}：お客様の報告により削除",
   "bite-dietary-labels-label": "食事ラベル",
   "bite-dietary-labels-hint": "任意。この料理についてのあなたの申告として表示されます。",
   "dietary-claimed-by-creator": "投稿者によると、この料理は",

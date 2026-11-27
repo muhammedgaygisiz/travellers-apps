@@ -1,0 +1,101 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="dietary-label-approvals">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title
+            >{{ 'admin-dietary-approvals' | transloco }}</ion-card-title
+          >
+        </ion-card-header>
+        <ion-card-content>
+          <ion-note>{{ 'admin-dietary-approvals-hint' | transloco }}</ion-note>
+          @if (failed()) {
+          <p data-testid="dietary-approvals-failed">
+            {{ 'admin-dietary-approvals-load-failed' | transloco }}
+          </p>
+          <ion-button fill="outline" (click)="reload.emit()"
+            >{{ 'admin-dietary-approvals-retry' | transloco }}</ion-button
+          >
+          } @else if (loading() && !approvals().length) {
+          <ion-spinner data-testid="dietary-approvals-loading" />
+          } @else if (!approvals().length) {
+          <p data-testid="dietary-approvals-empty">
+            {{ 'admin-dietary-approvals-empty' | transloco }}
+          </p>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      @for (approval of approvals(); track approval.restaurantId) {
+      <ion-card
+        [attr.data-testid]="'dietary-approvals-' + approval.restaurantId"
+      >
+        <ion-card-header>
+          <ion-card-title
+            >{{ approval.restaurantName || approval.restaurantId
+            }}</ion-card-title
+          >
+          <ion-card-subtitle
+            >{{ 'admin-dietary-approvals-requested' | transloco: { date:
+            approval.requestedAt.slice(0, 10) } }}</ion-card-subtitle
+          >
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full">
+            @for (item of approval.items; track item.menuItemId) { @for (row of
+            rowsOf(item); track row.kind + row.label) {
+            <ion-item
+              [attr.data-testid]="
+                      'dietary-approval-' +
+                      item.menuItemId +
+                      '-' +
+                      row.kind +
+                      '-' +
+                      row.label
+                    "
+            >
+              <ion-label>
+                <h2>{{ item.name || item.menuItemId }}</h2>
+                <p>
+                  {{ (row.kind === 'label' ? 'admin-dietary-approvals-label' :
+                  'admin-dietary-approvals-option' ) | transloco : { label:
+                  ('dietary-label-' + row.label | transloco), } }}
+                </p>
+              </ion-label>
+              <div class="answers" slot="end">
+                @if (isAnswering(approval.restaurantId, row)) {
+                <ion-spinner name="crescent" />
+                } @else {
+                <ion-button
+                  size="small"
+                  data-testid="dietary-approval-approve"
+                  [disabled]="!!answering()"
+                  (click)="respond(approval.restaurantId, row, true)"
+                  >{{ 'admin-dietary-approvals-approve' | transloco
+                  }}</ion-button
+                >
+                <ion-button
+                  size="small"
+                  fill="outline"
+                  color="danger"
+                  data-testid="dietary-approval-refuse"
+                  [disabled]="!!answering()"
+                  (click)="respond(approval.restaurantId, row, false)"
+                  >{{ 'admin-dietary-approvals-refuse' | transloco
+                  }}</ion-button
+                >
+                }
+              </div>
+            </ion-item>
+            } }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+      }
+    </div>
+  </ion-content>
+</ta-page>

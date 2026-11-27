@@ -31,6 +31,12 @@ export const ja: NotificationMessages = {
     '{{owner}}さんがフォローリクエストを承認しました。',
   'restaurantFollower.title': '新しいフォロワー',
   'restaurantFollower.body': '{{restaurant}}に新しいフォロワーがつきました。',
+  'dietaryLabelDisputed.title': '食事ラベルに異議が寄せられました',
+  'dietaryLabelDisputed.body':
+    '{{restaurant}}の{{dish}}の食事ラベルに、お客様から異議が寄せられました。',
+  'dietaryLabelRemoved.title': '食事ラベルが削除されました',
+  'dietaryLabelRemoved.body':
+    'お客様からの報告により、{{restaurant}}の{{dish}}の食事ラベルが削除されました。',
   'biteTagged.title': 'Biteでタグ付けされました',
   'biteTagged.body':
     '{{creator}}さんがBiteであなたをタグ付けしました: {{bite}}',

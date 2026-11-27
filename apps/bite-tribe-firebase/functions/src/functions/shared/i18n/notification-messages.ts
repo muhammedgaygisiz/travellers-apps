@@ -46,6 +46,13 @@ export type NotificationMessageKey =
   // who (#2132).
   | 'restaurantFollower.title'
   | 'restaurantFollower.body'
+  // A diner disputed one of the restaurant's dietary labels for the first
+  // time, or diners' disputes removed one (GitHub issue #2198). Sent to its
+  // owners, and never names the diner.
+  | 'dietaryLabelDisputed.title'
+  | 'dietaryLabelDisputed.body'
+  | 'dietaryLabelRemoved.title'
+  | 'dietaryLabelRemoved.body'
   | 'biteTagged.title'
   | 'biteTagged.body'
   | 'newLike.title'

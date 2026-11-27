@@ -32,6 +32,12 @@ export const fr: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} a accepté ta demande d’abonnement.',
   'restaurantFollower.title': 'Nouvel abonné',
   'restaurantFollower.body': '{{restaurant}} a un nouvel abonné.',
+  'dietaryLabelDisputed.title': 'Un client conteste une étiquette alimentaire',
+  'dietaryLabelDisputed.body':
+    'Un client conteste une étiquette alimentaire sur {{dish}} chez {{restaurant}}.',
+  'dietaryLabelRemoved.title': 'Étiquette alimentaire retirée',
+  'dietaryLabelRemoved.body':
+    'Une étiquette alimentaire sur {{dish}} chez {{restaurant}} a été retirée après des signalements de clients.',
   'biteTagged.title': 'Nouvelle identification dans un Bite',
   'biteTagged.body': '{{creator}} a ajouté ton nom à un Bite : {{bite}}',
   'newLike.title': 'Nouveau like sur ton Bite !',

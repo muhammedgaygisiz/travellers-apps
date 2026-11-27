@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
-import type { Menu } from 'model';
+import type { Menu, SaveMenuDietaryLabelsResult } from 'model';
 import { LoadingController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
@@ -40,6 +40,11 @@ export class EditMenuService {
    * account holding the restaurant (GitHub issue #1078).
    *
    * A save that lands also marks the menu reviewed (GitHub issue #2126).
+   *
+   * The labels are saved after the menu, by the backend (GitHub issue #2198),
+   * and the toast says when it did not publish all of them: a label removed
+   * after diner reports is locked, and a restaurant at the strike limit waits
+   * for an operator before a new label is shown.
    */
   async saveMenu(menu: Menu): Promise<void> {
     const loading = await this.loadingController.create({
@@ -48,8 +53,10 @@ export class EditMenuService {
     });
     await loading.present();
 
+    let result: SaveMenuDietaryLabelsResult;
+
     try {
-      await this.dataAccess.saveMenu(menu);
+      result = await this.dataAccess.saveMenu(menu);
     } catch {
       await loading.dismiss();
       await this.toast.present({
@@ -70,7 +77,11 @@ export class EditMenuService {
     this.dataAccess.markMenuReviewed().catch(() => undefined);
 
     await this.toast.present({
-      messageKey: 'menu-saved',
+      messageKey: result.locked.length
+        ? 'menu-saved-dietary-locked'
+        : result.pending.length
+          ? 'menu-saved-dietary-pending'
+          : 'menu-saved',
       outcome: 'success',
     });
   }

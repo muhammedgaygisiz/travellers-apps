@@ -292,6 +292,21 @@ and none for a changed menu.
   surface: the key is `RESTAURANT_NEW_FOLLOWER:<restaurantId>`, so the next day's push
   replaces the last and opening the restaurant clears it.
 
+## Dietary Label Dispute Contract
+
+Issue [#2198] tells a restaurant's owners when diners dispute one of its dietary labels.
+
+- **What.** `removeDisputedDietaryLabels`, on every write of a menu's dietary counts, sends
+  `DIETARY_LABEL_DISPUTED` at a label's first dispute and `DIETARY_LABEL_REMOVED` when the
+  disputes remove it, each carrying `restaurantId`, `menuItemId` and `label`, to every account
+  in the restaurant's `ownerUserIds`. A label removed by its first dispute - one "I got sick"
+  on a high-risk label - is announced once, as removed.
+- **Who is named.** The dish and the restaurant, never the diner. The copy is
+  `dietaryLabelDisputed` and `dietaryLabelRemoved` and follows the Localization Contract.
+- **Where it lands.** As the follower push: the BiteTribe phone app, on the restaurant's own
+  page. The key is the type, the restaurant, the dish and the label, so two labels disputed on
+  one dish both stay.
+
 ## Installation Contract
 
 Issue [#1184]
@@ -383,6 +398,7 @@ Relevant.
 - Issue [#2166] is the Follow Request Contract above - a push for a new follow request and for its acceptance, part of epic [#2144].
 - Issue [#2167] sends a private author's new-Bite push to their accepted followers, in the Follow Request Contract above, part of epic [#2144].
 - Issue [#2168] marks a profile's followers accepted when it turns private and accepts its requests without a push when it turns public, part of epic [#2144].
+- Issue [#2198] is the Dietary Label Dispute Contract above - a restaurant's owners are told about a label's first dispute and its removal, part of epic-2193.
 - Issue [#1184] is the Installation Contract above - notification delivery becomes per-installation rather than per-account. Closed. Shared with [UC - Configure Personal Settings](uc-configure-personal-settings.md), which owns the settings surface this delivery state feeds.
 
 ## Related Domains
@@ -420,4 +436,5 @@ Relevant.
 [#2168]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2168
 [#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
 [#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
+[#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
 [#2320]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2320

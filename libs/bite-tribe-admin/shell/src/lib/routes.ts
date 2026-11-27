@@ -121,6 +121,15 @@ export const ROUTES: Routes = withAuthRoutes(
       canActivate: [authGuard, roleGuard('admin')],
     },
     {
+      path: 'dietary-label-approvals',
+      title: 'Dietary label approvals',
+      loadComponent: () =>
+        import('bite-tribe-admin/restaurants').then(
+          (m) => m.DietaryLabelApprovalsContainer,
+        ),
+      canActivate: [authGuard, roleGuard('admin')],
+    },
+    {
       path: 'bite-places',
       title: 'Bite places',
       loadComponent: () =>

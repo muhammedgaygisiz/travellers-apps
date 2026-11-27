@@ -364,6 +364,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "专用无麸质厨房",
   "dietary-option": "可应要求做成{{label}}",
   "dietary-declared-by-restaurant": "由餐厅声明",
+  "dietary-removed-after-reports": "{{label}}：因食客反馈已移除",
   "bite-dietary-labels-label": "饮食标签",
   "bite-dietary-labels-hint": "可选。其他人会看到这是你对这道菜的说法。",
   "dietary-claimed-by-creator": "发布者说这道菜是",

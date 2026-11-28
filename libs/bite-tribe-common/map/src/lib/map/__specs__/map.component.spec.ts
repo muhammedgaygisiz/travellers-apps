@@ -74,6 +74,11 @@ jest.mock('../utils/add-gps-marker', () => ({
   addGpsMarker: (...args: unknown[]): void => addGpsMarkerMock(...args),
 }));
 
+const drawRouteMock = jest.fn();
+jest.mock('../utils/draw-route', () => ({
+  drawRoute: (...args: unknown[]): unknown => drawRouteMock(...args),
+}));
+
 const removeGpsMarkerMock = jest.fn();
 jest.mock('../utils/remove-gps-marker', () => ({
   removeGpsMarker: (...args: unknown[]): void => removeGpsMarkerMock(...args),
@@ -299,6 +304,7 @@ describe('MapComponent', () => {
         expect(geopointsToMarkersMock).toHaveBeenCalledWith(
           [expectedPosition],
           {},
+          {},
         );
       });
 
@@ -336,6 +342,7 @@ describe('MapComponent', () => {
         expect(emitClickOnMapSpy).toHaveBeenCalledWith(expectedPosition);
         expect(geopointsToMarkersMock).toHaveBeenCalledWith(
           [expectedPosition],
+          {},
           {},
         );
       });
@@ -944,6 +951,68 @@ describe('MapComponent', () => {
 
       expect(() => component.ngOnDestroy()).not.toThrow();
       expect(mockMap.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('route (issue #2355)', () => {
+    let removeLine: jest.Mock;
+
+    beforeEach(() => {
+      const mapDiv = document.createElement('div');
+      mapDiv.setAttribute('data-testid', 'map');
+      fixture.nativeElement.appendChild(mapDiv);
+      geopointsToMarkersMock.mockReturnValue([]);
+      removeLine = jest.fn();
+      drawRouteMock.mockReset();
+      drawRouteMock.mockReturnValue({ remove: removeLine });
+    });
+
+    it('draws no line unless asked to', () => {
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+
+      fixture.detectChanges();
+
+      expect(drawRouteMock).not.toHaveBeenCalled();
+    });
+
+    it('draws the route through the geopoints in the order given', () => {
+      componentRef.setInput('showRoute', true);
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+
+      fixture.detectChanges();
+
+      expect(drawRouteMock).toHaveBeenCalledWith(
+        mockMultipleGeopoints,
+        mockMap,
+      );
+    });
+
+    it('replaces the line when the geopoints change, and removes it when they go', () => {
+      componentRef.setInput('showRoute', true);
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+      fixture.detectChanges();
+
+      componentRef.setInput('geopoints', [...mockMultipleGeopoints].reverse());
+      fixture.detectChanges();
+      expect(removeLine).toHaveBeenCalledTimes(1);
+      expect(drawRouteMock).toHaveBeenCalledTimes(2);
+
+      componentRef.setInput('geopoints', []);
+      fixture.detectChanges();
+      expect(removeLine).toHaveBeenCalledTimes(2);
+    });
+
+    it('hands the labels to the markers', () => {
+      componentRef.setInput('markerLabels', { a: '1' });
+      componentRef.setInput('geopoints', mockMultipleGeopoints);
+
+      fixture.detectChanges();
+
+      expect(geopointsToMarkersMock).toHaveBeenLastCalledWith(
+        mockMultipleGeopoints,
+        {},
+        { a: '1' },
+      );
     });
   });
 });

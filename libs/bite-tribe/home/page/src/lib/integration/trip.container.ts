@@ -3,7 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { FirebaseAnalytics } from '@capacitor-firebase/analytics';
 import { BiteTribeHomeComponent } from '../components/page/home.component';
 import { HomeService } from './home.service';
-import { TripDetailService } from './trip-detail.service';
+import { NavController } from '@ionic/angular/standalone';
+import { TripDetailService } from 'bite-tribe/store';
+import { PATH } from 'utils';
 
 /**
  * A trip's page: its Bites, newest first, in the shared Bite list. The list
@@ -26,7 +28,7 @@ import { TripDetailService } from './trip-detail.service';
       [showHeaderMenu]="false"
       [showFooter]="false"
       [showFilters]="false"
-      [showMap]="false"
+      [showMap]="detail.hasRoute()"
       [enableBackButton]="true"
       [showAddButton]="false"
       [userId]="service.userId()"
@@ -39,6 +41,7 @@ import { TripDetailService } from './trip-detail.service';
       (menuNavigate)="service.onMenuNavigate($event)"
       (gotoEdit)="service.onGotoEditClick($event)"
       (refresh)="detail.reload()"
+      (openMapView)="openMap()"
     />
   `,
   imports: [BiteTribeHomeComponent],
@@ -47,9 +50,22 @@ export class TripContainer {
   protected readonly service = inject(HomeService);
   protected readonly detail = inject(TripDetailService);
   private readonly route = inject(ActivatedRoute);
+  private readonly navController = inject(NavController);
 
   ionViewWillEnter(): void {
     this.detail.enter(this.route.snapshot.paramMap.get('tripId') ?? '');
+  }
+
+  protected openMap(): void {
+    const trip = this.detail.trip();
+
+    if (trip) {
+      void this.navController.navigateForward([
+        PATH.MY_TRIPS,
+        trip.id,
+        'map-view',
+      ]);
+    }
   }
 
   ionViewDidEnter(): void {

@@ -1,6 +1,7 @@
 import { geopointsToMarkers } from '../geopoints-to-markers';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { getMarkerColor } from '../marker-color-tag';
+import { getMarkerLabel } from '../marker-label-tag';
 import { Geopoint } from 'model';
 
 jest.mock('leaflet');
@@ -78,5 +79,19 @@ describe('geopointsToMarkers', () => {
     );
 
     expect(getMarkerColor(markers[0])).toBe(MarkerColor.BLUE);
+  });
+
+  it('draws a label in place of the rating and keeps it on the marker', () => {
+    const markers = geopointsToMarkers(
+      [{ id: 'a', latitude: 1, longitude: 2, rating: 4 }],
+      {},
+      { a: '3' },
+    );
+
+    expect(getMarkerWithColorMock).toHaveBeenLastCalledWith(MarkerColor.RED, {
+      rating: '4',
+      label: '3',
+    });
+    expect(getMarkerLabel(markers[0])).toBe('3');
   });
 });

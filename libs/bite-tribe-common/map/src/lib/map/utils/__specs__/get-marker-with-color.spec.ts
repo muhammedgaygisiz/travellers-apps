@@ -45,4 +45,14 @@ describe('getMarkerWithColor', () => {
     expect(icon).toBeDefined();
     expect(icon.options.html).toContain('5 <ion-icon name="star"/>');
   });
+
+  it('draws a label instead of the rating when it has one', () => {
+    const icon = getMarkerWithColor(MarkerColor.RED, {
+      rating: '4',
+      label: '12',
+    });
+
+    expect(icon.options.html).toContain('>12</span>');
+    expect(icon.options.html).not.toContain('star');
+  });
 });

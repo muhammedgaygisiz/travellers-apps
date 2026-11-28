@@ -32,6 +32,10 @@ export default {
   circle: jest.fn(() => ({
     addTo: jest.fn(),
   })),
+  polyline: jest.fn(() => ({
+    addTo: jest.fn(),
+    remove: jest.fn(),
+  })),
   markerClusterGroup: jest.fn(() => ({
     addLayers: jest.fn(() => ({
       addTo: jest.fn(),

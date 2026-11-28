@@ -79,3 +79,41 @@ export const WithSelectedBite: Story = {
     selectedBite: WithBites.args?.bites?.[0],
   },
 };
+
+const tripStop = (
+  id: string,
+  name: string,
+  latitude: number,
+  longitude: number,
+): Bite =>
+  ({
+    id,
+    name,
+    userId: 'user-1',
+    position: { latitude, longitude },
+    place: name,
+    rating: 0,
+    imagePath: 'assets/demo/bite-demo.png',
+    likes: [] as Like[],
+    image: '',
+    price: 0,
+  }) as Bite;
+
+// A trip's route: its Bites numbered from 1 for the oldest and joined in that
+// order (issue #2355). Loki's Chrome paints neither the markers nor the line,
+// so a reference would guard nothing; the story is for looking at.
+export const TripRoute: Story = {
+  parameters: { loki: { skip: true } },
+  args: {
+    isAuthenticated: true,
+    enableZoom: false,
+    bites: [
+      tripStop('bangkok', 'Pad Thai', 13.7563, 100.5018),
+      tripStop('chiang-mai', 'Khao Soi', 18.7883, 98.9853),
+      tripStop('hanoi', 'Pho', 21.0278, 105.8342),
+    ],
+    markerLabels: { bangkok: '1', 'chiang-mai': '2', hanoi: '3' },
+    showRoute: true,
+    clusterMarkers: false,
+  },
+};

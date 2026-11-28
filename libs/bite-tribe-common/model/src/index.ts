@@ -39,6 +39,8 @@ export type * from './lib/create-and-save-to-bucket-list-params';
 export type * from './lib/create-bucket-list-from-bite-trail-params';
 export type * from './lib/remove-bite-from-bucketlist-params';
 export type * from './lib/bucketlist';
+/** A value export: the trip's date rules are read by the API and the trip pages (#2352). */
+export * from './lib/trip';
 export type * from './lib/bite-trail';
 export type * from './lib/folder-photo-verdict';
 export type * from './lib/public-user';

@@ -4,6 +4,7 @@ export * from './lib/leaderboard-api/leaderboard-api.service';
 export * from './lib/dietary-vote-api/dietary-vote-api.service';
 export * from './lib/settings-api/settings-api.service';
 export * from './lib/account-api/account-api.service';
+export * from './lib/trip-api/trip-api.service';
 export * from './lib/utils/local-image-file';
 export * from './lib/table-session-api/table-session-api.service';
 export * from './lib/table-order-api/table-order-api.service';

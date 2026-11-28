@@ -323,6 +323,12 @@ beforeEach(async () => {
       name: 'Munich',
       biteIds: [],
     });
+    await setDoc(doc(db, 'trips', 'consumer-trip'), {
+      userId: CONSUMER,
+      title: 'Southeast Asia',
+      startDate: '2026-12-01',
+      endDate: '2027-01-15',
+    });
     await setDoc(doc(db, 'biteTrails', 'consumer-trail'), {
       ownerId: CONSUMER,
       name: 'Munich Trail',
@@ -3727,6 +3733,103 @@ describe('bucket lists', () => {
       updateDoc(doc(asStranger(), 'bucketlists', 'consumer-list'), {
         biteIds: [],
       }),
+    );
+  });
+});
+
+describe('trips (issue #2352)', () => {
+  const tripDoc = (db: Firestore): DocumentReference =>
+    doc(db, 'trips', 'consumer-trip');
+
+  it('lets an account create, read, edit and delete its own trip', async () => {
+    await assertSucceeds(
+      addDoc(collection(asConsumer(), 'trips'), {
+        userId: CONSUMER,
+        title: 'Japan',
+        startDate: '2027-03-01',
+        createdAt: '2026-11-28T12:00:00.000Z',
+        createdAtTimestamp: 1795867200000,
+      }),
+    );
+    await assertSucceeds(getDoc(tripDoc(asConsumer())));
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(asConsumer(), 'trips'),
+          where('userId', '==', CONSUMER),
+        ),
+      ),
+    );
+    await assertSucceeds(
+      setDoc(tripDoc(asConsumer()), {
+        userId: CONSUMER,
+        title: 'Thailand',
+        startDate: '2026-12-02',
+      }),
+    );
+    await assertSucceeds(deleteDoc(tripDoc(asConsumer())));
+  });
+
+  it('keeps another account out of a trip, operators included', async () => {
+    for (const db of [asStranger(), asOperator()]) {
+      await assertFails(getDoc(tripDoc(db)));
+      await assertFails(updateDoc(tripDoc(db), { title: 'Mine now' }));
+      await assertFails(deleteDoc(tripDoc(db)));
+    }
+    await assertFails(getDoc(tripDoc(signedOut())));
+    await assertFails(getDoc(tripDoc(asTableGuest())));
+  });
+
+  it("refuses listing trips that are not filtered to the caller's own", async () => {
+    await assertFails(getDocs(collection(asStranger(), 'trips')));
+    await assertFails(
+      getDocs(
+        query(
+          collection(asStranger(), 'trips'),
+          where('userId', '==', CONSUMER),
+        ),
+      ),
+    );
+  });
+
+  it('refuses creating a trip for another account', async () => {
+    await assertFails(
+      addDoc(collection(asStranger(), 'trips'), {
+        userId: CONSUMER,
+        title: 'Planted',
+        startDate: '2026-12-01',
+      }),
+    );
+  });
+
+  it('refuses handing a trip to another account', async () => {
+    await assertFails(updateDoc(tripDoc(asConsumer()), { userId: STRANGER }));
+  });
+
+  it.each([
+    ['an empty title', { title: '' }],
+    ['a title over 100 characters', { title: 'x'.repeat(101) }],
+    ['a malformed start date', { startDate: '1 Dec 2026' }],
+    ['a malformed end date', { endDate: '2027-1-15' }],
+    ['an end date before the start date', { endDate: '2026-11-30' }],
+    ['an unknown field', { biteIds: ['consumer-bite'] }],
+  ])('refuses a trip with %s', async (_, change) => {
+    await assertFails(
+      setDoc(tripDoc(asConsumer()), {
+        userId: CONSUMER,
+        title: 'Southeast Asia',
+        startDate: '2026-12-01',
+        ...change,
+      }),
+    );
+  });
+
+  it('accepts a one-day trip and an ongoing one', async () => {
+    await assertSucceeds(
+      updateDoc(tripDoc(asConsumer()), { endDate: '2026-12-01' }),
+    );
+    await assertSucceeds(
+      updateDoc(tripDoc(asConsumer()), { endDate: deleteField() }),
     );
   });
 });

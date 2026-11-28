@@ -1269,6 +1269,45 @@ service cloud.firestore {
       allow update, delete: if isOperator() || owns(resource.data, 'userId');
     }
 
+    // ------------------------------------------------------------------ trips
+
+    /**
+     * A user's own named date range (issue #2352, `ssot/domain/trip.md`).
+     *
+     * **Private to its owner**, unlike a bucket list, which any member can
+     * read: no other account, operators included, reads or writes a trip. A
+     * query is only answered when it filters on the caller's own `userId`.
+     *
+     * A trip stores no Bites. They are read from `/bites` by the owner's id and
+     * a date range, under the Bite rules, so nothing here can widen what the
+     * owner sees.
+     */
+    function isTripDate(value) {
+      return value is string && value.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}');
+    }
+
+    function isValidTrip(data) {
+      return data.keys().hasOnly(['userId', 'title', 'startDate', 'endDate',
+            'createdAt', 'createdAtTimestamp', 'updatedAt', 'updatedAtTimestamp'])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 100
+        && isTripDate(data.startDate)
+        && (!('endDate' in data)
+          || (isTripDate(data.endDate) && data.endDate >= data.startDate));
+    }
+
+    match /trips/{tripId} {
+      allow read, delete: if isMember() && owns(resource.data, 'userId');
+      allow create: if isMember()
+        && owns(request.resource.data, 'userId')
+        && isValidTrip(request.resource.data);
+      allow update: if isMember()
+        && owns(resource.data, 'userId')
+        && owns(request.resource.data, 'userId')
+        && isValidTrip(request.resource.data);
+    }
+
     // ------------------------------------------------------------ bite trails
 
     match /biteTrails/{biteTrailId} {

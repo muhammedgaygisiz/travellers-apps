@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button data-testid="trip-form-cancel" (click)="cancelled.emit()">
+        {{ 'cancel' | transloco }}
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ (trip() ? 'edit-trip' : 'new-trip') | transloco }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        data-testid="trip-form-save"
+        [strong]="true"
+        (click)="submit()"
+      >
+        {{ 'save' | transloco }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list lines="full">
+    <ion-item>
+      <ion-input
+        data-testid="trip-form-title"
+        labelPlacement="stacked"
+        [label]="'trip-title' | transloco"
+        [placeholder]="'trip-title-placeholder' | transloco"
+        [maxlength]="titleMaxLength"
+        [value]="title()"
+        (ionInput)="onInput('title', $event)"
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input
+        data-testid="trip-form-start-date"
+        type="date"
+        labelPlacement="stacked"
+        [label]="'trip-start-date' | transloco"
+        [value]="startDate()"
+        (ionInput)="onInput('startDate', $event)"
+      />
+    </ion-item>
+    <ion-item>
+      <ion-input
+        data-testid="trip-form-end-date"
+        type="date"
+        labelPlacement="stacked"
+        [label]="'trip-end-date' | transloco"
+        [min]="startDate()"
+        [value]="endDate()"
+        (ionInput)="onInput('endDate', $event)"
+      />
+    </ion-item>
+  </ion-list>
+
+  @if (error(); as error) {
+    <ion-text color="danger" data-testid="trip-form-error" role="alert">
+      <p class="trip-form-error">{{ error | transloco }}</p>
+    </ion-text>
+  }
+</ion-content>

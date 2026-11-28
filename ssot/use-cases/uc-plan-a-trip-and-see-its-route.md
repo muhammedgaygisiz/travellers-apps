@@ -4,7 +4,8 @@
 
 **Level:** L1
 
-Not built. Specified in the product interview of 2026-11-28 and planned as epic [#2351].
+Partly built. "My Trips", with create, edit and delete, is built (issue [#2353]); the trip
+page and its map are not yet. Specified in the product interview of 2026-11-28 as epic [#2351].
 A user creates a trip from the home menu, and the trip's page lists the Bites they created
 in its date range and shows them on a map as a route.
 
@@ -37,8 +38,8 @@ Once a trip is saved:
 ## Flow
 
 - User opens the home menu and picks "My Trips", next to "My Bucket Lists".
-- The list shows the user's trips by start date, newest first, each with its date range, or
-  "ongoing" where the end date is empty or later than today. With no trips, an empty state
+- The list shows the user's trips by start date, newest first, each with its date range, and
+  "ongoing" on a trip that has started and not yet ended. With no trips, an empty state
   explains what a trip is and offers to create one.
 - User creates a trip with a title, a start date and an optional end date. An empty title,
   or an end date before the start date, is refused with the reason.

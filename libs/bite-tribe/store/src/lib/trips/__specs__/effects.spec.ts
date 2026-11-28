@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import type { Action } from '@ngrx/store';
 import { TripApiService } from 'bite-tribe/api';
+import { AnalyticsEvent, AnalyticsService } from 'ta-firestore';
+import { ToastService } from 'toast';
 import type { Bite, Trip } from 'model';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { TripActions } from '../actions';
@@ -28,6 +30,8 @@ describe(TripEffects.name, () => {
     loadTripBites: jest.fn(),
   };
   const errorHandler = { handleError: jest.fn() };
+  const analytics = { logEvent: jest.fn() };
+  const toast = { present: jest.fn().mockResolvedValue(undefined) };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,6 +41,8 @@ describe(TripEffects.name, () => {
         provideMockActions(() => actions$),
         { provide: TripApiService, useValue: api },
         { provide: ErrorHandler, useValue: errorHandler },
+        { provide: AnalyticsService, useValue: analytics },
+        { provide: ToastService, useValue: toast },
       ],
     });
     effects = TestBed.inject(TripEffects);
@@ -138,5 +144,32 @@ describe(TripEffects.name, () => {
     expect(await firstValueFrom(effects.loadTripBites$)).toEqual(
       TripActions.loadTripBitesFailed({ tripId: 'trip-1' }),
     );
+  });
+
+  it.each([
+    [TripActions.createdTrip({ trip }), AnalyticsEvent.TripCreated],
+    [TripActions.updatedTrip({ tripId: 'trip-1' }), AnalyticsEvent.TripUpdated],
+    [TripActions.deletedTrip({ tripId: 'trip-1' }), AnalyticsEvent.TripDeleted],
+  ])('logs %p once it is stored', async (action, event) => {
+    actions$ = of(action);
+
+    await firstValueFrom(effects.logWrites$);
+
+    expect(analytics.logEvent).toHaveBeenCalledWith(event);
+  });
+
+  it.each([
+    [TripActions.createTripFailed(), 'trip-save-failed'],
+    [TripActions.updateTripFailed(), 'trip-save-failed'],
+    [TripActions.deleteTripFailed(), 'trip-delete-failed'],
+  ])('tells the user about %p', async (action, messageKey) => {
+    actions$ = of(action);
+
+    await firstValueFrom(effects.reportFailedWrites$);
+
+    expect(toast.present).toHaveBeenCalledWith({
+      messageKey,
+      outcome: 'failure',
+    });
   });
 });

@@ -147,6 +147,7 @@ export class PageComponent {
   private readonly showMyBucketlists = computed(
     () => this.menu().myBucketlists,
   );
+  private readonly showMyTrips = computed(() => this.menu().myTrips);
   private readonly showMyProfile = computed(() => this.menu().myProfile);
   private readonly showMarketPlaceButton = computed(
     () => this.menu().marketPlace,
@@ -241,6 +242,7 @@ export class PageComponent {
         showAboutButton: this.showAboutButton,
         showMyBites: this.showMyBites,
         showMyBucketlists: this.showMyBucketlists,
+        showMyTrips: this.showMyTrips,
         showMyProfile: this.showMyProfile,
         showMarketPlaceButton: this.showMarketPlaceButton,
         showGalleryButton: this.showGalleryButton,

@@ -1,6 +1,7 @@
 import { focusMarker } from '../focus-marker';
 import { MarkerColor } from '../../model/marker-color.enum';
 import { setMarkerColor } from '../marker-color-tag';
+import { setMarkerLabel } from '../marker-label-tag';
 import * as L from 'leaflet';
 
 const getMarkerWithColorMock = jest.fn();
@@ -97,6 +98,24 @@ describe('focusMarker', () => {
     expect(getMarkerWithColorMock).not.toHaveBeenCalledWith(
       MarkerColor.DARKRED,
       expect.anything(),
+    );
+  });
+
+  it('keeps each marker on its own label when the focus moves', () => {
+    const labelled = setMarkerLabel(
+      { setIcon: mockSetIcon, options: {} } as unknown as L.Marker,
+      '3',
+    );
+
+    focusMarker(labelled, [labelled], mockMap);
+
+    expect(getMarkerWithColorMock).toHaveBeenCalledWith(MarkerColor.RED, {
+      rating: undefined,
+      label: '3',
+    });
+    expect(getMarkerWithColorMock).toHaveBeenLastCalledWith(
+      MarkerColor.DARKRED,
+      { size: 'big', rating: undefined, label: '3' },
     );
   });
 });

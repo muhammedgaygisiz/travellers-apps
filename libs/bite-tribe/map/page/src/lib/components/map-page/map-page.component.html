@@ -14,6 +14,9 @@
         emitMarkerClick
         [enableZoom]="enableZoom()"
         [geopoints]="positions()"
+        [markerLabels]="markerLabels()"
+        [showRoute]="showRoute()"
+        [clusterMarkers]="clusterMarkers()"
         [gpsPosition]="gpsPosition()"
         (clickOnMarker)="onGeopointSelection($event)"
         (touchstart)="keepTouchOnMap($event)"

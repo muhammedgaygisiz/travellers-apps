@@ -42,6 +42,11 @@ export class MapPageComponent {
   userId = input<string>();
   enableZoom = input(true);
   showMyPositionButton = input(false);
+  /** Draws a label, such as a stop's number, in a Bite's marker. By Bite id. */
+  markerLabels = input<Record<string, string>>({});
+  /** Joins the Bites with a line in the order they are given. */
+  showRoute = input(false);
+  clusterMarkers = input(true);
 
   readonly logoutClick = output();
   readonly likeButtonClick = output<LikeClick>();

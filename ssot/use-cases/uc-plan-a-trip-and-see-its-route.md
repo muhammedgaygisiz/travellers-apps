@@ -4,8 +4,8 @@
 
 **Level:** L1
 
-Partly built. "My Trips", with create, edit and delete (issue [#2353]), and the trip page
-with its Bites (issue [#2354]) are built; the map is not yet. Specified in the product interview of 2026-11-28 as epic [#2351].
+Built in the app: "My Trips" (issue [#2353]), the trip page (issue [#2354]) and its map
+(issue [#2355]). The end-to-end test is issue [#2350]. Specified in the product interview of 2026-11-28 as epic [#2351].
 A user creates a trip from the home menu, and the trip's page lists the Bites they created
 in its date range and shows them on a map as a route.
 

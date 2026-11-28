@@ -24,6 +24,8 @@ import { createMap } from './utils/create-map';
 import { TILE_LAYER_FACTORY } from './tile-layer.token';
 import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
+import { drawRoute } from './utils/draw-route';
+import { addMarkerLayer } from './utils/add-marker-layer';
 import { addGpsMarker } from './utils/add-gps-marker';
 import { removeGpsMarker } from './utils/remove-gps-marker';
 import { MarkerColor } from './model/marker-color.enum';
@@ -72,6 +74,19 @@ export class MapComponent implements OnDestroy {
   clusterMarkers = input(true, { transform: booleanAttribute });
 
   /**
+   * Text drawn in a marker in place of its rating, per geopoint id, such as a
+   * stop's number on a route. Ids without an entry keep the rating.
+   */
+  markerLabels = input<Record<string, string>>({});
+
+  /**
+   * Joins the geopoints with a straight line in the order they are given, to
+   * show a route. Off by default. A route's markers are never clustered, so
+   * every stop shows, even two at the same place; see `addMarkerLayer`.
+   */
+  showRoute = input(false, { transform: booleanAttribute });
+
+  /**
    * Id of the geopoint the host has selected. The map moves to it and grows its
    * marker, so a selection made outside the map - a row in a list - leaves the
    * map in the same state as clicking that marker does. Maps that leave it
@@ -81,8 +96,9 @@ export class MapComponent implements OnDestroy {
 
   private readonly createTileLayer = inject(TILE_LAYER_FACTORY);
   private map!: L.Map;
-  private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
+  private markerClusterGroup: L.Layer = L.markerClusterGroup();
   private markers: L.Marker[] = [];
+  private routeLine: L.Polyline | undefined;
   private hasAutoFitted = false;
   private centeredGeopointId?: string;
   private resizeObserver?: ResizeObserver;
@@ -235,6 +251,7 @@ export class MapComponent implements OnDestroy {
       this.map.setView([0, 0], 2);
       clearMarkers(this.markerClusterGroup, this.map);
       this.markers = [];
+      this.updateRoute([]);
       this.hasAutoFitted = false;
       return;
     }
@@ -307,15 +324,30 @@ export class MapComponent implements OnDestroy {
 
   private updateMarkers(positions: Geopoint[]): void {
     clearMarkers(this.markerClusterGroup, this.map);
-    this.markers = geopointsToMarkers(positions, this.markerColors());
-    this.markerClusterGroup = L.markerClusterGroup(
-      this.clusterMarkers() ? undefined : { maxClusterRadius: 0 },
-    )
-      .addLayers(this.markers)
-      .addTo(this.map);
+    this.markers = geopointsToMarkers(
+      positions,
+      this.markerColors(),
+      this.markerLabels(),
+    );
+    this.markerClusterGroup = addMarkerLayer(this.markers, this.map, {
+      clusterMarkers: this.clusterMarkers(),
+      showRoute: this.showRoute(),
+    });
+
+    this.updateRoute(positions);
 
     if (this.emitMarkerClick()) {
       this.addMarkerClickEvent();
+    }
+  }
+
+  /** Redraws the route line, or removes it when there is no route to show. */
+  private updateRoute(positions: Geopoint[]): void {
+    this.routeLine?.remove();
+    this.routeLine = undefined;
+
+    if (this.showRoute()) {
+      this.routeLine = drawRoute(positions, this.map);
     }
   }
 

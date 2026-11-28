@@ -2,6 +2,7 @@ import * as L from 'leaflet';
 import { getMarkerWithColor } from './get-marker-with-color';
 import { MarkerColor } from '../model/marker-color.enum';
 import { getMarkerColor } from './marker-color-tag';
+import { getMarkerLabel } from './marker-label-tag';
 
 /**
  * Red markers darken when focused, which is the contrast the bite maps rely on.
@@ -24,6 +25,7 @@ export const focusMarker = (
     marker.setIcon(
       getMarkerWithColor(getMarkerColor(marker), {
         rating: marker.options?.alt,
+        label: getMarkerLabel(marker),
       }),
     );
   });
@@ -33,6 +35,7 @@ export const focusMarker = (
       getMarkerWithColor(getFocusColor(getMarkerColor(marker)), {
         size: 'big',
         rating: marker.options?.alt,
+        label: getMarkerLabel(marker),
       }),
     );
   }

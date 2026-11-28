@@ -1,7 +1,7 @@
 import L from 'leaflet';
 
 export const clearMarkers = (
-  markerClusterGroup: L.MarkerClusterGroup | null,
+  markerClusterGroup: L.Layer | null,
   map: L.Map,
 ): void => {
   if (markerClusterGroup) {

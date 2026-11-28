@@ -10,7 +10,7 @@ const getAnchorY = (size: 'big' | 'small' = 'small'): number =>
 
 export const getMarkerWithColor = (
   color: MarkerColor | null,
-  options?: { size?: 'big' | 'small'; rating?: string },
+  options?: { size?: 'big' | 'small'; rating?: string; label?: string },
 ): L.DivIcon => {
   const styleSize = getSize(options?.size);
   const markerStyle = `
@@ -36,9 +36,12 @@ export const getMarkerWithColor = (
   text-align: center;
   white-space: nowrap`;
 
-  const innerContent = options?.rating
-    ? `<span style="${textStyle}">${options?.rating} <ion-icon name="star"/></span>`
-    : `<span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 1rem; height: 1rem; background-color: white; border-radius: 50%"></span>`;
+  // A label, such as a stop's number on a route, replaces the rating.
+  const innerContent = options?.label
+    ? `<span style="${textStyle}">${options.label}</span>`
+    : options?.rating
+      ? `<span style="${textStyle}">${options?.rating} <ion-icon name="star"/></span>`
+      : `<span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 1rem; height: 1rem; background-color: white; border-radius: 50%"></span>`;
 
   return L.divIcon({
     iconAnchor: [getAnchorX(options?.size), getAnchorY(options?.size)],

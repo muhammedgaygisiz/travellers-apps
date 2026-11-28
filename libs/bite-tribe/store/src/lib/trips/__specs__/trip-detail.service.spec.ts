@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { BiteTribeStoreService } from 'bite-tribe/store';
+import { BiteTribeStoreService } from '../../bite-tribe-store.service';
 import { BehaviorSubject } from 'rxjs';
 import type { Bite, Trip } from 'model';
 import { TripDetailService } from '../trip-detail.service';
@@ -127,5 +127,37 @@ describe(TripDetailService.name, () => {
     service.reload();
 
     expect(store.loadTripBites).not.toHaveBeenCalled();
+  });
+
+  describe('route stops (issue #2355)', () => {
+    const at = (id: string, latitude?: number): Bite =>
+      ({
+        id,
+        position:
+          latitude === undefined ? undefined : { latitude, longitude: 100 },
+      }) as unknown as Bite;
+
+    it('runs oldest first and leaves out Bites without a position', () => {
+      loaded$.next(true);
+      trip$.next(trip);
+      // The query returns newest first.
+      bites$.next([at('newest', 3), at('no-position'), at('oldest', 1)]);
+      service.enter('trip-1');
+      TestBed.tick();
+
+      expect(service.stops().map(({ id }) => id)).toEqual(['oldest', 'newest']);
+      expect(service.stopNumbers()).toEqual({ oldest: '1', newest: '2' });
+      expect(service.hasRoute()).toBe(true);
+    });
+
+    it('has no route without a positioned Bite', () => {
+      loaded$.next(true);
+      trip$.next(trip);
+      bites$.next([at('no-position')]);
+      service.enter('trip-1');
+      TestBed.tick();
+
+      expect(service.hasRoute()).toBe(false);
+    });
   });
 });

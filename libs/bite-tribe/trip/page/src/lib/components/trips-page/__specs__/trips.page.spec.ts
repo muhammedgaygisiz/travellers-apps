@@ -124,4 +124,26 @@ describe(TripsPage.name, () => {
 
     expect(deleted).toEqual(['past']);
   });
+
+  it('opens the trip that is tapped', async () => {
+    const opened: string[] = [];
+    page.gotoTrip.subscribe((id) => opened.push(id));
+    fixture.componentRef.setInput('trips', trips);
+    await fixture.whenStable();
+
+    all('trip-item')[1].click();
+
+    expect(opened).toEqual(['past']);
+  });
+
+  it('does not open the trip when its edit button is tapped', async () => {
+    const opened: string[] = [];
+    page.gotoTrip.subscribe((id) => opened.push(id));
+    fixture.componentRef.setInput('trips', trips);
+    await fixture.whenStable();
+
+    all('trip-edit')[0].click();
+
+    expect(opened).toEqual([]);
+  });
 });

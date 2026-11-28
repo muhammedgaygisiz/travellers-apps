@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
 import { of } from 'rxjs';
 import type { Trip } from 'model';
@@ -20,6 +21,7 @@ describe(TripsService.name, () => {
     updateTrip: jest.fn(),
     deleteTrip: jest.fn(),
   };
+  const navController = { navigateForward: jest.fn() };
   let service: TripsService;
 
   beforeEach(() => {
@@ -27,7 +29,10 @@ describe(TripsService.name, () => {
     jest.setSystemTime(new Date(2026, 10, 28, 9));
     jest.clearAllMocks();
     TestBed.configureTestingModule({
-      providers: [{ provide: BiteTribeStoreService, useValue: store }],
+      providers: [
+        { provide: BiteTribeStoreService, useValue: store },
+        { provide: NavController, useValue: navController },
+      ],
     });
     service = TestBed.inject(TripsService);
   });
@@ -58,5 +63,14 @@ describe(TripsService.name, () => {
     expect(store.createTrip).toHaveBeenCalledWith(draft);
     expect(store.updateTrip).toHaveBeenCalledWith(trip, draft);
     expect(store.deleteTrip).toHaveBeenCalledWith('trip-1');
+  });
+
+  it('opens a trip', () => {
+    service.gotoTrip('trip-1');
+
+    expect(navController.navigateForward).toHaveBeenCalledWith([
+      'my-trips',
+      'trip-1',
+    ]);
   });
 });

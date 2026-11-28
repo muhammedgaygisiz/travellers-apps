@@ -1121,5 +1121,7 @@
   "delete-trip": "여행 삭제",
   "are-you-sure-you-want-to-delete-this-trip": "이 여행을 삭제할까요? Bite는 그대로 남아요.",
   "trip-save-failed": "여행을 저장하지 못했어요. 다시 시도해 주세요.",
-  "trip-delete-failed": "여행을 삭제하지 못했어요. 다시 시도해 주세요."
+  "trip-delete-failed": "여행을 삭제하지 못했어요. 다시 시도해 주세요.",
+  "no-bites-in-this-trip": "이 여행에는 아직 Bite가 없어요. 여행 기간에 올린 Bite가 여기에 표시돼요.",
+  "trip-not-found": "이 여행이 없거나 내 여행이 아니에요."
 }

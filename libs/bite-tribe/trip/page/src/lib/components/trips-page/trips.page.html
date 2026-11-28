@@ -10,7 +10,11 @@
 
     <ion-list lines="full">
       @for (trip of trips(); track trip.id) {
-      <ion-item data-testid="trip-item">
+      <ion-item
+        data-testid="trip-item"
+        [button]="true"
+        (click)="gotoTrip.emit(trip.id)"
+      >
         <ion-icon name="airplane-outline" slot="start" />
         <div class="ion-display-flex ion-flex-column ion-flex-1 trip-content">
           <ion-label class="trip-title">

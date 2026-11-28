@@ -227,6 +227,12 @@ const APP_ROUTES: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: `${PATH.MY_TRIPS}/:tripId`,
+    loadComponent: () => import('bite-tribe/home').then((m) => m.TripContainer),
+    title: 'Trip',
+    canActivate: [authGuard],
+  },
+  {
     path: `${PATH.MY_BUCKETLISTS}/:bucketlistId`,
     loadComponent: () =>
       import('bite-tribe/home').then((m) => m.BucketListContainer),

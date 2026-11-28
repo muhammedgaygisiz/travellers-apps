@@ -1121,5 +1121,7 @@
   "delete-trip": "Eliminar viaje",
   "are-you-sure-you-want-to-delete-this-trip": "¿Eliminar este viaje? Tus Bites se quedan.",
   "trip-save-failed": "No se pudo guardar tu viaje. Inténtalo de nuevo.",
-  "trip-delete-failed": "No se pudo eliminar tu viaje. Inténtalo de nuevo."
+  "trip-delete-failed": "No se pudo eliminar tu viaje. Inténtalo de nuevo.",
+  "no-bites-in-this-trip": "Aún no hay Bites en este viaje. Los Bites que publiques entre sus fechas aparecerán aquí.",
+  "trip-not-found": "Este viaje no existe o no es tuyo."
 }

@@ -14,6 +14,7 @@ import { TripsService } from './trips.service';
       (createTrip)="service.createTrip($event)"
       (updateTrip)="service.updateTrip($event)"
       (deleteTrip)="service.deleteTrip($event)"
+      (gotoTrip)="service.gotoTrip($event)"
     />
   `,
   imports: [TripsPage],

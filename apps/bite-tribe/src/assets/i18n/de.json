@@ -1121,5 +1121,7 @@
   "delete-trip": "Reise löschen",
   "are-you-sure-you-want-to-delete-this-trip": "Diese Reise löschen? Deine Bites bleiben erhalten.",
   "trip-save-failed": "Deine Reise konnte nicht gespeichert werden. Versuch es noch einmal.",
-  "trip-delete-failed": "Deine Reise konnte nicht gelöscht werden. Versuch es noch einmal."
+  "trip-delete-failed": "Deine Reise konnte nicht gelöscht werden. Versuch es noch einmal.",
+  "no-bites-in-this-trip": "Noch keine Bites in dieser Reise. Bites, die du zwischen ihren Daten postest, erscheinen hier.",
+  "trip-not-found": "Diese Reise gibt es nicht, oder sie gehört nicht dir."
 }

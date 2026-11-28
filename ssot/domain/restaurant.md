@@ -61,7 +61,9 @@ Restaurant context should support dish-first discovery rather than becoming a ge
   | `fast-food`   | Fast food            |
   | `food-hall`   | Food hall            |
 
-  A food truck is not on it: a venue that moves is [#2134]'s question, not a category. Filtering the map or search by category is not built.
+  A food truck is not on it yet: [#2134] decided it becomes the `food-truck` category together with the mobile flag below, built in [#2341]. Filtering the map or search by category is not built.
+
+- **A mobile vendor has a fixed address and a current position.** Specified in [#2134], not built; the implementation is epic [#2340]. A Restaurant can be `mobile`, such as a food truck or a bicycle vendor. It keeps its regular fixed address and `position`, and adds a current position that only a holder writes: by hand in the business app ([#2342]), stale at the end of the day in the owner's local time, or by tracking from the BiteTribe phone app while it is open ([#2345]), stale 15 minutes after the last report. A stale current position reads as location unknown, and the map then hides the vendor ([#2343]). A mobile vendor's Bites are the Bites linked to it, wherever they were eaten, never those near it or named like it ([#2344]). The full contract is in [UC - Find And Run A Mobile Vendor](../use-cases/uc-find-and-run-a-mobile-vendor.md).
 
 - **A Restaurant states what fits a diet, and says so as its own claim.** Since issue [#2194] it declares dietary labels on each menu item and on each variant (`dietaryLabels`), the labels a dish _can be made_ to fit on request (`dietaryOptions`), and statements about its whole kitchen (`dietaryStatements`: fully plant-based, fully vegetarian, fully halal, fully kosher, a dedicated gluten-free kitchen) with a free `crossContaminationNote`. The vocabulary and each label's class are owned by [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md) (`R-1`); an unknown stored value is dropped on read, and every reader shows the claim as declared by the restaurant (`RD-DC-1`). The menu item labels are kept in the menu's `dietary` field since [#2198] and written only by the `saveMenuDietaryLabels` callable, for the account holding the Restaurant or an operator; the rules refuse the field to every client. A label diners' disputes removed is kept there as removed and locked, and counts as one of the Restaurant's `dietaryStrikes`, which only the backend writes; at 3 strikes within 12 months the Restaurant's new labels wait for an operator (`RD-DC-7`). The statements and the note are written only by the `saveRestaurantDietaryStatements` callable, which checks the note before another account can read it (`RD-UR-11`), and the rules refuse a client write of either. They are not tags: a `#vegan` on a Bite stays as typed.
 
@@ -345,3 +347,9 @@ images/restaurants/{restaurantId}/{filename}
 [#2132]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2132
 [#2318]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2318
 [#2133]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2133
+[#2340]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2340
+[#2341]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2341
+[#2342]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2342
+[#2343]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2343
+[#2344]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2344
+[#2345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2345

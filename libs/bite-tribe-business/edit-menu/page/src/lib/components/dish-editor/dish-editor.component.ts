@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
   untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -28,18 +29,22 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
+  IonTextarea,
   IonToggle,
 } from '@ionic/angular/standalone';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   DIETARY_LABELS,
+  MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH,
   menuItemDietaryOf,
   type DietaryLabel,
+  type DietaryRestorationDraft,
   type MenuItem,
   type MenuOptionGroup,
 } from 'model';
 import { map, startWith } from 'rxjs';
 import { createEntityId } from 'utils';
+import { ImageUploadComponent } from 'image-upload';
 import {
   formatPriceInput,
   parsePriceInput,
@@ -139,8 +144,10 @@ const MIN_PRICE = 0.01;
     IonToggle,
     IonSelect,
     IonSelectOption,
+    IonTextarea,
     IonButton,
     IonIcon,
+    ImageUploadComponent,
     TranslocoPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -175,18 +182,7 @@ export class DishEditorComponent {
    * them, and the backend refuses them anyway.
    */
   removedLabelsOf(id: string | undefined): DietaryLabel[] {
-    const dish = this.dish();
-
-    if (!dish || !id) {
-      return [];
-    }
-
-    const item =
-      dish.id === id
-        ? dish
-        : dish.variants?.find((variant) => variant.id === id);
-
-    return item?.removedDietaryLabels ?? [];
+    return this.itemById(id)?.removedDietaryLabels ?? [];
   }
 
   /** The removed labels by name, for the note under the pickers. */
@@ -198,6 +194,81 @@ export class DishEditorComponent {
   readonly cancelEdit = output<void>();
   /** The owner confirmed deleting the stored dish (GitHub issue #2181). */
   readonly deleteDish = output<void>();
+
+  /**
+   * The owner asks for a label diners' disputes removed back (GitHub issue
+   * #2199), with an explanation and an optional photo of the evidence. Sent
+   * on its own, apart from the dish's Save: only an operator decides.
+   */
+  readonly requestRestoration = output<DietaryRestorationDraft>();
+
+  /** The removed label whose request form is open, as `itemId/label`. */
+  readonly restoring = signal<string | undefined>(undefined);
+
+  readonly restorationExplanation = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.maxLength(MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH),
+    ],
+  });
+
+  readonly restorationPhoto = new FormControl<string | null>(null);
+
+  readonly maxRestorationExplanation =
+    MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH;
+
+  /** Whether the owner already asked for this label back. */
+  isRestorationRequested(id: string | undefined, label: DietaryLabel): boolean {
+    return !!this.itemById(id)?.restorationRequestedDietaryLabels?.includes(
+      label,
+    );
+  }
+
+  isRestoring(id: string | undefined, label: DietaryLabel): boolean {
+    return this.restoring() === `${id}/${label}`;
+  }
+
+  startRestoration(id: string | undefined, label: DietaryLabel): void {
+    this.restoring.set(`${id}/${label}`);
+    this.restorationExplanation.reset();
+    this.restorationPhoto.reset();
+  }
+
+  cancelRestoration(): void {
+    this.restoring.set(undefined);
+  }
+
+  sendRestoration(id: string | undefined, label: DietaryLabel): void {
+    const explanation = this.restorationExplanation.value.trim();
+
+    if (!id || !explanation || this.restorationExplanation.invalid) {
+      this.restorationExplanation.markAsTouched();
+      return;
+    }
+
+    const photo = this.restorationPhoto.value;
+
+    this.requestRestoration.emit({
+      menuItemId: id,
+      label,
+      explanation,
+      ...(photo ? { photo } : {}),
+    });
+    this.restoring.set(undefined);
+  }
+
+  private itemById(id: string | undefined): MenuItem | undefined {
+    const dish = this.dish();
+
+    if (!dish || !id) {
+      return undefined;
+    }
+
+    return dish.id === id
+      ? dish
+      : dish.variants?.find((variant) => variant.id === id);
+  }
 
   readonly form = this.formBuilder.nonNullable.group({
     name: ['', Validators.required],

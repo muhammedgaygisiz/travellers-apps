@@ -67,6 +67,8 @@ export interface DietaryLabelRemoval {
   disputes: number;
   confirmations: number;
   reasons: Partial<Record<DietaryDisputeReason, number>>;
+  /** When the owner last asked for it back (issue #2199). */
+  restorationRequestedAt?: string;
 }
 
 /** One menu item's labels as the restaurant publishes them. */
@@ -202,7 +204,10 @@ export const removedDietaryLabelsOf = (
 
 type StrippedMenuItem = Omit<
   MenuItem,
-  'dietaryLabels' | 'dietaryOptions' | 'removedDietaryLabels'
+  | 'dietaryLabels'
+  | 'dietaryOptions'
+  | 'removedDietaryLabels'
+  | 'restorationRequestedDietaryLabels'
 >;
 
 const stripItem = (item: MenuItem): StrippedMenuItem => {
@@ -211,6 +216,7 @@ const stripItem = (item: MenuItem): StrippedMenuItem => {
   delete rest.dietaryLabels;
   delete rest.dietaryOptions;
   delete rest.removedDietaryLabels;
+  delete rest.restorationRequestedDietaryLabels;
 
   return rest as StrippedMenuItem;
 };
@@ -246,6 +252,9 @@ export const withMenuDietary = <T extends Menu>(menu: T): T => {
   const overlay = (item: MenuItem): MenuItem => {
     const entry = dietary[item.id];
     const removed = removedDietaryLabelsOf(entry);
+    const requested = removed.filter(
+      (label) => !!entry?.removed?.[label]?.restorationRequestedAt,
+    );
     const labels = dietaryLabelsOf(entry?.labels).filter(
       (label) => !removed.includes(label),
     );
@@ -258,6 +267,9 @@ export const withMenuDietary = <T extends Menu>(menu: T): T => {
       ...(labels.length ? { dietaryLabels: labels } : {}),
       ...(options.length ? { dietaryOptions: options } : {}),
       ...(removed.length ? { removedDietaryLabels: removed } : {}),
+      ...(requested.length
+        ? { restorationRequestedDietaryLabels: requested }
+        : {}),
     } as MenuItem;
   };
 

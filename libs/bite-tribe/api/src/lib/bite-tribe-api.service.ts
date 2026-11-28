@@ -35,6 +35,8 @@ import {
   Review,
   SaveToBucketListParams,
   PublicMenuResult,
+  RequestDietaryLabelRestorationRequest,
+  RequestDietaryLabelRestorationResult,
   SaveMenuDietaryLabelsRequest,
   SaveMenuDietaryLabelsResult,
   Settings,
@@ -400,6 +402,23 @@ export class BiteTribeApiService {
 
   saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {
     return this.menuApiService.saveMenu(menu, restaurantId);
+  }
+
+  /** Asks for a removed dietary label back (issue #2199). */
+  requestDietaryLabelRestoration(
+    request: RequestDietaryLabelRestorationRequest,
+  ): Promise<RequestDietaryLabelRestorationResult> {
+    return this.menuApiService.requestDietaryLabelRestoration(request);
+  }
+
+  /** The evidence photo for a restoration request (issue #2199). */
+  uploadDietaryEvidence(removalId: string, photo: string): Promise<void> {
+    return this.menuApiService.uploadDietaryEvidence(removalId, photo);
+  }
+
+  /** The image check's verdict on that photo, as it lands. */
+  dietaryEvidenceVerdict$(removalId: string): Observable<FolderPhotoVerdict> {
+    return this.menuApiService.dietaryEvidenceVerdict$(removalId);
   }
 
   /** A menu's dietary labels, through the callable (issue #2198). */

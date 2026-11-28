@@ -152,7 +152,7 @@ pushes judge the text themselves, so neither sends it out in that window.
   `setUserPhotoUrlOnUpload` since [#2140], which also covers the avatar a new
   account brings from its identity provider, and
   `setRestaurantImagePathOnUpload` and `setBiteTrailImagePathOnUpload` since
-  [#2141]. A photo whose check could not run stays unpublished and is checked
+  [#2141], and `setDietaryEvidenceImagePathOnUpload` since [#2199]. A photo whose check could not run stays unpublished and is checked
   again since [#2142]. Photos stored before the check existed are checked once
   by the `image-moderation-backfill` migration since [#2143], below, and stay
   unchecked until an operator has run it in production. A restaurant photo chosen during
@@ -166,10 +166,10 @@ pushes judge the text themselves, so neither sends it out in that window.
 Issue [#2138], the first story of epic [#2137]: `checkImage` in
 `shared/moderation/check-image.ts`, next to `checkContent`, judges one uploaded
 image before it is published. It takes the Storage object (bucket and path),
-the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto` or
-`biteTrailPhoto` - and the uploading account, and answers `passed`,
+the upload surface - `bitePhoto`, `profilePhoto`, `restaurantPhoto`,
+`biteTrailPhoto` or `dietaryEvidencePhoto` - and the uploading account, and answers `passed`,
 `refused` with a category, or `unavailable`. What a verdict does to the image
-is the caller's; each upload path is its own story in the epic, and all four
+is the caller's; each upload path is its own story in the epic, and all five
 apply it through `applyImageVerdict` in `shared/moderation/checked-image-subjects.ts`.
 The Bite photo path ([#2139]) deletes a refused photo and marks the Bite
 `refused`; see [Bite](../domain/bite.md). The profile photo path ([#2140])
@@ -178,7 +178,8 @@ deletes a refused photo and marks the profile `photoStatus: refused` while
 restaurant and Bite Trail photo paths ([#2141]) share `publishCheckedFolderPhoto`:
 a refused photo is deleted and the document gets `imageStatus: refused` while
 `imagePath` keeps the previous photo; see [Restaurant](../domain/restaurant.md)
-and [Bite Trail](../domain/bite-trail.md). On `unavailable` every path keeps the
+and [Bite Trail](../domain/bite-trail.md). An owner's evidence for a removed dietary
+label ([#2199]) takes the same path, on its `dietaryLabelRemovals` document. On `unavailable` every path keeps the
 photo `pending` and schedules it to be checked again ([#2142]), below.
 
 - **What the model is asked.** The image goes to the same Gemini model as
@@ -399,5 +400,6 @@ function:
 [#2139]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2139
 [#2140]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2140
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
+[#2199]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2199
 [#2142]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2142
 [#2143]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2143

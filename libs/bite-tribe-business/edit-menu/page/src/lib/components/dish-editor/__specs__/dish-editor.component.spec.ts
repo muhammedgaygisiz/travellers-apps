@@ -487,6 +487,69 @@ describe(DishEditorComponent.name, () => {
       expect(dish.variants[0].removedDietaryLabels).toEqual(['halal']);
     });
 
+    /** Asking for a removed label back (issue #2199). */
+    it('sends a restoration request apart from the dish', () => {
+      const requests = jest.fn();
+      component.requestRestoration.subscribe(requests);
+      open({
+        ...PAD_THAI,
+        removedDietaryLabels: ['vegan', 'halal'],
+        restorationRequestedDietaryLabels: ['halal'],
+      });
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(
+        element.querySelector(
+          '[data-testid="dish-restoration-requested-halal"]',
+        ),
+      ).not.toBeNull();
+      expect(
+        element.querySelector('[data-testid="dish-restoration-start-halal"]'),
+      ).toBeNull();
+
+      component.startRestoration(PAD_THAI.id, 'vegan');
+      fixture.detectChanges();
+      expect(
+        element.querySelector('[data-testid="dish-restoration-form-vegan"]'),
+      ).not.toBeNull();
+
+      component.sendRestoration(PAD_THAI.id, 'vegan');
+      expect(requests).not.toHaveBeenCalled();
+
+      component.restorationExplanation.setValue('  New supplier  ');
+      component.restorationPhoto.setValue('data:image/png;base64,x');
+      component.sendRestoration(PAD_THAI.id, 'vegan');
+
+      expect(requests).toHaveBeenCalledWith({
+        menuItemId: PAD_THAI.id,
+        label: 'vegan',
+        explanation: 'New supplier',
+        photo: 'data:image/png;base64,x',
+      });
+      expect(component.restoring()).toBeUndefined();
+      expect(saved).not.toHaveBeenCalled();
+    });
+
+    it('closes the request form on cancel, and sends no photo when none was chosen', () => {
+      const requests = jest.fn();
+      component.requestRestoration.subscribe(requests);
+      open({ ...PAD_THAI, removedDietaryLabels: ['vegan'] });
+
+      component.startRestoration(PAD_THAI.id, 'vegan');
+      expect(component.isRestoring(PAD_THAI.id, 'vegan')).toBe(true);
+      component.cancelRestoration();
+      expect(component.isRestoring(PAD_THAI.id, 'vegan')).toBe(false);
+
+      component.startRestoration(PAD_THAI.id, 'vegan');
+      component.restorationExplanation.setValue('Recipe changed');
+      component.sendRestoration(PAD_THAI.id, 'vegan');
+      expect(requests).toHaveBeenCalledWith({
+        menuItemId: PAD_THAI.id,
+        label: 'vegan',
+        explanation: 'Recipe changed',
+      });
+    });
+
     it('saves the labels and options on the dish and each variant', () => {
       open(PAD_THAI);
       component.form.patchValue({

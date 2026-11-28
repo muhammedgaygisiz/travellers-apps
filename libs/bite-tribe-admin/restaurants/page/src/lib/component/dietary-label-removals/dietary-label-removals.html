@@ -1,0 +1,141 @@
+<ta-page
+  [chrome]="{ showFooter: false, fullWidth: true, enableBackButton: true }"
+  [isAuthenticated]="true"
+  (logoutClick)="logoutClick.emit()"
+>
+  <ion-content class="ion-padding">
+    <div class="dietary-label-removals">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title
+            >{{ 'admin-dietary-removals' | transloco }}</ion-card-title
+          >
+        </ion-card-header>
+        <ion-card-content>
+          <ion-note>{{ 'admin-dietary-removals-hint' | transloco }}</ion-note>
+          @if (failed()) {
+          <p data-testid="dietary-removals-failed">
+            {{ 'admin-dietary-removals-load-failed' | transloco }}
+          </p>
+          <ion-button fill="outline" (click)="reload.emit()"
+            >{{ 'admin-dietary-approvals-retry' | transloco }}</ion-button
+          >
+          } @else if (loading() && !removals().length) {
+          <ion-spinner data-testid="dietary-removals-loading" />
+          } @else if (!removals().length) {
+          <p data-testid="dietary-removals-empty">
+            {{ 'admin-dietary-removals-empty' | transloco }}
+          </p>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      @for (removal of removals(); track removal.removalId) {
+      <ion-card [attr.data-testid]="'dietary-removal-' + removal.removalId">
+        <ion-card-header>
+          <ion-card-subtitle
+            >{{ removal.restaurantName || removal.restaurantId
+            }}</ion-card-subtitle
+          >
+          <ion-card-title>
+            {{ removal.dishName || removal.menuItemId }} - {{ 'dietary-label-' +
+            removal.label | transloco }}
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>
+            {{ 'admin-dietary-removals-counts' | transloco : { date:
+            removal.removedAt.slice(0, 10), disputes: removal.disputes,
+            confirmations: removal.confirmations, } }}
+          </p>
+
+          <ion-list lines="full">
+            @for (entry of reasonCounts(removal); track entry[0]) {
+            <ion-item>
+              <ion-label
+                >{{ 'dietary-vote-reason-' + entry[0] | transloco }}: {{
+                entry[1] }}</ion-label
+              >
+            </ion-item>
+            } @for (dispute of removal.disputesDetail; track $index) { @if
+            (dispute.note) {
+            <ion-item data-testid="dietary-removal-note">
+              <ion-label class="ion-text-wrap">
+                <p>{{ dispute.votedAt.slice(0, 10) }}</p>
+                <h3>"{{ dispute.note }}"</h3>
+              </ion-label>
+            </ion-item>
+            } }
+          </ion-list>
+
+          @if (removal.requestedAt) {
+          <div data-testid="dietary-removal-request">
+            <h3>
+              {{ 'admin-dietary-removals-request' | transloco: { date:
+              removal.requestedAt.slice(0, 10) } }}
+            </h3>
+            <p class="ion-text-wrap">{{ removal.explanation }}</p>
+            @if (removal.imagePath) {
+            <img
+              class="evidence"
+              data-testid="dietary-removal-evidence"
+              [src]="removal.imagePath"
+              [alt]="'admin-dietary-removals-evidence' | transloco"
+            />
+            } @else if (removal.imageStatus === 'pending') {
+            <ion-note
+              >{{ 'admin-dietary-removals-evidence-checking' | transloco
+              }}</ion-note
+            >
+            } @else if ( removal.imageStatus === 'refused' ||
+            removal.imageStatus === 'failed' ) {
+            <ion-note
+              >{{ 'admin-dietary-removals-evidence-refused' | transloco
+              }}</ion-note
+            >
+            }
+          </div>
+          } @else {
+          <ion-note
+            >{{ 'admin-dietary-removals-no-request' | transloco }}</ion-note
+          >
+          }
+
+          <div class="decision">
+            <ion-textarea
+              fill="outline"
+              mode="md"
+              labelPlacement="stacked"
+              [autoGrow]="true"
+              [label]="'admin-dietary-removals-reason' | transloco"
+              [ngModel]="reasonOf(removal.removalId)"
+              (ngModelChange)="setReason(removal.removalId, $event)"
+              data-testid="dietary-removal-reason"
+            />
+            <div class="answers">
+              @if (answering() === removal.removalId) {
+              <ion-spinner name="crescent" />
+              } @else {
+              <ion-button
+                fill="outline"
+                color="danger"
+                data-testid="dietary-removal-confirm"
+                [disabled]="!canDecide(removal.removalId)"
+                (click)="decide(removal.removalId, 'confirm')"
+                >{{ 'admin-dietary-removals-confirm' | transloco }}</ion-button
+              >
+              <ion-button
+                data-testid="dietary-removal-restore"
+                [disabled]="!canDecide(removal.removalId)"
+                (click)="decide(removal.removalId, 'restore')"
+                >{{ 'admin-dietary-removals-restore' | transloco }}</ion-button
+              >
+              }
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      }
+    </div>
+  </ion-content>
+</ta-page>

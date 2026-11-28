@@ -112,6 +112,9 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   // operator's answer to each (issue #2198).
   listDietaryLabelApprovals: 'operator',
   answerDietaryLabelApproval: 'operator',
+  // Removed dietary labels, restored or confirmed with a reason (issue #2199).
+  listDietaryLabelRemovals: 'operator',
+  answerDietaryLabelRemoval: 'operator',
   hideReviewAsOperator: 'operator',
   listReviewReports: 'operator',
   listUsersWithRoles: 'operator',
@@ -139,6 +142,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   saveRestaurantDietaryStatements: 'restaurantAuthority',
   // A menu's dietary labels, the only way a client changes them (issue #2198).
   saveMenuDietaryLabels: 'restaurantAuthority',
+  // A restaurant asks for a removed dietary label back (issue #2199).
+  requestDietaryLabelRestoration: 'restaurantAuthority',
 
   // Replacing the codes of a whole room in one action (issue #1107). The same
   // door as the single rotation and deliberately *not* the `staffAuthority`

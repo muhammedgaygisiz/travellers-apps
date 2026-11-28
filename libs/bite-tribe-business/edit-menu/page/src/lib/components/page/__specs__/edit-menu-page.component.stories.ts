@@ -163,6 +163,36 @@ export const DishWithRemovedLabel: Story = {
 };
 
 /**
+ * The owner has asked BiteTribe to restore the removed label (GitHub issue
+ * #2199): the editor says it is waiting for review instead of offering the
+ * request again.
+ */
+export const DishWithRestorationRequested: Story = {
+  args: {
+    menu: {
+      ...menu,
+      categories: menu.categories.map((category) => ({
+        ...category,
+        items: category.items.map((item) =>
+          item.id === 'item-margherita'
+            ? {
+                ...item,
+                removedDietaryLabels: ['vegan' as const],
+                restorationRequestedDietaryLabels: ['vegan' as const],
+              }
+            : item,
+        ),
+      })),
+    },
+  },
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-dish-item-margherita"] [data-testid="open-dish"]',
+    ),
+};
+
+/**
  * A dish with options, which change nothing about its price (GitHub issue
  * #2254): the list shows each group on a line under the dish, and the editor
  * shows each group as a card with its choices and whether guests must choose.

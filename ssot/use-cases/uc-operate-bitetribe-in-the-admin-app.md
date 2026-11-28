@@ -62,6 +62,7 @@ The same card removes it. A required reason and a confirmation sit between the o
 12. **The operational migrations** are one dashboard entry each — new version notification, review timestamps backfill, Bite address backfill, restaurant clustering, image migration, geohash migration. See [UC - Run Operational Migrations](uc-run-operational-migrations.md).
 13. **City pages** curates the public pages at `bitetribe.app/eat/<city>`, one per city, with optional alias names that redirect to it ([#1974]), ([#1490], epic [#1487]). The operator writes the details and an intro, picks three to five Bites with the same `searchBites` lookup as Bite search, orders them, previews the page as it will be served, and publishes or withdraws it. Every write goes through an admin-only callable that logs one operator action, and publishing copies the Bites into the page so a later change to a Bite cannot break it. The page itself is owned by [Implementation - Web Search And Social Metadata](../implementation/web-search-and-social-metadata.md#city-landing-pages), and what its readers do with it by [UC - Find BiteTribe Through A City Landing Page](uc-find-bitetribe-through-a-city-landing-page.md).
 14. **Dietary label approvals** is the queue of dietary labels a restaurant at the strike limit asked to publish ([#2198], epic [#2193]): once diners' disputes have removed 3 of its labels within 12 months, a new one waits here. It reads `listDietaryLabelApprovals`, one card per restaurant and one row per waiting label, and each row is approved or refused on its own through `answerDietaryLabelApproval`, both admin-only and logged as operator actions. An approved label is published on the dish; a refused one is dropped; a label the owner withdrew, or diners removed meanwhile, is answered as no longer waiting. The rule is [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)'s `R-8`.
+15. **Removed dietary labels** is the queue of labels diners' disputes removed ([#2199], epic [#2193]), newest request or removal first. It reads `listDietaryLabelRemovals`: each label with its disputes - their reasons, notes and dates, never who - its confirmations, and the owner's explanation and evidence photo once the image check passed it. The operator restores the label or confirms its removal through `answerDietaryLabelRemoval`, with a required reason the operator log keeps, whether or not the owner asked. Restoring brings the label back, discards its disputes and takes back the strike; confirming keeps both and takes the item off the queue until the owner asks again. The rules are [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)'s `R-7` and `RD-DC-8`.
 
 ## Why It Is Needed
 
@@ -176,6 +177,7 @@ where the queues the reports arrive in live.
 - Issue [#1077] - assign and revoke restaurant ownership, and the admin-app surface for it; done
 - Issue [#1078] - ownership-scoped Firestore rules
 - Issue [#2198] - approve or refuse the dietary labels of a restaurant at the strike limit, part of epic-2193
+- Issue [#2199] - restore a removed dietary label or confirm its removal, part of epic-2193
 
 ## Related Domains
 
@@ -227,4 +229,5 @@ where the queues the reports arrive in live.
 [#2141]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2141
 [#2193]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2193
 [#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
+[#2199]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2199
 [#2137]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2137

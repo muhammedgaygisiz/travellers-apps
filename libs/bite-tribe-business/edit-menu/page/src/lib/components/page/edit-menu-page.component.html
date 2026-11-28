@@ -205,6 +205,7 @@
                 (save)="onSaveDish($event)"
                 (deleteDish)="onDeleteDish()"
                 (cancelEdit)="closeEditor()"
+                (requestRestoration)="requestDietaryRestoration.emit($event)"
               />
             } @else {
               <bt-category-editor

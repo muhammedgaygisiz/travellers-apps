@@ -14,6 +14,8 @@ export * from './lib/dietary-choice';
 export * from './lib/dietary-vote';
 /** A value export: removal, the lock and the strikes are read by both apps and the parity spec (issue #2198). */
 export * from './lib/dietary-removal';
+/** A value export: the restoration request and the operator's answer (issue #2199). */
+export * from './lib/dietary-restoration';
 export * from './lib/restaurant-setup-checklist';
 export * from './lib/restaurant-ownership';
 export type * from './lib/restaurant-candidate';

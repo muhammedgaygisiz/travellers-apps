@@ -1,6 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { MenuDataAccessService } from 'bite-tribe/menu-data-access';
-import type { Menu, SaveMenuDietaryLabelsResult } from 'model';
+import type {
+  DietaryRestorationDraft,
+  Menu,
+  SaveMenuDietaryLabelsResult,
+} from 'model';
 import { LoadingController } from '@ionic/angular/standalone';
 import { TranslocoService } from '@jsverse/transloco';
 import { ToastService } from 'toast';
@@ -84,6 +88,50 @@ export class EditMenuService {
           : 'menu-saved',
       outcome: 'success',
     });
+  }
+
+  /**
+   * Asks BiteTribe to restore a label diners' disputes removed (GitHub issue
+   * #2199), under the saving overlay. The toast says what became of it: sent,
+   * sent with its photo still being checked, sent but the photo refused, or
+   * not sent because the label is no longer removed. The menu is read again,
+   * so the editor shows the request instead of the button.
+   */
+  async requestDietaryRestoration(
+    draft: DietaryRestorationDraft,
+  ): Promise<void> {
+    const loading = await this.loadingController.create({
+      message: this.transloco.translate('menu-restoration-sending'),
+      backdropDismiss: false,
+    });
+    await loading.present();
+
+    let messageKey: string;
+    let outcome: 'success' | 'failure' = 'success';
+
+    try {
+      const result =
+        await this.dataAccess.requestDietaryLabelRestoration(draft);
+
+      if (result.status === 'not-removed') {
+        messageKey = 'menu-restoration-not-removed';
+        outcome = 'failure';
+      } else if (result.photo === 'refused') {
+        messageKey = 'menu-restoration-sent-photo-refused';
+        outcome = 'failure';
+      } else if (result.photo === 'checking') {
+        messageKey = 'menu-restoration-sent-photo-checking';
+      } else {
+        messageKey = 'menu-restoration-sent';
+      }
+    } catch {
+      messageKey = 'something-went-wrong-please-try-again';
+      outcome = 'failure';
+    }
+
+    await loading.dismiss();
+    this.dataAccess.retryMenuLoad();
+    await this.toast.present({ messageKey, outcome });
   }
 
   /**

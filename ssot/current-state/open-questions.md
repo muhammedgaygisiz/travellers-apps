@@ -1,6 +1,6 @@
 # Current State - Open Questions
 
-**Last verified:** 2026-11-27
+**Last verified:** 2026-11-28
 
 ## Purpose
 
@@ -125,8 +125,8 @@ read it. The check is described in [Architecture - AI](../architecture/ai.md).
   ([#1475]). The question reopens if reports show objectionable photos arriving.
   **Reopened by epic [#2137]**, which answers both reasons; see `Image Moderation Questions`.
   Its image check exists since [#2138], Bite photos go through it since [#2139], profile
-  photos since [#2140], and restaurant and Bite Trail photos since [#2141], so every upload
-  path is checked. Photos stored before the check were checked once by the
+  photos since [#2140], restaurant and Bite Trail photos since [#2141], and an owner's
+  evidence for a removed dietary label since [#2199], so every upload path is checked. Photos stored before the check were checked once by the
   `image-moderation-backfill` migration ([#2143]), whose two passes ran in production on 21
   November 2026.
 - Who maintains the wordlist, and how does a term get added or removed? It is code today, so
@@ -274,8 +274,8 @@ These belong to epic [#2193] and are bound by `RD-DC-*`. Each names the story it
   shown, and they carry the high-risk notice either way (`RD-DC-5`).
 - **How many confirmed removals, over what period, cost a restaurant self-declaration?
   Settled 27 November 2026 by `RD-DC-7`, delivered by [#2198]:** 3 in 12 months. Every
-  removal counts as a strike when it happens; what an Operator's restoration does to the
-  strike is [#2199]'s to decide.
+  removal counts as a strike when it happens, and an Operator's restoration takes it back
+  (`RD-DC-8`, [#2199]).
 - **Can the ad network exclude categories per request, without the member's choices leaving
   BiteTribe?** If not, the options are to block the sensitive categories for every member,
   to show members with dietary choices only house or direct-sold ads, or to show them none.

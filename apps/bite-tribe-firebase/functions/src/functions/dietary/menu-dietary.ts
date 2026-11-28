@@ -57,6 +57,8 @@ export interface DietaryLabelRemoval {
   disputes: number;
   confirmations: number;
   reasons: Partial<Record<DietaryDisputeReason, number>>;
+  /** When the owner last asked for it back (issue #2199). */
+  restorationRequestedAt?: string;
 }
 
 export interface MenuItemDietary {

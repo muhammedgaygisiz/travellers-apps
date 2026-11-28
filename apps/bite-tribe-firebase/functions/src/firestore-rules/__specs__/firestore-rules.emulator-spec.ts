@@ -4578,6 +4578,37 @@ describe('backend-owned collections', () => {
     }
   });
 
+  it('lets a restaurant holder get its removal queue item and nobody write it (issue #2199)', async () => {
+    const removal = `${OWNED_RESTAURANT}__m1__vegan`;
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'dietaryLabelRemovals', removal), {
+        restaurantId: OWNED_RESTAURANT,
+        status: 'open',
+      });
+    });
+
+    await assertSucceeds(
+      getDoc(doc(asOwner(), 'dietaryLabelRemovals', removal)),
+    );
+    await assertSucceeds(
+      getDoc(doc(asOperator(), 'dietaryLabelRemovals', removal)),
+    );
+    await assertFails(
+      getDoc(doc(asConsumer(), 'dietaryLabelRemovals', removal)),
+    );
+    await assertFails(
+      getDocs(collection(asOperator(), 'dietaryLabelRemovals')),
+    );
+    for (const db of [asOwner(), asOperator()]) {
+      await assertFails(
+        updateDoc(doc(db, 'dietaryLabelRemovals', removal), {
+          status: 'confirmed',
+        }),
+      );
+    }
+  });
+
   it('keeps the dietary label approvals from every client (issue #2198)', async () => {
     for (const db of [asOwner(), asOperator(), asConsumer()]) {
       await assertFails(

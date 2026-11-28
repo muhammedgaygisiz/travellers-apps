@@ -1,8 +1,9 @@
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { EMPTY } from 'rxjs';
+import { EMPTY, type Observable } from 'rxjs';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import {
+  DIETARY_LABEL_REMOVALS_COLLECTION,
   MENU_ITEM_STATS_COLLECTION,
   withMenuDietary,
   withoutMenuItemDietary,
@@ -13,10 +14,15 @@ import {
   type Menu,
   type MenuItemStats,
   type PublicMenuResult,
+  type FolderPhotoVerdict,
+  type RequestDietaryLabelRestorationRequest,
+  type RequestDietaryLabelRestorationResult,
   type SaveMenuDietaryLabelsRequest,
   type SaveMenuDietaryLabelsResult,
 } from 'model';
 import { getMenuById } from './utils/get-menu-by-id';
+import { uploadBase64ToFirebaseStorage } from '../utils/upload-base64-to-firebase-storage';
+import { folderPhotoVerdict$ } from '../utils/folder-photo-verdict';
 
 export const MENU_COLLECTION = 'menus';
 
@@ -191,6 +197,47 @@ export class MenuApiService {
     >({ name: 'saveMenuDietaryLabels', data: request });
 
     return result.data;
+  }
+
+  /**
+   * Asks for a removed dietary label back (GitHub issue #2199). With
+   * `withPhoto`, the request is marked as waiting for its photo, which
+   * {@link uploadDietaryEvidence} then sends.
+   */
+  async requestDietaryLabelRestoration(
+    request: RequestDietaryLabelRestorationRequest,
+  ): Promise<RequestDietaryLabelRestorationResult> {
+    const result = await FirebaseFunctions.callByName<
+      RequestDietaryLabelRestorationRequest,
+      RequestDietaryLabelRestorationResult
+    >({ name: 'requestDietaryLabelRestoration', data: request });
+
+    return result.data;
+  }
+
+  /**
+   * Uploads the evidence photo into the request's own folder,
+   * `images/dietaryLabelRemovals/{removalId}/`. Only the image check
+   * publishes it (`setDietaryEvidenceImagePathOnUpload`).
+   */
+  async uploadDietaryEvidence(removalId: string, photo: string): Promise<void> {
+    await uploadBase64ToFirebaseStorage({
+      base64: photo,
+      docId: removalId,
+      collection: DIETARY_LABEL_REMOVALS_COLLECTION,
+    });
+  }
+
+  /**
+   * The image check's verdict on the evidence photo, as it lands. The request
+   * was marked `pending` first, so only a verdict after that counts.
+   */
+  dietaryEvidenceVerdict$(removalId: string): Observable<FolderPhotoVerdict> {
+    return folderPhotoVerdict$(
+      `${DIETARY_LABEL_REMOVALS_COLLECTION}/${removalId}`,
+      { afterPending: true },
+      (error) => this.errorHandler.handleError(error),
+    );
   }
 
   handleError(err: unknown): typeof EMPTY {

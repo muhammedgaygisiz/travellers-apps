@@ -26,6 +26,9 @@ describe('EditMenuService', () => {
         .fn()
         .mockResolvedValue({ status: 'saved', locked: [], pending: [] }),
       retryMenuLoad: jest.fn(),
+      requestDietaryLabelRestoration: jest
+        .fn()
+        .mockResolvedValue({ status: 'requested' }),
       markMenuReviewed: jest.fn().mockResolvedValue(undefined),
       confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<MenuDataAccessService>;
@@ -55,6 +58,61 @@ describe('EditMenuService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  /** Asking for a removed dietary label back (issue #2199). */
+  describe('requestDietaryRestoration', () => {
+    const draft = {
+      menuItemId: 'm1',
+      label: 'vegan' as const,
+      explanation: 'New supplier',
+    };
+
+    it.each([
+      [{ status: 'requested' }, 'menu-restoration-sent', 'success'],
+      [
+        { status: 'requested', photo: 'uploaded' },
+        'menu-restoration-sent',
+        'success',
+      ],
+      [
+        { status: 'requested', photo: 'checking' },
+        'menu-restoration-sent-photo-checking',
+        'success',
+      ],
+      [
+        { status: 'requested', photo: 'refused' },
+        'menu-restoration-sent-photo-refused',
+        'failure',
+      ],
+      [{ status: 'not-removed' }, 'menu-restoration-not-removed', 'failure'],
+    ])('reports %j as %s', async (result, messageKey, outcome) => {
+      dataAccessMock.requestDietaryLabelRestoration = jest
+        .fn()
+        .mockResolvedValue(result);
+
+      await service.requestDietaryRestoration(draft);
+
+      expect(
+        dataAccessMock.requestDietaryLabelRestoration,
+      ).toHaveBeenCalledWith(draft);
+      expect(loading.dismiss).toHaveBeenCalled();
+      expect(dataAccessMock.retryMenuLoad).toHaveBeenCalled();
+      expect(toastMock.present).toHaveBeenCalledWith({ messageKey, outcome });
+    });
+
+    it('reports a failed request', async () => {
+      dataAccessMock.requestDietaryLabelRestoration = jest
+        .fn()
+        .mockRejectedValue(new Error('upload'));
+
+      await service.requestDietaryRestoration(draft);
+
+      expect(toastMock.present).toHaveBeenCalledWith({
+        messageKey: 'something-went-wrong-please-try-again',
+        outcome: 'failure',
+      });
+    });
   });
 
   describe('saveMenu', () => {

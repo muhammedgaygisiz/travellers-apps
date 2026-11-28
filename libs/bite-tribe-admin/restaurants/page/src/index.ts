@@ -5,3 +5,4 @@ export { RestaurantOwnershipContainer } from './lib/integration/restaurant-owner
 export { TableSessionsContainer } from './lib/integration/table-sessions-container';
 export { RestaurantPhotosContainer } from './lib/integration/restaurant-photos-container';
 export { DietaryLabelApprovalsContainer } from './lib/integration/dietary-label-approvals-container';
+export { DietaryLabelRemovalsContainer } from './lib/integration/dietary-label-removals-container';

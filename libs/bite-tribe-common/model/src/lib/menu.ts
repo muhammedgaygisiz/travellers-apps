@@ -92,6 +92,11 @@ export interface MenuItem {
    * removed after diner reports, and the business editor offers none of them.
    */
   removedDietaryLabels?: DietaryLabel[];
+  /**
+   * Those of {@link removedDietaryLabels} the owner has asked to have back
+   * (GitHub issue #2199), waiting for an operator. Derived on read like it.
+   */
+  restorationRequestedDietaryLabels?: DietaryLabel[];
   variants?: MenuItem[];
   /**
    * Choices on the dish that don't change its price, such as how spicy it

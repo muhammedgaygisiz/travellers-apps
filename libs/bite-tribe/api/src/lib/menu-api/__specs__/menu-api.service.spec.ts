@@ -1,4 +1,5 @@
 import { MenuApiService } from '../menu-api.service';
+import { ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from 'ta-firestore';
 import { FieldValue, FirebaseFirestore } from '@capacitor-firebase/firestore';
@@ -6,8 +7,16 @@ import { FirebaseFunctions } from '@capacitor-firebase/functions';
 import { of } from 'rxjs';
 import type { Menu } from 'model';
 import * as getMenuByIdUtil from '../utils/get-menu-by-id';
+import { uploadBase64ToFirebaseStorage } from '../../utils/upload-base64-to-firebase-storage';
+import { folderPhotoVerdict$ } from '../../utils/folder-photo-verdict';
 
 jest.mock('../utils/get-menu-by-id');
+jest.mock('../../utils/upload-base64-to-firebase-storage', () => ({
+  uploadBase64ToFirebaseStorage: jest.fn().mockResolvedValue('path'),
+}));
+jest.mock('../../utils/folder-photo-verdict', () => ({
+  folderPhotoVerdict$: jest.fn(),
+}));
 jest.mock('@capacitor-firebase/functions', () => ({
   FirebaseFunctions: { callByName: jest.fn() },
 }));
@@ -451,6 +460,61 @@ describe(MenuApiService.name, () => {
         name: 'saveMenuDietaryLabels',
         data: request,
       });
+    });
+  });
+
+  /** Asking for a removed dietary label back (issue #2199). */
+  describe('dietary label restoration', () => {
+    it('sends the request through the callable', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { status: 'requested', removalId: 'r1__m1__vegan' },
+      });
+      const request = {
+        restaurantId: 'r1',
+        menuItemId: 'm1',
+        label: 'vegan' as const,
+        explanation: 'New supplier',
+        withPhoto: true,
+      };
+
+      await expect(
+        service.requestDietaryLabelRestoration(request),
+      ).resolves.toEqual({ status: 'requested', removalId: 'r1__m1__vegan' });
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'requestDietaryLabelRestoration',
+        data: request,
+      });
+    });
+
+    it('uploads the evidence into the request folder', async () => {
+      await service.uploadDietaryEvidence(
+        'r1__m1__vegan',
+        'data:image/png;base64,x',
+      );
+
+      expect(uploadBase64ToFirebaseStorage).toHaveBeenCalledWith({
+        base64: 'data:image/png;base64,x',
+        docId: 'r1__m1__vegan',
+        collection: 'dietaryLabelRemovals',
+      });
+    });
+
+    it('waits for the verdict after the pending mark, and reports errors', () => {
+      const verdict$ = of({ imageStatus: 'uploaded' as const, imagePath: 'p' });
+      (folderPhotoVerdict$ as jest.Mock).mockReturnValue(verdict$);
+
+      expect(service.dietaryEvidenceVerdict$('r1__m1__vegan')).toBe(verdict$);
+
+      const [reference, options, onError] = (folderPhotoVerdict$ as jest.Mock)
+        .mock.calls[0];
+      expect(reference).toBe('dietaryLabelRemovals/r1__m1__vegan');
+      expect(options).toEqual({ afterPending: true });
+      const handleError = jest
+        .spyOn(TestBed.inject(ErrorHandler), 'handleError')
+        .mockImplementation(() => undefined);
+      const error = new Error('denied');
+      onError(error);
+      expect(handleError).toHaveBeenCalledWith(error);
     });
   });
 

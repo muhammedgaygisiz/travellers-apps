@@ -83,6 +83,12 @@ describe(DietaryLabelRemovals.name, () => {
       ['animal-product', 2],
       ['staff-said-not', 1],
     ]);
+    expect(
+      component.reasonCounts({
+        ...REQUESTED_REMOVAL,
+        reasons: undefined,
+      } as never),
+    ).toEqual([]);
   });
 
   it('decides only with a reason, and restores without a request', () => {

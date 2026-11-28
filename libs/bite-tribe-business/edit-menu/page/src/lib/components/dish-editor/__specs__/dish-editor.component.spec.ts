@@ -540,6 +540,13 @@ describe(DishEditorComponent.name, () => {
       component.cancelRestoration();
       expect(component.isRestoring(PAD_THAI.id, 'vegan')).toBe(false);
 
+      // A row with no id yet cannot be asked about.
+      component.startRestoration(PAD_THAI.id, 'vegan');
+      component.restorationExplanation.setValue('Recipe changed');
+      component.sendRestoration(undefined, 'vegan');
+      expect(requests).not.toHaveBeenCalled();
+      expect(component.isRestorationRequested(undefined, 'vegan')).toBe(false);
+
       component.startRestoration(PAD_THAI.id, 'vegan');
       component.restorationExplanation.setValue('Recipe changed');
       component.sendRestoration(PAD_THAI.id, 'vegan');

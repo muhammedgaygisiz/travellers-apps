@@ -70,7 +70,8 @@ declaration with its review video, and updates the declarations in the same chan
 - Issue [#2134] specified mobile venues. Part of epic [#2123].
 - Epic [#2340] implements them: [#2341] the model, [#2342] the hand-set position, [#2343]
   the map and page, [#2344] Create Bite and matching by link, [#2345] tracking while the app is
-  open, [#2346] linking earlier Bites, [#2347] background tracking.
+  open, [#2346] linking earlier Bites, [#2347] background tracking, and [#2349] the launch-readiness
+  test, on the emulator until it has no findings and then on QA, never production.
 
 ## Related Domains
 
@@ -101,3 +102,4 @@ declaration with its review video, and updates the declarations in the same chan
 [#2345]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2345
 [#2346]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2346
 [#2347]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2347
+[#2349]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2349

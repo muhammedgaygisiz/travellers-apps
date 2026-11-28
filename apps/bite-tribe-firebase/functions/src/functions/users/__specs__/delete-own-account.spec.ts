@@ -283,6 +283,16 @@ describe('deleteAccountForUser', () => {
     db.seed('reviews/review-1', { authorId: UID, review: 'Great' });
     db.seed('reviews/review-2', { authorId: 'someone-else', review: 'Fine' });
     db.seed(`bucketlists/list-1`, { userId: UID, name: 'Tokyo' });
+    db.seed('trips/trip-1', {
+      userId: UID,
+      title: 'Japan',
+      startDate: '2026-12-01',
+    });
+    db.seed('trips/trip-2', {
+      userId: 'someone-else',
+      title: 'Peru',
+      startDate: '2026-12-01',
+    });
     db.seed('biteTrails/trail-1', { ownerId: 'someone-else' });
     db.seed(`biteTrails/trail-1/ratings/${UID}`, { rating: 4 });
     db.seed('biteTrails/trail-1/sells/sell-1', { userId: UID, soldAt: 'x' });
@@ -670,6 +680,7 @@ describe('deleteAccountForUser', () => {
       deletedLikes: 1,
       deletedReviews: 1,
       deletedBucketlists: 1,
+      deletedTrips: 1,
       deletedRatings: 1,
       anonymizedSales: 1,
       deletedFollowEdges: 0,
@@ -679,6 +690,8 @@ describe('deleteAccountForUser', () => {
       deletedPushTokens: 1,
       deletedRestaurantStaff: 1,
     });
+    expect(db.exists('trips/trip-1')).toBe(false);
+    expect(db.exists('trips/trip-2')).toBe(true);
   });
 
   it('is a no-op when the account was already deleted', async () => {

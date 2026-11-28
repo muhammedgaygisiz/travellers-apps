@@ -33,7 +33,9 @@ import { MenuEffects } from './menus/effects';
 import { FirebaseOptions } from 'firebase/app';
 import { loadedRestaurantsFromApi } from './restaurants/actions';
 import { BucketListEffect } from './bucketlists/effects';
+import { TripEffects } from './trips/effects';
 import { fromBucketlists } from './bucketlists';
+import { fromTrips } from './trips';
 import { ServiceWorkerEffects } from './service-worker/effects';
 import { fromFilteringAndSorting } from './filtering-and-sorting';
 import { FilteringAndSortingEffects } from './filtering-and-sorting/effects';
@@ -200,6 +202,7 @@ export const provideBiteTribeStore = (
         RestaurantEffects,
         MenuEffects,
         BucketListEffect,
+        TripEffects,
         ServiceWorkerEffects,
         FilteringAndSortingEffects,
       ),
@@ -210,6 +213,7 @@ export const provideBiteTribeStore = (
   provideState(fromRestaurants.key, fromRestaurants.reducer),
   provideState(fromMenus.key, fromMenus.reducer),
   provideState(fromBucketlists.key, fromBucketlists.reducer),
+  provideState(fromTrips.key, fromTrips.reducer),
   provideState(fromFilteringAndSorting.key, fromFilteringAndSorting.reducer),
   provideState(fromUsers.key, fromUsers.reducer),
   provideFirestoreUtils(

@@ -61,9 +61,12 @@ Once a trip is saved:
 
 ## Authorization
 
-Planned: the Firestore rules on `/trips/{tripId}` allow read, update and delete by the owner
-only, and create only with the caller as owner. The Bites are read under the existing
-`/bites` rules, filtered to the owner. Nothing is built or enforced yet.
+**Enforced.** The Firestore rules on `/trips/{tripId}` allow read, update and delete by the
+owner only, operators included in the refusal, and create only with the caller as owner
+(issue [#2352]). The Bites are read under the existing `/bites` rules, filtered to the owner.
+
+**Not enforced.** Nothing in the rules stops the owner reading their own Bites outside a
+trip's range; the range is a query, not a permission.
 
 ## MVP Classification
 

@@ -58,6 +58,7 @@ import { FOLLOW_REQUESTS_COLLECTION } from './follow-request';
 const BITES_COLLECTION = 'bites';
 const BITE_TRAILS_COLLECTION = 'biteTrails';
 const BUCKETLISTS_COLLECTION = 'bucketlists';
+const TRIPS_COLLECTION = 'trips';
 const LIKES_COLLECTION = 'likes';
 const AUTHOR_PRIVATE_COLLECTION = 'authorPrivate';
 const RATINGS_COLLECTION = 'ratings';
@@ -214,6 +215,17 @@ export const deleteBucketlistsByUser = (
   applyToQuery(
     db,
     db.collection(BUCKETLISTS_COLLECTION).where('userId', '==', uid),
+    (batch, ref) => batch.delete(ref),
+  );
+
+/** Deletes the user's trips. A trip stores no Bites, so nothing else goes with it (issue #2352). */
+export const deleteTripsByUser = (
+  db: Firestore,
+  uid: string,
+): Promise<number> =>
+  applyToQuery(
+    db,
+    db.collection(TRIPS_COLLECTION).where('userId', '==', uid),
     (batch, ref) => batch.delete(ref),
   );
 
@@ -621,6 +633,7 @@ export const deleteAccountForUser = async (
     );
     const deletedReviews = await deleteReviewsByUser(db, uid);
     const deletedBucketlists = await deleteBucketlistsByUser(db, uid);
+    const deletedTrips = await deleteTripsByUser(db, uid);
     const deletedRatings = await deleteBiteTrailRatingsByUser(db, uid);
     const anonymizedSales = await anonymizeBiteTrailSalesByUser(db, uid);
     const deletedFollowEdges = await deleteFollowEdgesForUser(db, uid);
@@ -661,6 +674,7 @@ export const deleteAccountForUser = async (
         deletedBitePhotoPositions,
         deletedReviews,
         deletedBucketlists,
+        deletedTrips,
         deletedRatings,
         anonymizedSales,
         deletedFollowEdges,

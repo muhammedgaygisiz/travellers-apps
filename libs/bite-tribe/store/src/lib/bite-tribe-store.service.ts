@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { Login, StoreService } from 'utils';
 import { fromAuth } from 'ta-firestore';
 import { Store } from '@ngrx/store';
@@ -42,6 +43,8 @@ import type {
   Review,
   SaveToBucketListParams,
   Settings,
+  Trip,
+  TripDraft,
 } from 'model';
 import {
   blockedUserIds,
@@ -81,6 +84,13 @@ import {
   sortedBitesByRestaurant,
 } from './bites/bites-by-restaurant.selector';
 import { BucketlistActions } from './bucketlists/actions';
+import { TripActions } from './trips/actions';
+import {
+  sortedTrips,
+  tripBites,
+  tripById,
+  tripsLoaded,
+} from './trips/selectors';
 import {
   bucketlists,
   selectedBucketlist,
@@ -119,6 +129,9 @@ export class BiteTribeStoreService implements StoreService {
   );
   sortedHomeBites$ = this.store.select(sortedHomeBites);
   sortedBucketlists$ = this.store.select(sortedBucketlists);
+  /** The signed-in user's trips, newest start date first (issue #2352). */
+  sortedTrips$ = this.store.select(sortedTrips);
+  tripsLoaded$ = this.store.select(tripsLoaded);
   homeSorting$ = this.store.select(homeSorting);
   bite$ = this.store.select(bite);
   sortedMyBites$ = this.store.select(sortedBitesByUser);
@@ -327,6 +340,35 @@ export class BiteTribeStoreService implements StoreService {
 
   removeBiteFromBucketlist(params: RemoveBiteFromBucketlistParams): void {
     this.store.dispatch(BucketlistActions.removeBiteFromBucketlist(params));
+  }
+
+  tripById$(tripId: string): Observable<Trip | undefined> {
+    return this.store.select(tripById(tripId));
+  }
+
+  /** `undefined` until the trip's Bites have been read. */
+  tripBites$(tripId: string): Observable<Bite[] | undefined> {
+    return this.store.select(tripBites(tripId));
+  }
+
+  loadMyTrips(): void {
+    this.store.dispatch(TripActions.loadMyTrips());
+  }
+
+  createTrip(draft: TripDraft): void {
+    this.store.dispatch(TripActions.createTrip({ draft }));
+  }
+
+  updateTrip(trip: Trip, draft: TripDraft): void {
+    this.store.dispatch(TripActions.updateTrip({ trip, draft }));
+  }
+
+  deleteTrip(tripId: string): void {
+    this.store.dispatch(TripActions.deleteTrip({ tripId }));
+  }
+
+  loadTripBites(trip: Trip): void {
+    this.store.dispatch(TripActions.loadTripBites({ trip }));
   }
 
   submitDeleteBite(bite: Bite): void {

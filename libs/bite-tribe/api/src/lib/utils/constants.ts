@@ -1,5 +1,6 @@
 export const BITE_COLLECTION = 'bites';
 export const BUCKETLIST_COLLECTION = 'bucketlists';
+export const TRIP_COLLECTION = 'trips';
 export const RESTAURANT_COLLECTION = 'restaurants';
 export const REVIEW_COLLECTION = 'reviews';
 export const HIDDEN_REVIEW_COLLECTION = 'hiddenReviews';

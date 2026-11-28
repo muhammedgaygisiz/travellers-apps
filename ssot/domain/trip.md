@@ -32,9 +32,9 @@ Bites are created one at a time, wherever the user is. A Trip is the user's own 
 
 ## Required Data
 
-Planned model fields:
+Model fields:
 
-| Field      | Planned name | Description                             |
+| Field      | Name in code | Description                             |
 | ---------- | ------------ | --------------------------------------- |
 | Trip id    | `id`         | Unique Trip identifier.                 |
 | Owner      | `userId`     | User who owns the Trip.                 |
@@ -84,10 +84,14 @@ Planned model fields:
 
 ## Technical Implementation
 
-Not built yet. Planned in issue [#2352]:
+The data layer is built (issue [#2352]); the pages are not yet ([#2353], [#2354], [#2355]).
 
-- Firestore collection `/trips/{tripId}`, readable and writable only by the owner. Unlike `/bucketlists`, which any member can read.
-- A Trip's Bites are read from `/bites` on `userId` and a `createdAtTimestamp` range, ordered newest first. The existing `bites` index on `userId` ascending and `createdAtTimestamp` descending serves it.
+- **Model**: `Trip` and `TripDraft` in `libs/bite-tribe-common/model/src/lib/trip.ts`. `tripBiteRange` turns the dates into the `createdAtTimestamp` range, from the first millisecond of the start date to the last of the end date in the device's time zone, with no upper bound while the end date is empty.
+- **Firestore**: `/trips/{tripId}`. `firestore.rules` admits a member to read, update and delete only a trip whose `userId` is their own, and to create one only with their own `userId`. No other account reads a trip, operators included, unlike `/bucketlists`, which any member can read. A write must keep to the trip's fields, carry a title of 1 to 100 characters and `YYYY-MM-DD` dates, and an end date not before the start date.
+- **A trip's Bites** are read from `/bites` on the trip's `userId` and the `createdAtTimestamp` range, newest first, served by the existing `bites` index on `userId` ascending and `createdAtTimestamp` descending.
+- **API**: `TripApiService` in `libs/bite-tribe/api`. An edit replaces the whole document, so an end date that was cleared is removed. Failures reach the caller rather than being swallowed.
+- **Store**: the `trips` slice in `libs/bite-tribe/store`, with each trip's Bites kept beside the trips rather than on them, exposed through `BiteTribeStoreService`. Every write reports success or failure as its own action.
+- **Account deletion**: `deleteOwnAccount` deletes the account's trips (`deletedTrips` on the deletion job).
 
 ## Current Limitations
 
@@ -109,6 +113,9 @@ Not built yet. Planned in issue [#2352]:
 
 [#2351]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2351
 [#2352]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2352
+[#2353]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2353
+[#2354]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2354
+[#2355]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2355
 [#2356]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2356
 [#2357]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2357
 [#2358]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2358

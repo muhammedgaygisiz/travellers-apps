@@ -51,4 +51,5 @@ Part of the [SSOT index](../README.md).
 - [UC - Dismiss Restaurant Candidate](uc-dismiss-restaurant-candidate.md)
 - [UC - Resolve Candidate Against An Existing Restaurant](uc-resolve-candidate-against-an-existing-restaurant.md)
 - [UC - Share A Bite To Social Media](uc-share-a-bite-to-social-media.md)
+- [UC - Find And Run A Mobile Vendor](uc-find-and-run-a-mobile-vendor.md)
 - [UC - Find Dishes That Fit A Dietary Choice](uc-find-dishes-that-fit-a-dietary-choice.md)

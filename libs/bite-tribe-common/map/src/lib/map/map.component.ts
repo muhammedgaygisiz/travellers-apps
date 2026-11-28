@@ -25,6 +25,7 @@ import { TILE_LAYER_FACTORY } from './tile-layer.token';
 import { zoomToMarkers } from './utils/zoom-to-markers';
 import { focusMarker } from './utils/focus-marker';
 import { drawRoute } from './utils/draw-route';
+import { addMarkerLayer } from './utils/add-marker-layer';
 import { addGpsMarker } from './utils/add-gps-marker';
 import { removeGpsMarker } from './utils/remove-gps-marker';
 import { MarkerColor } from './model/marker-color.enum';
@@ -80,8 +81,8 @@ export class MapComponent implements OnDestroy {
 
   /**
    * Joins the geopoints with a straight line in the order they are given, to
-   * show a route. Off by default; turn clustering off with it, or a cluster
-   * hides the stops the line runs through.
+   * show a route. Off by default. A route's markers are never clustered, so
+   * every stop shows, even two at the same place; see `addMarkerLayer`.
    */
   showRoute = input(false, { transform: booleanAttribute });
 
@@ -95,7 +96,7 @@ export class MapComponent implements OnDestroy {
 
   private readonly createTileLayer = inject(TILE_LAYER_FACTORY);
   private map!: L.Map;
-  private markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
+  private markerClusterGroup: L.Layer = L.markerClusterGroup();
   private markers: L.Marker[] = [];
   private routeLine: L.Polyline | undefined;
   private hasAutoFitted = false;
@@ -328,11 +329,10 @@ export class MapComponent implements OnDestroy {
       this.markerColors(),
       this.markerLabels(),
     );
-    this.markerClusterGroup = L.markerClusterGroup(
-      this.clusterMarkers() ? undefined : { maxClusterRadius: 0 },
-    )
-      .addLayers(this.markers)
-      .addTo(this.map);
+    this.markerClusterGroup = addMarkerLayer(this.markers, this.map, {
+      clusterMarkers: this.clusterMarkers(),
+      showRoute: this.showRoute(),
+    });
 
     this.updateRoute(positions);
 

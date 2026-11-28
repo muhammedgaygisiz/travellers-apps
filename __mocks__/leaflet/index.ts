@@ -36,6 +36,9 @@ export default {
     addTo: jest.fn(),
     remove: jest.fn(),
   })),
+  featureGroup: jest.fn(() => ({
+    addTo: jest.fn(),
+  })),
   markerClusterGroup: jest.fn(() => ({
     addLayers: jest.fn(() => ({
       addTo: jest.fn(),

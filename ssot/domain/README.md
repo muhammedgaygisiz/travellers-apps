@@ -7,6 +7,7 @@ Part of the [SSOT index](../README.md).
 - [Bite](bite.md)
 - [Bite Trail](bite-trail.md)
 - [Bucket List](bucket-list.md)
+- [Trip](trip.md)
 - [Floor Plan](floor-plan.md)
 - [Market Place](market-place.md)
 - [Restaurant](restaurant.md)

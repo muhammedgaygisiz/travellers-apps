@@ -503,6 +503,7 @@ X5 SYS <action>
 | `UC-GIM` | Generate Initial Menu From Bite Evidence               | [UC - Generate Initial Menu From Bite Evidence](../use-cases/uc-generate-initial-menu-from-bite-evidence.md)                             |
 | `UC-MBR` | Manage A Bite's Restaurant Assignment                  | [UC - Manage A Bite's Restaurant Assignment](../use-cases/uc-manage-a-bites-restaurant-assignment.md)                                    |
 | `UC-SBS` | Share A Bite To Social Media                           | [UC - Share A Bite To Social Media](../use-cases/uc-share-a-bite-to-social-media.md)                                                     |
+| `UC-PTR` | Plan A Trip And See Its Route                          | [UC - Plan A Trip And See Its Route](../use-cases/uc-plan-a-trip-and-see-its-route.md)                                                   |
 | `UC-CLP` | Find BiteTribe Through A City Landing Page             | [UC - Find BiteTribe Through A City Landing Page](../use-cases/uc-find-bitetribe-through-a-city-landing-page.md)                         |
 | `UC-FDC` | Find Dishes That Fit A Dietary Choice                  | [UC - Find Dishes That Fit A Dietary Choice](../use-cases/uc-find-dishes-that-fit-a-dietary-choice.md)                                   |
 

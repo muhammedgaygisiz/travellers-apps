@@ -1121,5 +1121,7 @@
   "delete-trip": "删除旅行",
   "are-you-sure-you-want-to-delete-this-trip": "删除这次旅行？你的Bite会保留。",
   "trip-save-failed": "无法保存你的旅行，请重试。",
-  "trip-delete-failed": "无法删除你的旅行，请重试。"
+  "trip-delete-failed": "无法删除你的旅行，请重试。",
+  "no-bites-in-this-trip": "这次旅行还没有Bite。你在旅行日期内发布的Bite会显示在这里。",
+  "trip-not-found": "这次旅行不存在，或者不属于你。"
 }

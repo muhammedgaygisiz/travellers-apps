@@ -1121,5 +1121,7 @@
   "delete-trip": "Hapus perjalanan",
   "are-you-sure-you-want-to-delete-this-trip": "Hapus perjalanan ini? Bites-mu tetap ada.",
   "trip-save-failed": "Perjalananmu tidak bisa disimpan. Coba lagi.",
-  "trip-delete-failed": "Perjalananmu tidak bisa dihapus. Coba lagi."
+  "trip-delete-failed": "Perjalananmu tidak bisa dihapus. Coba lagi.",
+  "no-bites-in-this-trip": "Belum ada Bites di perjalanan ini. Bites yang kamu posting di antara tanggalnya akan muncul di sini.",
+  "trip-not-found": "Perjalanan ini tidak ada, atau bukan milikmu."
 }

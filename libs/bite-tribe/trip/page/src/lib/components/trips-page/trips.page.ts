@@ -72,6 +72,7 @@ export class TripsPage {
   readonly createTrip = output<TripDraft>();
   readonly updateTrip = output<{ trip: Trip; draft: TripDraft }>();
   readonly deleteTrip = output<string>();
+  readonly gotoTrip = output<string>();
 
   protected readonly activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang(),

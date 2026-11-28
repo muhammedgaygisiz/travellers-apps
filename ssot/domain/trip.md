@@ -85,7 +85,7 @@ Model fields:
 
 ## Technical Implementation
 
-The data layer (issue [#2352]) and "My Trips" (issue [#2353]) are built; the trip page and its map are not yet ([#2354], [#2355]).
+The data layer (issue [#2352]), "My Trips" (issue [#2353]) and the trip page (issue [#2354]) are built; the map is not yet ([#2355]).
 
 - **Model**: `Trip` and `TripDraft` in `libs/bite-tribe-common/model/src/lib/trip.ts`. `tripBiteRange` turns the dates into the `createdAtTimestamp` range, from the first millisecond of the start date to the last of the end date in the device's time zone, with no upper bound while the end date is empty.
 - **Firestore**: `/trips/{tripId}`. `firestore.rules` admits a member to read, update and delete only a trip whose `userId` is their own, and to create one only with their own `userId`. No other account reads a trip, operators included, unlike `/bucketlists`, which any member can read. A write must keep to the trip's fields, carry a title of 1 to 100 characters and `YYYY-MM-DD` dates, and an end date not before the start date.
@@ -93,6 +93,7 @@ The data layer (issue [#2352]) and "My Trips" (issue [#2353]) are built; the tri
 - **API**: `TripApiService` in `libs/bite-tribe/api`. An edit replaces the whole document, so an end date that was cleared is removed. Failures reach the caller rather than being swallowed.
 - **Store**: the `trips` slice in `libs/bite-tribe/store`, with each trip's Bites kept beside the trips rather than on them, exposed through `BiteTribeStoreService`. Every write reports success or failure as its own action.
 - **My Trips**: the `bite-tribe/trip` library, at `/my-trips` from the home menu. Create and edit share one form in a modal, checked by `tripDraftError`, which mirrors the rules. The form closes on save, and a write that fails afterwards raises a toast from the trips effects. `trip_created`, `trip_updated` and `trip_deleted` are logged once Firestore has the write.
+- **Trip page**: `TripContainer` in `bite-tribe/home`, at `/my-trips/:tripId`, renders the trip's Bites in the shared Bite list in the order the query returned them, newest first. The trip is looked up among the user's own trips, so another user's trip id shows the not-found message. The Bites are read on every visit and on pull to refresh, so a Bite posted since the last visit appears.
 - **Account deletion**: `deleteOwnAccount` deletes the account's trips (`deletedTrips` on the deletion job).
 
 ## Current Limitations

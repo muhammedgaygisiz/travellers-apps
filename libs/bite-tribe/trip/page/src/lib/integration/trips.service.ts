@@ -1,12 +1,15 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NavController } from '@ionic/angular/standalone';
 import { BiteTribeStoreService } from 'bite-tribe/store';
+import { PATH } from 'utils';
 import { tripDateOf } from 'model';
 import type { Trip, TripDraft } from 'model';
 
 @Injectable({ providedIn: 'root' })
 export class TripsService {
   private readonly store = inject(BiteTribeStoreService);
+  private readonly navController = inject(NavController);
 
   readonly trips = toSignal(this.store.sortedTrips$, {
     initialValue: [] as Trip[],
@@ -31,5 +34,9 @@ export class TripsService {
 
   deleteTrip(tripId: string): void {
     this.store.deleteTrip(tripId);
+  }
+
+  gotoTrip(tripId: string): void {
+    void this.navController.navigateForward([PATH.MY_TRIPS, tripId]);
   }
 }

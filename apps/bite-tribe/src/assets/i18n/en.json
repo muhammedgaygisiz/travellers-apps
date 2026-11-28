@@ -1121,5 +1121,7 @@
   "delete-trip": "Delete trip",
   "are-you-sure-you-want-to-delete-this-trip": "Delete this trip? Your Bites stay.",
   "trip-save-failed": "Couldn't save your trip. Try again.",
-  "trip-delete-failed": "Couldn't delete your trip. Try again."
+  "trip-delete-failed": "Couldn't delete your trip. Try again.",
+  "no-bites-in-this-trip": "No Bites in this trip yet. Bites you post between its dates show up here.",
+  "trip-not-found": "This trip doesn't exist, or it isn't yours."
 }

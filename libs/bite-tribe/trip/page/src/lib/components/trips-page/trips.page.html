@@ -1,0 +1,79 @@
+<ta-page
+  [chrome]="{ enableBackButton: true, showHeaderMenu: false, showAddButton: true }"
+  [addButtonText]="'create-new-trip' | transloco"
+  (addButtonClick)="openCreate()"
+>
+  <ion-content class="ion-padding content-safe-padding-bottom">
+    <ion-text color="secondary" class="subheadline">
+      <h4>{{ 'my-trips' | transloco }}</h4>
+    </ion-text>
+
+    <ion-list lines="full">
+      @for (trip of trips(); track trip.id) {
+      <ion-item data-testid="trip-item">
+        <ion-icon name="airplane-outline" slot="start" />
+        <div class="ion-display-flex ion-flex-column ion-flex-1 trip-content">
+          <ion-label class="trip-title">
+            <h2>{{ trip.title }}</h2>
+            <p data-testid="trip-dates">
+              @if (trip.endDate) { {{ trip | tripDates: activeLang() }} } @else
+              { {{ 'trip-since' | transloco: { date: trip | tripDates:
+              activeLang() } }} }
+            </p>
+          </ion-label>
+          <div class="ion-display-flex trip-actions">
+            <ion-button
+              size="small"
+              data-testid="trip-edit"
+              (click)="openEdit(trip, $event)"
+            >
+              {{ 'edit' | transloco }}
+            </ion-button>
+            <ion-button
+              size="small"
+              color="danger"
+              data-testid="trip-delete"
+              (click)="openDeleteConfirmation(trip.id, $event)"
+            >
+              {{ 'delete' | transloco }}
+            </ion-button>
+          </div>
+        </div>
+        @if (isOngoing(trip, today())) {
+        <ion-badge slot="end" color="success" data-testid="trip-ongoing">
+          {{ 'trip-ongoing' | transloco }}
+        </ion-badge>
+        }
+      </ion-item>
+      }
+    </ion-list>
+
+    @if (loaded() && trips().length === 0) {
+    <div
+      class="empty-message ion-display-flex ion-flex-column ion-align-items-center ion-padding-top"
+    >
+      <ion-text color="primary" data-testid="empty-trips-message">
+        {{ 'no-trips-yet-create-one' | transloco }}
+      </ion-text>
+    </div>
+    }
+
+    <ion-modal [isOpen]="formTarget() !== null" (didDismiss)="closeForm()">
+      <ng-template>
+        <bt-trip-form
+          [trip]="editedTrip(formTarget())"
+          (save)="onSave($event)"
+          (cancelled)="closeForm()"
+        />
+      </ng-template>
+    </ion-modal>
+
+    <ion-alert
+      [isOpen]="tripToDelete() !== null"
+      [header]="'delete-trip' | transloco"
+      [message]="'are-you-sure-you-want-to-delete-this-trip' | transloco"
+      [buttons]="deleteButtons"
+      (didDismiss)="onDeleteDismiss($event)"
+    />
+  </ion-content>
+</ta-page>

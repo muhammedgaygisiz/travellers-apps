@@ -80,6 +80,15 @@
           <ng-container>{{ 'my-bucket-lists' | transloco }}</ng-container>
         </ion-item>
       }
+      @if (showMyTrips()) {
+        <ion-item
+          data-testid="menu-my-trips"
+          (click)="menuNavigate.emit('my-trips')"
+        >
+          <ion-icon name="airplane-outline" slot="start" />
+          <ng-container>{{ 'my-trips' | transloco }}</ng-container>
+        </ion-item>
+      }
       @if (showMarketPlaceButton()) {
         <ion-item
           data-testid="menu-market-place"

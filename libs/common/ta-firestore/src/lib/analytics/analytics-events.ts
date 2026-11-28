@@ -37,6 +37,9 @@ export const AnalyticsEvent = {
   BiteImageUploadRetried: 'bite_image_upload_retried',
   BucketListCreated: 'bucketlist_created',
   BucketListRated: 'bucketlist_rated',
+  TripCreated: 'trip_created',
+  TripUpdated: 'trip_updated',
+  TripDeleted: 'trip_deleted',
   // Discovery
   SearchPerformed: 'search_performed',
   RestaurantViewed: 'restaurant_viewed',
@@ -171,6 +174,9 @@ export interface AnalyticsEventParamMap {
   [AnalyticsEvent.BiteImageUploadRetried]: never;
   [AnalyticsEvent.BucketListCreated]: never;
   [AnalyticsEvent.BucketListRated]: { rating: number };
+  [AnalyticsEvent.TripCreated]: never;
+  [AnalyticsEvent.TripUpdated]: never;
+  [AnalyticsEvent.TripDeleted]: never;
   [AnalyticsEvent.SearchPerformed]: never;
   [AnalyticsEvent.RestaurantViewed]: { verified: boolean };
   [AnalyticsEvent.BiteViewed]: never;
@@ -624,6 +630,9 @@ export const ANALYTICS_EVENT_SURFACE: Record<
   [AnalyticsEvent.BiteImageUploadRetried]: 'consumer',
   [AnalyticsEvent.BucketListCreated]: 'consumer',
   [AnalyticsEvent.BucketListRated]: 'consumer',
+  [AnalyticsEvent.TripCreated]: 'consumer',
+  [AnalyticsEvent.TripUpdated]: 'consumer',
+  [AnalyticsEvent.TripDeleted]: 'consumer',
   [AnalyticsEvent.SearchPerformed]: 'consumer',
   [AnalyticsEvent.RestaurantViewed]: 'consumer',
   [AnalyticsEvent.BiteExplanationRequested]: 'consumer',

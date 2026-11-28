@@ -447,6 +447,7 @@ describe('HomeService', () => {
       ['profile', ['my-profile']],
       ['my-bites', ['my-bites']],
       ['my-bucketlists', ['my-bucketlists']],
+      ['my-trips', ['my-trips']],
       ['about', ['about']],
       ['market-place', ['market-place']],
       ['gallery', ['gallery']],

@@ -1,4 +1,10 @@
-import { isTripDate, tripBiteRange } from '../trip';
+import {
+  isOngoingTrip,
+  isTripDate,
+  tripBiteRange,
+  tripDateOf,
+  tripDraftError,
+} from '../trip';
 
 describe('isTripDate', () => {
   it('accepts a calendar day written as YYYY-MM-DD', () => {
@@ -52,5 +58,54 @@ describe('tripBiteRange', () => {
     expect(() =>
       tripBiteRange({ startDate: '2026-12-01', endDate: 'soon' }),
     ).toThrow();
+  });
+});
+
+describe('tripDateOf', () => {
+  it('writes the local calendar day as YYYY-MM-DD', () => {
+    expect(tripDateOf(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05');
+  });
+});
+
+describe('isOngoingTrip', () => {
+  const today = '2026-11-28';
+
+  it('is ongoing from its start date while it has no end date', () => {
+    expect(isOngoingTrip({ startDate: '2026-11-01' }, today)).toBe(true);
+    expect(isOngoingTrip({ startDate: today }, today)).toBe(true);
+  });
+
+  it('is ongoing up to and including its last day', () => {
+    expect(
+      isOngoingTrip({ startDate: '2026-11-01', endDate: today }, today),
+    ).toBe(true);
+  });
+
+  it('is not ongoing once it has ended', () => {
+    expect(
+      isOngoingTrip({ startDate: '2026-11-01', endDate: '2026-11-27' }, today),
+    ).toBe(false);
+  });
+
+  it('is not ongoing before it starts', () => {
+    expect(isOngoingTrip({ startDate: '2026-12-01' }, today)).toBe(false);
+  });
+});
+
+describe('tripDraftError', () => {
+  const valid = { title: 'Asia', startDate: '2026-12-01' };
+
+  it('accepts a titled trip with a start date, with or without an end', () => {
+    expect(tripDraftError(valid)).toBeUndefined();
+    expect(tripDraftError({ ...valid, endDate: '2026-12-01' })).toBeUndefined();
+  });
+
+  it.each([
+    [{ ...valid, title: '   ' }, 'trip-title-required'],
+    [{ ...valid, title: 'x'.repeat(101) }, 'trip-title-too-long'],
+    [{ ...valid, startDate: '' }, 'trip-start-date-required'],
+    [{ ...valid, endDate: '2026-11-30' }, 'trip-end-before-start'],
+  ])('refuses %p with %s', (draft, error) => {
+    expect(tripDraftError(draft)).toBe(error);
   });
 });

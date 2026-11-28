@@ -61,6 +61,7 @@ export class AppMenuComponent {
   showMyBites = input<boolean | null>(false);
 
   showMyBucketlists = input<boolean | null>(false);
+  showMyTrips = input<boolean | null>(false);
 
   showMyProfile = input<boolean | null>(false);
 

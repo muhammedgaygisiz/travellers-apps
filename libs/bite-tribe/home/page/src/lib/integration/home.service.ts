@@ -125,6 +125,10 @@ export class HomeService {
     void this.navController.navigateForward(['my-bucketlists']);
   }
 
+  onGotoMyTrips(): void {
+    void this.navController.navigateForward([PATH.MY_TRIPS]);
+  }
+
   onGotoEditClick(biteToEdit: Bite): void {
     void this.navController.navigateForward(['bite', biteToEdit.id, 'edit']);
   }
@@ -162,6 +166,9 @@ export class HomeService {
         break;
       case 'my-bucketlists':
         this.onGotoMyBucketlists();
+        break;
+      case 'my-trips':
+        this.onGotoMyTrips();
         break;
       case 'about':
         this.onGotoAboutClick();

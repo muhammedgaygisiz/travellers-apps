@@ -121,6 +121,7 @@
       "bite-tribe/bucketlist": [
         "./libs/bite-tribe/bucketlist/page/src/index.ts"
       ],
+      "bite-tribe/trip": ["./libs/bite-tribe/trip/page/src/index.ts"],
       "bite-tribe/bucketlist-data-access": [
         "./libs/bite-tribe/bucketlist/data-access/src/index.ts"
       ],

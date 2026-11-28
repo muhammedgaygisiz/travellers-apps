@@ -97,3 +97,58 @@ export const tripBiteRange = (
 
   return { fromTimestamp, toTimestamp };
 };
+
+/** Today as a trip date, `YYYY-MM-DD`, in the device's time zone. */
+export const tripDateOf = (date: Date): string =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+
+/**
+ * A trip is ongoing once it has started and while it has not ended: its start
+ * date is today or earlier, and it has no end date or one that is today or
+ * later. A trip planned for later is not ongoing yet.
+ */
+export const isOngoingTrip = (
+  trip: Pick<Trip, 'startDate' | 'endDate'>,
+  today: string,
+): boolean =>
+  trip.startDate <= today && (!trip.endDate || trip.endDate >= today);
+
+/** Why a draft cannot be saved, as the translation key that says so. */
+export type TripDraftError =
+  | 'trip-title-required'
+  | 'trip-title-too-long'
+  | 'trip-start-date-required'
+  | 'trip-end-before-start';
+
+/**
+ * The first reason the draft would be refused, checked in the order the form
+ * shows its fields; `undefined` when it can be saved. Mirrors the rules on
+ * `/trips/{tripId}`, so the form refuses what the rules would refuse.
+ */
+export const tripDraftError = (
+  draft: Partial<TripDraft>,
+): TripDraftError | undefined => {
+  const title = draft.title?.trim() ?? '';
+
+  if (!title) {
+    return 'trip-title-required';
+  }
+
+  if (title.length > TRIP_TITLE_MAX_LENGTH) {
+    return 'trip-title-too-long';
+  }
+
+  if (!isTripDate(draft.startDate)) {
+    return 'trip-start-date-required';
+  }
+
+  if (draft.endDate && draft.endDate < draft.startDate) {
+    return 'trip-end-before-start';
+  }
+
+  return undefined;
+};

@@ -46,6 +46,7 @@ export default {
     showMyProfile: true,
     showMyBites: true,
     showMyBucketlists: true,
+    showMyTrips: true,
     showMarketPlaceButton: true,
     showGalleryButton: true,
     showLeaderboardButton: true,

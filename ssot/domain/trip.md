@@ -23,7 +23,8 @@ Bites are created one at a time, wherever the user is. A Trip is the user's own 
 - **A Trip's Bites are computed, never stored.** They are the owner's Bites whose `createdAt` falls between the start of the start date and the end of the end date, in the device's time zone. A Trip keeps no list of Bite ids.
 - Editing a Trip's dates changes its Bites. A Bite created later inside the range joins the Trip on its own.
 - A single Bite cannot be left out of a Trip.
-- **A Trip without an end date, or with an end date later than today, is ongoing.** It has no upper bound until an end date is set.
+- **A Trip without an end date has no upper bound** until an end date is set, so Bites keep joining it while the user travels.
+- **A Trip is ongoing once it has started and while it has not ended**: its start date is today or earlier, and it has no end date or one that is today or later. A Trip planned for later is not ongoing yet. `isOngoingTrip` in the model decides it.
 - Trips may overlap. A Bite inside two ranges belongs to both Trips.
 - Only the owner's own Bites belong to a Trip. A Bite whose photo is not uploaded still belongs to it, because its creator sees it on every surface (see [Bite](bite.md)).
 - `createdAt` is when a Bite was posted, not when the dish was eaten. A Bite posted after the trip, for example from the gallery, falls outside the range. Issue [#2356] would add the photo's capture date to close that gap.
@@ -43,7 +44,7 @@ Model fields:
 
 ## Optional Data
 
-- `endDate`, as `YYYY-MM-DD`. Absent while the Trip is ongoing.
+- `endDate`, as `YYYY-MM-DD`. Absent while the Trip has no planned end.
 - `createdAt`
 - `createdAtTimestamp`
 - `updatedAt`
@@ -84,13 +85,14 @@ Model fields:
 
 ## Technical Implementation
 
-The data layer is built (issue [#2352]); the pages are not yet ([#2353], [#2354], [#2355]).
+The data layer (issue [#2352]) and "My Trips" (issue [#2353]) are built; the trip page and its map are not yet ([#2354], [#2355]).
 
 - **Model**: `Trip` and `TripDraft` in `libs/bite-tribe-common/model/src/lib/trip.ts`. `tripBiteRange` turns the dates into the `createdAtTimestamp` range, from the first millisecond of the start date to the last of the end date in the device's time zone, with no upper bound while the end date is empty.
 - **Firestore**: `/trips/{tripId}`. `firestore.rules` admits a member to read, update and delete only a trip whose `userId` is their own, and to create one only with their own `userId`. No other account reads a trip, operators included, unlike `/bucketlists`, which any member can read. A write must keep to the trip's fields, carry a title of 1 to 100 characters and `YYYY-MM-DD` dates, and an end date not before the start date.
 - **A trip's Bites** are read from `/bites` on the trip's `userId` and the `createdAtTimestamp` range, newest first, served by the existing `bites` index on `userId` ascending and `createdAtTimestamp` descending.
 - **API**: `TripApiService` in `libs/bite-tribe/api`. An edit replaces the whole document, so an end date that was cleared is removed. Failures reach the caller rather than being swallowed.
 - **Store**: the `trips` slice in `libs/bite-tribe/store`, with each trip's Bites kept beside the trips rather than on them, exposed through `BiteTribeStoreService`. Every write reports success or failure as its own action.
+- **My Trips**: the `bite-tribe/trip` library, at `/my-trips` from the home menu. Create and edit share one form in a modal, checked by `tripDraftError`, which mirrors the rules. The form closes on save, and a write that fails afterwards raises a toast from the trips effects. `trip_created`, `trip_updated` and `trip_deleted` are logged once Firestore has the write.
 - **Account deletion**: `deleteOwnAccount` deletes the account's trips (`deletedTrips` on the deletion job).
 
 ## Current Limitations

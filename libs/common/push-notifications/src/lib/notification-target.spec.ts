@@ -100,6 +100,19 @@ describe(toNotificationTarget.name, () => {
     ).toBeUndefined();
   });
 
+  it("opens the restaurant's page for a dispute on one of its dietary labels", () => {
+    // Issue #2198: told to the restaurant's owners.
+    for (const type of ['DIETARY_LABEL_DISPUTED', 'DIETARY_LABEL_REMOVED']) {
+      expect(
+        toNotificationTarget(
+          { type, restaurantId: 'r-1', menuItemId: 'm-1', label: 'vegan' },
+          RECIPIENT,
+        ),
+      ).toEqual({ commands: ['restaurant', 'r-1'] });
+      expect(toNotificationTarget({ type }, RECIPIENT)).toBeUndefined();
+    }
+  });
+
   it('opens the follow-requests page for a follow request', () => {
     expect(
       toNotificationTarget(

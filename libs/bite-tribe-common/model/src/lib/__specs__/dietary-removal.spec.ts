@@ -1,4 +1,5 @@
 import {
+  dietaryApprovalKey,
   dietaryRemovalThreshold,
   dietaryStrikesWithin,
   menuDietaryLabelsOf,
@@ -120,6 +121,38 @@ describe('dietary removal', () => {
     expect(dish).not.toHaveProperty('removedDietaryLabels');
     expect(dish.variants?.[0]).not.toHaveProperty('dietaryOptions');
     expect(dish.name).toBe('Pad Thai');
+  });
+
+  it('reads stored menus defensively: no categories, no items, no id', () => {
+    const menu = {
+      id: 'menu-1',
+      categories: [
+        { id: 'c1', title: 'Empty' },
+        {
+          id: 'c2',
+          title: 'Mains',
+          items: [{ id: '', name: 'Unsaved', description: '', price: 1 }],
+        },
+      ],
+    } as unknown as Menu;
+
+    expect(menuDietaryLabelsOf(menu)).toEqual({});
+    expect(menuDietaryLabelsOf({} as Menu)).toEqual({});
+    expect(withoutMenuItemDietary(undefined)).toEqual([]);
+    expect(
+      withMenuDietary({ ...menu, dietary: {} }).categories[0].items,
+    ).toEqual([]);
+  });
+
+  it('names one waiting label by restaurant, dish, kind and label', () => {
+    expect(
+      dietaryApprovalKey({
+        restaurantId: 'r1',
+        menuItemId: 'm1',
+        kind: 'option',
+        label: 'vegan',
+      }),
+    ).toBe('r1/m1/option/vegan');
   });
 
   it('reads a stored map defensively', () => {

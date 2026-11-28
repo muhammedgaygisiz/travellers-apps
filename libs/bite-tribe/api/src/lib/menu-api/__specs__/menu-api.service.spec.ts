@@ -500,6 +500,14 @@ describe(MenuApiService.name, () => {
       expect(dish?.removedDietaryLabels).toEqual(['vegan']);
     });
 
+    it('passes an empty answer through', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: undefined,
+      });
+
+      await expect(service.loadPublicMenu('r1')).resolves.toBeUndefined();
+    });
+
     it('passes a refusal through', async () => {
       (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
         data: { ok: false, reason: 'menuMissing' },

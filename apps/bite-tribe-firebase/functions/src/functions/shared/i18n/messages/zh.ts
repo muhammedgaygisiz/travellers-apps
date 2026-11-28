@@ -27,6 +27,12 @@ export const zh: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}}接受了你的关注请求。',
   'restaurantFollower.title': '新关注者',
   'restaurantFollower.body': '{{restaurant}} 有了新的关注者。',
+  'dietaryLabelDisputed.title': '有食客对饮食标签提出异议',
+  'dietaryLabelDisputed.body':
+    '有食客对 {{restaurant}} 的 {{dish}} 的饮食标签提出异议。',
+  'dietaryLabelRemoved.title': '饮食标签已移除',
+  'dietaryLabelRemoved.body':
+    '根据食客的反馈，{{restaurant}} 的 {{dish}} 的饮食标签已被移除。',
   'biteTagged.title': '你在一个 Bite 中被标记了',
   'biteTagged.body': '{{creator}}在 Bite 中标记了你：{{bite}}',
   'newLike.title': '你的Bite收到了点赞！',

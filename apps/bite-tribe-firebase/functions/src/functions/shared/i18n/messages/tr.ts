@@ -30,6 +30,13 @@ export const tr: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} takip isteğini kabul etti.',
   'restaurantFollower.title': 'Yeni takipçi',
   'restaurantFollower.body': '{{restaurant}} yeni bir takipçi kazandı.',
+  'dietaryLabelDisputed.title':
+    'Bir misafir bir beslenme etiketine itiraz ediyor',
+  'dietaryLabelDisputed.body':
+    'Bir misafir {{restaurant}} mekanındaki {{dish}} için bir beslenme etiketine itiraz ediyor.',
+  'dietaryLabelRemoved.title': 'Beslenme etiketi kaldırıldı',
+  'dietaryLabelRemoved.body':
+    '{{restaurant}} mekanındaki {{dish}} için bir beslenme etiketi misafir bildirimleri sonrası kaldırıldı.',
   'biteTagged.title': "Bir Bite'ta etiketlendin",
   'biteTagged.body': "{{creator}} seni bir Bite'ta etiketledi: {{bite}}",
   'newLike.title': "Bite'ına yeni beğeni!",

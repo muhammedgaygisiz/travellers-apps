@@ -168,6 +168,33 @@ export class DishEditorComponent {
 
   /** The dietary vocabulary, in the order it is offered (issue #2194). */
   readonly dietaryLabelOptions = DIETARY_LABELS;
+
+  /**
+   * The labels diners' disputes removed from the dish or one of its variants
+   * (issue #2198), read off the stored item. Locked: the pickers do not offer
+   * them, and the backend refuses them anyway.
+   */
+  removedLabelsOf(id: string | undefined): DietaryLabel[] {
+    const dish = this.dish();
+
+    if (!dish || !id) {
+      return [];
+    }
+
+    const item =
+      dish.id === id
+        ? dish
+        : dish.variants?.find((variant) => variant.id === id);
+
+    return item?.removedDietaryLabels ?? [];
+  }
+
+  /** The removed labels by name, for the note under the pickers. */
+  removedLabelNames(labels: readonly DietaryLabel[]): string {
+    return labels
+      .map((label) => this.transloco.translate(`dietary-label-${label}`))
+      .join(', ');
+  }
   readonly cancelEdit = output<void>();
   /** The owner confirmed deleting the stored dish (GitHub issue #2181). */
   readonly deleteDish = output<void>();
@@ -489,6 +516,10 @@ export class DishEditorComponent {
       ...(notes ? { notes } : {}),
       isAvailable: value.isAvailable,
       ...dietaryFields(value.dietaryLabels, value.dietaryOptions),
+      // Kept so the lock still shows before the menu is read back (#2198).
+      ...(stored?.removedDietaryLabels?.length
+        ? { removedDietaryLabels: stored.removedDietaryLabels }
+        : {}),
       ...(variants.length ? { variants } : {}),
       ...(optionGroups.length ? { optionGroups } : {}),
     });

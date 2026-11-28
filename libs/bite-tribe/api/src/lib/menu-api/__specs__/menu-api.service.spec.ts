@@ -169,6 +169,90 @@ describe(MenuApiService.name, () => {
     });
 
     /**
+     * The labels are refused on the menu by the rules and travel through
+     * `saveMenuDietaryLabels` instead (issue #2198), so the write strips them.
+     */
+    it('leaves every dietary field out of the write of a menu with the map', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+
+      await service.saveMenu(
+        {
+          id: 'menuId',
+          categories: [
+            {
+              id: 'c1',
+              title: 'Mains',
+              items: [
+                {
+                  id: 'm1',
+                  name: 'Pad Thai',
+                  description: '',
+                  price: 12,
+                  dietaryLabels: ['vegan'],
+                  removedDietaryLabels: ['halal'],
+                  variants: [
+                    {
+                      id: 'v1',
+                      name: 'Tofu',
+                      description: '',
+                      price: 12,
+                      dietaryOptions: ['nut-free'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          dietary: { m1: { labels: ['vegan'] } },
+        },
+        'restaurantId',
+      );
+
+      const [{ data }] = updateDocumentSpy.mock.calls[0];
+      const dish = (data['categories'] as Menu['categories'])[0].items[0];
+
+      expect(dish).toEqual({
+        id: 'm1',
+        name: 'Pad Thai',
+        description: '',
+        price: 12,
+        variants: [{ id: 'v1', name: 'Tofu', description: '', price: 12 }],
+      });
+    });
+
+    /** A menu still without the map keeps its labels until the call lands. */
+    it('keeps the labels of a menu that has no map yet', async () => {
+      const updateDocumentSpy = jest
+        .spyOn(FirebaseFirestore, 'updateDocument')
+        .mockResolvedValue(undefined);
+      updateDocumentSpy.mockClear();
+      const categories: Menu['categories'] = [
+        {
+          id: 'c1',
+          title: 'Mains',
+          items: [
+            {
+              id: 'm1',
+              name: 'Pad Thai',
+              description: '',
+              price: 12,
+              dietaryLabels: ['vegan'],
+            },
+          ],
+        },
+      ];
+
+      await service.saveMenu({ id: 'menuId', categories }, 'restaurantId');
+
+      expect(updateDocumentSpy.mock.calls[0][0].data['categories']).toBe(
+        categories,
+      );
+    });
+
+    /**
      * The restaurant is what the ownership-scoped rules read the write's
      * authority from (issue #1078), so a save without one cannot succeed. It is
      * refused here rather than at Firestore, where it would come back as a
@@ -344,6 +428,94 @@ describe(MenuApiService.name, () => {
       expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
         name: 'linkBiteToMenuItem',
         data: { biteId: 'b1', menuItemId: 'm1' },
+      });
+    });
+  });
+
+  /** The only way a client changes a menu's labels (issue #2198). */
+  describe('saveMenuDietaryLabels', () => {
+    it('calls the callable and returns its answer', async () => {
+      const answer = { status: 'saved', locked: [], pending: [] };
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: answer,
+      });
+      const request = {
+        restaurantId: 'r1',
+        items: { m1: { labels: ['vegan' as const], options: [] } },
+      };
+
+      await expect(service.saveMenuDietaryLabels(request)).resolves.toEqual(
+        answer,
+      );
+      expect(FirebaseFunctions.callByName).toHaveBeenCalledWith({
+        name: 'saveMenuDietaryLabels',
+        data: request,
+      });
+    });
+  });
+
+  describe('loadPublicMenu', () => {
+    it('lays the restaurant’s labels over the items, a removed one as removed', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: {
+          ok: true,
+          restaurant: { id: 'r1', name: 'Thai Garden' },
+          menu: {
+            id: 'menu-1',
+            categories: [
+              {
+                id: 'c1',
+                title: 'Mains',
+                items: [
+                  {
+                    id: 'm1',
+                    name: 'Pad Thai',
+                    description: '',
+                    price: 12,
+                    dietaryLabels: ['vegan'],
+                  },
+                ],
+              },
+            ],
+            dietary: {
+              m1: {
+                removed: {
+                  vegan: {
+                    removedAt: '2026-11-27T00:00:00.000Z',
+                    disputes: 3,
+                    confirmations: 0,
+                    reasons: {},
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const result = await service.loadPublicMenu('r1');
+      const dish = result?.ok ? result.menu.categories[0].items[0] : undefined;
+
+      expect(dish?.dietaryLabels).toBeUndefined();
+      expect(dish?.removedDietaryLabels).toEqual(['vegan']);
+    });
+
+    it('passes an empty answer through', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: undefined,
+      });
+
+      await expect(service.loadPublicMenu('r1')).resolves.toBeUndefined();
+    });
+
+    it('passes a refusal through', async () => {
+      (FirebaseFunctions.callByName as jest.Mock).mockResolvedValue({
+        data: { ok: false, reason: 'menuMissing' },
+      });
+
+      await expect(service.loadPublicMenu('r1')).resolves.toEqual({
+        ok: false,
+        reason: 'menuMissing',
       });
     });
   });

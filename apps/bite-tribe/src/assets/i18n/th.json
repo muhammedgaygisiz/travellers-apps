@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "ครัวปลอดกลูเตนโดยเฉพาะ",
   "dietary-option": "ทำเป็น{{label}}ได้ตามคำขอ",
   "dietary-declared-by-restaurant": "ข้อมูลจากร้านอาหาร",
+  "dietary-removed-after-reports": "{{label}}: ถูกลบหลังลูกค้ารายงาน",
   "bite-dietary-labels-label": "ป้ายอาหาร",
   "bite-dietary-labels-hint": "ไม่บังคับ ผู้อื่นจะเห็นเป็นสิ่งที่คุณบอกเกี่ยวกับเมนูนี้",
   "dietary-claimed-by-creator": "ผู้โพสต์บอกว่าเมนูนี้เป็น",

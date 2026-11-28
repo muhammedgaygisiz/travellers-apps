@@ -20,6 +20,7 @@ import {
   hasMenuItemSignal,
   isMenuVariantAvailable,
   menuItemAverageRating,
+  dietaryLabelsOf,
   menuItemDietaryOf,
   missingRequiredOptions,
 } from 'model';
@@ -145,12 +146,16 @@ export class MenuItemComponent {
    * its labels and the labels it can be made to fit. A value the vocabulary
    * does not know is not shown, and every label names its source (`RD-DC-1`).
    */
-  protected readonly dietary = computed(() => menuItemDietaryOf(this.item()));
+  protected readonly dietary = computed(() => ({
+    ...menuItemDietaryOf(this.item()),
+    // Removed after diner reports (issue #2198); never among the labels.
+    removed: dietaryLabelsOf(this.item()?.removedDietaryLabels),
+  }));
 
   protected readonly hasDietary = computed(() => {
-    const { labels, options } = this.dietary();
+    const { labels, options, removed } = this.dietary();
 
-    return labels.length > 0 || options.length > 0;
+    return labels.length > 0 || options.length > 0 || removed.length > 0;
   });
 
   /** The dishes' dietary votes (issue #2197); see {@link MenuDietaryVotes}. */

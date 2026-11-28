@@ -327,6 +327,41 @@ export const WithDietaryLabels: Story = {
 };
 
 /**
+ * A restaurant's label diners' disputes removed (issue #2198): struck
+ * through and said so, never shown as a label the dish carries.
+ */
+export const WithRemovedDietaryLabel: Story = {
+  args: {
+    menu: {
+      ...MENU,
+      categories: [
+        {
+          id: 'category-ramen',
+          title: 'Ramen',
+          items: [
+            {
+              id: 'item-vegan-shoyu',
+              name: 'Vegan shoyu',
+              description: 'Kombu broth, tofu, menma',
+              price: 1300,
+              dietaryLabels: ['vegetarian'],
+              removedDietaryLabels: ['vegan'],
+            },
+            {
+              id: 'item-chicken-paitan',
+              name: 'Chicken paitan',
+              description: 'Creamy chicken broth',
+              price: 1400,
+              removedDietaryLabels: ['halal'],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
  * What diners said about the labels, on the member's menu (issue #2197):
  * counts under a label, the member's own vote, and each label a button.
  */

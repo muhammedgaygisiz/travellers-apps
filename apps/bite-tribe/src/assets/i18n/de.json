@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "Eigene glutenfreie Küche",
   "dietary-option": "{{label}} auf Wunsch",
   "dietary-declared-by-restaurant": "Angabe des Restaurants",
+  "dietary-removed-after-reports": "{{label}}: nach Meldungen von Gästen entfernt",
   "bite-dietary-labels-label": "Ernährungslabels",
   "bite-dietary-labels-hint": "Optional. Andere sehen sie als deine Angabe zu diesem Gericht.",
   "dietary-claimed-by-creator": "Laut Ersteller war das",

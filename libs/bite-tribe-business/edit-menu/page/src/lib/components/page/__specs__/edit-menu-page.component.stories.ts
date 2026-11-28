@@ -137,6 +137,32 @@ export const DishEditor: Story = {
 };
 
 /**
+ * A dish whose label diners' disputes removed (GitHub issue #2198): the
+ * pickers do not offer it, and the note under them says it was removed and
+ * who can restore it.
+ */
+export const DishWithRemovedLabel: Story = {
+  args: {
+    menu: {
+      ...menu,
+      categories: menu.categories.map((category) => ({
+        ...category,
+        items: category.items.map((item) =>
+          item.id === 'item-margherita'
+            ? { ...item, removedDietaryLabels: ['vegan' as const] }
+            : item,
+        ),
+      })),
+    },
+  },
+  play: async ({ canvasElement }) =>
+    tap(
+      canvasElement,
+      '[data-testid="menu-dish-item-margherita"] [data-testid="open-dish"]',
+    ),
+};
+
+/**
  * A dish with options, which change nothing about its price (GitHub issue
  * #2254): the list shows each group on a line under the dish, and the editor
  * shows each group as a card with its choices and whether guests must choose.

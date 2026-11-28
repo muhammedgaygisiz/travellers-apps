@@ -4,3 +4,4 @@ export { NewRestaurantContainer } from './lib/integration/new-restaurant-contain
 export { RestaurantOwnershipContainer } from './lib/integration/restaurant-ownership-container';
 export { TableSessionsContainer } from './lib/integration/table-sessions-container';
 export { RestaurantPhotosContainer } from './lib/integration/restaurant-photos-container';
+export { DietaryLabelApprovalsContainer } from './lib/integration/dietary-label-approvals-container';

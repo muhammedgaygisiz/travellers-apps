@@ -30,6 +30,12 @@ export const th: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} ยอมรับคำขอติดตามของคุณแล้ว',
   'restaurantFollower.title': 'ผู้ติดตามใหม่',
   'restaurantFollower.body': '{{restaurant}} มีผู้ติดตามใหม่',
+  'dietaryLabelDisputed.title': 'ลูกค้าโต้แย้งป้ายอาหาร',
+  'dietaryLabelDisputed.body':
+    'ลูกค้าโต้แย้งป้ายอาหารของ {{dish}} ที่ {{restaurant}}',
+  'dietaryLabelRemoved.title': 'ลบป้ายอาหารแล้ว',
+  'dietaryLabelRemoved.body':
+    'ป้ายอาหารของ {{dish}} ที่ {{restaurant}} ถูกลบหลังจากลูกค้ารายงาน',
   'biteTagged.title': 'คุณถูกแท็กใน Bite',
   'biteTagged.body': '{{creator}} แท็กคุณใน Bite: {{bite}}',
   'newLike.title': 'มีคนถูกใจ Bite ของคุณ!',

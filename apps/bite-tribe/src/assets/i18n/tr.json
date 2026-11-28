@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "Ayrı glutensiz mutfak",
   "dietary-option": "İstek üzerine {{label}}",
   "dietary-declared-by-restaurant": "Restoranın beyanı",
+  "dietary-removed-after-reports": "{{label}}: misafir bildirimleri sonrası kaldırıldı",
   "bite-dietary-labels-label": "Beslenme etiketleri",
   "bite-dietary-labels-hint": "İsteğe bağlı. Başkaları bunu bu yemek hakkındaki senin beyanın olarak görür.",
   "dietary-claimed-by-creator": "Paylaşana göre bu yemek",

@@ -1,4 +1,5 @@
 import { menuItemDietaryOf, type DietaryLabel } from './dietary-label';
+import type { MenuDietary } from './dietary-removal';
 
 /**
  * A restaurant's menu, and the identity an order line hangs from
@@ -84,6 +85,13 @@ export interface MenuItem {
    * (issue #2194). Never also one of {@link dietaryLabels}.
    */
   dietaryOptions?: DietaryLabel[];
+  /**
+   * The restaurant's labels diners' disputes removed from this row (GitHub
+   * issue #2198). **Derived on read** from {@link Menu.dietary} by
+   * `withMenuDietary`, never stored on the item: the menu shows each as
+   * removed after diner reports, and the business editor offers none of them.
+   */
+  removedDietaryLabels?: DietaryLabel[];
   variants?: MenuItem[];
   /**
    * Choices on the dish that don't change its price, such as how spicy it
@@ -273,6 +281,19 @@ export interface Menu {
    * every menu written before the field, which cannot be told apart afterwards.
    */
   derivedFromBites?: boolean;
+
+  /**
+   * The restaurant's dietary labels, by menu item id (GitHub issue #2198).
+   *
+   * Written only by the backend - the `saveMenuDietaryLabels` callable, the
+   * removal trigger and an operator's approval - and refused to every client
+   * write by the rules, which is what locks a removed label. When present,
+   * readers take every item's labels from here and ignore the item's own
+   * `dietaryLabels` and `dietaryOptions`; read the menu through
+   * `withMenuDietary`, which does that. Absent on a menu whose labels were
+   * last saved before the field, whose item fields still stand.
+   */
+  dietary?: MenuDietary;
 
   createdAt?: string;
   createdAtTimestamp?: number;

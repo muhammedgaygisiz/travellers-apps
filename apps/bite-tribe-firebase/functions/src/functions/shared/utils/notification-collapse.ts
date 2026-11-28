@@ -89,6 +89,17 @@ export const buildCollapseKey = (
       // earlier one and opening the restaurant clears it (issue #2318).
       return buildKey(type, data['restaurantId']);
 
+    case 'DIETARY_LABEL_DISPUTED':
+    case 'DIETARY_LABEL_REMOVED':
+      // The restaurant is the surface, and each label of each dish is its own
+      // notification, so two labels disputed on one dish both stay (#2198).
+      return buildKey(
+        type,
+        data['restaurantId'],
+        data['menuItemId'],
+        data['label'],
+      );
+
     case 'NEW_TABLE_ORDER':
       // The restaurant is the surface - one queue per restaurant - and the
       // table is the variant, so a second round from table 12 replaces the

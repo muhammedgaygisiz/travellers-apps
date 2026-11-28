@@ -363,6 +363,7 @@
   "dietary-statement-dedicated-gluten-free-kitchen": "ለግሉተን-ነፃ ብቻ የተመደበ ኩሽና",
   "dietary-option": "ሲጠየቅ {{label}}",
   "dietary-declared-by-restaurant": "በምግብ ቤቱ የተገለጸ",
+  "dietary-removed-after-reports": "{{label}}: ከተመጋቢዎች ሪፖርት በኋላ ተወግዷል",
   "bite-dietary-labels-label": "የአመጋገብ መለያዎች",
   "bite-dietary-labels-hint": "አማራጭ። ሌሎች ስለዚህ ምግብ እርስዎ እንደተናገሩት ያዩታል።",
   "dietary-claimed-by-creator": "አጋሪው እንደሚለው ይህ ነበር",

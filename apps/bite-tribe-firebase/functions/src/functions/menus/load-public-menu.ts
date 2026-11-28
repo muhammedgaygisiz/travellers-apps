@@ -188,6 +188,7 @@ export const loadPublicMenuHandler = async (
 
   const image = getString(restaurant, 'image');
   const currency = getString(menu, 'currency');
+  const dietary = menu['dietary'];
   const { categories } = backfillMenuIds(
     menu['categories'] as StoredMenuCategory[] | undefined,
   );
@@ -210,6 +211,9 @@ export const loadPublicMenuHandler = async (
       // bare numbers, which a reader can ask about - unlike a symbol the
       // product guessed, which they would believe.
       ...(currency ? { currency } : {}),
+      // The restaurant's labels since #2198, which the client lays over the
+      // items: a removed label is shown as removed, never as a label.
+      ...(dietary && typeof dietary === 'object' ? { dietary } : {}),
     },
   };
 };

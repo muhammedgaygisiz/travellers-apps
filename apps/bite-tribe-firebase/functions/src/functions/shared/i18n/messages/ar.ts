@@ -29,6 +29,12 @@ export const ar: NotificationMessages = {
   'followRequestAccepted.body': 'تم قبول طلبك لمتابعة {{owner}}.',
   'restaurantFollower.title': 'متابِع جديد',
   'restaurantFollower.body': 'لدى {{restaurant}} متابِع جديد.',
+  'dietaryLabelDisputed.title': 'أحد الزبائن يعترض على ملصق غذائي',
+  'dietaryLabelDisputed.body':
+    'أحد الزبائن يعترض على ملصق غذائي لطبق {{dish}} في {{restaurant}}.',
+  'dietaryLabelRemoved.title': 'تمت إزالة ملصق غذائي',
+  'dietaryLabelRemoved.body':
+    'تمت إزالة ملصق غذائي لطبق {{dish}} في {{restaurant}} بعد بلاغات الزبائن.',
   'biteTagged.title': 'تمت الإشارة إليك في Bite',
   'biteTagged.body': 'أشار {{creator}} إليك في Bite: {{bite}}',
   'newLike.title': 'إعجاب جديد على Bite الخاص بك!',

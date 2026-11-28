@@ -31,6 +31,12 @@ export const id: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} menerima permintaan mengikutimu.',
   'restaurantFollower.title': 'Pengikut baru',
   'restaurantFollower.body': '{{restaurant}} punya pengikut baru.',
+  'dietaryLabelDisputed.title': 'Seorang pengunjung menyanggah label diet',
+  'dietaryLabelDisputed.body':
+    'Seorang pengunjung menyanggah label diet pada {{dish}} di {{restaurant}}.',
+  'dietaryLabelRemoved.title': 'Label diet dihapus',
+  'dietaryLabelRemoved.body':
+    'Label diet pada {{dish}} di {{restaurant}} dihapus setelah laporan pengunjung.',
   'biteTagged.title': 'Kamu ditandai di sebuah Bite',
   'biteTagged.body': '{{creator}} menandaimu di sebuah Bite: {{bite}}',
   'newLike.title': 'Suka baru untuk Bite-mu!',

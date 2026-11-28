@@ -272,6 +272,15 @@ export class AdminDashboard {
       group: 'primary',
     },
     {
+      // Labels from a restaurant at the strike limit (issue #2198).
+      titleKey: 'admin-tool-dietary-label-approvals',
+      descriptionKey: 'admin-tool-dietary-label-approvals-description',
+      icon: 'restaurant-outline',
+      path: '/dietary-label-approvals',
+      testId: 'admin-tool-dietary-label-approvals',
+      group: 'primary',
+    },
+    {
       titleKey: 'admin-tool-table-sessions',
       descriptionKey: 'admin-tool-table-sessions-description',
       icon: 'people-outline',

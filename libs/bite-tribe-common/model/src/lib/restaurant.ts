@@ -5,6 +5,7 @@ import type { DaySchedule } from './opening-hours';
 import type { Address } from './address';
 import type { TableOrderingSettings } from './table-ordering';
 import type { RestaurantDietaryStatement } from './dietary-label';
+import type { DietaryStrike } from './dietary-removal';
 
 /**
  * What an operator's assignment can have made of a restaurant.
@@ -200,6 +201,14 @@ export interface Restaurant {
    * backend alone; the rules refuse it from every client.
    */
   followersCount?: number;
+
+  /**
+   * Each of the restaurant's labels removed after diner reports (GitHub issue
+   * #2198). Kept by the backend alone. At `DIETARY_STRIKE_LIMIT` within
+   * `DIETARY_STRIKE_PERIOD_DAYS` the restaurant's new labels wait for an
+   * operator (`R-8`).
+   */
+  dietaryStrikes?: DietaryStrike[];
   createdAt?: string;
   createdAtTimestamp?: number;
   updatedAt?: string;

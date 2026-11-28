@@ -119,6 +119,14 @@
   gap: 0.5rem;
 }
 
+// A label diners' disputes removed (issue #2198): locked, and said so.
+.dietary-removed {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ion-color-danger);
+}
+
 .add-variant,
 .add-option-group,
 .add-choice {

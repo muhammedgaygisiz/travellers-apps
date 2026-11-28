@@ -35,6 +35,8 @@ import {
   Review,
   SaveToBucketListParams,
   PublicMenuResult,
+  SaveMenuDietaryLabelsRequest,
+  SaveMenuDietaryLabelsResult,
   Settings,
   TableOrderingSettings,
   UserReportReason,
@@ -398,6 +400,13 @@ export class BiteTribeApiService {
 
   saveMenu(menu: Menu, restaurantId: string | undefined): Promise<void> {
     return this.menuApiService.saveMenu(menu, restaurantId);
+  }
+
+  /** A menu's dietary labels, through the callable (issue #2198). */
+  saveMenuDietaryLabels(
+    request: SaveMenuDietaryLabelsRequest,
+  ): Promise<SaveMenuDietaryLabelsResult> {
+    return this.menuApiService.saveMenuDietaryLabels(request);
   }
 
   /** The currency this menu's prices are stated in (GitHub issue #1102). */

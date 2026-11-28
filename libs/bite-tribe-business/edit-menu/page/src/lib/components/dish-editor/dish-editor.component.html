@@ -68,7 +68,11 @@
     <ng-container
       *ngTemplateOutlet="
         dietarySelects;
-        context: { $implicit: form, testId: 'dish' }
+        context: {
+          $implicit: form,
+          testId: 'dish',
+          removed: removedLabelsOf(dish()?.id),
+        }
       "
     />
     <p class="hint">{{ 'menu-dish-dietary-hint' | transloco }}</p>
@@ -162,7 +166,11 @@
           <ng-container
             *ngTemplateOutlet="
               dietarySelects;
-              context: { $implicit: variant, testId: 'dish-variant-' + i }
+              context: {
+                $implicit: variant,
+                testId: 'dish-variant-' + i,
+                removed: removedLabelsOf(variant.controls.id.value),
+              }
             "
           />
         </div>
@@ -417,8 +425,15 @@
 <!--
   The two dietary pickers, for the dish and for each variant (issue #2194).
   The group passed in carries a dietaryLabels and a dietaryOptions control.
+  `removed` are the labels diners' disputes removed (issue #2198): locked, so
+  neither picker offers them, and the note says why.
 -->
-<ng-template #dietarySelects let-group let-testId="testId">
+<ng-template
+  #dietarySelects
+  let-group
+  let-testId="testId"
+  let-removed="removed"
+>
   <div class="dietary-selects" [formGroup]="group">
     <ion-select
       formControlName="dietaryLabels"
@@ -432,9 +447,11 @@
       [attr.data-testid]="testId + '-dietary-labels'"
     >
       @for (label of dietaryLabelOptions; track label) {
-        <ion-select-option [value]="label">{{
-          'dietary-label-' + label | transloco
-        }}</ion-select-option>
+        <ion-select-option
+          [value]="label"
+          [disabled]="removed?.includes(label)"
+          >{{ 'dietary-label-' + label | transloco }}</ion-select-option
+        >
       }
     </ion-select>
     <ion-select
@@ -449,10 +466,23 @@
       [attr.data-testid]="testId + '-dietary-options'"
     >
       @for (label of dietaryLabelOptions; track label) {
-        <ion-select-option [value]="label">{{
-          'dietary-label-' + label | transloco
-        }}</ion-select-option>
+        <ion-select-option
+          [value]="label"
+          [disabled]="removed?.includes(label)"
+          >{{ 'dietary-label-' + label | transloco }}</ion-select-option
+        >
       }
     </ion-select>
+    @if (removed?.length) {
+      <p
+        class="dietary-removed"
+        [attr.data-testid]="testId + '-dietary-removed'"
+      >
+        {{
+          'menu-dish-dietary-removed'
+            | transloco: { labels: removedLabelNames(removed) }
+        }}
+      </p>
+    }
   </div>
 </ng-template>

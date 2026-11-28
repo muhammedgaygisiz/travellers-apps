@@ -97,6 +97,14 @@
         color: var(--ion-color-medium-shade);
       }
 
+      // Removed after diner reports (issue #2198): struck through, so it
+      // cannot be read as a label the dish still carries.
+      .dietary-removed {
+        border-color: var(--ion-color-medium);
+        color: var(--ion-color-medium-shade);
+        text-decoration: line-through;
+      }
+
       .dietary-source {
         color: var(--ion-color-medium);
         font-size: 0.75rem;

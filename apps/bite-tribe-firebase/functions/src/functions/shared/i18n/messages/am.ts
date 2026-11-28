@@ -28,6 +28,12 @@ export const am: NotificationMessages = {
   'followRequestAccepted.body': '{{owner}} የመከተል ጥያቄዎን ተቀብለዋል።',
   'restaurantFollower.title': 'አዲስ ተከታይ',
   'restaurantFollower.body': '{{restaurant}} አዲስ ተከታይ አግኝቷል።',
+  'dietaryLabelDisputed.title': 'አንድ ተመጋቢ የአመጋገብ መለያን ተቃወመ',
+  'dietaryLabelDisputed.body':
+    'አንድ ተመጋቢ በ{{restaurant}} ላለው {{dish}} የአመጋገብ መለያን ተቃወመ።',
+  'dietaryLabelRemoved.title': 'የአመጋገብ መለያ ተወግዷል',
+  'dietaryLabelRemoved.body':
+    'በ{{restaurant}} ላለው {{dish}} የአመጋገብ መለያ ከተመጋቢዎች ሪፖርት በኋላ ተወግዷል።',
   'biteTagged.title': 'በBite ውስጥ መለያ ተሰጥቶዎታል',
   'biteTagged.body': '{{creator}} በBite ውስጥ መለያ ሰጥተውዎታል፦ {{bite}}',
   'newLike.title': 'በBite ላይ አዲስ ውዴታ!',

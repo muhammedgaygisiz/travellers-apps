@@ -108,6 +108,10 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   listUserReports: 'operator',
   // The review report queue (issue #2117), on the same terms.
   dismissReviewReports: 'operator',
+  // The labels a restaurant at the strike limit asked to publish, and the
+  // operator's answer to each (issue #2198).
+  listDietaryLabelApprovals: 'operator',
+  answerDietaryLabelApproval: 'operator',
   hideReviewAsOperator: 'operator',
   listReviewReports: 'operator',
   listUsersWithRoles: 'operator',
@@ -133,6 +137,8 @@ const ACCESS_BY_ENDPOINT: Record<string, Access> = {
   rotateTableQrToken: 'restaurantAuthority',
   // A restaurant's dietary statements and checked note (issue #2194).
   saveRestaurantDietaryStatements: 'restaurantAuthority',
+  // A menu's dietary labels, the only way a client changes them (issue #2198).
+  saveMenuDietaryLabels: 'restaurantAuthority',
 
   // Replacing the codes of a whole room in one action (issue #1107). The same
   // door as the single rotation and deliberately *not* the `staffAuthority`

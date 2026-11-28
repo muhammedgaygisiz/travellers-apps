@@ -53,6 +53,7 @@ to find the pages it touches; `AGENTS.md` routes every other kind of task.
 - [Restaurant](domain/restaurant.md)
 - [Bucket List](domain/bucket-list.md)
 - [Bite Trail](domain/bite-trail.md)
+- [Trip](domain/trip.md)
 - [Market Place](domain/market-place.md)
 - [Floor Plan](domain/floor-plan.md)
 - [Table](domain/table.md)
@@ -95,6 +96,7 @@ to find the pages it touches; `AGENTS.md` routes every other kind of task.
 
 ### Next to implement
 
+- [UC - Plan A Trip And See Its Route](use-cases/uc-plan-a-trip-and-see-its-route.md)
 - [UC - Complete Universal Search](use-cases/uc-complete-universal-search.md)
 - [UC - Contact A Restaurant And Plan A Visit](use-cases/uc-contact-a-restaurant-and-plan-a-visit.md)
 - [UC - Price A BiteTrail For Sale](use-cases/uc-price-a-bitetrail-for-sale.md)

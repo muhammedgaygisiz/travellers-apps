@@ -61,6 +61,8 @@ existing name already or the term belongs here.
   - Business relevance: Gamification surface that can motivate creators and highlight active community members.
 - **Bucket list** — Personal saved list of bites or food experiences a user wants to remember or try later. See [Bucket List](../domain/bucket-list.md).
   - Business relevance: Retention feature that turns discovery into intent and future engagement.
+- **Trip** — A user's own named date range, such as "Southeast Asia 2026/2027", whose Bites are the ones that user created in the range. Private to its owner. Not a BiteTrail, which is curated for others to follow. See [Trip](../domain/trip.md).
+  - Business relevance: Gives a traveller a reason to keep posting through a whole journey, and is the base for a vlog or a BiteTrail made from it.
 
 ## Restaurants And Menus
 

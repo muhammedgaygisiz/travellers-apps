@@ -29,7 +29,14 @@ import {
 import tzlookup from '@photostructure/tz-lookup';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PageComponent } from 'common/ui/page';
-import type { Category, Geopoint, Menu, MenuItem, Restaurant } from 'model';
+import type {
+  Category,
+  DietaryRestorationDraft,
+  Geopoint,
+  Menu,
+  MenuItem,
+  Restaurant,
+} from 'model';
 import {
   currencyCodes,
   getCurrencyForDevice,
@@ -141,6 +148,9 @@ export class EditMenuPage {
   menu = input<Menu>();
 
   saveMenu = output<Menu>();
+
+  /** A removed dietary label the owner asks to have back (issue #2199). */
+  requestDietaryRestoration = output<DietaryRestorationDraft>();
 
   saveCurrencyCode = output<string>();
 

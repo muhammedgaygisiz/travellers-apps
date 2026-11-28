@@ -105,6 +105,17 @@ describe('removeDisputedDietaryLabels', () => {
     expect(db.read('restaurants/r1')?.['dietaryStrikes']).toEqual([
       { menuItemId: 'm1', label: 'vegan', removedAt: NOW.toISOString() },
     ]);
+    // The operator's queue item (issue #2199).
+    expect(db.read('dietaryLabelRemovals/r1__m1__vegan')).toMatchObject({
+      restaurantId: 'r1',
+      restaurantName: 'Thai Garden',
+      menuItemId: 'm1',
+      dishName: 'Pad Thai',
+      label: 'vegan',
+      disputes: 3,
+      confirmations: 1,
+      status: 'open',
+    });
     expect(send).toHaveBeenCalledTimes(1);
     expect(send.mock.calls[0][0]).toMatchObject({
       uids: ['owner'],

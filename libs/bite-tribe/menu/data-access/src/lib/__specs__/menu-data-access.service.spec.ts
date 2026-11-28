@@ -13,6 +13,9 @@ describe(MenuDataAccessService.name, () => {
   let apiMock: {
     saveMenu: jest.Mock;
     saveMenuDietaryLabels: jest.Mock;
+    requestDietaryLabelRestoration: jest.Mock;
+    uploadDietaryEvidence: jest.Mock;
+    dietaryEvidenceVerdict$: jest.Mock;
     confirmMenuAsOwn: jest.Mock;
     loadMenuItemStats: jest.Mock;
     loadBitesForMenuItem: jest.Mock;
@@ -41,6 +44,15 @@ describe(MenuDataAccessService.name, () => {
       saveMenuDietaryLabels: jest
         .fn()
         .mockResolvedValue({ status: 'saved', locked: [], pending: [] }),
+      requestDietaryLabelRestoration: jest
+        .fn()
+        .mockResolvedValue({ status: 'requested', removalId: 'r1__m1__vegan' }),
+      uploadDietaryEvidence: jest.fn().mockResolvedValue(undefined),
+      dietaryEvidenceVerdict$: jest
+        .fn()
+        .mockReturnValue(
+          of({ imageStatus: 'uploaded', imagePath: 'https://p' }),
+        ),
       confirmMenuAsOwn: jest.fn().mockResolvedValue(undefined),
       loadMenuItemStats: jest.fn().mockResolvedValue({}),
       loadBitesForMenuItem: jest.fn().mockResolvedValue([]),
@@ -198,6 +210,56 @@ describe(MenuDataAccessService.name, () => {
         service.saveMenu({ id: 'menu-1', categories: [] } as unknown as Menu),
       ).rejects.toThrow('permission-denied');
       expect(apiMock.saveMenuDietaryLabels).not.toHaveBeenCalled();
+    });
+  });
+
+  /** Asking for a removed dietary label back (GitHub issue #2199). */
+  describe('requestDietaryLabelRestoration', () => {
+    const draft = {
+      menuItemId: 'm1',
+      label: 'vegan' as const,
+      explanation: 'New supplier',
+    };
+
+    it('sends the request for the route restaurant, without a photo', async () => {
+      await expect(
+        service.requestDietaryLabelRestoration(draft),
+      ).resolves.toEqual({
+        status: 'requested',
+      });
+      expect(apiMock.requestDietaryLabelRestoration).toHaveBeenCalledWith({
+        restaurantId: 'restaurant-1',
+        ...draft,
+        withPhoto: false,
+      });
+      expect(apiMock.uploadDietaryEvidence).not.toHaveBeenCalled();
+    });
+
+    it('uploads the photo after the request and reports the check', async () => {
+      await expect(
+        service.requestDietaryLabelRestoration({
+          ...draft,
+          photo: 'data:image/png;base64,x',
+        }),
+      ).resolves.toEqual({ status: 'requested', photo: 'uploaded' });
+      expect(apiMock.requestDietaryLabelRestoration).toHaveBeenCalledWith(
+        expect.objectContaining({ withPhoto: true }),
+      );
+      expect(apiMock.uploadDietaryEvidence).toHaveBeenCalledWith(
+        'r1__m1__vegan',
+        'data:image/png;base64,x',
+      );
+    });
+
+    it('says when the label is no longer removed, and uploads nothing', async () => {
+      apiMock.requestDietaryLabelRestoration.mockResolvedValue({
+        status: 'not-removed',
+      });
+
+      await expect(
+        service.requestDietaryLabelRestoration({ ...draft, photo: 'data:x' }),
+      ).resolves.toEqual({ status: 'not-removed' });
+      expect(apiMock.uploadDietaryEvidence).not.toHaveBeenCalled();
     });
   });
 

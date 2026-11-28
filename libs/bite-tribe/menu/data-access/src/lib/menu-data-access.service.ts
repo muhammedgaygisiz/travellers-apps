@@ -9,13 +9,15 @@ import type {
   LinkBiteToMenuItemRequest,
   LinkBiteToMenuItemResult,
   Menu,
+  DietaryRestorationDraft,
+  DietaryRestorationOutcome,
   MenuItemStats,
   SaveMenuDietaryLabelsResult,
   VoteDietaryLabelRequest,
   VoteDietaryLabelResult,
 } from 'model';
 import type { Observable } from 'rxjs';
-import { BiteTribeApiService } from 'bite-tribe/api';
+import { awaitFolderPhotoVerdict, BiteTribeApiService } from 'bite-tribe/api';
 import { createEntityId } from 'utils';
 
 @Injectable({
@@ -83,6 +85,42 @@ export class MenuDataAccessService {
       restaurantId: restaurantId ?? '',
       items: menuDietaryLabelsOf(menu),
     });
+  }
+
+  /**
+   * Asks for a removed dietary label back on the route's restaurant (GitHub
+   * issue #2199). With a photo, the request is sent first - it marks the
+   * photo pending - and the photo is uploaded into the request's folder; the
+   * answer says whether the image check passed it, refused it, or has not
+   * answered yet. An upload that fails rejects, after the request was sent.
+   */
+  async requestDietaryLabelRestoration(
+    draft: DietaryRestorationDraft,
+  ): Promise<DietaryRestorationOutcome> {
+    const result = await this.api.requestDietaryLabelRestoration({
+      restaurantId: this.storeService.restaurantIdFromUrl() ?? '',
+      menuItemId: draft.menuItemId,
+      label: draft.label,
+      explanation: draft.explanation,
+      withPhoto: !!draft.photo,
+    });
+
+    if (result.status !== 'requested' || !draft.photo) {
+      return result.status === 'requested'
+        ? { status: 'requested' }
+        : { status: 'not-removed' };
+    }
+
+    const verdict = awaitFolderPhotoVerdict(
+      this.api.dietaryEvidenceVerdict$(result.removalId),
+    );
+
+    await this.api.uploadDietaryEvidence(result.removalId, draft.photo);
+
+    return {
+      status: 'requested',
+      photo: (await verdict)?.imageStatus ?? 'checking',
+    };
   }
 
   /**

@@ -142,6 +142,29 @@ service firebase.storage {
       allow delete: if holdsRestaurant() || isOperator();
     }
 
+    // -------------------------------------------- dietary evidence photos
+
+    /**
+     * An owner's evidence for a removed dietary label (GitHub issue #2199),
+     * uploaded once `requestDietaryLabelRestoration` has written the queue
+     * item it belongs to. Written and read by an account holding that item's
+     * restaurant, and read by operators; published on the item only once the
+     * image check passes it.
+     */
+    match /images/dietaryLabelRemovals/{removalId}/{fileName} {
+      function holdsRemovalRestaurant() {
+        return isMember()
+          && firestore.exists(docPath('dietaryLabelRemovals', removalId))
+          && request.auth.uid in firestore.get(docPath('restaurants',
+            firestore.get(docPath('dietaryLabelRemovals', removalId)).data.restaurantId))
+            .data.get('ownerUserIds', []);
+      }
+
+      allow read: if holdsRemovalRestaurant() || isOperator();
+      allow create, update: if isImageWrite() && holdsRemovalRestaurant();
+      allow delete: if holdsRemovalRestaurant() || isOperator();
+    }
+
     // ---------------------------------------------------- Bite Trail images
 
     /** The trail document is created and awaited before its photo uploads. */

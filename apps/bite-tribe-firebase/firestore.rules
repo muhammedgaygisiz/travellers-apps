@@ -1705,6 +1705,21 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    /**
+     * A removed dietary label's queue item and the owner's request for it
+     * back (GitHub issue #2199). Written only by the removal trigger,
+     * `requestDietaryLabelRestoration`, `answerDietaryLabelRemoval` and the
+     * evidence photo's check. An account holding the restaurant may `get` its
+     * own, which is how the business app waits for the photo's verdict; the
+     * queue itself is read through the operator-only
+     * `listDietaryLabelRemovals`, so the disputes stay with operators.
+     */
+    match /dietaryLabelRemovals/{removalId} {
+      allow get: if isOperator()
+        || (isMember() && holds(restaurantData(resource.data.restaurantId)));
+      allow list, write: if false;
+    }
+
     // ------------------------------------------------------------ bite reports
 
     /**

@@ -72,6 +72,7 @@
           $implicit: form,
           testId: 'dish',
           removed: removedLabelsOf(dish()?.id),
+          itemId: dish()?.id,
         }
       "
     />
@@ -170,6 +171,7 @@
                 $implicit: variant,
                 testId: 'dish-variant-' + i,
                 removed: removedLabelsOf(variant.controls.id.value),
+                itemId: variant.controls.id.value,
               }
             "
           />
@@ -433,6 +435,7 @@
   let-group
   let-testId="testId"
   let-removed="removed"
+  let-itemId="itemId"
 >
   <div class="dietary-selects" [formGroup]="group">
     <ion-select
@@ -483,6 +486,75 @@
             | transloco: { labels: removedLabelNames(removed) }
         }}
       </p>
+      <!-- Asking for a removed label back (issue #2199). -->
+      <div class="dietary-restoration">
+        @for (label of removed; track label) {
+          @if (isRestorationRequested(itemId, label)) {
+            <p
+              class="hint"
+              [attr.data-testid]="testId + '-restoration-requested-' + label"
+            >
+              {{
+                'menu-dish-restoration-requested'
+                  | transloco: { label: ('dietary-label-' + label | transloco) }
+              }}
+            </p>
+          } @else if (isRestoring(itemId, label)) {
+            <div
+              class="restoration-form"
+              [attr.data-testid]="testId + '-restoration-form-' + label"
+            >
+              <ion-textarea
+                [formControl]="restorationExplanation"
+                fill="outline"
+                mode="md"
+                labelPlacement="stacked"
+                [autoGrow]="true"
+                [counter]="true"
+                [maxlength]="maxRestorationExplanation"
+                [label]="
+                  'menu-dish-restoration-explanation'
+                    | transloco
+                      : { label: ('dietary-label-' + label | transloco) }
+                "
+                [placeholder]="
+                  'menu-dish-restoration-explanation-placeholder' | transloco
+                "
+                [attr.data-testid]="testId + '-restoration-explanation'"
+              />
+              <p class="hint">
+                {{ 'menu-dish-restoration-photo-hint' | transloco }}
+              </p>
+              <image-upload [formControl]="restorationPhoto" />
+              <div class="restoration-actions">
+                <ion-button
+                  fill="clear"
+                  [attr.data-testid]="testId + '-restoration-cancel'"
+                  (click)="cancelRestoration()"
+                  >{{ 'cancel' | transloco }}</ion-button
+                >
+                <ion-button
+                  [disabled]="restorationExplanation.invalid"
+                  [attr.data-testid]="testId + '-restoration-send'"
+                  (click)="sendRestoration(itemId, label)"
+                  >{{ 'menu-dish-restoration-send' | transloco }}</ion-button
+                >
+              </div>
+            </div>
+          } @else {
+            <ion-button
+              fill="outline"
+              size="small"
+              [attr.data-testid]="testId + '-restoration-start-' + label"
+              (click)="startRestoration(itemId, label)"
+              >{{
+                'menu-dish-restoration-start'
+                  | transloco: { label: ('dietary-label-' + label | transloco) }
+              }}</ion-button
+            >
+          }
+        }
+      </div>
     }
   </div>
 </ng-template>

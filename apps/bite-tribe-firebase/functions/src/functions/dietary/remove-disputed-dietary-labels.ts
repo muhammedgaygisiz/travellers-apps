@@ -9,6 +9,11 @@ import {
   ownerUserIdsOf,
   RESTAURANT_COLLECTION,
 } from '../restaurants/restaurant-authority';
+import {
+  DIETARY_LABEL_REMOVALS_COLLECTION,
+  dietaryLabelRemovalId,
+  removalRecordOf,
+} from './dietary-restoration';
 import { sendLocalizedNotification } from '../shared/utils/send-localized-notification';
 import {
   DIETARY_LABEL_TALLIES_COLLECTION,
@@ -199,6 +204,20 @@ const applyRemovals = async (
       };
       applied.push({ menuItemId, label });
       strikes.push({ menuItemId, label, removedAt });
+      // The operator's queue item, where the owner's request lands (#2199).
+      transaction.set(
+        db
+          .collection(DIETARY_LABEL_REMOVALS_COLLECTION)
+          .doc(dietaryLabelRemovalId(restaurantId, menuItemId, label)),
+        removalRecordOf({
+          restaurantId,
+          restaurant,
+          menuItemId,
+          dishName: dishNameOf(menu, menuItemId),
+          label,
+          removal,
+        }),
+      );
     });
 
     if (applied.length) {

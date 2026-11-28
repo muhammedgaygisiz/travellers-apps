@@ -190,7 +190,8 @@ asked.
 ## `RD-DC-*` - Dietary claims and choices
 
 Taken 20 November 2026 by the team, on epic [#2193], except `RD-DC-6`, taken on
-26 November 2026 for [#2197], and `RD-DC-7`, taken on 27 November 2026 for [#2198]. The
+26 November 2026 for [#2197], `RD-DC-7`, taken on 27 November 2026 for [#2198], and
+`RD-DC-8`, taken on 28 November 2026 for [#2199]. The
 questions they leave open are `Dietary Choice Questions` in
 [Current State - Open Questions](../current-state/open-questions.md).
 
@@ -203,6 +204,7 @@ questions they leave open are `Dietary Choice Questions` in
 | `RD-DC-5` | **High-risk labels are stricter.** Gluten-free, lactose-free, nut-free, halal and kosher are shown from diners or the creator only with a notice to confirm with the restaurant, never as a clean badge, and a restaurant's high-risk label is removed at a lower threshold than a lifestyle one                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `RD-DC-6` | **Who votes on a dietary label, and when diners report one.** Taken 26 November 2026 for [#2197]. An account votes once it is at least 14 days old and has posted a Bite of its own, and never as the Bite's creator or as an account holding the Restaurant. A creator's label becomes "reported by diners" at 3 confirmations with no dispute at all. Halal and kosher become "reported by diners" only where the restaurant declares them too; their votes are still counted and shown                                                                                                                                                                                                                                                                                                                        |
 | `RD-DC-7` | **When diners' disputes remove a restaurant's label, and what a removal costs.** Taken 27 November 2026 for [#2198], adopting the proposal of `Dietary Choice Questions`. A restaurant's label is removed once eligible disputes within 90 days reach 3 for a lifestyle label or 2 for a high-risk one, or a single "I got sick" dispute on a high-risk one, and in every case only while disputes outnumber confirmations. Each removal counts as a strike on the Restaurant; at 3 strikes within 12 months its new labels wait for an Operator. The abuse check is the eligibility of `RD-DC-6` and one vote per account: nothing links two accounts, and a later issue would have to add that. A removed label is locked by keeping the restaurant's labels in one field of the menu that no client may write |
+| `RD-DC-8` | **What restoring or confirming a removed label does.** Taken 28 November 2026 for [#2199]. A removal still counts as a strike the moment it happens, so the strike limit works without an Operator. Restoring takes that strike back and discards the disputes that removed the label: their votes are deleted and the label's dispute count starts from zero, while its confirmations stay. Confirming keeps the label removed and the strike counted, and closes the review until the owner asks again. An Operator restores with or without the owner's request. The owner's evidence photo goes through the image check like any upload                                                                                                                                                                      |
 
 ## Provenance
 
@@ -297,3 +299,4 @@ treating them as verified.
 [#2195]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2195
 [#2197]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2197
 [#2198]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2198
+[#2199]: https://github.com/muhammedgaygisiz/travellers-apps/issues/2199

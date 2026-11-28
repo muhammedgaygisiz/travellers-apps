@@ -5,7 +5,12 @@ import { logger } from 'firebase-functions';
  * other than the uploader's.
  */
 export type ImageSurface =
-  'bitePhoto' | 'profilePhoto' | 'restaurantPhoto' | 'biteTrailPhoto';
+  | 'bitePhoto'
+  | 'profilePhoto'
+  | 'restaurantPhoto'
+  | 'biteTrailPhoto'
+  /** An owner's evidence for a removed dietary label (issue #2199). */
+  | 'dietaryEvidencePhoto';
 
 /**
  * Where refused content was written (issues #1610 and #2138). Each is a

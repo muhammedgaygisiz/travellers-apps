@@ -11,7 +11,8 @@ restaurant. The creator's labels on a Bite of [#2195] exist too, shown beside th
 restaurant's labels for a linked dish. A member's own dietary choices of [#2196] exist, set in
 settings with consent for the religious and health ones, and nothing reads them yet. Diners
 confirm and dispute labels since [#2197], and a restaurant's label they dispute is removed,
-locked and counted as a strike since [#2198]. Restoration and the filters do not exist yet,
+locked and counted as a strike since [#2198], and an Operator restores it or confirms the
+removal since [#2199]. The filters do not exist yet,
 and a free-text tag such as `#vegan` on a Bite stays a tag that
 nothing filters on. `explainBite` states no dietary property by design (`UC-IBD` `R-2`), and this page keeps
 it that way. The flow below is the behaviour as the team agreed it on 20 November 2026; the
@@ -98,9 +99,17 @@ Once the behaviour has succeeded:
   anyway is told it stayed removed. Once a Restaurant has 3 strikes within 12 months, a label
   a dish does not publish yet waits for an Operator, and the save says so. The Operator
   approves or refuses each waiting label in the admin app's `Dietary label approvals`, and an
-  approved one is published on the dish. The rest of this flow is intended.
-- The Restaurant Owner asks for the removed label back with evidence, and an Operator restores
-  it or confirms the removal ([#2199]).
+  approved one is published on the dish.
+- Built: under a removed label in the dish editor, the Restaurant Owner asks BiteTribe to
+  restore it, with an explanation and an optional photo of the ingredients, recipe or supplier
+  change; the photo reaches the Operator only once the image check passed it. The editor then
+  says the request waits for review. Every removal waits in the admin app's
+  `Removed dietary labels` with its disputes - their reasons, notes and dates, never who - its
+  confirmations, and the owner's explanation and photo. The Operator restores the label or
+  confirms its removal, with a reason the operator log keeps, request or not ([#2199],
+  `RD-DC-8`). A restored label shows again and matches filters, its disputes are discarded and
+  its count starts from zero, and its strike is taken back. A confirmed removal keeps its
+  strike and leaves the queue until the owner asks again. The rest of this flow is intended.
 - A Bite Creator with dietary choices sees the feed, search, map and menus filtered by them,
   can limit the filter to what restaurants declared, and can switch it off ([#2200]).
 - Every ad request and every piece of promoted content for that member excludes the
@@ -135,7 +144,13 @@ the `removeDisputedDietaryLabels` trigger; and by the operator-only
 until the first of those writes the field; from then on the item fields are not read. The
 Restaurant's `dietaryStrikes` are refused to every client like its follower count, and the
 waiting labels in `dietaryLabelApprovals` are read only through the operator-only
-`listDietaryLabelApprovals`. The Restaurant's
+`listDietaryLabelApprovals`. Each removal's queue item in `dietaryLabelRemovals` is written
+only by the backend - the removal trigger, `requestDietaryLabelRestoration`, which admits an
+account holding the Restaurant or an Operator, the evidence photo's check, and the
+operator-only `answerDietaryLabelRemoval`, the only way a removed label comes back. An account
+holding the Restaurant may `get` its own item, to wait for the photo's verdict; the queue, with
+the disputes, is read only through the operator-only `listDietaryLabelRemovals`, and the
+storage rules admit the evidence photo from a holder of that item's Restaurant. The Restaurant's
 statements and note are written only by the `saveRestaurantDietaryStatements` callable,
 which admits the same two and checks the note, and the rules refuse every client write of
 them. The Bite's labels are creator-scoped like the rest of the Bite, and the rules
@@ -255,6 +270,21 @@ Built by [#2198]:
 - `libs/bite-tribe-admin/restaurants/page` (`dietary-label-approvals`) - the Operator's queue
 - the `dietaryLabelDisputed` and `dietaryLabelRemoved` pushes in the Functions notification
   catalog, in all fourteen languages
+
+Built by [#2199]:
+
+- `libs/bite-tribe-common/model/src/lib/dietary-restoration.ts` - the queue item, the
+  request and the decision; `MenuItem.restorationRequestedDietaryLabels`, laid over the menu
+  by `withMenuDietary`
+- `apps/bite-tribe-firebase/functions/src/functions/dietary/` -
+  `request-dietary-label-restoration.ts`, `list-dietary-label-removals.ts`,
+  `answer-dietary-label-removal.ts` and `set-dietary-evidence-image-path-on-upload.ts`; the
+  removal trigger writes each queue item
+- `apps/bite-tribe-firebase/firestore.rules` and `storage.rules` - `dietaryLabelRemovals` and
+  its evidence folder, with their cases in the two rules emulator specs
+- `libs/bite-tribe-business/edit-menu/page` (`dish-editor`) - the request form under a removed
+  label; `libs/bite-tribe/menu/data-access` sends it and the photo
+- `libs/bite-tribe-admin/restaurants/page` (`dietary-label-removals`) - the Operator's review
 
 Not implemented yet, the surfaces the later stories will touch:
 

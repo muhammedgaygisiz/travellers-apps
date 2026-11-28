@@ -38,6 +38,9 @@ class MenuApiMock {
   loadMenu = jest.fn();
   saveMenu = jest.fn();
   saveMenuDietaryLabels = jest.fn();
+  requestDietaryLabelRestoration = jest.fn();
+  uploadDietaryEvidence = jest.fn();
+  dietaryEvidenceVerdict$ = jest.fn();
 }
 
 class LikeApiMock {
@@ -533,6 +536,36 @@ describe(BiteTribeApiService.name, () => {
         const menu = { id: 'menu-id', items: [] } as any;
         service.saveMenu(menu, 'restaurant-id');
         expect(saveMenuSpy).toHaveBeenCalledWith(menu, 'restaurant-id');
+      },
+    ));
+  });
+
+  describe('dietary label restoration (issue #2199)', () => {
+    it('forwards the request, the upload and the verdict to MenuApiService', inject(
+      [BiteTribeApiService, MenuApiService],
+      (service: BiteTribeApiService, menuApiService: MenuApiService) => {
+        const request = {
+          restaurantId: 'r1',
+          menuItemId: 'm1',
+          label: 'vegan' as const,
+          explanation: 'New supplier',
+          withPhoto: false,
+        };
+
+        service.requestDietaryLabelRestoration(request);
+        service.uploadDietaryEvidence('r1__m1__vegan', 'data:x');
+        service.dietaryEvidenceVerdict$('r1__m1__vegan');
+
+        expect(
+          menuApiService.requestDietaryLabelRestoration,
+        ).toHaveBeenCalledWith(request);
+        expect(menuApiService.uploadDietaryEvidence).toHaveBeenCalledWith(
+          'r1__m1__vegan',
+          'data:x',
+        );
+        expect(menuApiService.dietaryEvidenceVerdict$).toHaveBeenCalledWith(
+          'r1__m1__vegan',
+        );
       },
     ));
   });

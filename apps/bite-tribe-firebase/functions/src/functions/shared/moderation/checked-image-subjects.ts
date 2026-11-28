@@ -55,7 +55,7 @@ export const clearedImageCheck = (): Record<string, unknown> => ({
 });
 
 export type CheckedImageCollection =
-  'bites' | 'users' | 'restaurants' | 'biteTrails';
+  'bites' | 'users' | 'restaurants' | 'biteTrails' | 'dietaryLabelRemovals';
 
 /** One kind of document whose uploaded photo the image check guards. */
 export interface CheckedImageSubject {
@@ -196,12 +196,28 @@ export const BITE_TRAIL_PHOTO: CheckedImageSubject = {
   uploaderOf: (_docId, data) => String(data['ownerId'] ?? ''),
 };
 
-/** Every subject, in the order the scheduled recheck reads them. */
+/**
+ * An owner's evidence for a removed dietary label (issue #2199), kept like a
+ * restaurant photo: only operators read it, and only once it passed. The
+ * refusal log names the account that sent the request.
+ */
+export const DIETARY_EVIDENCE_PHOTO: CheckedImageSubject = {
+  ...folderPhotoUpdates,
+  collection: 'dietaryLabelRemovals',
+  surface: 'dietaryEvidencePhoto',
+  uploaderOf: (_docId, data) => String(data['requesterUid'] ?? ''),
+};
+
+/**
+ * Every subject, in the order the scheduled recheck reads them. A new one is
+ * appended: the stored-photo backfill keeps its place by index.
+ */
 export const CHECKED_IMAGE_SUBJECTS: readonly CheckedImageSubject[] = [
   BITE_PHOTO,
   PROFILE_PHOTO,
   RESTAURANT_PHOTO,
   BITE_TRAIL_PHOTO,
+  DIETARY_EVIDENCE_PHOTO,
 ];
 
 /** The folder a subject's photos are uploaded to. */

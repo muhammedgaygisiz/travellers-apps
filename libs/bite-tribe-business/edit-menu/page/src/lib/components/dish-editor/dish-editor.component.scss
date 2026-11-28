@@ -119,6 +119,28 @@
   gap: 0.5rem;
 }
 
+// Asking for a removed label back (issue #2199).
+.dietary-restoration {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+
+  .restoration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .restoration-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
 // A label diners' disputes removed (issue #2198): locked, and said so.
 .dietary-removed {
   grid-column: 1 / -1;

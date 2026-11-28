@@ -83,6 +83,10 @@ export { saveMenuDietaryLabels } from './functions/dietary/save-menu-dietary-lab
 export { removeDisputedDietaryLabels } from './functions/dietary/remove-disputed-dietary-labels';
 export { answerDietaryLabelApproval } from './functions/dietary/answer-dietary-label-approval';
 export { listDietaryLabelApprovals } from './functions/dietary/list-dietary-label-approvals';
+export { requestDietaryLabelRestoration } from './functions/dietary/request-dietary-label-restoration';
+export { listDietaryLabelRemovals } from './functions/dietary/list-dietary-label-removals';
+export { answerDietaryLabelRemoval } from './functions/dietary/answer-dietary-label-removal';
+export { setDietaryEvidenceImagePathOnUpload } from './functions/dietary/set-dietary-evidence-image-path-on-upload';
 export { countUsers } from './functions/users/count-users';
 export { updateLastSeen } from './functions/users/update-last-seen';
 export { updateUserMetadata } from './functions/users/update-user-metadata';

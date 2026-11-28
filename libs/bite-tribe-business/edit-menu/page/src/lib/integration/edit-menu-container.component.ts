@@ -11,6 +11,7 @@ import { EditMenuService } from './edit-menu.service';
       (saveMenu)="service.saveMenu($event)"
       (saveCurrencyCode)="service.saveCurrency($event)"
       (confirmAsOwn)="service.confirmMenuAsOwn()"
+      (requestDietaryRestoration)="service.requestDietaryRestoration($event)"
     />
   `,
   imports: [EditMenuPage],

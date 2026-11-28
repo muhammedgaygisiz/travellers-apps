@@ -45,6 +45,7 @@ import { BiteTribeRole, rolesOf } from './roles';
 export const OPERATOR_ACTIONS = [
   'addRestaurantStaff',
   'answerDietaryLabelApproval',
+  'answerDietaryLabelRemoval',
   'assignRestaurantOwner',
   'backfillBiteAddress',
   'backfillBiteImageStatus',
@@ -64,6 +65,7 @@ export const OPERATOR_ACTIONS = [
   'rebuildBiteCountries',
   'recomputeMenuItemStats',
   'removeRestaurantStaff',
+  'requestDietaryLabelRestoration',
   'revokeRestaurantOwner',
   'saveLandingPage',
   'saveMenuDietaryLabels',

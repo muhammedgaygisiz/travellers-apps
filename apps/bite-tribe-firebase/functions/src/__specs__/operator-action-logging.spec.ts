@@ -39,6 +39,8 @@ const READ_ONLY_OPERATOR_ENDPOINTS = [
   // The dietary labels waiting for an operator (issue #2198); answering one is
   // logged by `answerDietaryLabelApproval`.
   'listDietaryLabelApprovals',
+  // The removed dietary labels waiting for an operator (issue #2199).
+  'listDietaryLabelRemovals',
   // City landing pages (issue #1490): the list the editor opens on, and a
   // preview rendered from the editor's own fields. Neither writes anything.
   'listLandingPages',

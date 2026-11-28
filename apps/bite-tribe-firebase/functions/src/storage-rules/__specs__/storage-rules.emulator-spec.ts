@@ -42,6 +42,7 @@ const PENDING_BITE = 'pending-bite';
 const RESTAURANT = 'held-restaurant';
 const MISSING_RESTAURANT = 'missing-restaurant';
 const TRAIL = 'owned-trail';
+const REMOVAL = 'held-restaurant__m1__vegan';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const IMAGE = { contentType: 'image/png' };
@@ -122,6 +123,9 @@ beforeEach(async () => {
       ownerUserIds: [HOLDER],
     });
     await setDoc(doc(db, 'biteTrails', TRAIL), { ownerId: OWNER });
+    await setDoc(doc(db, 'dietaryLabelRemovals', REMOVAL), {
+      restaurantId: RESTAURANT,
+    });
 
     // One existing object per path, for the overwrite, read and delete cases.
     await upload(context, userImage(OWNER));
@@ -240,6 +244,24 @@ describe('storage.rules (issue #1350)', () => {
       await assertFails(
         upload(member(HOLDER), restaurantImage(MISSING_RESTAURANT)),
       );
+    });
+  });
+
+  describe('dietary evidence, images/dietaryLabelRemovals/{removalId} (issue #2199)', () => {
+    const evidence = (removalId: string): string =>
+      `images/dietaryLabelRemovals/${removalId}/evidence.png`;
+
+    it('lets the restaurant holder upload evidence and an operator read it', async () => {
+      await assertSucceeds(upload(member(HOLDER), evidence(REMOVAL)));
+      await assertSucceeds(metadataOf(operator(), evidence(REMOVAL)));
+      await assertSucceeds(metadataOf(member(HOLDER), evidence(REMOVAL)));
+    });
+
+    it('refuses another account, and a removal that does not exist', async () => {
+      await assertFails(upload(member(STRANGER), evidence(REMOVAL)));
+      await assertFails(upload(member(HOLDER), evidence('no-such-removal')));
+      await upload(member(HOLDER), evidence(REMOVAL));
+      await assertFails(metadataOf(member(STRANGER), evidence(REMOVAL)));
     });
   });
 

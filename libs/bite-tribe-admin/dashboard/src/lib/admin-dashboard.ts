@@ -281,6 +281,15 @@ export class AdminDashboard {
       group: 'primary',
     },
     {
+      // Removed labels, restored or confirmed (issue #2199).
+      titleKey: 'admin-tool-dietary-label-removals',
+      descriptionKey: 'admin-tool-dietary-label-removals-description',
+      icon: 'restaurant-outline',
+      path: '/dietary-label-removals',
+      testId: 'admin-tool-dietary-label-removals',
+      group: 'primary',
+    },
+    {
       titleKey: 'admin-tool-table-sessions',
       descriptionKey: 'admin-tool-table-sessions-description',
       icon: 'people-outline',

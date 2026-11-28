@@ -9,6 +9,12 @@ import {
   DIETARY_STRIKE_PERIOD_DAYS,
   HIGH_RISK_DIETARY_LABELS,
 } from '../functions/dietary/menu-dietary';
+import {
+  DIETARY_LABEL_REMOVALS_COLLECTION,
+  dietaryLabelRemovalId,
+  MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH,
+  MIN_DIETARY_REMOVAL_DECISION_REASON_LENGTH,
+} from '../functions/dietary/dietary-restoration';
 
 /**
  * The removal thresholds exist twice, for the reason
@@ -62,6 +68,25 @@ describe('menu dietary parity', () => {
     expect(removal).toContain(
       `DIETARY_LABEL_APPROVALS_COLLECTION = '${DIETARY_LABEL_APPROVALS_COLLECTION}'`,
     );
+  });
+
+  it('keeps restoration requests the same way (issue #2199)', () => {
+    const restoration = readFileSync(
+      join(MODEL, 'dietary-restoration.ts'),
+      'utf8',
+    );
+
+    expect(restoration).toContain(
+      `DIETARY_LABEL_REMOVALS_COLLECTION = '${DIETARY_LABEL_REMOVALS_COLLECTION}'`,
+    );
+    expect(
+      numberIn(restoration, 'MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH'),
+    ).toBe(MAX_DIETARY_RESTORATION_EXPLANATION_LENGTH);
+    expect(
+      numberIn(restoration, 'MIN_DIETARY_REMOVAL_DECISION_REASON_LENGTH'),
+    ).toBe(MIN_DIETARY_REMOVAL_DECISION_REASON_LENGTH);
+    expect(restoration).toContain('`${restaurantId}__${menuItemId}__${label}`');
+    expect(dietaryLabelRemovalId('r', 'm', 'vegan')).toBe('r__m__vegan');
   });
 
   it('treats the same labels as high-risk', () => {

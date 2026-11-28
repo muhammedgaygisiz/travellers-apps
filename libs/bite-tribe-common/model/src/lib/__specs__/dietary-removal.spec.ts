@@ -78,6 +78,32 @@ describe('dietary removal', () => {
     expect(dish.variants?.[0].removedDietaryLabels).toBeUndefined();
   });
 
+  it('marks a removed label the owner asked back (issue #2199)', () => {
+    const menu: Menu = {
+      ...legacyMenu(),
+      dietary: {
+        'pad-thai': {
+          removed: {
+            vegan: {
+              ...removal,
+              restorationRequestedAt: '2026-11-28T00:00:00.000Z',
+            },
+            halal: removal,
+          },
+        },
+      },
+    };
+
+    const dish = withMenuDietary(menu).categories[0].items[0];
+
+    expect(dish.removedDietaryLabels).toEqual(['vegan', 'halal']);
+    expect(dish.restorationRequestedDietaryLabels).toEqual(['vegan']);
+    expect(
+      withoutMenuItemDietary([{ id: 'c', title: 'C', items: [dish] }])[0]
+        .items[0],
+    ).not.toHaveProperty('restorationRequestedDietaryLabels');
+  });
+
   it('never shows a removed label as a label, even when the map still lists it', () => {
     const menu: Menu = {
       ...legacyMenu(),

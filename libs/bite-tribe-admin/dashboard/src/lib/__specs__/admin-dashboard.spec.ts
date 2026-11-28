@@ -109,6 +109,7 @@ describe(AdminDashboard.name, () => {
       '/restaurant-ownership',
       '/restaurant-photos',
       '/dietary-label-approvals',
+      '/dietary-label-removals',
       '/table-sessions',
       '/bite-places',
       '/new-version-notification',
@@ -160,6 +161,7 @@ describe(AdminDashboard.name, () => {
       '/restaurant-ownership',
       '/restaurant-photos',
       '/dietary-label-approvals',
+      '/dietary-label-removals',
       '/table-sessions',
       '/bite-places',
     ]);
